@@ -16,19 +16,14 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.pie.PieWithLegendEvents;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.elements.SpanElement;
 
-public class PieWithLegendEventsIT extends AbstractTBTest {
+@TestPath("vaadin-charts/pie/pie-with-legend-events")
+public class PieWithLegendEventsIT extends AbstractChartTest {
 
     private SpanElement lastEvent;
     private SpanElement eventDetails;
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return PieWithLegendEvents.class;
-    }
 
     @Before
     public void init() {

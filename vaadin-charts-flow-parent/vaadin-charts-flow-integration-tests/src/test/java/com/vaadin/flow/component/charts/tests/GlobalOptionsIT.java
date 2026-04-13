@@ -19,16 +19,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.other.GlobalOptions;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 
-public class GlobalOptionsIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return GlobalOptions.class;
-    }
+@TestPath("vaadin-charts/other/global-options")
+public class GlobalOptionsIT extends AbstractChartTest {
 
     @Test
     public void addChart_defaultLangUsed() {

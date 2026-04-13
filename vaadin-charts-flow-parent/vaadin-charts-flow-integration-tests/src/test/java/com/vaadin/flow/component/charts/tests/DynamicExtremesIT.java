@@ -8,23 +8,16 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.dynamic.DynamicExtremes;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 
-public class DynamicExtremesIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return DynamicExtremes.class;
-    }
+@TestPath("vaadin-charts/dynamic/dynamic-extremes")
+public class DynamicExtremesIT extends AbstractChartTest {
 
     @Test
     public void axisFunction_toggleExtremesPoint_pointHidden() {
@@ -33,10 +26,10 @@ public class DynamicExtremesIT extends AbstractTBTest {
                 By.id("toggleExtremesButton"));
         int initialVisiblePointsCount = chart.getVisiblePoints().size();
         toggleExtremesButton.click();
-        assertNotEquals(initialVisiblePointsCount,
+        Assert.assertNotEquals(initialVisiblePointsCount,
                 chart.getVisiblePoints().size());
         toggleExtremesButton.click();
-        assertEquals(initialVisiblePointsCount,
+        Assert.assertEquals(initialVisiblePointsCount,
                 chart.getVisiblePoints().size());
     }
 }

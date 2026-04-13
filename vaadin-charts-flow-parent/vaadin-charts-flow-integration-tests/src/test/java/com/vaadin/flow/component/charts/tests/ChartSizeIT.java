@@ -8,25 +8,19 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.pie.PieWithSize;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 
-public class ChartSizeIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return PieWithSize.class;
-    }
+@TestPath("vaadin-charts/pie/pie-with-size")
+public class ChartSizeIT extends AbstractChartTest {
 
     @Test
     public void setSize_showChart_DimentionsAreSet() {
         ChartElement chart = getChartElement();
-        assertEquals(500, chart.getSize().getHeight());
-        assertEquals(400, chart.getSize().getWidth());
+        Assert.assertEquals(500, chart.getSize().getHeight());
+        Assert.assertEquals(400, chart.getSize().getWidth());
     }
 }

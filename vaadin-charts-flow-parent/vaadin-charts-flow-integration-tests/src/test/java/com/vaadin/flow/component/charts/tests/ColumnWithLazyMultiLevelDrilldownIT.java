@@ -8,24 +8,18 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldown;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return ColumnWithLazyMultiLevelDrilldown.class;
-    }
+@TestPath("vaadin-charts/column/column-with-lazy-multi-level-drilldown")
+public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractChartTest {
 
     @Test
     public void test() throws IOException, AssertionError {
@@ -49,7 +43,8 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
     }
 
     private void assertLogText(String text) {
-        assertTrue(String.format("Couldn't find text '%s' from the log.", text),
+        Assert.assertTrue(
+                String.format("Couldn't find text '%s' from the log.", text),
                 logContainsText(text));
     }
 

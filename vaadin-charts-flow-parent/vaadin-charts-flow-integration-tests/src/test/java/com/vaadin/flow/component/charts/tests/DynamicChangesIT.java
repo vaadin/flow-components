@@ -8,28 +8,22 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.dynamic.DynamicChanges;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 
-public class DynamicChangesIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return DynamicChanges.class;
-    }
+@TestPath("vaadin-charts/dynamic/dynamic-changes")
+public class DynamicChangesIT extends AbstractChartTest {
 
     @Test
     public void seriesFunction_addPoint_pointCreated() {
         ChartElement chart = getChartElement();
         int initialPointsCount = chart.getPoints().size();
         findElement(By.id("addPointButton")).click();
-        assertEquals(initialPointsCount + 1,
+        Assert.assertEquals(initialPointsCount + 1,
                 chart.$(".highcharts-point").all().size());
     }
 
@@ -38,7 +32,7 @@ public class DynamicChangesIT extends AbstractTBTest {
         ChartElement chart = getChartElement();
         int initialPointsCount = chart.getPoints().size();
         findElement(By.id("removePointButton")).click();
-        assertEquals(initialPointsCount - 1, chart.getPoints().size());
+        Assert.assertEquals(initialPointsCount - 1, chart.getPoints().size());
     }
 
 }

@@ -8,24 +8,20 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertTrue;
-
+import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.pie.PieWithClassName;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 
-public class ChartStyleIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return PieWithClassName.class;
-    }
+@TestPath("vaadin-charts/pie/pie-with-class-name")
+public class ChartStyleIT extends AbstractChartTest {
 
     @Test
     public void addClassName_showChart_classIsPresent() {
         ChartElement chart = getChartElement();
-        assertTrue(chart.getClassNames().contains(PieWithClassName.CLASS_NAME));
+        Assert.assertTrue(
+                chart.getClassNames().contains(PieWithClassName.CLASS_NAME));
     }
 }

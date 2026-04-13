@@ -16,21 +16,16 @@ import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.WheelInput;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.column.ColumnWithZooming;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-public class ChartZoomingIT extends AbstractTBTest {
+@TestPath("vaadin-charts/column/column-with-zooming")
+public class ChartZoomingIT extends AbstractChartTest {
 
     private ChartElement chart;
     private String[] chartXAxisLabels;
     private String[] chartYAxisLabels;
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return ColumnWithZooming.class;
-    }
 
     @Before
     public void init() {
