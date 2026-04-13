@@ -30,6 +30,11 @@ public abstract class AbstractComponentIT
         if (extraArgs != null && !extraArgs.isBlank()) {
             chromeOptions.addArguments(extraArgs.split("\\s+"));
         }
+
+        String chromeBinary = System.getenv("TESTBENCH_CHROME_BINARY");
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            chromeOptions.setBinary(chromeBinary);
+        }
     }
 
     @Override
