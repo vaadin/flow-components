@@ -215,6 +215,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                     "--disable-backgrounding-occluded-windows");
         }
 
+        String chromeBinary = System.getenv("TESTBENCH_CHROME_BINARY");
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            options.setBinary(chromeBinary);
+        }
+
         String extraArgs = System.getenv("TESTBENCH_CHROME_EXTRA_ARGS");
         if (extraArgs != null && !extraArgs.isBlank()) {
             options.addArguments(extraArgs.split("\\s+"));
