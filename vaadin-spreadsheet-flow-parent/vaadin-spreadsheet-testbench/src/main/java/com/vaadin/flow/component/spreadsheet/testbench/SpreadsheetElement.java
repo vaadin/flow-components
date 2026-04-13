@@ -66,27 +66,31 @@ public class SpreadsheetElement extends TestBenchElement {
         // when multiple matches exist. Polls to handle cases where the
         // cell hasn't been rendered yet (e.g. after scrolling).
         WebElement cell = (WebElement) getCommandExecutor().getDriver()
-                .executeAsyncScript("""
-                        var root = arguments[0].shadowRoot
-                            .querySelector('.v-spreadsheet');
-                        var selector = arguments[1];
-                        var mergedSelector = arguments[2];
-                        var callback = arguments[3];
-                        var attempts = 0;
-                        function poll() {
-                            var cells = root.querySelectorAll(selector);
-                            if (cells.length > 1) {
-                                callback(root.querySelector(mergedSelector));
-                            } else if (cells.length === 1) {
-                                callback(cells[0]);
-                            } else if (++attempts < 50) {
-                                setTimeout(poll, 100);
-                            } else {
+                .executeAsyncScript(
+                        """
+                                const root = arguments[0].shadowRoot
+                                    .querySelector('.v-spreadsheet');
+                                const selector = arguments[1];
+                                const mergedSelector = arguments[2];
+                                const callback = arguments[arguments.length - 1];
+
+                                const MAX_ATTEMPTS = 50;
+                                const delay = () => new Promise(r => setTimeout(r, 100));
+
+                                for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                    const cells = root.querySelectorAll(selector);
+                                    if (cells.length > 1) {
+                                        callback(root.querySelector(mergedSelector));
+                                        return;
+                                    } else if (cells.length === 1) {
+                                        callback(cells[0]);
+                                        return;
+                                    }
+                                    await delay();
+                                }
                                 callback(null);
-                            }
-                        }
-                        poll();
-                        """, this, selector, mergedSelector);
+                                """,
+                        this, selector, mergedSelector);
         if (cell == null) {
             throw new NoSuchElementException(
                     "Cell not found: row=" + row + ", column=" + column);

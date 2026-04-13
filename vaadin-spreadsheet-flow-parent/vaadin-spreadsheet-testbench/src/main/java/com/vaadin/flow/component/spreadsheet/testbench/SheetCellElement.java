@@ -48,19 +48,19 @@ public class SheetCellElement extends TestBenchElement {
                                     const shadowRoot = arguments[1].shadowRoot;
                                     const root = shadowRoot.querySelector('.v-spreadsheet');
                                     const value = arguments[2];
-                                    const callback = arguments[3];
+                                    const callback = arguments[arguments.length - 1];
 
                                     const MAX_ATTEMPTS = 50;
                                     const delay = () => new Promise(r => setTimeout(r, 100));
 
                                     function startEditing() {
+                                        // Fire synthetic events to trigger selection and editor opening
                                         // Needs correct mouse coordinates
                                         const r = cell.getBoundingClientRect();
                                         const cx = r.left + r.width / 2;
                                         const cy = r.top + r.height / 2;
                                         const opts = {bubbles: true, cancelable: true,
                                             view: window, clientX: cx, clientY: cy};
-                                        // Fire synthetic events to trigger selection and editor opening
                                         cell.dispatchEvent(new MouseEvent('mousedown', opts));
                                         cell.dispatchEvent(new MouseEvent('mouseup', opts));
                                         cell.dispatchEvent(new MouseEvent('click', opts));
@@ -75,40 +75,45 @@ public class SheetCellElement extends TestBenchElement {
                                             }
                                             await delay();
                                         }
-                                        callback(false);
+                                        return null;
                                     }
 
                                     async function waitForClose() {
                                         for (let i = 0; i < MAX_ATTEMPTS; i++) {
                                             const input = root.querySelector('#cellinput');
                                             if (!input || shadowRoot.activeElement !== input) {
-                                                return;
+                                                return true;
                                             }
                                             await delay();
                                         }
-                                        callback(false);
+                                        return false;
                                     }
 
-                                    // Main function
-                                    (async () => {
-                                        // Select the cell and open the editor
-                                        startEditing();
+                                    // Select the cell and open the editor
+                                    startEditing();
 
-                                        // Wait for input to be visible and focused
-                                        const input = await waitForInput();
+                                    // Wait for input to be visible and focused
+                                    const input = await waitForInput();
+                                    if (!input) {
+                                        callback(false);
+                                        return;
+                                    }
 
-                                        // Set the value, commit with Tab key
-                                        input.value = value;
-                                        input.dispatchEvent(new KeyboardEvent('keydown', {
-                                            key: 'Tab', code: 'Tab', keyCode: 9,
-                                            which: 9, bubbles: true, cancelable: true
-                                        }));
+                                    // Set the value, commit with Tab key
+                                    input.value = value;
+                                    input.dispatchEvent(new KeyboardEvent('keydown', {
+                                        key: 'Tab', code: 'Tab', keyCode: 9,
+                                        which: 9, bubbles: true, cancelable: true
+                                    }));
 
-                                        // Wait for the editor to close before finishing
-                                        // Allows next setValue call to start with a clean state
-                                        await waitForClose();
-                                        callback(true);
-                                    })();
+                                    // Wait for the editor to close before finishing
+                                    // Allows next setValue call to start with a clean state
+                                    const closed = await waitForClose();
+                                    if (!closed) {
+                                        callback(false);
+                                        return;
+                                    }
+                                    callback(true);
                                     """,
                             this, parent, newValue);
 
