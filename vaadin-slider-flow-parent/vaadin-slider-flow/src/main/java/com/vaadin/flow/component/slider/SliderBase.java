@@ -395,9 +395,9 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
     }
 
     private void warnIfPropertiesInconsistent() {
-        Double min = toDouble.apply(getMin());
-        Double max = toDouble.apply(getMax());
-        Double step = toDouble.apply(getStep());
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
+        double step = toDouble.apply(getStep());
         TValue value = getValue();
 
         if (min > max) {
