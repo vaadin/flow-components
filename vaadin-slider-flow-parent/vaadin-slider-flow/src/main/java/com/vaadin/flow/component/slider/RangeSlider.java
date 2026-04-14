@@ -15,15 +15,9 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.util.Arrays;
-
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JacksonUtils;
-
-import tools.jackson.databind.node.ArrayNode;
 
 /**
  * RangeSlider is an input field that allows the user to select a numeric range
@@ -37,18 +31,6 @@ import tools.jackson.databind.node.ArrayNode;
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class RangeSlider
         extends NumberRangeSlider<RangeSlider, RangeSliderValue, Double> {
-
-    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = (
-            arrayValue) -> {
-        return new RangeSliderValue(arrayValue.get(0).asDouble(),
-                arrayValue.get(1).asDouble());
-    };
-
-    private static final SerializableFunction<RangeSliderValue, ArrayNode> FORMATTER = (
-            value) -> {
-        return JacksonUtils
-                .listToJson(Arrays.asList(value.start(), value.end()));
-    };
 
     /**
      * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
@@ -72,7 +54,7 @@ public class RangeSlider
      *            the maximum value
      */
     public RangeSlider(double min, double max) {
-        super(min, max, PARSER, FORMATTER, v -> v, v -> v);
+        super(min, max, RangeSliderValue::new, v -> v, v -> v);
     }
 
     /**
@@ -105,10 +87,5 @@ public class RangeSlider
     public RangeSlider(String label, double min, double max) {
         this(min, max);
         setLabel(label);
-    }
-
-    @Override
-    protected RangeSliderValue createRange(Double start, Double end) {
-        return new RangeSliderValue(start, end);
     }
 }

@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.util.Arrays;
 import java.util.Optional;
 
+import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -37,22 +40,19 @@ import tools.jackson.databind.node.ArrayNode;
 abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent, TValue, TNumber>, TValue extends Range<TNumber>, TNumber extends Number>
         extends SliderBase<TComponent, TValue, TNumber, ArrayNode> {
 
+    private final SerializableBiFunction<TNumber, TNumber, TValue> rangeFactory;
+
     /**
-     * Constructs a NumberRangeSlider with the given min and max values,
-     * functions to convert between the slider's range value type and
-     * client-side presentation, and functions to convert between the slider's
-     * numeric type and double.
-     * 
+     * Constructs a NumberRangeSlider with the given min and max values, a
+     * factory function for creating range values, and functions to convert
+     * between the slider's numeric type and double.
+     *
      * @param min
      *            the minimum value
      * @param max
      *            the maximum value
-     * @param presentationToModel
-     *            a function to convert a client-side presentation value to the
-     *            slider's range value type
-     * @param modelToPresentation
-     *            a function to convert a value of the slider's range value type
-     *            to client-side presentation
+     * @param rangeFactory
+     *            a function to create range values from start and end values
      * @param fromDouble
      *            a function to convert a double value to the slider's numeric
      *            type
@@ -61,12 +61,20 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
      *            double
      */
     public NumberRangeSlider(TNumber min, TNumber max,
-            SerializableFunction<ArrayNode, TValue> presentationToModel,
-            SerializableFunction<TValue, ArrayNode> modelToPresentation,
+            SerializableBiFunction<TNumber, TNumber, TValue> rangeFactory,
             SerializableFunction<Double, TNumber> fromDouble,
             SerializableFunction<TNumber, Double> toDouble) {
-        super(min, max, ArrayNode.class, presentationToModel,
-                modelToPresentation, fromDouble, toDouble);
+        super(min, max, ArrayNode.class,
+                arrayValue -> rangeFactory.apply(
+                        fromDouble.apply(arrayValue.get(0).asDouble()),
+                        fromDouble.apply(arrayValue.get(1).asDouble())),
+                value -> JacksonUtils
+                        .listToJson(Arrays.asList(toDouble.apply(value.start()),
+                                toDouble.apply(value.end()))),
+                fromDouble, toDouble);
+        this.rangeFactory = rangeFactory;
+
+        setValue(rangeFactory.apply(min, max));
     }
 
     /**
@@ -120,7 +128,7 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
      */
     @Override
     public void clear() {
-        setValue(createRange(getMin(), getMax()));
+        setValue(rangeFactory.apply(getMin(), getMax()));
     }
 
     @Override
@@ -169,6 +177,4 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
         return Double.compare(valueStart, snappedStart) == 0
                 && Double.compare(valueEnd, snappedEnd) == 0;
     }
-
-    protected abstract TValue createRange(TNumber start, TNumber end);
 }

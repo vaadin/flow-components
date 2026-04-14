@@ -115,8 +115,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         setMin(min);
         setMax(max);
         setStep(fromDouble.apply(DEFAULT_STEP));
-        clear();
-
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 

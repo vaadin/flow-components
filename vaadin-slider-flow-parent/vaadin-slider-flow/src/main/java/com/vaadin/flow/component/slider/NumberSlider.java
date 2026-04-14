@@ -54,6 +54,8 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
             SerializableFunction<TValue, Double> toDouble) {
         super(min, max, Double.class, fromDouble, toDouble, fromDouble,
                 toDouble);
+
+        setValue(min);
     }
 
     /**
