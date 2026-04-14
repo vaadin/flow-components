@@ -55,14 +55,14 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
-    protected static final double DEFAULT_MIN = 0;
-    protected static final double DEFAULT_MAX = 100;
-    private static final double DEFAULT_STEP = 1;
+    static final double DEFAULT_MIN = 0;
+    static final double DEFAULT_MAX = 100;
+    static final double DEFAULT_STEP = 1;
 
-    protected final SerializableFunction<TPresentation, TValue> presentationToModel;
-    protected final SerializableFunction<TValue, TPresentation> modelToPresentation;
-    protected final SerializableFunction<Double, TNumber> fromDouble;
-    protected final SerializableFunction<TNumber, Double> toDouble;
+    final SerializableFunction<TPresentation, TValue> presentationToModel;
+    final SerializableFunction<TValue, TPresentation> modelToPresentation;
+    final SerializableFunction<Double, TNumber> fromDouble;
+    final SerializableFunction<TNumber, Double> toDouble;
 
     private ValueChangeMode currentMode;
 
@@ -94,8 +94,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      * @param toDouble
      *            a function to convert from the slider's number type to double
      */
-    protected SliderBase(TNumber min, TNumber max,
-            Class<TPresentation> presentationType,
+    SliderBase(TNumber min, TNumber max, Class<TPresentation> presentationType,
             SerializableFunction<TPresentation, TValue> presentationToModel,
             SerializableFunction<TValue, TPresentation> modelToPresentation,
             SerializableFunction<Double, TNumber> fromDouble,

@@ -49,7 +49,7 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
      *            a function to convert a value of the slider's value type to
      *            double
      */
-    protected NumberSlider(TValue min, TValue max,
+    NumberSlider(TValue min, TValue max,
             SerializableFunction<Double, TValue> fromDouble,
             SerializableFunction<TValue, Double> toDouble) {
         super(min, max, Double.class, fromDouble, toDouble, fromDouble,
