@@ -13,16 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.slider.testbench;
+package com.vaadin.flow.component.slider;
 
-import com.vaadin.testbench.elementsbase.Element;
+import com.vaadin.flow.testutil.ClassesSerializableTest;
 
-/**
- * A TestBench element for testing a {@code RangeSlider} component.
- */
-@Element("vaadin-range-slider")
-public class RangeSliderElement extends NumberRangeSliderElement<Double> {
-    public RangeSliderElement() {
-        super(v -> v, v -> v);
-    }
+public class SliderSerializableTest extends ClassesSerializableTest {
 }

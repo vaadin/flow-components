@@ -20,32 +20,32 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Slider is an input field that allows the user to select a numeric value
- * within a range by dragging a handle along a track or using arrow keys for
- * precise input.
+ * IntegerSlider is an input field that allows the user to select a numeric
+ * value within a range by dragging a handle along a track or using arrow keys
+ * for precise input.
  * <p>
- * Slider uses {@link Double} as the value type, see {@link IntegerSlider} for a
- * version of the component that supports integer values.
+ * IntegerSlider uses {@link Integer} as the value type, see {@link Slider} for
+ * a version of the component that supports decimal values.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
-public class Slider extends NumberSlider<Slider, Double> {
+public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     /**
-     * Constructs a {@code Slider} with min 0 and max 100. The initial value is
-     * 0.
+     * Constructs an {@code IntegerSlider} with min 0 and max 100. The initial
+     * value is 0.
      * <p>
      * The step defaults to 1.
      */
-    public Slider() {
-        this(DEFAULT_MIN, DEFAULT_MAX);
+    public IntegerSlider() {
+        this((int) DEFAULT_MIN, (int) DEFAULT_MAX);
     }
 
     /**
-     * Constructs a {@code Slider} with the given min and max. The initial value
-     * is set to the minimum value.
+     * Constructs an {@code IntegerSlider} with the given min and max. The
+     * initial value is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *
@@ -54,27 +54,27 @@ public class Slider extends NumberSlider<Slider, Double> {
      * @param max
      *            the maximum value
      */
-    public Slider(double min, double max) {
-        super(min, max, (v) -> v, (v) -> v);
+    public IntegerSlider(int min, int max) {
+        super(min, max, (v) -> v.intValue(), (v) -> v.doubleValue());
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min 0, and max 100. The
-     * initial value is 0.
+     * Constructs an {@code IntegerSlider} with the given label, min 0, and max
+     * 100. The initial value is 0.
      * <p>
      * The step defaults to 1.
      *
      * @param label
      *            the text to set as the label
      */
-    public Slider(String label) {
+    public IntegerSlider(String label) {
         this();
         setLabel(label);
     }
 
     /**
-     * Constructs a {@code Slider} with the given label, min and max. The
-     * initial value is set to the minimum value.
+     * Constructs an {@code IntegerSlider} with the given label, min and max.
+     * The initial value is set to the minimum value.
      * <p>
      * The step defaults to 1.
      *
@@ -85,7 +85,7 @@ public class Slider extends NumberSlider<Slider, Double> {
      * @param max
      *            the maximum value
      */
-    public Slider(String label, double min, double max) {
+    public IntegerSlider(String label, int min, int max) {
         this(min, max);
         setLabel(label);
     }
