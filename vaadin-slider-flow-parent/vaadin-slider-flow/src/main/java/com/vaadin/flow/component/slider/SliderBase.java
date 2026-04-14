@@ -85,10 +85,10 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      *            property
      * @param presentationToModel
      *            a function to convert a client-side presentation value to the
-     *            slider's range value type
+     *            slider's value type
      * @param modelToPresentation
-     *            a function to convert a value of the slider's range value type
-     *            to client-side presentation
+     *            a function to convert a value of the slider's value type to
+     *            client-side presentation
      * @param fromDouble
      *            a function to convert from double to the slider's number type
      * @param toDouble
@@ -202,12 +202,12 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
      */
     public void setStep(TNumber step) {
         Objects.requireNonNull(step, "Step value cannot be null");
-        double stepValue = toDouble.apply(step);
-        if (stepValue <= 0) {
+        double stepDouble = toDouble.apply(step);
+        if (stepDouble <= 0) {
             throw new IllegalArgumentException(
                     "The step must be greater than 0.");
         }
-        getElement().setProperty("step", stepValue);
+        getElement().setProperty("step", stepDouble);
         schedulePropertyConsistencyCheck();
     }
 

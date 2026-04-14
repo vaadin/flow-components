@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -30,7 +29,7 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 public record RangeSliderValue(Double start,
-        Double end) implements Serializable, Range<Double> {
+        Double end) implements Range<Double> {
 
     /**
      * Creates a new RangeSliderValue with the given start and end values.

@@ -17,8 +17,8 @@ package com.vaadin.flow.component.slider;
 
 import java.io.Serializable;
 
-interface Range<TValue extends Number> extends Serializable {
-    TValue start();
+interface Range<TNumber extends Number> extends Serializable {
+    TNumber start();
 
-    TValue end();
+    TNumber end();
 }
