@@ -60,7 +60,7 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
      *            a function to convert a value of the slider's numeric type to
      *            double
      */
-    public NumberRangeSlider(TNumber min, TNumber max,
+    protected NumberRangeSlider(TNumber min, TNumber max,
             SerializableBiFunction<TNumber, TNumber, TValue> rangeFactory,
             SerializableFunction<Double, TNumber> fromDouble,
             SerializableFunction<TNumber, Double> toDouble) {
