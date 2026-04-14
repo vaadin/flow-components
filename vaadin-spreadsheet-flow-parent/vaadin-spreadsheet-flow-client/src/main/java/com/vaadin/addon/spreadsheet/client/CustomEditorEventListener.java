@@ -89,8 +89,8 @@ public class CustomEditorEventListener implements EventListener {
                 getSheetWidget().updateSelectionOutline(col, col, row, row);
                 getSheetWidget().updateSelectedCellStyles(col, col, row, row,
                         true);
-                getSpreadsheetWidget().getSpreadsheetHandler()
-                        .cellSelected(row, col, true);
+                getSpreadsheetWidget().getSpreadsheetHandler().cellSelected(row,
+                        col, true);
             } else if (!cellAddress
                     .equals(getSheetWidget().getSelectedCellKey())) {
                 // Programmatic focus (e.g. inputElement.select() from a
