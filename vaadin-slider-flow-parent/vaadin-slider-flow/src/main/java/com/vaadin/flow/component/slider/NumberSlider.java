@@ -117,12 +117,6 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
     }
 
     @Override
-    protected boolean hasValidValue() {
-        TValue value = fromDouble.apply(getElement().getProperty("value", 0.0));
-        return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
-    }
-
-    @Override
     protected boolean isValueWithinMinMax(TValue value) {
         double min = toDouble.apply(getMin());
         double max = toDouble.apply(getMax());

@@ -424,6 +424,18 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         }
     }
 
+    @Override
+    protected boolean hasValidValue() {
+        try {
+            TPresentation arrayValue = (TPresentation) getElement()
+                    .getPropertyRaw("value");
+            TValue value = presentationToModel.apply(arrayValue);
+            return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
+        } catch (IllegalArgumentException | ClassCastException e) {
+            return false;
+        }
+    }
+
     abstract protected boolean isValueAlignedWithStep(TValue value);
 
     abstract protected boolean isValueWithinMinMax(TValue value);

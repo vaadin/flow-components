@@ -132,18 +132,6 @@ abstract class NumberRangeSlider<TComponent extends NumberRangeSlider<TComponent
     }
 
     @Override
-    protected boolean hasValidValue() {
-        try {
-            ArrayNode arrayValue = (ArrayNode) getElement()
-                    .getPropertyRaw("value");
-            TValue value = presentationToModel.apply(arrayValue);
-            return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
-        } catch (IllegalArgumentException | ClassCastException e) {
-            return false;
-        }
-    }
-
-    @Override
     protected boolean isValueWithinMinMax(TValue value) {
         double min = toDouble.apply(getMin());
         double max = toDouble.apply(getMax());
