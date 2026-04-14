@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.charts.examples.pie;
 
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
+import com.vaadin.flow.router.Route;
 
-@SkipFromDemo
+@Route("vaadin-charts/pie/pie-with-class-name")
 public class PieWithClassName extends PieWithLegend {
 
     public static final String CLASS_NAME = "redchart";

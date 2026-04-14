@@ -8,10 +8,10 @@
  */
 package com.vaadin.flow.component.charts.examples.pie;
 
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.Accessibility;
+import com.vaadin.flow.router.Route;
 
-@SkipFromDemo
+@Route("vaadin-charts/pie/pie-without-accessibility")
 public class PieWithoutAccessibility extends PieWithLegend {
 
     @Override

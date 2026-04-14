@@ -16,7 +16,9 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.RangeSelector;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/timeline/column-range")
 public class ColumnRange extends AbstractChartExample {
 
     @Override

@@ -8,31 +8,25 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-public class BasicChartIT extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return AreaChart.class;
-    }
+@TestPath("vaadin-charts/area/area-chart")
+public class BasicChartIT extends AbstractChartIT {
 
     @Test
     public void Chart_TitleDisplayed() {
         final TestBenchElement chart = getChartElement();
         final WebElement title = chart.$("*").withClassName("highcharts-title")
                 .first();
-        assertTrue(title.getText().contains("First Chart for Flow"));
+        Assert.assertTrue(title.getText().contains("First Chart for Flow"));
     }
 
     @Test
@@ -40,14 +34,14 @@ public class BasicChartIT extends AbstractTBTest {
         final TestBenchElement chart = getChartElement();
         final WebElement title = chart.$("*").withClassName("highcharts-title")
                 .first();
-        assertTrue(title.getText().contains("First Chart for Flow"));
+        Assert.assertTrue(title.getText().contains("First Chart for Flow"));
 
         final WebElement changeTitleButton = findElement(By.id("change_title"));
         changeTitleButton.click();
 
         final WebElement titleChanged = chart.$("*")
                 .withClassName("highcharts-title").first();
-        assertTrue(titleChanged.getText()
+        Assert.assertTrue(titleChanged.getText()
                 .contains("First Chart for Flow - title changed"));
     }
 
@@ -56,7 +50,7 @@ public class BasicChartIT extends AbstractTBTest {
         final TestBenchElement chart = getChartElement();
         final WebElement series = chart.$("*")
                 .withClassName("highcharts-legend-item").first();
-        assertTrue(series.getText().contains("Tokyo"));
+        Assert.assertTrue(series.getText().contains("Tokyo"));
     }
 
     @Test

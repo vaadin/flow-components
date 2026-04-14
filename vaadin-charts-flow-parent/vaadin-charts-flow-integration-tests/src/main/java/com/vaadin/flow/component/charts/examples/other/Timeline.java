@@ -14,7 +14,9 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItemTimeline;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/timeline")
 public class Timeline extends AbstractChartExample {
 
     @Override

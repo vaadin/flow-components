@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Cursor;
@@ -30,9 +29,10 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
-@SkipFromDemo
+@Route("vaadin-charts/column/column-with-lazy-multi-level-drilldown-callback-tests")
 public class ColumnWithLazyMultiLevelDrilldownCallbackTests
         extends AbstractChartExample {
 

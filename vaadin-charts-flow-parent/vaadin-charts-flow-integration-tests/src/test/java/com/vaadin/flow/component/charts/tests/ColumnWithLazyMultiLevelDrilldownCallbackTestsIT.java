@@ -8,27 +8,21 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldownCallbackTests;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
+@TestPath("vaadin-charts/column/column-with-lazy-multi-level-drilldown-callback-tests")
 public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
-        extends AbstractTBTest {
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return ColumnWithLazyMultiLevelDrilldownCallbackTests.class;
-    }
+        extends AbstractChartIT {
 
     @Test
     public void test() throws AssertionError {
@@ -37,7 +31,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
                 ".highcharts-drilldown-point") != null);
         clickDrilldownPoint(chart, 0);
         // Can't drilldown with null callback
-        assertEquals(0, getLogMessages().size());
+        Assert.assertEquals(0, getLogMessages().size());
 
         // Set new callback
         findElement(By.id("setNew")).click();
@@ -85,7 +79,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         // Get the first label
         TestBenchElement label = getElementFromShadowRoot(chart,
                 ".highcharts-data-labels.highcharts-series-0 tspan");
-        assertEquals("ITEM1_1", label.getText());
+        Assert.assertEquals("ITEM1_1", label.getText());
     }
 
     private void clickDrilldownPoint(ChartElement chart, int index) {
@@ -107,7 +101,7 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
 
     private void assertLastLogText(String text) {
         final List<String> messages = getLogMessages();
-        assertEquals(text, messages.get(messages.size() - 1));
+        Assert.assertEquals(text, messages.get(messages.size() - 1));
     }
 
     private List<String> getLogMessages() {

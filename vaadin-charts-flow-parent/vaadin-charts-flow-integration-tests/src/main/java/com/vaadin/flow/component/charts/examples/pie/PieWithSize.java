@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.charts.examples.pie;
 
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
+import com.vaadin.flow.router.Route;
 
-@SkipFromDemo
+@Route("vaadin-charts/pie/pie-with-size")
 public class PieWithSize extends PieWithLegend {
 
     @Override

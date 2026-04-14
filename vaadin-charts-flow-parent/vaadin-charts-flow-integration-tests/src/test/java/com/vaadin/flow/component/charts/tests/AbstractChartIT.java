@@ -8,19 +8,17 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
-import com.vaadin.flow.component.charts.ui.MainView;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
-public abstract class AbstractTBTest extends AbstractParallelTest {
+public abstract class AbstractChartIT extends AbstractComponentIT {
 
     @Override
     public void setup() throws Exception {
         super.setup();
-        driver.get(getTestUrl(getView()));
+        open();
     }
 
     protected ChartElement getChartElement() {
@@ -42,17 +40,4 @@ public abstract class AbstractTBTest extends AbstractParallelTest {
         throw new AssertionError(
                 "Could not find required element in the shadowRoot");
     }
-
-    /**
-     * Overriding the way how test path is calculated. In Charts we prepend a
-     * fragment like `/vaadin-charts/area/`
-     */
-    @Override
-    protected String getDeploymentPath(Class<?> viewClass) {
-        return "/" + viewClass.getCanonicalName()
-                .replace(MainView.EXAMPLE_BASE_PACKAGE, "vaadin-charts/")
-                .replace(".", "/");
-    }
-
-    protected abstract Class<? extends AbstractChartExample> getView();
 }

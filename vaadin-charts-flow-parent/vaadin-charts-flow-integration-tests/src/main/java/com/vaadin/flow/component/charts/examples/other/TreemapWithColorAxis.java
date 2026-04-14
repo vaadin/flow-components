@@ -20,7 +20,9 @@ import com.vaadin.flow.component.charts.model.TreeMapLayoutAlgorithm;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/treemap-with-color-axis")
 public class TreemapWithColorAxis extends AbstractChartExample {
 
     @Override

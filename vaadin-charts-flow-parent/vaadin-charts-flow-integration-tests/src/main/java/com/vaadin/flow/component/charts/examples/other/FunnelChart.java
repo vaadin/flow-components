@@ -15,7 +15,9 @@ import com.vaadin.flow.component.charts.model.DataLabelsFunnel;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsFunnel;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/funnel-chart")
 public class FunnelChart extends AbstractChartExample {
 
     @Override

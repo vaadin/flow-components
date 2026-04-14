@@ -20,8 +20,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.router.Route;
 
 @CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart")
+@Route("vaadin-charts/combinations/column-line-and-pie")
 public class ColumnLineAndPie extends AbstractChartExample {
 
     @Override

@@ -24,8 +24,10 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.router.Route;
 
 @CssImport(value = "./styles/BoxPlot.css", themeFor = "vaadin-chart")
+@Route("vaadin-charts/other/box-plot")
 public class BoxPlot extends AbstractChartExample {
 
     @Override

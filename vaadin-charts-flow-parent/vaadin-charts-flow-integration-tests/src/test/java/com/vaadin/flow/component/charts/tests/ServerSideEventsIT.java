@@ -24,24 +24,19 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.*;
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-public class ServerSideEventsIT extends AbstractTBTest {
+@TestPath("vaadin-charts/dynamic/server-side-events")
+public class ServerSideEventsIT extends AbstractChartIT {
 
     @Before
     public void init() {
         resetHistory();
-    }
-
-    @Override
-    protected Class<? extends AbstractChartExample> getView() {
-        return ServerSideEvents.class;
     }
 
     @Test

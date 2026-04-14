@@ -14,7 +14,6 @@ import java.util.List;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.ChartOptions;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -28,8 +27,9 @@ import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
 import com.vaadin.flow.component.charts.themes.LumoLightTheme;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.router.Route;
 
-@SkipFromDemo
+@Route("vaadin-charts/other/global-options")
 public class GlobalOptions extends AbstractChartExample {
 
     @Override

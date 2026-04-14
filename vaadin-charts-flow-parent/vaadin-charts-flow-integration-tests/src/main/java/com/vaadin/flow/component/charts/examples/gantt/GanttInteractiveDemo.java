@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -28,9 +27,10 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
-@SkipFromDemo
+@Route("vaadin-charts/gantt/gantt-interactive-demo")
 public class GanttInteractiveDemo extends AbstractChartExample {
 
     private VerticalLayout logPane;

@@ -20,7 +20,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsHeatmap;
 import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/heat-map")
 public class HeatMap extends AbstractChartExample {
 
     @Override
