@@ -483,6 +483,23 @@ class ChartRenderingTest {
         }
 
         @Test
+        void nullChartTypeSetsCategoriesFromNames() {
+            databaseProvider.results = List.of(
+                    row("category", "Jan", "value", 100),
+                    row("category", "Feb", "value", 200));
+
+            updateData("SELECT category, value FROM t");
+            controller.onRequestCompleted();
+
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            Assertions.assertNotNull(categories,
+                    "Categories should be set when chart type is null");
+            Assertions.assertArrayEquals(new String[] { "Jan", "Feb" },
+                    categories);
+        }
+
+        @Test
         void mixedXValuesSmallAndLargeDoesNotSetDatetime() {
             // First value is a timestamp, second is small — should NOT be
             // detected as datetime since not all values qualify
