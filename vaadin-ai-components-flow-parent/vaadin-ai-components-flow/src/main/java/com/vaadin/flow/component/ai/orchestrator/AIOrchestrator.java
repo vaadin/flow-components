@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +129,14 @@ public class AIOrchestrator implements Serializable {
      * The feature flag ID for AI components.
      */
     static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
+
+    /**
+     * Pattern for valid tool names. Popular LLM APIs (OpenAI, Anthropic, etc.)
+     * require tool names to contain only alphanumeric characters, underscores,
+     * and hyphens, with a maximum length of 64 characters.
+     */
+    private static final Pattern VALID_TOOL_NAME_PATTERN = Pattern
+            .compile("^[a-zA-Z0-9_-]{1,64}$");
 
     private transient LLMProvider provider;
     private final String systemPrompt;
@@ -389,7 +398,6 @@ public class AIOrchestrator implements Serializable {
         var controllerTools = controller != null
                 && controller.getTools() != null ? controller.getTools()
                         : List.<LLMProvider.ToolSpec> of();
-        warnDuplicateToolNames(controllerTools);
         var request = new LLMProvider.LLMRequest() {
 
             @Override
@@ -441,14 +449,27 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    private static void warnDuplicateToolNames(
-            List<LLMProvider.ToolSpec> tools) {
+    private static void validateToolNames(List<LLMProvider.ToolSpec> tools) {
         var seen = new HashSet<String>();
         for (var tool : tools) {
-            if (!seen.add(tool.getName())) {
+            var name = tool.getName();
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Tool name must not be null or empty.");
+            }
+            if (!VALID_TOOL_NAME_PATTERN.matcher(name).matches()) {
+                throw new IllegalArgumentException(
+                        "Tool name '" + name + "' is not valid. "
+                                + "Tool names must contain only alphanumeric "
+                                + "characters, underscores, and hyphens, "
+                                + "with a maximum length of 64 characters "
+                                + "(pattern: "
+                                + VALID_TOOL_NAME_PATTERN.pattern() + ").");
+            }
+            if (!seen.add(name)) {
                 LOGGER.warn(
                         "Duplicate tool name '{}': previous tool will be replaced",
-                        tool.getName());
+                        name);
             }
         }
     }
@@ -516,9 +537,14 @@ public class AIOrchestrator implements Serializable {
          * @param controller
          *            the controller to use, not {@code null}
          * @return this reconnector
+         * @throws IllegalArgumentException
+         *             if any tool name is invalid
          */
         public Reconnector withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
+            if (controller.getTools() != null) {
+                validateToolNames(controller.getTools());
+            }
             this.controller = controller;
             return this;
         }
@@ -790,9 +816,14 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          * @throws NullPointerException
          *             if controller is {@code null}
+         * @throws IllegalArgumentException
+         *             if any tool name is invalid
          */
         public Builder withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
+            if (controller.getTools() != null) {
+                validateToolNames(controller.getTools());
+            }
             warnIfAlreadySet(this.controller, "controller");
             this.controller = controller;
             return this;

@@ -1787,6 +1787,110 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withNullToolName_throwsIllegalArgumentException() {
+        var controller = createController(createToolSpec(null, "A tool"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertEquals("Tool name must not be null or empty.",
+                exception.getMessage());
+    }
+
+    @Test
+    void builder_withEmptyToolName_throwsIllegalArgumentException() {
+        var controller = createController(createToolSpec("", "A tool"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertEquals("Tool name must not be null or empty.",
+                exception.getMessage());
+    }
+
+    @Test
+    void builder_withInvalidToolNameContainingSpaces_throwsIllegalArgumentException() {
+        var controller = createController(createToolSpec("my tool", "A tool"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'my tool'"),
+                "Exception should mention the invalid tool name");
+    }
+
+    @Test
+    void builder_withInvalidToolNameContainingSpecialChars_throwsIllegalArgumentException() {
+        var controller = createController(
+                createToolSpec("tool@name!", "A tool"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'tool@name!'"),
+                "Exception should mention the invalid tool name");
+    }
+
+    @Test
+    void builder_withToolNameExceeding64Characters_throwsIllegalArgumentException() {
+        var controller = createController(
+                createToolSpec("a".repeat(65), "A tool"));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+    }
+
+    @Test
+    void builder_withToolNameExactly64Characters_doesNotThrow() {
+        var controller = createController(
+                createToolSpec("a".repeat(64), "A tool"));
+
+        Assertions.assertDoesNotThrow(() -> AIOrchestrator
+                .builder(mockProvider, null).withController(controller));
+    }
+
+    @Test
+    void builder_withValidToolNameContainingUnderscoresAndHyphens_doesNotThrow() {
+        var controller = createController(
+                createToolSpec("my_tool-Name123", "A tool"));
+
+        Assertions.assertDoesNotThrow(() -> AIOrchestrator
+                .builder(mockProvider, null).withController(controller));
+    }
+
+    @Test
+    void builder_withInvalidToolNameContainingDots_throwsIllegalArgumentException() {
+        var controller = createController(
+                createToolSpec("my.tool.name", "A tool"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'my.tool.name'"),
+                "Exception should mention the invalid tool name");
+    }
+
+    @Test
+    void reconnect_withInvalidToolName_throwsIllegalArgumentException()
+            throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+
+        // Simulate deserialization: null out the transient provider field
+        var providerField = AIOrchestrator.class.getDeclaredField("provider");
+        providerField.setAccessible(true);
+        providerField.set(orchestrator, null);
+
+        var controller = createController(
+                createToolSpec("invalid tool!", "A tool"));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> orchestrator.reconnect(mockProvider)
+                        .withController(controller));
+    }
+
+    @Test
     void builder_withControllerCalledTwice_logsWarning() {
         var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
                 .withController(createController());
