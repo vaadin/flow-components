@@ -41,10 +41,10 @@ public class CustomEditorSelectFixture implements SpreadsheetFixture {
     private static class SelectEditorFactory
             implements SpreadsheetComponentFactory {
 
+        private static final String[] FRUITS = { "Apple", "Banana", "Cherry" };
+
         private int callbackCount;
         private Span counterLabel;
-
-        private static final String[] FRUITS = { "Apple", "Banana", "Cherry" };
 
         @Override
         public Component getCustomComponentForCell(Cell cell, int rowIndex,

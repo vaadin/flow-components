@@ -253,6 +253,8 @@ public class Spreadsheet extends Component
 
     private Registration spreadsheetHandlerRegistration;
 
+    private boolean insideCustomEditorCallback;
+
     int getCols() {
         return cols;
     }
@@ -993,7 +995,6 @@ public class Spreadsheet extends Component
     private SpreadsheetStyleFactory styler;
     private HyperlinkCellClickHandler hyperlinkCellClickHandler;
     private SpreadsheetComponentFactory customComponentFactory;
-    private boolean insideCustomEditorCallback;
 
     private final CellSelectionManager selectionManager = new CellSelectionManager(
             this);

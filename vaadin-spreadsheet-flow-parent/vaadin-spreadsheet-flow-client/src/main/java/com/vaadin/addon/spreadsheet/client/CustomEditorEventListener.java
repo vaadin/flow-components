@@ -64,8 +64,7 @@ public class CustomEditorEventListener implements EventListener {
                 break;
             }
             break;
-        case Event.ONMOUSEDOWN:
-        case Event.ONTOUCHSTART:
+        case Event.ONMOUSEDOWN, Event.ONTOUCHSTART:
             userInitiatedFocus = true;
             break;
         case Event.ONFOCUS:
