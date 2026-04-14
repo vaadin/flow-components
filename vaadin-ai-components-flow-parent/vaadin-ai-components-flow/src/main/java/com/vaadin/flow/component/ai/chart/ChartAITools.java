@@ -191,11 +191,19 @@ public final class ChartAITools {
      * default.
      */
     private static String resolveChartId(JsonNode args, Callbacks callbacks) {
+        var ids = callbacks.getChartIds();
         JsonNode idNode = args.get("chartId");
         if (idNode != null && !idNode.isNull()) {
-            return idNode.asString();
+            String chartId = idNode.asString();
+            if (ids.contains(chartId)) {
+                return chartId;
+            }
+            // LLM provided an unrecognized ID; fall back to the single
+            // chart if there is exactly one, otherwise report the error.
+            if (ids.size() == 1) {
+                return ids.iterator().next();
+            }
         }
-        var ids = callbacks.getChartIds();
         if (ids.size() == 1) {
             return ids.iterator().next();
         }

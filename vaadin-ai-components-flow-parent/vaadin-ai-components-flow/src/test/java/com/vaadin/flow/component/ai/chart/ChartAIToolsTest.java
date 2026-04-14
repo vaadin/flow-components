@@ -125,6 +125,15 @@ class ChartAIToolsTest {
         }
 
         @Test
+        void execute_withUnrecognizedChartId_andSingleChart_defaultsToThatChart() {
+            callbacks.chartIds = Set.of("chart");
+            callbacks.stateToReturn = "state";
+            var result = tool.execute("{\"chartId\": \"1\"}");
+            Assertions.assertEquals("state", result);
+            Assertions.assertEquals("chart", callbacks.lastGetStateId);
+        }
+
+        @Test
         void execute_whenCallbackThrows_returnsError() {
             callbacks.getStateException = new RuntimeException(
                     "Chart not found");
