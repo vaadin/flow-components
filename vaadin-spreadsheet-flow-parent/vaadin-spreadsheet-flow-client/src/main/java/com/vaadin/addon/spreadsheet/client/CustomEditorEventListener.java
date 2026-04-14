@@ -30,13 +30,14 @@ public class CustomEditorEventListener implements EventListener {
     private Slot slot;
     private String cellAddress;
     private SpreadsheetWidget widget;
+    private boolean userInitiatedFocus;
 
     public void init(Slot slot, String cellAddress) {
         this.slot = slot;
         this.cellAddress = cellAddress;
         Event.setEventListener(slot.getAssignedElement(), this);
-        DOM.sinkEvents(slot.getAssignedElement(),
-                Event.ONKEYDOWN | Event.FOCUSEVENTS);
+        DOM.sinkEvents(slot.getAssignedElement(), Event.ONKEYDOWN
+                | Event.FOCUSEVENTS | Event.ONMOUSEDOWN | Event.ONTOUCHSTART);
     }
 
     public void setCellAddress(String cellAddress) {
@@ -63,20 +64,45 @@ public class CustomEditorEventListener implements EventListener {
                 break;
             }
             break;
+        case Event.ONMOUSEDOWN:
+        case Event.ONTOUCHSTART:
+            userInitiatedFocus = true;
+            break;
         case Event.ONFOCUS:
-            var jsniUtil = getSheetWidget().getSheetJsniUtil();
-            jsniUtil.parseColRow(cellAddress);
-            var col = jsniUtil.getParsedCol();
-            var row = jsniUtil.getParsedRow();
-            getSheetWidget().setSelectedCell(col, row);
-            getSheetWidget().updateSelectionOutline(col, col, row, row);
-            getSheetWidget().updateSelectedCellStyles(col, col, row, row, true);
-            getSpreadsheetWidget().getSpreadsheetHandler().cellSelected(row,
-                    col, true);
             slot.setElementFocused(true);
+            // Only update selection and notify the server if this focus was
+            // triggered by a user interaction (mouse/touch). Programmatic
+            // focus changes (e.g. inputElement.select() from
+            // onCustomEditorDisplayed) must not update the selection or send
+            // cellSelected — doing so would move the selection to a stale
+            // cell when the delayed server response arrives, and could
+            // create an infinite feedback loop between client and server.
+            // Keyboard navigation already handles selection updates and
+            // cellSelected through SelectionHandler independently.
+            if (userInitiatedFocus) {
+                userInitiatedFocus = false;
+                var jsniUtil = getSheetWidget().getSheetJsniUtil();
+                jsniUtil.parseColRow(cellAddress);
+                var col = jsniUtil.getParsedCol();
+                var row = jsniUtil.getParsedRow();
+                getSheetWidget().setSelectedCell(col, row);
+                getSheetWidget().updateSelectionOutline(col, col, row, row);
+                getSheetWidget().updateSelectedCellStyles(col, col, row, row,
+                        true);
+                getSpreadsheetWidget().getSpreadsheetHandler()
+                        .cellSelected(row, col, true);
+            } else if (!cellAddress
+                    .equals(getSheetWidget().getSelectedCellKey())) {
+                // Programmatic focus (e.g. inputElement.select() from a
+                // delayed server response) on a cell the user has already
+                // left. Return focus to the sheet so keyboard input isn't
+                // captured by a stale editor.
+                getSheetWidget().focusSheet();
+            }
             break;
         case Event.ONBLUR:
             slot.setElementFocused(false);
+            userInitiatedFocus = false;
             break;
         }
     }
