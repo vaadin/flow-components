@@ -36,8 +36,7 @@ public class BoardBasicIT extends AbstractComponentIT {
         List<TestBenchElement> children = firstRow.getChildren();
         Assert.assertEquals(4, children.size());
 
-        Assert.assertEquals("Total Revenue / 1 k$",
-                children.get(0).getText());
+        Assert.assertEquals("Total Revenue / 1 k$", children.get(0).getText());
         Assert.assertEquals("Billed / 1k$", children.get(1).getText());
         Assert.assertEquals("Outstanding / 1k$", children.get(2).getText());
         Assert.assertEquals("Refunded / 1k$", children.get(3).getText());
