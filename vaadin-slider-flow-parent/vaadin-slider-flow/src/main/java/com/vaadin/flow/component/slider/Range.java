@@ -17,6 +17,16 @@ package com.vaadin.flow.component.slider;
 
 import java.io.Serializable;
 
+/**
+ * Represents a range of numeric values with a start and end. Package-private
+ * for now, as it is only used to facilitate internal logic in
+ * {@link NumberRangeSlider}.
+ * 
+ * @param <TNumber>
+ *            the numeric type of the range's start and end values, which must
+ *            extend {@link Number}
+ * @author Vaadin Ltd
+ */
 interface Range<TNumber extends Number> extends Serializable {
     TNumber start();
 
