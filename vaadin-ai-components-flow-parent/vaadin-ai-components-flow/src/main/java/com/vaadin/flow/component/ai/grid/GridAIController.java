@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -34,7 +35,20 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * AI controller for populating a {@link Grid} with database data via LLM tool
- * calls. The grid automatically creates columns from query results with:
+ * calls. Attach it to an {@link AIOrchestrator} via
+ * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
+ * tools to the LLM. The recommended system prompt is available from
+ * {@link #getSystemPrompt()}.
+ *
+ * <pre>
+ * var controller = new GridAIController(grid, databaseProvider);
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, GridAIController.getSystemPrompt())
+ *         .withController(controller).withMessageList(messageList).build();
+ * </pre>
+ * <p>
+ * The grid automatically creates columns from query results with:
+ * </p>
  * <ul>
  * <li>Lazy loading with SQL {@code LIMIT}/{@code OFFSET}</li>
  * <li>Built-in renderers for dates and numbers</li>
@@ -49,15 +63,31 @@ import com.vaadin.flow.shared.Registration;
  * {@link Grid} component, so it survives serialization.
  * </p>
  * <p>
- * This controller is <b>not serializable</b>. Grid state can be captured via
- * {@link #getState()} and restored via {@link #restoreState(GridState)}. State
- * change listeners can be registered via
- * {@link #addStateChangeListener(SerializableConsumer)}.
+ * <b>Serialization:</b> This controller is not serialized with the
+ * orchestrator. After deserialization, create a new controller and restore
+ * transient dependencies via {@link AIOrchestrator#reconnect(LLMProvider)
+ * reconnect(provider)} {@code .withController(controller).apply()}. The grid
+ * data can be captured via {@link #getState()} and re-applied via
+ * {@link #restoreState(GridState)}:
+ * </p>
+ *
+ * <pre>
+ * var controller = new GridAIController(grid, databaseProvider);
+ * orchestrator.reconnect(llmProvider).withController(controller).apply();
+ * if (savedState != null) {
+ *     controller.restoreState(savedState);
+ * }
+ * </pre>
+ * <p>
+ * Register a listener via {@link #addStateChangeListener(SerializableConsumer)}
+ * to be notified when the grid state changes, for example to persist
+ * {@link #getState()} after each successful AI request.
  * </p>
  *
  * @author Vaadin Ltd
  * @see GridAITools
  * @see GridRenderer
+ * @see GridState
  * @see DatabaseProviderAITools
  */
 public class GridAIController implements AIController {
@@ -89,6 +119,8 @@ public class GridAIController implements AIController {
 
     /**
      * Returns the recommended system prompt for grid data display capabilities.
+     * Pass this to {@link AIOrchestrator#builder(LLMProvider, String)} so the
+     * LLM follows the intended tool-calling workflow.
      *
      * @return the system prompt text
      */
@@ -187,7 +219,13 @@ public class GridAIController implements AIController {
 
     /**
      * Adds a listener that is notified when the grid state changes after an AI
-     * request completes successfully.
+     * request completes successfully. This is typically used to persist the
+     * grid state — for example by calling {@link #getState()} and saving the
+     * result so that it can be reapplied with {@link #restoreState(GridState)}
+     * after deserialization.
+     * <p>
+     * The listener is not fired by {@link #restoreState(GridState)}.
+     * </p>
      *
      * @param listener
      *            the listener, not {@code null}
