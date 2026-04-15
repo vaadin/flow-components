@@ -16,11 +16,9 @@
 package com.vaadin.flow.component.slider.tests;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.slider.IntegerRangeSlider;
 import com.vaadin.flow.component.slider.IntegerRangeSliderValue;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-integer-range-slider/basic")
@@ -39,16 +37,6 @@ public class IntegerRangeSliderBasicPage extends Div {
         rangeSlider.addValueChangeListener(event -> serverValue.setText(
                 event.getValue().start() + "," + event.getValue().end()));
 
-        NativeButton setEagerMode = new NativeButton("Set eager mode",
-                e -> rangeSlider.setValueChangeMode(ValueChangeMode.EAGER));
-        setEagerMode.setId("set-eager-mode");
-
-        NativeButton setLazyMode = new NativeButton("Set lazy mode", e -> {
-            rangeSlider.setValueChangeMode(ValueChangeMode.LAZY);
-            rangeSlider.setValueChangeTimeout(1500);
-        });
-        setLazyMode.setId("set-lazy-mode");
-
-        add(rangeSlider, serverValue, setEagerMode, setLazyMode);
+        add(rangeSlider, serverValue);
     }
 }

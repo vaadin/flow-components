@@ -18,7 +18,6 @@ package com.vaadin.flow.component.slider.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.slider.testbench.IntegerSliderElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -27,6 +26,8 @@ import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-integer-slider/basic")
 public class IntegerSliderBasicIT extends AbstractComponentIT {
+    // Only covers basic functionality for setting and retrieving properties via
+    // the TestBench element. SliderIT has more comprehensive coverage.
 
     private IntegerSliderElement slider;
     private TestBenchElement serverValue;
@@ -50,51 +51,5 @@ public class IntegerSliderBasicIT extends AbstractComponentIT {
     public void setValue_valueSynchronizedToServer() {
         slider.setValue(100);
         Assert.assertEquals("100", serverValue.getText());
-    }
-
-    @Test
-    public void valueChangeMode_defaultMode_valueUpdatedOnThumbRelease() {
-        new Actions(getDriver()).moveToElement(slider.getInputElement())
-                .clickAndHold().moveByOffset(50, 0).perform();
-        Assert.assertEquals("Value should not be updated while dragging thumb",
-                "", serverValue.getText());
-
-        new Actions(getDriver()).release().perform();
-        Assert.assertNotEquals("Value should be updated after releasing thumb",
-                "", serverValue.getText());
-    }
-
-    @Test
-    public void valueChangeMode_eagerMode_valueUpdatedOnThumbDrag() {
-        $("button").id("set-eager-mode").click();
-
-        new Actions(getDriver()).moveToElement(slider.getInputElement())
-                .clickAndHold().moveByOffset(50, 0).perform();
-        Assert.assertNotEquals("Value should be updated while dragging thumb",
-                "", serverValue.getText());
-
-        new Actions(getDriver()).release().perform();
-        Assert.assertNotEquals("Value should be updated after releasing thumb",
-                "", serverValue.getText());
-    }
-
-    @Test
-    public void valueChangeMode_lazyMode_valueUpdatedOnThumbDragAfterTimeout() {
-        $("button").id("set-lazy-mode").click();
-
-        long start = System.currentTimeMillis();
-
-        new Actions(getDriver()).moveToElement(slider.getInputElement())
-                .clickAndHold().moveByOffset(50, 0).perform();
-        Assert.assertEquals("Value should not be updated before timeout", "",
-                serverValue.getText());
-
-        waitUntil(driver -> !serverValue.getText().isEmpty());
-
-        long elapsed = System.currentTimeMillis() - start;
-        Assert.assertTrue(
-                "Value should be updated after the timeout (elapsed: %d ms)"
-                        .formatted(elapsed),
-                elapsed >= 1500);
     }
 }
