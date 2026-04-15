@@ -162,10 +162,15 @@ public interface LLMProvider {
     interface ToolSpec {
 
         /**
-         * Gets the unique name of this tool. To avoid name collisions, use a
+         * Gets the unique name of this tool. The name must contain only
+         * alphanumeric characters, underscores, and hyphens, with a maximum
+         * length of 64 characters (matching the pattern
+         * {@code ^[a-zA-Z0-9_-]{1,64}$}), as required by popular LLM APIs.
+         * Names that do not match this pattern will be rejected by the
+         * orchestrator at request time. To avoid name collisions, use a
          * namespaced name such as {@code "MyController_updateConfig"}.
          *
-         * @return the tool name, never {@code null}
+         * @return the tool name, never {@code null} or empty
          */
         String getName();
 
