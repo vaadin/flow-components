@@ -681,7 +681,7 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withMessageList(AIMessageList messageList) {
-            warnIfAlreadySet(this.messageList, "messageList");
+            warnIfAlreadySet(this.messageList, "Message list");
             this.messageList = messageList;
             return this;
         }
@@ -694,7 +694,7 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withMessageList(MessageList messageList) {
-            warnIfAlreadySet(this.messageList, "messageList");
+            warnIfAlreadySet(this.messageList, "Message list");
             this.messageList = wrapMessageList(messageList);
             return this;
         }
@@ -707,7 +707,7 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withInput(AIInput input) {
-            warnIfAlreadySet(this.input, "input");
+            warnIfAlreadySet(this.input, "Input");
             this.input = input;
             return this;
         }
@@ -720,7 +720,7 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withInput(MessageInput messageInput) {
-            warnIfAlreadySet(this.input, "input");
+            warnIfAlreadySet(this.input, "Input");
             this.input = wrapInput(messageInput);
             return this;
         }
@@ -733,7 +733,7 @@ public class AIOrchestrator implements Serializable {
          * @return this builder
          */
         public Builder withFileReceiver(AIFileReceiver fileReceiver) {
-            warnIfAlreadySet(this.fileReceiver, "fileReceiver");
+            warnIfAlreadySet(this.fileReceiver, "File receiver");
             this.fileReceiver = fileReceiver;
             return this;
         }
@@ -750,7 +750,7 @@ public class AIOrchestrator implements Serializable {
          *             {@link UploadHandler}
          */
         public Builder withFileReceiver(UploadManager uploadManager) {
-            warnIfAlreadySet(this.fileReceiver, "fileReceiver");
+            warnIfAlreadySet(this.fileReceiver, "File receiver");
             if (uploadManager != null
                     && UploadHelper.hasUploadHandler(uploadManager)) {
                 throw new IllegalArgumentException(
@@ -773,7 +773,7 @@ public class AIOrchestrator implements Serializable {
          *             {@link UploadHandler} or a {@link Receiver}
          */
         public Builder withFileReceiver(Upload upload) {
-            warnIfAlreadySet(this.fileReceiver, "fileReceiver");
+            warnIfAlreadySet(this.fileReceiver, "File receiver");
             if (UploadHelper.hasUploadHandler(upload)) {
                 throw new IllegalArgumentException(
                         "The provided Upload already has an UploadHandler.");
@@ -800,7 +800,7 @@ public class AIOrchestrator implements Serializable {
          */
         public Builder withTools(Object... tools) {
             if (this.tools != null) {
-                warnIfAlreadySet(this.tools, "tools");
+                warnIfAlreadySet(this.tools, "Tools");
             }
             this.tools = tools;
             return this;
@@ -824,7 +824,7 @@ public class AIOrchestrator implements Serializable {
             if (controller.getTools() != null) {
                 validateToolNames(controller.getTools());
             }
-            warnIfAlreadySet(this.controller, "controller");
+            warnIfAlreadySet(this.controller, "Controller");
             this.controller = controller;
             return this;
         }
@@ -842,7 +842,7 @@ public class AIOrchestrator implements Serializable {
          */
         public Builder withUserName(String userName) {
             Objects.requireNonNull(userName, "User name cannot be null");
-            warnIfAlreadySet(this.userName, "userName");
+            warnIfAlreadySet(this.userName, "User name");
             this.userName = userName;
             return this;
         }
@@ -861,7 +861,7 @@ public class AIOrchestrator implements Serializable {
         public Builder withAssistantName(String assistantName) {
             Objects.requireNonNull(assistantName,
                     "Assistant name cannot be null");
-            warnIfAlreadySet(this.assistantName, "assistantName");
+            warnIfAlreadySet(this.assistantName, "Assistant name");
             this.assistantName = assistantName;
             return this;
         }
@@ -881,7 +881,7 @@ public class AIOrchestrator implements Serializable {
         public Builder withAttachmentSubmitListener(
                 AttachmentSubmitListener listener) {
             warnIfAlreadySet(this.attachmentSubmitListener,
-                    "attachmentSubmitListener");
+                    "Attachment submit listener");
             this.attachmentSubmitListener = listener;
             return this;
         }
@@ -904,7 +904,7 @@ public class AIOrchestrator implements Serializable {
         public Builder withAttachmentClickListener(
                 AttachmentClickListener listener) {
             warnIfAlreadySet(this.attachmentClickListener,
-                    "attachmentClickListener");
+                    "Attachment click listener");
             this.attachmentClickListener = listener;
             return this;
         }
@@ -932,7 +932,7 @@ public class AIOrchestrator implements Serializable {
         public Builder withResponseCompleteListener(
                 ResponseCompleteListener listener) {
             warnIfAlreadySet(this.responseCompleteListener,
-                    "responseCompleteListener");
+                    "Response complete listener");
             this.responseCompleteListener = listener;
             return this;
         }
@@ -962,7 +962,7 @@ public class AIOrchestrator implements Serializable {
             Objects.requireNonNull(history, "History must not be null");
             Objects.requireNonNull(attachmentsByMessageId,
                     "Attachments map must not be null");
-            warnIfAlreadySet(this.history, "history");
+            warnIfAlreadySet(this.history, "History");
             this.history = history;
             this.historyAttachments = attachmentsByMessageId;
             return this;
