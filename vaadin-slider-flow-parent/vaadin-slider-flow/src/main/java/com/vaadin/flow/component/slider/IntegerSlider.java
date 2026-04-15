@@ -55,7 +55,7 @@ public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
      *            the maximum value
      */
     public IntegerSlider(int min, int max) {
-        super(min, max, (v) -> v.intValue(), (v) -> v.doubleValue());
+        super(min, max, Number::intValue, Number::doubleValue);
     }
 
     /**

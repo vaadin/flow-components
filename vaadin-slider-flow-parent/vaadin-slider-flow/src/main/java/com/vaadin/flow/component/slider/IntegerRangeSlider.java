@@ -58,8 +58,8 @@ public class IntegerRangeSlider extends
      *            the maximum value
      */
     public IntegerRangeSlider(int min, int max) {
-        super(min, max, IntegerRangeSliderValue::new, v -> v.intValue(),
-                v -> v.doubleValue());
+        super(min, max, IntegerRangeSliderValue::new, Number::intValue,
+                Number::doubleValue);
     }
 
     /**
