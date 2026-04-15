@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntry;
@@ -371,6 +372,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void assertNoErrorIndicatorDetected() {
         Assert.assertTrue("Error indicator detected when there should be none.",
                 findElements(By.className("v-errorindicator")).isEmpty());
+    }
+
+    protected void assertAddressFieldValue(String expected) {
+        try {
+            waitUntil(
+                    driver -> Objects.equals(expected, getAddressFieldValue()),
+                    2);
+        } catch (TimeoutException e) {
+            var actual = getAddressFieldValue();
+            Assert.fail("Expected " + expected + " on addressField, actual:"
+                    + actual);
+        }
     }
 
     protected void assertAddressFieldValue(String expected, String actual) {

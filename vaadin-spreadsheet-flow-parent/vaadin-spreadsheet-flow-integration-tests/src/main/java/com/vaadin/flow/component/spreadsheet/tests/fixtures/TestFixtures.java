@@ -12,6 +12,7 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
  * Test fixtures for server-side Spreadsheet manipulation
  *
  */
+@SuppressWarnings("java:S115") // Enum constants use PascalCase by convention
 public enum TestFixtures {
     FirstColumnWidth(FirstColumnWidthFixture.class),
     PopupButton(PopupButtonFixture.class),
@@ -39,6 +40,7 @@ public enum TestFixtures {
     AdjacentCustomEditors(AdjacentCustomEditorsFixture.class),
     CustomEditorShared(CustomEditorSharedFixture.class),
     CustomEditorRow(CustomEditorRowFixture.class),
+    CustomEditorSelect(CustomEditorSelectFixture.class),
     Styles(StylesFixture.class),
     LockCell(LockCellFixture.class),
     LockSheet(LockSheetFixture.class),
