@@ -253,6 +253,8 @@ public class Spreadsheet extends Component
 
     private Registration spreadsheetHandlerRegistration;
 
+    private boolean insideCustomEditorCallback;
+
     int getCols() {
         return cols;
     }
@@ -3748,6 +3750,13 @@ public class Spreadsheet extends Component
      * cell.
      */
     protected void loadCustomEditorOnSelectedCell() {
+        // Guard against reentrancy: if user code in onCustomEditorDisplayed
+        // calls refreshCells() -> updateMarkedCells() ->
+        // reloadVisibleCellContents() -> loadCells() ->
+        // loadCustomEditorOnSelectedCell(), skip the recursive call.
+        if (insideCustomEditorCallback) {
+            return;
+        }
         CellReference selectedCellReference = selectionManager
                 .getSelectedCellReference();
         if (selectedCellReference != null && customComponentFactory != null) {
@@ -3761,9 +3770,18 @@ public class Spreadsheet extends Component
                 String componentId = currentCellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
                     if (getComponentNodeId(c).equals(componentId)) {
-                        customComponentFactory.onCustomEditorDisplayed(
-                                getCell(row, col), row, col, this,
-                                getActiveSheet(), c);
+                        insideCustomEditorCallback = true;
+                        try {
+                            customComponentFactory.onCustomEditorDisplayed(
+                                    getCell(row, col), row, col, this,
+                                    getActiveSheet(), c);
+                        } catch (Exception e) {
+                            LOGGER.warn(
+                                    "Error in onCustomEditorDisplayed for cell ({}, {})",
+                                    col + 1, row + 1, e);
+                        } finally {
+                            insideCustomEditorCallback = false;
+                        }
                         return;
                     }
                 }
