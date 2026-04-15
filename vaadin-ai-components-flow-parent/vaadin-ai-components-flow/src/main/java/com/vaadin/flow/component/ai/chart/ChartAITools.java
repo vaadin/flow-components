@@ -192,18 +192,15 @@ public final class ChartAITools {
      */
     private static String resolveChartId(JsonNode args, Callbacks callbacks) {
         var ids = callbacks.getChartIds();
-        var idNode = args.get("chartId");
-        if (idNode != null && !idNode.isNull()) {
-            var chartId = idNode.asString();
-            if (ids.contains(chartId)) {
-                return chartId;
-            }
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("No charts available.");
         }
         if (ids.size() == 1) {
             return ids.iterator().next();
         }
-        if (ids.isEmpty()) {
-            throw new IllegalArgumentException("No charts available.");
+        var idNode = args.get("chartId");
+        if (idNode != null && ids.contains(idNode.asString())) {
+            return idNode.asString();
         }
         throw new IllegalArgumentException(
                 "chartId is required when multiple charts exist. "
