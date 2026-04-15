@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -37,10 +38,20 @@ import com.vaadin.flow.shared.Registration;
  * AI controller for creating interactive chart visualizations from database
  * data.
  * <p>
- * This controller enables AI-powered chart generation by providing tools that
- * allow the LLM to query database schemas and create/update chart
- * visualizations based on natural language requests.
+ * This controller provides tools that allow the LLM to query database schemas
+ * and create or update chart visualizations based on natural language requests.
+ * Attach it to an {@link AIOrchestrator} via
+ * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
+ * tools to the LLM. The recommended system prompt is available from
+ * {@link #getSystemPrompt()}.
  * </p>
+ *
+ * <pre>
+ * var controller = new ChartAIController(chart, databaseProvider);
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, ChartAIController.getSystemPrompt())
+ *         .withController(controller).withMessageList(messageList).build();
+ * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
  * {@link #onRequestCompleted()}, avoiding partial state and multiple redraws
@@ -48,11 +59,38 @@ import com.vaadin.flow.shared.Registration;
  * {@link Chart} component, so it survives serialization.
  * </p>
  * <p>
- * This controller is <b>not serializable</b>. Chart state can be captured via
- * {@link #getState()} and restored via {@link #restoreState(ChartState)}.
+ * Data conversion from SQL query results to chart series is handled by a
+ * {@link DataConverter}. A default implementation is used unless overridden via
+ * {@link #setDataConverter(DataConverter)}.
+ * </p>
+ * <p>
+ * <b>Serialization:</b> This controller is not serialized with the
+ * orchestrator. After deserialization, create a new controller and restore
+ * transient dependencies via {@link AIOrchestrator#reconnect(LLMProvider)
+ * reconnect(provider)} {@code .withController(controller).apply()}. The chart
+ * data can be captured via {@link #getState()} and re-applied via
+ * {@link #restoreState(ChartState)}:
+ * </p>
+ *
+ * <pre>
+ * var controller = new ChartAIController(chart, databaseProvider);
+ * orchestrator.reconnect(llmProvider).withController(controller).apply();
+ * if (savedState != null) {
+ *     controller.restoreState(savedState);
+ * }
+ * </pre>
+ * <p>
+ * Register a listener via {@link #addStateChangeListener(SerializableConsumer)}
+ * to be notified when the chart state changes, for example to persist
+ * {@link #getState()} after each successful AI request.
  * </p>
  *
  * @author Vaadin Ltd
+ * @see ChartAITools
+ * @see ChartRenderer
+ * @see ChartState
+ * @see DataConverter
+ * @see DatabaseProviderAITools
  */
 public class ChartAIController implements AIController {
 
@@ -105,7 +143,8 @@ public class ChartAIController implements AIController {
 
     /**
      * Sets a custom data converter for transforming query results into chart
-     * data.
+     * series data. Replaces the default converter used to produce series points
+     * from the rows returned by the configured SQL queries.
      *
      * @param dataConverter
      *            the data converter to use, not {@code null}
@@ -117,7 +156,9 @@ public class ChartAIController implements AIController {
 
     /**
      * Returns the recommended system prompt for chart visualization
-     * capabilities.
+     * capabilities. Pass this to
+     * {@link AIOrchestrator#builder(LLMProvider, String)} so the LLM follows
+     * the intended tool-calling workflow.
      *
      * @return the system prompt text
      */
@@ -203,7 +244,13 @@ public class ChartAIController implements AIController {
 
     /**
      * Adds a listener that is notified when the chart state changes after an AI
-     * request completes successfully.
+     * request completes successfully. This is typically used to persist the
+     * chart state — for example by calling {@link #getState()} and saving the
+     * result so that it can be reapplied with {@link #restoreState(ChartState)}
+     * after deserialization.
+     * <p>
+     * The listener is not fired by {@link #restoreState(ChartState)}.
+     * </p>
      *
      * @param listener
      *            the listener, not {@code null}
