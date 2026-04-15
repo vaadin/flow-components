@@ -574,6 +574,10 @@ public final class ChartAITools {
                                 OHLC/Candlestick:
                                 - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
+                                - When adding a volume series alongside OHLC/candlestick data, use a separate query \
+                                with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, 'Volume' AS {SERIES} \
+                                FROM stock_prices). The {SERIES} alias names the series so it can be configured via \
+                                update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
 
                                 Sankey diagram:
                                 - 3 columns: {FROM}, {TO}, {WEIGHT}
