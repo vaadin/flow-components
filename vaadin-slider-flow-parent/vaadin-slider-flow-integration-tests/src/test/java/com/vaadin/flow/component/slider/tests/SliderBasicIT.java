@@ -48,7 +48,7 @@ public class SliderBasicIT extends AbstractComponentIT {
 
     @Test
     public void setValue_valueSynchronizedToServer() {
-        slider.setValue(100);
+        slider.setValue(100.0);
         Assert.assertEquals("100.0", serverValue.getText());
     }
 

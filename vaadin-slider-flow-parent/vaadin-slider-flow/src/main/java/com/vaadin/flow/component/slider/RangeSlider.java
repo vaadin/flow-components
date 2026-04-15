@@ -23,6 +23,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * RangeSlider is an input field that allows the user to select a numeric range
  * within bounds by dragging two thumbs along a track or using arrow keys for
  * precise input.
+ * <p>
+ * RangeSlider uses {@link Double} as the value type for its start and end
+ * values, see {@link IntegerRangeSlider} for a version of the component that
+ * supports integer values.
  *
  * @author Vaadin Ltd.
  */

@@ -49,19 +49,19 @@ public class RangeSliderBasicIT extends AbstractComponentIT {
 
     @Test
     public void setValue_valueSynchronizedToServer() {
-        rangeSlider.setValue(50, 100);
+        rangeSlider.setValue(50.0, 100.0);
         Assert.assertEquals("50.0,100.0", serverValue.getText());
     }
 
     @Test
     public void setStartValue_valueSynchronizedToServer() {
-        rangeSlider.setStartValue(50);
+        rangeSlider.setStartValue(50.0);
         Assert.assertEquals("50.0,150.0", serverValue.getText());
     }
 
     @Test
     public void setEndValue_valueSynchronizedToServer() {
-        rangeSlider.setEndValue(100);
+        rangeSlider.setEndValue(100.0);
         Assert.assertEquals("25.0,100.0", serverValue.getText());
     }
 

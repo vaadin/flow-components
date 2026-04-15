@@ -13,9 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.slider.tests;
+package com.vaadin.flow.component.slider.testbench;
 
-import com.vaadin.flow.testutil.ClassesSerializableTest;
+import com.vaadin.testbench.elementsbase.Element;
 
-public class SliderSerializableTest extends ClassesSerializableTest {
+/**
+ * A TestBench element for testing an {@code IntegerSlider} component.
+ */
+@Element("vaadin-slider")
+public class IntegerSliderElement extends NumberSliderElement<Integer> {
+    public IntegerSliderElement() {
+        super(v -> v != null ? v.intValue() : null,
+                v -> v != null ? v.doubleValue() : null);
+    }
 }

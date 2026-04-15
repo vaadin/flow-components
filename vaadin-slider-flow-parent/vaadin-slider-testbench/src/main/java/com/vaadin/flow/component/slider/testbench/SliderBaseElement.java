@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.slider.testbench;
 
+import java.util.function.Function;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasValidation;
@@ -23,16 +25,25 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * Base class for slider TestBench elements, containing shared functionality.
  */
-abstract class SliderBaseElement extends TestBenchElement
-        implements HasLabel, HasHelper, HasValidation {
+abstract class SliderBaseElement<TNumber extends Number>
+        extends TestBenchElement implements HasLabel, HasHelper, HasValidation {
+
+    final Function<Double, TNumber> fromDouble;
+    final Function<TNumber, Double> toDouble;
+
+    SliderBaseElement(Function<Double, TNumber> fromDouble,
+            Function<TNumber, Double> toDouble) {
+        this.fromDouble = fromDouble;
+        this.toDouble = toDouble;
+    }
 
     /**
      * Gets the minimum value of the slider.
      *
      * @return the minimum value
      */
-    public double getMin() {
-        return getPropertyDouble("min");
+    public TNumber getMin() {
+        return fromDouble.apply(getPropertyDouble("min"));
     }
 
     /**
@@ -40,8 +51,8 @@ abstract class SliderBaseElement extends TestBenchElement
      *
      * @return the maximum value
      */
-    public double getMax() {
-        return getPropertyDouble("max");
+    public TNumber getMax() {
+        return fromDouble.apply(getPropertyDouble("max"));
     }
 
     /**
@@ -49,7 +60,7 @@ abstract class SliderBaseElement extends TestBenchElement
      *
      * @return the step value
      */
-    public double getStep() {
-        return getPropertyDouble("step");
+    public TNumber getStep() {
+        return fromDouble.apply(getPropertyDouble("step"));
     }
 }

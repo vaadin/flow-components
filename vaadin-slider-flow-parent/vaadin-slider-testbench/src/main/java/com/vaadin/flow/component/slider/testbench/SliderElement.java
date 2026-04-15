@@ -15,45 +15,14 @@
  */
 package com.vaadin.flow.component.slider.testbench;
 
-import java.util.Collections;
-
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-slider&gt;</code>
- * element.
+ * A TestBench element for testing a {@code Slider} component.
  */
 @Element("vaadin-slider")
-public class SliderElement extends SliderBaseElement {
-
-    /**
-     * Sets the value of the slider, emulating user input. The emulation is done
-     * by setting the value property to the given value and then triggering
-     * synthetic {@code input} and {@code change} DOM events to synchronize the
-     * value with the server side.
-     */
-    public void setValue(double value) {
-        setProperty("value", value);
-        dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-    }
-
-    /**
-     * Gets the current value of the slider.
-     *
-     * @return the current value
-     */
-    public double getValue() {
-        return getPropertyDouble("value");
-    }
-
-    /**
-     * Gets the input element of the slider.
-     *
-     * @return the input element
-     */
-    public TestBenchElement getInputElement() {
-        return $("input").first();
+public class SliderElement extends NumberSliderElement<Double> {
+    public SliderElement() {
+        super(v -> v, v -> v);
     }
 }
