@@ -101,6 +101,23 @@ class ChartAIToolsTest {
         }
 
         @Test
+        void execute_withMultipleCharts_andExplicitChartId_resolvesCorrectChart() {
+            callbacks.chartIds = Set.of("chart-1", "chart-2");
+            callbacks.stateToReturn = "state-of-chart-2";
+            var result = tool.execute("{\"chartId\": \"chart-2\"}");
+            Assertions.assertEquals("state-of-chart-2", result);
+            Assertions.assertEquals("chart-2", callbacks.lastGetStateId);
+        }
+
+        @Test
+        void execute_withMultipleCharts_andUnrecognizedChartId_returnsError() {
+            callbacks.chartIds = Set.of("chart-1", "chart-2");
+            var result = tool.execute("{\"chartId\": \"bogus\"}");
+            Assertions.assertTrue(result.contains("Error"));
+            Assertions.assertTrue(result.contains("chartId is required"));
+        }
+
+        @Test
         void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
             var result = tool.execute("{}");
@@ -122,6 +139,15 @@ class ChartAIToolsTest {
             var result = tool.execute("{\"chartId\": null}");
             Assertions.assertEquals("state", result);
             Assertions.assertEquals("only-chart", callbacks.lastGetStateId);
+        }
+
+        @Test
+        void execute_withUnrecognizedChartId_andSingleChart_defaultsToThatChart() {
+            callbacks.chartIds = Set.of("chart");
+            callbacks.stateToReturn = "state";
+            var result = tool.execute("{\"chartId\": \"1\"}");
+            Assertions.assertEquals("state", result);
+            Assertions.assertEquals("chart", callbacks.lastGetStateId);
         }
 
         @Test
