@@ -170,7 +170,7 @@ public final class ChartRenderer implements Serializable {
         // Collects from all series to handle multi-series with different
         // categories (e.g. stacked by region where each region has
         // different months).
-        if (!NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
+        if (chartType == null || !NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
             var categories = extractCategories(allItems);
             if (!categories.isEmpty()) {
                 xAxis.setCategories(categories.toArray(new String[0]));
