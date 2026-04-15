@@ -27,9 +27,9 @@ public class SliderBasicPage extends Div {
 
     public SliderBasicPage() {
         Slider slider = new Slider();
-        slider.setMin(10);
-        slider.setMax(200);
-        slider.setStep(5);
+        slider.setMin(10.0);
+        slider.setMax(200.0);
+        slider.setStep(5.0);
         slider.setValue(50.0);
         slider.setWidth("200px");
 

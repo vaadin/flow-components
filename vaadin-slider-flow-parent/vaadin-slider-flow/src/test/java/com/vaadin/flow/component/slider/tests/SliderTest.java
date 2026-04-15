@@ -63,7 +63,7 @@ class SliderTest {
     @Test
     void setMin_updatesProperty() {
         Slider slider = new Slider();
-        slider.setMin(10);
+        slider.setMin(10.0);
 
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(10, slider.getElement().getProperty("min", 0),
@@ -71,13 +71,27 @@ class SliderTest {
     }
 
     @Test
+    void setMin_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMin(null));
+    }
+
+    @Test
     void setMax_updatesProperty() {
         Slider slider = new Slider();
-        slider.setMax(200);
+        slider.setMax(200.0);
 
         Assertions.assertEquals(200, slider.getMax(), 0);
         Assertions.assertEquals(200, slider.getElement().getProperty("max", 0),
                 0);
+    }
+
+    @Test
+    void setMax_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setMax(null));
     }
 
     @Test
@@ -88,6 +102,13 @@ class SliderTest {
         Assertions.assertEquals(0.1, slider.getStep(), 0);
         Assertions.assertEquals(0.1,
                 slider.getElement().getProperty("step", 0.0), 0);
+    }
+
+    @Test
+    void setStep_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setStep(null));
     }
 
     @Test
@@ -173,9 +194,16 @@ class SliderTest {
     }
 
     @Test
+    void setValue_null_throws() {
+        Slider slider = new Slider();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> slider.setValue(null));
+    }
+
+    @Test
     void setValueFromClient_valueNotAlignedWithStep_ignored() {
         Slider slider = new Slider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setProperty("value", 15.0);
         Assertions.assertEquals(0, slider.getValue(), 0);
     }
@@ -183,7 +211,7 @@ class SliderTest {
     @Test
     void setValueFromClient_valueBelowMin_ignored() {
         Slider slider = new Slider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setProperty("value", -10.0);
         Assertions.assertEquals(0, slider.getValue(), 0);
     }
@@ -191,7 +219,7 @@ class SliderTest {
     @Test
     void setValueFromClient_valueAboveMax_ignored() {
         Slider slider = new Slider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         slider.getElement().setProperty("value", 110.0);
         Assertions.assertEquals(0, slider.getValue(), 0);
     }

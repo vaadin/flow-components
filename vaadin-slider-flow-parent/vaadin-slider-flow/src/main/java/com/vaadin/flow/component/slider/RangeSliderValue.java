@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.io.Serializable;
+import java.util.Objects;
 
 /**
- * Represents the value of a {@link RangeSlider}, consisting of a start and end
- * value.
+ * Represents the value of a {@link RangeSlider}, consisting of decimal start
+ * and end values.
  *
  * @param start
  *            the start value of the range
@@ -28,8 +28,8 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd
  */
-public record RangeSliderValue(double start,
-        double end) implements Serializable {
+public record RangeSliderValue(Double start,
+        Double end) implements Range<Double> {
 
     /**
      * Creates a new RangeSliderValue with the given start and end values.
@@ -42,6 +42,8 @@ public record RangeSliderValue(double start,
      *             if start is greater than end
      */
     public RangeSliderValue {
+        Objects.requireNonNull(start, "Start value cannot be null");
+        Objects.requireNonNull(end, "End value cannot be null");
         if (start > end) {
             throw new IllegalArgumentException(
                     "Start value cannot be greater than end value");

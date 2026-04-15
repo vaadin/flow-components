@@ -15,16 +15,9 @@
  */
 package com.vaadin.flow.component.slider;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JacksonUtils;
-
-import tools.jackson.databind.node.ArrayNode;
 
 /**
  * RangeSlider is an input field that allows the user to select a numeric range
@@ -36,21 +29,8 @@ import tools.jackson.databind.node.ArrayNode;
 @Tag("vaadin-range-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
-public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
-    private static final SerializableFunction<ArrayNode, RangeSliderValue> PARSER = (
-            arrayValue) -> {
-        return new RangeSliderValue(arrayValue.get(0).asDouble(),
-                arrayValue.get(1).asDouble());
-    };
-
-    private static final SerializableFunction<RangeSliderValue, ArrayNode> FORMATTER = (
-            value) -> {
-        return JacksonUtils
-                .listToJson(Arrays.asList(value.start(), value.end()));
-    };
-
-    private static final double DEFAULT_MIN = 0.0;
-    private static final double DEFAULT_MAX = 100.0;
+public class RangeSlider
+        extends NumberRangeSlider<RangeSlider, RangeSliderValue, Double> {
 
     /**
      * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
@@ -74,7 +54,7 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
      *            the maximum value
      */
     public RangeSlider(double min, double max) {
-        super(min, max, ArrayNode.class, PARSER, FORMATTER);
+        super(min, max, RangeSliderValue::new, v -> v, v -> v);
     }
 
     /**
@@ -107,161 +87,5 @@ public class RangeSlider extends SliderBase<RangeSlider, RangeSliderValue> {
     public RangeSlider(String label, double min, double max) {
         this(min, max);
         setLabel(label);
-    }
-
-    /**
-     * Sets an accessible name for the start range input element of the slider.
-     *
-     * @param accessibleName
-     *            the accessible name to set, or {@code null} to remove it
-     */
-    public void setAccessibleNameStart(String accessibleName) {
-        getElement().setProperty("accessibleNameStart", accessibleName);
-    }
-
-    /**
-     * Gets the accessible name for the start range input element of the slider.
-     *
-     * @return an optional accessible name, or an empty optional if no
-     *         accessible name has been set
-     */
-    public Optional<String> getAccessibleNameStart() {
-        return Optional
-                .ofNullable(getElement().getProperty("accessibleNameStart"));
-    }
-
-    /**
-     * Sets an accessible name for the end range input element of the slider.
-     *
-     * @param accessibleName
-     *            the accessible name to set, or {@code null} to remove it
-     */
-    public void setAccessibleNameEnd(String accessibleName) {
-        getElement().setProperty("accessibleNameEnd", accessibleName);
-    }
-
-    /**
-     * Gets the accessible name for the end range input element of the slider.
-     *
-     * @return an optional accessible name, or an empty optional if no
-     *         accessible name has been set
-     */
-    public Optional<String> getAccessibleNameEnd() {
-        return Optional
-                .ofNullable(getElement().getProperty("accessibleNameEnd"));
-    }
-
-    /**
-     * Gets the minimum value of the slider.
-     *
-     * @return the minimum value
-     */
-    public double getMin() {
-        return super.getMinDouble();
-    }
-
-    /**
-     * Sets the minimum value of the slider.
-     *
-     * @param min
-     *            the minimum value
-     */
-    public void setMin(double min) {
-        setMinDouble(min);
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    public double getMax() {
-        return super.getMaxDouble();
-    }
-
-    /**
-     * Sets the maximum value of the slider.
-     *
-     * @param max
-     *            the maximum value
-     */
-    public void setMax(double max) {
-        setMaxDouble(max);
-    }
-
-    /**
-     * Gets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @return the step value
-     */
-    public double getStep() {
-        return super.getStepDouble();
-    }
-
-    /**
-     * Sets the step value of the slider.
-     * <p>
-     * Valid slider values are calculated relative to the minimum value:
-     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
-     *
-     * @param step
-     *            the step value
-     */
-    public void setStep(double step) {
-        setStepDouble(step);
-    }
-
-    /**
-     * Clears the slider value, setting it to the full range from minimum to
-     * maximum.
-     *
-     * @see #getMin()
-     * @see #getMax()
-     */
-    @Override
-    public void clear() {
-        setValue(new RangeSliderValue(getMin(), getMax()));
-    }
-
-    @Override
-    protected boolean hasValidValue() {
-        try {
-            ArrayNode arrayValue = (ArrayNode) getElement()
-                    .getPropertyRaw("value");
-            RangeSliderValue value = PARSER.apply(arrayValue);
-            return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
-        } catch (IllegalArgumentException | ClassCastException e) {
-            return false;
-        }
-    }
-
-    @Override
-    protected boolean isValueWithinMinMax(RangeSliderValue value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
-        if (min > max) {
-            return false;
-        }
-
-        return value.equals(new RangeSliderValue(
-                SliderUtil.clampToMinMax(value.start(), min, max),
-                SliderUtil.clampToMinMax(value.end(), min, max)));
-    }
-
-    @Override
-    protected boolean isValueAlignedWithStep(RangeSliderValue value) {
-        double min = getMinDouble();
-        double max = getMaxDouble();
-        double step = getStepDouble();
-        if (min > max) {
-            return false;
-        }
-
-        return value.equals(new RangeSliderValue(
-                SliderUtil.snapToStep(value.start(), min, max, step),
-                SliderUtil.snapToStep(value.end(), min, max, step)));
     }
 }

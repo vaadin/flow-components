@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.slider;
 
+import java.util.Objects;
+
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -39,17 +41,28 @@ import com.vaadin.flow.signals.Signal;
  * @param <TComponent>
  *            the component type
  * @param <TValue>
- *            the value type
+ *            the model value type
+ * @param <TNumber>
+ *            the number type used for min, max, and step properties
+ * @param <TPresentation>
+ *            the presentation type used by the element property
  *
  * @author Vaadin Ltd
  */
-abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TValue>
+abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNumber, TPresentation>, TValue, TNumber extends Number, TPresentation>
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
         KeyNotifier {
 
-    private static final double DEFAULT_STEP = 1.0;
+    static final double DEFAULT_MIN = 0;
+    static final double DEFAULT_MAX = 100;
+    static final double DEFAULT_STEP = 1;
+
+    final SerializableFunction<TPresentation, TValue> presentationToModel;
+    final SerializableFunction<TValue, TPresentation> modelToPresentation;
+    final SerializableFunction<Double, TNumber> fromDouble;
+    final SerializableFunction<TNumber, Double> toDouble;
 
     private ValueChangeMode currentMode;
 
@@ -68,29 +81,39 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param max
      *            the maximum value
      * @param presentationType
-     *            the class of the presentation type
+     *            the class of the presentation type used by the element
+     *            property
      * @param presentationToModel
-     *            a function to convert from presentation to model
+     *            a function to convert a client-side presentation value to the
+     *            slider's value type
      * @param modelToPresentation
-     *            a function to convert from model to presentation
+     *            a function to convert a value of the slider's value type to
+     *            client-side presentation
+     * @param fromDouble
+     *            a function to convert from double to the slider's number type
+     * @param toDouble
+     *            a function to convert from the slider's number type to double
      */
-    protected <TPresentation> SliderBase(double min, double max,
-            Class<TPresentation> presentationType,
+    SliderBase(TNumber min, TNumber max, Class<TPresentation> presentationType,
             SerializableFunction<TPresentation, TValue> presentationToModel,
-            SerializableFunction<TValue, TPresentation> modelToPresentation) {
+            SerializableFunction<TValue, TPresentation> modelToPresentation,
+            SerializableFunction<Double, TNumber> fromDouble,
+            SerializableFunction<TNumber, Double> toDouble) {
         super("value", null, presentationType, presentationToModel,
                 modelToPresentation);
+        this.presentationToModel = presentationToModel;
+        this.modelToPresentation = modelToPresentation;
+        this.fromDouble = fromDouble;
+        this.toDouble = toDouble;
 
         getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        setMinDouble(min);
-        setMaxDouble(max);
-        setStepDouble(DEFAULT_STEP);
-        clear();
-
+        setMin(min);
+        setMax(max);
+        setStep(fromDouble.apply(DEFAULT_STEP));
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
@@ -116,26 +139,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *
      * @return the minimum value
      */
-    double getMinDouble() {
-        return getElement().getProperty("min", 0.0);
-    }
-
-    /**
-     * Gets the maximum value of the slider.
-     *
-     * @return the maximum value
-     */
-    double getMaxDouble() {
-        return getElement().getProperty("max", 100.0);
-    }
-
-    /**
-     * Gets the step value of the slider.
-     *
-     * @return the step value
-     */
-    double getStepDouble() {
-        return getElement().getProperty("step", 1.0);
+    public TNumber getMin() {
+        return fromDouble.apply(getElement().getProperty("min", DEFAULT_MIN));
     }
 
     /**
@@ -144,9 +149,19 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param min
      *            the minimum value
      */
-    void setMinDouble(double min) {
-        getElement().setProperty("min", min);
+    public void setMin(TNumber min) {
+        Objects.requireNonNull(min, "Min value cannot be null");
+        getElement().setProperty("min", toDouble.apply(min));
         schedulePropertyConsistencyCheck();
+    }
+
+    /**
+     * Gets the maximum value of the slider.
+     *
+     * @return the maximum value
+     */
+    public TNumber getMax() {
+        return fromDouble.apply(getElement().getProperty("max", DEFAULT_MAX));
     }
 
     /**
@@ -155,23 +170,41 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      * @param max
      *            the maximum value
      */
-    void setMaxDouble(double max) {
-        getElement().setProperty("max", max);
+    public void setMax(TNumber max) {
+        Objects.requireNonNull(max, "Max value cannot be null");
+        getElement().setProperty("max", toDouble.apply(max));
         schedulePropertyConsistencyCheck();
     }
 
     /**
+     * Gets the step value of the slider.
+     * <p>
+     * Valid slider values are calculated relative to the minimum value:
+     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
+     *
+     * @return the step value
+     */
+    public TNumber getStep() {
+        return fromDouble.apply(getElement().getProperty("step", DEFAULT_STEP));
+    }
+
+    /**
      * Sets the step value of the slider.
+     * <p>
+     * Valid slider values are calculated relative to the minimum value:
+     * {@code min}, {@code min + step}, {@code min + 2*step}, etc.
      *
      * @param step
      *            the step value
      */
-    void setStepDouble(double step) {
-        if (step <= 0) {
+    public void setStep(TNumber step) {
+        Objects.requireNonNull(step, "Step value cannot be null");
+        double stepDouble = toDouble.apply(step);
+        if (stepDouble <= 0) {
             throw new IllegalArgumentException(
                     "The step must be greater than 0.");
         }
-        getElement().setProperty("step", step);
+        getElement().setProperty("step", stepDouble);
         schedulePropertyConsistencyCheck();
     }
 
@@ -198,7 +231,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindMin(Signal<Double> signal) {
+    public SignalBinding<TNumber> bindMin(Signal<TNumber> signal) {
         return getElement().bindProperty("min", signal, null);
     }
 
@@ -225,7 +258,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindMax(Signal<Double> signal) {
+    public SignalBinding<TNumber> bindMax(Signal<TNumber> signal) {
         return getElement().bindProperty("max", signal, null);
     }
 
@@ -252,7 +285,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
      *      SerializableConsumer)
      * @since 25.1
      */
-    public SignalBinding<Double> bindStep(Signal<Double> signal) {
+    public SignalBinding<TNumber> bindStep(Signal<TNumber> signal) {
         return getElement().bindProperty("step", signal, null);
     }
 
@@ -338,6 +371,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
 
     @Override
     public void setValue(TValue value) {
+        Objects.requireNonNull(value, "Value cannot be null");
         super.setValue(value);
         schedulePropertyConsistencyCheck();
     }
@@ -356,9 +390,9 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
     }
 
     private void warnIfPropertiesInconsistent() {
-        double min = getMinDouble();
-        double max = getMaxDouble();
-        double step = getStepDouble();
+        double min = toDouble.apply(getMin());
+        double max = toDouble.apply(getMax());
+        double step = toDouble.apply(getStep());
         TValue value = getValue();
 
         if (min > max) {
@@ -386,6 +420,18 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue>, TVa
                             Set only values of the form (min + N * step) to avoid an inconsistent UI state.
                             """,
                     value, min, max, step);
+        }
+    }
+
+    @Override
+    protected boolean hasValidValue() {
+        try {
+            TPresentation arrayValue = (TPresentation) getElement()
+                    .getPropertyRaw("value");
+            TValue value = presentationToModel.apply(arrayValue);
+            return isValueWithinMinMax(value) && isValueAlignedWithStep(value);
+        } catch (IllegalArgumentException | ClassCastException e) {
+            return false;
         }
     }
 

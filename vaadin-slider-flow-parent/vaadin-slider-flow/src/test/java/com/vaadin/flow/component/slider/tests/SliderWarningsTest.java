@@ -62,7 +62,7 @@ class SliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMin(200);
+        slider.setMin(200.0);
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
@@ -76,7 +76,7 @@ class SliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMax(-10);
+        slider.setMax(-10.0);
         ui.fakeClientCommunication();
 
         Mockito.verify(mockedLogger).warn(Mockito.contains("min"),
@@ -101,7 +101,7 @@ class SliderWarningsTest {
     @Test
     void setValueNotAlignedWithStep_warnsValueNotAligned() {
         Slider slider = new Slider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
@@ -117,7 +117,7 @@ class SliderWarningsTest {
     @Test
     void setConsistentProperties_noWarnings() {
         Slider slider = new Slider(0, 100);
-        slider.setStep(10);
+        slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
@@ -136,9 +136,9 @@ class SliderWarningsTest {
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
 
-        slider.setMin(10);
-        slider.setMax(50);
-        slider.setStep(5);
+        slider.setMin(10.0);
+        slider.setMax(50.0);
+        slider.setStep(5.0);
         slider.setValue(25.0);
         ui.fakeClientCommunication();
 
