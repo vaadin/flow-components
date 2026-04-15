@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -37,13 +38,13 @@ import com.vaadin.flow.shared.Registration;
  * AI controller for populating a {@link Grid} with database data via LLM tool
  * calls. Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
- * tools to the LLM. The recommended system prompt is available from
- * {@link #getSystemPrompt()}.
+ * tools to the LLM. The controller implements {@link HasSystemPrompt}, so the
+ * grid-specific tool-calling workflow instructions are automatically appended
+ * to the orchestrator's system prompt on every request.
  *
  * <pre>
  * var controller = new GridAIController(grid, databaseProvider);
- * AIOrchestrator orchestrator = AIOrchestrator
- *         .builder(llmProvider, GridAIController.getSystemPrompt())
+ * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider, null)
  *         .withController(controller).withMessageList(messageList).build();
  * </pre>
  * <p>
@@ -90,12 +91,31 @@ import com.vaadin.flow.shared.Registration;
  * @see GridState
  * @see DatabaseProviderAITools
  */
-public class GridAIController implements AIController {
+public class GridAIController implements AIController, HasSystemPrompt {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAIController.class);
 
     private static final String GRID_ID = "grid";
+
+    private static final String SYSTEM_PROMPT = """
+            You have access to grid data display capabilities:
+
+            TOOLS:
+            1. get_database_schema() - Retrieves database schema (tables, columns, types)
+            2. get_grid_state() - Returns current grid state (query)
+            3. update_grid_data(query) - Updates grid data with SQL SELECT query
+
+            WORKFLOW:
+            Complete the user's request in a SINGLE response by calling all needed tools.
+            1. Call get_grid_state() to see what's already configured
+            2. Call get_database_schema() to learn the exact table and column names
+            3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+
+            IMPORTANT:
+            - Call get_grid_state() and update_grid_data() in the SAME response
+            - Do NOT stop after get_grid_state()
+            """;
 
     private final Grid<Map<String, Object>> grid;
     private final DatabaseProvider databaseProvider;
@@ -118,31 +138,16 @@ public class GridAIController implements AIController {
     }
 
     /**
-     * Returns the recommended system prompt for grid data display capabilities.
-     * Pass this to {@link AIOrchestrator#builder(LLMProvider, String)} so the
-     * LLM follows the intended tool-calling workflow.
+     * Returns the grid-specific tool-calling workflow instructions that the LLM
+     * needs to use this controller's tools effectively. Contributed to the
+     * orchestrator automatically via {@link HasSystemPrompt}; applications do
+     * not need to pass it to the orchestrator builder explicitly.
      *
-     * @return the system prompt text
+     * @return the system prompt text, never {@code null}
      */
-    public static String getSystemPrompt() {
-        return """
-                You have access to grid data display capabilities:
-
-                TOOLS:
-                1. get_database_schema() - Retrieves database schema (tables, columns, types)
-                2. get_grid_state() - Returns current grid state (query)
-                3. update_grid_data(query) - Updates grid data with SQL SELECT query
-
-                WORKFLOW:
-                Complete the user's request in a SINGLE response by calling all needed tools.
-                1. Call get_grid_state() to see what's already configured
-                2. Call get_database_schema() to learn the exact table and column names
-                3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
-
-                IMPORTANT:
-                - Call get_grid_state() and update_grid_data() in the SAME response
-                - Do NOT stop after get_grid_state()
-                """;
+    @Override
+    public String getSystemPrompt() {
+        return SYSTEM_PROMPT;
     }
 
     @Override

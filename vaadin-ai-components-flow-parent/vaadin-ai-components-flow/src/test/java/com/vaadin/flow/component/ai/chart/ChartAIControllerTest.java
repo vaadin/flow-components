@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -94,14 +95,18 @@ class ChartAIControllerTest {
 
         @Test
         void isNotEmpty() {
-            Assertions
-                    .assertFalse(ChartAIController.getSystemPrompt().isEmpty());
+            Assertions.assertFalse(controller.getSystemPrompt().isEmpty());
         }
 
         @Test
         void mentionsWorkflow() {
-            Assertions.assertTrue(ChartAIController.getSystemPrompt()
-                    .contains("get_chart_state"));
+            Assertions.assertTrue(
+                    controller.getSystemPrompt().contains("get_chart_state"));
+        }
+
+        @Test
+        void implementsHasSystemPrompt() {
+            Assertions.assertInstanceOf(HasSystemPrompt.class, controller);
         }
     }
 

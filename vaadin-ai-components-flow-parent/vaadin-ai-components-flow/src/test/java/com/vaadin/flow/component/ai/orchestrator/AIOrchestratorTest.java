@@ -30,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
@@ -677,6 +678,129 @@ class AIOrchestratorTest {
         Mockito.verify(mockProvider).stream(captor.capture());
         Assertions.assertEquals("You are helpful",
                 captor.getValue().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerSystemPromptAndNoBuilderPrompt_sendsControllerPrompt() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt("Controller prompt");
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Controller prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerSystemPromptAndBuilderPrompt_concatenatesBoth() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt("Controller prompt");
+
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Builder prompt\n\nController prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerReturningNullPrompt_sendsBuilderPromptOnly() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt(null);
+
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Builder prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerReturningBlankPrompt_sendsBuilderPromptOnly() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt("   ");
+
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Builder prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withBothPromptsNullOrBlank_sendsNullSystemPrompt() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt(null);
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertNull(captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerSystemPromptWithWhitespace_trimmed() {
+        stubStreamingProvider();
+        var controller = createControllerWithPrompt("  Controller prompt  ");
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Controller prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withControllerNotImplementingHasSystemPrompt_sendsBuilderPromptOnly() {
+        stubStreamingProvider();
+        AIController controller = createController();
+
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals("Builder prompt",
+                captureRequest().systemPrompt());
+    }
+
+    @Test
+    void prompt_withDynamicControllerSystemPrompt_readsPerRequest() {
+        stubStreamingProvider();
+        var promptRef = new AtomicReference<>("First prompt");
+        AIController controller = new DynamicPromptController(promptRef);
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+
+        orchestrator.prompt("First");
+        promptRef.set("Second prompt");
+        orchestrator.prompt("Second");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider, Mockito.times(2)).stream(captor.capture());
+        var requests = captor.getAllValues();
+        Assertions.assertEquals("First prompt", requests.get(0).systemPrompt());
+        Assertions.assertEquals("Second prompt",
+                requests.get(1).systemPrompt());
     }
 
     @Test
@@ -2054,5 +2178,45 @@ class AIOrchestratorTest {
 
     private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
+    }
+
+    private void stubStreamingProvider() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+    }
+
+    private LLMProvider.LLMRequest captureRequest() {
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        return captor.getValue();
+    }
+
+    private static AIController createControllerWithPrompt(String prompt) {
+        class PromptController implements AIController, HasSystemPrompt {
+            @Override
+            public String getSystemPrompt() {
+                return prompt;
+            }
+        }
+        return new PromptController();
+    }
+
+    private static class DynamicPromptController
+            implements AIController, HasSystemPrompt {
+        private final AtomicReference<String> prompt;
+
+        DynamicPromptController(AtomicReference<String> prompt) {
+            this.prompt = prompt;
+        }
+
+        @Override
+        public String getSystemPrompt() {
+            return prompt.get();
+        }
     }
 }

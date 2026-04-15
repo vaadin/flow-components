@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -42,14 +43,14 @@ import com.vaadin.flow.shared.Registration;
  * and create or update chart visualizations based on natural language requests.
  * Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
- * tools to the LLM. The recommended system prompt is available from
- * {@link #getSystemPrompt()}.
+ * tools to the LLM. The controller implements {@link HasSystemPrompt}, so the
+ * chart-specific tool-calling workflow instructions are automatically appended
+ * to the orchestrator's system prompt on every request.
  * </p>
  *
  * <pre>
  * var controller = new ChartAIController(chart, databaseProvider);
- * AIOrchestrator orchestrator = AIOrchestrator
- *         .builder(llmProvider, ChartAIController.getSystemPrompt())
+ * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider, null)
  *         .withController(controller).withMessageList(messageList).build();
  * </pre>
  * <p>
@@ -92,7 +93,7 @@ import com.vaadin.flow.shared.Registration;
  * @see DataConverter
  * @see DatabaseProviderAITools
  */
-public class ChartAIController implements AIController {
+public class ChartAIController implements AIController, HasSystemPrompt {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAIController.class);
@@ -155,14 +156,15 @@ public class ChartAIController implements AIController {
     }
 
     /**
-     * Returns the recommended system prompt for chart visualization
-     * capabilities. Pass this to
-     * {@link AIOrchestrator#builder(LLMProvider, String)} so the LLM follows
-     * the intended tool-calling workflow.
+     * Returns the chart-specific tool-calling workflow instructions that the
+     * LLM needs to use this controller's tools effectively. Contributed to the
+     * orchestrator automatically via {@link HasSystemPrompt}; applications do
+     * not need to pass it to the orchestrator builder explicitly.
      *
-     * @return the system prompt text
+     * @return the system prompt text, never {@code null}
      */
-    public static String getSystemPrompt() {
+    @Override
+    public String getSystemPrompt() {
         return SYSTEM_PROMPT;
     }
 

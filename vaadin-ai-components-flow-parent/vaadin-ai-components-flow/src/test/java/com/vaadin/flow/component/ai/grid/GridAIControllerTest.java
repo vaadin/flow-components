@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.grid.Grid;
@@ -472,17 +473,22 @@ class GridAIControllerTest {
 
     @Test
     void getSystemPrompt_notNullOrEmpty() {
-        var prompt = GridAIController.getSystemPrompt();
+        var prompt = controller.getSystemPrompt();
         Assertions.assertNotNull(prompt);
         Assertions.assertFalse(prompt.isBlank());
     }
 
     @Test
     void getSystemPrompt_containsToolNames() {
-        var prompt = GridAIController.getSystemPrompt();
+        var prompt = controller.getSystemPrompt();
         Assertions.assertTrue(prompt.contains("get_database_schema"));
         Assertions.assertTrue(prompt.contains("get_grid_state"));
         Assertions.assertTrue(prompt.contains("update_grid_data"));
+    }
+
+    @Test
+    void controller_implementsHasSystemPrompt() {
+        Assertions.assertInstanceOf(HasSystemPrompt.class, controller);
     }
 
     // --- stripGroupPrefix ---

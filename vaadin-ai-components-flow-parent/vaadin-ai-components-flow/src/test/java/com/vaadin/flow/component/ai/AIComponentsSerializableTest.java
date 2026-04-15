@@ -32,6 +32,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 import com.vaadin.tests.EnableFeatureFlagExtension;
@@ -65,6 +66,8 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // AIController — intentionally not serializable; restored
                 // via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIController",
+                // HasSystemPrompt — mixin for AIController (see above)
+                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.HasSystemPrompt",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder",
@@ -306,6 +309,110 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
+    void reconnect_withHasSystemPromptController_appendsToPreservedBuilderPrompt()
+            throws Throwable {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt").build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        AIController newController = createPromptController(
+                "Controller prompt");
+        deserialized.reconnect(newProvider).withController(newController)
+                .apply();
+        deserialized.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("Builder prompt\n\nController prompt",
+                captor.getValue().systemPrompt());
+    }
+
+    @Test
+    void reconnect_withHasSystemPromptController_noBuilderPrompt_usesControllerPrompt()
+            throws Throwable {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        AIController newController = createPromptController(
+                "Controller prompt");
+        deserialized.reconnect(newProvider).withController(newController)
+                .apply();
+        deserialized.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("Controller prompt",
+                captor.getValue().systemPrompt());
+    }
+
+    @Test
+    void reconnect_withoutController_doesNotIncludeOriginalControllerPrompt()
+            throws Throwable {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIController originalController = createPromptController(
+                "Original controller prompt");
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withController(originalController).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        // Reconnect without supplying a new controller — the original
+        // controller is transient and must not leak into the request.
+        deserialized.reconnect(newProvider).apply();
+        deserialized.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("Builder prompt",
+                captor.getValue().systemPrompt());
+    }
+
+    @Test
+    void reconnect_replacesOriginalHasSystemPromptController_usesNewPrompt()
+            throws Throwable {
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIController originalController = createPromptController(
+                "Original controller prompt");
+        var orchestrator = AIOrchestrator
+                .builder(mockProvider, "Builder prompt")
+                .withController(originalController).build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        AIController newController = createPromptController(
+                "New controller prompt");
+        deserialized.reconnect(newProvider).withController(newController)
+                .apply();
+        deserialized.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("Builder prompt\n\nNew controller prompt",
+                captor.getValue().systemPrompt());
+    }
+
+    @Test
     void reconnect_withController_replacesController() throws Throwable {
         var newProvider = Mockito.mock(LLMProvider.class);
         Mockito.when(
@@ -343,6 +450,16 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 return List.of(tools);
             }
         };
+    }
+
+    private static AIController createPromptController(String prompt) {
+        class PromptController implements AIController, HasSystemPrompt {
+            @Override
+            public String getSystemPrompt() {
+                return prompt;
+            }
+        }
+        return new PromptController();
     }
 
     private static LLMProvider.ToolSpec createToolSpec(String name,
