@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 import com.vaadin.testbench.TestBenchElement;
 
-class NumberRangeSliderElement<TNumber extends Number>
+abstract class NumberRangeSliderElement<TNumber extends Number>
         extends SliderBaseElement<TNumber> {
 
     NumberRangeSliderElement(Function<Double, TNumber> fromDouble,
