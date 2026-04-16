@@ -263,29 +263,46 @@ public final class ChartRenderer implements Serializable {
     }
 
     /**
-     * Applies previously extracted series configuration to the data series,
-     * matching by name.
+     * Applies previously extracted series configuration to the data series.
+     * Matches by name first, then falls back to positional matching for
+     * unmatched series — copying the template's name, plot options, and
+     * y-axis binding.
      */
     private static void applySeriesConfig(List<Series> allSeries,
             Map<String, AbstractSeries> seriesConfig) {
-        if (seriesConfig.isEmpty()) {
-            return;
-        }
+        // Pass 1: match by name
+        var matched = new java.util.HashSet<String>();
         for (var series : allSeries) {
-            if (!(series instanceof AbstractSeries as)
-                    || as.getName() == null) {
-                continue;
+            if (series instanceof AbstractSeries as
+                    && as.getName() != null) {
+                var tpl = seriesConfig.get(as.getName());
+                if (tpl != null) {
+                    applyTemplate(as, tpl);
+                    matched.add(as.getName());
+                }
             }
-            var template = seriesConfig.get(as.getName());
-            if (template == null) {
-                continue;
-            }
-            if (template.getPlotOptions() != null) {
-                as.setPlotOptions(template.getPlotOptions());
-            }
-            if (template.getyAxis() != null) {
-                as.setyAxis(template.getyAxis());
-            }
+        }
+
+        // Pass 2: positional fallback for unmatched series
+        var templates = seriesConfig.values().stream()
+                .filter(t -> !matched.contains(t.getName())).toList();
+        var data = allSeries.stream()
+                .filter(AbstractSeries.class::isInstance)
+                .map(AbstractSeries.class::cast)
+                .filter(as -> !matched.contains(as.getName())).toList();
+        for (int i = 0; i < Math.min(data.size(), templates.size()); i++) {
+            data.get(i).setName(templates.get(i).getName());
+            applyTemplate(data.get(i), templates.get(i));
+        }
+    }
+
+    private static void applyTemplate(AbstractSeries target,
+            AbstractSeries template) {
+        if (template.getPlotOptions() != null) {
+            target.setPlotOptions(template.getPlotOptions());
+        }
+        if (template.getyAxis() != null) {
+            target.setyAxis(template.getyAxis());
         }
     }
 
