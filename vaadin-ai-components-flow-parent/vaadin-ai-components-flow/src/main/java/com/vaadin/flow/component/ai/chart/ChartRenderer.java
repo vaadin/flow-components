@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -270,29 +271,31 @@ public final class ChartRenderer implements Serializable {
      */
     private static void applySeriesConfig(List<Series> allSeries,
             Map<String, AbstractSeries> seriesConfig) {
-        // Pass 1: match by name
-        var matched = new java.util.HashSet<String>();
-        for (var series : allSeries) {
-            if (series instanceof AbstractSeries as
-                    && as.getName() != null) {
-                var tpl = seriesConfig.get(as.getName());
-                if (tpl != null) {
-                    applyTemplate(as, tpl);
-                    matched.add(as.getName());
-                }
+        // Pre-scan: which template names have a matching data series?
+        var nameMatched = new HashSet<String>();
+        for (var s : allSeries) {
+            if (s instanceof AbstractSeries as
+                    && seriesConfig.containsKey(as.getName())) {
+                nameMatched.add(as.getName());
             }
         }
 
-        // Pass 2: positional fallback for unmatched series
-        var templates = seriesConfig.values().stream()
-                .filter(t -> !matched.contains(t.getName())).toList();
-        var data = allSeries.stream()
-                .filter(AbstractSeries.class::isInstance)
-                .map(AbstractSeries.class::cast)
-                .filter(as -> !matched.contains(as.getName())).toList();
-        for (int i = 0; i < Math.min(data.size(), templates.size()); i++) {
-            data.get(i).setName(templates.get(i).getName());
-            applyTemplate(data.get(i), templates.get(i));
+        // Templates without a name match feed the positional fallback.
+        var positional = seriesConfig.values().stream()
+                .filter(t -> !nameMatched.contains(t.getName())).iterator();
+
+        for (var s : allSeries) {
+            if (!(s instanceof AbstractSeries as)) {
+                continue;
+            }
+            var tpl = seriesConfig.get(as.getName());
+            if (tpl == null && positional.hasNext()) {
+                tpl = positional.next();
+                as.setName(tpl.getName());
+            }
+            if (tpl != null) {
+                applyTemplate(as, tpl);
+            }
         }
     }
 
