@@ -50,7 +50,7 @@ class GridAIControllerTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
-    private Grid<Map<String, Object>> grid;
+    private Grid<AIDataRow> grid;
     private StubDatabaseProvider dbProvider;
     private GridAIController controller;
 
