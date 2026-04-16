@@ -24,6 +24,7 @@ import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
@@ -56,8 +57,9 @@ public class MapSerializationTest {
                 .registerResource((AbstractStreamResource) Mockito.any()))
                 .thenReturn(streamRegistrationMock);
 
-        Mockito.when(streamResourceRegistryMock
-                .registerResource((ElementRequestHandler) Mockito.any()))
+        Mockito.when(streamResourceRegistryMock.registerResource(
+                (ElementRequestHandler) Mockito.any(),
+                Mockito.any(Element.class)))
                 .thenReturn(streamRegistrationMock, streamRegistrationMock);
 
         map = new Map();
@@ -117,7 +119,7 @@ public class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler());
+                .registerResource(Assets.PIN.getHandler(), map.getElement());
         Mockito.clearInvocations(streamResourceRegistryMock);
 
         // Force another sync of the same icon
@@ -125,14 +127,14 @@ public class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler());
+                .registerResource(Assets.PIN.getHandler(), map.getElement());
 
         // Sync a different icon with the same resource
         setupMarker();
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.never())
-                .registerResource(Assets.PIN.getHandler());
+                .registerResource(Assets.PIN.getHandler(), map.getElement());
     }
 
     @Test
@@ -160,7 +162,7 @@ public class MapSerializationTest {
         ui.fakeClientCommunication();
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getHandler());
+                .registerResource(Assets.PIN.getHandler(), map.getElement());
     }
 
     private MarkerFeature setupMarker() {
