@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -36,6 +37,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
@@ -566,8 +568,7 @@ class ChartRenderingTest {
             Assertions.assertEquals(1, series.size());
             // Series should be named from title AND have plotOptions applied
             Assertions.assertEquals("Revenue", series.get(0).getName());
-            var plotOptions = ((com.vaadin.flow.component.charts.model.AbstractSeries) series
-                    .get(0)).getPlotOptions();
+            var plotOptions = ((AbstractSeries) series.get(0)).getPlotOptions();
             Assertions.assertNotNull(plotOptions,
                     "Per-series plotOptions should be applied to "
                             + "single unnamed series after title-based naming");
@@ -594,13 +595,13 @@ class ChartRenderingTest {
                 }
             });
 
-            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
-                    + "\"yAxis\":[{\"title\":{\"text\":\"Price\"}},"
-                    + "{\"title\":{\"text\":\"Volume\"},\"opposite\":true}],"
-                    + "\"series\":["
-                    + "{\"name\":\"Prices\",\"type\":\"candlestick\"},"
-                    + "{\"name\":\"Vol\",\"type\":\"column\",\"yAxis\":1}"
-                    + "]}");
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "yAxis":[{"title":{"text":"Price"}},
+                              {"title":{"text":"Volume"},"opposite":true}],
+                     "series":[{"name":"Prices","type":"candlestick"},
+                               {"name":"Vol","type":"column","yAxis":1}]}
+                    """);
             updateData("SELECT 1", "SELECT 2");
             controller.onRequestCompleted();
 
@@ -623,9 +624,11 @@ class ChartRenderingTest {
                     row(ColumnNames.SERIES, "South", "category", "Jan", "value",
                             38000));
 
-            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
-                    + "\"series\":[" + "{\"name\":\"Revenue\",\"yAxis\":0},"
-                    + "{\"name\":\"Costs\",\"yAxis\":1}" + "]}");
+            updateConfiguration("""
+                    {"chart":{"type":"column"},
+                     "series":[{"name":"Revenue","yAxis":0},
+                               {"name":"Costs","yAxis":1}]}
+                    """);
             updateData("SELECT s, c, v FROM t");
             controller.onRequestCompleted();
 
@@ -655,23 +658,21 @@ class ChartRenderingTest {
                 }
             });
 
-            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
-                    + "\"series\":["
-                    + "{\"name\":\"Revenue\",\"type\":\"column\",\"yAxis\":0},"
-                    + "{\"name\":\"Count\",\"type\":\"line\",\"yAxis\":1}"
-                    + "]}");
+            updateConfiguration("""
+                    {"chart":{"type":"column"},
+                     "series":[{"name":"Revenue","type":"column","yAxis":0},
+                               {"name":"Count","type":"line","yAxis":1}]}
+                    """);
             updateData("SELECT 1", "SELECT 2");
             controller.onRequestCompleted();
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(2, series.size());
-            var countSeries = (com.vaadin.flow.component.charts.model.AbstractSeries) series
-                    .get(1);
+            var countSeries = (AbstractSeries) series.get(1);
             Assertions.assertEquals("Count", countSeries.getName());
             Assertions.assertEquals(1, countSeries.getyAxis(),
                     "Positional match should apply yAxis from template");
-            Assertions.assertInstanceOf(
-                    com.vaadin.flow.component.charts.model.PlotOptionsLine.class,
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
                     countSeries.getPlotOptions(),
                     "Positional match should apply plotOptions from template");
         }
