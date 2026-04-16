@@ -40,6 +40,7 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
 class ChartAIControllerTest {
@@ -114,13 +115,17 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "column");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
-            String state = findTool(tools, "get_chart_state").execute("{}");
+            String state = findTool(tools, "get_chart_state")
+                    .execute(JacksonUtils.createObjectNode());
             Assertions.assertTrue(state.contains("\"configuration\""));
             Assertions.assertTrue(state.contains("\"series\""),
                     "State should include series configuration");
@@ -134,10 +139,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             ChartEntry entry = ChartEntry.get(chart);
@@ -152,8 +160,8 @@ class ChartAIControllerTest {
             var tool = findTool(controller.getTools(),
                     "update_chart_configuration");
 
-            String result = tool
-                    .execute("{\"configuration\": \"not a json object\"}");
+            String result = tool.execute(JacksonUtils.createObjectNode()
+                    .put("configuration", "not a json object"));
             Assertions.assertTrue(result.contains("Error"),
                     "Invalid config should return error: " + result);
         }
@@ -166,7 +174,9 @@ class ChartAIControllerTest {
                     .filter(t -> t.getName().equals("update_chart_data_source"))
                     .findFirst().get();
 
-            String result = tool.execute("{\"queries\":[\"SELECT invalid\"]}");
+            String result = tool.execute(JacksonUtils.createObjectNode().set(
+                    "queries",
+                    JacksonUtils.createArrayNode().add("SELECT invalid")));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Bad SQL"));
         }
@@ -178,7 +188,8 @@ class ChartAIControllerTest {
 
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
 
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
@@ -202,11 +213,13 @@ class ChartAIControllerTest {
             configuration.setPlotOptions(plotOptions);
 
             // Apply and render
-            findTool(tools, "update_chart_configuration")
-                    .execute("{\"configuration\":"
-                            + ChartSerialization.toJSON(configuration) + "}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.set("configuration", JacksonUtils
+                    .readTree(ChartSerialization.toJSON(configuration)));
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             // Verify plot options were applied to the chart
@@ -228,14 +241,16 @@ class ChartAIControllerTest {
                     .filter(t -> t.getName().equals("update_chart_data_source"))
                     .findFirst().get();
 
-            String result = dataTool.execute("{\"queries\":[\"SELECT 1\"]}");
+            String result = dataTool
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             Assertions.assertTrue(result.contains("updated"));
 
             // Verify queries are stored via get_chart_state
             var stateTool = tools.stream()
                     .filter(t -> t.getName().equals("get_chart_state"))
                     .findFirst().get();
-            String state = stateTool.execute("{}");
+            String state = stateTool.execute(JacksonUtils.createObjectNode());
             Assertions.assertTrue(state.contains("SELECT 1"));
         }
     }
@@ -255,15 +270,19 @@ class ChartAIControllerTest {
 
             var tools = controller.getTools();
 
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
             tools.stream()
                     .filter(t -> t.getName()
                             .equals("update_chart_configuration"))
-                    .findFirst().get().execute(
-                            "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+                    .findFirst().get().execute(configArgs);
 
             tools.stream()
                     .filter(t -> t.getName().equals("update_chart_data_source"))
-                    .findFirst().get().execute("{\"queries\":[\"SELECT 1\"]}");
+                    .findFirst().get()
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
 
             controller.onRequestCompleted();
 
@@ -291,10 +310,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"column\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "column");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             ChartState state = controller.getState();
@@ -314,10 +336,14 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"column\"},\"title\":{\"text\":\"Original\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            var configObj = configArgs.putObject("configuration");
+            configObj.putObject("chart").put("type", "column");
+            configObj.putObject("title").put("text", "Original");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             ChartState savedState = controller.getState();
@@ -441,10 +467,13 @@ class ChartAIControllerTest {
 
             // Create pending state via tool calls
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
 
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertTrue(entry.hasPendingState(),
@@ -473,10 +502,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             Assertions.assertNotNull(captured.get());
@@ -500,7 +532,8 @@ class ChartAIControllerTest {
 
             var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
 
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
@@ -519,10 +552,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             Assertions.assertNull(captured.get());
@@ -534,10 +570,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             List<ChartState> states = new ArrayList<>();
@@ -563,10 +602,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             Assertions.assertNotNull(secondListenerState.get(),
@@ -580,8 +622,10 @@ class ChartAIControllerTest {
             controller.addStateChangeListener(captured::set);
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "pie");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             controller.onRequestCompleted();
 
             Assertions.assertNull(captured.get());
@@ -602,10 +646,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             // Render is deferred (chart detached), so pending state
@@ -624,10 +671,13 @@ class ChartAIControllerTest {
                     .of(Map.of("category", "A", "value", 10));
 
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             // Listener should not fire while chart is detached
@@ -649,19 +699,25 @@ class ChartAIControllerTest {
             // First request while detached
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
             controller.onRequestCompleted();
 
             // Second request while still detached
             databaseProvider.results = List
                     .of(Map.of("category", "B", "value", 20));
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"pie\"}}}");
+            var configArgs2 = JacksonUtils.createObjectNode();
+            configArgs2.putObject("configuration").putObject("chart")
+                    .put("type", "pie");
+            findTool(tools, "update_chart_configuration").execute(configArgs2);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 2\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 2")));
             controller.onRequestCompleted();
 
             ui.add(chart);
@@ -694,10 +750,13 @@ class ChartAIControllerTest {
 
             // Create pending state via tools
             var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(
-                    "{\"configuration\":{\"chart\":{\"type\":\"bar\"}}}");
+            var configArgs = JacksonUtils.createObjectNode();
+            configArgs.putObject("configuration").putObject("chart").put("type",
+                    "bar");
+            findTool(tools, "update_chart_configuration").execute(configArgs);
             findTool(tools, "update_chart_data_source")
-                    .execute("{\"queries\":[\"SELECT 1\"]}");
+                    .execute(JacksonUtils.createObjectNode().set("queries",
+                            JacksonUtils.createArrayNode().add("SELECT 1")));
 
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);

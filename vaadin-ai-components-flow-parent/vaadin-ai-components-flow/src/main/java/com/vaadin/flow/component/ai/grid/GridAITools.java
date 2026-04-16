@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
@@ -139,11 +138,10 @@ public final class GridAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("get_grid_state called");
-                    var args = JacksonUtils.readTree(arguments);
-                    var gridId = resolveGridId(args, callbacks);
+                    var gridId = resolveGridId(arguments, callbacks);
                     return callbacks.getState(gridId);
                 } catch (Exception e) {
                     LOGGER.error("get_grid_state failed", e);
@@ -214,12 +212,11 @@ public final class GridAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("update_grid_data called with: {}", arguments);
-                    var args = JacksonUtils.readTree(arguments);
-                    var gridId = resolveGridId(args, callbacks);
-                    var query = args.get("query").asString();
+                    var gridId = resolveGridId(arguments, callbacks);
+                    var query = arguments.get("query").asString();
                     LOGGER.info("update_grid_data gridId={} query={}", gridId,
                             query);
                     callbacks.updateData(gridId, query);

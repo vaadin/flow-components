@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.internal.JacksonUtils;
+
 class DatabaseProviderAIToolsTest {
 
     private static final String SCHEMA = "Tables: users(id INT, name VARCHAR)";
@@ -71,7 +73,8 @@ class DatabaseProviderAIToolsTest {
     @Test
     void getDatabaseSchema_executeDelegatesToProvider() {
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
-        Assertions.assertEquals(SCHEMA, tool.execute(null));
+        Assertions.assertEquals(SCHEMA,
+                tool.execute(JacksonUtils.createObjectNode()));
     }
 
     @Test

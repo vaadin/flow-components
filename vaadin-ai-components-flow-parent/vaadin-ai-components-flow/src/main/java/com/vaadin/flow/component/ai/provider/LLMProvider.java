@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Framework-agnostic interface for Large Language Model (LLM) providers. This
@@ -185,10 +186,7 @@ public interface LLMProvider {
 
         /**
          * Gets the JSON Schema describing the parameters this tool accepts. The
-         * schema should follow the JSON Schema specification.
-         * <p>
-         * Example:
-         * </p>
+         * top-level schema must be an object:
          *
          * <pre>
          * {
@@ -199,6 +197,28 @@ public interface LLMProvider {
          *   "required": ["query"]
          * }
          * </pre>
+         * <p>
+         * To stay portable across LLM providers, prefer the following JSON
+         * Schema subset, which is supported by both OpenAI (including strict
+         * mode) and Anthropic:
+         * </p>
+         * <ul>
+         * <li>Top-level {@code "type": "object"} with {@code "properties"} and
+         * {@code "required"}</li>
+         * <li>Per-property {@code type} (one of {@code string},
+         * {@code integer}, {@code number}, {@code boolean}, {@code array},
+         * {@code object}), {@code description}, and {@code enum}</li>
+         * <li>{@code items} for arrays; nested {@code object} with its own
+         * {@code properties}/{@code required}</li>
+         * <li>{@code anyOf} for nullable / union types</li>
+         * </ul>
+         * <p>
+         * The following keywords are <b>not</b> portable across providers and
+         * should be avoided unless you target a specific provider:
+         * {@code $ref}, {@code oneOf}, {@code allOf}, {@code not},
+         * {@code pattern}, {@code format}, {@code minimum}, {@code maximum},
+         * {@code minItems}, {@code maxItems}.
+         * </p>
          *
          * @return the JSON Schema string, or {@code null} if the tool takes no
          *         parameters
@@ -215,12 +235,12 @@ public interface LLMProvider {
          * </p>
          *
          * @param arguments
-         *            the tool arguments as a JSON string matching the
-         *            parameters schema, or {@code null} if the tool takes no
-         *            parameters
+         *            the tool arguments as a {@link JsonNode} matching the
+         *            parameters schema, never {@code null}. Tools that take no
+         *            parameters receive an empty object node.
          * @return the result of the tool execution as a string, never
          *         {@code null}
          */
-        String execute(String arguments);
+        String execute(JsonNode arguments);
     }
 }

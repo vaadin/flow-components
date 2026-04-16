@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
@@ -252,11 +251,10 @@ public final class ChartAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("get_chart_state called");
-                    JsonNode args = JacksonUtils.readTree(arguments);
-                    String chartId = resolveChartId(args, callbacks);
+                    String chartId = resolveChartId(arguments, callbacks);
                     return callbacks.getState(chartId);
                 } catch (Exception e) {
                     LOGGER.error("get_chart_state failed", e);
@@ -502,14 +500,13 @@ public final class ChartAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("update_chart_configuration called with: {}",
                             arguments);
-                    JsonNode args = JacksonUtils.readTree(arguments);
-                    String chartId = resolveChartId(args, callbacks);
+                    String chartId = resolveChartId(arguments, callbacks);
 
-                    JsonNode configNode = args.get("configuration");
+                    JsonNode configNode = arguments.get("configuration");
                     if (configNode == null || configNode.isNull()) {
                         return "Error updating chart configuration: 'configuration' parameter is required.";
                     }
@@ -646,16 +643,15 @@ public final class ChartAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("update_chart_data_source called with: {}",
                             arguments);
-                    JsonNode args = JacksonUtils.readTree(arguments);
-                    String chartId = resolveChartId(args, callbacks);
+                    String chartId = resolveChartId(arguments, callbacks);
 
                     List<String> queries = new ArrayList<>();
                     String validationError = validateQueries(
-                            args.get("queries"), queries);
+                            arguments.get("queries"), queries);
                     if (validationError != null) {
                         return validationError;
                     }
@@ -711,12 +707,11 @@ public final class ChartAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 try {
                     LOGGER.info("get_plot_options_schema called with: {}",
                             arguments);
-                    JsonNode args = JacksonUtils.readTree(arguments);
-                    JsonNode typeNode = args.get("chartType");
+                    JsonNode typeNode = arguments.get("chartType");
                     if (typeNode == null || typeNode.isNull()) {
                         return "Error: 'chartType' parameter is required.";
                     }

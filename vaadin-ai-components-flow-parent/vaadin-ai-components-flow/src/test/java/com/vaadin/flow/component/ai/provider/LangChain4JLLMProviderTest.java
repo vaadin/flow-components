@@ -53,6 +53,7 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import tools.jackson.databind.JsonNode;
 
 class LangChain4JLLMProviderTest {
     @RegisterExtension
@@ -870,19 +871,19 @@ class LangChain4JLLMProviderTest {
 
     @Test
     void stream_withExplicitTool_passesArgumentsToExecutor() {
-        var receivedArgs = new ArrayList<String>();
+        var receivedArgs = new ArrayList<JsonNode>();
         var explicitTool = createExplicitTool("myTool", "A test tool",
                 "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
                 args -> {
                     receivedArgs.add(args);
-                    return "result for " + args;
+                    return "result for " + args.get("city").asString();
                 });
 
         var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
                 Collections.emptyList(), new Object[0], List.of(explicitTool));
 
-        var toolArgs = "{\"city\":\"Helsinki\"}";
-        var response1 = mockSimpleResponseWithTool("myTool", toolArgs);
+        var response1 = mockSimpleResponseWithTool("myTool",
+                "{\"city\":\"Helsinki\"}");
         var response2 = mockSimpleResponse("Done");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response1, response2);
@@ -891,13 +892,14 @@ class LangChain4JLLMProviderTest {
 
         Assertions.assertEquals(1, receivedArgs.size(),
                 "Tool executor should have been called once");
-        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
-                "Tool executor should receive the arguments from the LLM response");
+        Assertions.assertEquals("Helsinki",
+                receivedArgs.getFirst().get("city").asString(),
+                "Tool executor should receive arguments as a JsonNode parsed from the LLM response");
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
-        Assertions.assertEquals("result for " + toolArgs,
+        Assertions.assertEquals("result for Helsinki",
                 toolResults.getFirst().text());
     }
 
@@ -954,7 +956,7 @@ class LangChain4JLLMProviderTest {
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
-            java.util.function.Function<String, String> executor) {
+            java.util.function.Function<JsonNode, String> executor) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -972,7 +974,7 @@ class LangChain4JLLMProviderTest {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return executor.apply(arguments);
             }
         };

@@ -32,6 +32,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import dev.langchain4j.agent.tool.Tool;
@@ -62,7 +63,6 @@ import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * LangChain4j implementation of {@link LLMProvider}.
@@ -99,7 +99,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
@@ -216,8 +215,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
-            toolExecutors.put(tool.getName(),
-                    (execReq, memoryId) -> tool.execute(execReq.arguments()));
+            toolExecutors.put(tool.getName(), (execReq, memoryId) -> tool
+                    .execute(parseArguments(execReq.arguments())));
         }
         return toolExecutors;
     }
@@ -252,9 +251,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return builder.build();
     }
 
+    private static JsonNode parseArguments(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            return JacksonUtils.createObjectNode();
+        }
+        return JacksonUtils.readTree(arguments);
+    }
+
     private static JsonObjectSchema parseParametersSchema(String schemaJson) {
         try {
-            JsonNode root = OBJECT_MAPPER.readTree(schemaJson);
+            JsonNode root = JacksonUtils.readTree(schemaJson);
             var schemaBuilder = JsonObjectSchema.builder();
             if (root.has("properties")) {
                 JsonNode props = root.get("properties");

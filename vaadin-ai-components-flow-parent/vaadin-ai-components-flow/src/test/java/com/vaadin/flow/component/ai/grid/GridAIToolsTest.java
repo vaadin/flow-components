@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 
 class GridAIToolsTest {
 
@@ -77,7 +78,7 @@ class GridAIToolsTest {
     @Test
     void getGridState_noQuery_returnsEmpty() {
         var tool = GridAITools.getGridState(singleGridCallbacks(null, null));
-        var result = tool.execute("{}");
+        var result = tool.execute(JacksonUtils.createObjectNode());
         Assertions.assertTrue(result.contains("empty"));
     }
 
@@ -85,7 +86,7 @@ class GridAIToolsTest {
     void getGridState_withQuery_returnsQuery() {
         var tool = GridAITools
                 .getGridState(singleGridCallbacks("SELECT * FROM t", null));
-        var result = tool.execute("{}");
+        var result = tool.execute(JacksonUtils.createObjectNode());
         Assertions.assertTrue(result.contains("SELECT * FROM t"));
     }
 
@@ -106,14 +107,14 @@ class GridAIToolsTest {
     void getGridState_singleGrid_autoResolvesId() {
         var tool = GridAITools.getGridState(singleGridCallbacks(null, null));
         // No gridId in arguments — auto-resolves to the single grid
-        var result = tool.execute("{}");
+        var result = tool.execute(JacksonUtils.createObjectNode());
         Assertions.assertTrue(result.contains("grid"));
     }
 
     @Test
     void getGridState_multipleGrids_requiresId() {
         var tool = GridAITools.getGridState(multiGridCallbacks());
-        var result = tool.execute("{}");
+        var result = tool.execute(JacksonUtils.createObjectNode());
         Assertions.assertTrue(result.contains("Error"));
         Assertions.assertTrue(result.contains("gridId is required"));
     }
@@ -121,7 +122,8 @@ class GridAIToolsTest {
     @Test
     void getGridState_multipleGrids_withId_works() {
         var tool = GridAITools.getGridState(multiGridCallbacks());
-        var result = tool.execute("{\"gridId\": \"grid1\"}");
+        var result = tool.execute(
+                JacksonUtils.createObjectNode().put("gridId", "grid1"));
         Assertions.assertTrue(result.contains("grid1"));
     }
 
@@ -138,7 +140,8 @@ class GridAIToolsTest {
         var updated = new AtomicReference<String>();
         var tool = GridAITools
                 .updateGridData(singleGridCallbacks(null, updated));
-        var result = tool.execute("{\"query\": \"SELECT 1\"}");
+        var result = tool.execute(
+                JacksonUtils.createObjectNode().put("query", "SELECT 1"));
         Assertions.assertTrue(result.contains("queued successfully"));
         Assertions.assertEquals("SELECT 1", updated.get());
     }
@@ -161,7 +164,8 @@ class GridAIToolsTest {
                 return Set.of("grid");
             }
         });
-        var result = tool.execute("{\"query\": \"BAD\"}");
+        var result = tool
+                .execute(JacksonUtils.createObjectNode().put("query", "BAD"));
         Assertions.assertTrue(result.contains("Error"));
         Assertions.assertTrue(result.contains("bad query"));
     }
@@ -169,7 +173,7 @@ class GridAIToolsTest {
     @Test
     void updateGridData_missingQuery_returnsError() {
         var tool = GridAITools.updateGridData(singleGridCallbacks(null, null));
-        var result = tool.execute("{}");
+        var result = tool.execute(JacksonUtils.createObjectNode());
         Assertions.assertTrue(result.contains("Error"));
     }
 
@@ -206,8 +210,8 @@ class GridAIToolsTest {
                 return Set.of("g1", "g2");
             }
         });
-        var result = tool
-                .execute("{\"gridId\": \"g1\", \"query\": \"SELECT 1\"}");
+        var result = tool.execute(JacksonUtils.createObjectNode()
+                .put("gridId", "g1").put("query", "SELECT 1"));
         Assertions.assertTrue(result.contains("queued successfully"));
         Assertions.assertEquals("g1:SELECT 1", updated.get());
     }
