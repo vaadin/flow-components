@@ -18,6 +18,8 @@ package com.vaadin.flow.component.ai.provider;
 import java.util.List;
 import java.util.Objects;
 
+import tools.jackson.databind.JsonNode;
+
 /**
  * Factory for creating reusable database {@link LLMProvider.ToolSpec}
  * instances. These tools can be used by any controller that works with a
@@ -59,7 +61,7 @@ public final class DatabaseProviderAITools {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return provider.getSchema();
             }
         };

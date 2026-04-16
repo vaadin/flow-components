@@ -60,6 +60,7 @@ import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 class AIOrchestratorTest {
     @RegisterExtension
@@ -2046,7 +2047,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return "result";
             }
         };

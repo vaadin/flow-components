@@ -32,10 +32,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test page for ChartAIController with Dashboard. Uses an async LLM provider
@@ -98,12 +100,19 @@ public class DashboardChartControllerPage extends Div {
             if ("/render-bar".equals(message)) {
                 return Flux.<String> create(sink -> {
                     new Thread(() -> {
+                        var dataArgs = JacksonUtils.createObjectNode();
+                        dataArgs.putArray("queries").add("SELECT * FROM sales");
                         executeTool(tools, "update_chart_data_source",
-                                "{\"queries\":[\"SELECT * FROM sales\"]}");
+                                dataArgs);
+
+                        var configArgs = JacksonUtils.createObjectNode();
+                        var configObj = configArgs.putObject("configuration");
+                        configObj.putObject("chart").put("type", "bar");
+                        configObj.putObject("title").put("text",
+                                "Monthly Revenue");
                         executeTool(tools, "update_chart_configuration",
-                                "{\"configuration\":{\"chart\":"
-                                        + "{\"type\":\"bar\"},\"title\":"
-                                        + "{\"text\":\"Monthly Revenue\"}}}");
+                                configArgs);
+
                         sink.next("Rendered bar chart.");
                         sink.complete();
                     }).start();
@@ -119,7 +128,7 @@ public class DashboardChartControllerPage extends Div {
         }
 
         private static void executeTool(List<ToolSpec> tools, String name,
-                String args) {
+                JsonNode args) {
             tools.stream().filter(t -> t.getName().equals(name)).findFirst()
                     .orElseThrow().execute(args);
         }
