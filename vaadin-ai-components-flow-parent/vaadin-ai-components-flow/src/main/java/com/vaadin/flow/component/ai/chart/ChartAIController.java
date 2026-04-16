@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -43,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * and create or update chart visualizations based on natural language requests.
  * Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
- * tools to the LLM. The controller implements {@link HasSystemPrompt}, so the
+ * tools to the LLM. The controller overrides {@link #getSystemPrompt()}, so the
  * chart-specific tool-calling workflow instructions are automatically appended
  * to the orchestrator's system prompt on every request.
  * </p>
@@ -93,7 +92,7 @@ import com.vaadin.flow.shared.Registration;
  * @see DataConverter
  * @see DatabaseProviderAITools
  */
-public class ChartAIController implements AIController, HasSystemPrompt {
+public class ChartAIController implements AIController {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAIController.class);
@@ -158,8 +157,8 @@ public class ChartAIController implements AIController, HasSystemPrompt {
     /**
      * Returns the chart-specific tool-calling workflow instructions that the
      * LLM needs to use this controller's tools effectively. Contributed to the
-     * orchestrator automatically via {@link HasSystemPrompt}; applications do
-     * not need to pass it to the orchestrator builder explicitly.
+     * orchestrator automatically via {@link AIController}; applications do not
+     * need to pass it to the orchestrator builder explicitly.
      *
      * @return the system prompt text, never {@code null}
      */

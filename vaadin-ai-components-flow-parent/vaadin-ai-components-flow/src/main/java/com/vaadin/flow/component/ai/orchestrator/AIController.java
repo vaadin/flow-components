@@ -21,11 +21,17 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 
 /**
  * Interface for AI controllers that extend orchestrator capabilities by
- * providing tools that the LLM can use.
+ * providing tools and an optional system prompt that the LLM can use.
  * <p>
  * Controllers provide domain-specific tools and functionality to the AI
  * orchestrator. Tools are functions that the AI can call to perform actions
  * like querying databases, creating visualizations, filling forms, etc.
+ * </p>
+ * <p>
+ * Controllers that override {@link #getSystemPrompt()} contribute tool-calling
+ * workflow instructions that are automatically appended to the orchestrator's
+ * system prompt on every LLM request, so applications do not need to pass them
+ * to the builder explicitly.
  * </p>
  * <p>
  * Controllers are <b>not serialized</b> with the orchestrator. After
@@ -37,6 +43,28 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * @author Vaadin Ltd
  */
 public interface AIController {
+
+    /**
+     * Returns the system prompt contributed by this controller. The
+     * orchestrator appends this to its own system prompt before sending each
+     * LLM request.
+     * <p>
+     * If both the orchestrator and the controller provide a non-blank prompt,
+     * they are joined with a blank line separator, orchestrator prompt first.
+     * If only one side provides a non-blank prompt, it is used as-is.
+     * </p>
+     * <p>
+     * This method is invoked on every LLM request, so implementations may
+     * return a dynamic value. Return {@code null} or a blank string to
+     * contribute nothing (the default).
+     * </p>
+     *
+     * @return the system prompt, or {@code null} if this controller does not
+     *         contribute one
+     */
+    default String getSystemPrompt() {
+        return null;
+    }
 
     /**
      * Returns the tools this controller provides to the LLM.

@@ -767,7 +767,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withControllerNotImplementingHasSystemPrompt_sendsBuilderPromptOnly() {
+    void prompt_withControllerWithDefaultSystemPrompt_sendsBuilderPromptOnly() {
         stubStreamingProvider();
         AIController controller = createController();
 
@@ -2197,7 +2197,7 @@ class AIOrchestratorTest {
     }
 
     private static AIController createControllerWithPrompt(String prompt) {
-        class PromptController implements AIController, HasSystemPrompt {
+        class PromptController implements AIController {
             @Override
             public String getSystemPrompt() {
                 return prompt;
@@ -2206,8 +2206,7 @@ class AIOrchestratorTest {
         return new PromptController();
     }
 
-    private static class DynamicPromptController
-            implements AIController, HasSystemPrompt {
+    private static class DynamicPromptController implements AIController {
         private final AtomicReference<String> prompt;
 
         DynamicPromptController(AtomicReference<String> prompt) {

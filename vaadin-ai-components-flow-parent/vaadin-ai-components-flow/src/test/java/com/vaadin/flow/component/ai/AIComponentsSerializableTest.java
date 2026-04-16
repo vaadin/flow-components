@@ -32,7 +32,6 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.orchestrator.HasSystemPrompt;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 import com.vaadin.tests.EnableFeatureFlagExtension;
@@ -66,8 +65,6 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // AIController — intentionally not serializable; restored
                 // via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIController",
-                // HasSystemPrompt — mixin for AIController (see above)
-                "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.HasSystemPrompt",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.AIComponentsFeatureFlagProvider",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Reconnector",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.orchestrator\\.AIOrchestrator\\$Builder",
@@ -309,7 +306,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    void reconnect_withHasSystemPromptController_appendsToPreservedBuilderPrompt()
+    void reconnect_withControllerSystemPrompt_appendsToPreservedBuilderPrompt()
             throws Throwable {
         var newProvider = Mockito.mock(LLMProvider.class);
         Mockito.when(
@@ -334,7 +331,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    void reconnect_withHasSystemPromptController_noBuilderPrompt_usesControllerPrompt()
+    void reconnect_withControllerSystemPrompt_noBuilderPrompt_usesControllerPrompt()
             throws Throwable {
         var newProvider = Mockito.mock(LLMProvider.class);
         Mockito.when(
@@ -385,7 +382,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    void reconnect_replacesOriginalHasSystemPromptController_usesNewPrompt()
+    void reconnect_replacesOriginalControllerSystemPrompt_usesNewPrompt()
             throws Throwable {
         var newProvider = Mockito.mock(LLMProvider.class);
         Mockito.when(
@@ -453,7 +450,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
     }
 
     private static AIController createPromptController(String prompt) {
-        class PromptController implements AIController, HasSystemPrompt {
+        class PromptController implements AIController {
             @Override
             public String getSystemPrompt() {
                 return prompt;

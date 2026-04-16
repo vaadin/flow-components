@@ -98,10 +98,10 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)}.
  * </p>
  * <p>
- * If the attached controller implements {@link HasSystemPrompt}, its prompt is
- * appended to the orchestrator's system prompt on every LLM request, so the
- * controller can ship the tool-calling workflow instructions the LLM needs to
- * use its tools effectively.
+ * If the attached controller overrides {@link AIController#getSystemPrompt()},
+ * its prompt is appended to the orchestrator's system prompt on every LLM
+ * request, so the controller can ship the tool-calling workflow instructions
+ * the LLM needs to use its tools effectively.
  * </p>
  * <p>
  * <b>Serialization:</b> The LLM provider and tool objects are not serialized
@@ -179,17 +179,17 @@ public class AIOrchestrator implements Serializable {
     /**
      * Creates a new builder for AIOrchestrator with a system prompt.
      * <p>
-     * If the controller attached to the orchestrator implements
-     * {@link HasSystemPrompt}, its prompt is appended to this system prompt on
-     * every LLM request.
+     * If the attached controller overrides
+     * {@link AIController#getSystemPrompt()}, its prompt is appended to this
+     * system prompt on every LLM request.
      * </p>
      *
      * @param provider
      *            the LLM provider
      * @param systemPrompt
      *            the system prompt for the LLM, or {@code null} to rely
-     *            entirely on the controller's {@link HasSystemPrompt}
-     *            contribution (if any)
+     *            entirely on the controller's
+     *            {@link AIController#getSystemPrompt()} contribution (if any)
      * @return a new builder
      */
     public static Builder builder(LLMProvider provider, String systemPrompt) {
@@ -444,8 +444,8 @@ public class AIOrchestrator implements Serializable {
         if (systemPrompt != null && !systemPrompt.isBlank()) {
             effectiveSystemPrompt = systemPrompt.trim();
         }
-        if (controller instanceof HasSystemPrompt hasSystemPrompt) {
-            var controllerPrompt = hasSystemPrompt.getSystemPrompt();
+        if (controller != null) {
+            var controllerPrompt = controller.getSystemPrompt();
             if (controllerPrompt != null && !controllerPrompt.isBlank()) {
                 controllerPrompt = controllerPrompt.trim();
                 effectiveSystemPrompt = effectiveSystemPrompt == null
