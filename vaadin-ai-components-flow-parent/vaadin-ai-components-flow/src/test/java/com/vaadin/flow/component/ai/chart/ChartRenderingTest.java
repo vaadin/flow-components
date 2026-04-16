@@ -638,43 +638,6 @@ class ChartRenderingTest {
         }
 
         @Test
-        void nameMatchedSeriesNotOverwrittenByPositionalFallback() {
-            // When one data series matches a config template by name and
-            // another doesn't, the name-matched series must not be
-            // re-processed by positional fallback. The name-matched
-            // series ("Revenue") is deliberately second in data order so
-            // that positional fallback — if it ignored matched tracking —
-            // would assign it the wrong template.
-            databaseProvider.results = List.of(
-                    row(ColumnNames.SERIES, "Other", "category", "Jan",
-                            "value", 38000),
-                    row(ColumnNames.SERIES, "Revenue", "category", "Jan",
-                            "value", 45000));
-
-            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
-                    + "\"series\":["
-                    + "{\"name\":\"Revenue\",\"yAxis\":0},"
-                    + "{\"name\":\"Costs\",\"yAxis\":1}" + "]}");
-            updateData("SELECT s, c, v FROM t");
-            controller.onRequestCompleted();
-
-            var series = chart.getConfiguration().getSeries();
-            Assertions.assertEquals(2, series.size());
-            // "Other" did not match — positional fallback renames to "Costs"
-            Assertions.assertEquals("Costs", series.get(0).getName());
-            Assertions.assertEquals(1,
-                    ((com.vaadin.flow.component.charts.model.AbstractSeries) series
-                            .get(0)).getyAxis(),
-                    "Positionally matched series should get template yAxis");
-            // "Revenue" matched by name — must keep its name and yAxis
-            Assertions.assertEquals("Revenue", series.get(1).getName());
-            Assertions.assertEquals(0,
-                    ((com.vaadin.flow.component.charts.model.AbstractSeries) series
-                            .get(1)).getyAxis(),
-                    "Name-matched series should keep its yAxis");
-        }
-
-        @Test
         void positionalMatchAppliesPlotOptionsAndYAxis() {
             // Positional fallback must apply plotOptions and yAxis from
             // the config template, not just the name.

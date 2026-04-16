@@ -17,7 +17,6 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -264,48 +263,30 @@ public final class ChartRenderer implements Serializable {
     }
 
     /**
-     * Applies previously extracted series configuration to the data series.
-     * Matches by name first, then falls back to positional matching for
-     * unmatched series — copying the template's name, plot options, and
-     * y-axis binding.
+     * Applies series configuration templates to data series by position.
+     * Templates and data series are assumed to be in the same order (both
+     * produced by the LLM in a single request). If a template has a name, it
+     * overrides the data series name so the legend shows the LLM-specified
+     * label.
      */
-    private static void applySeriesConfig(List<Series> allSeries,
-            Map<String, AbstractSeries> seriesConfig) {
-        // Pre-scan: which template names have a matching data series?
-        var nameMatched = new HashSet<String>();
-        for (var s : allSeries) {
-            if (s instanceof AbstractSeries as
-                    && seriesConfig.containsKey(as.getName())) {
-                nameMatched.add(as.getName());
-            }
-        }
-
-        // Templates without a name match feed the positional fallback.
-        var positional = seriesConfig.values().stream()
-                .filter(t -> !nameMatched.contains(t.getName())).iterator();
-
-        for (var s : allSeries) {
-            if (!(s instanceof AbstractSeries as)) {
+    private static void applySeriesConfig(List<Series> dataSeries,
+            Map<String, AbstractSeries> templates) {
+        var templateList = new ArrayList<>(templates.values());
+        for (int i = 0; i < Math.min(dataSeries.size(),
+                templateList.size()); i++) {
+            if (!(dataSeries.get(i) instanceof AbstractSeries as)) {
                 continue;
             }
-            var tpl = seriesConfig.get(as.getName());
-            if (tpl == null && positional.hasNext()) {
-                tpl = positional.next();
-                as.setName(tpl.getName());
+            var template = templateList.get(i);
+            if (template.getName() != null) {
+                as.setName(template.getName());
             }
-            if (tpl != null) {
-                applyTemplate(as, tpl);
+            if (template.getPlotOptions() != null) {
+                as.setPlotOptions(template.getPlotOptions());
             }
-        }
-    }
-
-    private static void applyTemplate(AbstractSeries target,
-            AbstractSeries template) {
-        if (template.getPlotOptions() != null) {
-            target.setPlotOptions(template.getPlotOptions());
-        }
-        if (template.getyAxis() != null) {
-            target.setyAxis(template.getyAxis());
+            if (template.getyAxis() != null) {
+                as.setyAxis(template.getyAxis());
+            }
         }
     }
 
