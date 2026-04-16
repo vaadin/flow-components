@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -39,13 +40,13 @@ public class MapSerializer implements Serializable {
     private final ObjectWriter writer;
     private final Map<Object, StreamRegistration> streamRegistrationCache = new HashMap<>();
 
-    public MapSerializer(com.vaadin.flow.component.map.MapBase map) {
+    public MapSerializer(MapBase map) {
         // Create mapper that automatically registers stream resources and
         // download handlers in the current UI's stream resource registry
         SimpleModule streamResourceModule = new SimpleModule().addSerializer(
                 StreamResource.class, new StreamResourceSerializer());
         SimpleModule downloadHandlerModule = new SimpleModule().addSerializer(
-                DownloadHandler.class, new DownloadHandlerSerializer());
+                DownloadHandler.class, new DownloadHandlerSerializer(map));
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(streamResourceModule);
@@ -132,8 +133,11 @@ public class MapSerializer implements Serializable {
     private class DownloadHandlerSerializer
             extends StdSerializer<DownloadHandler> {
 
-        public DownloadHandlerSerializer() {
+        private final MapBase map;
+
+        public DownloadHandlerSerializer(MapBase map) {
             super(DownloadHandler.class);
+            this.map = map;
         }
 
         @Override
@@ -153,7 +157,8 @@ public class MapSerializer implements Serializable {
             if (registration == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrent()
                         .getSession().getResourceRegistry();
-                registration = resourceRegistry.registerResource(resource);
+                registration = resourceRegistry.registerResource(resource,
+                        map.getElement());
                 streamRegistrationCache.put(resource, registration);
             }
             return registration.getResourceUri();
