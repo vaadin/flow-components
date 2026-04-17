@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.breadcrumb.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.breadcrumb.Breadcrumb;
 import com.vaadin.flow.component.breadcrumb.BreadcrumbItem;
+import com.vaadin.flow.component.html.Span;
 
 class BreadcrumbTest {
 
@@ -143,5 +145,38 @@ class BreadcrumbTest {
         List<BreadcrumbItem> items = breadcrumb.getItems();
         assertEquals(1, items.size());
         assertEquals(item1, items.get(0));
+    }
+
+    @Test
+    void setSeparator_addsSeparatorWithSlotAttribute() {
+        Span separator = new Span("/");
+        breadcrumb.setSeparator(separator);
+
+        assertEquals(separator, breadcrumb.getSeparator());
+        assertEquals("separator",
+                separator.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    void getSeparator_returnsSetSeparator() {
+        Span separator = new Span(">");
+        breadcrumb.setSeparator(separator);
+
+        assertEquals(separator, breadcrumb.getSeparator());
+    }
+
+    @Test
+    void setSeparator_null_removesExistingSeparator() {
+        Span separator = new Span("/");
+        breadcrumb.setSeparator(separator);
+        assertEquals(separator, breadcrumb.getSeparator());
+
+        breadcrumb.setSeparator(null);
+        assertNull(breadcrumb.getSeparator());
+    }
+
+    @Test
+    void getSeparator_returnsNullWhenNoSeparatorSet() {
+        assertNull(breadcrumb.getSeparator());
     }
 }

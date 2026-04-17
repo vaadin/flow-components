@@ -24,12 +24,15 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 @Tag("vaadin-breadcrumb")
 @NpmPackage(value = "@vaadin/breadcrumb", version = "25.2.0-alpha7")
 @JsModule("@vaadin/breadcrumb/src/vaadin-breadcrumb.js")
 public class Breadcrumb extends Component
         implements HasBreadcrumbItems, HasSize, HasStyle {
+
+    private static final String SEPARATOR_SLOT_NAME = "separator";
 
     /**
      * Replaces all current breadcrumb items with the given items.
@@ -53,5 +56,27 @@ public class Breadcrumb extends Component
         Objects.requireNonNull(items, "Items must not be null");
         removeAll();
         addItem(items.toArray(new BreadcrumbItem[0]));
+    }
+
+    /**
+     * Sets a custom separator component to be used between breadcrumb items.
+     * The component is placed in the {@code separator} slot.
+     * <p>
+     * Passing {@code null} removes any existing separator.
+     *
+     * @param separator
+     *            the separator component, or {@code null} to remove
+     */
+    public void setSeparator(Component separator) {
+        SlotUtils.setSlot(this, SEPARATOR_SLOT_NAME, separator);
+    }
+
+    /**
+     * Gets the current separator component.
+     *
+     * @return the separator component, or {@code null} if none is set
+     */
+    public Component getSeparator() {
+        return SlotUtils.getChildInSlot(this, SEPARATOR_SLOT_NAME);
     }
 }
