@@ -298,6 +298,45 @@ getElement().appendChild(child.getElement());                // Add child
 - For state that must throw when a signal binding is active, use `Element.bindProperty` (returns the corresponding `bind*` implementation) — or use `SignalPropertySupport` for custom logic (see next section).
 - Never reach past `getElement()` to manipulate the DOM of child elements directly. Use child `Component` instances.
 
+### Boolean Property Naming — Positive Form
+
+Web component boolean attributes work by presence/absence (e.g. `disabled` present = disabled), which forces them to use the non-default state as the attribute name. The Flow wrapper is free from this constraint and SHOULD use the positive, natural-language form instead. See [DESIGN_GUIDELINES.md → Prefer positive-form boolean APIs](DESIGN_GUIDELINES.md#prefer-positive-form-boolean-apis) for the rationale.
+
+**Implementation pattern — polarity flip:**
+
+```java
+// Flow API: positive form
+public void setEnabled(boolean enabled) {
+    getElement().setEnabled(enabled);
+    // Internally, this maps to the web component's `disabled` property
+}
+
+public boolean isEnabled() {
+    return getElement().isEnabled();
+}
+```
+
+The `HasEnabled` interface from Flow already handles this mapping. When you implement a new boolean state that doesn't have a pre-built mixin:
+
+```java
+// Custom boolean state — flip the polarity at the element boundary
+public void setEditable(boolean editable) {
+    getElement().setProperty("readonly", !editable);
+}
+
+public boolean isEditable() {
+    return !getElement().getProperty("readonly", false);
+}
+```
+
+When the web component attribute already uses the natural form (`opened`, `required`), keep the same polarity — no flip:
+
+```java
+public void setOpened(boolean opened) {
+    getElement().setProperty("opened", opened);
+}
+```
+
 ---
 
 ## Mixin Interfaces
