@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.breadcrumb;
 
+import java.util.List;
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -27,4 +30,28 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/breadcrumb/src/vaadin-breadcrumb.js")
 public class Breadcrumb extends Component
         implements HasBreadcrumbItems, HasSize, HasStyle {
+
+    /**
+     * Replaces all current breadcrumb items with the given items.
+     *
+     * @param items
+     *            the breadcrumb items to set
+     */
+    public void setItems(BreadcrumbItem... items) {
+        Objects.requireNonNull(items, "Items must not be null");
+        removeAll();
+        addItem(items);
+    }
+
+    /**
+     * Replaces all current breadcrumb items with the given list of items.
+     *
+     * @param items
+     *            the breadcrumb items to set
+     */
+    public void setItems(List<BreadcrumbItem> items) {
+        Objects.requireNonNull(items, "Items must not be null");
+        removeAll();
+        addItem(items.toArray(new BreadcrumbItem[0]));
+    }
 }
