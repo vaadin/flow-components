@@ -21,6 +21,11 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -28,6 +33,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-breadcrumb")
 @NpmPackage(value = "@vaadin/breadcrumb", version = "25.2.0-alpha7")
@@ -111,6 +117,67 @@ public class Breadcrumb extends Component
                 "The i18N properties object should not be null");
         this.i18n = i18n;
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * Adds a listener for {@link NavigateEvent} events fired when a breadcrumb
+     * item is activated.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a registration for removing the listener
+     */
+    public Registration addNavigateListener(
+            ComponentEventListener<NavigateEvent> listener) {
+        return ComponentUtil.addListener(this, NavigateEvent.class, listener);
+    }
+
+    /**
+     * Event fired when a breadcrumb item is activated by the user.
+     */
+    @DomEvent("navigate")
+    public static class NavigateEvent extends ComponentEvent<Breadcrumb> {
+
+        private final String path;
+        private final boolean current;
+
+        /**
+         * Creates a new navigate event.
+         *
+         * @param source
+         *            the breadcrumb that fired the event
+         * @param fromClient
+         *            whether the event originated from the client
+         * @param path
+         *            the path of the activated breadcrumb item
+         * @param current
+         *            whether the activated item is the current item
+         */
+        public NavigateEvent(Breadcrumb source, boolean fromClient,
+                @EventData("event.detail.path") String path,
+                @EventData("event.detail.current") boolean current) {
+            super(source, fromClient);
+            this.path = path;
+            this.current = current;
+        }
+
+        /**
+         * Gets the path of the activated breadcrumb item.
+         *
+         * @return the path
+         */
+        public String getPath() {
+            return path;
+        }
+
+        /**
+         * Checks whether the activated item is the current item.
+         *
+         * @return {@code true} if the activated item is current
+         */
+        public boolean isCurrent() {
+            return current;
+        }
     }
 
     /**

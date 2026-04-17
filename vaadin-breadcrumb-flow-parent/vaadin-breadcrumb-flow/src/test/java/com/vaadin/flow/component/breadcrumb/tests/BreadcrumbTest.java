@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.breadcrumb.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -26,14 +28,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.breadcrumb.Breadcrumb;
 import com.vaadin.flow.component.breadcrumb.Breadcrumb.BreadcrumbI18n;
+import com.vaadin.flow.component.breadcrumb.Breadcrumb.NavigateEvent;
 import com.vaadin.flow.component.breadcrumb.BreadcrumbItem;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -253,5 +259,60 @@ class BreadcrumbTest {
         assertTrue(json.has("navigationLabel"));
         assertTrue(!json.has("overflow"),
                 "Null overflow field should be omitted from JSON");
+    }
+
+    @Test
+    void addNavigateListener_returnsRegistration() {
+        Registration registration = breadcrumb
+                .addNavigateListener(event -> {
+                });
+        assertInstanceOf(Registration.class, registration);
+    }
+
+    @Test
+    void navigateEvent_triggersListener() {
+        AtomicReference<NavigateEvent> eventRef = new AtomicReference<>();
+        breadcrumb.addNavigateListener(eventRef::set);
+
+        ComponentUtil.fireEvent(breadcrumb,
+                new NavigateEvent(breadcrumb, false, "/test", false));
+
+        assertNotNull(eventRef.get());
+    }
+
+    @Test
+    void navigateEvent_carriesCorrectPath() {
+        AtomicReference<NavigateEvent> eventRef = new AtomicReference<>();
+        breadcrumb.addNavigateListener(eventRef::set);
+
+        ComponentUtil.fireEvent(breadcrumb,
+                new NavigateEvent(breadcrumb, false, "/products", false));
+
+        assertEquals("/products", eventRef.get().getPath());
+    }
+
+    @Test
+    void navigateEvent_carriesCorrectCurrentFlag() {
+        AtomicReference<NavigateEvent> eventRef = new AtomicReference<>();
+        breadcrumb.addNavigateListener(eventRef::set);
+
+        ComponentUtil.fireEvent(breadcrumb,
+                new NavigateEvent(breadcrumb, false, "/current", true));
+
+        assertTrue(eventRef.get().isCurrent());
+    }
+
+    @Test
+    void navigateListener_removingRegistrationStopsFiring() {
+        AtomicReference<NavigateEvent> eventRef = new AtomicReference<>();
+        Registration registration = breadcrumb
+                .addNavigateListener(eventRef::set);
+
+        registration.remove();
+
+        ComponentUtil.fireEvent(breadcrumb,
+                new NavigateEvent(breadcrumb, false, "/test", false));
+
+        assertNull(eventRef.get());
     }
 }
