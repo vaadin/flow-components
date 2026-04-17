@@ -43,6 +43,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setAlign(HorizontalAlign align) {
         this.align = align;
+        markAsDirty();
     }
 
     /**
@@ -60,6 +61,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setFloating(Boolean floating) {
         this.floating = floating;
+        markAsDirty();
     }
 
     /**
@@ -77,6 +79,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setMargin(Number margin) {
         this.margin = margin;
+        markAsDirty();
     }
 
     /**
@@ -106,6 +109,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setStyle(Style style) {
         this.style = style;
+        markAsDirty();
     }
 
     public Title(String text) {
@@ -127,6 +131,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setText(String text) {
         this.text = text;
+        markAsDirty();
     }
 
     /**
@@ -145,6 +150,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setUseHTML(Boolean useHTML) {
         this.useHTML = useHTML;
+        markAsDirty();
     }
 
     /**
@@ -162,6 +168,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setVerticalAlign(VerticalAlign verticalAlign) {
         this.verticalAlign = verticalAlign;
+        markAsDirty();
     }
 
     /**
@@ -179,6 +186,7 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setX(Number x) {
         this.x = x;
+        markAsDirty();
     }
 
     /**
@@ -196,5 +204,6 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setY(Number y) {
         this.y = y;
+        markAsDirty();
     }
 }

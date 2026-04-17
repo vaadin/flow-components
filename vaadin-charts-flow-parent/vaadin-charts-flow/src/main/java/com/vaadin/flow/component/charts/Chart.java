@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
@@ -109,6 +111,12 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private DrilldownCallback drilldownCallback;
 
+    private boolean reactiveEnabled;
+
+    private Registration pendingReactiveSync;
+
+    private ObjectNode lastSyncedJson;
+
     /**
      * Creates a new chart with default configuration
      */
@@ -131,7 +139,23 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
+        reactiveEnabled = FeatureFlags
+                .get(attachEvent.getUI().getSession().getService().getContext())
+                .isEnabled(ChartsFeatureFlagProvider.REACTIVE_CHARTS);
+
         beforeClientResponse(attachEvent.getUI(), false);
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (pendingReactiveSync != null) {
+            pendingReactiveSync.remove();
+            pendingReactiveSync = null;
+        }
+        if (configuration != null) {
+            configuration.setReactiveSyncTrigger(null);
+        }
+        super.onDetach(detachEvent);
     }
 
     private void beforeClientResponse(UI ui, boolean resetConfiguration) {
@@ -147,9 +171,86 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
                         // Start listening to data series events once the chart
                         // has been drawn.
                         configuration.addChangeListener(changeListener);
+
+                        if (reactiveEnabled) {
+                            seedReactiveSnapshot();
+                            configuration.setReactiveSyncTrigger(
+                                    this::requestReactiveSync);
+                        }
                     }
                     configurationUpdateRegistration = null;
                 });
+    }
+
+    /**
+     * Seeds the snapshot against which future reactive syncs compute their
+     * delta. Called after the initial {@code drawChart(false)} so the first
+     * reactive diff is against the state just shipped to the client.
+     * Package-visible for unit tests.
+     */
+    void seedReactiveSnapshot() {
+        if (configuration == null) {
+            lastSyncedJson = null;
+            return;
+        }
+        lastSyncedJson = JacksonUtils
+                .readTree(ChartSerialization.toJSON(configuration));
+    }
+
+    private void requestReactiveSync() {
+        if (pendingReactiveSync != null || configuration == null) {
+            return;
+        }
+        getUI().ifPresent(ui -> pendingReactiveSync = ui
+                .beforeClientResponse(this, context -> {
+                    pendingReactiveSync = null;
+                    synchronizeReactiveConfiguration();
+                }));
+    }
+
+    /** Package-visible for unit tests. */
+    void synchronizeReactiveConfiguration() {
+        if (configuration == null) {
+            return;
+        }
+        ObjectNode current = JacksonUtils
+                .readTree(ChartSerialization.toJSON(configuration));
+        ObjectNode delta = computeBranchDiff(lastSyncedJson, current);
+        if (delta != null && !delta.isEmpty()) {
+            getElement().callJsFunction("updateConfiguration", delta, false);
+        }
+        lastSyncedJson = current;
+    }
+
+    /**
+     * Computes a shallow per-top-level-branch delta. For each key in
+     * {@code current}, includes the whole branch value if it differs from the
+     * value in {@code previous} (or if the key is new). Highcharts'
+     * {@code chart.update} merges shallowly by top-level key, so deeper diffing
+     * would be redundant.
+     *
+     * <p>
+     * Limitation (tracked for Phase 3): keys removed from {@code current}
+     * (present only in {@code previous}) are not encoded — the current
+     * web-component API cannot express a deletion through
+     * {@code updateConfiguration(delta, false)}. Replacement semantics for
+     * {@code setSeries} and {@code setPlotOptions} are handled in a later
+     * phase.
+     */
+    private static ObjectNode computeBranchDiff(ObjectNode previous,
+            ObjectNode current) {
+        ObjectNode delta = JacksonUtils.getMapper().createObjectNode();
+        if (current == null) {
+            return delta;
+        }
+        current.properties().forEach(entry -> {
+            String key = entry.getKey();
+            if (previous == null || !previous.has(key)
+                    || !previous.get(key).equals(entry.getValue())) {
+                delta.set(key, entry.getValue());
+            }
+        });
+        return delta;
     }
 
     private void reportUsage() {

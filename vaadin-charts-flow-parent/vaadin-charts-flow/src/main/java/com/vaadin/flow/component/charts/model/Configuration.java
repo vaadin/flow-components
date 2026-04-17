@@ -207,6 +207,7 @@ public class Configuration extends AbstractConfigurationObject
     public Title getTitle() {
         if (title == null) {
             title = new Title();
+            addChild(title);
         }
         return title;
     }
@@ -217,7 +218,13 @@ public class Configuration extends AbstractConfigurationObject
      * @param title
      */
     public void setTitle(Title title) {
+        if (this.title != null) {
+            removeChild(this.title);
+        }
         this.title = title;
+        if (title != null) {
+            addChild(title);
+        }
     }
 
     /**
@@ -227,7 +234,7 @@ public class Configuration extends AbstractConfigurationObject
      *            Text of title
      */
     public void setTitle(String text) {
-        title = new Title(text);
+        setTitle(new Title(text));
     }
 
     /**
@@ -1206,5 +1213,27 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void setConnectors(ChartConnectors connectors) {
         this.connectors = connectors;
+    }
+
+    @JsonIgnore
+    private transient Runnable reactiveSyncTrigger;
+
+    /**
+     * For internal use only. May be renamed or removed in a future release.
+     * <p>
+     * Installs (or clears, when {@code trigger} is {@code null}) a callback
+     * invoked whenever this configuration or any of its registered descendants
+     * is mutated. The Chart component uses this to schedule a delta sync while
+     * the experimental {@code reactiveCharts} feature flag is enabled.
+     */
+    public void setReactiveSyncTrigger(Runnable trigger) {
+        this.reactiveSyncTrigger = trigger;
+    }
+
+    @Override
+    protected void markAsDirty() {
+        if (reactiveSyncTrigger != null) {
+            reactiveSyncTrigger.run();
+        }
     }
 }

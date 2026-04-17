@@ -1,0 +1,27 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.charts;
+
+import java.util.List;
+
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlagProvider;
+
+public class ChartsFeatureFlagProvider implements FeatureFlagProvider {
+
+    public static final Feature REACTIVE_CHARTS = new Feature(
+            "Reactive Chart configuration updates", "reactiveCharts",
+            "github.com/vaadin/flow-components/issues/NEW", true,
+            "com.vaadin.flow.component.charts.Chart");
+
+    @Override
+    public List<Feature> getFeatures() {
+        return List.of(REACTIVE_CHARTS);
+    }
+}
