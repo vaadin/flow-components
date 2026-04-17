@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.breadcrumb;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -25,6 +27,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 
 @Tag("vaadin-breadcrumb")
 @NpmPackage(value = "@vaadin/breadcrumb", version = "25.2.0-alpha7")
@@ -33,6 +36,8 @@ public class Breadcrumb extends Component
         implements HasBreadcrumbItems, HasSize, HasStyle {
 
     private static final String SEPARATOR_SLOT_NAME = "separator";
+
+    private BreadcrumbI18n i18n;
 
     /**
      * Replaces all current breadcrumb items with the given items.
@@ -78,5 +83,84 @@ public class Breadcrumb extends Component
      */
     public Component getSeparator() {
         return SlotUtils.getChildInSlot(this, SEPARATOR_SLOT_NAME);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(BreadcrumbI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public BreadcrumbI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Updates the i18n settings in the web component. Merges the
+     * {@link BreadcrumbI18n} settings with the current / default settings of
+     * the web component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(BreadcrumbI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The i18N properties object should not be null");
+        this.i18n = i18n;
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * The internationalization properties for {@link Breadcrumb}.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class BreadcrumbI18n implements Serializable {
+        private String navigationLabel;
+        private String overflow;
+
+        /**
+         * Gets the label for the breadcrumb navigation landmark.
+         *
+         * @return the navigation label
+         */
+        public String getNavigationLabel() {
+            return navigationLabel;
+        }
+
+        /**
+         * Sets the label for the breadcrumb navigation landmark.
+         *
+         * @param navigationLabel
+         *            the navigation label
+         * @return this instance for method chaining
+         */
+        public BreadcrumbI18n setNavigationLabel(String navigationLabel) {
+            this.navigationLabel = navigationLabel;
+            return this;
+        }
+
+        /**
+         * Gets the label for the overflow button.
+         *
+         * @return the overflow label
+         */
+        public String getOverflow() {
+            return overflow;
+        }
+
+        /**
+         * Sets the label for the overflow button.
+         *
+         * @param overflow
+         *            the overflow label
+         * @return this instance for method chaining
+         */
+        public BreadcrumbI18n setOverflow(String overflow) {
+            this.overflow = overflow;
+            return this;
+        }
     }
 }

@@ -128,8 +128,7 @@ class BreadcrumbItemTest {
         BreadcrumbItem item = new BreadcrumbItem("Home");
         TestIcon icon = new TestIcon();
         item.setPrefixComponent(icon);
-        assertEquals("prefix",
-                icon.getElement().getAttribute("slot"));
+        assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -143,8 +142,7 @@ class BreadcrumbItemTest {
     @Test
     void constructor_withLabelPathAndPrefix_setsAllProperties() {
         TestIcon icon = new TestIcon();
-        BreadcrumbItem item = new BreadcrumbItem("Projects", "/projects",
-                icon);
+        BreadcrumbItem item = new BreadcrumbItem("Projects", "/projects", icon);
         assertEquals("Projects", item.getLabel());
         assertEquals("/projects", item.getPath());
         assertSame(icon, item.getPrefixComponent());

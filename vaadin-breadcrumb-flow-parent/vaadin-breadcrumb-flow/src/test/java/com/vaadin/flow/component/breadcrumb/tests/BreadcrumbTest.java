@@ -16,17 +16,26 @@
 package com.vaadin.flow.component.breadcrumb.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.breadcrumb.Breadcrumb;
+import com.vaadin.flow.component.breadcrumb.Breadcrumb.BreadcrumbI18n;
 import com.vaadin.flow.component.breadcrumb.BreadcrumbItem;
 import com.vaadin.flow.component.html.Span;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class BreadcrumbTest {
 
@@ -153,8 +162,7 @@ class BreadcrumbTest {
         breadcrumb.setSeparator(separator);
 
         assertEquals(separator, breadcrumb.getSeparator());
-        assertEquals("separator",
-                separator.getElement().getAttribute("slot"));
+        assertEquals("separator", separator.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -178,5 +186,72 @@ class BreadcrumbTest {
     @Test
     void getSeparator_returnsNullWhenNoSeparatorSet() {
         assertNull(breadcrumb.getSeparator());
+    }
+
+    @Test
+    void setI18n_pushesJsonToElement() {
+        BreadcrumbI18n i18n = new BreadcrumbI18n()
+                .setNavigationLabel("Breadcrumb");
+        breadcrumb.setI18n(i18n);
+
+        ObjectNode json = (ObjectNode) breadcrumb.getElement()
+                .getPropertyRaw("i18n");
+        assertNotNull(json);
+        assertEquals("Breadcrumb", json.get("navigationLabel").asText());
+    }
+
+    @Test
+    void getI18n_returnsPreviouslySetI18n() {
+        BreadcrumbI18n i18n = new BreadcrumbI18n()
+                .setNavigationLabel("Breadcrumb").setOverflow("More");
+        breadcrumb.setI18n(i18n);
+
+        BreadcrumbI18n result = breadcrumb.getI18n();
+        assertSame(i18n, result);
+        assertEquals("Breadcrumb", result.getNavigationLabel());
+        assertEquals("More", result.getOverflow());
+    }
+
+    @Test
+    void getI18n_returnsNullWhenNotSet() {
+        assertNull(breadcrumb.getI18n());
+    }
+
+    @Test
+    void i18n_fluentSettersReturnInstance() {
+        BreadcrumbI18n i18n = new BreadcrumbI18n();
+        BreadcrumbI18n result = i18n.setNavigationLabel("Nav");
+        assertSame(i18n, result);
+
+        result = i18n.setOverflow("More");
+        assertSame(i18n, result);
+    }
+
+    @Test
+    void i18n_isSerializable() throws Exception {
+        BreadcrumbI18n i18n = new BreadcrumbI18n()
+                .setNavigationLabel("Breadcrumb").setOverflow("More");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new ObjectOutputStream(baos).writeObject(i18n);
+
+        BreadcrumbI18n deserialized = (BreadcrumbI18n) new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray())).readObject();
+
+        assertEquals("Breadcrumb", deserialized.getNavigationLabel());
+        assertEquals("More", deserialized.getOverflow());
+    }
+
+    @Test
+    void i18n_nullFieldsOmittedFromJson() {
+        BreadcrumbI18n i18n = new BreadcrumbI18n()
+                .setNavigationLabel("Breadcrumb");
+        breadcrumb.setI18n(i18n);
+
+        ObjectNode json = (ObjectNode) breadcrumb.getElement()
+                .getPropertyRaw("i18n");
+        assertTrue(json.has("navigationLabel"));
+        assertTrue(!json.has("overflow"),
+                "Null overflow field should be omitted from JSON");
     }
 }
