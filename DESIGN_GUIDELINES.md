@@ -154,6 +154,37 @@ The underlying web components are router-agnostic by design (they render plain `
 
 ---
 
+## Prefer positive-form boolean APIs
+
+Web component boolean attributes work by presence/absence: `disabled` present means disabled, `disabled` absent means enabled. This forces web components to name every boolean attribute for the NON-DEFAULT state — you cannot have an `enabled` attribute because the default (enabled) would require setting the attribute on every element.
+
+Flow has no such constraint. Java methods take `boolean` parameters, so the API can — and should — use the positive, natural-language form that reads most clearly in application code.
+
+**What this means in practice:**
+
+- Name the Flow API for the concept, not the web component attribute. Use `setEnabled(true/false)`, not `setDisabled(true/false)`. Use `setVisible(true/false)`, not `setHidden(true/false)`.
+- The mapping from the positive-form Java API to the negative-form HTML attribute is the wrapper's job and is invisible to the developer. `setEnabled(false)` internally sets the `disabled` property on the element; the developer never needs to think about that.
+- When the web component attribute already uses the natural-language form (`readonly`, `required`, `opened`), keep the same polarity in Java: `setReadOnly(true)` maps to `readonly`, `setOpened(true)` maps to `opened`. No flip needed.
+- The getter follows the same polarity as the setter: `isEnabled()`, `isVisible()`, `isReadOnly()`, `isOpened()`.
+
+**Existing examples in the codebase:**
+
+| Flow API | Web component attribute | Polarity |
+| --- | --- | --- |
+| `setEnabled(false)` | `disabled` added | Flipped — Java uses the positive form |
+| `setVisible(false)` | `hidden` added | Flipped — Java uses the positive form |
+| `setReadOnly(true)` | `readonly` added | Same — attribute is already natural |
+| `setOpened(true)` | `opened` added | Same — attribute is already natural |
+| `setRequiredIndicatorVisible(true)` | `required` added | Same — attribute is already natural |
+
+**Why:**
+
+- `button.setEnabled(false)` is immediately clear. `button.setDisabled(true)` requires a mental double-negative when asking "is this button active?" — especially inside conditionals: `if (!button.isDisabled())` vs `if (button.isEnabled())`.
+- Consistency with standard Java and Swing conventions, where `setEnabled`, `setVisible`, and `setEditable` are the established names.
+- The web component naming constraint is an HTML platform limitation, not a design choice. The Flow layer exists precisely to provide a better developer experience on top of the platform, and using natural-language naming is one of the ways it does that.
+
+---
+
 ## Consistency over novelty
 
 Look first at how the closest existing Flow component solves the problem. Match its conventions before inventing a new one.
