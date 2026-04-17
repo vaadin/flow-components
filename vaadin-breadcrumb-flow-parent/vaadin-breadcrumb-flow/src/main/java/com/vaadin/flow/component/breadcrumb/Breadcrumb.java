@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,6 +32,7 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -49,6 +52,23 @@ public class Breadcrumb extends Component implements HasBreadcrumbItems,
     private static final String SEPARATOR_SLOT_NAME = "separator";
 
     private BreadcrumbI18n i18n;
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        checkFeatureFlag(attachEvent.getUI());
+    }
+
+    private void checkFeatureFlag(UI ui) {
+        FeatureFlags featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        boolean enabled = featureFlags
+                .isEnabled(BreadcrumbFeatureFlagProvider.BREADCRUMB_COMPONENT);
+
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
+    }
 
     private boolean explicitItems = false;
 
