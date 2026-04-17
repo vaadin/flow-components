@@ -312,9 +312,9 @@ The web component is responsible for RTL layout. The Flow wrapper MUST NOT intro
 
 A component must behave identically regardless of whether its properties are set before or after it is attached to a `UI`. Setting `value`, `items`, `label`, theme variants, enabled state, or any other property on a detached component and then adding it to the UI must produce the same result as adding first and configuring afterwards. The underlying web component enforces this at the DOM level; the Flow wrapper must not introduce ordering dependencies of its own (e.g. by deferring property writes to `onAttach` in a way that discards values set earlier).
 
-### Graceful behaviour before attachment
+### Safe to use before attachment
 
-Calling action methods (`focus()`, `open()`, `scrollToIndex()`, `clickInClient()`, etc.) on a component that is not yet attached to a UI must silently do nothing — not throw. The caller is responsible for ensuring the component is attached before invoking actions that require a live client-side element; the component is responsible for not exploding when they forget.
+Flow stores property state server-side and queues client-bound calls (`Element.executeJs`, `Element.callJsFunction`) until the component is attached to a UI — they are not lost and not silently dropped. This means a component must never throw when methods are called on a detached instance. Properties set before attachment sync to the client on connect; client-delegating action methods (`focus()`, `clickInClient()`, `open()`, etc.) execute when the element appears on the client side. Pure server-side methods like `Button.click()` (which fires events directly) work regardless of attachment.
 
 ### No thrown errors for bad input; warnings instead
 
