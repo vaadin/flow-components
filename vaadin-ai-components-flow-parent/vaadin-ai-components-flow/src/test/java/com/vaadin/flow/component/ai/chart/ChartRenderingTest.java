@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -36,6 +37,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.tests.MockUIExtension;
 
@@ -566,11 +568,194 @@ class ChartRenderingTest {
             Assertions.assertEquals(1, series.size());
             // Series should be named from title AND have plotOptions applied
             Assertions.assertEquals("Revenue", series.get(0).getName());
-            var plotOptions = ((com.vaadin.flow.component.charts.model.AbstractSeries) series
-                    .get(0)).getPlotOptions();
+            var plotOptions = ((AbstractSeries) series.get(0)).getPlotOptions();
             Assertions.assertNotNull(plotOptions,
                     "Per-series plotOptions should be applied to "
                             + "single unnamed series after title-based naming");
+        }
+
+        @Test
+        void multiQueryUnnamedSeriesReceiveNamesFromConfig() {
+            // When two separate queries produce unnamed series (e.g.
+            // candlestick OHLC + volume) and the LLM config provides a
+            // series array with names, the names should be applied
+            // positionally to the unnamed data series.
+            int[] callCount = { 0 };
+            controller.setDataConverter(data -> {
+                callCount[0]++;
+                if (callCount[0] == 1) {
+                    DataSeries ohlcSeries = new DataSeries();
+                    ohlcSeries.add(new OhlcItem(1704067200000L, 142.5, 148.2,
+                            141.0, 147.8));
+                    return List.of(ohlcSeries);
+                } else {
+                    DataSeries volumeSeries = new DataSeries();
+                    volumeSeries.add(new DataSeriesItem(1704067200000L, 52000));
+                    return List.of(volumeSeries);
+                }
+            });
+
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "yAxis":[{"title":{"text":"Price"}},
+                              {"title":{"text":"Volume"},"opposite":true}],
+                     "series":[{"name":"Prices","type":"candlestick"},
+                               {"name":"Vol","type":"column","yAxis":1}]}
+                    """);
+            updateData("SELECT 1", "SELECT 2");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            Assertions.assertEquals("Prices", series.get(0).getName(),
+                    "First unnamed series should receive name from config");
+            Assertions.assertEquals("Vol", series.get(1).getName(),
+                    "Second unnamed series should receive name from config");
+        }
+
+        @Test
+        void configSeriesNamesOverrideSeriesColumnNames() {
+            // When _SERIES column produces named series but the config
+            // also provides explicit series names, the config names
+            // should win (the user asked for specific legend labels).
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            45000),
+                    row(ColumnNames.SERIES, "South", "category", "Jan", "value",
+                            38000));
+
+            updateConfiguration("""
+                    {"chart":{"type":"column"},
+                     "series":[{"name":"Revenue","yAxis":0},
+                               {"name":"Costs","yAxis":1}]}
+                    """);
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            Assertions.assertEquals("Revenue", series.get(0).getName(),
+                    "Config name should override _SERIES name");
+            Assertions.assertEquals("Costs", series.get(1).getName(),
+                    "Config name should override _SERIES name");
+        }
+
+        @Test
+        void nameMatchedSeriesNotOverwrittenByPositionalFallback() {
+            // When one data series matches a config template by name and
+            // another doesn't, the name-matched series must not be
+            // re-processed by positional fallback. The name-matched
+            // series ("Revenue") is deliberately second in data order so
+            // that positional fallback — if it ignored matched tracking —
+            // would assign it the wrong template.
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "Other", "category", "Jan", "value",
+                            38000),
+                    row(ColumnNames.SERIES, "Revenue", "category", "Jan",
+                            "value", 45000));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"series\":[" + "{\"name\":\"Revenue\",\"yAxis\":0},"
+                    + "{\"name\":\"Costs\",\"yAxis\":1}" + "]}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            // "Other" did not match — positional fallback renames to "Costs"
+            Assertions.assertEquals("Costs", series.get(0).getName());
+            Assertions.assertEquals(1,
+                    ((AbstractSeries) series.get(0)).getyAxis(),
+                    "Positionally matched series should get template yAxis");
+            // "Revenue" matched by name — must keep its name and yAxis
+            Assertions.assertEquals("Revenue", series.get(1).getName());
+            Assertions.assertEquals(0,
+                    ((AbstractSeries) series.get(1)).getyAxis(),
+                    "Name-matched series should keep its yAxis");
+        }
+
+        @Test
+        void positionalMatchAppliesPlotOptionsAndYAxis() {
+            // Positional fallback must apply plotOptions and yAxis from
+            // the config template, not just the name.
+            int[] callCount = { 0 };
+            controller.setDataConverter(data -> {
+                callCount[0]++;
+                if (callCount[0] == 1) {
+                    DataSeries s = new DataSeries();
+                    s.add(new DataSeriesItem("Jan", 100));
+                    return List.of(s);
+                } else {
+                    DataSeries s = new DataSeries();
+                    s.add(new DataSeriesItem("Jan", 200));
+                    return List.of(s);
+                }
+            });
+
+            updateConfiguration("""
+                    {"chart":{"type":"column"},
+                     "series":[{"name":"Revenue","type":"column","yAxis":0},
+                               {"name":"Count","type":"line","yAxis":1}]}
+                    """);
+            updateData("SELECT 1", "SELECT 2");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            var countSeries = (AbstractSeries) series.get(1);
+            Assertions.assertEquals("Count", countSeries.getName());
+            Assertions.assertEquals(1, countSeries.getyAxis(),
+                    "Positional match should apply yAxis from template");
+            Assertions.assertInstanceOf(PlotOptionsLine.class,
+                    countSeries.getPlotOptions(),
+                    "Positional match should apply plotOptions from template");
+        }
+
+        @Test
+        void dataOrderDifferentFromConfigOrderPreservesDataLabels() {
+            // The LLM writes the config series[] array without any
+            // guarantee that the SQL data will come back in that order
+            // (GROUP BY without ORDER BY, DB-side hash ordering, etc.).
+            // When data order differs from config order, matching by
+            // position renames data series to the WRONG labels —
+            // effectively swapping data points under their legend
+            // labels. Matching by name (the prior behavior) avoids this.
+            controller.setDataConverter(data -> {
+                // Simulate DB returning "South" before "North"
+                DataSeries south = new DataSeries("South");
+                south.add(new DataSeriesItem("Jan", 38000));
+                DataSeries north = new DataSeries("North");
+                north.add(new DataSeriesItem("Jan", 45000));
+                return List.of(south, north);
+            });
+
+            updateConfiguration("""
+                    {"chart":{"type":"column"},
+                     "yAxis":[{"title":{"text":"Primary"}},
+                              {"title":{"text":"Secondary"},"opposite":true}],
+                     "series":[{"name":"North","yAxis":0},
+                               {"name":"South","yAxis":1}]}
+                    """);
+            updateData("SELECT s, c, v FROM t");
+            controller.onRequestCompleted();
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            // The first data series is South (value 38000); its label
+            // must remain "South", not be overwritten to "North".
+            Assertions.assertEquals("South", series.get(0).getName(),
+                    "Data series labels must not be swapped when data "
+                            + "order differs from config order");
+            Assertions.assertEquals("North", series.get(1).getName());
+            // Similarly the yAxis assignment should follow the name,
+            // so that "South" sits on the Secondary axis (yAxis=1).
+            Assertions.assertEquals(1,
+                    ((AbstractSeries) series.get(0)).getyAxis(),
+                    "South should end up on Secondary y-axis (yAxis=1), "
+                            + "not Primary");
+            Assertions.assertEquals(0,
+                    ((AbstractSeries) series.get(1)).getyAxis(),
+                    "North should end up on Primary y-axis (yAxis=0)");
         }
 
         @Test
