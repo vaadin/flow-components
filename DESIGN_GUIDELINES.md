@@ -308,6 +308,18 @@ Flow components inherit their DOM structure from the underlying web component. I
 
 The web component is responsible for RTL layout. The Flow wrapper MUST NOT introduce per-direction branches, CSS, or behaviour of its own. If the Flow component sends icons or directional text to the web component, it relies on the component to render them correctly under RTL.
 
+### Property order independence
+
+A component must behave identically regardless of whether its properties are set before or after it is attached to a `UI`. Setting `value`, `items`, `label`, theme variants, enabled state, or any other property on a detached component and then adding it to the UI must produce the same result as adding first and configuring afterwards. The underlying web component enforces this at the DOM level; the Flow wrapper must not introduce ordering dependencies of its own (e.g. by deferring property writes to `onAttach` in a way that discards values set earlier).
+
+### Graceful behaviour before attachment
+
+Calling action methods (`focus()`, `open()`, `scrollToIndex()`, `clickInClient()`, etc.) on a component that is not yet attached to a UI must silently do nothing — not throw. The caller is responsible for ensuring the component is attached before invoking actions that require a live client-side element; the component is responsible for not exploding when they forget.
+
+### No thrown errors for bad input; warnings instead
+
+Components should not throw exceptions in response to application-provided values that are out of range or otherwise unexpected. Instead, ignore the value or clamp it to the nearest valid state, and log a warning so the developer sees the problem during development. The explicit exception to this rule is signal binding conflicts (`BindingActiveException`), which must throw because silently ignoring the setter would hide a real state-ownership bug.
+
 ### Serialisation
 
 Every Flow component, and every data object the component exposes (i18n objects, items in `setItems`, event objects, etc.) MUST be `Serializable`. Vaadin sessions may be persisted to disk, and a non-serialisable component breaks that invariant. Always add a `{Component}SerializableTest` for this.
