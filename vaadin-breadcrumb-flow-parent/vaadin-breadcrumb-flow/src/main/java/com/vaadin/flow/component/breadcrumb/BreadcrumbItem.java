@@ -83,6 +83,20 @@ public class BreadcrumbItem extends Component
     }
 
     /**
+     * Creates a breadcrumb item with only a prefix component (such as an icon)
+     * that links to the given path, and no label.
+     *
+     * @param prefixComponent
+     *            the prefix component for the item (usually an icon)
+     * @param path
+     *            the path to link to
+     */
+    public BreadcrumbItem(Component prefixComponent, String path) {
+        setPath(path);
+        setPrefixComponent(prefixComponent);
+    }
+
+    /**
      * Gets the label of this breadcrumb item.
      *
      * @return the label or null if no label has been set

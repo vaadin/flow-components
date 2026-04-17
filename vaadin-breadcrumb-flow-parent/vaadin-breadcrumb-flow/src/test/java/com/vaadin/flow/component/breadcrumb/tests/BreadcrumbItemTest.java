@@ -23,9 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.breadcrumb.BreadcrumbItem;
 
 class BreadcrumbItemTest {
+
+    @Tag("div")
+    private static class TestIcon extends Component {
+    }
 
     @Test
     void constructor_withLabel_setsLabel() {
@@ -115,5 +121,41 @@ class BreadcrumbItemTest {
         BreadcrumbItem result = item.asCurrent();
         assertTrue(item.isCurrent());
         assertSame(item, result);
+    }
+
+    @Test
+    void setPrefixComponent_addsComponentWithPrefixSlot() {
+        BreadcrumbItem item = new BreadcrumbItem("Home");
+        TestIcon icon = new TestIcon();
+        item.setPrefixComponent(icon);
+        assertEquals("prefix",
+                icon.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    void getPrefixComponent_returnsSetComponent() {
+        BreadcrumbItem item = new BreadcrumbItem("Home");
+        TestIcon icon = new TestIcon();
+        item.setPrefixComponent(icon);
+        assertSame(icon, item.getPrefixComponent());
+    }
+
+    @Test
+    void constructor_withLabelPathAndPrefix_setsAllProperties() {
+        TestIcon icon = new TestIcon();
+        BreadcrumbItem item = new BreadcrumbItem("Projects", "/projects",
+                icon);
+        assertEquals("Projects", item.getLabel());
+        assertEquals("/projects", item.getPath());
+        assertSame(icon, item.getPrefixComponent());
+    }
+
+    @Test
+    void constructor_withPrefixAndPath_setsPathAndPrefix() {
+        TestIcon icon = new TestIcon();
+        BreadcrumbItem item = new BreadcrumbItem(icon, "/");
+        assertEquals("/", item.getPath());
+        assertSame(icon, item.getPrefixComponent());
+        assertNull(item.getLabel());
     }
 }
