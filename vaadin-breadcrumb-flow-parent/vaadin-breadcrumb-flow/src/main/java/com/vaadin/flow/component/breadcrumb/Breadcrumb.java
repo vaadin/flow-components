@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -33,40 +34,112 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-breadcrumb")
 @NpmPackage(value = "@vaadin/breadcrumb", version = "25.2.0-alpha7")
 @JsModule("@vaadin/breadcrumb/src/vaadin-breadcrumb.js")
-public class Breadcrumb extends Component
-        implements HasBreadcrumbItems, HasSize, HasStyle {
+public class Breadcrumb extends Component implements HasBreadcrumbItems,
+        HasSize, HasStyle, AfterNavigationObserver {
 
     private static final String SEPARATOR_SLOT_NAME = "separator";
 
     private BreadcrumbI18n i18n;
 
+    private boolean explicitItems = false;
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Calling this method switches the breadcrumb to explicit mode, disabling
+     * automatic trail generation from the view hierarchy.
+     */
+    @Override
+    public void addItem(BreadcrumbItem... items) {
+        explicitItems = true;
+        HasBreadcrumbItems.super.addItem(items);
+    }
+
     /**
      * Replaces all current breadcrumb items with the given items.
+     * <p>
+     * Calling this method switches the breadcrumb to explicit mode, disabling
+     * automatic trail generation from the view hierarchy.
      *
      * @param items
      *            the breadcrumb items to set
      */
     public void setItems(BreadcrumbItem... items) {
         Objects.requireNonNull(items, "Items must not be null");
+        explicitItems = true;
         removeAll();
-        addItem(items);
+        HasBreadcrumbItems.super.addItem(items);
     }
 
     /**
      * Replaces all current breadcrumb items with the given list of items.
+     * <p>
+     * Calling this method switches the breadcrumb to explicit mode, disabling
+     * automatic trail generation from the view hierarchy.
      *
      * @param items
      *            the breadcrumb items to set
      */
     public void setItems(List<BreadcrumbItem> items) {
         Objects.requireNonNull(items, "Items must not be null");
+        explicitItems = true;
         removeAll();
-        addItem(items.toArray(new BreadcrumbItem[0]));
+        HasBreadcrumbItems.super
+                .addItem(items.toArray(new BreadcrumbItem[0]));
+    }
+
+    /**
+     * Builds the breadcrumb trail automatically from the active route chain
+     * when no explicit items have been set.
+     * <p>
+     * For each element in the navigation chain, a {@link BreadcrumbItem} is
+     * created with a label derived from the {@link PageTitle} annotation,
+     * {@link HasDynamicTitle} interface, or the class simple name. The last
+     * item is marked as the current page.
+     *
+     * @param event
+     *            the after-navigation event
+     */
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        if (explicitItems) {
+            return;
+        }
+
+        // Clear without setting explicitItems
+        HasBreadcrumbItems.super.removeAll();
+
+        List<HasElement> chain = event.getActiveChain();
+        for (int i = 0; i < chain.size(); i++) {
+            HasElement element = chain.get(i);
+            String label = resolveLabel(element);
+            BreadcrumbItem item = new BreadcrumbItem(label);
+            if (i == chain.size() - 1) {
+                item.setCurrent(true);
+            }
+            HasBreadcrumbItems.super.addItem(item);
+        }
+    }
+
+    private String resolveLabel(HasElement element) {
+        Class<?> clazz = element.getClass();
+        PageTitle pageTitle = clazz.getAnnotation(PageTitle.class);
+        if (pageTitle != null) {
+            return pageTitle.value();
+        }
+        if (element instanceof HasDynamicTitle) {
+            return ((HasDynamicTitle) element).getPageTitle();
+        }
+        return clazz.getSimpleName();
     }
 
     /**

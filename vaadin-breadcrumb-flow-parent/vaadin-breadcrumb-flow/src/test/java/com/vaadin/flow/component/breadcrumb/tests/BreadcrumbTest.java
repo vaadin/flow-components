@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,12 +35,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.breadcrumb.Breadcrumb;
 import com.vaadin.flow.component.breadcrumb.Breadcrumb.BreadcrumbI18n;
 import com.vaadin.flow.component.breadcrumb.Breadcrumb.NavigateEvent;
 import com.vaadin.flow.component.breadcrumb.BreadcrumbItem;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -314,5 +322,149 @@ class BreadcrumbTest {
                 new NavigateEvent(breadcrumb, false, "/test", false));
 
         assertNull(eventRef.get());
+    }
+
+    // --- Auto-trail tests ---
+
+    @PageTitle("Home")
+    @Tag("div")
+    private static class HomeView extends Component {
+    }
+
+    @PageTitle("Products")
+    @Tag("div")
+    private static class ProductsView extends Component {
+    }
+
+    @Tag("div")
+    private static class DynamicTitleView extends Component
+            implements HasDynamicTitle {
+        @Override
+        public String getPageTitle() {
+            return "Dynamic Title";
+        }
+    }
+
+    @Tag("div")
+    private static class PlainView extends Component {
+    }
+
+    private AfterNavigationEvent createMockEvent(HasElement... chain) {
+        AfterNavigationEvent event = mock(AfterNavigationEvent.class);
+        when(event.getActiveChain()).thenReturn(List.of(chain));
+        return event;
+    }
+
+    @Test
+    void afterNavigation_noExplicitItems_buildsItemsFromRouteChain() {
+        HomeView home = new HomeView();
+        ProductsView products = new ProductsView();
+
+        breadcrumb.afterNavigation(createMockEvent(home, products));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(2, items.size());
+        assertEquals("Home", items.get(0).getLabel());
+        assertEquals("Products", items.get(1).getLabel());
+    }
+
+    @Test
+    void afterNavigation_usesPageTitleAnnotation() {
+        HomeView home = new HomeView();
+
+        breadcrumb.afterNavigation(createMockEvent(home));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(1, items.size());
+        assertEquals("Home", items.get(0).getLabel());
+    }
+
+    @Test
+    void afterNavigation_usesHasDynamicTitle() {
+        DynamicTitleView view = new DynamicTitleView();
+
+        breadcrumb.afterNavigation(createMockEvent(view));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(1, items.size());
+        assertEquals("Dynamic Title", items.get(0).getLabel());
+    }
+
+    @Test
+    void afterNavigation_fallsBackToSimpleClassName() {
+        PlainView view = new PlainView();
+
+        breadcrumb.afterNavigation(createMockEvent(view));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(1, items.size());
+        assertEquals("PlainView", items.get(0).getLabel());
+    }
+
+    @Test
+    void afterNavigation_lastItemIsMarkedAsCurrent() {
+        HomeView home = new HomeView();
+        ProductsView products = new ProductsView();
+
+        breadcrumb.afterNavigation(createMockEvent(home, products));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertFalse(items.get(0).isCurrent());
+        assertTrue(items.get(1).isCurrent());
+    }
+
+    @Test
+    void addItem_disablesAutoMode() {
+        breadcrumb.addItem(new BreadcrumbItem("Explicit", "/explicit"));
+
+        HomeView home = new HomeView();
+        breadcrumb.afterNavigation(createMockEvent(home));
+
+        // Should still have the explicit item, not auto-generated ones
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(1, items.size());
+        assertEquals("Explicit", items.get(0).getLabel());
+    }
+
+    @Test
+    void setItems_varargs_disablesAutoMode() {
+        breadcrumb.setItems(new BreadcrumbItem("A", "/a"),
+                new BreadcrumbItem("B", "/b"));
+
+        HomeView home = new HomeView();
+        breadcrumb.afterNavigation(createMockEvent(home));
+
+        // Should still have the explicit items
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(2, items.size());
+        assertEquals("A", items.get(0).getLabel());
+        assertEquals("B", items.get(1).getLabel());
+    }
+
+    @Test
+    void setItems_list_disablesAutoMode() {
+        breadcrumb.setItems(List.of(new BreadcrumbItem("X", "/x")));
+
+        HomeView home = new HomeView();
+        breadcrumb.afterNavigation(createMockEvent(home));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(1, items.size());
+        assertEquals("X", items.get(0).getLabel());
+    }
+
+    @Test
+    void afterNavigation_replacesAutoItemsOnSubsequentCalls() {
+        HomeView home = new HomeView();
+        breadcrumb.afterNavigation(createMockEvent(home));
+        assertEquals(1, breadcrumb.getItems().size());
+
+        ProductsView products = new ProductsView();
+        breadcrumb.afterNavigation(createMockEvent(home, products));
+
+        List<BreadcrumbItem> items = breadcrumb.getItems();
+        assertEquals(2, items.size());
+        assertEquals("Home", items.get(0).getLabel());
+        assertEquals("Products", items.get(1).getLabel());
     }
 }
