@@ -346,11 +346,11 @@ class MasterDetailLayoutTest {
                 layout.getOverlayContainment());
 
         layout.setOverlayContainment(
-                MasterDetailLayout.OverlayContainment.VIEWPORT);
+                MasterDetailLayout.OverlayContainment.PAGE);
 
-        Assertions.assertEquals(MasterDetailLayout.OverlayContainment.VIEWPORT,
+        Assertions.assertEquals(MasterDetailLayout.OverlayContainment.PAGE,
                 layout.getOverlayContainment());
-        Assertions.assertEquals("viewport",
+        Assertions.assertEquals("page",
                 layout.getElement().getProperty("overlayContainment"));
     }
 

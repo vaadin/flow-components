@@ -73,7 +73,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      * Supported overlay containment values for {@link MasterDetailLayout}.
      */
     public enum OverlayContainment {
-        LAYOUT, VIEWPORT
+        LAYOUT, PAGE
     }
 
     /**
@@ -378,8 +378,8 @@ public class MasterDetailLayout extends Component implements HasSize,
     /**
      * Sets the containment of the detail area when the layout is in overlay
      * mode. When set to {@link OverlayContainment#LAYOUT}, the overlay is
-     * confined to the layout. When set to {@link OverlayContainment#VIEWPORT},
-     * the overlay is confined to the browser's viewport. Defaults to
+     * confined to the layout. When set to {@link OverlayContainment#PAGE}, the
+     * overlay is confined to the browser's viewport. Defaults to
      * {@link OverlayContainment#LAYOUT}.
      *
      * @param overlayContainment
