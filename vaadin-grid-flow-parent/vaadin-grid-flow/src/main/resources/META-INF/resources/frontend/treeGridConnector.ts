@@ -56,7 +56,7 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
       return;
     }
 
-    const [start, end] = getViewportRange();
+    const [start, end] = grid.$connector.getViewportRange();
     const padding = Math.floor((end - start) * 1.5);
     const flatIndex = await grid.$server.setViewportRangeByIndexPath(indexes, padding);
     grid._scrollToFlatIndex(flatIndex);

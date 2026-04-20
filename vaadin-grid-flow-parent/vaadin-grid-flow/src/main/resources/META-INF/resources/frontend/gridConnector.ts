@@ -14,8 +14,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   const dataProviderController = grid._dataProviderController;
 
-  const rootRequestDelay = 150;
-  let rootRequestDebouncer;
+  const requestDebouncerDelay = 150;
+  let requestDebouncer;
 
   let lastRequestedRange = [0, 0];
 
@@ -32,7 +32,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.hasRootRequestQueue = () => {
     const { pendingRequests } = dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!rootRequestDebouncer?.isActive();
+    return Object.keys(pendingRequests).length > 0 || !!requestDebouncer?.isActive();
   };
 
   grid.$connector.doSelection = function (items, userOriginated) {
@@ -138,33 +138,31 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
   grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-  grid.$connector.debounceRootRequest = function (page) {
-    const delay = grid._hasData ? rootRequestDelay : 0;
-
-    rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setViewportRange(firstIndex, size), page);
-    });
+  grid.$connector.getViewportRange = function () {
+    const renderedRows = grid._getRenderedRows();
+    return [renderedRows.at(0)?.index ?? 0, renderedRows.at(-1)?.index ?? 0];
   };
 
-  grid.$connector.fetchPage = function (fetch, page) {
+  grid.$connector.requestPage = function (page) {
     // Adjust the requested page to be within the valid range in case
     // the grid size has changed while fetchPage was debounced.
     page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
 
     // Determine what to fetch based on scroll position and not only
     // what grid asked for
-    const visibleRows = grid._getRenderedRows();
-    let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-    let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
+    let viewportRange = grid.$connector.getViewportRange();
 
     // The buffer size could be multiplied by some constant defined by the user,
     // if he needs to reduce the number of items sent to the Grid to improve performance
     // or to increase it to make Grid smoother when scrolling
-    let buffer = end - start;
-    start = Math.max(0, start - buffer);
-    end = Math.min(end + buffer, grid.size);
+    const buffer = viewportRange[1] - viewportRange[0];
+    viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
+    viewportRange[1] = Math.min(viewportRange[1] + buffer, grid.size);
 
-    let pageRange = [Math.floor(start / grid.pageSize), Math.floor(end / grid.pageSize)];
+    let viewportPageRange = [
+      Math.floor(viewportRange[0] / grid.pageSize),
+      Math.floor(viewportRange[1] / grid.pageSize)
+    ];
 
     // When the viewport doesn't contain the requested page or it doesn't contain any items from
     // the requested level at all, it means that the scroll position has changed while fetchPage
@@ -173,14 +171,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
     // to make sure all hanging requests are resolved. After that, the grid requests the first page
     // or whatever in the viewport again.
-    if (page < pageRange[0] || page > pageRange[1]) {
-      pageRange = [page, page];
+    if (page < viewportPageRange[0] || page > viewportPageRange[1]) {
+      viewportPageRange = [page, page];
     }
 
-    if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
-      lastRequestedRange = pageRange;
-      let pageCount = pageRange[1] - pageRange[0] + 1;
-      fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
+    if (lastRequestedRange[0] != viewportPageRange[0] || lastRequestedRange[1] != viewportPageRange[1]) {
+      lastRequestedRange = viewportPageRange;
+      const pageCount = viewportPageRange[1] - viewportPageRange[0] + 1;
+      grid.$server.setViewportRange(viewportPageRange[0] * grid.pageSize, pageCount * grid.pageSize);
     }
   };
 
@@ -201,7 +199,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    grid.$connector.debounceRootRequest(params.page);
+    requestDebouncer = Debouncer.debounce(
+      requestDebouncer,
+      timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
+      () => {
+        grid.$connector.requestPage(params.page);
+      }
+    );
   };
 
   grid.$connector.setSorterDirections = function (directions) {
@@ -354,7 +358,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.reset = function () {
     dataProviderController.clearCache();
     lastRequestedRange = [-1, -1];
-    rootRequestDebouncer?.cancel();
+    requestDebouncer?.cancel();
     grid.__updateVisibleRows();
   };
 
@@ -391,7 +395,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // already made its own requests), cancel the request debouncer to
     // prevent further unnecessary calls.
     if (Object.keys(rootCache.pendingRequests).length === 0) {
-      rootRequestDebouncer?.cancel();
+      requestDebouncer?.cancel();
       lastRequestedRange = [-1, -1];
     }
 
