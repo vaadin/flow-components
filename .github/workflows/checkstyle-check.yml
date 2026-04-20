@@ -1,9 +1,7 @@
 name: Checkstyle Check
 
 on:
-  pull_request_target:
-    types: [ opened, synchronize, reopened ]
-    branches: [ main ]
+  pull_request:
 
 permissions:
   contents: read
