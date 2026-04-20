@@ -14,8 +14,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   const dataProviderController = grid._dataProviderController;
 
-  const rootRequestDelay = 150;
-  let rootRequestDebouncer;
+  const requestDelay = 150;
+  let requestDebouncer;
 
   let lastRequestedRange = [0, 0];
 
@@ -32,7 +32,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.hasRootRequestQueue = () => {
     const { pendingRequests } = dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!rootRequestDebouncer?.isActive();
+    return Object.keys(pendingRequests).length > 0 || !!requestDebouncer?.isActive();
   };
 
   grid.$connector.doSelection = function (items, userOriginated) {
@@ -138,51 +138,62 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
   grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-  grid.$connector.debounceRootRequest = function (page) {
-    const delay = grid._hasData ? rootRequestDelay : 0;
+  grid.$connector.requestPage = function (page) {
+    const delay = grid._hasData ? requestDelay : 0;
 
-    rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setViewportRange(firstIndex, size), page);
+    requestDebouncer = Debouncer.debounce(requestDebouncer, timeOut.after(delay), () => {
+      let [startPage, endPage] = grid.$connector.getViewportPageRange();
+
+      // Adjust the requested page to be within the valid range in case
+      // the grid size has changed while fetchPage was debounced.
+      page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
+
+      // When the viewport doesn't contain the requested page or it doesn't contain any items from
+      // the requested level at all, it means that the scroll position has changed while fetchPage
+      // was debounced. For example, it can happen if the user scrolls the grid to the bottom and
+      // then immediately back to the top. In this case, the request for the last page will be left
+      // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
+      // to make sure all hanging requests are resolved. After that, the grid requests the first page
+      // or whatever in the viewport again.
+      if (page < startPage || page > endPage) {
+        startPage = page;
+        endPage = page;
+      }
+
+      if (startPage != lastRequestedRange[0] || endPage != lastRequestedRange[1]) {
+        const pageCount = endPage - startPage + 1;
+        grid.$server.setViewportRange(startPage * grid.pageSize, pageCount * grid.pageSize);
+      }
+
+      lastRequestedRange = [startPage, endPage];
     });
   };
 
-  grid.$connector.fetchPage = function (fetch, page) {
-    // Adjust the requested page to be within the valid range in case
-    // the grid size has changed while fetchPage was debounced.
-    page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
-
-    // Determine what to fetch based on scroll position and not only
-    // what grid asked for
-    const visibleRows = grid._getRenderedRows();
-    let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-    let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
-
-    // The buffer size could be multiplied by some constant defined by the user,
-    // if he needs to reduce the number of items sent to the Grid to improve performance
-    // or to increase it to make Grid smoother when scrolling
-    let buffer = end - start;
-    start = Math.max(0, start - buffer);
-    end = Math.min(end + buffer, grid.size);
-
-    let pageRange = [Math.floor(start / grid.pageSize), Math.floor(end / grid.pageSize)];
-
-    // When the viewport doesn't contain the requested page or it doesn't contain any items from
-    // the requested level at all, it means that the scroll position has changed while fetchPage
-    // was debounced. For example, it can happen if the user scrolls the grid to the bottom and
-    // then immediately back to the top. In this case, the request for the last page will be left
-    // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
-    // to make sure all hanging requests are resolved. After that, the grid requests the first page
-    // or whatever in the viewport again.
-    if (page < pageRange[0] || page > pageRange[1]) {
-      pageRange = [page, page];
+  grid.$connector.getViewportRange = function () {
+    // Use currently rendered rows as the basis for the viewport range
+    const renderedRows = grid._getRenderedRows();
+    if (renderedRows.length === 0) {
+      return [0, 0];
     }
 
-    if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
-      lastRequestedRange = pageRange;
-      let pageCount = pageRange[1] - pageRange[0] + 1;
-      fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
-    }
+    // Seed the range with the indices of the first and last rendered rows
+    const range = [renderedRows.at(0).index, renderedRows.at(-1).index];
+
+    // Extend the range by one viewport on each side to prefetch items around
+    // the visible area, so that scrolling doesn't immediately hit uncached data
+    range[0] -= renderedRows.length;
+    range[1] += renderedRows.length;
+
+    // Clamp to the valid item index bounds
+    range[0] = Math.max(range[0], 0);
+    range[1] = Math.min(range[1], grid.size - 1);
+
+    return range;
   };
+
+  grid.$connector.getViewportPageRange = function () {
+    return grid.$connector.getViewportRange().map((index) => Math.floor(index / grid.pageSize));
+  }
 
   grid.dataProvider = function (params, callback) {
     if (params.pageSize != grid.pageSize) {
@@ -201,7 +212,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    grid.$connector.debounceRootRequest(params.page);
+    grid.$connector.requestPage(params.page);
   };
 
   grid.$connector.setSorterDirections = function (directions) {
@@ -354,7 +365,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.reset = function () {
     dataProviderController.clearCache();
     lastRequestedRange = [-1, -1];
-    rootRequestDebouncer?.cancel();
+    requestDebouncer?.cancel();
     grid.__updateVisibleRows();
   };
 
@@ -391,7 +402,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // already made its own requests), cancel the request debouncer to
     // prevent further unnecessary calls.
     if (Object.keys(rootCache.pendingRequests).length === 0) {
-      rootRequestDebouncer?.cancel();
+      requestDebouncer?.cancel();
       lastRequestedRange = [-1, -1];
     }
 
