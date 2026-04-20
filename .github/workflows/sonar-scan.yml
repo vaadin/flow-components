@@ -1,13 +1,16 @@
 name: Sonar Scan
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [ opened, synchronize, reopened ]
+    branches: [ main ]
 
 permissions:
   contents: read
 
 jobs:
   sonar-scan:
+    environment: ${{ github.event.pull_request.head.repo.full_name != github.repository && 'external-checks' || '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR code
