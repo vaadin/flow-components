@@ -193,7 +193,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.getViewportPageRange = function () {
     return grid.$connector.getViewportRange().map((index) => Math.floor(index / grid.pageSize));
-  }
+  };
 
   grid.dataProvider = function (params, callback) {
     if (params.pageSize != grid.pageSize) {
