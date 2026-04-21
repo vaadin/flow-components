@@ -387,6 +387,92 @@ public class MasterDetailLayout extends Component
     }
 
     /**
+     * Sets the size of the detail area and the size of the detail area when
+     * shown as an overlay, both in CSS length units.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param overlaySize
+     *            the overlay size in CSS length units
+     * @see #setDetailSize(String)
+     * @see #setOverlaySize(String)
+     */
+    public void setDetailSize(String size, String overlaySize) {
+        setDetailSize(size);
+        setOverlaySize(overlaySize);
+    }
+
+    /**
+     * Sets the size of the detail area and the size of the detail area when
+     * shown as an overlay, both in CSS length units.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit for the detail size
+     * @param overlaySize
+     *            the overlay size
+     * @param overlayUnit
+     *            the unit for the overlay size
+     * @see #setDetailSize(float, Unit)
+     * @see #setOverlaySize(float, Unit)
+     */
+    public void setDetailSize(float size, Unit unit, float overlaySize,
+            Unit overlayUnit) {
+        setDetailSize(size, unit);
+        setOverlaySize(overlaySize, overlayUnit);
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units, whether the detail
+     * area expands to fill available space, and the size of the detail area
+     * when shown as an overlay.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @param overlaySize
+     *            the overlay size in CSS length units
+     * @see #setDetailSize(String)
+     * @see #setExpandDetail(boolean)
+     * @see #setOverlaySize(String)
+     */
+    public void setDetailSize(String size, boolean expand, String overlaySize) {
+        setDetailSize(size);
+        setExpandDetail(expand);
+        setOverlaySize(overlaySize);
+    }
+
+    /**
+     * Sets the size of the detail area, whether the detail area expands to fill
+     * available space, and the size of the detail area when shown as an
+     * overlay.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit for the detail size
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @param overlaySize
+     *            the overlay size
+     * @param overlayUnit
+     *            the unit for the overlay size
+     * @see #setDetailSize(float, Unit)
+     * @see #setExpandDetail(boolean)
+     * @see #setOverlaySize(float, Unit)
+     */
+    public void setDetailSize(float size, Unit unit, boolean expand,
+            float overlaySize, Unit overlayUnit) {
+        setDetailSize(size, unit);
+        setExpandDetail(expand);
+        setOverlaySize(overlaySize, overlayUnit);
+    }
+
+    /**
      * Gets the orientation of the layout. Defaults to
      * {@link Orientation#HORIZONTAL}.
      *
