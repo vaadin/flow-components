@@ -59,16 +59,10 @@ public final class GridRenderer implements Serializable {
     /**
      * Renders the grid with results from the given SQL query. Columns are
      * created dynamically from the query result, with type-appropriate
-     * renderers, grouping, and lazy loading via {@link CallbackDataProvider}.
-     * <p>
-     * Any existing columns and extra header rows on the grid are removed before
-     * the new columns are added, so columns added manually by application code
-     * will not survive a call to this method.
-     * </p>
+     * renderers, grouping, and lazy loading.
      * <p>
      * The caller is responsible for ensuring this method runs on the UI thread
      * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
-     * </p>
      *
      * @param grid
      *            the grid to render, not {@code null}
