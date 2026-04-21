@@ -42,14 +42,14 @@ import com.vaadin.flow.shared.Registration;
  * and create or update chart visualizations based on natural language requests.
  * Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
- * tools to the LLM. The recommended system prompt is available from
- * {@link #getSystemPrompt()}.
+ * tools to the LLM. Workflow instructions are delivered through the description
+ * of the {@code get_chart_instructions} tool, which the LLM reads as part of
+ * the tool manifest.
  * </p>
  *
  * <pre>
  * var controller = new ChartAIController(chart, databaseProvider);
- * AIOrchestrator orchestrator = AIOrchestrator
- *         .builder(llmProvider, ChartAIController.getSystemPrompt())
+ * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider, systemPrompt)
  *         .withController(controller).withMessageList(messageList).build();
  * </pre>
  * <p>
@@ -99,10 +99,12 @@ public class ChartAIController implements AIController {
 
     private static final String CHART_ID = "chart";
 
-    private static final String SYSTEM_PROMPT = """
-            You have chart visualization tools. Follow this workflow when working with Charts:
+    private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
 
-            1. ALWAYS call get_chart_state() FIRST before making changes
+    private static final String INSTRUCTIONS_TEXT = """
+            Chart visualization workflow. Follow this for every chart request:
+
+            1. Call get_chart_state() to see the current chart state
             2. Call get_database_schema() to understand available data
             3. Call update_chart_data_source() and update_chart_configuration() \
             as needed — they can be called independently
@@ -154,21 +156,10 @@ public class ChartAIController implements AIController {
                 "Data converter cannot be null");
     }
 
-    /**
-     * Returns the recommended system prompt for chart visualization
-     * capabilities. Pass this to
-     * {@link AIOrchestrator#builder(LLMProvider, String)} so the LLM follows
-     * the intended tool-calling workflow.
-     *
-     * @return the system prompt text
-     */
-    public static String getSystemPrompt() {
-        return SYSTEM_PROMPT;
-    }
-
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
+        tools.add(createInstructionsTool());
         tools.addAll(DatabaseProviderAITools.createAll(databaseProvider));
         tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
             @Override
@@ -207,6 +198,36 @@ public class ChartAIController implements AIController {
             }
         }));
         return tools;
+    }
+
+    private LLMProvider.ToolSpec createInstructionsTool() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return INSTRUCTIONS_TOOL_NAME;
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Read this before using any chart or database tool.
+                        Calling this tool returns these same instructions —
+                        normally unnecessary since you are already reading them here.
+
+                        """
+                        + INSTRUCTIONS_TEXT;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(String arguments) {
+                return INSTRUCTIONS_TEXT;
+            }
+        };
     }
 
     /**

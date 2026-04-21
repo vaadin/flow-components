@@ -82,26 +82,39 @@ class ChartAIControllerTest {
         void toolNamesIncludeExpected() {
             var names = controller.getTools().stream().map(t -> t.getName())
                     .toList();
+            Assertions.assertTrue(names.contains("get_chart_instructions"));
             Assertions.assertTrue(names.contains("get_database_schema"));
             Assertions.assertTrue(names.contains("get_chart_state"));
             Assertions.assertTrue(names.contains("update_chart_configuration"));
             Assertions.assertTrue(names.contains("update_chart_data_source"));
         }
+
+        @Test
+        void instructionsToolIsFirst() {
+            Assertions.assertEquals("get_chart_instructions",
+                    controller.getTools().get(0).getName());
+        }
     }
 
     @Nested
-    class GetSystemPrompt {
+    class GetChartInstructions {
 
         @Test
-        void isNotEmpty() {
-            Assertions
-                    .assertFalse(ChartAIController.getSystemPrompt().isEmpty());
+        void descriptionContainsWorkflow() {
+            var tool = findTool(controller.getTools(),
+                    "get_chart_instructions");
+            Assertions.assertTrue(
+                    tool.getDescription().contains("get_chart_state"));
+            Assertions.assertTrue(
+                    tool.getDescription().contains("get_database_schema"));
         }
 
         @Test
-        void mentionsWorkflow() {
-            Assertions.assertTrue(ChartAIController.getSystemPrompt()
-                    .contains("get_chart_state"));
+        void executeReturnsWorkflow() {
+            var result = findTool(controller.getTools(),
+                    "get_chart_instructions").execute(null);
+            Assertions.assertFalse(result.isEmpty());
+            Assertions.assertTrue(result.contains("get_chart_state"));
         }
     }
 
