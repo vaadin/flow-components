@@ -16,18 +16,20 @@
 package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Represents a single row of data in an AI-managed grid. Row instances are
  * created internally by the framework when rendering query results and should
- * not be constructed or modified by application code.
+ * not be constructed by application code.
  * <p>
- * This type exists to make the {@link GridAIController}'s grid type parameter
- * explicit ({@code Grid<AIDataRow>}) and to signal that row data is
- * framework-owned. Application code should interact with the grid's columns and
- * state through the controller API, not through individual row values.
+ * Application code may read values from a row using {@link #get(String)}, for
+ * example from a custom column renderer or a row click listener. Columns
+ * themselves are managed by {@link GridAIController} and rebuilt from the
+ * current query on every update.
  * </p>
  *
  * @author Vaadin Ltd
@@ -39,13 +41,15 @@ public final class AIDataRow implements Serializable {
     private final Map<String, Object> values;
 
     /**
-     * Creates a new row from the given column-value map.
+     * Creates a new row from the given column-value map. The map is copied
+     * defensively; later mutations to the source map do not affect the row.
      *
      * @param values
      *            the column values keyed by column name, not {@code null}
      */
     AIDataRow(Map<String, Object> values) {
-        this.values = values;
+        Objects.requireNonNull(values, "values must not be null");
+        this.values = new LinkedHashMap<>(values);
     }
 
     /**
@@ -53,16 +57,17 @@ public final class AIDataRow implements Serializable {
      *
      * @param column
      *            the column name
-     * @return the value, or {@code null} if the column is not present
+     * @return the value, or {@code null} if the column is not present or its
+     *         value is {@code null}
      */
-    Object get(String column) {
+    public Object get(String column) {
         return values.get(column);
     }
 
     /**
-     * Returns the set of column names in this row.
+     * Returns the column-value entries in this row, in insertion order.
      *
-     * @return the column names, never {@code null}
+     * @return the entries, never {@code null}
      */
     Set<Map.Entry<String, Object>> entries() {
         return values.entrySet();

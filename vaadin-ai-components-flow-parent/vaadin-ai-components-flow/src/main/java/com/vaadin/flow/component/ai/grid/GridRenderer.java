@@ -59,10 +59,16 @@ public final class GridRenderer implements Serializable {
     /**
      * Renders the grid with results from the given SQL query. Columns are
      * created dynamically from the query result, with type-appropriate
-     * renderers, grouping, and lazy loading.
+     * renderers, grouping, and lazy loading via {@link CallbackDataProvider}.
+     * <p>
+     * Any existing columns and extra header rows on the grid are removed before
+     * the new columns are added, so columns added manually by application code
+     * will not survive a call to this method.
+     * </p>
      * <p>
      * The caller is responsible for ensuring this method runs on the UI thread
      * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
+     * </p>
      *
      * @param grid
      *            the grid to render, not {@code null}
@@ -98,8 +104,7 @@ public final class GridRenderer implements Serializable {
         applyColumnGrouping(grid);
         var dataProvider = createDataProvider(databaseProvider, query);
         grid.setItems(dataProvider);
-        LOGGER.info("Grid configured with {} columns",
-                firstRow.entries().size());
+        LOGGER.info("Grid configured with {} columns", sortedColumns.size());
     }
 
     private static void addColumn(Grid<AIDataRow> grid, String columnName,
@@ -180,12 +185,17 @@ public final class GridRenderer implements Serializable {
         }, countFetchQuery -> {
             LOGGER.debug("Counting rows: {}", countQuery);
             var countResult = databaseProvider.executeQuery(countQuery);
-            if (!countResult.isEmpty()) {
-                var firstValue = countResult.getFirst().values().iterator()
-                        .next();
-                return firstValue instanceof Number n ? n.intValue() : 0;
+            if (countResult.isEmpty()) {
+                return 0;
             }
-            return 0;
+            // The COUNT(*) column name is driver-dependent, so read the
+            // first (and only) value instead of looking it up by name.
+            var entries = new AIDataRow(countResult.getFirst()).entries();
+            if (entries.isEmpty()) {
+                return 0;
+            }
+            var firstValue = entries.iterator().next().getValue();
+            return firstValue instanceof Number n ? n.intValue() : 0;
         }, row -> row);
     }
 
