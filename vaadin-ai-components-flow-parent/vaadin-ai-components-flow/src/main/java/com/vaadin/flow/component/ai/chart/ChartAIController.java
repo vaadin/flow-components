@@ -49,8 +49,9 @@ import com.vaadin.flow.shared.Registration;
  *
  * <pre>
  * var controller = new ChartAIController(chart, databaseProvider);
- * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider, systemPrompt)
- *         .withController(controller).withMessageList(messageList).build();
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .withMessageList(messageList).build();
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in

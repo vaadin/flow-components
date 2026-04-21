@@ -43,8 +43,9 @@ import com.vaadin.flow.shared.Registration;
  *
  * <pre>
  * var controller = new GridAIController(grid, databaseProvider);
- * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider, systemPrompt)
- *         .withController(controller).withMessageList(messageList).build();
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .withMessageList(messageList).build();
  * </pre>
  * <p>
  * The grid automatically creates columns from query results with:
