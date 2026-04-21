@@ -24,7 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -137,6 +139,21 @@ public class AIOrchestrator implements Serializable {
      */
     private static final Pattern VALID_TOOL_NAME_PATTERN = Pattern
             .compile("^[a-zA-Z0-9_-]{1,64}$");
+
+    private static final Set<Object> CLAIMED_INSTANCES = Collections
+            .synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+
+    private static void claim(Object instance) {
+        if (instance == null) {
+            return;
+        }
+        if (!CLAIMED_INSTANCES.add(instance)) {
+            throw new IllegalStateException(instance.getClass().getSimpleName()
+                    + " is already in use by another AIOrchestrator. "
+                    + "Each instance can only be used by a single "
+                    + "orchestrator.");
+        }
+    }
 
     private transient LLMProvider provider;
     private final String systemPrompt;
@@ -974,6 +991,20 @@ public class AIOrchestrator implements Serializable {
          * @return the configured orchestrator
          */
         public AIOrchestrator build() {
+            claim(provider);
+            claim(messageList instanceof MessageListWrapper w ? w.messageList
+                    : messageList);
+            claim(input instanceof MessageInputWrapper w ? w.messageInput()
+                    : input);
+            if (fileReceiver instanceof UploadManagerWrapper w) {
+                claim(w.uploadManager);
+            } else if (fileReceiver instanceof UploadWrapper w) {
+                claim(w.upload);
+            } else {
+                claim(fileReceiver);
+            }
+            claim(controller);
+
             var orchestrator = new AIOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
             orchestrator.input = input;

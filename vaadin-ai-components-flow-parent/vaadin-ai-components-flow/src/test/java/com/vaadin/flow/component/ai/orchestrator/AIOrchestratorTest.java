@@ -1975,6 +1975,87 @@ class AIOrchestratorTest {
         assertBuilderWarning("responseCompleteListener");
     }
 
+    @Test
+    void builder_withProviderAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedProvider = Mockito.mock(LLMProvider.class);
+        AIOrchestrator.builder(sharedProvider, null).build();
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> AIOrchestrator.builder(sharedProvider, null).build());
+    }
+
+    @Test
+    void builder_withMessageListAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedMessageList = Mockito.mock(AIMessageList.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withMessageList(sharedMessageList).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withMessageList(sharedMessageList);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void builder_withFlowMessageListAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedFlowMessageList = Mockito.mock(MessageList.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withMessageList(sharedFlowMessageList).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withMessageList(sharedFlowMessageList);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void builder_withInputAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedInput = Mockito.mock(AIInput.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withInput(sharedInput).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withInput(sharedInput);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void builder_withFlowMessageInputAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedFlowInput = Mockito.mock(MessageInput.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withInput(sharedFlowInput).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withInput(sharedFlowInput);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void builder_withFileReceiverAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedFileReceiver = Mockito.mock(AIFileReceiver.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withFileReceiver(sharedFileReceiver).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withFileReceiver(sharedFileReceiver);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    void builder_withControllerAlreadyUsedByAnotherOrchestrator_throws() {
+        var sharedController = createController();
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withController(sharedController).build();
+
+        var builder = AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null)
+                .withController(sharedController);
+        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    }
+
     private static byte[] createTestImage(int width, int height)
             throws IOException {
         var image = new BufferedImage(width, height,

@@ -30,7 +30,7 @@ import com.vaadin.flow.component.messages.MessageListItem;
  */
 class MessageListWrapper implements AIMessageList {
 
-    private final MessageList messageList;
+    final MessageList messageList;
     private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
 
     MessageListWrapper(MessageList messageList) {
