@@ -274,6 +274,20 @@ class MasterDetailLayoutTest {
     }
 
     @Test
+    void setMasterSizeWithExpand_getMasterSize_isExpandMaster() {
+        layout.setMasterSize("300px", true);
+        Assertions.assertEquals("300px", layout.getMasterSize());
+        Assertions.assertTrue(layout.isExpandMaster());
+    }
+
+    @Test
+    void setMasterSizeWithUnitAndExpand_getMasterSize_isExpandMaster() {
+        layout.setMasterSize(30, Unit.EM, true);
+        Assertions.assertEquals("30.0em", layout.getMasterSize());
+        Assertions.assertTrue(layout.isExpandMaster());
+    }
+
+    @Test
     void setDetailSize_getDetailSize() {
         String size = "400px";
         layout.setDetailSize(size);
@@ -288,6 +302,20 @@ class MasterDetailLayoutTest {
         Assertions.assertEquals("30.0em", layout.getDetailSize());
         Assertions.assertEquals("30.0em",
                 layout.getElement().getProperty("detailSize"));
+    }
+
+    @Test
+    void setDetailSizeWithExpand_getDetailSize_isExpandDetail() {
+        layout.setDetailSize("300px", true);
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+    }
+
+    @Test
+    void setDetailSizeWithUnitAndExpand_getDetailSize_isExpandDetail() {
+        layout.setDetailSize(30, Unit.EM, true);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
     }
 
     @Test

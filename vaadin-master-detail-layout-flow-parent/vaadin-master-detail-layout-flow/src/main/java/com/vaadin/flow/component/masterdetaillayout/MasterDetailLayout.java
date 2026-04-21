@@ -268,6 +268,42 @@ public class MasterDetailLayout extends Component
     }
 
     /**
+     * Sets the size of the master area in CSS length units and whether the
+     * master area expands to fill available space.
+     *
+     * @param size
+     *            the size of the master area in CSS length units
+     * @param expand
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
+     * @see #setMasterSize(String)
+     * @see #setExpandMaster(boolean)
+     */
+    public void setMasterSize(String size, boolean expand) {
+        setMasterSize(size);
+        setExpandMaster(expand);
+    }
+
+    /**
+     * Sets the size of the master area in CSS length units and whether the
+     * master area expands to fill available space.
+     *
+     * @param size
+     *            the size of the master area
+     * @param unit
+     *            the unit
+     * @param expand
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
+     * @see #setMasterSize(float, Unit)
+     * @see #setExpandMaster(boolean)
+     */
+    public void setMasterSize(float size, Unit unit, boolean expand) {
+        setMasterSize(size, unit);
+        setExpandMaster(expand);
+    }
+
+    /**
      * Gets the size of the detail area.
      *
      * @return the size of the detail area in CSS length units, or {@code null}
@@ -312,6 +348,42 @@ public class MasterDetailLayout extends Component
     public void setDetailSize(float size, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
         getElement().setProperty("detailSize", HasSize.getCssSize(size, unit));
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units and whether the
+     * detail area expands to fill available space.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @see #setDetailSize(String)
+     * @see #setExpandDetail(boolean)
+     */
+    public void setDetailSize(String size, boolean expand) {
+        setDetailSize(size);
+        setExpandDetail(expand);
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units and whether the
+     * detail area expands to fill available space.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @see #setDetailSize(float, Unit)
+     * @see #setExpandDetail(boolean)
+     */
+    public void setDetailSize(float size, Unit unit, boolean expand) {
+        setDetailSize(size, unit);
+        setExpandDetail(expand);
     }
 
     /**
