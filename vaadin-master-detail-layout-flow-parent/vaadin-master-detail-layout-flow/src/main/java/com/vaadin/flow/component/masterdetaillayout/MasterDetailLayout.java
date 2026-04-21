@@ -446,8 +446,8 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets the size of the detail area, whether the detail area expands to
-     * fill available space, and the size of the detail area when shown as an
+     * Sets the size of the detail area, whether the detail area expands to fill
+     * available space, and the size of the detail area when shown as an
      * overlay.
      *
      * @param size
