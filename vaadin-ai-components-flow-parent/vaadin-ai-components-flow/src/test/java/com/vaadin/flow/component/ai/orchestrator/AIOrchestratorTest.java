@@ -1638,6 +1638,11 @@ class AIOrchestratorTest {
         var callCount = new AtomicInteger();
         AIController controller = new AIController() {
             @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
             public void onRequestCompleted() {
                 callCount.incrementAndGet();
             }
@@ -1662,6 +1667,11 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         AIController throwingController = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
             @Override
             public void onRequestCompleted() {
                 throw new RuntimeException("Controller error");
@@ -1693,6 +1703,11 @@ class AIOrchestratorTest {
         var callCount = new AtomicInteger();
         AIController controller = new AIController() {
             @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
             public void onRequestCompleted() {
                 callCount.incrementAndGet();
             }
@@ -1720,6 +1735,11 @@ class AIOrchestratorTest {
         var listenerCapture = new ArrayList<String>();
         var controllerCallCount = new AtomicInteger();
         AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
             @Override
             public void onRequestCompleted() {
                 controllerCallCount.incrementAndGet();
@@ -1998,6 +2018,11 @@ class AIOrchestratorTest {
             @Override
             public List<LLMProvider.ToolSpec> getTools() {
                 return List.of(tools);
+            }
+
+            @Override
+            public void onRequestCompleted() {
+                // no-op
             }
         };
     }
