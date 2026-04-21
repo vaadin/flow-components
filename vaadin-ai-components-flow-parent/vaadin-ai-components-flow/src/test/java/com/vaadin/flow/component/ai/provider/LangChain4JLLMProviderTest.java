@@ -904,6 +904,35 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitTool_malformedJsonArguments_returnsError() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "not json");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(0, receivedArgs.size());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertTrue(toolResults.getFirst().text()
+                .startsWith("Error executing tool:"));
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");

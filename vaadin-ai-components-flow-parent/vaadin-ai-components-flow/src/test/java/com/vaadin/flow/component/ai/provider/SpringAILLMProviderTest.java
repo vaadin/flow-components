@@ -902,6 +902,31 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitTool_malformedJsonArguments_returnsError() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("Not json");
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertEquals(0, receivedArgs.size());
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_usesEmptySchema() {
         provider.setStreaming(false);
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
