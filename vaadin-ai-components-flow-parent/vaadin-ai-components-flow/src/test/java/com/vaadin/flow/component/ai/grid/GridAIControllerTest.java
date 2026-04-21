@@ -890,7 +890,6 @@ class GridAIControllerTest {
 
         @Test
         void count_rowWithNoColumns_returnsZero() {
-            // Pathological case: a count row with no columns at all
             dbProvider.queryResults = List.of(new LinkedHashMap<>());
             var size = grid.getDataProvider().size(new Query<>());
 
