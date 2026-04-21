@@ -48,9 +48,8 @@ import com.vaadin.flow.shared.Registration;
  * </pre>
  * <p>
  * The grid uses {@link AIDataRow} as its item type. Row instances are created
- * internally when query results are rendered; application code does not
- * construct them but may read values via {@link AIDataRow#get(String)}, for
- * example from a custom renderer or a row click listener.
+ * internally when query results are rendered and are not intended to be
+ * constructed or inspected by application code.
  * </p>
  * <p>
  * The grid automatically creates columns from query results with:

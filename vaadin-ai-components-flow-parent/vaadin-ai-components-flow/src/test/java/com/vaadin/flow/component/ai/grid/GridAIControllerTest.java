@@ -857,14 +857,6 @@ class GridAIControllerTest {
                     .fetch(new Query<>(0, 50, List.of(), null, null)).toList();
 
             Assertions.assertEquals(2, rows.size());
-        }
-
-        @Test
-        void fetch_wrapsRowsAsAIDataRow() {
-            dbProvider.queryResults = List.of(row("a", 10), row("a", 20));
-            var rows = grid.getDataProvider()
-                    .fetch(new Query<>(0, 50, List.of(), null, null)).toList();
-
             Assertions.assertEquals(10, rows.get(0).get("a"));
             Assertions.assertEquals(20, rows.get(1).get("a"));
         }

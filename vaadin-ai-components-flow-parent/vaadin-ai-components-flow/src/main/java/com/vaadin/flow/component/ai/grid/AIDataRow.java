@@ -23,14 +23,10 @@ import java.util.Set;
 
 /**
  * Represents a single row of data in an AI-managed grid. Row instances are
- * created internally by the framework when rendering query results and should
- * not be constructed by application code.
- * <p>
- * Application code may read values from a row using {@link #get(String)}, for
- * example from a custom column renderer or a row click listener. Columns
- * themselves are managed by {@link GridAIController} and rebuilt from the
- * current query on every update.
- * </p>
+ * created internally by the framework when rendering query results and are not
+ * intended to be constructed or inspected by application code. This type exists
+ * to make the {@link GridAIController}'s grid type parameter explicit
+ * ({@code Grid<AIDataRow>}) and to signal that row data is framework-owned.
  *
  * @author Vaadin Ltd
  * @see GridAIController
@@ -60,7 +56,7 @@ public final class AIDataRow implements Serializable {
      * @return the value, or {@code null} if the column is not present or its
      *         value is {@code null}
      */
-    public Object get(String column) {
+    Object get(String column) {
         return values.get(column);
     }
 
