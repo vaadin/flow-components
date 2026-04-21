@@ -386,6 +386,19 @@ class MasterDetailLayoutTest {
     }
 
     @Test
+    public void setForceOverlay_isForceOverlay() {
+        Assert.assertFalse(layout.isForceOverlay());
+        Assert.assertFalse(
+                layout.getElement().getProperty("forceOverlay", false));
+
+        layout.setForceOverlay(true);
+
+        Assert.assertTrue(layout.isForceOverlay());
+        Assert.assertTrue(
+                layout.getElement().getProperty("forceOverlay", false));
+    }
+
+    @Test
     void setAnimationEnabled_isAnimationEnabled() {
         Assertions.assertTrue(layout.isAnimationEnabled());
         Assertions.assertFalse(

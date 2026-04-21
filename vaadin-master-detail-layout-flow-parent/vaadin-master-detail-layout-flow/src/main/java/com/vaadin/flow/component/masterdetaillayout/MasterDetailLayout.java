@@ -457,6 +457,31 @@ public class MasterDetailLayout extends Component
     }
 
     /**
+     * Gets whether the layout forces the detail area to be shown as an overlay,
+     * even if there is enough space for master and detail to be shown next to
+     * each other using the default (split) mode.
+     *
+     * @return {@code true} if the overlay mode is enforced, {@code false}
+     *         otherwise
+     */
+    public boolean isForceOverlay() {
+        return getElement().getProperty("forceOverlay", false);
+    }
+
+    /**
+     * Sets whether the layout forces the detail area to be shown as an overlay,
+     * even if there is enough space for master and detail to be shown next to
+     * each other using the default (split) mode.
+     *
+     * @param forceOverlay
+     *            {@code true} if the overlay mode is enforced, {@code false}
+     *            otherwise
+     */
+    public void setForceOverlay(boolean forceOverlay) {
+        getElement().setProperty("forceOverlay", forceOverlay);
+    }
+
+    /**
      * Gets whether the layout animation is enabled.
      *
      * @return {@code true} if the animation is enabled, {@code false} otherwise
