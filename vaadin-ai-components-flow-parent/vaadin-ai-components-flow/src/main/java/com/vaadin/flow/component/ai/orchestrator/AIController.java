@@ -47,9 +47,7 @@ public interface AIController {
      *
      * @return list of tools, or empty list if controller provides no tools
      */
-    default List<LLMProvider.ToolSpec> getTools() {
-        return List.of();
-    }
+    List<LLMProvider.ToolSpec> getTools();
 
     /**
      * Called by the orchestrator when an LLM request cycle has completed.
@@ -61,6 +59,5 @@ public interface AIController {
      * </p>
      *
      */
-    default void onRequestCompleted() {
-    }
+    void onRequestCompleted();
 }
