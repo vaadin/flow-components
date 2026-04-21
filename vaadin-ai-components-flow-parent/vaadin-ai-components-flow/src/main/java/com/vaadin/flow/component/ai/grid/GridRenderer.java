@@ -188,8 +188,6 @@ public final class GridRenderer implements Serializable {
             if (countResult.isEmpty()) {
                 return 0;
             }
-            // The COUNT(*) column name is driver-dependent, so read the
-            // first (and only) value instead of looking it up by name.
             var entries = new AIDataRow(countResult.getFirst()).entries();
             if (entries.isEmpty()) {
                 return 0;
