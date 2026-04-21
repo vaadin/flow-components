@@ -186,7 +186,10 @@ public interface LLMProvider {
 
         /**
          * Gets the JSON Schema describing the parameters this tool accepts. The
-         * top-level schema must be an object:
+         * schema should follow the JSON Schema specification.
+         * <p>
+         * Example:
+         * </p>
          *
          * <pre>
          * {
@@ -197,28 +200,6 @@ public interface LLMProvider {
          *   "required": ["query"]
          * }
          * </pre>
-         * <p>
-         * To stay portable across LLM providers, prefer the following JSON
-         * Schema subset, which is supported by both OpenAI (including strict
-         * mode) and Anthropic:
-         * </p>
-         * <ul>
-         * <li>Top-level {@code "type": "object"} with {@code "properties"} and
-         * {@code "required"}</li>
-         * <li>Per-property {@code type} (one of {@code string},
-         * {@code integer}, {@code number}, {@code boolean}, {@code array},
-         * {@code object}), {@code description}, and {@code enum}</li>
-         * <li>{@code items} for arrays; nested {@code object} with its own
-         * {@code properties}/{@code required}</li>
-         * <li>{@code anyOf} for nullable / union types</li>
-         * </ul>
-         * <p>
-         * The following keywords are <b>not</b> portable across providers and
-         * should be avoided unless you target a specific provider:
-         * {@code $ref}, {@code oneOf}, {@code allOf}, {@code not},
-         * {@code pattern}, {@code format}, {@code minimum}, {@code maximum},
-         * {@code minItems}, {@code maxItems}.
-         * </p>
          *
          * @return the JSON Schema string, or {@code null} if the tool takes no
          *         parameters
@@ -229,15 +210,12 @@ public interface LLMProvider {
          * Executes the tool with the given arguments.
          * <p>
          * Implementations should return a human-readable result string on
-         * success. On failure, implementations may throw any runtime exception;
-         * the provider will catch it and report the error message back to the
-         * LLM so it can recover gracefully.
+         * success. On failure, they may throw any runtime exception.
          * </p>
          *
          * @param arguments
          *            the tool arguments as a {@link JsonNode} matching the
-         *            parameters schema, never {@code null}. Tools that take no
-         *            parameters receive an empty object node.
+         *            parameters schema
          * @return the result of the tool execution as a string, never
          *         {@code null}
          */
