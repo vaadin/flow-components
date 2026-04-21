@@ -46,27 +46,21 @@ class MasterDetailLayoutTest {
     }
 
     @Test
-    void constructorWithSizesAndExpand() {
-        var customLayout = new MasterDetailLayout("400px", "200px",
-                MasterDetailLayout.ExpandingArea.MASTER);
+    void constructorWithSizes() {
+        var customLayout = new MasterDetailLayout("400px", "200px");
         ui.add(customLayout);
 
         Assertions.assertEquals("400px", customLayout.getMasterSize());
         Assertions.assertEquals("200px", customLayout.getDetailSize());
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
-                customLayout.getExpandingArea());
     }
 
     @Test
-    void constructorWithSizesUnitsAndExpandingArea() {
-        var customLayout = new MasterDetailLayout(30, Unit.EM, 15, Unit.EM,
-                MasterDetailLayout.ExpandingArea.DETAIL);
+    void constructorWithSizesAndUnits() {
+        var customLayout = new MasterDetailLayout(30, Unit.EM, 15, Unit.EM);
         ui.add(customLayout);
 
         Assertions.assertEquals("30.0em", customLayout.getMasterSize());
         Assertions.assertEquals("15.0em", customLayout.getDetailSize());
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
-                customLayout.getExpandingArea());
     }
 
     @Test
@@ -360,29 +354,29 @@ class MasterDetailLayoutTest {
     }
 
     @Test
-    void setExpandingArea_getExpandingArea() {
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
-                layout.getExpandingArea());
+    void setExpandMaster_isExpandMaster() {
+        Assertions.assertFalse(layout.isExpandMaster());
+        Assertions.assertFalse(
+                layout.getElement().getProperty("expandMaster", false));
 
-        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.BOTH);
+        layout.setExpandMaster(true);
 
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.BOTH,
-                layout.getExpandingArea());
-        Assertions.assertEquals("both",
-                layout.getElement().getProperty("expand"));
-
-        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.DETAIL);
-
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
-                layout.getExpandingArea());
-        Assertions.assertEquals("detail",
-                layout.getElement().getProperty("expand"));
+        Assertions.assertTrue(layout.isExpandMaster());
+        Assertions.assertTrue(
+                layout.getElement().getProperty("expandMaster", false));
     }
 
     @Test
-    void setExpandingAreaNull_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> layout.setExpandingArea(null));
+    void setExpandDetail_isExpandDetail() {
+        Assertions.assertFalse(layout.isExpandDetail());
+        Assertions.assertFalse(
+                layout.getElement().getProperty("expandDetail", false));
+
+        layout.setExpandDetail(true);
+
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertTrue(
+                layout.getElement().getProperty("expandDetail", false));
     }
 
     @Test

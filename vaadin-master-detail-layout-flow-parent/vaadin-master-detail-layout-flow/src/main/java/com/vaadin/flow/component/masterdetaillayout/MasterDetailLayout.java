@@ -76,40 +76,26 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Supported expand values for {@link MasterDetailLayout}. Controls which
-     * area(s) expand to fill available space.
-     */
-    public enum ExpandingArea {
-        MASTER, DETAIL, BOTH
-    }
-
-    /**
      * Creates an empty Master Detail Layout.
      */
     public MasterDetailLayout() {
     }
 
     /**
-     * Creates a Master Detail Layout with the given master size, detail size,
-     * and expanding side.
+     * Creates a Master Detail Layout with the given master and detail sizes.
      *
      * @param masterSize
      *            the size of the master area in CSS length units
      * @param detailSize
      *            the size of the detail area in CSS length units
-     * @param expandingArea
-     *            which area(s) expand to fill available space
      */
-    public MasterDetailLayout(String masterSize, String detailSize,
-            ExpandingArea expandingArea) {
+    public MasterDetailLayout(String masterSize, String detailSize) {
         setMasterSize(masterSize);
         setDetailSize(detailSize);
-        setExpandingArea(expandingArea);
     }
 
     /**
-     * Creates a Master Detail Layout with the given master size, detail size,
-     * and expanding area.
+     * Creates a Master Detail Layout with the given master and detail sizes.
      *
      * @param masterSize
      *            the size of the master area
@@ -119,14 +105,11 @@ public class MasterDetailLayout extends Component
      *            the size of the detail area
      * @param detailUnit
      *            the unit for the detail size
-     * @param expandingArea
-     *            which area(s) expand to fill available space
      */
     public MasterDetailLayout(float masterSize, Unit masterUnit,
-            float detailSize, Unit detailUnit, ExpandingArea expandingArea) {
+            float detailSize, Unit detailUnit) {
         setMasterSize(masterSize, masterUnit);
         setDetailSize(detailSize, detailUnit);
-        setExpandingArea(expandingArea);
     }
 
     /**
@@ -429,31 +412,51 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets which area(s) expand to fill available space. Defaults to
-     * {@link ExpandingArea#MASTER}.
+     * Gets whether the master area expands to fill available space. Defaults to
+     * {@code false}.
      *
-     * @return the expanding area
+     * @return {@code true} if the master area expands, {@code false} otherwise
      */
-    public ExpandingArea getExpandingArea() {
-        String expand = getElement().getProperty("expand");
-        if (expand != null) {
-            return ExpandingArea.valueOf(expand.toUpperCase());
-        }
-        return ExpandingArea.MASTER;
+    public boolean isExpandMaster() {
+        return getElement().getProperty("expandMaster", false);
     }
 
     /**
-     * Controls which area(s) expand to fill available space. Possible values
-     * are {@link ExpandingArea#MASTER}, {@link ExpandingArea#DETAIL}, and
-     * {@link ExpandingArea#BOTH}. Defaults to {@link ExpandingArea#MASTER}.
+     * Sets whether the master area expands to fill available space. When both
+     * {@link #setExpandMaster(boolean)} and {@link #setExpandDetail(boolean)}
+     * are set to {@code true}, the master and detail areas share the available
+     * space equally.
      *
-     * @param expandingArea
-     *            the expanding area
+     * @param expandMaster
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
      */
-    public void setExpandingArea(ExpandingArea expandingArea) {
-        Objects.requireNonNull(expandingArea, "ExpandingArea cannot be null");
-        getElement().setProperty("expand",
-                expandingArea.name().toLowerCase(Locale.ENGLISH));
+    public void setExpandMaster(boolean expandMaster) {
+        getElement().setProperty("expandMaster", expandMaster);
+    }
+
+    /**
+     * Gets whether the detail area expands to fill available space. Defaults to
+     * {@code false}.
+     *
+     * @return {@code true} if the detail area expands, {@code false} otherwise
+     */
+    public boolean isExpandDetail() {
+        return getElement().getProperty("expandDetail", false);
+    }
+
+    /**
+     * Sets whether the detail area expands to fill available space. When both
+     * {@link #setExpandMaster(boolean)} and {@link #setExpandDetail(boolean)}
+     * are set to {@code true}, the master and detail areas share the available
+     * space equally.
+     *
+     * @param expandDetail
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     */
+    public void setExpandDetail(boolean expandDetail) {
+        getElement().setProperty("expandDetail", expandDetail);
     }
 
     /**
