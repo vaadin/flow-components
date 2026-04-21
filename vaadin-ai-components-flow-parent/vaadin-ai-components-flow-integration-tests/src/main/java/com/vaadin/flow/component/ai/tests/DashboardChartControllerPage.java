@@ -37,7 +37,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Test page for ChartAIController with Dashboard. Uses an async LLM provider
@@ -100,19 +99,12 @@ public class DashboardChartControllerPage extends Div {
             if ("/render-bar".equals(message)) {
                 return Flux.<String> create(sink -> {
                     new Thread(() -> {
-                        var dataArgs = JacksonUtils.createObjectNode();
-                        dataArgs.putArray("queries").add("SELECT * FROM sales");
                         executeTool(tools, "update_chart_data_source",
-                                dataArgs);
-
-                        var configArgs = JacksonUtils.createObjectNode();
-                        var configObj = configArgs.putObject("configuration");
-                        configObj.putObject("chart").put("type", "bar");
-                        configObj.putObject("title").put("text",
-                                "Monthly Revenue");
+                                "{\"queries\":[\"SELECT * FROM sales\"]}");
                         executeTool(tools, "update_chart_configuration",
-                                configArgs);
-
+                                "{\"configuration\":{\"chart\":"
+                                        + "{\"type\":\"bar\"},\"title\":"
+                                        + "{\"text\":\"Monthly Revenue\"}}}");
                         sink.next("Rendered bar chart.");
                         sink.complete();
                     }).start();
@@ -128,9 +120,9 @@ public class DashboardChartControllerPage extends Div {
         }
 
         private static void executeTool(List<ToolSpec> tools, String name,
-                JsonNode args) {
+                String args) {
             tools.stream().filter(t -> t.getName().equals(name)).findFirst()
-                    .orElseThrow().execute(args);
+                    .orElseThrow().execute(JacksonUtils.readTree(args));
         }
     }
 

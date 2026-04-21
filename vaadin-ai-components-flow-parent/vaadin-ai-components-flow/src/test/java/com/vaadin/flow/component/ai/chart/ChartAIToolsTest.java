@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.databind.JsonNode;
+
 class ChartAIToolsTest {
 
     private TestCallbacks callbacks;
@@ -58,6 +60,10 @@ class ChartAIToolsTest {
         Assertions.assertTrue(names.contains("get_plot_options_schema"));
     }
 
+    private static JsonNode json(String json) {
+        return JacksonUtils.readTree(json);
+    }
+
     @Nested
     class GetChartState {
 
@@ -87,8 +93,7 @@ class ChartAIToolsTest {
         @Test
         void execute_withExplicitChartId_returnsState() {
             callbacks.stateToReturn = "{\"chart\":{\"type\":\"line\"}}";
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "chart-1"));
+            var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
             Assertions.assertEquals("{\"chart\":{\"type\":\"line\"}}", result);
             Assertions.assertEquals("chart-1", callbacks.lastGetStateId);
         }
@@ -97,7 +102,7 @@ class ChartAIToolsTest {
         void execute_withSingleChart_defaultsToThatChart() {
             callbacks.chartIds = Set.of("only-chart");
             callbacks.stateToReturn = "state";
-            var result = tool.execute(JacksonUtils.createObjectNode());
+            var result = tool.execute(json("{}"));
             Assertions.assertEquals("state", result);
             Assertions.assertEquals("only-chart", callbacks.lastGetStateId);
         }
@@ -106,8 +111,7 @@ class ChartAIToolsTest {
         void execute_withMultipleCharts_andExplicitChartId_resolvesCorrectChart() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
             callbacks.stateToReturn = "state-of-chart-2";
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "chart-2"));
+            var result = tool.execute(json("{\"chartId\": \"chart-2\"}"));
             Assertions.assertEquals("state-of-chart-2", result);
             Assertions.assertEquals("chart-2", callbacks.lastGetStateId);
         }
@@ -115,8 +119,7 @@ class ChartAIToolsTest {
         @Test
         void execute_withMultipleCharts_andUnrecognizedChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "bogus"));
+            var result = tool.execute(json("{\"chartId\": \"bogus\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("chartId is required"));
         }
@@ -124,14 +127,14 @@ class ChartAIToolsTest {
         @Test
         void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            var result = tool.execute(JacksonUtils.createObjectNode());
+            var result = tool.execute(json("{}"));
             Assertions.assertTrue(result.contains("Error"));
         }
 
         @Test
         void execute_withNoCharts_returnsError() {
             callbacks.chartIds = Set.of();
-            var result = tool.execute(JacksonUtils.createObjectNode());
+            var result = tool.execute(json("{}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("No charts available"));
         }
@@ -140,8 +143,7 @@ class ChartAIToolsTest {
         void execute_withNullChartId_andSingleChart_defaultsToThatChart() {
             callbacks.chartIds = Set.of("only-chart");
             callbacks.stateToReturn = "state";
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().putNull("chartId"));
+            var result = tool.execute(json("{\"chartId\": null}"));
             Assertions.assertEquals("state", result);
             Assertions.assertEquals("only-chart", callbacks.lastGetStateId);
         }
@@ -150,8 +152,7 @@ class ChartAIToolsTest {
         void execute_withUnrecognizedChartId_andSingleChart_defaultsToThatChart() {
             callbacks.chartIds = Set.of("chart");
             callbacks.stateToReturn = "state";
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "1"));
+            var result = tool.execute(json("{\"chartId\": \"1\"}"));
             Assertions.assertEquals("state", result);
             Assertions.assertEquals("chart", callbacks.lastGetStateId);
         }
@@ -160,8 +161,7 @@ class ChartAIToolsTest {
         void execute_whenCallbackThrows_returnsError() {
             callbacks.getStateException = new RuntimeException(
                     "Chart not found");
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "chart-1"));
+            var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Chart not found"));
         }
@@ -196,11 +196,8 @@ class ChartAIToolsTest {
 
         @Test
         void execute_withExplicitChartId_updatesConfiguration() {
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putObject("configuration").putObject("chart").put("type",
-                    "bar");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
 
             Assertions.assertEquals("chart-1", callbacks.lastUpdateConfigId);
             Assertions.assertEquals("{\"chart\":{\"type\":\"bar\"}}",
@@ -212,9 +209,7 @@ class ChartAIToolsTest {
         @Test
         void execute_withSingleChart_defaultsToThatChart() {
             callbacks.chartIds = Set.of("my-chart");
-            var argsNode = JacksonUtils.createObjectNode();
-            argsNode.putObject("configuration").put("title", "Test");
-            tool.execute(argsNode);
+            tool.execute(json("{\"configuration\": {\"title\": \"Test\"}}"));
 
             Assertions.assertEquals("my-chart", callbacks.lastUpdateConfigId);
         }
@@ -222,16 +217,14 @@ class ChartAIToolsTest {
         @Test
         void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            var argsNode = JacksonUtils.createObjectNode();
-            argsNode.putObject("configuration").put("title", "Test");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(
+                    json("{\"configuration\": {\"title\": \"Test\"}}"));
             Assertions.assertTrue(result.contains("Error"));
         }
 
         @Test
         void execute_withMissingConfiguration_returnsError() {
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "chart-1"));
+            var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(
                     result.contains("'configuration' parameter is required"));
@@ -241,11 +234,8 @@ class ChartAIToolsTest {
         void execute_whenCallbackThrows_returnsError() {
             callbacks.updateConfigException = new RuntimeException(
                     "Config rejected");
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putObject("configuration").putObject("chart").put("type",
-                    "bar");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Config rejected"));
         }
@@ -283,11 +273,8 @@ class ChartAIToolsTest {
 
         @Test
         void execute_withExplicitChartId_updatesData() {
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putArray("queries").add("SELECT * FROM t1")
-                    .add("SELECT * FROM t2");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT * FROM t1\", \"SELECT * FROM t2\"]}"));
 
             Assertions.assertEquals("chart-1", callbacks.lastUpdateDataId);
             Assertions.assertEquals(
@@ -300,9 +287,7 @@ class ChartAIToolsTest {
         @Test
         void execute_withSingleChart_defaultsToThatChart() {
             callbacks.chartIds = Set.of("my-chart");
-            var argsNode = JacksonUtils.createObjectNode();
-            argsNode.putArray("queries").add("SELECT 1");
-            tool.execute(argsNode);
+            tool.execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
             Assertions.assertEquals("my-chart", callbacks.lastUpdateDataId);
             Assertions.assertEquals(List.of("SELECT 1"),
@@ -312,9 +297,7 @@ class ChartAIToolsTest {
         @Test
         void execute_withMultipleCharts_noChartId_returnsError() {
             callbacks.chartIds = Set.of("chart-1", "chart-2");
-            var argsNode = JacksonUtils.createObjectNode();
-            argsNode.putArray("queries").add("SELECT 1");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json("{\"queries\": [\"SELECT 1\"]}"));
             Assertions.assertTrue(result.contains("Error"));
         }
 
@@ -322,27 +305,21 @@ class ChartAIToolsTest {
         void execute_whenCallbackThrows_returnsError() {
             callbacks.updateDataException = new RuntimeException(
                     "Invalid query");
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putArray("queries").add("SELECT invalid");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT invalid\"]}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("Invalid query"));
         }
 
         @Test
         void execute_withEmptyQueries_updatesData() {
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putArray("queries");
-            tool.execute(argsNode);
+            tool.execute(json("{\"chartId\": \"chart-1\", \"queries\": []}"));
             Assertions.assertEquals(List.of(), callbacks.lastUpdateDataQueries);
         }
 
         @Test
         void execute_withMissingQueries_returnsError() {
-            var result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartId", "chart-1"));
+            var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(
                     result.contains("'queries' parameter is required"));
@@ -350,19 +327,16 @@ class ChartAIToolsTest {
 
         @Test
         void execute_withNonArrayQueries_returnsError() {
-            var argsNode = JacksonUtils.createObjectNode()
-                    .put("chartId", "chart-1").put("queries", "SELECT 1");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"queries\": \"SELECT 1\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("must be an array"));
         }
 
         @Test
         void execute_withNullQueryElement_returnsError() {
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putArray("queries").addNull();
-            var result = tool.execute(argsNode);
+            var result = tool.execute(
+                    json("{\"chartId\": \"chart-1\", \"queries\": [null]}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(
                     result.contains("must not contain null elements"));
@@ -370,10 +344,8 @@ class ChartAIToolsTest {
 
         @Test
         void execute_withEmptyQueryString_returnsError() {
-            var argsNode = JacksonUtils.createObjectNode().put("chartId",
-                    "chart-1");
-            argsNode.putArray("queries").add("");
-            var result = tool.execute(argsNode);
+            var result = tool.execute(
+                    json("{\"chartId\": \"chart-1\", \"queries\": [\"\"]}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(
                     result.contains("must not contain empty strings"));
@@ -398,8 +370,8 @@ class ChartAIToolsTest {
 
         @Test
         void unknownType_returnsError() {
-            String result = tool.execute(JacksonUtils.createObjectNode()
-                    .put("chartType", "nonexistent"));
+            String result = tool
+                    .execute(json("{\"chartType\":\"nonexistent\"}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("unknown chart type"));
             Assertions.assertTrue(result.contains("Supported types:"),
@@ -410,15 +382,14 @@ class ChartAIToolsTest {
 
         @Test
         void missingParameter_returnsError() {
-            String result = tool.execute(JacksonUtils.createObjectNode());
+            String result = tool.execute(json("{}"));
             Assertions.assertTrue(result.contains("Error"));
             Assertions.assertTrue(result.contains("chartType"));
         }
 
         @Test
         void caseInsensitive() {
-            String result = tool.execute(
-                    JacksonUtils.createObjectNode().put("chartType", "COLUMN"));
+            String result = tool.execute(json("{\"chartType\":\"COLUMN\"}"));
             Assertions.assertFalse(result.contains("Error"), result);
             Assertions.assertTrue(result.contains("\"properties\""));
         }

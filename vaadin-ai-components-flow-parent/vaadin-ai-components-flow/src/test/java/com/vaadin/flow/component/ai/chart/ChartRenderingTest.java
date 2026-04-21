@@ -72,18 +72,21 @@ class ChartRenderingTest {
     }
 
     private void updateConfiguration(String configJson) {
-        var argsNode = JacksonUtils.createObjectNode();
-        argsNode.set("configuration", JacksonUtils.readTree(configJson));
-        findTool("update_chart_configuration").execute(argsNode);
+        findTool("update_chart_configuration").execute(JacksonUtils
+                .readTree("{\"configuration\":" + configJson + "}"));
     }
 
     private void updateData(String... queries) {
-        var argsNode = JacksonUtils.createObjectNode();
-        var array = argsNode.putArray("queries");
-        for (var query : queries) {
-            array.add(query);
+        var sb = new StringBuilder("{\"queries\":[");
+        for (int i = 0; i < queries.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("\"").append(queries[i]).append("\"");
         }
-        findTool("update_chart_data_source").execute(argsNode);
+        sb.append("]}");
+        findTool("update_chart_data_source")
+                .execute(JacksonUtils.readTree(sb.toString()));
     }
 
     @Nested
