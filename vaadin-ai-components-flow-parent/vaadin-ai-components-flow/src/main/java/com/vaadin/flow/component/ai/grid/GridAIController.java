@@ -32,19 +32,22 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.JsonNode;
+
 /**
  * AI controller for populating a {@link Grid Grid&lt;AIDataRow&gt;} with
  * database data via LLM tool calls. Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
- * tools to the LLM. The recommended system prompt is available from
- * {@link #getSystemPrompt()}.
+ * tools to the LLM. Workflow instructions are delivered through the description
+ * of the {@code get_grid_instructions} tool, which the LLM reads as part of the
+ * tool manifest.
  *
  * <pre>
  * var grid = new Grid&lt;AIDataRow&gt;();
  * var controller = new GridAIController(grid, databaseProvider);
  * AIOrchestrator orchestrator = AIOrchestrator
- *         .builder(llmProvider, GridAIController.getSystemPrompt())
- *         .withController(controller).withMessageList(messageList).build();
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .withMessageList(messageList).build();
  * </pre>
  * <p>
  * The grid uses {@link AIDataRow} as its item type. Row instances are created
@@ -103,6 +106,27 @@ public class GridAIController implements AIController {
 
     private static final String GRID_ID = "grid";
 
+    private static final String INSTRUCTIONS_TOOL_NAME = "get_grid_instructions";
+
+    private static final String INSTRUCTIONS_TEXT = """
+            Grid data display workflow. Follow this for every grid request:
+
+            TOOLS:
+            1. get_database_schema() - Retrieves database schema (tables, columns, types)
+            2. get_grid_state() - Returns current grid state (query)
+            3. update_grid_data(query) - Updates grid data with SQL SELECT query
+
+            WORKFLOW:
+            Complete the user's request in a SINGLE response by calling all needed tools.
+            1. Call get_grid_state() to see what's already configured
+            2. Call get_database_schema() to learn the exact table and column names
+            3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+
+            IMPORTANT:
+            - Call get_grid_state() and update_grid_data() in the SAME response
+            - Do NOT stop after get_grid_state()
+            """;
+
     private final Grid<AIDataRow> grid;
     private final DatabaseProvider databaseProvider;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
@@ -123,37 +147,10 @@ public class GridAIController implements AIController {
                 "DatabaseProvider must not be null");
     }
 
-    /**
-     * Returns the recommended system prompt for grid data display capabilities.
-     * Pass this to {@link AIOrchestrator#builder(LLMProvider, String)} so the
-     * LLM follows the intended tool-calling workflow.
-     *
-     * @return the system prompt text
-     */
-    public static String getSystemPrompt() {
-        return """
-                You have access to grid data display capabilities:
-
-                TOOLS:
-                1. get_database_schema() - Retrieves database schema (tables, columns, types)
-                2. get_grid_state() - Returns current grid state (query)
-                3. update_grid_data(query) - Updates grid data with SQL SELECT query
-
-                WORKFLOW:
-                Complete the user's request in a SINGLE response by calling all needed tools.
-                1. Call get_grid_state() to see what's already configured
-                2. Call get_database_schema() to learn the exact table and column names
-                3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
-
-                IMPORTANT:
-                - Call get_grid_state() and update_grid_data() in the SAME response
-                - Do NOT stop after get_grid_state()
-                """;
-    }
-
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LLMProvider.ToolSpec>();
+        tools.add(createInstructionsTool());
         tools.addAll(DatabaseProviderAITools.createAll(databaseProvider));
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
@@ -176,6 +173,36 @@ public class GridAIController implements AIController {
             }
         }));
         return tools;
+    }
+
+    private LLMProvider.ToolSpec createInstructionsTool() {
+        return new LLMProvider.ToolSpec() {
+            @Override
+            public String getName() {
+                return INSTRUCTIONS_TOOL_NAME;
+            }
+
+            @Override
+            public String getDescription() {
+                return """
+                        Read this before using any grid or database tool.
+                        Calling this tool returns these same instructions —
+                        normally unnecessary since you are already reading them here.
+
+                        """
+                        + INSTRUCTIONS_TEXT;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return null;
+            }
+
+            @Override
+            public String execute(JsonNode arguments) {
+                return INSTRUCTIONS_TEXT;
+            }
+        };
     }
 
     @Override

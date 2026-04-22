@@ -82,18 +82,25 @@ class GridAIControllerTest {
     // --- Tools ---
 
     @Test
-    void getTools_returnsThreeTools() {
+    void getTools_returnsFourTools() {
         var tools = controller.getTools();
-        Assertions.assertEquals(3, tools.size());
+        Assertions.assertEquals(4, tools.size());
     }
 
     @Test
     void getTools_containsSchemaStatAndUpdateTools() {
         var tools = controller.getTools();
         var names = tools.stream().map(LLMProvider.ToolSpec::getName).toList();
+        Assertions.assertTrue(names.contains("get_grid_instructions"));
         Assertions.assertTrue(names.contains("get_database_schema"));
         Assertions.assertTrue(names.contains("get_grid_state"));
         Assertions.assertTrue(names.contains("update_grid_data"));
+    }
+
+    @Test
+    void getTools_instructionsToolIsFirst() {
+        Assertions.assertEquals("get_grid_instructions",
+                controller.getTools().get(0).getName());
     }
 
     @Test
@@ -471,21 +478,23 @@ class GridAIControllerTest {
         Assertions.assertNull(grid.getEmptyStateText());
     }
 
-    // --- System prompt ---
+    // --- Instructions tool ---
 
     @Test
-    void getSystemPrompt_notNullOrEmpty() {
-        var prompt = GridAIController.getSystemPrompt();
-        Assertions.assertNotNull(prompt);
-        Assertions.assertFalse(prompt.isBlank());
+    void instructionsTool_descriptionContainsWorkflow() {
+        var tool = findTool("get_grid_instructions");
+        Assertions.assertTrue(tool.getDescription().contains("get_grid_state"));
+        Assertions.assertTrue(
+                tool.getDescription().contains("get_database_schema"));
+        Assertions
+                .assertTrue(tool.getDescription().contains("update_grid_data"));
     }
 
     @Test
-    void getSystemPrompt_containsToolNames() {
-        var prompt = GridAIController.getSystemPrompt();
-        Assertions.assertTrue(prompt.contains("get_database_schema"));
-        Assertions.assertTrue(prompt.contains("get_grid_state"));
-        Assertions.assertTrue(prompt.contains("update_grid_data"));
+    void instructionsTool_executeReturnsWorkflow() {
+        var result = findTool("get_grid_instructions").execute(null);
+        Assertions.assertFalse(result.isBlank());
+        Assertions.assertTrue(result.contains("get_grid_state"));
     }
 
     // --- stripGroupPrefix ---
