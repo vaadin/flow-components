@@ -202,19 +202,18 @@ public interface LLMProvider {
          * </pre>
          * <p>
          * Hand-writing the JSON is fine for small schemas but becomes
-         * error-prone as they grow. For larger schemas, a schema builder from
-         * your provider's SDK catches keyword typos and structural mistakes at
-         * compile time:
-         * </p>
-         * <p>
-         * <b>1. Spring AI's {@code JsonSchemaGenerator}</b> (no extra
-         * dependency when using {@link SpringAILLMProvider}):
+         * error-prone as they grow. For larger schemas, a schema generator
+         * catches keyword typos and structural mistakes at compile time. When
+         * using {@link SpringAILLMProvider}, Spring AI's
+         * {@code JsonSchemaGenerator} is available without an extra dependency:
          * </p>
          *
          * <pre>
+         * import com.fasterxml.jackson.annotation.JsonPropertyDescription;
          * import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
          *
-         * record UpdateGridArgs(String query) {}
+         * record UpdateGridArgs(
+         *         &#064;JsonPropertyDescription("The SQL query") String query) {}
          *
          * private static final String SCHEMA = JsonSchemaGenerator
          *         .generateForType(UpdateGridArgs.class);
@@ -224,19 +223,9 @@ public interface LLMProvider {
          *         UpdateGridArgs.class);
          * </pre>
          * <p>
-         * <b>2. LangChain4J's {@code JsonObjectSchema} builder</b> (no extra
-         * dependency when using {@link LangChain4JLLMProvider}): a fluent
-         * builder whose result needs to be serialized to a {@code String}:
+         * For other setups, any general-purpose JSON Schema generator that
+         * produces a schema string from a typed Java class works equivalently.
          * </p>
-         *
-         * <pre>
-         * import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-         *
-         * var schema = JsonObjectSchema.builder()
-         *         .addStringProperty("query", "The SQL query")
-         *         .required("query").build();
-         * return new ObjectMapper().writeValueAsString(schema);
-         * </pre>
          * <p>
          * Whichever approach you pick, verify the output stays inside the
          * portable JSON Schema subset (string, integer, number, boolean, array,
