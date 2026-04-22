@@ -17,7 +17,6 @@ package com.vaadin.flow.component.ai.grid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,19 +35,25 @@ import com.vaadin.flow.shared.Registration;
 import tools.jackson.databind.JsonNode;
 
 /**
- * AI controller for populating a {@link Grid} with database data via LLM tool
- * calls. Attach it to an {@link AIOrchestrator} via
+ * AI controller for populating a {@link Grid Grid&lt;AIDataRow&gt;} with
+ * database data via LLM tool calls. Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
  * tools to the LLM. Workflow instructions are delivered through the description
  * of the {@code get_grid_instructions} tool, which the LLM reads as part of the
  * tool manifest.
  *
  * <pre>
+ * var grid = new Grid&lt;AIDataRow&gt;();
  * var controller = new GridAIController(grid, databaseProvider);
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
  * </pre>
+ * <p>
+ * The grid uses {@link AIDataRow} as its item type. Row instances are created
+ * internally when query results are rendered and are not intended to be
+ * constructed or inspected by application code.
+ * </p>
  * <p>
  * The grid automatically creates columns from query results with:
  * </p>
@@ -88,6 +93,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
+ * @see AIDataRow
  * @see GridAITools
  * @see GridRenderer
  * @see GridState
@@ -121,7 +127,7 @@ public class GridAIController implements AIController {
             - Do NOT stop after get_grid_state()
             """;
 
-    private final Grid<Map<String, Object>> grid;
+    private final Grid<AIDataRow> grid;
     private final DatabaseProvider databaseProvider;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
@@ -134,7 +140,7 @@ public class GridAIController implements AIController {
      *            the database provider for schema and query execution, not
      *            {@code null}
      */
-    public GridAIController(Grid<Map<String, Object>> grid,
+    public GridAIController(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider) {
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
