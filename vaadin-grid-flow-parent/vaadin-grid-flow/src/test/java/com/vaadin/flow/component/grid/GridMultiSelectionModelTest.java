@@ -311,7 +311,7 @@ class GridMultiSelectionModelTest {
     }
 
     @Test
-    void clientSelectAllOrder() {
+    void clientSelectAll_preservesDataProviderOrder() {
         var model = (AbstractGridMultiSelectionModel<Person>) selectionModel;
         model.clientSelectAll();
 
@@ -323,7 +323,7 @@ class GridMultiSelectionModelTest {
     }
 
     @Test
-    void selectAllOrder() {
+    void selectAll_preservesDataProviderOrder() {
         selectionModel.selectAll();
 
         var value = selectionModel.getSelectedItems().stream().toList();
