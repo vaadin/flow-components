@@ -34,6 +34,8 @@ import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.JsonNode;
+
 /**
  * AI controller for creating interactive chart visualizations from database
  * data.
@@ -225,7 +227,7 @@ public class ChartAIController implements AIController {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return INSTRUCTIONS_TEXT;
             }
         };

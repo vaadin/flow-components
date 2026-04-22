@@ -33,6 +33,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.JsonNode;
+
 /**
  * AI controller for populating a {@link Grid} with database data via LLM tool
  * calls. Attach it to an {@link AIOrchestrator} via
@@ -191,7 +193,7 @@ public class GridAIController implements AIController {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return INSTRUCTIONS_TEXT;
             }
         };
