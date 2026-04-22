@@ -84,6 +84,16 @@ import com.vaadin.flow.shared.Registration;
  * to be notified when the chart state changes, for example to persist
  * {@link #getState()} after each successful AI request.
  * </p>
+ * <p>
+ * <b>Provider compatibility:</b> The chart tools use {@code anyOf} unions and
+ * optional properties in their parameter schemas, and are therefore
+ * incompatible with OpenAI's strict tool-calling mode (used when the OpenAI
+ * tool definition is sent with {@code "strict": true}). Strict tool calling is
+ * off by default in both LangChain4J and Spring AI, so no action is required
+ * for typical setups; just avoid opting in (e.g. do not pass
+ * {@code strictTools(true)} to LangChain4J's {@code OpenAiStreamingChatModel}
+ * builder).
+ * </p>
  *
  * @author Vaadin Ltd
  * @see ChartAITools
