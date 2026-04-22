@@ -200,6 +200,39 @@ public interface LLMProvider {
          *   "required": ["query"]
          * }
          * </pre>
+         * <p>
+         * Hand-writing the JSON is fine for small schemas but becomes
+         * error-prone as they grow. For larger schemas, a schema generator
+         * catches keyword typos and structural mistakes at compile time. When
+         * using {@link SpringAILLMProvider}, Spring AI's
+         * {@code JsonSchemaGenerator} is available without an extra dependency:
+         * </p>
+         *
+         * <pre>
+         * import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+         * import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
+         *
+         * record UpdateGridArgs(
+         *         &#064;JsonPropertyDescription("The SQL query") String query) {}
+         *
+         * private static final String SCHEMA = JsonSchemaGenerator
+         *         .generateForType(UpdateGridArgs.class);
+         *
+         * // in execute(JsonNode arguments):
+         * UpdateGridArgs args = new ObjectMapper().treeToValue(arguments,
+         *         UpdateGridArgs.class);
+         * </pre>
+         * <p>
+         * For other setups, any general-purpose JSON Schema generator that
+         * produces a schema string from a typed Java class works equivalently.
+         * </p>
+         * <p>
+         * Whichever approach you pick, verify the output stays inside the
+         * portable JSON Schema subset (string, integer, number, boolean, array,
+         * object, plus {@code anyOf} and {@code enum}). Generators may emit
+         * keywords such as {@code format}, {@code pattern}, or {@code $ref}
+         * that not every LLM provider accepts.
+         * </p>
          *
          * @return the JSON Schema string, or {@code null} if the tool takes no
          *         parameters
