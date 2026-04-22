@@ -233,7 +233,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 (Set<T>) getGrid().getDataCommunicator().getDataProvider()
                         .fetch(getGrid().getDataCommunicator().buildQuery(0,
                                 Integer.MAX_VALUE))
-                        .collect(Collectors.toSet()),
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
