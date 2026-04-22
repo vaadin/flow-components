@@ -196,11 +196,15 @@ public class AIOrchestrator implements Serializable {
 
     /**
      * Creates a new builder for AIOrchestrator with a system prompt.
+     * <p>
+     * A system prompt is strongly recommended — without one, the LLM has no
+     * guidance beyond tool descriptions and may behave inconsistently.
+     * </p>
      *
      * @param provider
      *            the LLM provider
      * @param systemPrompt
-     *            the system prompt for the LLM
+     *            the system prompt for the LLM, or {@code null} to omit
      * @return a new builder
      */
     public static Builder builder(LLMProvider provider, String systemPrompt) {
@@ -999,7 +1003,6 @@ public class AIOrchestrator implements Serializable {
          */
         public AIOrchestrator build() {
             forEachClaimable(AIOrchestrator::claim);
-
             var orchestrator = new AIOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
             orchestrator.input = input;
