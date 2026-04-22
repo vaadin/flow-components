@@ -2062,6 +2062,31 @@ class AIOrchestratorTest {
                 .addSubmitListener(Mockito.any());
     }
 
+    @Test
+    void builder_withNullSystemPrompt_logsWarning() {
+        AIOrchestrator.builder(mockProvider, null).build();
+        assertSystemPromptWarning(true);
+    }
+
+    @Test
+    void builder_withBlankSystemPrompt_logsWarning() {
+        AIOrchestrator.builder(mockProvider, "   ").build();
+        assertSystemPromptWarning(true);
+    }
+
+    @Test
+    void builder_withEmptySystemPrompt_logsWarning() {
+        AIOrchestrator.builder(mockProvider, "").build();
+        assertSystemPromptWarning(true);
+    }
+
+    @Test
+    void builder_withNonBlankSystemPrompt_doesNotLogWarning() {
+        AIOrchestrator.builder(mockProvider, "You are a helpful assistant")
+                .build();
+        assertSystemPromptWarning(false);
+    }
+
     private static byte[] createTestImage(int width, int height)
             throws IOException {
         var image = new BufferedImage(width, height,
@@ -2088,6 +2113,13 @@ class AIOrchestratorTest {
                 .findFirst();
         Assertions.assertTrue(warning.isPresent(),
                 "Expected warning for " + fieldName);
+    }
+
+    private void assertSystemPromptWarning(boolean warningExpected) {
+        var warning = logger.getLoggingEvents().stream().filter(
+                e -> e.getMessage().contains("No system prompt was provided"))
+                .findAny();
+        Assertions.assertEquals(warningExpected, warning.isPresent());
     }
 
     private void assertNoBuilderWarning() {
