@@ -690,6 +690,12 @@ public class AIOrchestrator implements Serializable {
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
+            if (systemPrompt == null || systemPrompt.isBlank()) {
+                LOGGER.warn("No system prompt was provided to the "
+                        + "AIOrchestrator. Pass a system prompt to "
+                        + "AIOrchestrator.builder(provider, systemPrompt) "
+                        + "to guide the LLM's behaviour.");
+            }
             this.provider = provider;
             this.systemPrompt = systemPrompt;
         }
