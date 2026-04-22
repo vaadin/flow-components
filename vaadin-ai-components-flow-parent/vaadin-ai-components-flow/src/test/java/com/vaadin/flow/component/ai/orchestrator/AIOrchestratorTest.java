@@ -20,12 +20,15 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -1976,84 +1979,55 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withProviderAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedProvider = Mockito.mock(LLMProvider.class);
-        AIOrchestrator.builder(sharedProvider, null).build();
+    void builder_claimsAllResources_toPreventSharing() throws Exception {
+        // Builder with-methods that do NOT configure a shareable resource —
+        // value types, listeners, tools, and restored conversation state. Any
+        // other with-method is treated as configuring a resource that build()
+        // must claim. If you add a new resource with-method (component,
+        // controller, ...), do not add it here — ensure build() claims it.
+        Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
+                "withAssistantName", "withAttachmentSubmitListener",
+                "withAttachmentClickListener", "withResponseCompleteListener",
+                "withHistory");
 
+        // Provider is set via the factory method, not a with-method.
+        assertClaimed(null, LLMProvider.class);
+
+        for (Method method : AIOrchestrator.Builder.class
+                .getDeclaredMethods()) {
+            if (!Modifier.isPublic(method.getModifiers())
+                    || !method.getName().startsWith("with")
+                    || nonResourceSetters.contains(method.getName())) {
+                continue;
+            }
+            Assertions.assertEquals(1, method.getParameterCount(),
+                    "Resource with-method must take a single argument: "
+                            + method.getName());
+            assertClaimed(method, method.getParameterTypes()[0]);
+        }
+    }
+
+    private static void assertClaimed(Method setter, Class<?> resourceType)
+            throws Exception {
+        var shared = Mockito.mock(resourceType);
+        buildWith(setter, shared);
         Assertions.assertThrows(IllegalStateException.class,
-                () -> AIOrchestrator.builder(sharedProvider, null).build());
+                () -> buildWith(setter, shared),
+                "Builder must claim the " + resourceType.getSimpleName()
+                        + " passed to "
+                        + (setter == null ? "builder()" : setter.getName())
+                        + " to prevent sharing between orchestrators");
     }
 
-    @Test
-    void builder_withMessageListAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedMessageList = Mockito.mock(AIMessageList.class);
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withMessageList(sharedMessageList).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withMessageList(sharedMessageList);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
-    }
-
-    @Test
-    void builder_withFlowMessageListAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedFlowMessageList = Mockito.mock(MessageList.class);
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withMessageList(sharedFlowMessageList).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withMessageList(sharedFlowMessageList);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
-    }
-
-    @Test
-    void builder_withInputAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedInput = Mockito.mock(AIInput.class);
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withInput(sharedInput).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withInput(sharedInput);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
-    }
-
-    @Test
-    void builder_withFlowMessageInputAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedFlowInput = Mockito.mock(MessageInput.class);
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withInput(sharedFlowInput).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withInput(sharedFlowInput);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
-    }
-
-    @Test
-    void builder_withFileReceiverAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedFileReceiver = Mockito.mock(AIFileReceiver.class);
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withFileReceiver(sharedFileReceiver).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withFileReceiver(sharedFileReceiver);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
-    }
-
-    @Test
-    void builder_withControllerAlreadyUsedByAnotherOrchestrator_throws() {
-        var sharedController = createController();
-        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
-                .withController(sharedController).build();
-
-        var builder = AIOrchestrator
-                .builder(Mockito.mock(LLMProvider.class), null)
-                .withController(sharedController);
-        Assertions.assertThrows(IllegalStateException.class, builder::build);
+    private static AIOrchestrator buildWith(Method setter, Object shared)
+            throws Exception {
+        if (setter == null) {
+            return AIOrchestrator.builder((LLMProvider) shared, null).build();
+        }
+        var builder = AIOrchestrator.builder(Mockito.mock(LLMProvider.class),
+                null);
+        setter.invoke(builder, shared);
+        return builder.build();
     }
 
     @Test
