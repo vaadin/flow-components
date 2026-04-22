@@ -39,6 +39,7 @@ import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
 /**
@@ -71,12 +72,12 @@ class ChartRenderingTest {
     }
 
     private void updateConfiguration(String configJson) {
-        findTool("update_chart_configuration")
-                .execute("{\"configuration\":" + configJson + "}");
+        findTool("update_chart_configuration").execute(JacksonUtils
+                .readTree("{\"configuration\":" + configJson + "}"));
     }
 
     private void updateData(String... queries) {
-        StringBuilder sb = new StringBuilder("{\"queries\":[");
+        var sb = new StringBuilder("{\"queries\":[");
         for (int i = 0; i < queries.length; i++) {
             if (i > 0) {
                 sb.append(",");
@@ -84,7 +85,8 @@ class ChartRenderingTest {
             sb.append("\"").append(queries[i]).append("\"");
         }
         sb.append("]}");
-        findTool("update_chart_data_source").execute(sb.toString());
+        findTool("update_chart_data_source")
+                .execute(JacksonUtils.readTree(sb.toString()));
     }
 
     @Nested

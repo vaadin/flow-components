@@ -59,6 +59,7 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -659,16 +660,16 @@ class ChartAIToolsSchemaTest {
                     "sankey", "scatter", "solidgauge", "spline", "timeline",
                     "treemap", "waterfall", "xrange" };
             for (String type : expectedTypes) {
-                String result = schemaTool
-                        .execute("{\"chartType\":\"" + type + "\"}");
+                String result = schemaTool.execute(
+                        JacksonUtils.createObjectNode().put("chartType", type));
                 Assertions.assertFalse(result.startsWith("Error"),
                         "Missing schema for type '" + type + "': " + result);
             }
         }
 
         private JsonNode getSchemaNode(String chartType) {
-            String json = schemaTool
-                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            String json = schemaTool.execute(JacksonUtils.createObjectNode()
+                    .put("chartType", chartType));
             Assertions.assertFalse(json.startsWith("Error"),
                     "Schema lookup failed: " + json);
             return MAPPER.readTree(json);
@@ -676,8 +677,8 @@ class ChartAIToolsSchemaTest {
 
         private void assertPlotOptionsMatchSchema(String chartType,
                 AbstractPlotOptions plotOptions) {
-            String schemaJson = schemaTool
-                    .execute("{\"chartType\":\"" + chartType + "\"}");
+            String schemaJson = schemaTool.execute(JacksonUtils
+                    .createObjectNode().put("chartType", chartType));
             Assertions.assertFalse(schemaJson.startsWith("Error"),
                     "Schema lookup failed: " + schemaJson);
             var schema = SchemaRegistry

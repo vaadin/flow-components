@@ -41,9 +41,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Spring AI implementation of {@link LLMProvider}.
@@ -285,12 +287,19 @@ public class SpringAILLMProvider implements LLMProvider {
             @Override
             public String call(String arguments) {
                 try {
-                    return tool.execute(arguments);
+                    return tool.execute(parseArguments(arguments));
                 } catch (Exception e) {
                     return "Error executing tool: " + e.getMessage();
                 }
             }
         };
+    }
+
+    private static JsonNode parseArguments(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            return JacksonUtils.createObjectNode();
+        }
+        return JacksonUtils.readTree(arguments);
     }
 
     private static void checkPushConfiguration() {

@@ -43,7 +43,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.JsonNode;
 
 class GridAIControllerTest {
 
@@ -106,7 +109,7 @@ class GridAIControllerTest {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("get_database_schema"))
                 .findFirst().orElseThrow();
-        Assertions.assertEquals("test schema", tool.execute("{}"));
+        Assertions.assertEquals("test schema", tool.execute(json("{}")));
     }
 
     @Test
@@ -114,7 +117,7 @@ class GridAIControllerTest {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("get_grid_state")).findFirst()
                 .orElseThrow();
-        var result = tool.execute("{}");
+        var result = tool.execute(json("{}"));
         Assertions.assertTrue(result.contains("empty"));
     }
 
@@ -124,7 +127,7 @@ class GridAIControllerTest {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
                 .orElseThrow();
-        var result = tool.execute("{\"query\": \"SELECT 1\"}");
+        var result = tool.execute(json("{\"query\": \"SELECT 1\"}"));
         Assertions.assertTrue(result.contains("queued successfully"));
     }
 
@@ -134,7 +137,7 @@ class GridAIControllerTest {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
                 .orElseThrow();
-        var result = tool.execute("{\"query\": \"INVALID\"}");
+        var result = tool.execute(json("{\"query\": \"INVALID\"}"));
         Assertions.assertTrue(result.contains("Error"));
     }
 
@@ -143,7 +146,7 @@ class GridAIControllerTest {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
                 .orElseThrow();
-        var result = tool.execute("{}");
+        var result = tool.execute(json("{}"));
         Assertions.assertTrue(result.contains("Error"));
     }
 
@@ -177,7 +180,7 @@ class GridAIControllerTest {
     void getState_afterFailedRender_returnsNull() {
         dbProvider.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
-                .execute("{\"query\": \"SELECT a FROM t\"}");
+                .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
         controller.onRequestCompleted();
@@ -193,7 +196,7 @@ class GridAIControllerTest {
         simulateUpdate("SELECT a FROM t");
 
         var stateTool = findTool("get_grid_state");
-        var result = stateTool.execute("{}");
+        var result = stateTool.execute(json("{}"));
         Assertions.assertTrue(result.contains("SELECT a FROM t"));
     }
 
@@ -217,7 +220,7 @@ class GridAIControllerTest {
         // State should still reflect the first update
         var stateTool = findTool("get_grid_state");
         Assertions.assertTrue(
-                stateTool.execute("{}").contains("SELECT a FROM t"));
+                stateTool.execute(json("{}")).contains("SELECT a FROM t"));
     }
 
     // --- GridState serialization ---
@@ -316,7 +319,7 @@ class GridAIControllerTest {
         // LLM tries a bad query
         dbProvider.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
-                .execute("{\"query\": \"SELECT a FROM bad\"}");
+                .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
         dbProvider.throwOnExecute = true;
         controller.onRequestCompleted();
 
@@ -330,7 +333,7 @@ class GridAIControllerTest {
         dbProvider.queryResults = List.of(row("a", 1));
         controller.restoreState(new GridState("SELECT a FROM t"));
 
-        var result = findTool("get_grid_state").execute("{}");
+        var result = findTool("get_grid_state").execute(json("{}"));
         Assertions.assertTrue(result.contains("SELECT a FROM t"));
     }
 
@@ -355,7 +358,7 @@ class GridAIControllerTest {
 
         dbProvider.queryResults = List.of(row("a", 1));
         findTool("update_grid_data")
-                .execute("{\"query\": \"SELECT a FROM t\"}");
+                .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
         controller.onRequestCompleted();
@@ -916,12 +919,16 @@ class GridAIControllerTest {
                 .orElseThrow();
     }
 
+    private static JsonNode json(String json) {
+        return JacksonUtils.readTree(json);
+    }
+
     /**
      * Simulates a full LLM update cycle: tool call + onRequestCompleted.
      */
     private void simulateUpdate(String query) {
-        findTool("update_grid_data").execute(
-                "{\"query\": \"" + query.replace("\"", "\\\"") + "\"}");
+        findTool("update_grid_data")
+                .execute(json("{\"query\": \"" + query + "\"}"));
         controller.onRequestCompleted();
     }
 

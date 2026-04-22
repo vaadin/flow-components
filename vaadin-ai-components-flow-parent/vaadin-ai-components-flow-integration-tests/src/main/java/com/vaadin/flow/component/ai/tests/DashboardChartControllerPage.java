@@ -32,6 +32,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 
@@ -121,7 +122,7 @@ public class DashboardChartControllerPage extends Div {
         private static void executeTool(List<ToolSpec> tools, String name,
                 String args) {
             tools.stream().filter(t -> t.getName().equals(name)).findFirst()
-                    .orElseThrow().execute(args);
+                    .orElseThrow().execute(JacksonUtils.readTree(args));
         }
     }
 

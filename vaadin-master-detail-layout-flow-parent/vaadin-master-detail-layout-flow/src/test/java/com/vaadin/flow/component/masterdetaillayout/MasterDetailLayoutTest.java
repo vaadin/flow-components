@@ -319,6 +319,36 @@ class MasterDetailLayoutTest {
     }
 
     @Test
+    void setDetailSizeWithOverlaySize_getDetailSize_getOverlaySize() {
+        layout.setDetailSize("300px", "200px");
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertEquals("200px", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithUnitAndOverlaySize_getDetailSize_getOverlaySize() {
+        layout.setDetailSize(30, Unit.EM, 20, Unit.EM);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertEquals("20.0em", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithExpandAndOverlaySize_getDetailSize_isExpandDetail_getOverlaySize() {
+        layout.setDetailSize("300px", true, "200px");
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertEquals("200px", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithUnitExpandAndOverlaySize_getDetailSize_isExpandDetail_getOverlaySize() {
+        layout.setDetailSize(30, Unit.EM, true, 20, Unit.EM);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertEquals("20.0em", layout.getOverlaySize());
+    }
+
+    @Test
     void setOverlaySize_getOverlaySize() {
         String size = "500px";
         layout.setOverlaySize(size);
