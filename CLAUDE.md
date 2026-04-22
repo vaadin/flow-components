@@ -85,7 +85,7 @@ mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am 
 - Server needs to be restarted after code changes
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
 - When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
-- When stopping a server that was started as a background task in the current session, use the `TaskStop` tool with the task ID instead of killing the process directly.
+- To stop a running Jetty server, run `mvn jetty:stop -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests`. Do not use `TaskStop` on the background `jetty:run` task — that terminates the Maven wrapper but leaves the forked Jetty JVM running and holding port 8080.
 
 ### Code Quality
 
