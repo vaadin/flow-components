@@ -25,7 +25,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-slider/basic")
+@TestPath("vaadin-slider/decimal-slider-basic")
 public class DecimalSliderBasicIT extends AbstractComponentIT {
 
     private DecimalSliderElement slider;

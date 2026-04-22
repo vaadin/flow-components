@@ -21,7 +21,7 @@ import com.vaadin.flow.component.slider.IntegerRangeSlider;
 import com.vaadin.flow.component.slider.IntegerRangeSliderValue;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-integer-range-slider/basic")
+@Route("vaadin-slider/integer-range-slider-basic")
 public class IntegerRangeSliderBasicPage extends Div {
 
     public IntegerRangeSliderBasicPage() {

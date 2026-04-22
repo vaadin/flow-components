@@ -23,7 +23,7 @@ import com.vaadin.flow.component.slider.DecimalRangeSliderValue;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-range-slider/basic")
+@Route("vaadin-slider/decimal-range-slider-basic")
 public class DecimalRangeSliderBasicPage extends Div {
 
     public DecimalRangeSliderBasicPage() {

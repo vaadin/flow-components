@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.slider.IntegerSlider;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-integer-slider/basic")
+@Route("vaadin-slider/integer-slider-basic")
 public class IntegerSliderBasicPage extends Div {
 
     public IntegerSliderBasicPage() {

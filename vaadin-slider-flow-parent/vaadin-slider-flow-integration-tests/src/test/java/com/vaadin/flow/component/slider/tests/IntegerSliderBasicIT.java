@@ -24,10 +24,10 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-integer-slider/basic")
+@TestPath("vaadin-slider/integer-slider-basic")
 public class IntegerSliderBasicIT extends AbstractComponentIT {
     // Only covers basic functionality for setting and retrieving properties via
-    // the TestBench element. SliderIT has more comprehensive coverage.
+    // the TestBench element. DecimalSliderIT has more comprehensive coverage.
 
     private IntegerSliderElement slider;
     private TestBenchElement serverValue;
