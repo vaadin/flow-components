@@ -18,8 +18,8 @@ package com.vaadin.flow.component.slider;
 import java.util.Objects;
 
 /**
- * Represents the value of a {@link RangeSlider}, consisting of decimal start
- * and end values.
+ * Represents the value of a {@link DecimalRangeSlider}, consisting of decimal
+ * start and end values.
  *
  * @param start
  *            the start value of the range
@@ -28,11 +28,12 @@ import java.util.Objects;
  *
  * @author Vaadin Ltd
  */
-public record RangeSliderValue(Double start,
+public record DecimalRangeSliderValue(Double start,
         Double end) implements Range<Double> {
 
     /**
-     * Creates a new RangeSliderValue with the given start and end values.
+     * Creates a new DecimalRangeSliderValue with the given start and end
+     * values.
      *
      * @param start
      *            the start value of the range
@@ -41,7 +42,7 @@ public record RangeSliderValue(Double start,
      * @throws IllegalArgumentException
      *             if start is greater than end
      */
-    public RangeSliderValue {
+    public DecimalRangeSliderValue {
         Objects.requireNonNull(start, "Start value cannot be null");
         Objects.requireNonNull(end, "End value cannot be null");
         if (start > end) {

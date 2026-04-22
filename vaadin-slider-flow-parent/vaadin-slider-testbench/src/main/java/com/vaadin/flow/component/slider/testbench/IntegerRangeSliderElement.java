@@ -19,6 +19,9 @@ import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element for testing an {@code IntegerRangeSlider} component.
+ * <p>
+ * See {@link DecimalRangeSliderElement} for testing {@code DecimalRangeSlider}
+ * components.
  */
 @Element("vaadin-range-slider")
 public class IntegerRangeSliderElement

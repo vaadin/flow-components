@@ -18,20 +18,20 @@ package com.vaadin.flow.component.slider.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.slider.RangeSlider;
-import com.vaadin.flow.component.slider.RangeSliderValue;
+import com.vaadin.flow.component.slider.DecimalRangeSlider;
+import com.vaadin.flow.component.slider.DecimalRangeSliderValue;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-range-slider/basic")
-public class RangeSliderBasicPage extends Div {
+public class DecimalRangeSliderBasicPage extends Div {
 
-    public RangeSliderBasicPage() {
-        RangeSlider rangeSlider = new RangeSlider();
+    public DecimalRangeSliderBasicPage() {
+        DecimalRangeSlider rangeSlider = new DecimalRangeSlider();
         rangeSlider.setMin(10.0);
         rangeSlider.setMax(200.0);
         rangeSlider.setStep(5.0);
-        rangeSlider.setValue(new RangeSliderValue(25.0, 150.0));
+        rangeSlider.setValue(new DecimalRangeSliderValue(25.0, 150.0));
         rangeSlider.setWidth("200px");
 
         Span serverValue = new Span();
