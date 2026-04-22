@@ -320,7 +320,7 @@ public final class ChartAITools {
                                     "{c:BORDER_WIDTH}": { "type": "number", "description": "Pixel width of the outer chart border" },
                                     "{c:BORDER_RADIUS}": { "type": "number", "description": "Corner radius of the outer chart border" },
                                     "{c:WIDTH}": { "type": "number", "description": "Chart width in pixels" },
-                                    "{c:HEIGHT}": { "oneOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
+                                    "{c:HEIGHT}": { "anyOf": [{ "type": "number", "description": "Height in pixels" }, { "type": "string", "description": "Height as string (e.g., '400px', '100%')" }] },
                                     "{c:MARGIN_TOP}": { "type": "number", "description": "Fixed pixel margin between the top outer edge of the chart and the plot area" },
                                     "{c:MARGIN_RIGHT}": { "type": "number", "description": "Fixed pixel margin between the right outer edge of the chart and the plot area" },
                                     "{c:MARGIN_BOTTOM}": { "type": "number", "description": "Fixed pixel margin between the bottom outer edge of the chart and the plot area" },
@@ -361,13 +361,13 @@ public final class ChartAITools {
                                   }
                                 },
                                 "{c:TITLE}": {
-                                  "oneOf": [
+                                  "anyOf": [
                                     { "type": "string", "description": "Title text" },
                                     { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The title text" } } }
                                   ]
                                 },
                                 "{c:SUBTITLE}": {
-                                  "oneOf": [
+                                  "anyOf": [
                                     { "type": "string", "description": "Subtitle text" },
                                     { "type": "object", "properties": { "{c:TEXT}": { "type": "string", "description": "The subtitle text" } } }
                                   ]
@@ -384,7 +384,7 @@ public final class ChartAITools {
                                   }
                                 },
                                 "{c:Y_AXIS}": {
-                                  "oneOf": [
+                                  "anyOf": [
                                     {
                                       "type": "object",
                                       "description": "Single Y-axis configuration",

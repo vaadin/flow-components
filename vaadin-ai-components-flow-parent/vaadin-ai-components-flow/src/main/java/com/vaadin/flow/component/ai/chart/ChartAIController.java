@@ -87,6 +87,15 @@ import tools.jackson.databind.JsonNode;
  * to be notified when the chart state changes, for example to persist
  * {@link #getState()} after each successful AI request.
  * </p>
+ * <p>
+ * <b>Provider compatibility:</b> The chart tools use optional properties in
+ * their parameter schemas, which are incompatible with OpenAI's strict
+ * tool-calling mode (strict mode requires every property listed under
+ * {@code properties} to also appear in {@code required}). Strict tool calling
+ * is off by default in both LangChain4J and Spring AI; only users who
+ * explicitly opt in (e.g. {@code strictTools(true)} on LangChain4J's
+ * {@code OpenAiStreamingChatModel} builder) are affected.
+ * </p>
  *
  * @author Vaadin Ltd
  * @see ChartAITools
