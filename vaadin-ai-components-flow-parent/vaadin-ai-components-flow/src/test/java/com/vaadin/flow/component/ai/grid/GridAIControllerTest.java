@@ -53,7 +53,7 @@ class GridAIControllerTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
-    private Grid<Map<String, Object>> grid;
+    private Grid<AIDataRow> grid;
     private StubDatabaseProvider dbProvider;
     private GridAIController controller;
 
@@ -886,6 +886,14 @@ class GridAIControllerTest {
         @Test
         void count_nonNumericResult_returnsZero() {
             dbProvider.queryResults = List.of(row("COUNT(*)", "not a number"));
+            var size = grid.getDataProvider().size(new Query<>());
+
+            Assertions.assertEquals(0, size);
+        }
+
+        @Test
+        void count_rowWithNoColumns_returnsZero() {
+            dbProvider.queryResults = List.of(new LinkedHashMap<>());
             var size = grid.getDataProvider().size(new Query<>());
 
             Assertions.assertEquals(0, size);

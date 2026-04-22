@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public final class GridRenderer implements Serializable {
      * @param query
      *            the SQL SELECT query, not {@code null}
      */
-    public static void renderGrid(Grid<Map<String, Object>> grid,
+    public static void renderGrid(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
         removeExtraHeaderRows(grid);
@@ -85,8 +84,9 @@ public final class GridRenderer implements Serializable {
             grid.setItems(List.of());
             return;
         }
-        var firstRow = sampleRows.getFirst();
-        var sortedColumns = new ArrayList<>(firstRow.entrySet());
+
+        var firstRow = new AIDataRow(sampleRows.getFirst());
+        var sortedColumns = new ArrayList<>(firstRow.entries());
         sortedColumns.sort((a, b) -> {
             var prefixA = GridFormatting.groupPrefix(a.getKey());
             var prefixB = GridFormatting.groupPrefix(b.getKey());
@@ -98,15 +98,15 @@ public final class GridRenderer implements Serializable {
         applyColumnGrouping(grid);
         var dataProvider = createDataProvider(databaseProvider, query);
         grid.setItems(dataProvider);
-        LOGGER.info("Grid configured with {} columns", firstRow.size());
+        LOGGER.info("Grid configured with {} columns", sortedColumns.size());
     }
 
-    private static void addColumn(Grid<Map<String, Object>> grid,
-            String columnName, Object sampleValue) {
+    private static void addColumn(Grid<AIDataRow> grid, String columnName,
+            Object sampleValue) {
         var header = GridFormatting
                 .formatHeader(GridFormatting.stripGroupPrefix(columnName));
 
-        Grid.Column<Map<String, Object>> column;
+        Grid.Column<AIDataRow> column;
 
         if (sampleValue instanceof LocalDate
                 || sampleValue instanceof java.sql.Date) {
@@ -132,8 +132,8 @@ public final class GridRenderer implements Serializable {
                 .setAutoWidth(true).setResizable(true);
     }
 
-    private static void applyColumnGrouping(Grid<Map<String, Object>> grid) {
-        var groups = new LinkedHashMap<String, List<Grid.Column<Map<String, Object>>>>();
+    private static void applyColumnGrouping(Grid<AIDataRow> grid) {
+        var groups = new LinkedHashMap<String, List<Grid.Column<AIDataRow>>>();
         for (var column : grid.getColumns()) {
             var key = column.getKey();
             var dotIndex = key.indexOf('.');
@@ -159,7 +159,7 @@ public final class GridRenderer implements Serializable {
         }
     }
 
-    private static void removeExtraHeaderRows(Grid<Map<String, Object>> grid) {
+    private static void removeExtraHeaderRows(Grid<AIDataRow> grid) {
         var headerRows = grid.getHeaderRows();
         while (headerRows.size() > 1) {
             grid.removeHeaderRow(headerRows.getFirst());
@@ -167,23 +167,27 @@ public final class GridRenderer implements Serializable {
         }
     }
 
-    private static DataProvider<Map<String, Object>, Void> createDataProvider(
+    private static DataProvider<AIDataRow, Void> createDataProvider(
             DatabaseProvider databaseProvider, String query) {
         var countQuery = wrapWithCount(query);
         return new CallbackDataProvider<>(fetchQuery -> {
             var sql = enrichQuery(query, fetchQuery.getOffset(),
                     fetchQuery.getLimit(), fetchQuery.getSortOrders());
             LOGGER.debug("Fetching rows: {}", sql);
-            return databaseProvider.executeQuery(sql).stream();
+            return databaseProvider.executeQuery(sql).stream()
+                    .map(AIDataRow::new);
         }, countFetchQuery -> {
             LOGGER.debug("Counting rows: {}", countQuery);
             var countResult = databaseProvider.executeQuery(countQuery);
-            if (!countResult.isEmpty()) {
-                var firstValue = countResult.getFirst().values().iterator()
-                        .next();
-                return firstValue instanceof Number n ? n.intValue() : 0;
+            if (countResult.isEmpty()) {
+                return 0;
             }
-            return 0;
+            var entries = new AIDataRow(countResult.getFirst()).entries();
+            if (entries.isEmpty()) {
+                return 0;
+            }
+            var firstValue = entries.iterator().next().getValue();
+            return firstValue instanceof Number n ? n.intValue() : 0;
         }, row -> row);
     }
 
