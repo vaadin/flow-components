@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Framework-agnostic interface for Large Language Model (LLM) providers. This
@@ -209,18 +210,15 @@ public interface LLMProvider {
          * Executes the tool with the given arguments.
          * <p>
          * Implementations should return a human-readable result string on
-         * success. On failure, implementations may throw any runtime exception;
-         * the provider will catch it and report the error message back to the
-         * LLM so it can recover gracefully.
+         * success. On failure, they may throw any runtime exception.
          * </p>
          *
          * @param arguments
-         *            the tool arguments as a JSON string matching the
-         *            parameters schema, or {@code null} if the tool takes no
-         *            parameters
+         *            the tool arguments as a {@link JsonNode} matching the
+         *            parameters schema
          * @return the result of the tool execution as a string, never
          *         {@code null}
          */
-        String execute(String arguments);
+        String execute(JsonNode arguments);
     }
 }

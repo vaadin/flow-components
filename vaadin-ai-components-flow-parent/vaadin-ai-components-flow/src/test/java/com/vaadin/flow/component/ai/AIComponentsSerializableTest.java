@@ -38,6 +38,7 @@ import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 class AIComponentsSerializableTest extends ClassesSerializableTest {
 
@@ -369,7 +370,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return "result";
             }
         };

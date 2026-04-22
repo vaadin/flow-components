@@ -50,6 +50,7 @@ import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.JsonNode;
 
 class SpringAILLMProviderTest {
     @RegisterExtension
@@ -847,12 +848,12 @@ class SpringAILLMProviderTest {
     @Test
     void stream_withExplicitTool_passesArgumentsToCallback() {
         provider.setStreaming(false);
-        var receivedArgs = new ArrayList<String>();
+        var receivedArgs = new ArrayList<JsonNode>();
         var explicitTool = createExplicitTool("myTool", "A test tool",
                 "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
                 args -> {
                     receivedArgs.add(args);
-                    return "result for " + args;
+                    return "result for " + args.get("city").asString();
                 });
 
         var request = new TestLLMRequestWithExplicitTools("Call tool", null,
@@ -866,14 +867,15 @@ class SpringAILLMProviderTest {
                 .getToolCallbacks();
         Assertions.assertEquals(1, toolCallbacks.size());
 
-        // Call the callback directly to verify arguments are forwarded
-        var toolArgs = "{\"city\":\"Helsinki\"}";
-        var result = toolCallbacks.getFirst().call(toolArgs);
+        // Call the callback directly to verify arguments are parsed and
+        // forwarded as a JsonNode
+        var result = toolCallbacks.getFirst().call("{\"city\":\"Helsinki\"}");
         Assertions.assertEquals(1, receivedArgs.size(),
                 "Tool executor should have been called once");
-        Assertions.assertEquals(toolArgs, receivedArgs.getFirst(),
-                "Tool executor should receive the arguments passed to the callback");
-        Assertions.assertEquals("result for " + toolArgs, result);
+        Assertions.assertEquals("Helsinki",
+                receivedArgs.getFirst().get("city").asString(),
+                "Tool executor should receive arguments as a JsonNode matching the callback input");
+        Assertions.assertEquals("result for Helsinki", result);
     }
 
     @Test
@@ -897,6 +899,31 @@ class SpringAILLMProviderTest {
         Assertions.assertNotNull(toolCallbacks);
         // 2 from SampleToolsClass + 1 explicit
         Assertions.assertEquals(3, toolCallbacks.size());
+    }
+
+    @Test
+    void stream_withExplicitTool_malformedJsonArguments_returnsError() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("Not json");
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertEquals(0, receivedArgs.size());
     }
 
     @Test
@@ -925,7 +952,7 @@ class SpringAILLMProviderTest {
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
-            java.util.function.Function<String, String> executor) {
+            java.util.function.Function<JsonNode, String> executor) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -943,7 +970,7 @@ class SpringAILLMProviderTest {
             }
 
             @Override
-            public String execute(String arguments) {
+            public String execute(JsonNode arguments) {
                 return executor.apply(arguments);
             }
         };
