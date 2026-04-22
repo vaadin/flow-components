@@ -200,6 +200,50 @@ public interface LLMProvider {
          *   "required": ["query"]
          * }
          * </pre>
+         * <p>
+         * Hand-writing the JSON is fine for small schemas but becomes
+         * error-prone as they grow. For larger schemas, a schema builder from
+         * your provider's SDK catches keyword typos and structural mistakes at
+         * compile time:
+         * </p>
+         * <p>
+         * <b>1. Spring AI's {@code JsonSchemaGenerator}</b> (no extra
+         * dependency when using {@link SpringAILLMProvider}):
+         * </p>
+         *
+         * <pre>
+         * import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
+         *
+         * record UpdateGridArgs(String query) {}
+         *
+         * private static final String SCHEMA = JsonSchemaGenerator
+         *         .generateForType(UpdateGridArgs.class);
+         *
+         * // in execute(JsonNode arguments):
+         * UpdateGridArgs args = new ObjectMapper().treeToValue(arguments,
+         *         UpdateGridArgs.class);
+         * </pre>
+         * <p>
+         * <b>2. LangChain4J's {@code JsonObjectSchema} builder</b> (no extra
+         * dependency when using {@link LangChain4JLLMProvider}): a fluent
+         * builder whose result needs to be serialized to a {@code String}:
+         * </p>
+         *
+         * <pre>
+         * import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+         *
+         * var schema = JsonObjectSchema.builder()
+         *         .addStringProperty("query", "The SQL query")
+         *         .required("query").build();
+         * return new ObjectMapper().writeValueAsString(schema);
+         * </pre>
+         * <p>
+         * Whichever approach you pick, verify the output stays inside the
+         * portable JSON Schema subset (string, integer, number, boolean, array,
+         * object, plus {@code anyOf} and {@code enum}). Generators may emit
+         * keywords such as {@code format}, {@code pattern}, or {@code $ref}
+         * that not every LLM provider accepts.
+         * </p>
          *
          * @return the JSON Schema string, or {@code null} if the tool takes no
          *         parameters
