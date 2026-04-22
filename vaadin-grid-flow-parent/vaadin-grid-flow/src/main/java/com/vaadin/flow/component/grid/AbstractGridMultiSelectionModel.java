@@ -436,7 +436,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
             allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator()
                     .buildQuery(0, Integer.MAX_VALUE));
         }
-        doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
+        doUpdateSelection(
+                allItemsStream
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
