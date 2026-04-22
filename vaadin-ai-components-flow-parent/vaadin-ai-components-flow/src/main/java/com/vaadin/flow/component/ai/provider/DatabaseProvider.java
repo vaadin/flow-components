@@ -74,14 +74,19 @@ import java.util.Map;
  * public String getSchema() {
  *     try (var connection = readOnlyDataSource.getConnection()) {
  *         var meta = connection.getMetaData();
+ *         var catalog = connection.getCatalog();
+ *         var schemaName = connection.getSchema();
  *         var schema = new StringBuilder();
- *         try (var tables = meta.getTables(null, null, "%",
+ *         try (var tables = meta.getTables(catalog, schemaName, "%",
  *                 new String[] { "TABLE" })) {
  *             while (tables.next()) {
  *                 var table = tables.getString("TABLE_NAME");
- *                 // Append columns via meta.getColumns
- *                 // Append primary keys via meta.getPrimaryKeys
- *                 // Append foreign keys via meta.getImportedKeys
+ *                 // Append columns via meta.getColumns(catalog, schemaName,
+ *                 // table, "%")
+ *                 // Append primary keys via meta.getPrimaryKeys(catalog,
+ *                 // schemaName, table)
+ *                 // Append foreign keys via meta.getImportedKeys(catalog,
+ *                 // schemaName, table)
  *             }
  *         }
  *         return schema.toString();
