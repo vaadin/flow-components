@@ -734,7 +734,7 @@ class ChartAIToolsSchemaTest {
     /**
      * Recursively walks the JSON node and checks that every object property at
      * each level is declared in the corresponding schema's "properties".
-     * Handles "oneOf" by checking if at least one alternative covers all
+     * Handles "anyOf" by checking if at least one alternative covers all
      * properties.
      */
     private static void assertAllPropertiesCovered(JsonNode jsonNode,
@@ -743,9 +743,9 @@ class ChartAIToolsSchemaTest {
             return;
         }
 
-        // Handle oneOf: at least one alternative must cover all properties
-        if (schemaNode.has("oneOf")) {
-            for (JsonNode option : schemaNode.get("oneOf")) {
+        // Handle anyOf: at least one alternative must cover all properties
+        if (schemaNode.has("anyOf")) {
+            for (JsonNode option : schemaNode.get("anyOf")) {
                 List<String> optionUncovered = new ArrayList<>();
                 assertAllPropertiesCovered(jsonNode, option, path,
                         optionUncovered);
@@ -754,7 +754,7 @@ class ChartAIToolsSchemaTest {
                 }
             }
             uncovered
-                    .add(path + ": no oneOf alternative covers all properties");
+                    .add(path + ": no anyOf alternative covers all properties");
             return;
         }
 
