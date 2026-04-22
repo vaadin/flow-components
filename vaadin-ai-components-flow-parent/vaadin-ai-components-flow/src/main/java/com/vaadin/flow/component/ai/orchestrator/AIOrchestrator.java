@@ -24,10 +24,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -137,6 +140,27 @@ public class AIOrchestrator implements Serializable {
      */
     private static final Pattern VALID_TOOL_NAME_PATTERN = Pattern
             .compile("^[a-zA-Z0-9_-]{1,64}$");
+
+    private static final Set<Object> CLAIMED_INSTANCES = Collections
+            .synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+
+    private static void claim(Object instance) {
+        if (instance == null) {
+            return;
+        }
+        if (!CLAIMED_INSTANCES.add(instance)) {
+            throw new IllegalStateException(instance.getClass().getSimpleName()
+                    + " is already in use by another AIOrchestrator. "
+                    + "Each instance can only be used by a single "
+                    + "orchestrator.");
+        }
+    }
+
+    private static void unclaim(Object instance) {
+        if (instance != null) {
+            CLAIMED_INSTANCES.remove(instance);
+        }
+    }
 
     private transient LLMProvider provider;
     private final String systemPrompt;
@@ -974,6 +998,8 @@ public class AIOrchestrator implements Serializable {
          * @return the configured orchestrator
          */
         public AIOrchestrator build() {
+            forEachClaimable(AIOrchestrator::claim);
+
             var orchestrator = new AIOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
             orchestrator.input = input;
@@ -986,22 +1012,31 @@ public class AIOrchestrator implements Serializable {
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseCompleteListener = responseCompleteListener;
-            if (input != null) {
-                input.addSubmitListener(orchestrator::doPrompt);
-            }
+            try {
+                if (input != null) {
+                    input.addSubmitListener(orchestrator::doPrompt);
+                }
 
-            if (attachmentClickListener != null && messageList != null) {
-                messageList.addAttachmentClickListener((message, attIndex) -> {
-                    var messageId = orchestrator.itemToMessageId.get(message);
-                    if (messageId != null) {
-                        orchestrator.attachmentClickListener.onAttachmentClick(
-                                new AttachmentClickListener.AttachmentClickEvent(
-                                        messageId, attIndex));
-                    }
-                });
-            }
-            if (history != null) {
-                orchestrator.restoreHistory(history, historyAttachments);
+                if (attachmentClickListener != null && messageList != null) {
+                    messageList
+                            .addAttachmentClickListener((message, attIndex) -> {
+                                var messageId = orchestrator.itemToMessageId
+                                        .get(message);
+                                if (messageId != null) {
+                                    orchestrator.attachmentClickListener
+                                            .onAttachmentClick(
+                                                    new AttachmentClickListener.AttachmentClickEvent(
+                                                            messageId,
+                                                            attIndex));
+                                }
+                            });
+                }
+                if (history != null) {
+                    orchestrator.restoreHistory(history, historyAttachments);
+                }
+            } catch (RuntimeException e) {
+                forEachClaimable(AIOrchestrator::unclaim);
+                throw e;
             }
 
             LOGGER.debug(
@@ -1016,6 +1051,24 @@ public class AIOrchestrator implements Serializable {
                     orchestrator.assistantName);
 
             return orchestrator;
+        }
+
+        private void forEachClaimable(Consumer<Object> action) {
+            action.accept(provider);
+            action.accept(
+                    messageList instanceof MessageListWrapper w ? w.messageList
+                            : messageList);
+            action.accept(
+                    input instanceof MessageInputWrapper w ? w.messageInput()
+                            : input);
+            if (fileReceiver instanceof UploadManagerWrapper w) {
+                action.accept(w.uploadManager);
+            } else if (fileReceiver instanceof UploadWrapper w) {
+                action.accept(w.upload);
+            } else {
+                action.accept(fileReceiver);
+            }
+            action.accept(controller);
         }
 
         private static AIMessageList wrapMessageList(MessageList messageList) {

@@ -30,7 +30,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  */
 class UploadManagerWrapper implements AIFileReceiver {
 
-    private final UploadManager uploadManager;
+    final UploadManager uploadManager;
     private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
 
     UploadManagerWrapper(UploadManager uploadManager) {
