@@ -2056,6 +2056,37 @@ class AIOrchestratorTest {
         Assertions.assertThrows(IllegalStateException.class, builder::build);
     }
 
+    @Test
+    void builder_buildFailsAfterClaim_resourceCanBeReused() {
+        var input = Mockito.mock(AIInput.class);
+        Mockito.doThrow(new RuntimeException("simulated build failure"))
+                .doNothing().when(input).addSubmitListener(Mockito.any());
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> AIOrchestrator
+                        .builder(Mockito.mock(LLMProvider.class), null)
+                        .withInput(input).build());
+
+        Assertions.assertDoesNotThrow(() -> AIOrchestrator
+                .builder(Mockito.mock(LLMProvider.class), null).withInput(input)
+                .build());
+    }
+
+    @Test
+    void builder_withAlreadyClaimedResource_doesNotApplySideEffects() {
+        var sharedInput = Mockito.mock(AIInput.class);
+        AIOrchestrator.builder(Mockito.mock(LLMProvider.class), null)
+                .withInput(sharedInput).build();
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> AIOrchestrator
+                        .builder(Mockito.mock(LLMProvider.class), null)
+                        .withInput(sharedInput).build());
+
+        Mockito.verify(sharedInput, Mockito.times(1))
+                .addSubmitListener(Mockito.any());
+    }
+
     private static byte[] createTestImage(int width, int height)
             throws IOException {
         var image = new BufferedImage(width, height,

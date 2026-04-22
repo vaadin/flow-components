@@ -30,6 +30,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -152,6 +153,12 @@ public class AIOrchestrator implements Serializable {
                     + " is already in use by another AIOrchestrator. "
                     + "Each instance can only be used by a single "
                     + "orchestrator.");
+        }
+    }
+
+    private static void unclaim(Object instance) {
+        if (instance != null) {
+            CLAIMED_INSTANCES.remove(instance);
         }
     }
 
@@ -991,19 +998,7 @@ public class AIOrchestrator implements Serializable {
          * @return the configured orchestrator
          */
         public AIOrchestrator build() {
-            claim(provider);
-            claim(messageList instanceof MessageListWrapper w ? w.messageList
-                    : messageList);
-            claim(input instanceof MessageInputWrapper w ? w.messageInput()
-                    : input);
-            if (fileReceiver instanceof UploadManagerWrapper w) {
-                claim(w.uploadManager);
-            } else if (fileReceiver instanceof UploadWrapper w) {
-                claim(w.upload);
-            } else {
-                claim(fileReceiver);
-            }
-            claim(controller);
+            forEachClaimable(AIOrchestrator::claim);
 
             var orchestrator = new AIOrchestrator(provider, systemPrompt);
             orchestrator.messageList = messageList;
@@ -1017,22 +1012,31 @@ public class AIOrchestrator implements Serializable {
             orchestrator.attachmentSubmitListener = attachmentSubmitListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseCompleteListener = responseCompleteListener;
-            if (input != null) {
-                input.addSubmitListener(orchestrator::doPrompt);
-            }
+            try {
+                if (input != null) {
+                    input.addSubmitListener(orchestrator::doPrompt);
+                }
 
-            if (attachmentClickListener != null && messageList != null) {
-                messageList.addAttachmentClickListener((message, attIndex) -> {
-                    var messageId = orchestrator.itemToMessageId.get(message);
-                    if (messageId != null) {
-                        orchestrator.attachmentClickListener.onAttachmentClick(
-                                new AttachmentClickListener.AttachmentClickEvent(
-                                        messageId, attIndex));
-                    }
-                });
-            }
-            if (history != null) {
-                orchestrator.restoreHistory(history, historyAttachments);
+                if (attachmentClickListener != null && messageList != null) {
+                    messageList
+                            .addAttachmentClickListener((message, attIndex) -> {
+                                var messageId = orchestrator.itemToMessageId
+                                        .get(message);
+                                if (messageId != null) {
+                                    orchestrator.attachmentClickListener
+                                            .onAttachmentClick(
+                                                    new AttachmentClickListener.AttachmentClickEvent(
+                                                            messageId,
+                                                            attIndex));
+                                }
+                            });
+                }
+                if (history != null) {
+                    orchestrator.restoreHistory(history, historyAttachments);
+                }
+            } catch (RuntimeException e) {
+                forEachClaimable(AIOrchestrator::unclaim);
+                throw e;
             }
 
             LOGGER.debug(
@@ -1047,6 +1051,24 @@ public class AIOrchestrator implements Serializable {
                     orchestrator.assistantName);
 
             return orchestrator;
+        }
+
+        private void forEachClaimable(Consumer<Object> action) {
+            action.accept(provider);
+            action.accept(
+                    messageList instanceof MessageListWrapper w ? w.messageList
+                            : messageList);
+            action.accept(
+                    input instanceof MessageInputWrapper w ? w.messageInput()
+                            : input);
+            if (fileReceiver instanceof UploadManagerWrapper w) {
+                action.accept(w.uploadManager);
+            } else if (fileReceiver instanceof UploadWrapper w) {
+                action.accept(w.upload);
+            } else {
+                action.accept(fileReceiver);
+            }
+            action.accept(controller);
         }
 
         private static AIMessageList wrapMessageList(MessageList messageList) {
