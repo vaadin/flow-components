@@ -85,14 +85,13 @@ import com.vaadin.flow.shared.Registration;
  * {@link #getState()} after each successful AI request.
  * </p>
  * <p>
- * <b>Provider compatibility:</b> The chart tools use {@code anyOf} unions and
- * optional properties in their parameter schemas, and are therefore
- * incompatible with OpenAI's strict tool-calling mode (used when the OpenAI
- * tool definition is sent with {@code "strict": true}). Strict tool calling is
- * off by default in both LangChain4J and Spring AI, so no action is required
- * for typical setups; just avoid opting in (e.g. do not pass
- * {@code strictTools(true)} to LangChain4J's {@code OpenAiStreamingChatModel}
- * builder).
+ * <b>Provider compatibility:</b> The chart tools use optional properties in
+ * their parameter schemas, which are incompatible with OpenAI's strict
+ * tool-calling mode (strict mode requires every property listed under
+ * {@code properties} to also appear in {@code required}). Strict tool calling
+ * is off by default in both LangChain4J and Spring AI; only users who
+ * explicitly opt in (e.g. {@code strictTools(true)} on LangChain4J's
+ * {@code OpenAiStreamingChatModel} builder) are affected.
  * </p>
  *
  * @author Vaadin Ltd
