@@ -19,14 +19,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.DecimalSlider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 
 class SliderBinderValidationTest {
     private static final String VALIDATION_ERROR_MESSAGE = "Value must be at least 50";
 
-    private Slider slider;
+    private DecimalSlider slider;
     private Binder<Bean> binder;
 
     public static class Bean {
@@ -43,7 +43,7 @@ class SliderBinderValidationTest {
 
     @BeforeEach
     void setup() {
-        slider = new Slider();
+        slider = new DecimalSlider();
         binder = new Binder<>(Bean.class);
         binder.forField(slider)
                 .withValidator(value -> value >= 50, VALIDATION_ERROR_MESSAGE)

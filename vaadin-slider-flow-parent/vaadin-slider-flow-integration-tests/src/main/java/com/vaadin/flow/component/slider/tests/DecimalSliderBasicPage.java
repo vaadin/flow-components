@@ -18,15 +18,15 @@ package com.vaadin.flow.component.slider.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.DecimalSlider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-slider/basic")
-public class SliderBasicPage extends Div {
+public class DecimalSliderBasicPage extends Div {
 
-    public SliderBasicPage() {
-        Slider slider = new Slider();
+    public DecimalSliderBasicPage() {
+        DecimalSlider slider = new DecimalSlider();
         slider.setMin(10.0);
         slider.setMax(200.0);
         slider.setStep(5.0);

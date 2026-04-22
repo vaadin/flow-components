@@ -44,7 +44,7 @@ class SliderWarningsTest {
 
         mockLoggerFactoryStatic = Mockito.mockStatic(LoggerFactory.class);
         mockLoggerFactoryStatic
-                .when(() -> LoggerFactory.getLogger(Slider.class))
+                .when(() -> LoggerFactory.getLogger(DecimalSlider.class))
                 .thenReturn(mockedLogger);
     }
 
@@ -55,7 +55,7 @@ class SliderWarningsTest {
 
     @Test
     void setMinGreaterThanMax_warnsMinGreaterThanMax() {
-        Slider slider = new Slider();
+        DecimalSlider slider = new DecimalSlider();
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
@@ -69,7 +69,7 @@ class SliderWarningsTest {
 
     @Test
     void setMaxLessThanMin_warnsMinGreaterThanMax() {
-        Slider slider = new Slider();
+        DecimalSlider slider = new DecimalSlider();
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
@@ -83,7 +83,7 @@ class SliderWarningsTest {
 
     @Test
     void setValueOutOfRange_warnsValueOutOfRange() {
-        Slider slider = new Slider(0, 100);
+        DecimalSlider slider = new DecimalSlider(0, 100);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);
@@ -98,7 +98,7 @@ class SliderWarningsTest {
 
     @Test
     void setValueNotAlignedWithStep_warnsValueNotAligned() {
-        Slider slider = new Slider(0, 100);
+        DecimalSlider slider = new DecimalSlider(0, 100);
         slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
@@ -114,7 +114,7 @@ class SliderWarningsTest {
 
     @Test
     void setConsistentProperties_noWarnings() {
-        Slider slider = new Slider(0, 100);
+        DecimalSlider slider = new DecimalSlider(0, 100);
         slider.setStep(10.0);
         ui.add(slider);
         ui.fakeClientCommunication();
@@ -129,7 +129,7 @@ class SliderWarningsTest {
 
     @Test
     void setMultipleProperties_onlyOneCheckPerResponseCycle() {
-        Slider slider = new Slider(0, 100);
+        DecimalSlider slider = new DecimalSlider(0, 100);
         ui.add(slider);
         ui.fakeClientCommunication();
         Mockito.clearInvocations(mockedLogger);

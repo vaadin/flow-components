@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.slider.validation;
 
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.DecimalSlider;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 class SliderBasicValidationTest
-        extends AbstractBasicValidationTest<Slider, Double> {
+        extends AbstractBasicValidationTest<DecimalSlider, Double> {
 
     @Override
-    protected Slider createTestField() {
-        return new Slider();
+    protected DecimalSlider createTestField() {
+        return new DecimalSlider();
     }
 }
