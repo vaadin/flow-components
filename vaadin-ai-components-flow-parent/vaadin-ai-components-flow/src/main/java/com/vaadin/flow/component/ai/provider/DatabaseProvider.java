@@ -60,6 +60,55 @@ import java.util.Map;
  * }
  * </pre>
  *
+ * <p>
+ * <b>Dynamic schema retrieval:</b> Hand-writing the schema string works for
+ * small fixed schemas, but most databases expose introspection commands you can
+ * run on the read-only connection to build the description at runtime. Pick the
+ * idiom that matches your database:
+ * </p>
+ * <ul>
+ * <li><b>H2 (2.x, including in-memory):</b> run
+ * {@code SCRIPT NODATA NOSETTINGS} — returns the DDL needed to recreate the
+ * schema, one statement per row. This includes user, role, sequence, and grant
+ * statements alongside the table DDL, which may be more detail than the LLM
+ * needs. Note that H2 requires admin rights to execute {@code SCRIPT}, so the
+ * account used for introspection cannot be a true read-only role; in typical
+ * in-memory setups the default {@code sa} user is admin and this just
+ * works.</li>
+ * <li><b>MySQL (8.x, including 8.4 LTS):</b> iterate rows of
+ * {@code SHOW TABLES} and call {@code SHOW CREATE TABLE `<name>`} for each
+ * table to get its DDL (returned in the {@code Create Table} column). Use
+ * {@code SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'} instead if you want
+ * to skip views.</li>
+ * <li><b>PostgreSQL:</b> query {@code information_schema.columns} and assemble
+ * a per-table description from {@code table_name}, {@code column_name}, and
+ * {@code data_type}. Filter by {@code table_schema} to the schema(s) you want
+ * exposed — {@code 'public'} for default installs, or
+ * {@code table_schema = ANY(current_schemas(false))} to follow the connection's
+ * {@code search_path}.</li>
+ * </ul>
+ * <p>
+ * For example, an H2 implementation of {@link #getSchema()} can be as simple
+ * as:
+ * </p>
+ *
+ * <pre>
+ * &#064;Override
+ * public String getSchema() {
+ *     try (var connection = readOnlyDataSource.getConnection();
+ *             var statement = connection.createStatement();
+ *             var rs = statement.executeQuery("SCRIPT NODATA NOSETTINGS")) {
+ *         var schema = new StringBuilder();
+ *         while (rs.next()) {
+ *             schema.append(rs.getString(1)).append('\n');
+ *         }
+ *         return schema.toString();
+ *     } catch (SQLException e) {
+ *         throw new RuntimeException(e);
+ *     }
+ * }
+ * </pre>
+ *
  * @author Vaadin Ltd
  */
 public interface DatabaseProvider extends Serializable {
@@ -69,6 +118,11 @@ public interface DatabaseProvider extends Serializable {
      * The description should include table names, column names with their
      * types, and optionally the SQL dialect (e.g., PostgreSQL, MySQL). The LLM
      * uses this information to generate valid SQL queries.
+     * <p>
+     * See the class-level "Dynamic schema retrieval" section for idioms that
+     * build this description at runtime from H2, MySQL, and PostgreSQL
+     * introspection commands.
+     * </p>
      *
      * @return a text description of the database schema, never {@code null}
      */
