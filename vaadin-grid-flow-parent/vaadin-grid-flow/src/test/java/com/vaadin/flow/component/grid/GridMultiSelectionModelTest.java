@@ -32,7 +32,6 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -312,9 +311,29 @@ class GridMultiSelectionModelTest {
     }
 
     @Test
-    @Disabled
-    // Ignored because selectAll is not implemented yet
-    // See https://github.com/vaadin/flow/issues/2546
+    void clientSelectAll_preservesDataProviderOrder() {
+        var model = (AbstractGridMultiSelectionModel<Person>) selectionModel;
+        model.clientSelectAll();
+
+        var value = model.getSelectedItems().stream().toList();
+
+        assertEquals(PERSON_A, value.get(0));
+        assertEquals(PERSON_B, value.get(1));
+        assertEquals(PERSON_C, value.get(2));
+    }
+
+    @Test
+    void selectAll_preservesDataProviderOrder() {
+        selectionModel.selectAll();
+
+        var value = selectionModel.getSelectedItems().stream().toList();
+
+        assertEquals(PERSON_A, value.get(0));
+        assertEquals(PERSON_B, value.get(1));
+        assertEquals(PERSON_C, value.get(2));
+    }
+
+    @Test
     void selectAll() {
         selectionModel.selectAll();
 
