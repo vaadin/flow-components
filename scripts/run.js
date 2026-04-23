@@ -132,6 +132,7 @@ function runJetty(module, modeKey) {
     'jetty:run',
     '-Dvaadin.pnpm.enable',
     '-Dvaadin.frontend.hotdeploy=true',
+    '-Djetty.scan=5',
     '-am',
     '-B',
     '-q',
