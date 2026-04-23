@@ -1661,11 +1661,18 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withControllerOnRequestCompletedThrows_logsAndContinues() {
+    void builder_withControllerOnRequestCompletedThrows_showsErrorMessage()
+            throws InterruptedException {
         var mockMessage = createMockMessage();
+        var errorText = "An error occurred. Please try again.";
+        var latch = new CountDownLatch(1);
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
+                Mockito.anyString(), Mockito.anyList())).thenAnswer(inv -> {
+                    if (errorText.equals(inv.getArgument(0))) {
+                        latch.countDown();
+                    }
+                    return mockMessage;
+                });
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -1689,9 +1696,22 @@ class AIOrchestratorTest {
         // Should not throw
         orchestrator.prompt("Hello");
 
-        // History should still be recorded
+        Assertions.assertTrue(latch.await(2, TimeUnit.SECONDS),
+                "Error message should be appended within timeout");
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq(errorText),
+                Mockito.anyString(), Mockito.anyList());
+
+        // History records what the LLM actually said. The render failure
+        // is surfaced as a separate UI message, not by rewriting the
+        // assistant entry: the LLM's response is already committed to
+        // the provider's chat memory, and overwriting only our local
+        // history would misrepresent what the LLM produced.
         var history = orchestrator.getHistory();
         Assertions.assertEquals(2, history.size());
+        var lastAssistant = history.get(history.size() - 1);
+        Assertions.assertEquals(ChatMessage.Role.ASSISTANT,
+                lastAssistant.role());
+        Assertions.assertEquals("Response", lastAssistant.content());
     }
 
     @Test

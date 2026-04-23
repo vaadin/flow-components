@@ -371,7 +371,7 @@ public class AIOrchestrator implements Serializable {
                 conversationHistory
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
-                fireResponseCompleteListener(responseText);
+                fireResponseCompleteListener(responseText, ui);
             }
             LOGGER.debug("LLM streaming completed successfully");
         });
@@ -458,7 +458,7 @@ public class AIOrchestrator implements Serializable {
         streamResponseToMessage(request, assistantMessage, ui);
     }
 
-    private void fireResponseCompleteListener(String responseText) {
+    private void fireResponseCompleteListener(String responseText, UI ui) {
         if (responseCompleteListener != null) {
             try {
                 responseCompleteListener.onResponseComplete(
@@ -469,11 +469,23 @@ public class AIOrchestrator implements Serializable {
             }
         }
         if (controller != null) {
-            try {
-                controller.onRequestCompleted();
-            } catch (Exception e) {
-                LOGGER.error("Error in controller onRequestCompleted", e);
-            }
+            ui.access(() -> {
+                try {
+                    controller.onRequestCompleted();
+                } catch (Exception e) {
+                    LOGGER.error("Error in controller onRequestCompleted", e);
+                    // Append a separate assistant message instead of
+                    // rewriting the LLM's response. By the time this
+                    // runs, the response is already in the provider's
+                    // chat memory and in our history; rewriting either
+                    // would misrepresent what the LLM actually said.
+                    if (messageList != null) {
+                        messageList.addMessage(
+                                "An error occurred. Please try again.",
+                                assistantName, Collections.emptyList());
+                    }
+                }
+            });
         }
     }
 

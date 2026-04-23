@@ -272,7 +272,11 @@ public class ChartAIController implements AIController {
         chart.setConfiguration(copyConfiguration(state.configuration()));
         ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
         entry.setQueries(state.queries());
-        deferRender(entry, state.queries(), null, false);
+        try {
+            render(entry, state.queries(), null, false);
+        } catch (Exception e) {
+            LOGGER.error("Rendering failed during state restore", e);
+        }
     }
 
     /**
@@ -313,24 +317,24 @@ public class ChartAIController implements AIController {
         }
 
         String configJson = entry.getPendingConfigurationJson();
-        deferRender(entry, queries, configJson, true);
+        // Render synchronously so exceptions propagate to the orchestrator,
+        // which runs this on the UI thread under session lock. Attachment
+        // is not required: Configuration is server-side state and any JS
+        // calls are queued by Flow until the chart attaches.
+        render(entry, queries, configJson, true);
     }
 
-    private void deferRender(ChartEntry entry, List<String> queries,
+    private void render(ChartEntry entry, List<String> queries,
             String configJson, boolean fireListeners) {
-        chart.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            try {
-                ChartRenderer.renderChart(chart, databaseProvider,
-                        dataConverter, queries, configJson);
-                if (fireListeners) {
-                    fireStateChangeListeners();
-                }
-            } catch (Exception e) {
-                LOGGER.error("Rendering failed", e);
-            } finally {
-                entry.clearPendingState();
+        try {
+            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
+                    queries, configJson);
+            if (fireListeners) {
+                fireStateChangeListeners();
             }
-        }));
+        } finally {
+            entry.clearPendingState();
+        }
     }
 
     private void fireStateChangeListeners() {

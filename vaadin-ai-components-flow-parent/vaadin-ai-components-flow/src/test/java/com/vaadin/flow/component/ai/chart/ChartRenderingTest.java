@@ -211,12 +211,17 @@ class ChartRenderingTest {
             // Make DB throw for the render phase
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
-            // Exception is caught internally; no exception should propagate
-            controller.onRequestCompleted();
+            // Exception propagates so the orchestrator can surface it to
+            // the user, but pending state must still be cleared.
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onRequestCompleted());
 
-            // Pending state should be cleared despite the error
+            // Pending state should be cleared despite the error: a
+            // subsequent call with no pending state is a no-op and
+            // must not re-trigger the DB (which would still throw).
             databaseProvider.throwOnExecute = null;
-            controller.onRequestCompleted(); // should be no-op
+            Assertions
+                    .assertDoesNotThrow(() -> controller.onRequestCompleted());
         }
     }
 
