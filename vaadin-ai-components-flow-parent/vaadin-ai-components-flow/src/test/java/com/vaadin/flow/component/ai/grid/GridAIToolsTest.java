@@ -138,6 +138,34 @@ class GridAIToolsTest {
                 () -> GridAITools.getGridState(null));
     }
 
+    @Test
+    void getGridState_handlerThrows_doesNotLeakExceptionMessage() {
+        // Exception messages can carry sensitive internal detail (SQL
+        // fragments, schema names, file paths, credentials). The tool
+        // result is fed to the LLM, which a user can prompt to repeat
+        // it verbatim — so raw exception messages must not be included.
+        var tool = GridAITools.getGridState(new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                throw new RuntimeException("SENSITIVE_INTERNAL_DETAIL_XYZ");
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+                throw new UnsupportedOperationException(
+                        "updateData not expected in getState leak test");
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of("grid");
+            }
+        });
+        var result = tool.execute(json("{}"));
+        Assertions.assertFalse(result.contains("SENSITIVE_INTERNAL_DETAIL_XYZ"),
+                "Tool result leaks exception message to LLM: " + result);
+    }
+
     // --- updateGridData ---
 
     @Test
@@ -170,7 +198,29 @@ class GridAIToolsTest {
         });
         var result = tool.execute(json("{\"query\": \"BAD\"}"));
         Assertions.assertTrue(result.contains("Error"));
-        Assertions.assertTrue(result.contains("bad query"));
+    }
+
+    @Test
+    void updateGridData_handlerThrows_doesNotLeakExceptionMessage() {
+        var tool = GridAITools.updateGridData(new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                return "{}";
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+                throw new RuntimeException("SENSITIVE_INTERNAL_DETAIL_XYZ");
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of("grid");
+            }
+        });
+        var result = tool.execute(json("{\"query\": \"BAD\"}"));
+        Assertions.assertFalse(result.contains("SENSITIVE_INTERNAL_DETAIL_XYZ"),
+                "Tool result leaks exception message to LLM: " + result);
     }
 
     @Test

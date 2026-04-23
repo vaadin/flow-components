@@ -163,7 +163,20 @@ class ChartAIToolsTest {
                     "Chart not found");
             var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
             Assertions.assertTrue(result.contains("Error"));
-            Assertions.assertTrue(result.contains("Chart not found"));
+        }
+
+        @Test
+        void execute_whenCallbackThrows_doesNotLeakExceptionMessage() {
+            // Exception messages can carry sensitive internal detail (SQL
+            // fragments, schema names, file paths, credentials). The tool
+            // result is fed to the LLM, which a user can prompt to repeat
+            // it verbatim — so raw exception messages must not be included.
+            callbacks.getStateException = new RuntimeException(
+                    "SENSITIVE_INTERNAL_DETAIL_XYZ");
+            var result = tool.execute(json("{\"chartId\": \"chart-1\"}"));
+            Assertions.assertFalse(
+                    result.contains("SENSITIVE_INTERNAL_DETAIL_XYZ"),
+                    "Tool result leaks exception message to LLM: " + result);
         }
     }
 
@@ -237,7 +250,17 @@ class ChartAIToolsTest {
             var result = tool.execute(json(
                     "{\"chartId\": \"chart-1\", \"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             Assertions.assertTrue(result.contains("Error"));
-            Assertions.assertTrue(result.contains("Config rejected"));
+        }
+
+        @Test
+        void execute_whenCallbackThrows_doesNotLeakExceptionMessage() {
+            callbacks.updateConfigException = new RuntimeException(
+                    "SENSITIVE_INTERNAL_DETAIL_XYZ");
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+            Assertions.assertFalse(
+                    result.contains("SENSITIVE_INTERNAL_DETAIL_XYZ"),
+                    "Tool result leaks exception message to LLM: " + result);
         }
     }
 
@@ -308,7 +331,17 @@ class ChartAIToolsTest {
             var result = tool.execute(json(
                     "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT invalid\"]}"));
             Assertions.assertTrue(result.contains("Error"));
-            Assertions.assertTrue(result.contains("Invalid query"));
+        }
+
+        @Test
+        void execute_whenCallbackThrows_doesNotLeakExceptionMessage() {
+            callbacks.updateDataException = new RuntimeException(
+                    "SENSITIVE_INTERNAL_DETAIL_XYZ");
+            var result = tool.execute(json(
+                    "{\"chartId\": \"chart-1\", \"queries\": [\"SELECT invalid\"]}"));
+            Assertions.assertFalse(
+                    result.contains("SENSITIVE_INTERNAL_DETAIL_XYZ"),
+                    "Tool result leaks exception message to LLM: " + result);
         }
 
         @Test
@@ -392,6 +425,19 @@ class ChartAIToolsTest {
             String result = tool.execute(json("{\"chartType\":\"COLUMN\"}"));
             Assertions.assertFalse(result.contains("Error"), result);
             Assertions.assertTrue(result.contains("\"properties\""));
+        }
+
+        @Test
+        void execute_whenExceptionThrown_doesNotLeakExceptionMessage() {
+            // Calling asString() on a container node throws
+            // JsonNodeException with a message that embeds the raw
+            // node value — exactly the kind of detail the catch-all
+            // handler must not pass through to the LLM.
+            var result = tool.execute(json("{\"chartType\":[1,2,3]}"));
+            Assertions.assertFalse(result.contains("coerce"),
+                    "Tool result leaks exception message to LLM: " + result);
+            Assertions.assertFalse(result.contains("ArrayNode"),
+                    "Tool result leaks exception message to LLM: " + result);
         }
 
     }

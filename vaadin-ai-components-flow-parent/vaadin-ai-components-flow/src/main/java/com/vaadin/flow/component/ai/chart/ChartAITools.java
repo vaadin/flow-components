@@ -185,6 +185,18 @@ public final class ChartAITools {
     }
 
     /**
+     * Signals a validation failure whose message is safe to pass back to the
+     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
+     * detail (SQL fragments, schema names, file paths) and must be replaced
+     * with a generic message before being returned.
+     */
+    private static final class ValidationException extends RuntimeException {
+        ValidationException(String message) {
+            super(message);
+        }
+    }
+
+    /**
      * Resolves the chart ID from the tool arguments. If {@code chartId} is not
      * provided and there is exactly one chart, that chart's ID is used as the
      * default.
@@ -192,7 +204,7 @@ public final class ChartAITools {
     private static String resolveChartId(JsonNode args, Callbacks callbacks) {
         var ids = callbacks.getChartIds();
         if (ids.isEmpty()) {
-            throw new IllegalArgumentException("No charts available.");
+            throw new ValidationException("No charts available.");
         }
         if (ids.size() == 1) {
             return ids.iterator().next();
@@ -201,7 +213,7 @@ public final class ChartAITools {
         if (idNode != null && ids.contains(idNode.asString())) {
             return idNode.asString();
         }
-        throw new IllegalArgumentException(
+        throw new ValidationException(
                 "chartId is required when multiple charts exist. "
                         + "Available chart IDs: " + ids);
     }
@@ -256,9 +268,12 @@ public final class ChartAITools {
                     LOGGER.info("get_chart_state called");
                     String chartId = resolveChartId(arguments, callbacks);
                     return callbacks.getState(chartId);
+                } catch (ValidationException e) {
+                    LOGGER.warn("get_chart_state validation failed", e);
+                    return "Error getting chart state: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("get_chart_state failed", e);
-                    return "Error getting chart state: " + e.getMessage();
+                    return "Error getting chart state.";
                 }
             }
         };
@@ -515,10 +530,14 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' configuration updated. Changes will be applied when the request completes.";
-                } catch (Exception e) {
-                    LOGGER.error("update_chart_configuration failed", e);
+                } catch (ValidationException e) {
+                    LOGGER.warn("update_chart_configuration validation failed",
+                            e);
                     return "Error updating chart configuration: "
                             + e.getMessage();
+                } catch (Exception e) {
+                    LOGGER.error("update_chart_configuration failed", e);
+                    return "Error updating chart configuration.";
                 }
             }
         };
@@ -663,9 +682,13 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
+                } catch (ValidationException e) {
+                    LOGGER.warn("update_chart_data_source validation failed",
+                            e);
+                    return "Error updating chart data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);
-                    return "Error updating chart data: " + e.getMessage();
+                    return "Error updating chart data.";
                 }
             }
         };
@@ -725,7 +748,7 @@ public final class ChartAITools {
                     return schema;
                 } catch (Exception e) {
                     LOGGER.error("get_plot_options_schema failed", e);
-                    return "Error: " + e.getMessage();
+                    return "Error getting plot options schema.";
                 }
             }
         };

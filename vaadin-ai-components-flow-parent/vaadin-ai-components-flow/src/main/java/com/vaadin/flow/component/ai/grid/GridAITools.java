@@ -47,6 +47,18 @@ public final class GridAITools {
     }
 
     /**
+     * Signals a validation failure whose message is safe to pass back to the
+     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
+     * detail (SQL fragments, schema names, file paths) and must be replaced
+     * with a generic message before being returned.
+     */
+    private static final class ValidationException extends RuntimeException {
+        ValidationException(String message) {
+            super(message);
+        }
+    }
+
+    /**
      * Callback interface for grid state access and mutation.
      */
     public interface Callbacks extends Serializable {
@@ -95,9 +107,9 @@ public final class GridAITools {
             return ids.iterator().next();
         }
         if (ids.isEmpty()) {
-            throw new IllegalArgumentException("No grids available.");
+            throw new ValidationException("No grids available.");
         }
-        throw new IllegalArgumentException(
+        throw new ValidationException(
                 "gridId is required when multiple grids exist. "
                         + "Available grid IDs: " + ids);
     }
@@ -143,9 +155,12 @@ public final class GridAITools {
                     LOGGER.info("get_grid_state called");
                     var gridId = resolveGridId(arguments, callbacks);
                     return callbacks.getState(gridId);
+                } catch (ValidationException e) {
+                    LOGGER.warn("get_grid_state validation failed", e);
+                    return "Error getting grid state: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("get_grid_state failed", e);
-                    return "Error getting grid state: " + e.getMessage();
+                    return "Error getting grid state.";
                 }
             }
         };
@@ -222,9 +237,12 @@ public final class GridAITools {
                     callbacks.updateData(gridId, query);
                     return "Grid '" + gridId
                             + "' data update queued successfully";
+                } catch (ValidationException e) {
+                    LOGGER.warn("update_grid_data validation failed", e);
+                    return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_grid_data failed", e);
-                    return "Error updating grid data: " + e.getMessage();
+                    return "Error updating grid data.";
                 }
             }
         };
