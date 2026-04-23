@@ -27,7 +27,7 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-slider/integer-range-slider-basic")
 public class IntegerRangeSliderBasicIT extends AbstractComponentIT {
     // Only covers basic functionality for setting and retrieving properties via
-    // the TestBench element. DecimalRangeSliderIT has more comprehensive
+    // the TestBench element. DecimalRangeSliderBasicIT has more comprehensive
     // coverage.
 
     private IntegerRangeSliderElement rangeSlider;
