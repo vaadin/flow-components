@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -310,9 +309,29 @@ public class GridMultiSelectionModelTest {
     }
 
     @Test
-    @Ignore
-    // Ignored because selectAll is not implemented yet
-    // See https://github.com/vaadin/flow/issues/2546
+    public void clientSelectAll_preservesDataProviderOrder() {
+        var model = (AbstractGridMultiSelectionModel<Person>) selectionModel;
+        model.clientSelectAll();
+
+        var value = model.getSelectedItems().stream().toList();
+
+        assertEquals(PERSON_A, value.get(0));
+        assertEquals(PERSON_B, value.get(1));
+        assertEquals(PERSON_C, value.get(2));
+    }
+
+    @Test
+    public void selectAll_preservesDataProviderOrder() {
+        selectionModel.selectAll();
+
+        var value = selectionModel.getSelectedItems().stream().toList();
+
+        assertEquals(PERSON_A, value.get(0));
+        assertEquals(PERSON_B, value.get(1));
+        assertEquals(PERSON_C, value.get(2));
+    }
+
+    @Test
     public void selectAll() {
         selectionModel.selectAll();
 
