@@ -190,7 +190,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_renderFails_doesNotThrow() {
+        void onRequestCompleted_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -201,8 +201,9 @@ class ChartAIControllerTest {
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
 
-            Assertions
-                    .assertDoesNotThrow(() -> controller.onRequestCompleted());
+            var ex = Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onRequestCompleted());
+            Assertions.assertEquals("Render failure", ex.getMessage());
         }
 
         @Test
@@ -524,7 +525,8 @@ class ChartAIControllerTest {
 
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
-            controller.onRequestCompleted();
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onRequestCompleted());
 
             Assertions.assertNull(captured.get());
         }
@@ -617,26 +619,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_pendingStateSurvivesUntilRender() {
-            databaseProvider.results = List
-                    .of(Map.of("category", "A", "value", 10));
-
-            var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(json(
-                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
-            findTool(tools, "update_chart_data_source")
-                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
-
-            // Render is deferred (chart detached), so pending state
-            // should not yet be cleared.
-            ChartEntry entry = ChartEntry.get(chart);
-            Assertions.assertTrue(entry.hasPendingState(),
-                    "Pending state should survive until render executes");
-        }
-
-        @Test
-        void onRequestCompleted_listenerFiresOnReattach() {
+        void onRequestCompleted_appliesStateAndFiresListenerImmediately() {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
@@ -650,46 +633,30 @@ class ChartAIControllerTest {
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
             controller.onRequestCompleted();
 
-            // Listener should not fire while chart is detached
-            Assertions.assertNull(captured.get(),
-                    "State change listener should not fire before "
-                            + "chart is attached and render completes");
-
-            // After re-attachment, deferred render should fire listener
-            ui.add(chart);
-            Assertions.assertNotNull(captured.get(),
-                    "State change listener should fire after "
-                            + "chart is re-attached");
+            // Attachment does not gate the controller: configuration
+            // lives on the server side and Flow queues any JS calls
+            // until attach, so a state change is a state change even
+            // when the chart is not currently visible.
+            ChartEntry entry = ChartEntry.get(chart);
+            Assertions.assertFalse(entry.hasPendingState());
+            Assertions.assertNotNull(captured.get());
         }
 
         @Test
-        void onRequestCompleted_rendersLatestStateOnAttach() {
-            var tools = controller.getTools();
-
-            // First request while detached
+        void onRequestCompleted_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
-            findTool(tools, "update_chart_configuration").execute(json(
-                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+
+            var tools = controller.getTools();
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
 
-            // Second request while still detached
-            databaseProvider.results = List
-                    .of(Map.of("category", "B", "value", 20));
-            findTool(tools, "update_chart_configuration").execute(json(
-                    "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            findTool(tools, "update_chart_data_source")
-                    .execute(json("{\"queries\": [\"SELECT 2\"]}"));
-            controller.onRequestCompleted();
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
 
-            ui.add(chart);
-
-            // After re-attachment, the chart should reflect the latest
-            // state from the second request.
-            Assertions.assertEquals(ChartType.PIE,
-                    chart.getConfiguration().getChart().getType());
+            // Errors propagate regardless of attach state so the
+            // orchestrator can still surface them in the chat UI.
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onRequestCompleted());
         }
 
         @Test
@@ -699,46 +666,11 @@ class ChartAIControllerTest {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
 
-            controller
-                    .restoreState(new ChartState(List.of("SELECT 1"), config));
-
-            // Re-attach triggers the deferred render, which will fail.
-            // Should not propagate the exception.
-            Assertions.assertDoesNotThrow(() -> ui.add(chart));
-        }
-
-        @Test
-        void restoreState_pendingStateSurvivesUntilRender() {
-            databaseProvider.results = List
-                    .of(Map.of("category", "A", "value", 10));
-
-            // Create pending state via tools
-            var tools = controller.getTools();
-            findTool(tools, "update_chart_configuration").execute(json(
-                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
-            findTool(tools, "update_chart_data_source")
-                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-
-            Configuration config = new Configuration();
-            config.getChart().setType(ChartType.COLUMN);
-            controller
-                    .restoreState(new ChartState(List.of("SELECT 2"), config));
-
-            // Render is deferred (chart detached), so pending state
-            // from the tool calls should be cleared by restoreState,
-            // but the restoreState render itself hasn't executed yet.
-            ChartEntry entry = ChartEntry.get(chart);
-            Assertions.assertTrue(
-                    chart.getConfiguration().getSeries().isEmpty(),
-                    "Render should be deferred while chart is detached");
-
-            // After re-attachment, the chart should be rendered
-            ui.add(chart);
-            Assertions.assertFalse(
-                    chart.getConfiguration().getSeries().isEmpty(),
-                    "Chart should be rendered after re-attachment");
-            Assertions.assertFalse(entry.hasPendingState(),
-                    "Pending state should be cleared after render");
+            // restoreState catches render failures so a corrupted
+            // persisted state does not break the caller (typically
+            // view init code).
+            Assertions.assertDoesNotThrow(() -> controller
+                    .restoreState(new ChartState(List.of("SELECT 1"), config)));
         }
     }
 

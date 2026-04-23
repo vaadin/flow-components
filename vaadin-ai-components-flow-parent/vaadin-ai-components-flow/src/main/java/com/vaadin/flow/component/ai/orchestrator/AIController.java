@@ -57,7 +57,12 @@ public interface AIController {
      * can use this callback to perform deferred operations, such as rendering
      * UI updates or committing state changes.
      * </p>
-     *
+     * <p>
+     * The orchestrator invokes this method on the UI thread under the session
+     * lock, so implementations may update UI components directly. Any exception
+     * thrown is caught by the orchestrator and reported to the user as a
+     * generic error message.
+     * </p>
      */
     void onRequestCompleted();
 }

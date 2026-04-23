@@ -214,7 +214,12 @@ public class GridAIController implements AIController {
         }
         var query = entry.getPendingQuery();
         LOGGER.info("onRequestCompleted: applying query: {}", query);
-        deferRender(entry, query, true);
+        // Render synchronously so exceptions propagate to the orchestrator,
+        // which runs this on the UI thread under session lock. Attachment
+        // is not required: grid state (columns, data provider) is
+        // server-side and syncs to the client on attach.
+        render(entry, query, true);
+        LOGGER.info("Grid updated successfully");
     }
 
     /**
@@ -247,7 +252,23 @@ public class GridAIController implements AIController {
             return;
         }
         var entry = GridEntry.getOrCreate(grid, GRID_ID);
-        deferRender(entry, state.query(), false);
+        try {
+            render(entry, state.query(), false);
+        } catch (Exception e) {
+            LOGGER.error("Error updating grid during state restore", e);
+        }
+    }
+
+    private void render(GridEntry entry, String query, boolean fireListeners) {
+        try {
+            GridRenderer.renderGrid(grid, databaseProvider, query);
+            entry.setCurrentQuery(query);
+            if (fireListeners) {
+                fireStateChangeListeners();
+            }
+        } finally {
+            entry.clearPendingState();
+        }
     }
 
     /**
@@ -269,24 +290,6 @@ public class GridAIController implements AIController {
         Objects.requireNonNull(listener, "Listener cannot be null");
         stateChangeListeners.add(listener);
         return () -> stateChangeListeners.remove(listener);
-    }
-
-    private void deferRender(GridEntry entry, String query,
-            boolean fireListeners) {
-        grid.getElement().getNode().runWhenAttached(ui -> ui.access(() -> {
-            try {
-                GridRenderer.renderGrid(grid, databaseProvider, query);
-                entry.setCurrentQuery(query);
-                if (fireListeners) {
-                    fireStateChangeListeners();
-                }
-                LOGGER.info("Grid updated successfully");
-            } catch (Exception e) {
-                LOGGER.error("Error updating grid", e);
-            } finally {
-                entry.clearPendingState();
-            }
-        }));
     }
 
     private void fireStateChangeListeners() {
