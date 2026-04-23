@@ -20,64 +20,64 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.internal.JacksonUtils;
 
-class RangeSliderTest
-        extends AbstractRangeSliderTest<RangeSlider, RangeSliderValue, Double> {
+class DecimalRangeSliderTest extends
+        AbstractRangeSliderTest<DecimalRangeSlider, DecimalRangeSliderValue, Double> {
 
     @Override
-    RangeSlider createSlider() {
-        return new RangeSlider();
+    DecimalRangeSlider createSlider() {
+        return new DecimalRangeSlider();
     }
 
     @Test
     void defaultConstructor() {
-        RangeSlider slider = new RangeSlider();
+        DecimalRangeSlider slider = new DecimalRangeSlider();
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void minMaxConstructor() {
-        RangeSlider slider = new RangeSlider(10, 50);
+        DecimalRangeSlider slider = new DecimalRangeSlider(10, 50);
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);
         Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(10.0, 50.0),
                 slider.getValue());
     }
 
     @Test
     void labelConstructor() {
-        RangeSlider slider = new RangeSlider("Label");
+        DecimalRangeSlider slider = new DecimalRangeSlider("Label");
         Assertions.assertEquals("Label", slider.getLabel());
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void labelMinMaxConstructor() {
-        RangeSlider slider = new RangeSlider("Label", 10, 50);
+        DecimalRangeSlider slider = new DecimalRangeSlider("Label", 10, 50);
         Assertions.assertEquals("Label", slider.getLabel());
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);
         Assertions.assertEquals(1, slider.getStep(), 0);
-        Assertions.assertEquals(new RangeSliderValue(10.0, 50.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(10.0, 50.0),
                 slider.getValue());
     }
 
     @Test
-    void rangeSliderValue_nullStart_throws() {
+    void decimalRangeSliderValue_nullStart_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new RangeSliderValue(null, 100.0));
+                () -> new DecimalRangeSliderValue(null, 100.0));
     }
 
     @Test
-    void rangeSliderValue_nullEnd_throws() {
+    void decimalRangeSliderValue_nullEnd_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new RangeSliderValue(0.0, null));
+                () -> new DecimalRangeSliderValue(0.0, null));
     }
 
     @Test
@@ -111,7 +111,7 @@ class RangeSliderTest
     void setValueFromClient_null_ignored() {
         slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", JacksonUtils.nullNode());
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
@@ -119,7 +119,7 @@ class RangeSliderTest
     void setValueFromClient_startNotAlignedWithStep_ignored() {
         slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(15, 80));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
@@ -127,28 +127,28 @@ class RangeSliderTest
     void setValueFromClient_endNotAlignedWithStep_ignored() {
         slider.setStep(10.0);
         slider.getElement().setPropertyJson("value", createValueArray(20, 85));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_startBelowMin_ignored() {
         slider.getElement().setPropertyJson("value", createValueArray(-10, 50));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_endAboveMax_ignored() {
         slider.getElement().setPropertyJson("value", createValueArray(50, 110));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 
     @Test
     void setValueFromClient_startGreaterThanEnd_ignored() {
         slider.getElement().setPropertyJson("value", createValueArray(80, 20));
-        Assertions.assertEquals(new RangeSliderValue(0.0, 100.0),
+        Assertions.assertEquals(new DecimalRangeSliderValue(0.0, 100.0),
                 slider.getValue());
     }
 }

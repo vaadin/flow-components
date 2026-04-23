@@ -31,14 +31,14 @@ class SliderSignalTest extends AbstractSignalsTest {
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
             SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
-    private Slider slider;
+    private DecimalSlider slider;
     private ValueSignal<Double> minSignal;
     private ValueSignal<Double> maxSignal;
     private ValueSignal<Double> stepSignal;
 
     @BeforeEach
     void setup() {
-        slider = new Slider();
+        slider = new DecimalSlider();
         minSignal = new ValueSignal<>(0.0);
         maxSignal = new ValueSignal<>(100.0);
         stepSignal = new ValueSignal<>(1.0);

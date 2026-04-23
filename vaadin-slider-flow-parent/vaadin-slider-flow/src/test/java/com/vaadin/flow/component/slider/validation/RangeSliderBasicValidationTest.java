@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.slider.validation;
 
-import com.vaadin.flow.component.slider.RangeSlider;
-import com.vaadin.flow.component.slider.RangeSliderValue;
+import com.vaadin.flow.component.slider.DecimalRangeSlider;
+import com.vaadin.flow.component.slider.DecimalRangeSliderValue;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-class RangeSliderBasicValidationTest
-        extends AbstractBasicValidationTest<RangeSlider, RangeSliderValue> {
+class RangeSliderBasicValidationTest extends
+        AbstractBasicValidationTest<DecimalRangeSlider, DecimalRangeSliderValue> {
 
     @Override
-    protected RangeSlider createTestField() {
-        return new RangeSlider();
+    protected DecimalRangeSlider createTestField() {
+        return new DecimalRangeSlider();
     }
 }

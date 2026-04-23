@@ -18,36 +18,37 @@ package com.vaadin.flow.component.slider.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.DecimalRangeSlider;
+import com.vaadin.flow.component.slider.DecimalRangeSliderValue;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-slider/basic")
-public class SliderBasicPage extends Div {
+@Route("vaadin-slider/decimal-range-slider-basic")
+public class DecimalRangeSliderBasicPage extends Div {
 
-    public SliderBasicPage() {
-        Slider slider = new Slider();
-        slider.setMin(10.0);
-        slider.setMax(200.0);
-        slider.setStep(5.0);
-        slider.setValue(50.0);
-        slider.setWidth("200px");
+    public DecimalRangeSliderBasicPage() {
+        DecimalRangeSlider rangeSlider = new DecimalRangeSlider();
+        rangeSlider.setMin(10.0);
+        rangeSlider.setMax(200.0);
+        rangeSlider.setStep(5.0);
+        rangeSlider.setValue(new DecimalRangeSliderValue(25.0, 150.0));
+        rangeSlider.setWidth("200px");
 
         Span serverValue = new Span();
         serverValue.setId("server-value");
-        slider.addValueChangeListener(
-                event -> serverValue.setText(String.valueOf(event.getValue())));
+        rangeSlider.addValueChangeListener(event -> serverValue.setText(
+                event.getValue().start() + "," + event.getValue().end()));
 
         NativeButton setEagerMode = new NativeButton("Set eager mode",
-                e -> slider.setValueChangeMode(ValueChangeMode.EAGER));
+                e -> rangeSlider.setValueChangeMode(ValueChangeMode.EAGER));
         setEagerMode.setId("set-eager-mode");
 
         NativeButton setLazyMode = new NativeButton("Set lazy mode", e -> {
-            slider.setValueChangeMode(ValueChangeMode.LAZY);
-            slider.setValueChangeTimeout(1500);
+            rangeSlider.setValueChangeMode(ValueChangeMode.LAZY);
+            rangeSlider.setValueChangeTimeout(1500);
         });
         setLazyMode.setId("set-lazy-mode");
 
-        add(slider, serverValue, setEagerMode, setLazyMode);
+        add(rangeSlider, serverValue, setEagerMode, setLazyMode);
     }
 }

@@ -18,16 +18,16 @@ package com.vaadin.flow.component.slider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class SliderTest extends AbstractSliderTest<Slider, Double> {
+class DecimalSliderTest extends AbstractSliderTest<DecimalSlider, Double> {
 
     @Override
-    Slider createSlider() {
-        return new Slider();
+    DecimalSlider createSlider() {
+        return new DecimalSlider();
     }
 
     @Test
     void defaultConstructor() {
-        Slider slider = new Slider();
+        DecimalSlider slider = new DecimalSlider();
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
         Assertions.assertEquals(0, slider.getValue(), 0);
@@ -35,7 +35,7 @@ class SliderTest extends AbstractSliderTest<Slider, Double> {
 
     @Test
     void minMaxConstructor() {
-        Slider slider = new Slider(10, 50);
+        DecimalSlider slider = new DecimalSlider(10, 50);
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);
         Assertions.assertEquals(1, slider.getStep(), 0);
@@ -44,7 +44,7 @@ class SliderTest extends AbstractSliderTest<Slider, Double> {
 
     @Test
     void labelConstructor() {
-        Slider slider = new Slider("Label");
+        DecimalSlider slider = new DecimalSlider("Label");
         Assertions.assertEquals("Label", slider.getLabel());
         Assertions.assertEquals(0, slider.getMin(), 0);
         Assertions.assertEquals(100, slider.getMax(), 0);
@@ -53,7 +53,7 @@ class SliderTest extends AbstractSliderTest<Slider, Double> {
 
     @Test
     void labelMinMaxConstructor() {
-        Slider slider = new Slider("Label", 10, 50);
+        DecimalSlider slider = new DecimalSlider("Label", 10, 50);
         Assertions.assertEquals("Label", slider.getLabel());
         Assertions.assertEquals(10, slider.getMin(), 0);
         Assertions.assertEquals(50, slider.getMax(), 0);

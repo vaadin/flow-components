@@ -16,17 +16,18 @@
 package com.vaadin.flow.component.slider;
 
 /**
- * An exception which is thrown when somebody attempts to use the {@link Slider}
+ * An exception which is thrown when somebody attempts to use any slider
  * component without activating the associated feature flag first.
  *
  * @author Vaadin Ltd
  */
 public class ExperimentalFeatureException extends RuntimeException {
     public ExperimentalFeatureException() {
-        super("The Slider component is currently an experimental feature and needs to be "
-                + "explicitly enabled. The component can be enabled using Copilot, in the "
-                + "experimental features tab, or by adding a "
-                + "`src/main/resources/vaadin-featureflags.properties` file with the following content: "
-                + "`com.vaadin.experimental.sliderComponent=true`");
+        super("""
+                The slider components are currently experimental and need to be \
+                explicitly enabled. The components can be enabled using Copilot, in the \
+                experimental features tab, or by adding a \
+                `src/main/resources/vaadin-featureflags.properties` file with the following content: \
+                `com.vaadin.experimental.sliderComponent=true`.""");
     }
 }

@@ -19,32 +19,33 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.slider.RangeSlider;
-import com.vaadin.flow.component.slider.RangeSliderValue;
+import com.vaadin.flow.component.slider.DecimalRangeSlider;
+import com.vaadin.flow.component.slider.DecimalRangeSliderValue;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 
 class RangeSliderBinderValidationTest {
     private static final String VALIDATION_ERROR_MESSAGE = "End value must be at least 50";
 
-    private RangeSlider rangeSlider;
+    private DecimalRangeSlider rangeSlider;
     private Binder<Bean> binder;
 
     public static class Bean {
-        private RangeSliderValue value = new RangeSliderValue(0.0, 100.0);
+        private DecimalRangeSliderValue value = new DecimalRangeSliderValue(0.0,
+                100.0);
 
-        public RangeSliderValue getValue() {
+        public DecimalRangeSliderValue getValue() {
             return value;
         }
 
-        public void setValue(RangeSliderValue value) {
+        public void setValue(DecimalRangeSliderValue value) {
             this.value = value;
         }
     }
 
     @BeforeEach
     void setup() {
-        rangeSlider = new RangeSlider();
+        rangeSlider = new DecimalRangeSlider();
         binder = new Binder<>(Bean.class);
         binder.forField(rangeSlider)
                 .withValidator(value -> value.end() >= 50,
@@ -54,7 +55,7 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void setValue_validatorPasses_noValidationError() {
-        rangeSlider.setValue(new RangeSliderValue(0.0, 50.0));
+        rangeSlider.setValue(new DecimalRangeSliderValue(0.0, 50.0));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
@@ -64,7 +65,7 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void setValue_validatorFails_hasValidationError() {
-        rangeSlider.setValue(new RangeSliderValue(0.0, 49.0));
+        rangeSlider.setValue(new DecimalRangeSliderValue(0.0, 49.0));
 
         BindingValidationStatus<?> status = binder.validate()
                 .getFieldValidationStatuses().get(0);
@@ -76,10 +77,11 @@ class RangeSliderBinderValidationTest {
 
     @Test
     void readBean_null_setsEmptyValue() {
-        rangeSlider.setValue(new RangeSliderValue(25.0, 75.0));
+        rangeSlider.setValue(new DecimalRangeSliderValue(25.0, 75.0));
         binder.readBean(null);
 
-        Assertions.assertEquals(new RangeSliderValue(rangeSlider.getMin(),
-                rangeSlider.getMax()), rangeSlider.getValue());
+        Assertions
+                .assertEquals(new DecimalRangeSliderValue(rangeSlider.getMin(),
+                        rangeSlider.getMax()), rangeSlider.getValue());
     }
 }

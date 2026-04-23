@@ -20,21 +20,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.slider.testbench.SliderElement;
+import com.vaadin.flow.component.slider.testbench.DecimalSliderElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-slider/basic")
-public class SliderBasicIT extends AbstractComponentIT {
+@TestPath("vaadin-slider/decimal-slider-basic")
+public class DecimalSliderBasicIT extends AbstractComponentIT {
 
-    private SliderElement slider;
+    private DecimalSliderElement slider;
     private TestBenchElement serverValue;
 
     @Before
     public void init() {
         open();
-        slider = $(SliderElement.class).first();
+        slider = $(DecimalSliderElement.class).first();
         serverValue = $("span").id("server-value");
     }
 

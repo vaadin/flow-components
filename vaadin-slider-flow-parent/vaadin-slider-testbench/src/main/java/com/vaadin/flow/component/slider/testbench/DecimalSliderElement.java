@@ -18,11 +18,14 @@ package com.vaadin.flow.component.slider.testbench;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element for testing a {@code RangeSlider} component.
+ * A TestBench element for testing a {@code DecimalSlider} component.
+ * <p>
+ * See {@link IntegerSliderElement} for testing {@code IntegerSlider}
+ * components.
  */
-@Element("vaadin-range-slider")
-public class RangeSliderElement extends NumberRangeSliderElement<Double> {
-    public RangeSliderElement() {
+@Element("vaadin-slider")
+public class DecimalSliderElement extends NumberSliderElement<Double> {
+    public DecimalSliderElement() {
         super(v -> v, v -> v);
     }
 }

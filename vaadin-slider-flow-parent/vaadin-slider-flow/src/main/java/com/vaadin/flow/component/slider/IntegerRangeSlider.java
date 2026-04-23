@@ -20,13 +20,13 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * IntegerRangeSlider is an input field that allows the user to select a numeric
- * range within bounds by dragging two thumbs along a track or using arrow keys
- * for precise input.
+ * IntegerRangeSlider is an input field that allows the user to select an
+ * integer range within bounds by dragging two thumbs along a track or using
+ * arrow keys for precise input.
  * <p>
  * IntegerRangeSlider uses {@link Integer} as the value type for its start and
- * end values, see {@link RangeSlider} for a version of the component that
- * supports decimal values.
+ * end values, see {@link DecimalRangeSlider} for a version of the component
+ * that supports decimal values.
  *
  * @author Vaadin Ltd.
  */

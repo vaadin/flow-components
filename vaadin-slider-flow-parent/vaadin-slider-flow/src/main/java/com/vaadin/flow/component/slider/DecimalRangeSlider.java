@@ -20,35 +20,35 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * RangeSlider is an input field that allows the user to select a numeric range
- * within bounds by dragging two thumbs along a track or using arrow keys for
- * precise input.
+ * DecimalRangeSlider is an input field that allows the user to select a decimal
+ * range within bounds by dragging two thumbs along a track or using arrow keys
+ * for precise input.
  * <p>
- * RangeSlider uses {@link Double} as the value type for its start and end
- * values, see {@link IntegerRangeSlider} for a version of the component that
- * supports integer values.
+ * DecimalRangeSlider uses {@link Double} as the value type for its start and
+ * end values, see {@link IntegerRangeSlider} for a version of the component
+ * that supports integer values.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-range-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha8")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
-public class RangeSlider
-        extends NumberRangeSlider<RangeSlider, RangeSliderValue, Double> {
+public class DecimalRangeSlider extends
+        NumberRangeSlider<DecimalRangeSlider, DecimalRangeSliderValue, Double> {
 
     /**
-     * Constructs a {@code RangeSlider} with min 0 and max 100. The initial
-     * value is [0, 100].
+     * Constructs a {@code DecimalRangeSlider} with min 0 and max 100. The
+     * initial value is [0, 100].
      * <p>
      * The step defaults to 1.
      */
-    public RangeSlider() {
+    public DecimalRangeSlider() {
         this(DEFAULT_MIN, DEFAULT_MAX);
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given min and max. The initial
-     * value is set to [min, max].
+     * Constructs a {@code DecimalRangeSlider} with the given min and max. The
+     * initial value is set to [min, max].
      * <p>
      * The step defaults to 1.
      *
@@ -57,27 +57,27 @@ public class RangeSlider
      * @param max
      *            the maximum value
      */
-    public RangeSlider(double min, double max) {
-        super(min, max, RangeSliderValue::new, v -> v, v -> v);
+    public DecimalRangeSlider(double min, double max) {
+        super(min, max, DecimalRangeSliderValue::new, v -> v, v -> v);
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, min 0, and max
-     * 100. The initial value is [0, 100].
+     * Constructs a {@code DecimalRangeSlider} with the given label, min 0, and
+     * max 100. The initial value is [0, 100].
      * <p>
      * The step defaults to 1.
      *
      * @param label
      *            the text to set as the label
      */
-    public RangeSlider(String label) {
+    public DecimalRangeSlider(String label) {
         this();
         setLabel(label);
     }
 
     /**
-     * Constructs a {@code RangeSlider} with the given label, min and max. The
-     * initial value is set to [min, max].
+     * Constructs a {@code DecimalRangeSlider} with the given label, min and
+     * max. The initial value is set to [min, max].
      * <p>
      * The step defaults to 1.
      *
@@ -88,7 +88,7 @@ public class RangeSlider
      * @param max
      *            the maximum value
      */
-    public RangeSlider(String label, double min, double max) {
+    public DecimalRangeSlider(String label, double min, double max) {
         this(min, max);
         setLabel(label);
     }
