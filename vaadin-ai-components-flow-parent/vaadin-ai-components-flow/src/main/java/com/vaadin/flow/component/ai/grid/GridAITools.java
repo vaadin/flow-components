@@ -156,6 +156,7 @@ public final class GridAITools {
                     var gridId = resolveGridId(arguments, callbacks);
                     return callbacks.getState(gridId);
                 } catch (ValidationException e) {
+                    LOGGER.warn("get_grid_state validation failed", e);
                     return "Error getting grid state: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("get_grid_state failed", e);
@@ -237,6 +238,7 @@ public final class GridAITools {
                     return "Grid '" + gridId
                             + "' data update queued successfully";
                 } catch (ValidationException e) {
+                    LOGGER.warn("update_grid_data validation failed", e);
                     return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_grid_data failed", e);

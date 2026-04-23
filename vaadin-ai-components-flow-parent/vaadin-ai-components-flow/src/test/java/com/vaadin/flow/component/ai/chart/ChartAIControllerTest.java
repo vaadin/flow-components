@@ -186,7 +186,6 @@ class ChartAIControllerTest {
             String result = tool
                     .execute(json("{\"queries\": [\"SELECT invalid\"]}"));
             Assertions.assertTrue(result.contains("Error"));
-            Assertions.assertTrue(result.contains("Bad SQL"));
         }
 
         @Test

@@ -269,6 +269,7 @@ public final class ChartAITools {
                     String chartId = resolveChartId(arguments, callbacks);
                     return callbacks.getState(chartId);
                 } catch (ValidationException e) {
+                    LOGGER.warn("get_chart_state validation failed", e);
                     return "Error getting chart state: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("get_chart_state failed", e);
@@ -530,6 +531,8 @@ public final class ChartAITools {
                     return "Chart '" + chartId
                             + "' configuration updated. Changes will be applied when the request completes.";
                 } catch (ValidationException e) {
+                    LOGGER.warn("update_chart_configuration validation failed",
+                            e);
                     return "Error updating chart configuration: "
                             + e.getMessage();
                 } catch (Exception e) {
@@ -680,6 +683,8 @@ public final class ChartAITools {
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
                 } catch (ValidationException e) {
+                    LOGGER.warn("update_chart_data_source validation failed",
+                            e);
                     return "Error updating chart data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);

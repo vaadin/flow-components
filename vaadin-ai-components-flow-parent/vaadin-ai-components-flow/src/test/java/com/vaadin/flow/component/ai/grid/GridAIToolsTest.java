@@ -152,6 +152,8 @@ class GridAIToolsTest {
 
             @Override
             public void updateData(String gridId, String query) {
+                throw new UnsupportedOperationException(
+                        "updateData not expected in getState leak test");
             }
 
             @Override
