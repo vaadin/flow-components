@@ -60,6 +60,42 @@ import java.util.Map;
  * }
  * </pre>
  *
+ * <p>
+ * <b>Dynamic schema retrieval:</b> Hand-writing the schema string works for
+ * small fixed schemas, but for larger schemas {@link java.sql.DatabaseMetaData}
+ * builds the description at runtime from a truly read-only connection and works
+ * consistently across H2, MySQL, and PostgreSQL. Including primary and foreign
+ * keys helps the LLM pick correct joins rather than guessing them from column
+ * names:
+ * </p>
+ *
+ * <pre>
+ * &#064;Override
+ * public String getSchema() {
+ *     try (var connection = readOnlyDataSource.getConnection()) {
+ *         var meta = connection.getMetaData();
+ *         var catalog = connection.getCatalog();
+ *         var schemaName = connection.getSchema();
+ *         var schema = new StringBuilder();
+ *         try (var tables = meta.getTables(catalog, schemaName, "%",
+ *                 new String[] { "TABLE" })) {
+ *             while (tables.next()) {
+ *                 var table = tables.getString("TABLE_NAME");
+ *                 // Append columns via meta.getColumns(catalog, schemaName,
+ *                 // table, "%")
+ *                 // Append primary keys via meta.getPrimaryKeys(catalog,
+ *                 // schemaName, table)
+ *                 // Append foreign keys via meta.getImportedKeys(catalog,
+ *                 // schemaName, table)
+ *             }
+ *         }
+ *         return schema.toString();
+ *     } catch (SQLException e) {
+ *         throw new RuntimeException(e);
+ *     }
+ * }
+ * </pre>
+ *
  * @author Vaadin Ltd
  */
 public interface DatabaseProvider extends Serializable {
@@ -69,6 +105,11 @@ public interface DatabaseProvider extends Serializable {
      * The description should include table names, column names with their
      * types, and optionally the SQL dialect (e.g., PostgreSQL, MySQL). The LLM
      * uses this information to generate valid SQL queries.
+     * <p>
+     * See the class-level "Dynamic schema retrieval" section for a
+     * {@link java.sql.DatabaseMetaData}-based example that builds this
+     * description at runtime.
+     * </p>
      *
      * @return a text description of the database schema, never {@code null}
      */
