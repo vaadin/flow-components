@@ -80,6 +80,7 @@
         <jetty.version>12.1.2</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
+        <jetty.scan>0</jetty.scan>
         <karaf-maven-plugin.version>4.4.10</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
@@ -366,6 +367,7 @@
                         <stopPort>${jetty.stop.port}</stopPort>
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
+                        <scan>${jetty.scan}</scan>
                         <systemProperties>
                             <force>true</force>
                             <project.basedir>${project.basedir}</project.basedir>
