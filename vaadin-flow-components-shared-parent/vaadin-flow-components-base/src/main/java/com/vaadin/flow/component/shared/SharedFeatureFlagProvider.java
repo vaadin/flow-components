@@ -24,7 +24,8 @@ public class SharedFeatureFlagProvider implements FeatureFlagProvider {
 
     public static final Feature ACCESSIBLE_DISABLED_MENU_ITEMS = new Feature(
             "Accessible disabled menu items", "accessibleDisabledMenuItems",
-            "https://github.com/vaadin/web-components/issues/10415", true, null);
+            "https://github.com/vaadin/web-components/issues/10415", true,
+            null);
 
     @Override
     public List<Feature> getFeatures() {
