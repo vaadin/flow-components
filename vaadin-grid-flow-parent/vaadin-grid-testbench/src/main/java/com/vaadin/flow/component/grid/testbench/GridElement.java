@@ -547,8 +547,9 @@ public class GridElement extends TestBenchElement {
                         return grid._getColumns().find((column) => column.selectAll !== undefined) ?? null;
                         """,
                 this);
-        if (column == null)
+        if (column == null) {
             return null;
+        }
         return column.wrap(GridColumnElement.class);
     }
 
