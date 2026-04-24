@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.annotation.Tool;
@@ -188,10 +190,56 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            return getPromptSpec(request).stream().content();
+            var chatResponses = getPromptSpec(request).stream().chatResponse();
+            return failOnMissingFinishReason(chatResponses)
+                    .map(SpringAILLMProvider::getAssistantText)
+                    .filter(text -> !text.isEmpty());
         } catch (Exception e) {
             return Flux.error(e);
         }
+    }
+
+    /**
+     * Passes the stream through unchanged, raising an
+     * {@link IllegalStateException} on completion if no chunk carried a
+     * finish_reason.
+     * <p>
+     * A compliant OpenAI-style streaming response terminates with a chunk whose
+     * finish_reason is set; any termination reason that legitimately yields
+     * empty content (TOOL_CALLS, CONTENT_FILTER, STOP with no text, etc.) still
+     * provides one. A stream that completes without ever carrying a
+     * finish_reason therefore indicates abnormal termination, typically an
+     * error that was not surfaced by the transport.
+     */
+    private static Flux<ChatResponse> failOnMissingFinishReason(
+            Flux<ChatResponse> source) {
+        var finishReasonSeen = new AtomicBoolean(false);
+        return source.doOnNext(response -> {
+            if (!finishReasonSeen.get() && hasFinishReason(response)) {
+                finishReasonSeen.set(true);
+            }
+        }).concatWith(Flux.defer(() -> finishReasonSeen.get() ? Flux.empty()
+                : Flux.error(new IllegalStateException(
+                        "LLM stream ended without a finish reason, "
+                                + "indicating abnormal termination."))));
+    }
+
+    private static boolean hasFinishReason(ChatResponse response) {
+        var result = response.getResult();
+        if (result == null) {
+            return false;
+        }
+        var reason = result.getMetadata().getFinishReason();
+        return reason != null && !reason.isEmpty();
+    }
+
+    private static String getAssistantText(ChatResponse response) {
+        var result = response.getResult();
+        if (result == null) {
+            return "";
+        }
+        var text = result.getOutput().getText();
+        return text != null ? text : "";
     }
 
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
