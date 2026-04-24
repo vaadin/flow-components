@@ -90,17 +90,12 @@ public class GridTHTDElement extends TestBenchElement {
      * @return the column element
      */
     public GridColumnElement getColumn() {
-        Double id = getPropertyDouble("_column", "__generatedTbId");
-        GridElement grid = getGrid();
-        if (id == null) {
-            grid.generatedColumnIdsIfNeeded();
-            id = getPropertyDouble("_column", "__generatedTbId");
-        }
-        if (id == null) {
+        TestBenchElement column = getPropertyElement("_column");
+        if (column == null) {
             throw new NoSuchElementException(
                     "Unable to find column. This should not really happen.");
         }
-        return new GridColumnElement(id.longValue(), grid);
+        return column.wrap(GridColumnElement.class);
     }
 
     /**
