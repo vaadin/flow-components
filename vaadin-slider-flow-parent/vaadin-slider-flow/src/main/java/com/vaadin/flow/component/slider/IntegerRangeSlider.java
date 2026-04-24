@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-range-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/slider", version = "25.2.0-alpha9")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class IntegerRangeSlider extends
         NumberRangeSlider<IntegerRangeSlider, IntegerRangeSliderValue, Integer> {
