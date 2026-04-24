@@ -81,9 +81,8 @@ public class GridElement extends TestBenchElement {
             return;
         }
         executeScript("""
-                  const grid = arguments[0];
-                  const column = arguments[1];
-                  grid.scrollToColumn(column);
+                const [grid, column] = arguments;
+                grid.scrollToColumn(column);
                 """, this, column);
     }
 
@@ -302,10 +301,13 @@ public class GridElement extends TestBenchElement {
      *         given column
      */
     public List<GridColumnElement> getAllColumns() {
-        String allColumnsJS = "return arguments[0]._getColumns().sort(function(a,b) { return a._order - b._order;});";
         @SuppressWarnings("unchecked")
         List<TestBenchElement> columns = (List<TestBenchElement>) executeScript(
-                allColumnsJS, this);
+                """
+                        const [grid] = arguments;
+                        return grid._getColumns().sort((a, b) => a._order - b._order);
+                        """,
+                this);
         return columns.stream()
                 .map(element -> element.wrap(GridColumnElement.class)).toList();
     }
@@ -318,9 +320,14 @@ public class GridElement extends TestBenchElement {
      *         given column
      */
     public List<GridColumnElement> getVisibleColumns() {
-        String visibleColumnsJS = "return arguments[0]._getColumns().filter(function(column) {return !column.hidden;}).sort(function(a,b) { return a._order - b._order;});";
+        @SuppressWarnings("unchecked")
         List<TestBenchElement> columns = (List<TestBenchElement>) executeScript(
-                visibleColumnsJS, this);
+                """
+                        const [grid] = arguments;
+                        return grid._getColumns()
+                            .filter((column) => !column.hidden)
+                            .sort((a, b) => a._order - b._order);
+                        """, this);
         return columns.stream()
                 .map(element -> element.wrap(GridColumnElement.class)).toList();
     }
@@ -535,7 +542,10 @@ public class GridElement extends TestBenchElement {
      */
     private GridColumnElement getMultiSelectColumn() {
         TestBenchElement column = (TestBenchElement) executeScript(
-                "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';})[0];",
+                """
+                        const [grid] = arguments;
+                        return grid._getColumns().find((column) => column.selectAll !== undefined) ?? null;
+                        """,
                 this);
         if (column == null)
             return null;

@@ -45,12 +45,13 @@ public class GridTRElement extends TestBenchElement {
      *         columns
      */
     public List<GridTHTDElement> getCells(GridColumnElement... columns) {
+        @SuppressWarnings("unchecked")
         List<TestBenchElement> cells = (List<TestBenchElement>) executeScript(
-                "const row = arguments[0];" //
-                        + "const columns = arguments[1];"
-                        + "return Array.from(row.children)."
-                        + "filter(function(cell) { return columns.includes(cell._column);})",
-                this, columns);
+                """
+                        const [row, columns] = arguments;
+                        return Array.from(row.children)
+                            .filter((cell) => columns.includes(cell._column));
+                        """, this, columns);
         return cells.stream().map(cell -> cell.wrap(GridTHTDElement.class))
                 .toList();
     }
