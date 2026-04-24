@@ -37,21 +37,23 @@ class MenuBarItem extends MenuItem {
     }
 
     /**
-     * Sets the menu item explicitly disabled or enabled. When disabled, the
-     * menu item is rendered as "dimmed" and prevents all user interactions
-     * (mouse and keyboard).
+     * Sets the menu item explicitly disabled or enabled. When disabled, menu
+     * bar items are rendered as "dimmed".
      * <p>
-     * Since disabled buttons (root-level items) are not focusable and cannot
-     * react to hover events by default, it can cause accessibility issues by
-     * making them entirely invisible to assistive technologies, and prevents
-     * the use of Tooltips to explain why the action is not available. This can
-     * be addressed with the feature flag {@code accessibleDisabledButtons},
-     * which makes disabled buttons focusable and hoverable, while preventing
-     * them from being triggered. To enable this feature flag, add the following
-     * line to {@code src/main/resources/vaadin-featureflags.properties}:
+     * By default, disabled items are not focusable and don't react to hover. As
+     * a result, they are hidden from assistive technologies, and it's not
+     * possible to show a tooltip to explain why they are disabled. This can be
+     * addressed by enabling several feature flags, which make disabled items
+     * focusable and hoverable, while still preventing them from being
+     * activated. To enable the feature flags, add the following lines to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
+     * # Allow focus and hover interactions with disabled menu bar root items (buttons)
      * com.vaadin.experimental.accessibleDisabledButtons = true
+     *
+     * # Allow focus and hover interactions with disabled menu bar sub-menu items
+     * com.vaadin.experimental.accessibleDisabledMenuItems = true
      * </pre>
      */
     @Override
