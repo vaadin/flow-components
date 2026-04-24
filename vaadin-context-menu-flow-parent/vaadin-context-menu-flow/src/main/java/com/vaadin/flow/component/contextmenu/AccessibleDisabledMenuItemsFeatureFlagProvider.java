@@ -13,14 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.contextmenu;
 
 import java.util.List;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlagProvider;
 
-public class SharedFeatureFlagProvider implements FeatureFlagProvider {
+public class AccessibleDisabledMenuItemsFeatureFlagProvider
+        implements FeatureFlagProvider {
 
     public static final Feature ACCESSIBLE_DISABLED_MENU_ITEMS = new Feature(
             "Accessible disabled menu items", "accessibleDisabledMenuItems",
