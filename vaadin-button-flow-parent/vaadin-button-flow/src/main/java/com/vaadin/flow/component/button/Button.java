@@ -443,16 +443,15 @@ public class Button extends Component
 
     /**
      * Sets the button explicitly disabled or enabled. When disabled, the button
-     * is rendered as "dimmed" and prevents all user interactions (mouse and
-     * keyboard).
+     * is rendered as "dimmed".
      * <p>
-     * Since disabled buttons are not focusable and cannot react to hover events
-     * by default, it can cause accessibility issues by making them entirely
-     * invisible to assistive technologies, and prevents the use of Tooltips to
-     * explain why the action is not available. This can be addressed with the
-     * feature flag {@code accessibleDisabledButtons}, which makes disabled
-     * buttons focusable and hoverable, while preventing them from being
-     * triggered. To enable this feature flag, add the following line to
+     * By default, disabled buttons are not focusable and don't react to hover.
+     * As a result, they are hidden from assistive technologies, and it's not
+     * possible to show a tooltip to explain why they are disabled. This can be
+     * addressed by enabling the feature flag {@code accessibleDisabledButtons},
+     * which makes disabled buttons focusable and hoverable, while still
+     * preventing them from being activated. To enable this feature flag, add
+     * the following line to
      * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
