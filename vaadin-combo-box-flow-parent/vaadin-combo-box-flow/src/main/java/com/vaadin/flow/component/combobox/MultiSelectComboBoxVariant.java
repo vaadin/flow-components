@@ -57,6 +57,7 @@ public enum MultiSelectComboBoxVariant implements ThemeVariant {
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),
+    AURA_FILLED("filled"),
     ALIGN_LEFT("align-left"),
     ALIGN_CENTER("align-center"),
     ALIGN_RIGHT("align-right"),
