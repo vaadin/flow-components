@@ -45,6 +45,7 @@ public enum MenuBarVariant implements ThemeVariant {
      */
     @Deprecated
     AURA_TERTIARY("tertiary"),
+    AURA_FILLED("filled"),
     PRIMARY("primary"),
     TERTIARY("tertiary"),
     SUCCESS("success"),
