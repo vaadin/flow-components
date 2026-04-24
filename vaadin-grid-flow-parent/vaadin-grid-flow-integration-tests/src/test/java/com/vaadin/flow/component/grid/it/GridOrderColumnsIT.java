@@ -82,7 +82,7 @@ public class GridOrderColumnsIT extends AbstractComponentIT {
     private void assertColumnHeaders(String... headers) {
         for (int i = 0; i < headers.length; i++) {
             Assert.assertEquals("Unexpected header for column " + i, headers[i],
-                    grid.getHeaderCell(i).getText());
+                    grid.getHeaderCell(0, i).getText());
         }
     }
 }
