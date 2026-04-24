@@ -275,7 +275,6 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the editor type
          */
-        @Synchronize("editor-type-changed")
         protected String getEditorType() {
             return getElement().getProperty("editorType", "text");
         }
@@ -460,7 +459,6 @@ public class GridPro<E> extends Grid<E> {
      *
      * @return enterNextRow value
      */
-    @Synchronize("enter-next-row-changed")
     public boolean getEnterNextRow() {
         return getElement().getProperty("enterNextRow", false);
     }
@@ -486,7 +484,6 @@ public class GridPro<E> extends Grid<E> {
      *
      * @return singleCellEdit value
      */
-    @Synchronize("single-cell-edit-changed")
     public boolean getSingleCellEdit() {
         return getElement().getProperty("singleCellEdit", false);
     }
