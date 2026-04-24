@@ -80,10 +80,7 @@ public class GridElement extends TestBenchElement {
         if (column == null) {
             return;
         }
-        executeScript("""
-                const [grid, column] = arguments;
-                grid.scrollToColumn(column);
-                """, this, column);
+        callFunction("scrollToColumn", column);
     }
 
     /**
