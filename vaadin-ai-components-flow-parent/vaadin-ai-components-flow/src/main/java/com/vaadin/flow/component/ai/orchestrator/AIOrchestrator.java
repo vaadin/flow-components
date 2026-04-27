@@ -471,9 +471,9 @@ public class AIOrchestrator implements Serializable {
         if (controller != null) {
             ui.access(() -> {
                 try {
-                    controller.onRequestCompleted();
+                    controller.onResponseComplete();
                 } catch (Exception e) {
-                    LOGGER.error("Error in controller onRequestCompleted", e);
+                    LOGGER.error("Error in controller onResponseComplete", e);
                     // Append a separate assistant message instead of
                     // rewriting the LLM's response. By the time this
                     // runs, the response is already in the provider's

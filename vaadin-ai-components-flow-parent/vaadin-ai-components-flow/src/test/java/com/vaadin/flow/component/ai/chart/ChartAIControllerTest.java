@@ -134,7 +134,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
@@ -155,7 +155,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
@@ -189,7 +189,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_renderFails_propagates() {
+        void onResponseComplete_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -201,7 +201,7 @@ class ChartAIControllerTest {
                     "Render failure");
 
             var ex = Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onRequestCompleted());
+                    () -> controller.onResponseComplete());
             Assertions.assertEquals("Render failure", ex.getMessage());
         }
 
@@ -225,7 +225,7 @@ class ChartAIControllerTest {
                             + ChartSerialization.toJSON(configuration) + "}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             // Verify plot options were applied to the chart
             var applied = (PlotOptionsColumn) chart.getConfiguration()
@@ -285,7 +285,7 @@ class ChartAIControllerTest {
                     .findFirst().get()
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(1, series.size());
@@ -315,7 +315,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             ChartState state = controller.getState();
             Assertions.assertNotNull(state);
@@ -338,7 +338,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}, \"title\": {\"text\": \"Original\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             ChartState savedState = controller.getState();
 
@@ -485,7 +485,7 @@ class ChartAIControllerTest {
     class StateChangeListeners {
 
         @Test
-        void firesAfterOnRequestCompleted() {
+        void firesAfterOnResponseComplete() {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
@@ -497,7 +497,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             Assertions.assertNotNull(captured.get());
             Assertions.assertEquals(List.of("SELECT 1"),
@@ -525,7 +525,7 @@ class ChartAIControllerTest {
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onRequestCompleted());
+                    () -> controller.onResponseComplete());
 
             Assertions.assertNull(captured.get());
         }
@@ -544,7 +544,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             Assertions.assertNull(captured.get());
         }
@@ -559,15 +559,15 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             List<ChartState> states = new ArrayList<>();
             controller.addStateChangeListener(states::add);
 
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             Assertions.assertTrue(states.isEmpty(),
-                    "Second onRequestCompleted should not fire listeners "
+                    "Second onResponseComplete should not fire listeners "
                             + "because pending state was already cleared");
         }
 
@@ -588,7 +588,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             Assertions.assertNotNull(secondListenerState.get(),
                     "Second listener should still fire even if the "
@@ -603,7 +603,7 @@ class ChartAIControllerTest {
             var tools = controller.getTools();
             findTool(tools, "update_chart_configuration").execute(json(
                     "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             Assertions.assertNull(captured.get());
         }
@@ -618,7 +618,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_appliesStateAndFiresListenerImmediately() {
+        void onResponseComplete_appliesStateAndFiresListenerImmediately() {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
@@ -630,7 +630,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onRequestCompleted();
+            controller.onResponseComplete();
 
             // Attachment does not gate the controller: configuration
             // lives on the server side and Flow queues any JS calls
@@ -642,7 +642,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onRequestCompleted_renderFails_propagates() {
+        void onResponseComplete_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -655,7 +655,7 @@ class ChartAIControllerTest {
             // Errors propagate regardless of attach state so the
             // orchestrator can still surface them in the chat UI.
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onRequestCompleted());
+                    () -> controller.onResponseComplete());
         }
 
         @Test

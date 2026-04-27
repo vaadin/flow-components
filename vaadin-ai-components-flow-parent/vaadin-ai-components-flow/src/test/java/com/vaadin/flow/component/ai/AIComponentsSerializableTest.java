@@ -345,7 +345,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 // Test controller doesn't need to handle request completion
             }
         };

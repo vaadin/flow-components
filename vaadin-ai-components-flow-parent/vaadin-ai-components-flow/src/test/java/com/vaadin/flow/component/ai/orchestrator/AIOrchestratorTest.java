@@ -1630,7 +1630,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withController_callsOnRequestCompleted() {
+    void builder_withController_callsOnResponseComplete() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1647,7 +1647,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 callCount.incrementAndGet();
             }
         };
@@ -1661,7 +1661,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withControllerOnRequestCompletedThrows_showsErrorMessage()
+    void builder_withControllerOnResponseCompleteThrows_showsErrorMessage()
             throws InterruptedException {
         var mockMessage = createMockMessage();
         var errorText = "An error occurred. Please try again.";
@@ -1684,7 +1684,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 throw new RuntimeException("Controller error");
             }
         };
@@ -1715,7 +1715,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withController_onRequestCompletedNotCalledOnError() {
+    void builder_withController_onResponseCompleteNotCalledOnError() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1732,7 +1732,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 callCount.incrementAndGet();
             }
         };
@@ -1743,7 +1743,7 @@ class AIOrchestratorTest {
         orchestrator.prompt("Hello");
 
         Assertions.assertEquals(0, callCount.get(),
-                "onRequestCompleted should not be called on error");
+                "onResponseComplete should not be called on error");
     }
 
     @Test
@@ -1765,7 +1765,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 controllerCallCount.incrementAndGet();
             }
         };
@@ -2160,7 +2160,7 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onRequestCompleted() {
+            public void onResponseComplete() {
                 // no-op
             }
         };
