@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,17 +18,19 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.google.gson.*;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.*;
-import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @TestPath("vaadin-charts/dynamic/server-side-events")
 public class ServerSideEventsIT extends AbstractChartIT {
@@ -77,8 +78,7 @@ public class ServerSideEventsIT extends AbstractChartIT {
         HistoryEvent event = findHistoryEventOfType(
                 SeriesLegendItemClickEvent.class);
         Assert.assertNotNull(event);
-        Assert.assertFalse(
-                event.as(SeriesLegendItemClickEvent.class).isShiftKey());
+        Assert.assertFalse(event.at("/details/shiftKey").asBoolean());
     }
 
     @Test
@@ -93,8 +93,7 @@ public class ServerSideEventsIT extends AbstractChartIT {
         HistoryEvent event = findHistoryEventOfType(
                 SeriesLegendItemClickEvent.class);
         Assert.assertNotNull(event);
-        Assert.assertTrue(
-                event.as(SeriesLegendItemClickEvent.class).isShiftKey());
+        Assert.assertTrue(event.at("/details/shiftKey").asBoolean());
     }
 
     @Test
@@ -125,8 +124,7 @@ public class ServerSideEventsIT extends AbstractChartIT {
         HistoryEvent event = findHistoryEventOfType(
                 SeriesCheckboxClickEvent.class);
         Assert.assertNotNull(event);
-        Assert.assertEquals(1,
-                event.as(SeriesCheckboxClickEvent.class).getSeriesItemIndex());
+        Assert.assertEquals(1, event.at("/seriesIndex").asInt());
     }
 
     @Test
@@ -138,7 +136,7 @@ public class ServerSideEventsIT extends AbstractChartIT {
         HistoryEvent event = findHistoryEventOfType(
                 SeriesCheckboxClickEvent.class);
         Assert.assertNotNull(event);
-        Assert.assertTrue(event.as(SeriesCheckboxClickEvent.class).isChecked());
+        Assert.assertTrue(event.at("/checked").asBoolean());
     }
 
     @Test
@@ -287,15 +285,6 @@ public class ServerSideEventsIT extends AbstractChartIT {
         return $(ButtonElement.class).id("toggleExtremes");
     }
 
-    private static class DataSeriesDeserializer
-            implements JsonDeserializer<Series> {
-        @Override
-        public Series deserialize(JsonElement series, Type type,
-                JsonDeserializationContext jdc) throws JsonParseException {
-            return new Gson().fromJson(series, DataSeries.class);
-        }
-    }
-
     private List<HistoryEvent> getHistoryEvents() {
         TestBenchElement historyLayout = $(TestBenchElement.class)
                 .id("history");
@@ -314,19 +303,23 @@ public class ServerSideEventsIT extends AbstractChartIT {
     }
 
     private static class HistoryEvent {
+        private static final ObjectMapper MAPPER = JsonMapper.builder().build();
+
         String eventType;
-        String eventDetailsJson;
+        JsonNode eventDetails;
 
         public HistoryEvent(String eventType, String eventDetailsJson) {
             this.eventType = eventType;
-            this.eventDetailsJson = eventDetailsJson;
+            try {
+                this.eventDetails = MAPPER.readTree(eventDetailsJson);
+            } catch (JacksonException e) {
+                throw new RuntimeException("Failed to parse event details JSON",
+                        e);
+            }
         }
 
-        public <T> T as(Class<T> clazz) {
-            Gson gson = new GsonBuilder().registerTypeAdapter(Series.class,
-                    new DataSeriesDeserializer()).create();
-
-            return gson.fromJson(this.eventDetailsJson, clazz);
+        public JsonNode at(String path) {
+            return eventDetails.at(path);
         }
     }
 }

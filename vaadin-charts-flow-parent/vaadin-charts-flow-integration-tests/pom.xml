@@ -12,12 +12,6 @@
     <description>Vaadin Charts Integration Tests</description>
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
             <version>${flow.version}</version>
