@@ -28,12 +28,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -803,6 +806,173 @@ class SpringAILLMProviderTest {
         Assertions.assertTrue(userMsg.getMedia().isEmpty());
     }
 
+    // --- Streaming finish_reason / abnormal termination tests ---
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void stream_streamingWithMissingFinishReason_throwsIllegalStateException(
+            String reason) {
+        // OpenAI-compatible backends emit "" for an unset finish_reason;
+        // both "" and null must be treated as missing.
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("", reason)));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).collectList().block());
+    }
+
+    @Test
+    void stream_streamingCompletesEmptyWithNoChunks_throwsIllegalStateException() {
+        // Zero-chunk stream: doOnNext never fires; the concatWith tail raises.
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.empty());
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).collectList().block());
+    }
+
+    @Test
+    void stream_streamingWithValidFinishReasonButEmptyContent_completesWithoutError() {
+        // Tool-only turns and content-filter stops produce empty text but
+        // always carry a finish_reason; not errors.
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("", "STOP")));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void stream_streamingWithLengthFinishReason_emitsPartialContent() {
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("partial", "LENGTH")));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("partial"), results);
+    }
+
+    @Test
+    void stream_streamingWithFinishReasonOnlyOnLastChunk_completesNormally() {
+        // Real OpenAI streams set finish_reason only on the terminal chunk.
+        var request = createSimpleRequest("Hello");
+        var chunk1 = mockChatResponse("Hel", null);
+        var chunk2 = mockChatResponse("lo", null);
+        var terminal = mockChatResponse(" World", "STOP");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(chunk1, chunk2, terminal));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hel", "lo", " World"), results);
+    }
+
+    @Test
+    void stream_streamingWithNullGeneration_throwsIllegalStateException() {
+        // ChatResponse(emptyList()) yields getResult() == null and no
+        // finish_reason: indistinguishable from an abort.
+        var request = createSimpleRequest("Hello");
+        var responseWithNoResult = new ChatResponse(Collections.emptyList());
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(responseWithNoResult));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).collectList().block());
+    }
+
+    @Test
+    void stream_streamingWithNullGenerationButFollowedByFinish_completesNormally() {
+        // A null-result chunk is tolerated as long as another chunk signs
+        // the stream off with a finish_reason.
+        var request = createSimpleRequest("Hello");
+        var empty = new ChatResponse(Collections.emptyList());
+        var terminal = mockChatResponse("ok", "STOP");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(empty, terminal));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("ok"), results);
+    }
+
+    @Test
+    void stream_streamingWithNullTextInMessage_filtersOut() {
+        // AssistantMessage.getText() is @Nullable; null text is filtered
+        // rather than propagated as the empty string.
+        var request = createSimpleRequest("Hello");
+        var nullTextMessage = new AssistantMessage((String) null);
+        var response = new ChatResponse(
+                List.of(new Generation(nullTextMessage, ChatGenerationMetadata
+                        .builder().finishReason("STOP").build())));
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(response));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertNotNull(results);
+        Assertions.assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void stream_streamingWithMultipleChunksAndMixedEmptyContent_emitsOnlyNonEmpty() {
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("", null),
+                        mockChatResponse("Hello", null),
+                        mockChatResponse("", null),
+                        mockChatResponse(" World", "STOP")));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hello", " World"), results);
+    }
+
+    @Test
+    void stream_streamingUpstreamErrorsDuringStream_propagatesOriginalError() {
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("network broken");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.error(originalError));
+
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+        Assertions.assertEquals(originalError, thrown);
+    }
+
+    @Test
+    void stream_streamingUpstreamErrorsAfterFinishReason_propagatesOriginalError() {
+        // finish_reason was already seen, yet an upstream error must still
+        // win over our abort detector.
+        var request = createSimpleRequest("Hello");
+        var chunk = mockChatResponse("data", "STOP");
+        var originalError = new RuntimeException("broken after chunk");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(
+                        Flux.just(chunk).concatWith(Flux.error(originalError)));
+
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+        Assertions.assertEquals(originalError, thrown);
+    }
+
+    @Test
+    void stream_streamingChatModelThrowsSynchronously_propagatesError() {
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("stream API down");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenThrow(originalError);
+
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+        Assertions.assertEquals(originalError, thrown);
+    }
+
     private void mockSimpleChat(String responseText) {
         var response = mockSimpleChatResponse(responseText);
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
@@ -810,8 +980,18 @@ class SpringAILLMProviderTest {
     }
 
     private ChatResponse mockSimpleChatResponse(String text) {
+        // Single-chunk responses are always terminal; tag them with STOP so
+        // the finish_reason gate is satisfied.
+        return mockChatResponse(text, "STOP");
+    }
+
+    private static ChatResponse mockChatResponse(String text,
+            String finishReason) {
         var assistantMessage = new AssistantMessage(text);
-        var generation = new Generation(assistantMessage);
+        var metadata = finishReason == null ? ChatGenerationMetadata.NULL
+                : ChatGenerationMetadata.builder().finishReason(finishReason)
+                        .build();
+        var generation = new Generation(assistantMessage, metadata);
         return new ChatResponse(List.of(generation));
     }
 
