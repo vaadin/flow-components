@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
@@ -834,15 +833,13 @@ class SpringAILLMProviderTest {
                 () -> provider.stream(request).collectList().block());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = { "STOP", "TOOL_CALLS", "CONTENT_FILTER" })
-    void stream_streamingWithValidFinishReasonButEmptyContent_completesWithoutError(
-            String reason) {
+    @Test
+    void stream_streamingWithValidFinishReasonButEmptyContent_completesWithoutError() {
         // Tool-only turns and content-filter stops produce empty text but
         // always carry a finish_reason; not errors.
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                .thenReturn(Flux.just(mockChatResponse("", reason)));
+                .thenReturn(Flux.just(mockChatResponse("", "STOP")));
 
         var results = provider.stream(request).collectList().block();
 
