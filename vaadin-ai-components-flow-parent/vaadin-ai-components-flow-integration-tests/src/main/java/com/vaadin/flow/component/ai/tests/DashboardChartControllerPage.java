@@ -41,7 +41,7 @@ import reactor.core.publisher.Flux;
 /**
  * Test page for ChartAIController with Dashboard. Uses an async LLM provider
  * that streams from a background thread (like a real LLM) and invokes chart
- * tools, so the orchestrator's onRequestCompleted() runs via ui.access() from
+ * tools, so the orchestrator's onResponseComplete() runs via ui.access() from
  * the background thread. This reproduces the real-world timing where the
  * dashboard widget addition and chart rendering happen across separate Push
  * updates, causing the connectedCallback/updateConfiguration microtask race.
@@ -74,7 +74,7 @@ public class DashboardChartControllerPage extends Div {
         var renderBarChart = new NativeButton("Render Bar Chart", e -> {
             // Add fresh chart widget to dashboard, then prompt the
             // async LLM which will call chart tools from a background
-            // thread and trigger onRequestCompleted via ui.access().
+            // thread and trigger onResponseComplete via ui.access().
             var widget = new DashboardWidget();
             widget.setTitle("Revenue");
             widget.setContent(chart);

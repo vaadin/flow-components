@@ -66,7 +66,7 @@ import tools.jackson.databind.JsonNode;
  * </ul>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onRequestCompleted()}, avoiding partial state and multiple redraws
+ * {@link #onResponseComplete()}, avoiding partial state and multiple redraws
  * during a multi-tool LLM turn. The grid state is stored directly on the
  * {@link Grid} component, so it survives serialization.
  * </p>
@@ -206,14 +206,14 @@ public class GridAIController implements AIController {
     }
 
     @Override
-    public void onRequestCompleted() {
+    public void onResponseComplete() {
         var entry = GridEntry.get(grid);
         if (entry == null || !entry.hasPendingState()) {
-            LOGGER.debug("onRequestCompleted: no pending query");
+            LOGGER.debug("onResponseComplete: no pending query");
             return;
         }
         var query = entry.getPendingQuery();
-        LOGGER.info("onRequestCompleted: applying query: {}", query);
+        LOGGER.info("onResponseComplete: applying query: {}", query);
         // Render synchronously so exceptions propagate to the orchestrator,
         // which runs this on the UI thread under session lock. Attachment
         // is not required: grid state (columns, data provider) is

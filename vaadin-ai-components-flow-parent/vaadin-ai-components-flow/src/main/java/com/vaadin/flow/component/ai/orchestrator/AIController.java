@@ -64,5 +64,5 @@ public interface AIController {
      * generic error message.
      * </p>
      */
-    void onRequestCompleted();
+    void onResponseComplete();
 }

@@ -57,7 +57,7 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onRequestCompleted()}, avoiding partial state and multiple redraws
+ * {@link #onResponseComplete()}, avoiding partial state and multiple redraws
  * during a multi-tool LLM turn. The chart state is stored directly on the
  * {@link Chart} component, so it survives serialization.
  * </p>
@@ -301,7 +301,7 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public void onRequestCompleted() {
+    public void onResponseComplete() {
         ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || !entry.hasPendingState()) {
             return;

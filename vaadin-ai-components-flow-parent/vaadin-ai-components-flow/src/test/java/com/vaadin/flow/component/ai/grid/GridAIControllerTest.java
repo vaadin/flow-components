@@ -184,12 +184,12 @@ class GridAIControllerTest {
 
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onRequestCompleted());
+                () -> controller.onResponseComplete());
 
         Assertions.assertNull(controller.getState());
     }
 
-    // --- onRequestCompleted ---
+    // --- onResponseComplete ---
 
     @Test
     void currentStateTool_afterUpdate_returnsQuery() {
@@ -202,21 +202,21 @@ class GridAIControllerTest {
     }
 
     @Test
-    void onRequestCompleted_noPending_doesNotChangeGrid() {
+    void onResponseComplete_noPending_doesNotChangeGrid() {
         // No pending query — should be a no-op
         var columnsBefore = grid.getColumns().size();
-        controller.onRequestCompleted();
+        controller.onResponseComplete();
         Assertions.assertEquals(columnsBefore, grid.getColumns().size());
         Assertions.assertNull(controller.getState());
     }
 
     @Test
-    void onRequestCompleted_clearsPending_secondCallIsNoOp() {
+    void onResponseComplete_clearsPending_secondCallIsNoOp() {
         dbProvider.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         // Second call — no pending query
-        controller.onRequestCompleted();
+        controller.onResponseComplete();
 
         // State should still reflect the first update
         var stateTool = findTool("get_grid_state");
@@ -323,7 +323,7 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onRequestCompleted());
+                () -> controller.onResponseComplete());
 
         // Previous successful query should be retained
         Assertions.assertEquals("SELECT a FROM good",
@@ -342,7 +342,7 @@ class GridAIControllerTest {
     // --- State change listeners ---
 
     @Test
-    void stateChangeListener_firesAfterOnRequestCompleted() {
+    void stateChangeListener_firesAfterOnResponseComplete() {
         var captured = new AtomicReference<GridState>();
         controller.addStateChangeListener(captured::set);
 
@@ -364,7 +364,7 @@ class GridAIControllerTest {
 
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onRequestCompleted());
+                () -> controller.onResponseComplete());
 
         Assertions.assertNull(captured.get());
     }
@@ -400,10 +400,10 @@ class GridAIControllerTest {
         var states = new ArrayList<GridState>();
         controller.addStateChangeListener(states::add);
 
-        controller.onRequestCompleted();
+        controller.onResponseComplete();
 
         Assertions.assertTrue(states.isEmpty(),
-                "Second onRequestCompleted should not fire listeners");
+                "Second onResponseComplete should not fire listeners");
     }
 
     @Test
@@ -935,12 +935,12 @@ class GridAIControllerTest {
     }
 
     /**
-     * Simulates a full LLM update cycle: tool call + onRequestCompleted.
+     * Simulates a full LLM update cycle: tool call + onResponseComplete.
      */
     private void simulateUpdate(String query) {
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"" + query + "\"}"));
-        controller.onRequestCompleted();
+        controller.onResponseComplete();
     }
 
     private static Map<String, Object> row(Object... keysAndValues) {
