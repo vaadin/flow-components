@@ -100,8 +100,7 @@ class GridColumnOrderHelper<T> {
 
         // This will reset all column orders so that the visual column order
         // will also reflect that in the DOM.
-        grid.getElement()
-                .executeJs("this._updateOrders(this._columnTree, null)");
+        grid.getElement().callJsFunction("_resetColumnOrder");
     }
 
     /**
