@@ -35,6 +35,9 @@ import tools.jackson.databind.JsonNode;
  * dashboard). Callers provide a {@link Callbacks} implementation for state
  * retrieval and mutation, keeping this class decoupled from {@code Grid}.
  * </p>
+ * <p>
+ * Intended only for internal use and can be removed in the future.
+ * </p>
  *
  * @author Vaadin Ltd
  */
@@ -121,7 +124,7 @@ public final class GridAITools {
      *            the callbacks for grid state access, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolSpec getGridState(Callbacks callbacks) {
+    static LLMProvider.ToolSpec getGridState(Callbacks callbacks) {
         Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
@@ -174,7 +177,7 @@ public final class GridAITools {
      *            the callbacks for grid mutation, not {@code null}
      * @return the tool definition, never {@code null}
      */
-    public static LLMProvider.ToolSpec updateGridData(Callbacks callbacks) {
+    static LLMProvider.ToolSpec updateGridData(Callbacks callbacks) {
         Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
             @Override
