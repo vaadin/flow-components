@@ -51,4 +51,16 @@ public class ViewIT extends AbstractComponentIT {
 
         Assert.assertEquals(0.785398, view.getRotation(), 0.0001);
     }
+
+    @Test
+    public void zoomLimits_appliedToOpenLayersView() {
+        MapElement map = $(MapElement.class).first();
+        MapElement.ViewReference view = map.getMapReference().getView();
+
+        $("button").id("set-min-zoom-button").click();
+        $("button").id("set-max-zoom-button").click();
+
+        Assert.assertEquals(3, view.getMinZoom(), 0.0001);
+        Assert.assertEquals(10, view.getMaxZoom(), 0.0001);
+    }
 }
