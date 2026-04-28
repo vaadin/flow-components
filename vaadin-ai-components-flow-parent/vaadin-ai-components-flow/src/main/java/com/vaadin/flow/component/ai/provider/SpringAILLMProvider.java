@@ -204,24 +204,21 @@ public class SpringAILLMProvider implements LLMProvider {
      * {@link IllegalStateException} on completion if the most recent chunk did
      * not represent a terminal model state.
      * <p>
-     * A streaming chunk is terminal when it carries a finish_reason and the
-     * response has no pending tool calls. The second condition uses
-     * {@link ChatResponse#hasToolCalls()} - the same method Spring AI's default
-     * {@code ToolExecutionEligibilityPredicate} consults to decide whether to
-     * dispatch tools and start a follow-up roundtrip. Pending tool calls mean
-     * such a follow-up is expected, and its chunks would be concatenated to
+     * A streaming chunk is terminal when it carries a {@code finish_reason} and
+     * the response has no pending tool calls. Pending tool calls mean a
+     * follow-up round-trip is expected, and its chunks would be concatenated to
      * this same Flux, so a chunk with tool calls is intermediate even when it
-     * carries a finish_reason. A stream that completes on a non-terminal chunk
-     * - whether because no chunk ever carried a finish_reason at all, or
-     * because the last one still had tool calls pending - indicates abnormal
-     * termination.
+     * carries a {@code finish_reason}. A stream that completes on a
+     * non-terminal chunk - whether because no chunk ever carried a
+     * {@code finish_reason} at all, or because the last one still had tool
+     * calls pending - indicates abnormal termination.
      */
     private static Flux<ChatResponse> failOnMissingFinishReason(
             Flux<ChatResponse> source) {
-        var lastChunkTerminal = new AtomicBoolean(false);
+        var isLastChunkTerminal = new AtomicBoolean(false);
         return source.doOnNext(
-                response -> lastChunkTerminal.set(isTerminalChunk(response)))
-                .concatWith(Flux.defer(() -> lastChunkTerminal.get()
+                response -> isLastChunkTerminal.set(isTerminalChunk(response)))
+                .concatWith(Flux.defer(() -> isLastChunkTerminal.get()
                         ? Flux.empty()
                         : Flux.error(new IllegalStateException(
                                 "LLM stream ended without reaching a terminal "

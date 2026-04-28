@@ -860,13 +860,6 @@ class SpringAILLMProviderTest {
 
     @Test
     void stream_streamingEndsWithPendingToolCalls_throwsIllegalStateException() {
-        // Spring AI dispatches tools whenever the assistant message has
-        // pending tool calls (its ToolExecutionEligibilityPredicate). After
-        // dispatch a follow-up roundtrip is concatenated to this same Flux.
-        // If the follow-up silently aborts (server emits no chunks - e.g.
-        // context exceeded after tool result is added), the merged stream
-        // ends on a chunk whose tool calls are still pending. That is
-        // abnormal termination: the model never reached a terminal state.
         var request = createSimpleRequest("invoke tool");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
@@ -876,18 +869,13 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_streamingMultiRoundtripCompletesSuccessfully_emitsTerminalText() {
-        // Counterpart: the merged Flux from a tool-using exchange contains
-        // chunks for each roundtrip. As long as the FINAL chunk has no
-        // pending tool calls (and a finish_reason set), the stream is
-        // healthy regardless of intermediate tool-call chunks.
+    void stream_streamingMultiRoundTripCompletesSuccessfully_emitsTerminalText() {
         var request = createSimpleRequest("invoke tool");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
                         mockChatResponse("done", "STOP")));
 
         var results = provider.stream(request).collectList().block();
-
         Assertions.assertEquals(List.of("done"), results);
     }
 
