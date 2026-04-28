@@ -1018,9 +1018,8 @@ class SpringAILLMProviderTest {
 
     private static ChatResponse mockChatResponseWithPendingToolCall() {
         // Mirrors what a real backend emits at the end of a tool-using
-        // roundtrip: empty text, a tool call attached to the assistant
-        // message, and a finish_reason set (the exact value isn't
-        // inspected by the production code).
+        // round-trip: empty text, a tool call attached to the assistant
+        // message, and a finish_reason set.
         var toolCall = new AssistantMessage.ToolCall("call_1", "function",
                 "doSomething", "{}");
         var assistantMessage = AssistantMessage.builder().content("")
