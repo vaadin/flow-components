@@ -191,7 +191,7 @@ public class SpringAILLMProvider implements LLMProvider {
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
             var chatResponses = getPromptSpec(request).stream().chatResponse();
-            return failOnMissingFinishReason(chatResponses)
+            return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
         } catch (Exception e) {
@@ -200,9 +200,8 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Passes the stream through unchanged, raising an
-     * {@link IllegalStateException} on completion if no chunk in the stream
-     * ever represented a terminal model state.
+     * Passes the stream through unchanged, logging a warning on completion if
+     * no chunk in the stream ever represented a terminal model state.
      * <p>
      * A streaming chunk is terminal when it carries a {@code finish_reason} and
      * the response has no pending tool calls. Pending tool calls mean a
@@ -214,20 +213,27 @@ public class SpringAILLMProvider implements LLMProvider {
      * back. A stream that completes without ever seeing a terminal chunk -
      * whether because no chunk carried a {@code finish_reason} at all, or
      * because the only terminal-looking chunks still had tool calls pending -
-     * indicates abnormal termination.
+     * may indicate abnormal termination.
      */
-    private static Flux<ChatResponse> failOnMissingFinishReason(
+    private static Flux<ChatResponse> warnOnMissingFinishReason(
             Flux<ChatResponse> source) {
         var terminalSeen = new AtomicBoolean(false);
         return source.doOnNext(response -> {
             if (isTerminalChunk(response)) {
                 terminalSeen.set(true);
             }
-        }).concatWith(Flux.defer(() -> terminalSeen.get() ? Flux.empty()
-                : Flux.error(new IllegalStateException(
-                        "LLM stream ended without reaching a terminal "
-                                + "state, indicating abnormal "
-                                + "termination."))));
+        }).concatWith(Flux.defer(() -> {
+            if (!terminalSeen.get()) {
+                LOGGER.warn("LLM stream ended without observing a terminal "
+                        + "chunk (one carrying finish_reason and "
+                        + "no pending tool calls). This may "
+                        + "indicate a silent abnormal termination "
+                        + "such as an upstream error or transport "
+                        + "closure; if responses appear truncated "
+                        + "this warning is the signal.");
+            }
+            return Flux.empty();
+        }));
     }
 
     private static boolean isTerminalChunk(ChatResponse response) {

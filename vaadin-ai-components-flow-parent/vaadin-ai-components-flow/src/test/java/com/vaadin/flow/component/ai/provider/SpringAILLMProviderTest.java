@@ -69,7 +69,7 @@ class SpringAILLMProviderTest {
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
         provider = new SpringAILLMProvider(mockChatModel);
-        logger.clear();
+        logger.clearAll();
     }
 
     @Test
@@ -810,27 +810,29 @@ class SpringAILLMProviderTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    void stream_streamingWithMissingFinishReason_throwsIllegalStateException(
-            String reason) {
+    void stream_streamingWithMissingFinishReason_logsWarning(String reason) {
         // OpenAI-compatible backends emit "" for an unset finish_reason;
-        // both "" and null must be treated as missing.
+        // both "" and null must be treated as missing and surfaced via
+        // the abnormal-termination warning.
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponse("", reason)));
 
-        Assertions.assertThrows(IllegalStateException.class,
-                () -> provider.stream(request).collectList().block());
+        provider.stream(request).collectList().block();
+
+        assertAbnormalTerminationWarningLogged();
     }
 
     @Test
-    void stream_streamingCompletesEmptyWithNoChunks_throwsIllegalStateException() {
-        // Zero-chunk stream: doOnNext never fires; the concatWith tail raises.
+    void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
+        // Zero-chunk stream: nothing ever flips the terminal gate.
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.empty());
 
-        Assertions.assertThrows(IllegalStateException.class,
-                () -> provider.stream(request).collectList().block());
+        provider.stream(request).collectList().block();
+
+        assertAbnormalTerminationWarningLogged();
     }
 
     @Test
@@ -859,13 +861,16 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_streamingEndsWithPendingToolCalls_throwsIllegalStateException() {
+    void stream_streamingEndsWithPendingToolCalls_logsWarning() {
+        // A tool-call chunk is intermediate, not terminal, so a stream
+        // that ends right after one has never seen a real terminal chunk.
         var request = createSimpleRequest("invoke tool");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
 
-        Assertions.assertThrows(IllegalStateException.class,
-                () -> provider.stream(request).collectList().block());
+        provider.stream(request).collectList().block();
+
+        assertAbnormalTerminationWarningLogged();
     }
 
     @Test
@@ -880,19 +885,21 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_streamingToolCallFollowedByNonTerminalChunks_throwsIllegalStateException() {
-        // Multi-roundtrip silent abort: a tool-call chunk is observed (which
-        // is intermediate, not terminal), then the follow-up round produces
-        // text but never reaches a real finish_reason - e.g. the provider
-        // truncates the stream after an upstream error. The sticky check
-        // must still fire because no terminal chunk was ever seen.
+    void stream_streamingToolCallFollowedByNonTerminalChunks_logsWarning() {
+        // Multi-roundtrip silent abort: a tool-call chunk is observed
+        // (which is intermediate, not terminal), then the follow-up round
+        // produces text but never reaches a real finish_reason - e.g. the
+        // provider truncates the stream after an upstream error. The
+        // sticky check must still surface this because no terminal chunk
+        // was ever seen.
         var request = createSimpleRequest("invoke tool");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
                         mockChatResponse("partial", null)));
 
-        Assertions.assertThrows(IllegalStateException.class,
-                () -> provider.stream(request).collectList().block());
+        provider.stream(request).collectList().block();
+
+        assertAbnormalTerminationWarningLogged();
     }
 
     @Test
@@ -911,7 +918,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_streamingWithNullGeneration_throwsIllegalStateException() {
+    void stream_streamingWithNullGeneration_logsWarning() {
         // ChatResponse(emptyList()) yields getResult() == null and no
         // finish_reason: indistinguishable from an abort.
         var request = createSimpleRequest("Hello");
@@ -919,8 +926,9 @@ class SpringAILLMProviderTest {
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(responseWithNoResult));
 
-        Assertions.assertThrows(IllegalStateException.class,
-                () -> provider.stream(request).collectList().block());
+        provider.stream(request).collectList().block();
+
+        assertAbnormalTerminationWarningLogged();
     }
 
     @Test
@@ -943,8 +951,8 @@ class SpringAILLMProviderTest {
         // OpenAI's stream_options.include_usage=true appends a final
         // empty-choices chunk carrying usage metadata after the terminal
         // chunk. Once a real terminal chunk has been observed, a trailing
-        // metadata-only chunk must not flip the gate back and fail the
-        // response.
+        // metadata-only chunk must not flip the gate back and trigger the
+        // abnormal-termination warning.
         var request = createSimpleRequest("Hello");
         var terminal = mockChatResponse("Hi", "STOP");
         var trailingUsage = new ChatResponse(Collections.emptyList());
@@ -954,6 +962,7 @@ class SpringAILLMProviderTest {
         var results = provider.stream(request).collectList().block();
 
         Assertions.assertEquals(List.of("Hi"), results);
+        assertAbnormalTerminationWarningNotLogged();
     }
 
     @Test
@@ -1026,6 +1035,29 @@ class SpringAILLMProviderTest {
         var thrown = Assertions.assertThrows(RuntimeException.class,
                 () -> provider.stream(request).collectList().block());
         Assertions.assertEquals(originalError, thrown);
+    }
+
+    private void assertAbnormalTerminationWarningLogged() {
+        // The warning is emitted from a Reactor scheduler thread (Spring
+        // AI's chatResponse pipeline), so we have to query across all
+        // threads rather than just the current one.
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("LLM stream ended without observing a "
+                                + "terminal chunk"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected abnormal-termination warning to be logged");
+    }
+
+    private void assertAbnormalTerminationWarningNotLogged() {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("LLM stream ended without observing a "
+                                + "terminal chunk"))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(),
+                "Expected no abnormal-termination warning");
     }
 
     private void mockSimpleChat(String responseText) {
