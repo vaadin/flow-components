@@ -393,7 +393,7 @@ public class AIOrchestrator implements Serializable {
         }
         try {
             processUserInput(userMessage);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             // streamResponseToMessage's doFinally only fires after
             // subscription. If processUserInput throws before that (e.g. an
             // AttachmentSubmitListener failure), the flag would
