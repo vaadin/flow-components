@@ -322,6 +322,23 @@ class PopoverTest {
     }
 
     @Test
+    void setTabFocusEnabled_isTabFocusEnabled() {
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(false);
+        Assertions.assertFalse(popover.isTabFocusEnabled());
+        Assertions.assertTrue(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(true);
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
+    }
+
+    @Test
     void popoverWithContent() {
         Div content = new Div();
         Popover popoverWithContent = new Popover(content);
