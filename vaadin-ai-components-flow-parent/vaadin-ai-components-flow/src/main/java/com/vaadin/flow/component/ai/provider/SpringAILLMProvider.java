@@ -201,36 +201,44 @@ public class SpringAILLMProvider implements LLMProvider {
 
     /**
      * Passes the stream through unchanged, raising an
-     * {@link IllegalStateException} on completion if no chunk carried a
-     * finish_reason.
+     * {@link IllegalStateException} on completion if the most recent chunk did
+     * not represent a terminal model state.
      * <p>
-     * A compliant OpenAI-style streaming response terminates with a chunk whose
-     * finish_reason is set; any termination reason that legitimately yields
-     * empty content (TOOL_CALLS, CONTENT_FILTER, STOP with no text, etc.) still
-     * provides one. A stream that completes without ever carrying a
-     * finish_reason therefore indicates abnormal termination, typically an
-     * error that was not surfaced by the transport.
+     * A streaming chunk is terminal when it carries a finish_reason and the
+     * response has no pending tool calls. The second condition uses
+     * {@link ChatResponse#hasToolCalls()} - the same method Spring AI's default
+     * {@code ToolExecutionEligibilityPredicate} consults to decide whether to
+     * dispatch tools and start a follow-up roundtrip. Pending tool calls mean
+     * such a follow-up is expected, and its chunks would be concatenated to
+     * this same Flux, so a chunk with tool calls is intermediate even when it
+     * carries a finish_reason. A stream that completes on a non-terminal chunk
+     * - whether because no chunk ever carried a finish_reason at all, or
+     * because the last one still had tool calls pending - indicates abnormal
+     * termination.
      */
     private static Flux<ChatResponse> failOnMissingFinishReason(
             Flux<ChatResponse> source) {
-        var finishReasonSeen = new AtomicBoolean(false);
-        return source.doOnNext(response -> {
-            if (!finishReasonSeen.get() && hasFinishReason(response)) {
-                finishReasonSeen.set(true);
-            }
-        }).concatWith(Flux.defer(() -> finishReasonSeen.get() ? Flux.empty()
-                : Flux.error(new IllegalStateException(
-                        "LLM stream ended without a finish reason, "
-                                + "indicating abnormal termination."))));
+        var lastChunkTerminal = new AtomicBoolean(false);
+        return source.doOnNext(
+                response -> lastChunkTerminal.set(isTerminalChunk(response)))
+                .concatWith(Flux.defer(() -> lastChunkTerminal.get()
+                        ? Flux.empty()
+                        : Flux.error(new IllegalStateException(
+                                "LLM stream ended without reaching a terminal "
+                                        + "state, indicating abnormal "
+                                        + "termination."))));
     }
 
-    private static boolean hasFinishReason(ChatResponse response) {
+    private static boolean isTerminalChunk(ChatResponse response) {
         var result = response.getResult();
         if (result == null) {
             return false;
         }
         var reason = result.getMetadata().getFinishReason();
-        return reason != null && !reason.isEmpty();
+        if (reason == null || reason.isEmpty()) {
+            return false;
+        }
+        return !response.hasToolCalls();
     }
 
     private static String getAssistantText(ChatResponse response) {

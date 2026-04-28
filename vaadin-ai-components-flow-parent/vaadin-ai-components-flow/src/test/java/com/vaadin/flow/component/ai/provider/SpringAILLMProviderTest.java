@@ -859,6 +859,39 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_streamingEndsWithPendingToolCalls_throwsIllegalStateException() {
+        // Spring AI dispatches tools whenever the assistant message has
+        // pending tool calls (its ToolExecutionEligibilityPredicate). After
+        // dispatch a follow-up roundtrip is concatenated to this same Flux.
+        // If the follow-up silently aborts (server emits no chunks - e.g.
+        // context exceeded after tool result is added), the merged stream
+        // ends on a chunk whose tool calls are still pending. That is
+        // abnormal termination: the model never reached a terminal state.
+        var request = createSimpleRequest("invoke tool");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).collectList().block());
+    }
+
+    @Test
+    void stream_streamingMultiRoundtripCompletesSuccessfully_emitsTerminalText() {
+        // Counterpart: the merged Flux from a tool-using exchange contains
+        // chunks for each roundtrip. As long as the FINAL chunk has no
+        // pending tool calls (and a finish_reason set), the stream is
+        // healthy regardless of intermediate tool-call chunks.
+        var request = createSimpleRequest("invoke tool");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
+                        mockChatResponse("done", "STOP")));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+    }
+
+    @Test
     void stream_streamingWithFinishReasonOnlyOnLastChunk_completesNormally() {
         // Real OpenAI streams set finish_reason only on the terminal chunk.
         var request = createSimpleRequest("Hello");
@@ -993,6 +1026,21 @@ class SpringAILLMProviderTest {
                         .build();
         var generation = new Generation(assistantMessage, metadata);
         return new ChatResponse(List.of(generation));
+    }
+
+    private static ChatResponse mockChatResponseWithPendingToolCall() {
+        // Mirrors what a real backend emits at the end of a tool-using
+        // roundtrip: empty text, a tool call attached to the assistant
+        // message, and a finish_reason set (the exact value isn't
+        // inspected by the production code).
+        var toolCall = new AssistantMessage.ToolCall("call_1", "function",
+                "doSomething", "{}");
+        var assistantMessage = AssistantMessage.builder().content("")
+                .toolCalls(List.of(toolCall)).build();
+        var metadata = ChatGenerationMetadata.builder().finishReason("STOP")
+                .build();
+        return new ChatResponse(
+                List.of(new Generation(assistantMessage, metadata)));
     }
 
     private static LLMRequest createSimpleRequest(String message) {
