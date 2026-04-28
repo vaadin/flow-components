@@ -74,6 +74,8 @@ class MapSerializationTest {
         // Configure view
         map.getView().setZoom(13);
         map.getView().setCenter(new Coordinate(42, 27));
+        map.getView().setMinZoom(3.0);
+        map.getView().setMaxZoom(10.0);
 
         // Configure custom source
         OSMSource.Options options = new OSMSource.Options();
@@ -97,6 +99,10 @@ class MapSerializationTest {
         ObjectNode centerNode = (ObjectNode) viewNode.get("center");
         Assertions.assertEquals(42, centerNode.get("x").asDouble(), 0.0001);
         Assertions.assertEquals(27, centerNode.get("y").asDouble(), 0.0001);
+        Assertions.assertEquals(3.0, viewNode.get("minZoom").asDouble(),
+                0.0001);
+        Assertions.assertEquals(10.0, viewNode.get("maxZoom").asDouble(),
+                0.0001);
 
         // Verify custom source
         ObjectNode sourceNode = findSyncedItem(syncedItems, source.getId());
