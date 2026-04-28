@@ -880,6 +880,22 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_streamingToolCallFollowedByNonTerminalChunks_throwsIllegalStateException() {
+        // Multi-roundtrip silent abort: a tool-call chunk is observed (which
+        // is intermediate, not terminal), then the follow-up round produces
+        // text but never reaches a real finish_reason - e.g. the provider
+        // truncates the stream after an upstream error. The sticky check
+        // must still fire because no terminal chunk was ever seen.
+        var request = createSimpleRequest("invoke tool");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
+                        mockChatResponse("partial", null)));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> provider.stream(request).collectList().block());
+    }
+
+    @Test
     void stream_streamingWithFinishReasonOnlyOnLastChunk_completesNormally() {
         // Real OpenAI streams set finish_reason only on the terminal chunk.
         var request = createSimpleRequest("Hello");
@@ -920,6 +936,24 @@ class SpringAILLMProviderTest {
         var results = provider.stream(request).collectList().block();
 
         Assertions.assertEquals(List.of("ok"), results);
+    }
+
+    @Test
+    void stream_streamingTerminalChunkFollowedByMetadataOnlyChunk_completesNormally() {
+        // OpenAI's stream_options.include_usage=true appends a final
+        // empty-choices chunk carrying usage metadata after the terminal
+        // chunk. Once a real terminal chunk has been observed, a trailing
+        // metadata-only chunk must not flip the gate back and fail the
+        // response.
+        var request = createSimpleRequest("Hello");
+        var terminal = mockChatResponse("Hi", "STOP");
+        var trailingUsage = new ChatResponse(Collections.emptyList());
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(terminal, trailingUsage));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hi"), results);
     }
 
     @Test
