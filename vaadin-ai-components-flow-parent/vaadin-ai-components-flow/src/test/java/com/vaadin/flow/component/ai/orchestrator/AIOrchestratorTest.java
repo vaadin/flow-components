@@ -384,6 +384,41 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_attachmentSubmitListenerException_orchestratorRecoversForNextPrompt() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var attachment = new AIAttachment("file.txt", "text/plain",
+                "data".getBytes());
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(attachment));
+
+        var attempts = new AtomicInteger();
+        AttachmentSubmitListener listener = event -> {
+            if (attempts.incrementAndGet() == 1) {
+                throw new RuntimeException("storage transiently unavailable");
+            }
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver)
+                .withAttachmentSubmitListener(listener).build();
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("First"));
+
+        orchestrator.prompt("Second");
+
+        Mockito.verify(mockProvider, Mockito.times(1))
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
     void prompt_whileProcessing_isIgnored() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),

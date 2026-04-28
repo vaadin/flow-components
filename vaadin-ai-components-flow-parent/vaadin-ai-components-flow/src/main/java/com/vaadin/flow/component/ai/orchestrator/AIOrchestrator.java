@@ -391,7 +391,17 @@ public class AIOrchestrator implements Serializable {
                     "Ignoring prompt: another request is already in progress");
             return;
         }
-        processUserInput(userMessage);
+        try {
+            processUserInput(userMessage);
+        } catch (RuntimeException e) {
+            // streamResponseToMessage's doFinally only fires after
+            // subscription. If processUserInput throws before that (e.g. an
+            // AttachmentSubmitListener failure), the flag would
+            // stay stuck and the orchestrator would refuse every later
+            // prompt.
+            isProcessing.set(false);
+            throw e;
+        }
     }
 
     private void processUserInput(String userMessage) {
