@@ -420,9 +420,24 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   // sent — and the server would no-op the fetch, leaving pending callbacks
   // unresolved. Forcing a reset on the next setViewportRange RPC ensures
   // the server re-sends data for the requested range.
+  //
+  // The reset also re-keys items via the data communicator's normal
+  // passivate-and-unregister flow — items outside the post-reset active
+  // range have their KeyMapper entries removed and get fresh keys when
+  // re-fetched. Cached pages in the connector and the data-provider
+  // controller would then hold items with stale keys that no longer match
+  // the freshly-keyed selectedItem, breaking selection highlighting (and
+  // leaving them as targets for the focusSelectedItem RPC's scrollToIndex
+  // when it sees a real item at the resolved index but with a stale key).
+  // Wipe all client-side cache state on close so the next open populates
+  // from the post-reset server data with current keys.
   comboBox.addEventListener('opened-changed', (e) => {
     if (e.detail.value === false && focusSelectedItemEnabled && comboBox.selectedItem) {
       serverFacade.needsDataCommunicatorReset();
+      cache = {};
+      committedPages.clear();
+      comboBox.__dataProviderController.clearCache();
+      comboBox._forceNextRequest = true;
     }
   });
 
