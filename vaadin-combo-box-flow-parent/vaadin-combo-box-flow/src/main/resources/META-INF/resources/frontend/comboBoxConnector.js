@@ -11,8 +11,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   comboBox.$connector = {};
 
-  // holds pageIndex -> callback pairs of subsequent indexes (current active range)
+  // holds pageIndex -> callback pairs for pending requests (uncommitted)
   const pageCallbacks = {};
+  // holds page indexes whose data has been delivered to the combo-box
+  // (i.e. their items live in comboBox.filteredItems and are not
+  // placeholders). Used together with pageCallbacks to compute the
+  // current active range for memory-cap eviction.
+  const committedPages = new Set();
   let cache = {};
   let lastFilter = '';
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
@@ -44,11 +49,28 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     };
   })();
 
-  const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
-    // Flush and empty the existing requests
+  const clearPageCallbacks = (pages) => {
+    // Default: clear every page currently loaded or pending. Callers that
+    // only want to evict a specific page (e.g. the active-range
+    // memory-cap path) pass the page list explicitly.
+    if (pages === undefined) {
+      pages = [
+        ...new Set([
+          ...Object.keys(pageCallbacks),
+          ...[...committedPages].map(String)
+        ])
+      ];
+    }
     pages.forEach((page) => {
-      pageCallbacks[page]([], comboBox.size);
-      delete pageCallbacks[page];
+      // The page may already have been committed (its callback fired and
+      // pageCallbacks entry deleted) when an active-range eviction targets
+      // it for re-fetch. Skip the flush for absent callbacks; the
+      // filteredItems reset below still runs so the page goes back to
+      // placeholders.
+      if (pageCallbacks[page]) {
+        pageCallbacks[page]([], comboBox.size);
+        delete pageCallbacks[page];
+      }
 
       // Empty the comboBox's internal cache without invoking observers by filling
       // the filteredItems array with placeholders (comboBox will request for data when it
@@ -59,6 +81,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       for (let i = pageStart; i < end; i++) {
         comboBox.filteredItems[i] = placeHolder;
       }
+      committedPages.delete(parseInt(page));
     });
   };
 
@@ -127,7 +150,15 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     } else {
       pageCallbacks[params.page] = callback;
       const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
-      const activePages = Object.keys(pageCallbacks).map((page) => parseInt(page));
+      // Active range covers both pending and already-committed pages, so
+      // the memory-cap eviction triggers on the *total* loaded item count,
+      // not just the currently-pending ones.
+      const activePages = [
+        ...new Set([
+          ...Object.keys(pageCallbacks).map((page) => parseInt(page)),
+          ...committedPages
+        ])
+      ];
       const rangeMin = Math.min(...activePages);
       const rangeMax = Math.max(...activePages);
 
@@ -139,8 +170,14 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         }
         comboBox.dataProvider(params, callback);
       } else if (rangeMax - rangeMin + 1 !== activePages.length) {
-        // Wasn't a sequential page index, clear the cache so combo-box will request for new pages
-        clearPageCallbacks();
+        // The new page is not contiguous with the loaded/pending pages
+        // (e.g. user jumped via scrollToIndex). Fetch only the new page
+        // — aggregating across the gap would trigger a huge unnecessary
+        // range request, and wiping the gap would discard data that's
+        // already been delivered to the combo-box.
+        const startIndex = params.pageSize * params.page;
+        const endIndex = startIndex + params.pageSize;
+        serverFacade.requestData(startIndex, endIndex, params);
       } else {
         // The requested page was sequential, extend the requested range
         const startIndex = params.pageSize * rangeMin;
@@ -261,6 +298,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       // comboBox.size and remove updateSize function.
       callback(data, comboBox.size);
     }
+    // Page is now committed (its callback has been invoked). Drop the
+    // pageCallbacks entry so the connector's range-management logic
+    // tracks only pending requests — otherwise, every subsequent fetch
+    // for a different page would treat the just-committed entry as a
+    // gap and incorrectly invoke clearPageCallbacks() across all pages.
+    delete pageCallbacks[page];
+    committedPages.add(parseInt(page));
   };
 
   // Perform filter on client side (here) using the items from specified page

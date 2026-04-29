@@ -96,30 +96,33 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
             int pageSize, int maxLoadedItemsCount) {
         comboBox.openPopup();
 
-        // Scroll to the end.
+        // Jump to the end. Page 0 (loaded by openPopup) is preserved when
+        // the connector receives a non-contiguous request — the connector
+        // no longer wipes already-committed pages on a jump (it used to,
+        // due to a range-management bug). Memory stays bounded by the
+        // maxLoadedItemsCount cap, which kicks in only when total active
+        // pages exceed the cap.
         int lastIndex = ITEMS_COUNT - 1;
         scrollToItem(comboBox, lastIndex);
         waitUntilTextInContent(comboBox, "Item " + lastIndex);
         assertLoadedItemsCount(String.format(
-                "Should have %s items loaded after jumping to the end",
-                pageSize), pageSize, comboBox);
+                "Should have %s items loaded after jumping to the end (page 0 + last page)",
+                pageSize * 2), pageSize * 2, comboBox);
 
         // Scroll to the beginning page by page.
         for (int i = lastIndex; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
             waitUntilTextInContent(comboBox, "Item " + i);
 
-            if (lastIndex - i < maxLoadedItemsCount) {
-                int page = (lastIndex - i) / pageSize;
-                int loadedItemsCount = (page + 1) * pageSize;
-                assertLoadedItemsCount(String.format(
-                        "Should have %s items loaded after scrolling to the index %s from the end",
-                        loadedItemsCount, i), loadedItemsCount, comboBox);
-            } else {
-                assertLoadedItemsCount(String.format(
-                        "Should have %s items loaded after scrolling to the index %s from the end",
-                        maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
-            }
+            // (lastIndex - i) items scrolled past since the jump, plus the
+            // initial page 0 still cached, plus the last page. The cap
+            // applies once the cumulative count exceeds maxLoadedItemsCount.
+            int loadedSoFar = ((lastIndex - i) / pageSize + 1) * pageSize
+                    + pageSize;
+            int expected = Math.min(loadedSoFar, maxLoadedItemsCount);
+            assertLoadedItemsCount(String.format(
+                    "Should have %s items loaded after scrolling to the index %s from the end",
+                    expected, i), expected, comboBox);
         }
 
         // Scroll to the end page by page.
