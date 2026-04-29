@@ -427,14 +427,10 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         // runs first. Poll via microtask until $connector is ready instead
         // of relying on runBeforeClientResponse ordering.
         runBeforeClientResponse(ui -> getElement().executeJs(
-                "const apply = (val) => {"
-                        + "  if (this.$connector) {"
+                "const apply = (val) => {" + "  if (this.$connector) {"
                         + "    this.$connector.setFocusSelectedItem(val);"
-                        + "  } else {"
-                        + "    queueMicrotask(() => apply(val));"
-                        + "  }"
-                        + "};"
-                        + "apply($0);",
+                        + "  } else {" + "    queueMicrotask(() => apply(val));"
+                        + "  }" + "};" + "apply($0);",
                 focusSelectedItem));
     }
 
@@ -449,8 +445,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * Called by the client-side connector when the dropdown opens. Returns the
-     * flat index of the current value under the current filter, or
-     * {@code null} if it cannot be resolved (no value, no data provider, or no
+     * flat index of the current value under the current filter, or {@code null}
+     * if it cannot be resolved (no value, no data provider, or no
      * {@link ItemIndexProvider} for a lazy data provider).
      */
     @ClientCallable
