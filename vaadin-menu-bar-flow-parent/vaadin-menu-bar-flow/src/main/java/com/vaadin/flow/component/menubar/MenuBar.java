@@ -500,19 +500,11 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     public void setTooltipText(MenuItem item, String tooltipText) {
         if (!getElement().getChildren().anyMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
-            // No <vaadin-tooltip> yet added, add one
-            Element tooltipElement = new Element("vaadin-tooltip");
-
-            tooltipElement.addAttachListener(e -> {
-                // Assigns a generator that reads the tooltip property of the
-                // item component
-                tooltipElement.executeJs(
-                        "this.generator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
-            });
-            SlotUtils.addToSlot(this, "tooltip", tooltipElement);
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
         }
 
         item.getElement().setProperty("tooltip", tooltipText);
+        updateButtons();
     }
 
     /**
