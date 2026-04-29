@@ -54,12 +54,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     // only want to evict a specific page (e.g. the active-range
     // memory-cap path) pass the page list explicitly.
     if (pages === undefined) {
-      pages = [
-        ...new Set([
-          ...Object.keys(pageCallbacks),
-          ...[...committedPages].map(String)
-        ])
-      ];
+      pages = [...new Set([...Object.keys(pageCallbacks), ...[...committedPages].map(String)])];
     }
     pages.forEach((page) => {
       // The page may already have been committed (its callback fired and
@@ -154,10 +149,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       // the memory-cap eviction triggers on the *total* loaded item count,
       // not just the currently-pending ones.
       const activePages = [
-        ...new Set([
-          ...Object.keys(pageCallbacks).map((page) => parseInt(page)),
-          ...committedPages
-        ])
+        ...new Set([...Object.keys(pageCallbacks).map((page) => parseInt(page)), ...committedPages])
       ];
       const rangeMin = Math.min(...activePages);
       const rangeMax = Math.max(...activePages);

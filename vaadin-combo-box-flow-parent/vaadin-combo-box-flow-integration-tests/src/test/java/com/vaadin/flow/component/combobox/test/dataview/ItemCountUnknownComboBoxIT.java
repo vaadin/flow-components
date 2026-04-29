@@ -59,14 +59,15 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         waitUntilTextInContent(comboBoxElement, "Callback Item 199");
         Assert.assertTrue(
                 "Item count should grow past the default after scrolling",
-                getItems(comboBoxElement).size() > getDefaultInitialItemCount());
+                getItems(comboBoxElement)
+                        .size() > getDefaultInitialItemCount());
 
         // Scroll past actual end multiple times to trigger convergence.
         // Each scroll past the buffer's current end grows the buffer; once
         // a fetch returns fewer items than requested, the data view sets
         // the count to the actual.
-        for (int attempt = 0; attempt < 10
-                && getItems(comboBoxElement).size() != datasetItemCount; attempt++) {
+        for (int attempt = 0; attempt < 10 && getItems(comboBoxElement)
+                .size() != datasetItemCount; attempt++) {
             int currentCount = getItems(comboBoxElement).size();
             scrollToItem(comboBoxElement, currentCount - 1);
         }
