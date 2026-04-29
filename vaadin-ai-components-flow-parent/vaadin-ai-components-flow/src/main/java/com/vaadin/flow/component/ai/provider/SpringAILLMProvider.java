@@ -191,7 +191,7 @@ public class SpringAILLMProvider implements LLMProvider {
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
             var chatResponses = getPromptSpec(request).stream().chatResponse();
-            return failOnMissingFinishReason(chatResponses)
+            return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
         } catch (Exception e) {
@@ -200,37 +200,52 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Passes the stream through unchanged, raising an
-     * {@link IllegalStateException} on completion if no chunk carried a
-     * finish_reason.
+     * Passes the stream through unchanged, logging a warning on completion if
+     * no chunk in the stream ever represented a terminal model state.
      * <p>
-     * A compliant OpenAI-style streaming response terminates with a chunk whose
-     * finish_reason is set; any termination reason that legitimately yields
-     * empty content (TOOL_CALLS, CONTENT_FILTER, STOP with no text, etc.) still
-     * provides one. A stream that completes without ever carrying a
-     * finish_reason therefore indicates abnormal termination, typically an
-     * error that was not surfaced by the transport.
+     * A streaming chunk is terminal when it carries a {@code finish_reason} and
+     * the response has no pending tool calls. Pending tool calls mean a
+     * follow-up round-trip is expected, and its chunks would be concatenated to
+     * this same Flux, so a chunk with tool calls is intermediate even when it
+     * carries a {@code finish_reason}. The check is sticky - once any terminal
+     * chunk is observed the gate stays open - so that trailing metadata-only
+     * chunks emitted by some providers after the terminal chunk cannot flip it
+     * back. A stream that completes without ever seeing a terminal chunk -
+     * whether because no chunk carried a {@code finish_reason} at all, or
+     * because the only terminal-looking chunks still had tool calls pending -
+     * may indicate abnormal termination.
      */
-    private static Flux<ChatResponse> failOnMissingFinishReason(
+    private static Flux<ChatResponse> warnOnMissingFinishReason(
             Flux<ChatResponse> source) {
-        var finishReasonSeen = new AtomicBoolean(false);
+        var terminalSeen = new AtomicBoolean(false);
         return source.doOnNext(response -> {
-            if (!finishReasonSeen.get() && hasFinishReason(response)) {
-                finishReasonSeen.set(true);
+            if (isTerminalChunk(response)) {
+                terminalSeen.set(true);
             }
-        }).concatWith(Flux.defer(() -> finishReasonSeen.get() ? Flux.empty()
-                : Flux.error(new IllegalStateException(
-                        "LLM stream ended without a finish reason, "
-                                + "indicating abnormal termination."))));
+        }).concatWith(Flux.defer(() -> {
+            if (!terminalSeen.get()) {
+                LOGGER.warn("LLM stream ended without observing a terminal "
+                        + "chunk (one carrying finish_reason and "
+                        + "no pending tool calls). This may "
+                        + "indicate a silent abnormal termination "
+                        + "such as an upstream error or transport "
+                        + "closure; if responses appear truncated "
+                        + "this warning is the signal.");
+            }
+            return Flux.empty();
+        }));
     }
 
-    private static boolean hasFinishReason(ChatResponse response) {
+    private static boolean isTerminalChunk(ChatResponse response) {
         var result = response.getResult();
         if (result == null) {
             return false;
         }
         var reason = result.getMetadata().getFinishReason();
-        return reason != null && !reason.isEmpty();
+        if (reason == null || reason.isEmpty()) {
+            return false;
+        }
+        return !response.hasToolCalls();
     }
 
     private static String getAssistantText(ChatResponse response) {
