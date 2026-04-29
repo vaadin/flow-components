@@ -163,12 +163,41 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         comboBox.dataProvider(params, callback);
       } else if (rangeMax - rangeMin + 1 !== activePages.length) {
         // The new page is not contiguous with the loaded/pending pages
-        // (e.g. user jumped via scrollToIndex). Fetch only the new page
-        // — aggregating across the gap would trigger a huge unnecessary
-        // range request, and wiping the gap would discard data that's
-        // already been delivered to the combo-box.
-        const startIndex = params.pageSize * params.page;
-        const endIndex = startIndex + params.pageSize;
+        // (e.g. user jumped via scrollToIndex). Fire a setViewportRange
+        // covering all currently-pending pages — overlapping
+        // setViewportRange RPCs overwrite each other on the server (last
+        // write wins), so an earlier-pending request that doesn't fall
+        // within the latest range would never receive data and its
+        // pageCallbacks entry would linger, leaving the combo-box stuck
+        // on loading=true.
+        const pendingPages = Object.keys(pageCallbacks).map((page) => parseInt(page));
+        const newRangeMin = Math.min(...pendingPages);
+        const newRangeMax = Math.max(...pendingPages);
+        const startIndex = params.pageSize * newRangeMin;
+        const endIndex = params.pageSize * (newRangeMax + 1);
+
+        // Committed pages outside the new viewport range may have had
+        // their server-side ComponentRenderer-created components
+        // passivated (virtual children detached) when the items left
+        // the KeyMapper's active set. The cached item JSON on the
+        // client still references the old node ids, so re-rendering
+        // from the cache would show stale (or empty) renderer slots.
+        // Evict only renderer-rendered committed pages so the data-
+        // provider-controller re-requests them on scroll-back and the
+        // server re-creates components with fresh node ids. Plain-data
+        // pages (no `*_nodeid` property) have no server-side components
+        // to passivate and stay valid in the cache.
+        const pagesToEvict = [...committedPages]
+          .filter((page) => {
+            if (page >= newRangeMin && page <= newRangeMax) return false;
+            const firstItem = comboBox.filteredItems[page * params.pageSize];
+            return firstItem && Object.keys(firstItem).some((k) => k.endsWith('_nodeid'));
+          })
+          .map(String);
+        if (pagesToEvict.length > 0) {
+          clearPageCallbacks(pagesToEvict);
+        }
+
         serverFacade.requestData(startIndex, endIndex, params);
       } else {
         // The requested page was sequential, extend the requested range

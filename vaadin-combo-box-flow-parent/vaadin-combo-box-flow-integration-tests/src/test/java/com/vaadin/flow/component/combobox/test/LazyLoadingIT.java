@@ -17,7 +17,6 @@ package com.vaadin.flow.component.combobox.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -411,17 +410,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 
-    @Ignore("Pre-existing regression exposed by the connector range-management"
-            + " fix. The previous connector wiped already-committed pages on"
-            + " any non-sequential scroll, which caused the FlowComponentRenderer's"
-            + " server-side components to be re-attached on each subsequent"
-            + " fetch — keeping renderer output alive across scrolls."
-            + " With the fix, committed pages are preserved (no needless"
-            + " re-fetching), but the WC + FlowComponentRenderer lifecycle"
-            + " no longer guarantees the component is re-bound to the"
-            + " appropriate slot when the user scrolls back into a"
-            + " previously-loaded range. Tracked separately as a follow-up"
-            + " in FlowComponentRenderer.")
     @Test
     // https://github.com/vaadin/vaadin-combo-box-flow/issues/227
     // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
