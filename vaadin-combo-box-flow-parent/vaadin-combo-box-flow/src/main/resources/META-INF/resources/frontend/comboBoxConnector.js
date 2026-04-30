@@ -189,14 +189,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         // to passivate and stay valid in the cache.
         const pagesToEvict = [...committedPages]
           .filter((page) => {
-            if (page >= newRangeMin && page <= newRangeMax) return false;
+            const outOfRange = page < newRangeMin || page > newRangeMax;
             const firstItem = comboBox.filteredItems[page * params.pageSize];
-            return firstItem && Object.keys(firstItem).some((k) => k.endsWith('_nodeid'));
+            const hasRendererNodeId = firstItem && Object.keys(firstItem).some((k) => k.endsWith('_nodeid'));
+            return outOfRange && hasRendererNodeId;
           })
           .map(String);
-        if (pagesToEvict.length > 0) {
-          clearPageCallbacks(pagesToEvict);
-        }
+        clearPageCallbacks(pagesToEvict);
 
         serverFacade.requestData(startIndex, endIndex, params);
       } else {
