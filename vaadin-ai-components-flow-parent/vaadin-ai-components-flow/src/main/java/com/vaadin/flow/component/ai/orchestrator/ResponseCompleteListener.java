@@ -21,15 +21,19 @@ import java.io.Serializable;
  * Listener for LLM response completion events.
  * <p>
  * The listener is called after each successful exchange — when the assistant's
- * response has been fully streamed and added to the conversation history. This
- * is the recommended hook for persisting conversation state (via
- * {@link AIOrchestrator#getHistory()}), triggering follow-up actions, or
- * updating UI elements.
+ * stream has completed without error. This is the recommended hook for
+ * persisting conversation state (via {@link AIOrchestrator#getHistory()}),
+ * triggering follow-up actions, or updating UI elements.
+ * <p>
+ * The response text may be empty if the model emitted only tool calls or
+ * stopped without producing visible content. Such turns are still successful
+ * exchanges; check {@code event.getResponse().isEmpty()} if your listener
+ * should only react to text-bearing responses. Empty responses are <i>not</i>
+ * appended to {@link AIOrchestrator#getHistory()}.
  * <p>
  * The listener is <b>not</b> called when:
  * <ul>
  * <li>The LLM response fails with an error or times out</li>
- * <li>The assistant response is empty</li>
  * <li>History is restored via {@code Builder.withHistory()}</li>
  * </ul>
  * <p>
@@ -41,8 +45,7 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface ResponseCompleteListener extends Serializable {
     /**
-     * Called when the assistant's response has been fully streamed and recorded
-     * in the conversation history.
+     * Called when the assistant's stream has completed without error.
      *
      * @param event
      *            the response complete event
@@ -50,8 +53,7 @@ public interface ResponseCompleteListener extends Serializable {
     void onResponseComplete(ResponseCompleteEvent event);
 
     /**
-     * Event fired after the assistant's response has been fully streamed and
-     * added to the conversation history.
+     * Event fired after the assistant's stream has completed without error.
      */
     class ResponseCompleteEvent implements Serializable {
         private final String response;
@@ -61,9 +63,11 @@ public interface ResponseCompleteListener extends Serializable {
         }
 
         /**
-         * Gets the full text of the assistant's response.
+         * Gets the full text of the assistant's response. May be empty when the
+         * model emitted only tool calls or otherwise produced no visible
+         * content.
          *
-         * @return the response text, never {@code null} or empty
+         * @return the response text, never {@code null}
          */
         public String getResponse() {
             return response;

@@ -419,6 +419,65 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_toolOnlyResponse_firesControllerOnResponseComplete() {
+        // Tool-only turns produce empty text, but the controller still
+        // needs the lifecycle hook to flush its pending state (e.g. a
+        // ChartAIController applies its pending query in onResponseComplete
+        // and would otherwise never render).
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var controller = Mockito.mock(AIController.class);
+        var fakeTool = Mockito.mock(LLMProvider.ToolSpec.class);
+        Mockito.when(fakeTool.getName()).thenReturn("fake_tool");
+        Mockito.when(controller.getTools()).thenReturn(List.of(fakeTool));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(inv -> {
+                    var req = (LLMProvider.LLMRequest) inv.getArgument(0);
+                    req.explicitTools().get(0).execute(null);
+                    return Flux.empty();
+                });
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+        orchestrator.prompt("do it");
+
+        Mockito.verify(fakeTool).execute(Mockito.any());
+        Mockito.verify(controller).onResponseComplete();
+    }
+
+    @Test
+    void prompt_emptyResponse_firesUserListenerWithEmptyText() {
+        // Empty-text turns are still successful exchanges (tool-only,
+        // content filter, deliberate silence). The listener fires with an
+        // empty response so apps can observe every completion. The history
+        // stays gated to avoid polluting it with empty assistant messages.
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var listener = Mockito.mock(ResponseCompleteListener.class);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.empty());
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseCompleteListener(listener).build();
+        orchestrator.prompt("hi");
+
+        var captor = ArgumentCaptor
+                .forClass(ResponseCompleteListener.ResponseCompleteEvent.class);
+        Mockito.verify(listener).onResponseComplete(captor.capture());
+        Assertions.assertEquals("", captor.getValue().getResponse());
+        Assertions.assertTrue(orchestrator.getHistory().stream()
+                .noneMatch(msg -> msg.role() == ChatMessage.Role.ASSISTANT));
+    }
+
+    @Test
     void prompt_whileProcessing_isIgnored() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -1513,29 +1572,6 @@ class AIOrchestratorTest {
 
         Assertions.assertTrue(captured.isEmpty(),
                 "Listener should not fire on error");
-    }
-
-    @Test
-    void responseCompleteListener_afterEmptyResponse_doesNotFire() {
-        var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.empty());
-
-        var captured = new ArrayList<String>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList)
-                .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
-                        event -> captured.add(event.getResponse()))
-                .build();
-        orchestrator.prompt("Hello");
-
-        Assertions.assertTrue(captured.isEmpty(),
-                "Listener should not fire on empty response");
     }
 
     @Test

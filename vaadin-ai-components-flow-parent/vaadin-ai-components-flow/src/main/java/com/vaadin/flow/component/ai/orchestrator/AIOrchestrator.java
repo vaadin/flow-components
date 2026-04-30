@@ -371,8 +371,8 @@ public class AIOrchestrator implements Serializable {
                 conversationHistory
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
-                fireResponseCompleteListener(responseText, ui);
             }
+            fireResponseCompleteListener(responseText, ui);
             LOGGER.debug("LLM streaming completed successfully");
         });
     }
@@ -967,19 +967,25 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets a listener that is called after each successful exchange — when
-         * the assistant's response has been fully streamed and added to the
-         * conversation history. This is the recommended hook for persisting
-         * conversation state (via {@link AIOrchestrator#getHistory()}),
-         * triggering follow-up actions, or updating UI elements.
+         * the assistant's stream has completed without error. This is the
+         * recommended hook for persisting conversation state (via
+         * {@link AIOrchestrator#getHistory()}), triggering follow-up actions,
+         * or updating UI elements.
+         * <p>
+         * The response text passed to the listener may be empty if the model
+         * emitted only tool calls or otherwise stopped without producing
+         * visible content. Such turns are still successful exchanges; check
+         * {@code event.getResponse().isEmpty()} if your listener should only
+         * react to text-bearing responses. Empty responses are <i>not</i>
+         * appended to the conversation history.
          * <p>
          * The listener is called from a background thread (Reactor scheduler).
          * It is safe to perform blocking I/O (e.g. database writes) directly.
          * To update Vaadin UI components from this listener, use
          * {@code ui.access()}.
          * <p>
-         * The listener is not called when the LLM response fails, times out, or
-         * produces an empty response, nor when history is restored via
-         * {@link #withHistory(List, Map)}.
+         * The listener is not called when the LLM response fails or times out,
+         * nor when history is restored via {@link #withHistory(List, Map)}.
          *
          * @param listener
          *            the listener to call after each successful exchange
