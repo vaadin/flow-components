@@ -162,31 +162,24 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         }
         comboBox.dataProvider(params, callback);
       } else if (rangeMax - rangeMin + 1 !== activePages.length) {
-        // The new page is not contiguous with the loaded/pending pages
-        // (e.g. user jumped via scrollToIndex). Fire a setViewportRange
-        // covering all currently-pending pages — overlapping
-        // setViewportRange RPCs overwrite each other on the server (last
-        // write wins), so an earlier-pending request that doesn't fall
-        // within the latest range would never receive data and its
-        // pageCallbacks entry would linger, leaving the combo-box stuck
-        // on loading=true.
+        // Non-contiguous active range. The setViewportRange RPC is
+        // last-write-wins on the server, so the requested range must
+        // cover every currently-pending page; otherwise the earlier
+        // pending request gets no data and its pageCallbacks entry
+        // lingers, leaving the combo-box stuck on loading=true.
         const pendingPages = Object.keys(pageCallbacks).map((page) => parseInt(page));
         const newRangeMin = Math.min(...pendingPages);
         const newRangeMax = Math.max(...pendingPages);
         const startIndex = params.pageSize * newRangeMin;
         const endIndex = params.pageSize * (newRangeMax + 1);
 
-        // Committed pages outside the new viewport range may have had
-        // their server-side ComponentRenderer-created components
-        // passivated (virtual children detached) when the items left
-        // the KeyMapper's active set. The cached item JSON on the
-        // client still references the old node ids, so re-rendering
-        // from the cache would show stale (or empty) renderer slots.
-        // Evict only renderer-rendered committed pages so the data-
-        // provider-controller re-requests them on scroll-back and the
-        // server re-creates components with fresh node ids. Plain-data
-        // pages (no `*_nodeid` property) have no server-side components
-        // to passivate and stay valid in the cache.
+        // ComponentRenderer-rendered committed pages outside the new
+        // viewport carry node ids that point at server-side components
+        // already passivated when the items left the KeyMapper's
+        // active set — re-rendering from the cache would bind to
+        // detached virtual children. Evict so the next scroll-back
+        // re-fetches with fresh ids. Plain-data pages have no
+        // server-side components and stay valid in the cache.
         const pagesToEvict = [...committedPages]
           .filter((page) => {
             const outOfRange = page < newRangeMin || page > newRangeMax;
@@ -318,11 +311,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       // comboBox.size and remove updateSize function.
       callback(data, comboBox.size);
     }
-    // Page is now committed (its callback has been invoked). Drop the
-    // pageCallbacks entry so the connector's range-management logic
-    // tracks only pending requests — otherwise, every subsequent fetch
-    // for a different page would treat the just-committed entry as a
-    // gap and incorrectly invoke clearPageCallbacks() across all pages.
+    // The page is committed: track it in committedPages and drop the
+    // pageCallbacks entry so range-management sees only pending requests.
     delete pageCallbacks[page];
     committedPages.add(parseInt(page));
   };

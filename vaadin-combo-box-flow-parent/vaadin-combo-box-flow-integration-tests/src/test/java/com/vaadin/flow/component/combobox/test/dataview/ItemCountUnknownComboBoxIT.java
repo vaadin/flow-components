@@ -26,28 +26,12 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("item-count-unknown")
 public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
 
-    // Note: RangeLog assertions in these scroll-to-end tests have been
-    // dropped. They were verifying a specific server-side fetch *cadence*
-    // that depended on the connector's pre-fix range-management bug —
-    // every non-contiguous request triggered a clearPageCallbacks() that
-    // wiped previously-loaded pages, causing the WC to re-fetch them.
-    // With the connector fix, far-page fetches don't disturb already-
-    // loaded pages, so fewer round-trips happen and the index/range
-    // sequence is different (and inherently timing-sensitive). The
-    // behavior we still verify — item count growth, visible labels, count
-    // mode switching — is what matters for the feature.
-
     @Test
     public void undefinedItemCount_scrollToEnd_itemCountGrowsAndConverges() {
-        // Verifies that an undefined item count grows past the default
-        // initial count when the user scrolls forward, and converges to
-        // the actual dataset size once the user scrolls past the actual
-        // end. The exact buffer-growth cadence is implementation detail
-        // (it changed with the connector range-management fix), so we
-        // only assert: (a) initial count is the default, (b) count
-        // strictly grows after a forward scroll, (c) once the user
-        // reaches the actual end and continues scrolling, count converges
-        // to the actual dataset size.
+        // Asserts: (a) initial count is the default, (b) count strictly
+        // grows after a forward scroll, (c) once the user reaches the
+        // actual end and continues scrolling, count converges to the
+        // actual dataset size.
         final int datasetItemCount = 500;
         open(datasetItemCount);
 

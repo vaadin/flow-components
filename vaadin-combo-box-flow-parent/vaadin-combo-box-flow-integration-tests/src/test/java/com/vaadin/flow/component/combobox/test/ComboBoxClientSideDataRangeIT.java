@@ -96,11 +96,9 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
             int pageSize, int maxLoadedItemsCount) {
         comboBox.openPopup();
 
-        // Jump to the end. Page 0 (loaded by openPopup) is preserved when
-        // the connector receives a non-contiguous request — the connector
-        // no longer wipes already-committed pages on a jump (it used to,
-        // due to a range-management bug). Memory stays bounded by the
-        // maxLoadedItemsCount cap, which kicks in only when total active
+        // Jump to the end. Page 0 (loaded by openPopup) is preserved
+        // across the non-contiguous request; memory stays bounded by
+        // maxLoadedItemsCount, which only kicks in once total active
         // pages exceed the cap.
         int lastIndex = ITEMS_COUNT - 1;
         scrollToItem(comboBox, lastIndex);
