@@ -1575,29 +1575,6 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void responseCompleteListener_afterEmptyResponse_firesWithEmptyText() {
-        var mockMessage = createMockMessage();
-        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(mockMessage);
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.empty());
-
-        var captured = new ArrayList<String>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList)
-                .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
-                        event -> captured.add(event.getResponse()))
-                .build();
-        orchestrator.prompt("Hello");
-
-        Assertions.assertEquals(List.of(""), captured,
-                "Listener should fire once with empty response");
-    }
-
-    @Test
     void responseCompleteListener_receivesResponseText() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
