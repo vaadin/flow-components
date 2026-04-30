@@ -327,9 +327,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   // Prevent setting the custom value as the 'value'-prop automatically
   comboBox.addEventListener('custom-value-set', (e) => e.preventDefault());
 
-  // Feature flag for the focus-selected-item behavior. Set from the Java side
-  // via `comboBox.$connector.setFocusSelectedItem(value)` so it doesn't need
-  // to live as an element property the web component would otherwise ignore.
+  // Set from the Java side via `comboBox.$connector.setFocusSelectedItem(value)`.
   let focusSelectedItemEnabled = false;
   comboBox.$connector.setFocusSelectedItem = (value) => {
     focusSelectedItemEnabled = !!value;
@@ -414,23 +412,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   comboBox.addEventListener('vaadin-combo-box-dropdown-opened', resolveFocusSelectedItem);
 
-  // Arm a DataCommunicator reset when the dropdown closes with
-  // focusSelectedItem enabled. On the next open, the feature scrolls to the
-  // selected item's position — the same viewport range the server last
-  // sent — and the server would no-op the fetch, leaving pending callbacks
-  // unresolved. Forcing a reset on the next setViewportRange RPC ensures
-  // the server re-sends data for the requested range.
-  //
-  // The reset also re-keys items via the data communicator's normal
-  // passivate-and-unregister flow — items outside the post-reset active
-  // range have their KeyMapper entries removed and get fresh keys when
-  // re-fetched. Cached pages in the connector and the data-provider
-  // controller would then hold items with stale keys that no longer match
-  // the freshly-keyed selectedItem, breaking selection highlighting (and
-  // leaving them as targets for the focusSelectedItem RPC's scrollToIndex
-  // when it sees a real item at the resolved index but with a stale key).
-  // Wipe all client-side cache state on close so the next open populates
-  // from the post-reset server data with current keys.
+  // On close with focusSelectedItem on, arm a DataCommunicator reset and
+  // wipe all client-side cache. The next open scrolls to the same viewport
+  // range the server last sent, which would otherwise be a no-op fetch and
+  // leave pending callbacks unresolved. The reset also re-keys items
+  // outside the post-reset active range; cached pages holding the old keys
+  // would no longer match the freshly-keyed selectedItem, breaking the
+  // resolveSelectedItemIndex → scrollToIndex flow.
   comboBox.addEventListener('opened-changed', (e) => {
     if (e.detail.value === false && focusSelectedItemEnabled && comboBox.selectedItem) {
       serverFacade.needsDataCommunicatorReset();

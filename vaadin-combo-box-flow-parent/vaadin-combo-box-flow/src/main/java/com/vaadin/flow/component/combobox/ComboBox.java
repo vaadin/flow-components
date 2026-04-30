@@ -421,11 +421,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      */
     public void setFocusSelectedItem(boolean focusSelectedItem) {
         this.focusSelectedItem = focusSelectedItem;
-        // The connector's setFocusSelectedItem becomes available only once
-        // initLazy has run. Both this call and initLazy are queued via
-        // executeJs, but on the first attach there's no guarantee initLazy
-        // runs first. Poll via microtask until $connector is ready instead
-        // of relying on runBeforeClientResponse ordering.
+        // $connector is registered during initLazy. Poll via microtask
+        // until it's available so attach order isn't load-bearing.
         runBeforeClientResponse(ui -> getElement().executeJs(
                 "const apply = (val) => {" + "  if (this.$connector) {"
                         + "    this.$connector.setFocusSelectedItem(val);"
