@@ -30,8 +30,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
@@ -55,7 +58,9 @@ import tools.jackson.databind.node.ObjectNode;
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
 @NpmPackage(value = "@vaadin/context-menu", version = "25.2.0-alpha10")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-alpha10")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
@@ -66,7 +71,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private Component target;
     private MenuManager<C, I, S> menuManager;
-    private MenuItemsArrayGenerator<I> menuItemsArrayGenerator;
+    MenuItemsArrayGenerator<I> menuItemsArrayGenerator;
 
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
@@ -190,6 +195,61 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public boolean isOpenOnClick() {
         return "click".equals(openOnEventName);
+    }
+
+    /**
+     * Sets the tooltip text for the given menu item.
+     * <p>
+     * The first call to this method on a context menu attaches a slotted
+     * {@code <vaadin-tooltip>} element to the context menu host that is shared
+     * by all items, including items in sub-menus. Hover and hide delays as well
+     * as the position can be configured via the slotted element. Setting
+     * {@code null} or an empty text removes the tooltip from the item.
+     *
+     * @param item
+     *            the menu item to set the tooltip for, not {@code null}
+     * @param tooltipText
+     *            the tooltip text to set for the item, or {@code null} to clear
+     *            it
+     * @see #setTooltipPosition(MenuItemBase, TooltipPosition)
+     */
+    public void setTooltipText(I item, String tooltipText) {
+        ensureTooltipElement();
+        item.getElement().setProperty("tooltip", tooltipText);
+        scheduleTooltipUpdate();
+    }
+
+    /**
+     * Sets the tooltip position for the given menu item, overriding the
+     * default. Items with a sub-menu default to {@code start} so the tooltip
+     * doesn't overlap the opening sub-menu; all other items, including disabled
+     * ones, default to {@code end}. If the slotted {@code <vaadin-tooltip>}
+     * element has its own {@code position} property set, that value is used
+     * instead.
+     *
+     * @param item
+     *            the menu item to set the tooltip position for, not
+     *            {@code null}
+     * @param position
+     *            the tooltip position, or {@code null} to clear it and use the
+     *            default
+     * @see #setTooltipText(MenuItemBase, String)
+     */
+    public void setTooltipPosition(I item, TooltipPosition position) {
+        item.getElement().setProperty("tooltipPosition",
+                position != null ? position.getPosition() : null);
+        scheduleTooltipUpdate();
+    }
+
+    private void ensureTooltipElement() {
+        if (getElement().getChildren().noneMatch(
+                child -> "tooltip".equals(child.getAttribute("slot")))) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
+    }
+
+    void scheduleTooltipUpdate() {
+        menuItemsArrayGenerator.generate();
     }
 
     /**

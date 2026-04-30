@@ -73,6 +73,27 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
         Assert.assertEquals("Updated Edit tooltip", getActiveTooltipText());
     }
 
+    @Test
+    public void setTooltipPosition_tooltipUsesPosition() {
+        var menuBar = $(MenuBarElement.class).first();
+
+        showTooltip(menuBar.getButtons().get(0));
+        var tooltip = findElement(By.tagName("vaadin-tooltip"));
+        Assert.assertEquals("top", tooltip.getDomProperty("_position"));
+    }
+
+    @Test
+    public void hoverOverSubMenuItem_showTooltip() {
+        var menuBar = $(MenuBarElement.class).first();
+
+        // Open the View sub-menu and hover the Ruler item
+        var subMenu = menuBar.getButtons().get(4).openSubMenu();
+        var rulerItem = subMenu.getMenuItem("Ruler").orElseThrow();
+
+        showTooltip(rulerItem);
+        Assert.assertEquals("Show or hide the ruler", getActiveTooltipText());
+    }
+
     private void showTooltip(TestBenchElement button) {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",

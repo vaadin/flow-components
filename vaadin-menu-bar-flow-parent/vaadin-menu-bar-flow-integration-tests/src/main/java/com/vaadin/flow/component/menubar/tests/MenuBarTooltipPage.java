@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.TooltipConfiguration;
 import com.vaadin.flow.router.Route;
 
@@ -38,6 +39,15 @@ public class MenuBarTooltipPage extends Div {
         menuBar.addItem("Move", "Move tooltip", (e) -> {
         });
         menuBar.addItem(new Span("Duplicate"), "Duplicate tooltip");
+
+        // Item with sub-menu containing items with tooltips
+        var viewMenuItem = menuBar.addItem("View");
+        var rulerSubItem = viewMenuItem.getSubMenu().addItem("Ruler");
+        menuBar.setTooltipText(rulerSubItem, "Show or hide the ruler");
+        menuBar.setTooltipPosition(rulerSubItem, TooltipPosition.END);
+
+        // Tooltip position override on root item
+        menuBar.setTooltipPosition(editMenuItem, TooltipPosition.TOP);
 
         // Add a button for toggling the menu-bar attached state.
         var toggleAttachedButton = new NativeButton("Toggle attached",

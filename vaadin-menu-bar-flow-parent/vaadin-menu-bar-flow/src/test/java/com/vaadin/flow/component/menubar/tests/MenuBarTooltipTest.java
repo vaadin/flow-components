@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -62,6 +63,36 @@ class MenuBarTooltipTest {
         menuBar.addItem("Item 0", "Item 0 tooltip");
         menuBar.addItem("Item 1", "Item 1 tooltip");
         Assertions.assertEquals(1, getTooltipElements(menuBar).count());
+    }
+
+    @Test
+    void setTooltipText_subMenuItem_setsTooltipProperty() {
+        var rootItem = menuBar.addItem("Item");
+        var subItem = rootItem.getSubMenu().addItem("Sub item");
+
+        menuBar.setTooltipText(subItem, "Sub tooltip");
+
+        Assertions.assertEquals("Sub tooltip",
+                subItem.getElement().getProperty("tooltip"));
+        Assertions.assertTrue(getTooltipElement(menuBar).isPresent());
+    }
+
+    @Test
+    void setTooltipPosition_setsTooltipPositionPropertyOnItem() {
+        var item = menuBar.addItem("Item");
+        menuBar.setTooltipPosition(item, TooltipPosition.BOTTOM);
+
+        Assertions.assertEquals("bottom",
+                item.getElement().getProperty("tooltipPosition"));
+    }
+
+    @Test
+    void setTooltipPositionNull_clearsTooltipPositionProperty() {
+        var item = menuBar.addItem("Item");
+        menuBar.setTooltipPosition(item, TooltipPosition.BOTTOM);
+        menuBar.setTooltipPosition(item, null);
+
+        Assertions.assertNull(item.getElement().getProperty("tooltipPosition"));
     }
 
     private Optional<Element> getTooltipElement(MenuBar menuBar) {
