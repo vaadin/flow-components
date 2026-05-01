@@ -18,7 +18,6 @@ package com.vaadin.flow.component.menubar.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -28,79 +27,75 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-menu-bar/tooltip")
 public class MenuBarTooltipIT extends AbstractComponentIT {
 
+    private MenuBarElement menuBar;
+    private TestBenchElement menuBarTooltip;
+
     @Before
     public void init() {
         open();
+        menuBar = $(MenuBarElement.class).single();
+        menuBarTooltip = menuBar.$("vaadin-tooltip").single();
     }
 
     @Test
-    public void hoverOverMenuBarButton_showTooltip() {
-        var menuBar = $(MenuBarElement.class).first();
+    public void hoverOverRootItems_tooltipDisplayed() {
+        var buttons = menuBar.getButtons();
 
-        showTooltip(menuBar.getButtons().get(0));
-        Assert.assertEquals("Edit tooltip", getActiveTooltipText());
+        buttons.get(0).hover();
+        Assert.assertEquals("Item 0 / Tooltip", menuBarTooltip.getText());
 
-        showTooltip(menuBar.getButtons().get(1));
-        Assert.assertEquals("Share tooltip", getActiveTooltipText());
+        buttons.get(1).hover();
+        Assert.assertEquals("Item 1 / Tooltip", menuBarTooltip.getText());
 
-        showTooltip(menuBar.getButtons().get(2));
-        Assert.assertEquals("Move tooltip", getActiveTooltipText());
-
-        showTooltip(menuBar.getButtons().get(3));
-        Assert.assertEquals("Duplicate tooltip", getActiveTooltipText());
+        buttons.get(2).hover();
+        Assert.assertEquals("Item 2 / Tooltip", menuBarTooltip.getText());
+        Assert.assertEquals("top", menuBarTooltip.getDomProperty("_position"));
     }
 
     @Test
-    public void toggleAttached_hoverOverTooltipColumnCell_showTooltip() {
-        // Remove the menubar
-        clickElementWithJs("toggle-attached-button");
-        // Add the menubar
-        clickElementWithJs("toggle-attached-button");
+    public void hoverOverSubMenuItems_tooltipDisplayed() {
+        var subMenu = menuBar.getButtons().get(0).openSubMenu();
+        var subMenuItems = subMenu.getMenuItems();
 
-        var menuBar = $(MenuBarElement.class).first();
-        showTooltip(menuBar.getButtons().get(0));
-        Assert.assertEquals("Edit tooltip", getActiveTooltipText());
+        subMenuItems.get(0).hover();
+        Assert.assertEquals("Item 0-0 / Tooltip", menuBarTooltip.getText());
+
+        subMenuItems.get(1).hover();
+        Assert.assertEquals("Item 0-1 / Tooltip", menuBarTooltip.getText());
+
+        subMenuItems.get(2).hover();
+        Assert.assertEquals("Item 0-2 / Tooltip", menuBarTooltip.getText());
+        Assert.assertEquals("top", menuBarTooltip.getDomProperty("_position"));
     }
 
     @Test
-    public void updateTooltipText_showUpdatedTooltip() {
-        var menuBar = $(MenuBarElement.class).first();
+    public void updateTooltip_updatedTooltipDisplayed() {
+        clickElementWithJs("update-tooltips");
 
-        // Udpate tooltip text
-        clickElementWithJs("update-item-tooltip-button");
+        menuBar.getButtons().get(0).hover();
+        Assert.assertEquals("Item 0 / Updated Tooltip", menuBarTooltip.getText());
 
-        showTooltip(menuBar.getButtons().get(0));
-        Assert.assertEquals("Updated Edit tooltip", getActiveTooltipText());
+        var subMenu = menuBar.getButtons().get(0).openSubMenu();
+        subMenu.getMenuItems().get(0).hover();
+        Assert.assertEquals("Item 0-0 / Updated Tooltip", menuBarTooltip.getText());
     }
 
     @Test
-    public void setTooltipPosition_tooltipUsesPosition() {
-        var menuBar = $(MenuBarElement.class).first();
+    public void detachAndAttach_hoverOverItems_tooltipDisplayed() {
+        detachAndAttach();
 
-        showTooltip(menuBar.getButtons().get(0));
-        var tooltip = findElement(By.tagName("vaadin-tooltip"));
-        Assert.assertEquals("top", tooltip.getDomProperty("_position"));
+        menuBar.getButtons().get(0).hover();
+        Assert.assertEquals("Item 0 / Tooltip", menuBarTooltip.getText());
+
+        var subMenu = menuBar.getButtons().get(0).openSubMenu();
+        subMenu.getMenuItems().get(0).hover();
+        Assert.assertEquals("Item 0-0 / Tooltip", menuBarTooltip.getText());
     }
 
-    @Test
-    public void hoverOverSubMenuItem_showTooltip() {
-        var menuBar = $(MenuBarElement.class).first();
-
-        // Open the View sub-menu and hover the Ruler item
-        var subMenu = menuBar.getButtons().get(4).openSubMenu();
-        var rulerItem = subMenu.getMenuItem("Ruler").orElseThrow();
-
-        showTooltip(rulerItem);
-        Assert.assertEquals("Show or hide the ruler", getActiveTooltipText());
-    }
-
-    private void showTooltip(TestBenchElement button) {
-        executeScript(
-                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
-                button);
-    }
-
-    private String getActiveTooltipText() {
-        return findElement(By.tagName("vaadin-tooltip")).getText();
+    private void detachAndAttach() {
+        clickElementWithJs("detach");
+        clickElementWithJs("attach");
+        menuBar = $(MenuBarElement.class).single();
+        menuBarTooltip = menuBar.$("vaadin-tooltip").single();
     }
 }

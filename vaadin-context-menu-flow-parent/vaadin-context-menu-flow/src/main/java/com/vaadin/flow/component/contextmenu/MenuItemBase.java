@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
@@ -337,6 +338,52 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         executeJsWhenAttached(
                 "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
                 getElement(), themeName);
+    }
+
+    /**
+     * Sets the tooltip text for this menu item.
+     * <p>
+     * The first call to this method on an item attaches a slotted
+     * {@code <vaadin-tooltip>} element to the menu host that is shared by all
+     * items, including items in sub-menus. Hover and hide delays as well as the
+     * position can be configured via the slotted element. Setting {@code null}
+     * or an empty text removes the tooltip from the item.
+     *
+     * @param tooltipText
+     *            the tooltip text to set for the item, or {@code null} to clear
+     *            it
+     * @see #setTooltipPosition(TooltipPosition)
+     */
+    public void setTooltipText(String tooltipText) {
+        ensureTooltipElement();
+        getElement().setProperty("tooltip", tooltipText);
+        scheduleTooltipUpdate();
+    }
+
+    /**
+     * Sets the tooltip position for this menu item, overriding the default.
+     * Items with a sub-menu default to {@code start} so the tooltip doesn't
+     * overlap the opening sub-menu; all other items, including disabled ones,
+     * default to {@code end}. If the slotted {@code <vaadin-tooltip>} element
+     * has its own {@code position} property set, that value is used instead.
+     *
+     * @param position
+     *            the tooltip position, or {@code null} to clear it and use the
+     *            default
+     * @see #setTooltipText(String)
+     */
+    public void setTooltipPosition(TooltipPosition position) {
+        getElement().setProperty("tooltipPosition",
+                position != null ? position.getPosition() : null);
+        scheduleTooltipUpdate();
+    }
+
+    protected void ensureTooltipElement() {
+        contextMenu.ensureTooltipElement();
+    }
+
+    protected void scheduleTooltipUpdate() {
+        contextMenu.scheduleTooltipUpdate();
     }
 
     protected abstract S createSubMenu();

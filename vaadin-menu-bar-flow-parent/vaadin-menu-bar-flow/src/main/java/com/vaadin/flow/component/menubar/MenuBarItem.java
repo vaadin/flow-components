@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.menubar;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -24,11 +23,22 @@ import com.vaadin.flow.function.SerializableRunnable;
 class MenuBarItem extends MenuItem {
 
     private final SerializableRunnable contentReset;
+    final MenuBar menuBar;
 
-    public MenuBarItem(ContextMenu contextMenu,
-            SerializableRunnable contentReset) {
-        super(contextMenu, contentReset);
+    public MenuBarItem(MenuBar menuBar, SerializableRunnable contentReset) {
+        super(null, contentReset);
+        this.menuBar = menuBar;
         this.contentReset = contentReset;
+    }
+
+    @Override
+    protected void ensureTooltipElement() {
+        menuBar.ensureTooltipElement();
+    }
+
+    @Override
+    protected void scheduleTooltipUpdate() {
+        menuBar.updateButtons();
     }
 
     @Override

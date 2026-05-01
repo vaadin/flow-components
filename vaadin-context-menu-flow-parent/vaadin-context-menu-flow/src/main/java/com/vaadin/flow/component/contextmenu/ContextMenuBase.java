@@ -31,7 +31,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
@@ -197,51 +196,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         return "click".equals(openOnEventName);
     }
 
-    /**
-     * Sets the tooltip text for the given menu item.
-     * <p>
-     * The first call to this method on a context menu attaches a slotted
-     * {@code <vaadin-tooltip>} element to the context menu host that is shared
-     * by all items, including items in sub-menus. Hover and hide delays as well
-     * as the position can be configured via the slotted element. Setting
-     * {@code null} or an empty text removes the tooltip from the item.
-     *
-     * @param item
-     *            the menu item to set the tooltip for, not {@code null}
-     * @param tooltipText
-     *            the tooltip text to set for the item, or {@code null} to clear
-     *            it
-     * @see #setTooltipPosition(MenuItemBase, TooltipPosition)
-     */
-    public void setTooltipText(I item, String tooltipText) {
-        ensureTooltipElement();
-        item.getElement().setProperty("tooltip", tooltipText);
-        scheduleTooltipUpdate();
-    }
-
-    /**
-     * Sets the tooltip position for the given menu item, overriding the
-     * default. Items with a sub-menu default to {@code start} so the tooltip
-     * doesn't overlap the opening sub-menu; all other items, including disabled
-     * ones, default to {@code end}. If the slotted {@code <vaadin-tooltip>}
-     * element has its own {@code position} property set, that value is used
-     * instead.
-     *
-     * @param item
-     *            the menu item to set the tooltip position for, not
-     *            {@code null}
-     * @param position
-     *            the tooltip position, or {@code null} to clear it and use the
-     *            default
-     * @see #setTooltipText(MenuItemBase, String)
-     */
-    public void setTooltipPosition(I item, TooltipPosition position) {
-        item.getElement().setProperty("tooltipPosition",
-                position != null ? position.getPosition() : null);
-        scheduleTooltipUpdate();
-    }
-
-    private void ensureTooltipElement() {
+    void ensureTooltipElement() {
         if (getElement().getChildren().noneMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
@@ -283,6 +238,38 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public I addItem(Component component) {
         return getMenuManager().addItem(component);
+    }
+
+    /**
+     * Creates a new menu item with the given text content and tooltip text and
+     * adds it to the context menu.
+     *
+     * @param text
+     *            the text content for the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     */
+    public I addItem(String text, String tooltipText) {
+        var item = addItem(text);
+        item.setTooltipText(tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new menu item with the given component content and tooltip text
+     * and adds it to the context menu.
+     *
+     * @param component
+     *            the component to add to the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     */
+    public I addItem(Component component, String tooltipText) {
+        var item = addItem(component);
+        item.setTooltipText(tooltipText);
+        return item;
     }
 
     /**

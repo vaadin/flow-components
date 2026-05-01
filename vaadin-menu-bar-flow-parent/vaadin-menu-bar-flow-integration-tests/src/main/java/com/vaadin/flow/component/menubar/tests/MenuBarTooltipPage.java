@@ -17,7 +17,6 @@ package com.vaadin.flow.component.menubar.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.TooltipConfiguration;
@@ -33,41 +32,40 @@ public class MenuBarTooltipPage extends Div {
         TooltipConfiguration.setDefaultHideDelay(0);
 
         MenuBar menuBar = new MenuBar();
-        // Use each add API with tooltip parameter to add menu items
-        var editMenuItem = menuBar.addItem("Edit", "Edit tooltip");
-        menuBar.addItem(new Span("Share"), "Share tooltip");
-        menuBar.addItem("Move", "Move tooltip", (e) -> {
-        });
-        menuBar.addItem(new Span("Duplicate"), "Duplicate tooltip");
 
-        // Item with sub-menu containing items with tooltips
-        var viewMenuItem = menuBar.addItem("View");
-        var rulerSubItem = viewMenuItem.getSubMenu().addItem("Ruler");
-        menuBar.setTooltipText(rulerSubItem, "Show or hide the ruler");
-        menuBar.setTooltipPosition(rulerSubItem, TooltipPosition.END);
+        // Root items (buttons)
+        var item0 = menuBar.addItem("Item 0", "Item 0 / Tooltip");
 
-        // Tooltip position override on root item
-        menuBar.setTooltipPosition(editMenuItem, TooltipPosition.TOP);
+        var item1 = menuBar.addItem("Item 1", "Item 1 / Tooltip");
+        item1.setEnabled(false);
 
-        // Add a button for toggling the menu-bar attached state.
-        var toggleAttachedButton = new NativeButton("Toggle attached",
+        var item2 = menuBar.addItem("Item 2", "Item 2 / Tooltip");
+        item2.setTooltipPosition(TooltipPosition.TOP);
+
+        // Sub menu items
+        var item0_0 = item0.getSubMenu().addItem("Item 0-0",
+                "Item 0-0 / Tooltip");
+
+        var item0_1 = item0.getSubMenu().addItem("Item 0-1",
+                "Item 0-1 / Tooltip");
+        item0_1.setEnabled(false);
+
+        var item0_2 = item0.getSubMenu().addItem("Item 0-2",
+                "Item 0-2 / Tooltip");
+        item0_2.setTooltipPosition(TooltipPosition.TOP);
+
+        var attach = new NativeButton("Attach", event -> add(menuBar));
+        attach.setId("attach");
+        var detach = new NativeButton("Detach", event -> remove(menuBar));
+        detach.setId("detach");
+
+        var updateTooltips = new NativeButton("Update tooltips",
                 event -> {
-                    if (menuBar.getParent().isPresent()) {
-                        remove(menuBar);
-                    } else {
-                        add(menuBar);
-                    }
+                    item0.setTooltipText("Item 0 / Updated Tooltip");
+                    item0_0.setTooltipText("Item 0-0 / Updated Tooltip");
                 });
-        toggleAttachedButton.setId("toggle-attached-button");
+        updateTooltips.setId("update-tooltips");
 
-        // Add a button for updating an item's tooltip
-        var updateItemTooltipButton = new NativeButton("Update item tooltip",
-                event -> {
-                    menuBar.setTooltipText(editMenuItem,
-                            "Updated Edit tooltip");
-                });
-        updateItemTooltipButton.setId("update-item-tooltip-button");
-
-        add(toggleAttachedButton, updateItemTooltipButton, menuBar);
+        add(attach, detach, updateTooltips, menuBar);
     }
 }

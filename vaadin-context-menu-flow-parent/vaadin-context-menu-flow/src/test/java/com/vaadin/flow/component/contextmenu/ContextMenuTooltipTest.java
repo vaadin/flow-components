@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 
@@ -41,8 +42,8 @@ class ContextMenuTooltipTest {
 
     @Test
     void setTooltipText_addsSlottedTooltipElement() {
-        var item = contextMenu.addItem("Item");
-        contextMenu.setTooltipText(item, "Item tooltip");
+        var item = contextMenu.addItem("Item 0");
+        item.setTooltipText("Item 0 / Tooltip");
 
         var tooltip = getTooltipElement();
         Assertions.assertTrue(tooltip.isPresent());
@@ -51,39 +52,97 @@ class ContextMenuTooltipTest {
 
     @Test
     void setTooltipText_setsTooltipPropertyOnItem() {
-        var item = contextMenu.addItem("Item");
-        contextMenu.setTooltipText(item, "Item tooltip");
+        var item = contextMenu.addItem("Item 0");
+        item.setTooltipText("Item 0 / Tooltip");
 
-        Assertions.assertEquals("Item tooltip",
+        Assertions.assertEquals("Item 0 / Tooltip",
                 item.getElement().getProperty("tooltip"));
     }
 
     @Test
     void setTooltipText_multipleItems_singleTooltipElement() {
+        var item0 = contextMenu.addItem("Item 0");
         var item1 = contextMenu.addItem("Item 1");
-        var item2 = contextMenu.addItem("Item 2");
-        contextMenu.setTooltipText(item1, "Tooltip 1");
-        contextMenu.setTooltipText(item2, "Tooltip 2");
+        item0.setTooltipText("Item 0 / Tooltip");
+        item1.setTooltipText("Item 1 / Tooltip");
 
         Assertions.assertEquals(1, getTooltipElements().count());
     }
 
     @Test
     void setTooltipText_subMenuItem_setsTooltipProperty() {
-        var item = contextMenu.addItem("Item");
-        var subItem = item.getSubMenu().addItem("Sub item");
+        var item = contextMenu.addItem("Item 0");
+        var subItem = item.getSubMenu().addItem("Item 0-0");
 
-        contextMenu.setTooltipText(subItem, "Sub tooltip");
+        subItem.setTooltipText("Item 0-0 / Tooltip");
 
-        Assertions.assertEquals("Sub tooltip",
+        Assertions.assertEquals("Item 0-0 / Tooltip",
                 subItem.getElement().getProperty("tooltip"));
         Assertions.assertTrue(getTooltipElement().isPresent());
     }
 
     @Test
+    void addItemWithTextAndTooltip_setsTooltipProperty() {
+        var item = contextMenu.addItem("Item 0", "Item 0 / Tooltip");
+
+        Assertions.assertEquals("Item 0 / Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void addItemWithComponentAndTooltip_setsTooltipProperty() {
+        var item = contextMenu.addItem(new Span("Item 0"), "Item 0 / Tooltip");
+
+        Assertions.assertEquals("Item 0 / Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void subMenu_addItemWithTextAndTooltip_setsTooltipProperty() {
+        var item = contextMenu.addItem("Item 0");
+        var subItem = item.getSubMenu().addItem("Item 0-0",
+                "Item 0-0 / Tooltip");
+
+        Assertions.assertEquals("Item 0-0 / Tooltip",
+                subItem.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void subMenu_addItemWithComponentAndTooltip_setsTooltipProperty() {
+        var item = contextMenu.addItem("Item 0");
+        var subItem = item.getSubMenu().addItem(new Span("Item 0-0"),
+                "Item 0-0 / Tooltip");
+
+        Assertions.assertEquals("Item 0-0 / Tooltip",
+                subItem.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void subMenu_addItemWithTextTooltipAndListener_setsTooltipProperty() {
+        var item = contextMenu.addItem("Item 0");
+        var subItem = item.getSubMenu().addItem("Item 0-0",
+                "Item 0-0 / Tooltip", e -> {
+                });
+
+        Assertions.assertEquals("Item 0-0 / Tooltip",
+                subItem.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void subMenu_addItemWithComponentTooltipAndListener_setsTooltipProperty() {
+        var item = contextMenu.addItem("Item 0");
+        var subItem = item.getSubMenu().addItem(new Span("Item 0-0"),
+                "Item 0-0 / Tooltip", e -> {
+                });
+
+        Assertions.assertEquals("Item 0-0 / Tooltip",
+                subItem.getElement().getProperty("tooltip"));
+    }
+
+    @Test
     void setTooltipPosition_setsTooltipPositionPropertyOnItem() {
-        var item = contextMenu.addItem("Item");
-        contextMenu.setTooltipPosition(item, TooltipPosition.END);
+        var item = contextMenu.addItem("Item 0");
+        item.setTooltipPosition(TooltipPosition.END);
 
         Assertions.assertEquals("end",
                 item.getElement().getProperty("tooltipPosition"));
@@ -91,9 +150,9 @@ class ContextMenuTooltipTest {
 
     @Test
     void setTooltipPositionNull_clearsTooltipPositionProperty() {
-        var item = contextMenu.addItem("Item");
-        contextMenu.setTooltipPosition(item, TooltipPosition.END);
-        contextMenu.setTooltipPosition(item, null);
+        var item = contextMenu.addItem("Item 0");
+        item.setTooltipPosition(TooltipPosition.END);
+        item.setTooltipPosition(null);
 
         Assertions.assertNull(item.getElement().getProperty("tooltipPosition"));
     }

@@ -50,6 +50,80 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
         return getMenuManager().addItem(component, clickListener);
     }
 
+    /**
+     * Creates a new {@link MenuItem} component with the given text content and
+     * tooltip text and adds it to this sub menu.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText) {
+        var item = addItem(text);
+        item.setTooltipText(tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the given tooltip text and
+     * adds it to this sub menu. The provided component is added into the
+     * created {@link MenuItem}.
+     *
+     * @param component
+     *            the component to add inside the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText) {
+        var item = addItem(component);
+        item.setTooltipText(tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the given text content,
+     * tooltip text and click listener and adds it to this sub menu.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(text, clickListener);
+        item.setTooltipText(tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the given tooltip text and
+     * click listener and adds it to this sub menu. The provided component is
+     * added into the created {@link MenuItem}.
+     *
+     * @param component
+     *            the component to add inside the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(component, clickListener);
+        item.setTooltipText(tooltipText);
+        return item;
+    }
+
     @Override
     protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager() {
         return new MenuManager<>(getParentMenuItem().getContextMenu(),

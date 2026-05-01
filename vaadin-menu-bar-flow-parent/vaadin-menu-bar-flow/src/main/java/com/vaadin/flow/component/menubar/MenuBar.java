@@ -38,7 +38,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -202,7 +201,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(String text, String tooltipText) {
         var item = addItem(text);
-        setTooltipText(item, tooltipText);
+        item.setTooltipText(tooltipText);
         return item;
     }
 
@@ -227,7 +226,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(Component component, String tooltipText) {
         var item = addItem(component);
-        setTooltipText(item, tooltipText);
+        item.setTooltipText(tooltipText);
         return item;
     }
 
@@ -256,7 +255,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(text, clickListener);
-        setTooltipText(item, tooltipText);
+        item.setTooltipText(tooltipText);
         return item;
     }
 
@@ -285,7 +284,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(component, clickListener);
-        setTooltipText(item, tooltipText);
+        item.setTooltipText(tooltipText);
         return item;
     }
 
@@ -490,50 +489,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         }
     }
 
-    /**
-     * Sets the tooltip text for the given {@link MenuItem}. Works for both
-     * root-level items (rendered as buttons) and items inside sub-menus.
-     * <p>
-     * The first call to this method on a menu bar attaches a slotted
-     * {@code <vaadin-tooltip>} element to the menu-bar host that is shared by
-     * all items. Hover and hide delays as well as the position can be
-     * configured via the slotted element. Setting {@code null} or an empty text
-     * removes the tooltip from the item.
-     *
-     * @param item
-     *            the menu item to set the tooltip for
-     * @param tooltipText
-     *            the tooltip text to set for the item
-     * @see #setTooltipPosition(MenuItem, TooltipPosition)
-     */
-    public void setTooltipText(MenuItem item, String tooltipText) {
-        ensureTooltipElement();
-        item.getElement().setProperty("tooltip", tooltipText);
-        updateButtons();
-    }
-
-    /**
-     * Sets the tooltip position for the given {@link MenuItem}, overriding the
-     * default. Root-level items default to {@code bottom}; items with a
-     * sub-menu default to {@code start} so the tooltip doesn't overlap the
-     * opening sub-menu; all other items, including disabled ones, default to
-     * {@code end}. If the slotted {@code <vaadin-tooltip>} element has its own
-     * {@code position} property set, that value is used instead.
-     *
-     * @param item
-     *            the menu item to set the tooltip position for
-     * @param position
-     *            the tooltip position, or {@code null} to clear it and use the
-     *            default
-     * @see #setTooltipText(MenuItem, String)
-     */
-    public void setTooltipPosition(MenuItem item, TooltipPosition position) {
-        item.getElement().setProperty("tooltipPosition",
-                position != null ? position.getPosition() : null);
-        updateButtons();
-    }
-
-    private void ensureTooltipElement() {
+    void ensureTooltipElement() {
         if (getElement().getChildren().noneMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));

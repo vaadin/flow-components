@@ -26,6 +26,7 @@ import com.vaadin.flow.router.Route;
 public class ContextMenuTooltipPage extends Div {
 
     public ContextMenuTooltipPage() {
+        // Reset default delay values from 500 to 0
         TooltipConfiguration.setDefaultFocusDelay(0);
         TooltipConfiguration.setDefaultHoverDelay(0);
         TooltipConfiguration.setDefaultHideDelay(0);
@@ -34,23 +35,39 @@ public class ContextMenuTooltipPage extends Div {
         target.setId("target");
 
         var contextMenu = new ContextMenu(target);
-        var openItem = contextMenu.addItem("Open");
-        contextMenu.setTooltipText(openItem, "Open the selected file");
 
-        var deleteItem = contextMenu.addItem("Delete");
-        deleteItem.setEnabled(false);
-        contextMenu.setTooltipText(deleteItem, "Not available right now");
-        contextMenu.setTooltipPosition(deleteItem, TooltipPosition.START);
+        // Root items
+        var item0 = contextMenu.addItem("Item 0", "Item 0 / Tooltip");
 
-        var moreItem = contextMenu.addItem("More");
-        var subItem = moreItem.getSubMenu().addItem("Sub item");
-        contextMenu.setTooltipText(subItem, "Sub item tooltip");
+        var item1 = contextMenu.addItem("Item 1", "Item 1 / Tooltip");
+        item1.setEnabled(false);
 
-        var updateTooltipButton = new NativeButton("Update tooltip",
-                event -> contextMenu.setTooltipText(openItem,
-                        "Updated tooltip"));
-        updateTooltipButton.setId("update-tooltip-button");
+        var item2 = contextMenu.addItem("Item 2", "Item 2 / Tooltip");
+        item2.setTooltipPosition(TooltipPosition.TOP);
 
-        add(target, updateTooltipButton);
+        // Sub menu items
+        var item0_0 = item0.getSubMenu().addItem("Item 0-0",
+                "Item 0-0 / Tooltip");
+
+        var item0_1 = item0.getSubMenu().addItem("Item 0-1",
+                "Item 0-1 / Tooltip");
+        item0_1.setEnabled(false);
+
+        var item0_2 = item0.getSubMenu().addItem("Item 0-2",
+                "Item 0-2 / Tooltip");
+        item0_2.setTooltipPosition(TooltipPosition.TOP);
+
+        var attach = new NativeButton("Attach", event -> add(target));
+        attach.setId("attach");
+        var detach = new NativeButton("Detach", event -> remove(target));
+        detach.setId("detach");
+
+        var updateTooltips = new NativeButton("Update tooltips", event -> {
+            item0.setTooltipText("Item 0 / Updated Tooltip");
+            item0_0.setTooltipText("Item 0-0 / Updated Tooltip");
+        });
+        updateTooltips.setId("update-tooltips");
+
+        add(attach, detach, updateTooltips, target);
     }
 }
