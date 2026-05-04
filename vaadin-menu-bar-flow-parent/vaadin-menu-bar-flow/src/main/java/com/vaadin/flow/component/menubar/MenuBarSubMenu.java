@@ -34,8 +34,8 @@ class MenuBarSubMenu extends SubMenu {
     @Override
     protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager() {
         var menuBar = ((MenuBarItem) getParentMenuItem()).menuBar;
-        return new MenuManager<ContextMenu, MenuItem, SubMenu>(null,
-                contentReset, (menu, reset) -> new MenuBarItem(menuBar, reset),
-                MenuItem.class, getParentMenuItem());
+        return new MenuManager<>(null, contentReset,
+                (menu, reset) -> new MenuBarItem(menuBar, reset), MenuItem.class,
+                getParentMenuItem());
     }
 }
