@@ -61,7 +61,7 @@ jobs:
             exit 0
           fi
           pr_number="${{ github.event.pull_request.number }}"
-          commits=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/commits" --jq '.[].commit.message')
+          commits=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/commits" --jq '.[].commit.message | split("\n")[0]')
           if echo "$commits" | grep -q '\[skip ci\]'; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
