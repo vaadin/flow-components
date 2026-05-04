@@ -389,7 +389,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         contentReset.run();
     }
 
-    protected abstract void ensureTooltipElement();
+    protected void ensureTooltipElement() {
+        contextMenu.ensureTooltipElement();
+    }
 
     protected abstract S createSubMenu();
 
