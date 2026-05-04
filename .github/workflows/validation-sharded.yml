@@ -119,7 +119,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          elements=$(node scripts/detect-modified-components.js)
+          elements="${{ github.event.inputs.components || '' }}"
+          if [ -z "$elements" ]; then
+            case "${{ github.event_name }}" in
+              pull_request)
+                elements=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename' | node scripts/detect-modified-components.js)
+                ;;
+              merge_group)
+                elements=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}" | node scripts/detect-modified-components.js)
+                ;;
+            esac
+          fi
           [ -n "$elements" ] && echo "Running partial build for: $elements" || echo "Running full build"
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
