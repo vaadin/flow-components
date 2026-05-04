@@ -69,7 +69,8 @@ class GridContextMenuTest {
     @Test
     void addTextItem_delegateToMenuManager() {
         TestContextMenu menu = new TestContextMenu();
-        menu.addItem("foo", (ComponentEventListener<ClickEvent<MenuItem>>) null);
+        menu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Mockito.verify(menuManager).addItem("foo", null);
     }
