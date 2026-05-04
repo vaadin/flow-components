@@ -103,8 +103,16 @@ jobs:
           google-chrome --version
           chromedriver --version
 
-      - name: Unit tests and install
+      - name: Restore build cache
+        id: build-cache
         if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
+      - name: Unit tests and install
+        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
           mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
