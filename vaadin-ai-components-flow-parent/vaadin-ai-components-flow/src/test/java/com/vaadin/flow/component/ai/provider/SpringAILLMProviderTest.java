@@ -68,6 +68,8 @@ class SpringAILLMProviderTest {
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
+        Mockito.when(mockChatModel.getDefaultOptions())
+                .thenReturn(ToolCallingChatOptions.builder().build());
         provider = new SpringAILLMProvider(mockChatModel);
         logger.clearAll();
     }
