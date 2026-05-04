@@ -196,12 +196,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         return "click".equals(openOnEventName);
     }
 
-    void ensureTooltipElement() {
-        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
-            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
-        }
-    }
-
     /**
      * Closes this context menu if it is currently open.
      */
@@ -516,5 +510,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         getElement().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
                 appId);
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }

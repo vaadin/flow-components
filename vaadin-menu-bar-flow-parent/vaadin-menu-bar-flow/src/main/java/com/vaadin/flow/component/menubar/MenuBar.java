@@ -496,16 +496,16 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         }
     }
 
-    void ensureTooltipElement() {
-        if (SlotUtils.getElementsInSlot(this, "tooltip").findAny().isEmpty()) {
-            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
-        }
-    }
-
     /**
      * Closes the current submenu.
      */
     public void close() {
         getElement().callJsFunction("close");
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }
