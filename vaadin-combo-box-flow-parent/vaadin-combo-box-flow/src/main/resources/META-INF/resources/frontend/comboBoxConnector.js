@@ -354,9 +354,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     if (!focusSelectedItemEnabled) return;
     // When the user is filtering, keyboard navigation should start from the
     // top of the filtered list rather than jumping to the selected item — so
-    // skip the resolve while a filter is active. We never re-focus once a
-    // filter has been typed, so a separate `filter-changed` listener isn't
-    // needed either.
+    // skip the resolve while a filter is active.
     if (comboBox.filter) return;
     const token = ++focusSelectedItemToken;
     queueMicrotask(() => {
@@ -410,7 +408,28 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     });
   };
 
-  comboBox.addEventListener('vaadin-combo-box-dropdown-opened', resolveFocusSelectedItem);
+  // `opened-changed`, not `vaadin-combo-box-dropdown-opened`: the latter
+  // fires on every `_overlayOpened` true transition, and the WC briefly
+  // toggles `_overlayOpened` during filter changes when the items list
+  // empties and refills — even though `opened` itself stays true.
+  comboBox.addEventListener('opened-changed', (e) => {
+    if (e.detail.value === true) {
+      resolveFocusSelectedItem();
+    }
+  });
+
+  // Filter-change cleanup. `_setDropdownItems` would otherwise carry the
+  // previously-focused item across the filter change by identity, so a
+  // type-then-clear sequence re-focuses the originally auto-focused
+  // selectedItem; resetting `_focusedIndex` makes its fallback return -1
+  // for an empty filter. The token bump cancels any in-flight resolve so
+  // its late `scrollToIndex` doesn't park `__scrollToPendingIndex` on the
+  // new fetch and re-scroll once the data lands.
+  comboBox.addEventListener('filter-changed', () => {
+    if (!focusSelectedItemEnabled) return;
+    focusSelectedItemToken++;
+    comboBox._focusedIndex = -1;
+  });
 
   // On close with focusSelectedItem on, arm a DataCommunicator reset and
   // wipe all client-side cache. The next open scrolls to the same viewport
