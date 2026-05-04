@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - sharded-test-runs
+  pull_request:
+    branches: ['main', '25.*']
+  merge_group:
   workflow_dispatch:
     inputs:
       components:
@@ -31,10 +34,12 @@ jobs:
   setup:
     name: Build & Package WAR
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     outputs:
       matrix: ${{ steps.shards.outputs.matrix }}
       has-tests: ${{ steps.shards.outputs.has-tests }}
+      skip: ${{ steps.skip-ci.outputs.skip }}
+      elements: ${{ steps.components.outputs.elements }}
     steps:
       - name: Set Maven args
         run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
@@ -44,7 +49,31 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
           fetch-depth: ${{ github.event_name == 'merge_group' && 50 || 1 }}
 
+      - name: Check for skip-ci
+        id: skip-ci
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [ "${{ github.event_name }}" = "merge_group" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if echo "$PR_TITLE" | grep -q '\[skip ci\]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pr_number="${{ github.event.pull_request.number }}"
+          commits=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/commits" --jq '.[].commit.message')
+          if echo "$commits" | grep -q '\[skip ci\]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
       - name: Setup JDK 21
+        if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
@@ -52,12 +81,13 @@ jobs:
           cache: 'maven'
 
       - name: Setup Node
+        if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
       - name: Install TestBench license
-        if: env.TB_LICENSE != ''
+        if: steps.skip-ci.outputs.skip != 'true' && env.TB_LICENSE != ''
         env:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
@@ -65,6 +95,7 @@ jobs:
           echo "$TB_LICENSE" > ~/.vaadin/proKey
 
       - name: Show environment info
+        if: steps.skip-ci.outputs.skip != 'true'
         run: |
           java -version
           mvn -version
@@ -74,6 +105,7 @@ jobs:
           chromedriver --version
 
       - name: Unit tests and install
+        if: steps.skip-ci.outputs.skip != 'true'
         run: |
           mvn install -Drelease -T $FORK_COUNT || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
@@ -81,21 +113,49 @@ jobs:
             mvn install -Drelease -T $FORK_COUNT
           }
 
-      - name: Resolve components
+      - name: Detect modified components
         id: components
+        if: steps.skip-ci.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           elements="${{ github.event.inputs.components || '' }}"
+          changed_files=""
+          if [ -z "$elements" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            pr_number="${{ github.event.pull_request.number }}"
+            changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
+          elif [ -z "$elements" ] && [ "${{ github.event_name }}" = "merge_group" ]; then
+            changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
+          fi
+          if [ -n "$changed_files" ]; then
+            modified=$(echo "$changed_files" \
+              | grep 'vaadin.*flow-parent' \
+              | sed 's,^vaadin-\(.*\)-flow-parent.*,\1,' \
+              | sort -u)
+            nmods=$(echo "$modified" | wc -w | tr -d ' ')
+            all_files=$(echo "$changed_files" | sort -u | tr -d '[:space:]')
+            component_files=$(echo "$changed_files" | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
+            if [ "$nmods" -lt 5 ] && [ ${#all_files} -eq ${#component_files} ]; then
+              elements=$(echo $modified | tr '\n' ' ')
+              echo "Running partial build for: $elements"
+            fi
+          fi
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
       - name: npm install
+        if: steps.skip-ci.outputs.skip != 'true'
         run: npm install --ignore-scripts --silent --quiet --no-progress
 
       - name: Merge ITs
+        if: steps.skip-ci.outputs.skip != 'true'
         run: node scripts/mergeITs.js ${{ steps.components.outputs.elements }}
 
+      - name: WTR tests
+        if: steps.skip-ci.outputs.skip != 'true'
+        run: node scripts/wtr.js ${{ steps.components.outputs.elements }}
+
       - name: Package integration-tests WAR
+        if: steps.skip-ci.outputs.skip != 'true'
         run: |
           mvn package -pl integration-tests \
             -Dvaadin.pnpm.enable -Drun-it -Drelease \
@@ -103,10 +163,12 @@ jobs:
             -DskipTests -DskipJetty
 
       - name: Compile IT test sources
+        if: steps.skip-ci.outputs.skip != 'true'
         run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests
 
       - name: Compute IT shards
         id: shards
+        if: steps.skip-ci.outputs.skip != 'true'
         env:
           SHARDS: ${{ github.event.inputs.shards || '5' }}
         run: |
@@ -140,6 +202,7 @@ jobs:
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
       - name: Package setup bundle
+        if: steps.skip-ci.outputs.skip != 'true' && steps.shards.outputs.has-tests == 'true'
         run: |
           tar --zstd -cf it-module.tzst \
             integration-tests/pom.xml \
@@ -153,6 +216,7 @@ jobs:
           ls -lh it-module.tzst m2-vaadin.tzst
 
       - uses: actions/upload-artifact@v6
+        if: steps.skip-ci.outputs.skip != 'true' && steps.shards.outputs.has-tests == 'true'
         with:
           name: it-setup-bundle
           path: |
@@ -164,7 +228,7 @@ jobs:
   it:
     name: IT shard ${{ matrix.shard }}
     needs: setup
-    if: needs.setup.outputs.has-tests == 'true'
+    if: needs.setup.outputs.skip != 'true' && needs.setup.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -229,7 +293,7 @@ jobs:
   collect:
     name: Collect screenshots
     needs: [setup, it]
-    if: always() && needs.setup.outputs.has-tests == 'true'
+    if: always() && needs.setup.outputs.skip != 'true' && needs.setup.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v6
