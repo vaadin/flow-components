@@ -73,11 +73,13 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
         clickElementWithJs("update-tooltips");
 
         menuBar.getButtons().get(0).hover();
-        Assert.assertEquals("Item 0 / Updated Tooltip", menuBarTooltip.getText());
+        Assert.assertEquals("Item 0 / Updated Tooltip",
+                menuBarTooltip.getText());
 
         var subMenu = menuBar.getButtons().get(0).openSubMenu();
         subMenu.getMenuItems().get(0).hover();
-        Assert.assertEquals("Item 0-0 / Updated Tooltip", menuBarTooltip.getText());
+        Assert.assertEquals("Item 0-0 / Updated Tooltip",
+                menuBarTooltip.getText());
     }
 
     @Test

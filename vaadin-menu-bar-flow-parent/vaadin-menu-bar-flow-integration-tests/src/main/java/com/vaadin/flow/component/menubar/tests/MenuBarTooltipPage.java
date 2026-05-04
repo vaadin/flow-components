@@ -59,11 +59,10 @@ public class MenuBarTooltipPage extends Div {
         var detach = new NativeButton("Detach", event -> remove(menuBar));
         detach.setId("detach");
 
-        var updateTooltips = new NativeButton("Update tooltips",
-                event -> {
-                    item0.setTooltipText("Item 0 / Updated Tooltip");
-                    item0_0.setTooltipText("Item 0-0 / Updated Tooltip");
-                });
+        var updateTooltips = new NativeButton("Update tooltips", event -> {
+            item0.setTooltipText("Item 0 / Updated Tooltip");
+            item0_0.setTooltipText("Item 0-0 / Updated Tooltip");
+        });
         updateTooltips.setId("update-tooltips");
 
         add(attach, detach, updateTooltips, menuBar);
