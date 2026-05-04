@@ -68,6 +68,6 @@ public class ContextMenuTooltipPage extends Div {
         });
         updateTooltips.setId("update-tooltips");
 
-        add(attach, detach, updateTooltips, target);
+        add(attach, detach, updateTooltips, target, contextMenu);
     }
 }

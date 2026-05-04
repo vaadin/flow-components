@@ -35,12 +35,14 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
     public void init() {
         open();
         target = $(TestBenchElement.class).id("target");
-        contextMenu = ContextMenuElement.openByRightClick(target);
+        contextMenu = $(ContextMenuElement.class).single();
         contextMenuTooltip = contextMenu.$("vaadin-tooltip").single();
     }
 
     @Test
-    public void hoverOverRootItems_tooltipDisplayed() {
+    public void openMenu_hoverOverRootItems_tooltipDisplayed() {
+        ContextMenuElement.openByRightClick(target);
+
         var items = contextMenu.getMenuItems();
 
         items.get(0).hover();
@@ -56,7 +58,9 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
     }
 
     @Test
-    public void hoverOverSubMenuItems_tooltipDisplayed() {
+    public void openMenu_hoverOverSubMenuItems_tooltipDisplayed() {
+        ContextMenuElement.openByRightClick(target);
+
         var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         var subMenuItems = subMenu.getMenuItems();
 
@@ -73,8 +77,10 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
     }
 
     @Test
-    public void updateTooltip_updatedTooltipDisplayed() {
+    public void updateTooltip_openMenu_hoverOverItems_updatedTooltipDisplayed() {
         clickElementWithJs("update-tooltips");
+
+        ContextMenuElement.openByRightClick(target);
 
         contextMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0 / Updated Tooltip",
@@ -87,8 +93,10 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
     }
 
     @Test
-    public void detachAndAttach_hoverOverItems_tooltipDisplayed() {
+    public void detachAndAttach_openMenu_hoverOverItems_tooltipDisplayed() {
         detachAndAttach();
+
+        ContextMenuElement.openByRightClick(target);
 
         contextMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0 / Tooltip", contextMenuTooltip.getText());
@@ -102,7 +110,5 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
         clickElementWithJs("detach");
         clickElementWithJs("attach");
         target = $(TestBenchElement.class).id("target");
-        contextMenu = ContextMenuElement.openByRightClick(target);
-        contextMenuTooltip = contextMenu.$("vaadin-tooltip").single();
     }
 }
