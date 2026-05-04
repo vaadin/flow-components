@@ -295,7 +295,8 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *            the menu item to set the tooltip for
      * @param tooltipText
      *            the tooltip text to set for the item
-     * @deprecated Use {@link MenuItem#setTooltipText(String)} instead.
+     * @deprecated Use {@link MenuItem#setTooltipText(String)} instead. This
+     *             method is scheduled for removal in Vaadin 26.
      */
     @Deprecated
     public void setTooltipText(MenuItem item, String tooltipText) {
