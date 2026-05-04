@@ -72,7 +72,8 @@ class GridContextMenuTest {
         menu.addItem("foo",
                 (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
-        Mockito.verify(menuManager).addItem("foo", null);
+        Mockito.verify(menuManager).addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
     }
 
     @Test
@@ -82,7 +83,8 @@ class GridContextMenuTest {
         menu.addItem(component,
                 (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
-        Mockito.verify(menuManager).addItem(component, null);
+        Mockito.verify(menuManager).addItem(component,
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
     }
 
     @Test

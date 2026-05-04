@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.Signal;
 
@@ -63,6 +64,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
             this);
 
+    private final SerializableRunnable contentReset;
+
     /**
      * Default constructor
      *
@@ -70,7 +73,21 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *            the context menu to which this item belongs to
      */
     public MenuItemBase(C contextMenu) {
+        this(contextMenu, () -> {
+        });
+    }
+
+    /**
+     * Creates a menu item belonging to the given menu.
+     *
+     * @param contextMenu
+     *            the context menu to which this item belongs to
+     * @param contentReset
+     *            callback to reset the menu content
+     */
+    public MenuItemBase(C contextMenu, SerializableRunnable contentReset) {
         this.contextMenu = contextMenu;
+        this.contentReset = contentReset;
         getElement().addEventListener("click", e -> {
             if (checkable) {
                 setChecked(!isChecked());
@@ -352,7 +369,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     public void setTooltipText(String tooltipText) {
         ensureTooltipElement();
         getElement().setProperty("tooltip", tooltipText);
-        scheduleTooltipUpdate();
+        contentReset.run();
     }
 
     /**
@@ -369,15 +386,11 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     public void setTooltipPosition(TooltipPosition position) {
         getElement().setProperty("tooltipPosition",
                 position != null ? position.getPosition() : null);
-        scheduleTooltipUpdate();
+        contentReset.run();
     }
 
     protected void ensureTooltipElement() {
         contextMenu.ensureTooltipElement();
-    }
-
-    protected void scheduleTooltipUpdate() {
-        contextMenu.scheduleTooltipUpdate();
     }
 
     protected abstract S createSubMenu();

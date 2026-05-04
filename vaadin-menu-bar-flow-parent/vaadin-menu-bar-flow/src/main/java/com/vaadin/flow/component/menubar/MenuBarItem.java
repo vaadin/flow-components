@@ -37,11 +37,6 @@ class MenuBarItem extends MenuItem {
     }
 
     @Override
-    protected void scheduleTooltipUpdate() {
-        menuBar.resetContent();
-    }
-
-    @Override
     protected MenuBarSubMenu createSubMenu() {
         return new MenuBarSubMenu(this, contentReset);
     }

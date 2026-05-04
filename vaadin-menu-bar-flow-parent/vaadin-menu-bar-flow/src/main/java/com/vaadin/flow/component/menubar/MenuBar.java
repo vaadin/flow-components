@@ -200,9 +200,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(String text, String tooltipText) {
-        var item = addItem(text);
-        item.setTooltipText(tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText);
     }
 
     /**
@@ -225,9 +223,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(Component component, String tooltipText) {
-        var item = addItem(component);
-        item.setTooltipText(tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText);
     }
 
     /**
@@ -254,9 +250,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(text, clickListener);
-        item.setTooltipText(tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText, clickListener);
     }
 
     /**
@@ -283,9 +277,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(component, clickListener);
-        item.setTooltipText(tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText, clickListener);
     }
 
     /**

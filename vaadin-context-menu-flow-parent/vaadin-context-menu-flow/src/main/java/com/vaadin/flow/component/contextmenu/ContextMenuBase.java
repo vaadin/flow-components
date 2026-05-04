@@ -202,10 +202,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
     }
 
-    void scheduleTooltipUpdate() {
-        menuItemsArrayGenerator.generate();
-    }
-
     /**
      * Closes this context menu if it is currently open.
      */
@@ -250,9 +246,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @return the created menu item
      */
     public I addItem(String text, String tooltipText) {
-        var item = addItem(text);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(text, tooltipText);
     }
 
     /**
@@ -266,9 +260,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @return the created menu item
      */
     public I addItem(Component component, String tooltipText) {
-        var item = addItem(component);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(component, tooltipText);
     }
 
     /**

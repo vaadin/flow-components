@@ -61,9 +61,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(String text, String tooltipText) {
-        var item = addItem(text);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(text, tooltipText);
     }
 
     /**
@@ -78,9 +76,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(Component component, String tooltipText) {
-        var item = addItem(component);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(component, tooltipText);
     }
 
     /**
@@ -98,9 +94,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(text, clickListener);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(text, tooltipText, clickListener);
     }
 
     /**
@@ -119,9 +113,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(component, clickListener);
-        item.setTooltipText(tooltipText);
-        return item;
+        return getMenuManager().addItem(component, tooltipText, clickListener);
     }
 
     @Override
