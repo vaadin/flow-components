@@ -505,8 +505,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     void ensureTooltipElement() {
-        if (getElement().getChildren().noneMatch(
-                child -> "tooltip".equals(child.getAttribute("slot")))) {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").findAny().isEmpty()) {
             SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
         }
     }

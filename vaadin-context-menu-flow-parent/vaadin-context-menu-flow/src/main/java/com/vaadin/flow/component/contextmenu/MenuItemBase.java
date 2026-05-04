@@ -341,13 +341,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     }
 
     /**
-     * Sets the tooltip text for this menu item.
-     * <p>
-     * The first call to this method on an item attaches a slotted
-     * {@code <vaadin-tooltip>} element to the menu host that is shared by all
-     * items, including items in sub-menus. Hover and hide delays as well as the
-     * position can be configured via the slotted element. Setting {@code null}
-     * or an empty text removes the tooltip from the item.
+     * Sets the tooltip text for this menu item. Setting {@code null} or an
+     * empty text removes the tooltip from the item.
      *
      * @param tooltipText
      *            the tooltip text to set for the item, or {@code null} to clear
@@ -364,8 +359,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * Sets the tooltip position for this menu item, overriding the default.
      * Items with a sub-menu default to {@code start} so the tooltip doesn't
      * overlap the opening sub-menu; all other items, including disabled ones,
-     * default to {@code end}. If the slotted {@code <vaadin-tooltip>} element
-     * has its own {@code position} property set, that value is used instead.
+     * default to {@code end}.
      *
      * @param position
      *            the tooltip position, or {@code null} to clear it and use the
