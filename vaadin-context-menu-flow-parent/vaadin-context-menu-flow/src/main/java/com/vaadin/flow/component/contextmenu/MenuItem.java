@@ -44,6 +44,11 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
         return new SubMenu(this, contentReset);
     }
 
+    @Override
+    protected void ensureTooltipElement() {
+        getContextMenu().ensureTooltipElement();
+    }
+
     /**
      * Sets the menu item explicitly disabled or enabled. When disabled, menu
      * items are rendered as "dimmed".
