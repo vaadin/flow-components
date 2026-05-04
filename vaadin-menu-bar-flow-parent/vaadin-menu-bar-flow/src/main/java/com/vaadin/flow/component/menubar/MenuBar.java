@@ -289,6 +289,20 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     /**
+     * Sets the tooltip text for the given {@link MenuItem}.
+     *
+     * @param item
+     *            the menu item to set the tooltip for
+     * @param tooltipText
+     *            the tooltip text to set for the item
+     * @deprecated Use {@link MenuItem#setTooltipText(String)} instead.
+     */
+    @Deprecated
+    public void setTooltipText(MenuItem item, String tooltipText) {
+        item.setTooltipText(tooltipText);
+    }
+
+    /**
      * Gets the {@link MenuItem} components added to the root level of the menu
      * bar.
      * <p>

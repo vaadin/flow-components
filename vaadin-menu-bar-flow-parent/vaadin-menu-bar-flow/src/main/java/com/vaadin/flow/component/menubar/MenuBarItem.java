@@ -38,7 +38,7 @@ class MenuBarItem extends MenuItem {
 
     @Override
     protected void scheduleTooltipUpdate() {
-        menuBar.updateButtons();
+        menuBar.resetContent();
     }
 
     @Override

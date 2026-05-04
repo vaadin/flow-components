@@ -68,21 +68,6 @@ function initLazy(menubar, appId) {
 
       let items = menubar.__generatedItems || [];
 
-      // Refresh tooltip text and position from the underlying components so
-      // the menu-bar's tooltip controller recognizes the item as having a
-      // tooltip. Walks sub-menu items recursively because tooltips work on
-      // any item, not just root buttons.
-      const refreshTooltips = (items) => {
-        items.forEach((item) => {
-          item.tooltip = item.component.tooltip;
-          item.tooltipPosition = item.component.tooltipPosition;
-          if (item.children) {
-            refreshTooltips(item.children);
-          }
-        });
-      };
-      refreshTooltips(items);
-
       items.forEach((item) => {
         // Propagate disabled state from items to parent buttons
         item.disabled = item.component.disabled;

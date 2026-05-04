@@ -70,7 +70,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private Component target;
     private MenuManager<C, I, S> menuManager;
-    MenuItemsArrayGenerator<I> menuItemsArrayGenerator;
+    private MenuItemsArrayGenerator<I> menuItemsArrayGenerator;
 
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
