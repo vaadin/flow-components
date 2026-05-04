@@ -113,23 +113,32 @@ jobs:
             mvn install -Drelease -T $FORK_COUNT
           }
 
-      - name: Detect modified components
-        id: components
-        if: steps.skip-ci.outputs.skip != 'true'
+      - name: Resolve components from workflow_dispatch input
+        id: wd
+        if: steps.skip-ci.outputs.skip != 'true' && github.event_name == 'workflow_dispatch'
+        run: echo "elements=${{ github.event.inputs.components }}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect components from PR
+        id: pr
+        if: steps.skip-ci.outputs.skip != 'true' && github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          elements="${{ github.event.inputs.components || '' }}"
-          if [ -z "$elements" ]; then
-            case "${{ github.event_name }}" in
-              pull_request)
-                elements=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename' | node scripts/detect-modified-components.js)
-                ;;
-              merge_group)
-                elements=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}" | node scripts/detect-modified-components.js)
-                ;;
-            esac
-          fi
+          elements=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename' | node scripts/detect-modified-components.js)
+          echo "elements=$elements" >> "$GITHUB_OUTPUT"
+
+      - name: Detect components from merge group
+        id: mg
+        if: steps.skip-ci.outputs.skip != 'true' && github.event_name == 'merge_group'
+        run: |
+          elements=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}" | node scripts/detect-modified-components.js)
+          echo "elements=$elements" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve build elements
+        id: components
+        if: steps.skip-ci.outputs.skip != 'true'
+        run: |
+          elements="${{ steps.wd.outputs.elements || steps.pr.outputs.elements || steps.mg.outputs.elements }}"
           [ -n "$elements" ] && echo "Running partial build for: $elements" || echo "Running full build"
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
