@@ -119,27 +119,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          elements="${{ github.event.inputs.components || '' }}"
-          changed_files=""
-          if [ -z "$elements" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
-            pr_number="${{ github.event.pull_request.number }}"
-            changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
-          elif [ -z "$elements" ] && [ "${{ github.event_name }}" = "merge_group" ]; then
-            changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
-          fi
-          if [ -n "$changed_files" ]; then
-            modified=$(echo "$changed_files" \
-              | grep 'vaadin.*flow-parent' \
-              | sed 's,^vaadin-\(.*\)-flow-parent.*,\1,' \
-              | sort -u)
-            nmods=$(echo "$modified" | wc -w | tr -d ' ')
-            all_files=$(echo "$changed_files" | sort -u | tr -d '[:space:]')
-            component_files=$(echo "$changed_files" | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
-            if [ "$nmods" -lt 5 ] && [ ${#all_files} -eq ${#component_files} ]; then
-              elements=$(echo $modified | tr '\n' ' ')
-              echo "Running partial build for: $elements"
-            fi
-          fi
+          elements=$(node scripts/detect-modified-components.js)
+          [ -n "$elements" ] && echo "Running partial build for: $elements" || echo "Running full build"
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
       - name: npm install
