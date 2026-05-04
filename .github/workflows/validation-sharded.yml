@@ -26,7 +26,6 @@ jobs:
       matrix: ${{ steps.shards.outputs.matrix }}
       has-tests: ${{ steps.shards.outputs.has-tests }}
       skip: ${{ steps.skip-ci.outputs.skip }}
-      modified-components: ${{ steps.modified-components.outputs.result }}
     steps:
       - name: Set Maven args
         run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
@@ -101,23 +100,33 @@ jobs:
           }
 
       - name: Detect modified components
-        id: modified-components
+        id: components
         if: steps.skip-ci.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          case "${{ github.event_name }}" in
-            pull_request)
-              changed_files=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename')
-              ;;
-            merge_group)
-              changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
-              ;;
-            *)
-              changed_files=""
-              ;;
-          esac
-          echo "result=$(echo "$changed_files" | node scripts/detect-modified-components.js)" >> "$GITHUB_OUTPUT"
+          elements=""
+          changed_files=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pr_number="${{ github.event.pull_request.number }}"
+            changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
+          fi
+          if [ -n "$changed_files" ]; then
+            modified=$(echo "$changed_files" \
+              | grep 'vaadin.*flow-parent' \
+              | sed 's,^vaadin-\(.*\)-flow-parent.*,\1,' \
+              | sort -u)
+            nmods=$(echo "$modified" | wc -w | tr -d ' ')
+            all_files=$(echo "$changed_files" | sort -u | tr -d '[:space:]')
+            component_files=$(echo "$changed_files" | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
+            if [ "$nmods" -lt 5 ] && [ ${#all_files} -eq ${#component_files} ]; then
+              elements=$(echo $modified | tr '\n' ' ')
+              echo "Running partial build for: $elements"
+            fi
+          fi
+          echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
       - name: npm install
         if: steps.skip-ci.outputs.skip != 'true'
@@ -125,11 +134,11 @@ jobs:
 
       - name: Merge ITs
         if: steps.skip-ci.outputs.skip != 'true'
-        run: node scripts/mergeITs.js ${{ steps.modified-components.outputs.result }}
+        run: node scripts/mergeITs.js ${{ steps.components.outputs.elements }}
 
       - name: WTR tests
         if: steps.skip-ci.outputs.skip != 'true'
-        run: node scripts/wtr.js ${{ steps.modified-components.outputs.result }}
+        run: node scripts/wtr.js ${{ steps.components.outputs.elements }}
 
       - name: Package integration-tests WAR
         if: steps.skip-ci.outputs.skip != 'true'
