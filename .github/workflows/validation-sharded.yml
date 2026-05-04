@@ -1,18 +1,9 @@
 name: Validation (Sharded)
 
 on:
-  push:
-    branches:
-      - sharded-test-runs
   pull_request:
-    branches: ['main', '25.*', 'sharded-test-runs']
+    branches: ['main', '25.*', 'port-sharded-validation-workflow']
   merge_group:
-  workflow_dispatch:
-    inputs:
-      shards:
-        description: 'Number of parallel IT shards'
-        required: false
-        default: '5'
 
 permissions:
   contents: read
@@ -156,7 +147,7 @@ jobs:
         id: shards
         if: steps.skip-ci.outputs.skip != 'true'
         env:
-          SHARDS: ${{ github.event.inputs.shards || '5' }}
+          SHARDS: 5
         run: |
           mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
           count=${#its[@]}
