@@ -349,6 +349,29 @@ public class Dashboard extends Component
     }
 
     /**
+     * Returns the fixed row height of the dashboard.
+     *
+     * @return the fixed row height of the dashboard
+     */
+    public String getRowHeight() {
+        return getStyle().get("--vaadin-dashboard-row-height");
+    }
+
+    /**
+     * Sets a fixed row height for the dashboard. When set, this value overrides
+     * the {@link #setMinimumRowHeight(String) minimum row height} and prevents
+     * rows from growing to fit their content, allowing widgets to use
+     * {@code 100%} height for their inner content.
+     *
+     * @param rowHeight
+     *            the new fixed row height. Pass in {@code null} to set the row
+     *            height back to the default value.
+     */
+    public void setRowHeight(String rowHeight) {
+        getStyle().set("--vaadin-dashboard-row-height", rowHeight);
+    }
+
+    /**
      * Returns the gap of the dashboard. This value adjusts the gap between
      * elements within the dashboard.
      *
