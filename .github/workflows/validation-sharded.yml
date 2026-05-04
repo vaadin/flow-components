@@ -1,0 +1,259 @@
+name: Validation (Sharded)
+
+on:
+  push:
+    branches:
+      - sharded-test-runs
+  workflow_dispatch:
+    inputs:
+      components:
+        description: 'Space-separated component names (e.g. "grid combo-box"), empty for all'
+        required: false
+        default: ''
+      shards:
+        description: 'Number of parallel IT shards'
+        required: false
+        default: '5'
+
+permissions:
+  contents: read
+  checks: write
+  actions: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORK_COUNT: 4
+
+jobs:
+  setup:
+    name: Build & Package WAR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.shards.outputs.matrix }}
+      has-tests: ${{ steps.shards.outputs.has-tests }}
+    steps:
+      - name: Set Maven args
+        run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: ${{ github.event_name == 'merge_group' && 50 || 1 }}
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install TestBench license
+        if: env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          echo "$TB_LICENSE" > ~/.vaadin/proKey
+
+      - name: Show environment info
+        run: |
+          java -version
+          mvn -version
+          node --version
+          npm --version
+          google-chrome --version
+          chromedriver --version
+
+      - name: Unit tests and install
+        run: |
+          mvn install -Drelease -T $FORK_COUNT || {
+            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
+            sleep 15
+            mvn install -Drelease -T $FORK_COUNT
+          }
+
+      - name: Resolve components
+        id: components
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          elements="${{ github.event.inputs.components || '' }}"
+          echo "elements=$elements" >> "$GITHUB_OUTPUT"
+
+      - name: npm install
+        run: npm install --ignore-scripts --silent --quiet --no-progress
+
+      - name: Merge ITs
+        run: node scripts/mergeITs.js ${{ steps.components.outputs.elements }}
+
+      - name: Package integration-tests WAR
+        run: |
+          mvn package -pl integration-tests \
+            -Dvaadin.pnpm.enable -Drun-it -Drelease \
+            -Dvaadin.productionMode -Dvaadin.force.production.build=true \
+            -DskipTests -DskipJetty
+
+      - name: Compile IT test sources
+        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests
+
+      - name: Compute IT shards
+        id: shards
+        env:
+          SHARDS: ${{ github.event.inputs.shards || '5' }}
+        run: |
+          mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
+          count=${#its[@]}
+          echo "Found $count IT classes"
+          if [ "$count" -eq 0 ]; then
+            echo "has-tests=false" >> "$GITHUB_OUTPUT"
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          n=$SHARDS
+          if [ "$n" -gt "$count" ]; then n=$count; fi
+          declare -a buckets
+          for i in $(seq 1 $n); do buckets[$i]=""; done
+          i=1
+          for t in "${its[@]}"; do
+            if [ -n "${buckets[$i]}" ]; then buckets[$i]+=","; fi
+            buckets[$i]+="$t"
+            i=$((i+1))
+            [ $i -gt $n ] && i=1
+          done
+          json='{"include":['
+          for k in $(seq 1 $n); do
+            [ $k -gt 1 ] && json+=','
+            json+='{"shard":"'"$k"'","tests":"'"${buckets[$k]}"'"}'
+          done
+          json+=']}'
+          echo "$json"
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          echo "has-tests=true" >> "$GITHUB_OUTPUT"
+
+      - name: Package setup bundle
+        run: |
+          tar --zstd -cf it-module.tzst \
+            integration-tests/pom.xml \
+            integration-tests/target/*.war \
+            integration-tests/target/classes \
+            integration-tests/target/test-classes
+          # Only this repo's freshly-installed SNAPSHOT artifacts; framework
+          # release deps come from the setup-java Maven cache in each shard.
+          ( cd "$HOME/.m2/repository" && find com/vaadin -maxdepth 3 -type d -name '*-SNAPSHOT' ) > m2-snapshots.lst
+          tar --zstd -cf m2-vaadin.tzst -C "$HOME/.m2/repository" --files-from=m2-snapshots.lst
+          ls -lh it-module.tzst m2-vaadin.tzst
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: it-setup-bundle
+          path: |
+            it-module.tzst
+            m2-vaadin.tzst
+          retention-days: 1
+          compression-level: 0
+
+  it:
+    name: IT shard ${{ matrix.shard }}
+    needs: setup
+    if: needs.setup.outputs.has-tests == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - name: Set Maven args
+        run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install TestBench license
+        if: env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          echo "$TB_LICENSE" > ~/.vaadin/proKey
+
+      - uses: actions/download-artifact@v6
+        with:
+          name: it-setup-bundle
+
+      - name: Restore setup bundle
+        run: |
+          tar --zstd -xf it-module.tzst
+          mkdir -p "$HOME/.m2/repository"
+          tar --zstd -xf m2-vaadin.tzst -C "$HOME/.m2/repository"
+          rm -f it-module.tzst m2-vaadin.tzst
+          ls integration-tests/target/*.war
+
+      - name: Run integration tests (shard ${{ matrix.shard }})
+        env:
+          SHARD_TESTS: ${{ matrix.tests }}
+        run: |
+          mvn -pl integration-tests -Drun-it \
+            jetty:start-war failsafe:integration-test jetty:stop failsafe:verify \
+            -Dvaadin.productionMode \
+            -DskipFrontend \
+            -Dfailsafe.forkCount=$FORK_COUNT \
+            -Dcom.vaadin.testbench.Parameters.testsInParallel=1 \
+            -Dfailsafe.rerunFailingTestsCount=2 \
+            -Dit.test="$SHARD_TESTS"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: error-screenshots-${{ matrix.shard }}
+          path: integration-tests/error-screenshots/*.png
+          if-no-files-found: ignore
+
+  collect:
+    name: Collect screenshots
+    needs: [setup, it]
+    if: always() && needs.setup.outputs.has-tests == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: error-screenshots-*
+          merge-multiple: true
+          path: error-screenshots
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: error-screenshots
+          path: error-screenshots/*.png
+          if-no-files-found: ignore
+
+      - name: Delete intermediate artifacts
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts" \
+            --jq '.artifacts[] | select(.name == "it-setup-bundle" or (.name | startswith("error-screenshots-"))) | "\(.id) \(.name)"' \
+            | while read -r id name; do
+                echo "Deleting artifact $name (id=$id)"
+                gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
+              done
