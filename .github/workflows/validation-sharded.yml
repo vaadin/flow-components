@@ -5,7 +5,7 @@ on:
     branches:
       - sharded-test-runs
   pull_request:
-    branches: ['main', '25.*']
+    branches: ['main', '25.*', 'sharded-test-runs']
   merge_group:
   workflow_dispatch:
     inputs:
