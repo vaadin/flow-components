@@ -86,6 +86,10 @@ mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am 
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
 - When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
 - To stop a running Jetty server, run `mvn jetty:stop -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests`. Do not use `TaskStop` on the background `jetty:run` task — that terminates the Maven wrapper but leaves the forked Jetty JVM running and holding port 8080.
+- To run integration tests in **headed mode** (visible browser), add the following flags. The `jdwp` agent causes `ChromeBrowserTest` to skip headless mode. Use `suspend=n` so the test runs without waiting for a debugger:
+  ```sh
+  mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests -Dit.test='{file-pattern}' -DskipUnitTests -Dfailsafe.forkCount=1 -Dmaven.failsafe.debug="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+  ```
 
 ### Code Quality
 

@@ -1,6 +1,8 @@
 name: Validation (Sharded)
 
 on:
+  push:
+    branches: ['test-headed-mode']
   pull_request:
     branches: ['main', '25.*', 'port-sharded-validation-workflow']
   merge_group:
@@ -475,6 +477,7 @@ jobs:
             -Dcom.vaadin.testbench.Parameters.testsInParallel=1 \
             -Dfailsafe.rerunFailingTestsCount=2 \
             -Dmaven.test.redirectTestOutputToFile=true \
+            -Dtest.reuseDriver=true \
             -Dit.test="$SHARD_TESTS" \
             $MAVEN_ARGS
 

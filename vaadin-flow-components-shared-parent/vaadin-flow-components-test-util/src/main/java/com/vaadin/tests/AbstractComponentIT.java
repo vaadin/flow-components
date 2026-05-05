@@ -21,13 +21,27 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.vaadin.testbench.ScreenshotOnFailureRule;
 
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
 
+    private static final boolean REUSE_DRIVER =
+            Boolean.getBoolean("test.reuseDriver");
+
+    /**
+     * Override the parent's screenshotOnFailure rule: when reusing the driver,
+     * do not quit it after each test.
+     */
+    @Rule
+    public ScreenshotOnFailureRule screenshotOnFailure =
+            new ScreenshotOnFailureRule(this, !REUSE_DRIVER);
     private static WebDriver sharedDriver;
+    private static boolean shutdownHookRegistered = false;
     private static int consecutiveFailures = 0;
     private static final int MAX_CONSECUTIVE_FAILURES = 5;
 
@@ -80,7 +94,8 @@ public abstract class AbstractComponentIT
 
     @Override
     public void setup() throws Exception {
-        if (sharedDriver != null && isDriverAlive(sharedDriver)) {
+        if (REUSE_DRIVER && sharedDriver != null
+                && isDriverAlive(sharedDriver)) {
             setDriver(sharedDriver);
             getDriver().manage().deleteAllCookies();
         } else {
@@ -89,14 +104,24 @@ public abstract class AbstractComponentIT
             }
             super.setup();
             sharedDriver = getDriver();
+            if (REUSE_DRIVER && !shutdownHookRegistered) {
+                shutdownHookRegistered = true;
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    tryQuitDriver(sharedDriver);
+                }));
+            }
         }
         testBench().resizeViewPortTo(1024, 800);
     }
 
     private static boolean isDriverAlive(WebDriver driver) {
         try {
-            if (driver instanceof RemoteWebDriver) {
-                return ((RemoteWebDriver) driver).getSessionId() != null;
+            WebDriver actual = driver;
+            if (actual instanceof WrapsDriver) {
+                actual = ((WrapsDriver) actual).getWrappedDriver();
+            }
+            if (actual instanceof RemoteWebDriver) {
+                return ((RemoteWebDriver) actual).getSessionId() != null;
             }
             driver.getTitle();
             return true;
