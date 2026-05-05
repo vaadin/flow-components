@@ -327,39 +327,23 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   // Prevent setting the custom value as the 'value'-prop automatically
   comboBox.addEventListener('custom-value-set', (e) => e.preventDefault());
 
-  // Set from the Java side via `comboBox.$connector.setFocusSelectedItem(value)`.
   let focusSelectedItemEnabled = false;
   comboBox.$connector.setFocusSelectedItem = (value) => {
     focusSelectedItemEnabled = !!value;
   };
 
-  // Ask the server for the selected item's index when the dropdown opens.
-  //
-  // Control flow has three async boundaries, each a point where a newer
-  // invocation (from a subsequent dropdown open) can overtake us:
-  //   - microtask deferral so `_onOpened`'s synchronous work populates
-  //     `_focusedIndex` first;
-  //   - waiting for `loading` to settle so the server sees the filter the
-  //     client just pushed via setViewportRange;
-  //   - awaiting the server RPC response.
-  //
-  // `focusSelectedItemToken` is a monotonic per-instance counter: each call
-  // captures its own value at entry and compares against the latest at each
-  // async boundary ("switch"-style cancellation, similar to RxJS `switchMap`).
-  // An older invocation that's been superseded bails out — on the outside
-  // edges to save wasted work, at the RPC-response edge to avoid the actual
-  // bug of scrolling to a stale-filter index inside a newer-filter dropdown.
+  // On open, ask the server for the selected item's flat index and scroll
+  // to it. The token cancels older invocations at each async boundary
+  // (microtask, page-loaded wait, RPC response) — switchMap-style. The
+  // RPC-response check is correctness-critical: a stale answer would
+  // scroll into the wrong filtered array.
   let focusSelectedItemToken = 0;
   const resolveFocusSelectedItem = () => {
     if (!focusSelectedItemEnabled) return;
-    // When the user is filtering, keyboard navigation should start from the
-    // top of the filtered list rather than jumping to the selected item — so
-    // skip the resolve while a filter is active.
+    // While filtering, navigation starts from the top of the filtered list.
     if (comboBox.filter) return;
     const token = ++focusSelectedItemToken;
     queueMicrotask(() => {
-      // Superseded by a later sync call that queued its own microtask. Bail
-      // early to avoid registering a redundant `page-loaded` listener.
       if (token !== focusSelectedItemToken) return;
       if (!comboBox.selectedItem) return;
       const selectedValue = comboBox._getItemValue(comboBox.selectedItem);
@@ -368,14 +352,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         return;
       }
       const invoke = () => {
-        // Superseded while we waited for `loading` to settle. Skip the RPC
-        // — its answer would be dropped on arrival anyway.
         if (token !== focusSelectedItemToken) return;
         comboBox.$server.resolveSelectedItemIndex().then(
           (index) => {
-            // Superseded during the server round-trip. The response reflects
-            // an older state; applying it would scroll into the wrong
-            // array. Correctness-critical guard — do not remove.
             if (token !== focusSelectedItemToken) return;
             if (index != null) {
               comboBox.scrollToIndex(index);
@@ -386,12 +365,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       };
       if (comboBox.loading) {
         // Wait for loading to fully settle — under overlapping fetches,
-        // page-loaded fires once per fetch but the server's filter state
-        // isn't guaranteed to match the latest client filter until all
-        // pending fetches land.
+        // page-loaded fires per-fetch but the server's filter state may not
+        // match the client until all pending fetches land.
         const onPageLoaded = () => {
-          // Self-remove if superseded, so stale listeners don't linger on
-          // the controller.
           if (token !== focusSelectedItemToken) {
             comboBox.__dataProviderController.removeEventListener('page-loaded', onPageLoaded);
             return;
@@ -408,36 +384,30 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     });
   };
 
-  // `opened-changed`, not `vaadin-combo-box-dropdown-opened`: the latter
-  // fires on every `_overlayOpened` true transition, and the WC briefly
-  // toggles `_overlayOpened` during filter changes when the items list
-  // empties and refills — even though `opened` itself stays true.
+  // `opened-changed` fires only on real opens; `vaadin-combo-box-dropdown-opened`
+  // would also fire during the brief `_overlayOpened` toggle that filter
+  // changes cause (even though `opened` itself stays true).
   comboBox.addEventListener('opened-changed', (e) => {
     if (e.detail.value === true) {
       resolveFocusSelectedItem();
     }
   });
 
-  // Filter-change cleanup. `_setDropdownItems` would otherwise carry the
-  // previously-focused item across the filter change by identity, so a
-  // type-then-clear sequence re-focuses the originally auto-focused
-  // selectedItem; resetting `_focusedIndex` makes its fallback return -1
-  // for an empty filter. The token bump cancels any in-flight resolve so
-  // its late `scrollToIndex` doesn't park `__scrollToPendingIndex` on the
-  // new fetch and re-scroll once the data lands.
+  // `_setDropdownItems` carries the previously focused item across a filter
+  // change by identity, so type-then-clear would re-focus the auto-focused
+  // selectedItem. Resetting `_focusedIndex` makes its fallback return -1
+  // for an empty filter. The token bump cancels any in-flight resolve whose
+  // late scrollToIndex would park `__scrollToPendingIndex` on the next fetch.
   comboBox.addEventListener('filter-changed', () => {
     if (!focusSelectedItemEnabled) return;
     focusSelectedItemToken++;
     comboBox._focusedIndex = -1;
   });
 
-  // On close with focusSelectedItem on, arm a DataCommunicator reset and
-  // wipe all client-side cache. The next open scrolls to the same viewport
-  // range the server last sent, which would otherwise be a no-op fetch and
-  // leave pending callbacks unresolved. The reset also re-keys items
-  // outside the post-reset active range; cached pages holding the old keys
-  // would no longer match the freshly-keyed selectedItem, breaking the
-  // resolveSelectedItemIndex → scrollToIndex flow.
+  // On close, wipe client-side cache and arm a DataCommunicator reset so the
+  // next open re-fetches. Otherwise the same viewport-range RPC would be a
+  // no-op and leave pending callbacks unresolved; the reset also re-keys
+  // items so cached pages don't mismatch the freshly-keyed selectedItem.
   comboBox.addEventListener('opened-changed', (e) => {
     if (e.detail.value === false && focusSelectedItemEnabled && comboBox.selectedItem) {
       serverFacade.needsDataCommunicatorReset();
