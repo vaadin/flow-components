@@ -37,6 +37,14 @@ public class ViewPage extends Div {
         });
         setRotation.setId("set-rotation-button");
 
-        add(map, setCenterButton, setZoom, setRotation);
+        NativeButton setMinZoom = new NativeButton("Set Min Zoom",
+                e -> map.getView().setMinZoom(3.0));
+        setMinZoom.setId("set-min-zoom-button");
+
+        NativeButton setMaxZoom = new NativeButton("Set Max Zoom",
+                e -> map.getView().setMaxZoom(10.0));
+        setMaxZoom.setId("set-max-zoom-button");
+
+        add(map, setCenterButton, setZoom, setRotation, setMinZoom, setMaxZoom);
     }
 }
