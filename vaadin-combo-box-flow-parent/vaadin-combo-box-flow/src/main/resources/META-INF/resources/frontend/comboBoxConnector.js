@@ -171,6 +171,20 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         const pendingPages = Object.keys(getPendingRequests()).map((page) => parseInt(page));
         const newRangeMin = Math.min(...pendingPages);
         const newRangeMax = Math.max(...pendingPages);
+
+        // If the bounding box of pending pages exceeds the memory cap
+        // (e.g. a deferred page-0 re-fetch racing a deep scrollToIndex
+        // request), drop the pending page furthest from the freshest
+        // request and recurse so the next iteration sees a smaller box.
+        if ((newRangeMax - newRangeMin + 1) * params.pageSize > maxRangeCount) {
+          const farthest = pendingPages.reduce((a, b) =>
+            Math.abs(a - params.page) >= Math.abs(b - params.page) ? a : b
+          );
+          clearPageCallbacks([String(farthest)]);
+          comboBox.dataProvider(params, callback);
+          return;
+        }
+
         const startIndex = params.pageSize * newRangeMin;
         const endIndex = params.pageSize * (newRangeMax + 1);
 
@@ -179,11 +193,15 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         // state that gets passivated when items leave the KeyMapper's
         // active set — re-rendering from the cache would bind to
         // detached state. Evict so the next scroll-back re-fetches
-        // with fresh ids. Plain-data combo-boxes (no renderer) keep
-        // their cache valid.
+        // with fresh ids. Skip the page that contains the currently
+        // focused index, so a focusSelectedItem-driven scroll isn't
+        // immediately undone by an unrelated index-requested for an
+        // out-of-range placeholder. Plain-data combo-boxes (no
+        // renderer) keep their cache valid.
         if (comboBox.renderer) {
+          const focusedPage = comboBox._focusedIndex >= 0 ? Math.floor(comboBox._focusedIndex / params.pageSize) : -1;
           const pagesToEvict = [...committedPages]
-            .filter((page) => page < newRangeMin || page > newRangeMax)
+            .filter((page) => (page < newRangeMin || page > newRangeMax) && page !== focusedPage)
             .map(String);
           clearPageCallbacks(pagesToEvict);
         }

@@ -136,5 +136,50 @@ describe('combo-box connector', () => {
 
       expect((comboBox.filteredItems[0] as { label: string }).label).to.equal('Item 0');
     });
+
+    it('does not evict the page containing the focused index', () => {
+      // The WC's `scrollIntoView` runs `_visibleItemsCount`, which
+      // re-anchors the virtualizer at index 0. Any rendered placeholder
+      // there fires `index-requested`, which arrives at the connector
+      // as a request for page 0 — and the focused page (containing
+      // `comboBox._focusedIndex`) must not be evicted as a side effect.
+      comboBox.renderer = () => {};
+      commitPage0();
+      // Pretend page 6 is committed and currently the focused page.
+      const items = plainItems(300, comboBox.pageSize);
+      comboBox.dataProvider!({ page: 6, pageSize: comboBox.pageSize, filter: '' }, () => {});
+      comboBox.$connector.set(300, items, '');
+      for (let i = 0; i < items.length; i++) {
+        comboBox.filteredItems[300 + i] = items[i];
+      }
+      comboBox.$connector.confirm(2, '');
+      comboBox._focusedIndex = 300;
+      comboBox.$server.setViewportRange.resetHistory();
+
+      // A page-0 re-fetch arrives. The new range is page 0 alone, so
+      // page 6 would otherwise be evicted — but it's the focused page.
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, () => {});
+
+      expect((comboBox.filteredItems[300] as { label: string }).label).to.equal('Item 300');
+    });
+
+    it('drops the farthest pending page when the bounding box exceeds the cap', () => {
+      // Simulates a deferred page-0 re-fetch racing a deep scrollToIndex
+      // jump: page 0 and page 100 are both pending, bounding box would
+      // be 5050 items. The connector evicts the farthest pending page
+      // and recurses so the resulting RPC stays within the cap.
+      commitPage0();
+      comboBox.$server.setViewportRange.resetHistory();
+
+      // Stage page 0 as pending, then request page 100. After commitPage0
+      // page 0 is committed, so first pretend a re-fetch is in flight.
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, () => {});
+      comboBox.dataProvider!({ page: 100, pageSize: comboBox.pageSize, filter: '' }, () => {});
+
+      // The latest RPC must NOT cover all 100 pages — it should be a
+      // single-page request (50 items) for page 100.
+      const last = comboBox.$server.setViewportRange.lastCall;
+      expect(last.args[1]).to.be.at.most(500);
+    });
   });
 });
