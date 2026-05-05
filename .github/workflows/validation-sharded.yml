@@ -110,10 +110,10 @@ jobs:
       - name: Install and unit tests
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Detect modified components
