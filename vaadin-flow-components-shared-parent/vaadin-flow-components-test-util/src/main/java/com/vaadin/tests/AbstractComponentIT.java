@@ -266,10 +266,8 @@ public abstract class AbstractComponentIT
 
     private static boolean isDriverAlive(WebDriver driver) {
         try {
-            WebDriver actual = unwrap(driver);
-            if (actual instanceof RemoteWebDriver) {
-                return ((RemoteWebDriver) actual).getSessionId() != null;
-            }
+            // Use getTitle() as a real health check: it sends a command
+            // to the ChromeDriver process and fails if it's dead.
             driver.getTitle();
             return true;
         } catch (Exception e) {
