@@ -33,7 +33,9 @@ class MenuBarSubMenu extends SubMenu {
 
     @Override
     protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager() {
-        return new MenuManager<>(null, contentReset, MenuBarItem::new,
-                MenuItem.class, getParentMenuItem());
+        var parentMenuItem = ((MenuBarItem) getParentMenuItem());
+        return new MenuManager<>(null, contentReset,
+                (menu, reset) -> new MenuBarItem(parentMenuItem.menuBar, reset),
+                MenuItem.class, parentMenuItem);
     }
 }

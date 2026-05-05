@@ -147,6 +147,72 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     }
 
     /**
+     * Adds a text as a menu item with a tooltip text.
+     *
+     * @param text
+     *            the text for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @return a new menu item
+     */
+    public I addItem(String text, String tooltipText) {
+        I menuItem = addItem(text);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a component as a menu item with a tooltip text.
+     *
+     * @param component
+     *            the component for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @return a new menu item
+     */
+    public I addItem(Component component, String tooltipText) {
+        I menuItem = addItem(component);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a text as a menu item with a tooltip text and a click listener.
+     *
+     * @param text
+     *            the text for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     */
+    public I addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<I>> clickListener) {
+        I menuItem = addItem(text, clickListener);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a component as a menu item with a tooltip text and a click listener.
+     *
+     * @param component
+     *            the component for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     */
+    public I addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<I>> clickListener) {
+        I menuItem = addItem(component, clickListener);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
      * Adds components to the (sub)menu.
      * <p>
      * The components are added into the content as is, they are not wrapped as

@@ -35,7 +35,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
-        super(contextMenu);
+        super(contextMenu, contentReset);
         this.contentReset = contentReset;
     }
 

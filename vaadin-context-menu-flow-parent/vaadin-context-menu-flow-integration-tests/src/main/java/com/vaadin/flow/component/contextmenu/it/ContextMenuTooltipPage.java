@@ -13,33 +13,36 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.menubar.tests;
+package com.vaadin.flow.component.contextmenu.it;
 
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.TooltipConfiguration;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-menu-bar/tooltip")
-public class MenuBarTooltipPage extends Div {
+@Route("vaadin-context-menu/tooltip")
+public class ContextMenuTooltipPage extends Div {
 
-    public MenuBarTooltipPage() {
+    public ContextMenuTooltipPage() {
         // Reset default delay values from 500 to 0
         TooltipConfiguration.setDefaultFocusDelay(0);
         TooltipConfiguration.setDefaultHoverDelay(0);
         TooltipConfiguration.setDefaultHideDelay(0);
 
-        MenuBar menuBar = new MenuBar();
+        var target = new NativeButton("Target");
+        target.setId("target");
 
-        // Root items (buttons)
-        var item0 = menuBar.addItem("Item 0", "Item 0 / Tooltip");
+        var contextMenu = new ContextMenu(target);
 
-        var item1 = menuBar.addItem("Item 1", "Item 1 / Tooltip");
+        // Root items
+        var item0 = contextMenu.addItem("Item 0", "Item 0 / Tooltip");
+
+        var item1 = contextMenu.addItem("Item 1", "Item 1 / Tooltip");
         item1.setEnabled(false);
 
-        var item2 = menuBar.addItem("Item 2", "Item 2 / Tooltip");
+        var item2 = contextMenu.addItem("Item 2", "Item 2 / Tooltip");
         item2.setTooltipPosition(TooltipPosition.TOP);
 
         // Sub menu items
@@ -54,9 +57,9 @@ public class MenuBarTooltipPage extends Div {
                 "Item 0-2 / Tooltip");
         item0_2.setTooltipPosition(TooltipPosition.TOP);
 
-        var attach = new NativeButton("Attach", event -> add(menuBar));
+        var attach = new NativeButton("Attach", event -> add(target));
         attach.setId("attach");
-        var detach = new NativeButton("Detach", event -> remove(menuBar));
+        var detach = new NativeButton("Detach", event -> remove(target));
         detach.setId("detach");
 
         var updateTooltips = new NativeButton("Update tooltips", event -> {
@@ -65,6 +68,6 @@ public class MenuBarTooltipPage extends Div {
         });
         updateTooltips.setId("update-tooltips");
 
-        add(attach, detach, updateTooltips, menuBar);
+        add(attach, detach, updateTooltips, target, contextMenu);
     }
 }

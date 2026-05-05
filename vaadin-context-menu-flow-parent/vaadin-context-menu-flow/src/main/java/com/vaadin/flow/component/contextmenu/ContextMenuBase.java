@@ -30,8 +30,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
@@ -55,7 +57,9 @@ import tools.jackson.databind.node.ObjectNode;
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
 @NpmPackage(value = "@vaadin/context-menu", version = "25.2.0-alpha10")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-alpha10")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
@@ -223,6 +227,34 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public I addItem(Component component) {
         return getMenuManager().addItem(component);
+    }
+
+    /**
+     * Creates a new menu item with the given text content and tooltip text and
+     * adds it to the context menu.
+     *
+     * @param text
+     *            the text content for the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     */
+    public I addItem(String text, String tooltipText) {
+        return getMenuManager().addItem(text, tooltipText);
+    }
+
+    /**
+     * Creates a new menu item with the given component content and tooltip text
+     * and adds it to the context menu.
+     *
+     * @param component
+     *            the component to add to the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     */
+    public I addItem(Component component, String tooltipText) {
+        return getMenuManager().addItem(component, tooltipText);
     }
 
     /**
@@ -478,5 +510,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         getElement().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
                 appId);
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }

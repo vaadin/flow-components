@@ -200,9 +200,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(String text, String tooltipText) {
-        var item = addItem(text);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText);
     }
 
     /**
@@ -225,9 +223,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(Component component, String tooltipText) {
-        var item = addItem(component);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText);
     }
 
     /**
@@ -254,9 +250,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(text, clickListener);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText, clickListener);
     }
 
     /**
@@ -283,9 +277,22 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(component, clickListener);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText, clickListener);
+    }
+
+    /**
+     * Sets the tooltip text for the given {@link MenuItem}.
+     *
+     * @param item
+     *            the menu item to set the tooltip for
+     * @param tooltipText
+     *            the tooltip text to set for the item
+     * @deprecated Use {@link MenuItem#setTooltipText(String)} instead. This
+     *             method is scheduled for removal in Vaadin 26.
+     */
+    @Deprecated
+    public void setTooltipText(MenuItem item, String tooltipText) {
+        item.setTooltipText(tooltipText);
     }
 
     /**
@@ -490,27 +497,15 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     /**
-     * Sets the tooltip text for the given {@link MenuItem}.
-     *
-     * @param item
-     *            the menu item to set the tooltip for
-     * @param tooltipText
-     *            the tooltip text to set for the item
-     */
-    public void setTooltipText(MenuItem item, String tooltipText) {
-        if (!getElement().getChildren().anyMatch(
-                child -> "tooltip".equals(child.getAttribute("slot")))) {
-            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
-        }
-
-        item.getElement().setProperty("tooltip", tooltipText);
-        updateButtons();
-    }
-
-    /**
      * Closes the current submenu.
      */
     public void close() {
         getElement().callJsFunction("close");
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }

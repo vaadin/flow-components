@@ -72,10 +72,6 @@ function initLazy(menubar, appId) {
         // Propagate disabled state from items to parent buttons
         item.disabled = item.component.disabled;
 
-        // Propagate tooltip text so the menu-bar's tooltip controller
-        // recognizes the item as having a tooltip and shows it.
-        item.tooltip = item.component.tooltip;
-
         // Saving item to component because `_item` can be reassigned to a new value
         // when the component goes to the overflow menu
         item.component._rootItem = item;
