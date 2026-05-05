@@ -12,11 +12,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   comboBox.$connector = {};
 
   const getPendingRequests = () => comboBox.__dataProviderController.rootCache.pendingRequests;
-  // holds page indexes whose data has been delivered to the combo-box
-  // (i.e. their items live in comboBox.filteredItems and are not
-  // placeholders). Used together with the data-provider controller's
-  // pendingRequests to compute the current active range for memory-cap
-  // eviction.
+  // Pages whose data has been delivered to filteredItems. Combined with
+  // pendingRequests to compute the active range for memory-cap eviction.
   const committedPages = new Set();
   let cache = {};
   let lastFilter = '';
@@ -50,27 +47,19 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   })();
 
   const clearPageCallbacks = (pages) => {
-    // Default: clear every page currently loaded or pending. Callers that
-    // only want to evict a specific page (e.g. the active-range
-    // memory-cap path) pass the page list explicitly.
     const pendingRequests = getPendingRequests();
     if (pages === undefined) {
       pages = [...new Set([...Object.keys(pendingRequests), ...[...committedPages].map(String)])];
     }
     pages.forEach((page) => {
-      // The page may already have been committed (its callback fired and
-      // its pendingRequests entry deleted) when an active-range eviction
-      // targets it for re-fetch. Skip the flush for absent callbacks; the
-      // filteredItems reset below still runs so the page goes back to
-      // placeholders.
+      // Skip the flush if the page was already committed (its callback
+      // fired and pendingRequests entry deleted); the placeholder fill
+      // still runs.
       if (pendingRequests[page]) {
         pendingRequests[page]([], comboBox.size);
         delete pendingRequests[page];
       }
-
-      // Empty the comboBox's internal cache without invoking observers by filling
-      // the filteredItems array with placeholders (comboBox will request for data when it
-      // encounters a placeholder)
+      // Refill filteredItems with placeholders so the combo-box re-requests.
       const pageStart = parseInt(page) * comboBox.pageSize;
       const pageEnd = pageStart + comboBox.pageSize;
       const end = Math.min(pageEnd, comboBox.filteredItems.length);
@@ -145,10 +134,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       commitPage(params.page, callback);
     } else {
       getPendingRequests()[params.page] = callback;
-      const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
-      // Active range covers both pending and already-committed pages, so
-      // the memory-cap eviction triggers on the *total* loaded item count,
-      // not just the currently-pending ones.
+      const maxRangeCount = Math.max(params.pageSize * 2, 500);
+      // activePages covers both pending and committed pages, so the cap
+      // triggers on the *total* loaded item count.
       const activePages = [
         ...new Set([...Object.keys(getPendingRequests()).map((page) => parseInt(page)), ...committedPages])
       ];
@@ -163,19 +151,16 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         }
         comboBox.dataProvider(params, callback);
       } else if (rangeMax - rangeMin + 1 !== activePages.length) {
-        // Non-contiguous active range. The setViewportRange RPC is
-        // last-write-wins on the server, so the requested range must
-        // cover every currently-pending page; otherwise the earlier
-        // pending request gets no data and its pendingRequests entry
-        // lingers, leaving the combo-box stuck on loading=true.
+        // Non-contiguous active range. setViewportRange is last-write-wins
+        // server-side, so the request must cover every pending page or the
+        // earlier ones never receive data and stay stuck on loading=true.
         const pendingPages = Object.keys(getPendingRequests()).map((page) => parseInt(page));
         const newRangeMin = Math.min(...pendingPages);
         const newRangeMax = Math.max(...pendingPages);
 
-        // If the bounding box of pending pages exceeds the memory cap
-        // (e.g. a deferred page-0 re-fetch racing a deep scrollToIndex
-        // request), drop the pending page furthest from the freshest
-        // request and recurse so the next iteration sees a smaller box.
+        // If the pending-page bounding box itself exceeds the cap (e.g. a
+        // deferred page-0 re-fetch racing a deep scrollToIndex), drop the
+        // farther extreme and recurse.
         if ((newRangeMax - newRangeMin + 1) * params.pageSize > maxRangeCount) {
           const farthest = pendingPages.reduce((a, b) =>
             Math.abs(a - params.page) >= Math.abs(b - params.page) ? a : b
@@ -188,16 +173,10 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         const startIndex = params.pageSize * newRangeMin;
         const endIndex = params.pageSize * (newRangeMax + 1);
 
-        // When a renderer is set, committed pages outside the new
-        // viewport carry node ids pointing at server-side rendering
-        // state that gets passivated when items leave the KeyMapper's
-        // active set — re-rendering from the cache would bind to
-        // detached state. Evict so the next scroll-back re-fetches
-        // with fresh ids. Skip the page that contains the currently
-        // focused index, so a focusSelectedItem-driven scroll isn't
-        // immediately undone by an unrelated index-requested for an
-        // out-of-range placeholder. Plain-data combo-boxes (no
-        // renderer) keep their cache valid.
+        // Renderer pages outside the new range hold server-side keys that
+        // this RPC will passivate; evict so a scroll-back re-fetches fresh
+        // state. Skip the focused page so a focusSelectedItem scroll isn't
+        // undone by a stray index-requested for index 0.
         if (comboBox.renderer) {
           const focusedPage = comboBox._focusedIndex >= 0 ? Math.floor(comboBox._focusedIndex / params.pageSize) : -1;
           const pagesToEvict = [...committedPages]
@@ -328,9 +307,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       // comboBox.size and remove updateSize function.
       callback(data, comboBox.size);
     }
-    // The page is committed: track it in committedPages and drop the
-    // pendingRequests entry so range-management sees only pending requests.
-    delete getPendingRequests()[page];
     committedPages.add(parseInt(page));
   };
 
