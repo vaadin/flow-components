@@ -85,14 +85,6 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install TestBench license
-        if: steps.skip-ci.outputs.skip != 'true' && env.TB_LICENSE != ''
-        env:
-          TB_LICENSE: ${{ secrets.TB_LICENSE }}
-        run: |
-          mkdir -p ~/.vaadin
-          echo "$TB_LICENSE" > ~/.vaadin/proKey
-
       - name: Show environment info
         if: steps.skip-ci.outputs.skip != 'true'
         run: |
@@ -111,7 +103,15 @@ jobs:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
 
-      - name: Unit tests and install
+      - name: Install TestBench license
+        if: steps.skip-ci.outputs.skip != 'true' && env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          echo "$TB_LICENSE" > ~/.vaadin/proKey
+
+      - name: Install and unit tests
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
           mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
@@ -161,7 +161,7 @@ jobs:
         if: steps.skip-ci.outputs.skip != 'true'
         run: node scripts/mergeITs.js ${{ steps.components.outputs.elements }}
 
-      - name: WTR tests
+      - name: Run WTR tests
         if: steps.skip-ci.outputs.skip != 'true'
         run: node scripts/wtr.js ${{ steps.components.outputs.elements }}
 
@@ -278,7 +278,9 @@ jobs:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
           mkdir -p ~/.vaadin
-          echo "$TB_LICENSE" > ~/.vaadin/proKey
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - uses: actions/download-artifact@v6
         with:
