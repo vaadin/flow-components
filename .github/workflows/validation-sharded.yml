@@ -332,6 +332,11 @@ jobs:
       checks: write
       actions: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 1
+
       - uses: actions/download-artifact@v6
         with:
           pattern: failsafe-reports-*
