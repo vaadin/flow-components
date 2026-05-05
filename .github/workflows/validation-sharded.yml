@@ -52,7 +52,6 @@ jobs:
         id: skip-ci
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         env:
-          GH_TOKEN: ${{ github.token }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           if [ "${{ github.event_name }}" = "merge_group" ]; then
@@ -61,15 +60,9 @@ jobs:
           fi
           if echo "$PR_TITLE" | grep -q '\[skip ci\]'; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-          pr_number="${{ github.event.pull_request.number }}"
-          commits=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/commits" --jq '.[].commit.message | split("\n")[0]')
-          if echo "$commits" | grep -q '\[skip ci\]'; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true'
