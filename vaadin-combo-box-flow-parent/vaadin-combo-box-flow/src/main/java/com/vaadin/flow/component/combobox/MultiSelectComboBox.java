@@ -549,6 +549,30 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets whether all selected item chips collapse into the overflow chip when
+     * they don't all fit.
+     *
+     * @since 25.2
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isCollapseChips() {
+        return getElement().getProperty("collapseChips", false);
+    }
+
+    /**
+     * Enables or disables collapsing of all selected item chips into the
+     * overflow chip when they don't all fit. By default, as many chips as
+     * possible are shown and only the remaining ones are collapsed.
+     *
+     * @since 25.2
+     * @param collapseChips
+     *            {@code true} to collapse all chips into the overflow chip
+     */
+    public void setCollapseChips(boolean collapseChips) {
+        getElement().setProperty("collapseChips", collapseChips);
+    }
+
+    /**
      * Gets whether the filter is kept after selecting items. {@code false} by
      * default.
      *
