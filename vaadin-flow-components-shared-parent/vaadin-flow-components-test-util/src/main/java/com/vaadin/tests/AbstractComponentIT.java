@@ -162,7 +162,10 @@ public abstract class AbstractComponentIT
             return;
         }
 
-        if (Files.exists(DRIVER_FILE)) {
+        // Reconnect only works when ChromeDriver survives between forks
+        // (macOS local dev with headed mode). In headless CI on Linux,
+        // the ChromeDriver dies with the fork.
+        if (isDebugMode() && Files.exists(DRIVER_FILE)) {
             try {
                 WebDriver reconnected = reconnectDriver();
                 if (reconnected != null && isDriverAlive(reconnected)) {
@@ -181,7 +184,9 @@ public abstract class AbstractComponentIT
         }
         super.setup();
         sharedDriver = getDriver();
-        saveDriverInfo(sharedDriver);
+        if (isDebugMode()) {
+            saveDriverInfo(sharedDriver);
+        }
         testBench().resizeViewPortTo(1024, 800);
     }
 
@@ -254,6 +259,11 @@ public abstract class AbstractComponentIT
         } catch (Exception e) {
             // Ignore
         }
+    }
+
+    private static boolean isDebugMode() {
+        return java.lang.management.ManagementFactory.getRuntimeMXBean()
+                .getInputArguments().toString().contains("jdwp");
     }
 
     private static WebDriver unwrap(WebDriver driver) {
