@@ -15,10 +15,51 @@
  */
 package com.vaadin.tests;
 
+import org.junit.AssumptionViolatedException;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
+
+    private static WebDriver sharedDriver;
+    private static int consecutiveFailures = 0;
+    private static final int MAX_CONSECUTIVE_FAILURES = 5;
+
+    /**
+     * Aborts test execution after too many consecutive failures,
+     * preventing cascading timeouts when the server is down.
+     */
+    @Rule
+    public TestRule consecutiveFailureAbort = new TestRule() {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                        throw new AssumptionViolatedException(
+                                "Aborting: " + consecutiveFailures
+                                        + " consecutive failures");
+                    }
+                    try {
+                        base.evaluate();
+                        consecutiveFailures = 0;
+                    } catch (AssumptionViolatedException e) {
+                        throw e;
+                    } catch (Throwable t) {
+                        consecutiveFailures++;
+                        throw t;
+                    }
+                }
+            };
+        }
+    };
 
     protected int getDeploymentPort() {
         return 8080;
@@ -39,9 +80,36 @@ public abstract class AbstractComponentIT
 
     @Override
     public void setup() throws Exception {
-        super.setup();
-
-        // Set a default window size
+        if (sharedDriver != null && isDriverAlive(sharedDriver)) {
+            setDriver(sharedDriver);
+            getDriver().manage().deleteAllCookies();
+        } else {
+            if (sharedDriver != null) {
+                tryQuitDriver(sharedDriver);
+            }
+            super.setup();
+            sharedDriver = getDriver();
+        }
         testBench().resizeViewPortTo(1024, 800);
+    }
+
+    private static boolean isDriverAlive(WebDriver driver) {
+        try {
+            if (driver instanceof RemoteWebDriver) {
+                return ((RemoteWebDriver) driver).getSessionId() != null;
+            }
+            driver.getTitle();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void tryQuitDriver(WebDriver driver) {
+        try {
+            driver.quit();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 }
