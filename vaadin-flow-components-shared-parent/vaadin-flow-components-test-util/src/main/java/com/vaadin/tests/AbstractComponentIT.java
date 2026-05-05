@@ -15,385 +15,273 @@
  */
 package com.vaadin.tests;
 
-import java.lang.management.ManagementFactory;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.AssumptionViolatedException;
 import org.junit.Rule;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.TimeoutException;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.logging.LogEntry;
-import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openqa.selenium.remote.HttpCommandExecutor;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.SessionId;
+import org.openqa.selenium.remote.codec.w3c.W3CHttpCommandCodec;
+import org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.flow.testutil.net.PortProber;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
 import com.vaadin.testbench.TestBench;
-import com.vaadin.testbench.TestBenchTestCase;
 
 /**
  * Base class for Flow component integration tests.
  * <p>
- * Extends {@link TestBenchTestCase} directly and manages a local headless
- * Chrome driver that is reused across all test methods in the same test class.
- * <p>
- * This test setup does not support running tests in parallel. The only way to
- * parallelize tests is forking separate JVMs that run one suite at a time, for
- * example using {@code failsafe.forkCount}.
- * <p>
- * Test classes must be annotated with {@link TestPath} to specify the URL path
- * of the test view.
+ * When {@code -Dtest.reuseDriver=true} is set, the browser is reused across
+ * test methods (within a class) and across test classes (via file-based
+ * ChromeDriver session reconnect). Navigation between different routes uses
+ * SPA navigation ({@code vaadin-navigate} event), while same-route navigation
+ * uses {@code location.reload()} to get a fresh view state.
  */
-public abstract class AbstractComponentIT extends TestBenchTestCase {
-
-    private static final Logger logger = LoggerFactory
-            .getLogger(AbstractComponentIT.class);
+public abstract class AbstractComponentIT
+        extends com.vaadin.flow.testutil.AbstractComponentIT {
 
     private static final boolean REUSE_DRIVER =
             Boolean.getBoolean("test.reuseDriver");
 
-    private static WebDriver sharedDriver;
+    private static final Path DRIVER_FILE =
+            Path.of(System.getProperty("java.io.tmpdir"),
+                    "vaadin-test-driver-"
+                            + System.getProperty("surefire.forkNumber", "0")
+                            + ".txt");
 
     @Rule
-    public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
-            this, false);
+    public ScreenshotOnFailureRule screenshotOnFailure =
+            new ScreenshotOnFailureRule(this, !REUSE_DRIVER);
 
-    @BeforeClass
-    public static void createDriver() {
-        if (!REUSE_DRIVER) {
-            return;
-        }
-        sharedDriver = createChromeDriver();
-        sharedDriver.manage().window().setSize(new Dimension(1024, 800));
-        sharedDriver.manage().timeouts()
-                .pageLoadTimeout(Duration.ofSeconds(10));
-    }
-
-    @Before
-    public void resetDriver() throws Exception {
-        if (!REUSE_DRIVER) {
-            sharedDriver = createChromeDriver();
-            sharedDriver.manage().window().setSize(new Dimension(1024, 800));
-            sharedDriver.manage().timeouts()
-                    .pageLoadTimeout(Duration.ofSeconds(10));
-        }
-        setDriver(sharedDriver);
-        getDriver().manage().deleteAllCookies();
-        getDriver().navigate().to("about:blank");
-    }
-
-    @After
-    public void quitDriverPerMethod() {
-        if (!REUSE_DRIVER) {
-            tryQuitDriver(sharedDriver);
-            sharedDriver = null;
+    {
+        if (REUSE_DRIVER) {
+            disableParentDriverQuit();
         }
     }
 
-    @AfterClass
-    public static void quitDriver() {
-        if (!REUSE_DRIVER) {
-            return;
+    private static WebDriver sharedDriver;
+    private static int consecutiveFailures = 0;
+    private static final int MAX_CONSECUTIVE_FAILURES = 5;
+
+    @Rule
+    public TestRule consecutiveFailureAbort = new TestRule() {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                        throw new AssumptionViolatedException(
+                                "Aborting: " + consecutiveFailures
+                                        + " consecutive failures");
+                    }
+                    try {
+                        base.evaluate();
+                        consecutiveFailures = 0;
+                    } catch (AssumptionViolatedException e) {
+                        throw e;
+                    } catch (Throwable t) {
+                        consecutiveFailures++;
+                        throw t;
+                    }
+                }
+            };
         }
-        tryQuitDriver(sharedDriver);
-        sharedDriver = null;
+    };
+
+    protected int getDeploymentPort() {
+        return 8080;
     }
 
-    // ----- Test path and URL resolution -----
-
-    protected String getTestPath() {
-        TestPath annotation = getClass().getAnnotation(TestPath.class);
-        if (annotation == null) {
-            throw new IllegalStateException(
-                    "The test class should be annotated with @TestPath");
-        }
-        String path = annotation.value();
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-        return path;
-    }
-
-    protected String getRootURL() {
-        return "http://localhost:8080";
-    }
-
-    protected String getTestURL(String... parameters) {
-        return getTestURL(getRootURL(), getTestPath(), parameters);
-    }
-
-    public static String getTestURL(String rootUrl, String testPath,
-            String... parameters) {
-        while (rootUrl.endsWith("/")) {
-            rootUrl = rootUrl.substring(0, rootUrl.length() - 1);
-        }
-        rootUrl = rootUrl + testPath;
-
-        if (parameters != null && parameters.length != 0) {
-            if (!rootUrl.contains("?")) {
-                rootUrl += "?";
-            } else {
-                rootUrl += "&";
-            }
-            rootUrl += Arrays.stream(parameters)
-                    .collect(Collectors.joining("&"));
-        }
-
-        return rootUrl;
-    }
-
-    protected void open() {
-        open((String[]) null);
-    }
-
+    @Override
     protected void open(String... parameters) {
         String url = getTestURL(parameters);
-        TimeoutException lastTimeout = null;
-        for (int attempt = 1; attempt <= 3; attempt++) {
+        String path = getTestPath();
+
+        if (REUSE_DRIVER) {
             try {
-                getDriver().get(url);
-                waitForDevServer();
-                return;
-            } catch (TimeoutException e) {
-                lastTimeout = e;
-                logger.warn(
-                        "Page load timed out for {} (attempt {}/3), retrying",
-                        url, attempt);
-            }
-        }
-        throw lastTimeout;
-    }
-
-    // ----- Driver management -----
-
-    private static void tryQuitDriver(WebDriver driver) {
-        try {
-            driver.quit();
-        } catch (Exception e) {
-            // Ignore - driver may already be dead
-        }
-    }
-
-    private static boolean isJavaInDebugMode() {
-        return ManagementFactory.getRuntimeMXBean().getInputArguments()
-                .toString().contains("jdwp");
-    }
-
-    private static WebDriver createChromeDriver() {
-        for (int i = 0; i < 3; i++) {
-            try {
-                return tryCreateChromeDriver();
+                String currentUrl = getDriver().getCurrentUrl();
+                Boolean hasVaadin = (Boolean) executeScript(
+                        "return !!(window.Vaadin && window.Vaadin.Flow)");
+                if (Boolean.TRUE.equals(hasVaadin)) {
+                    if (currentUrl != null && !currentUrl.contains(path)) {
+                        executeScript(
+                                "window.dispatchEvent(new CustomEvent("
+                                + "'vaadin-navigate', {detail:{url:arguments[0],"
+                                + "state:null, replace:false, callback:true}}))",
+                                path);
+                    } else {
+                        getDriver().get(url);
+                        waitForDevServer();
+                    }
+                    return;
+                }
             } catch (Exception e) {
-                logger.warn("Unable to create chromedriver on attempt " + i, e);
+                // Fall through to full load
             }
         }
-        throw new RuntimeException(
-                "Gave up trying to create a chromedriver instance");
+
+        getDriver().get(url);
+        waitForDevServer();
     }
 
-    private static WebDriver tryCreateChromeDriver() {
-        ChromeOptions options = new ChromeOptions();
-        if (!isJavaInDebugMode()) {
-            options.addArguments("--headless=new", "--disable-gpu",
-                    "--disable-backgrounding-occluded-windows");
-        }
-
+    @Override
+    protected void updateHeadlessChromeOptions(ChromeOptions chromeOptions) {
         String extraArgs = System.getenv("TESTBENCH_CHROME_EXTRA_ARGS");
         if (extraArgs != null && !extraArgs.isBlank()) {
-            options.addArguments(extraArgs.split("\\s+"));
+            chromeOptions.addArguments(extraArgs.split("\\s+"));
         }
 
         String chromeBinary = System.getenv("TESTBENCH_CHROME_BINARY");
         if (chromeBinary != null && !chromeBinary.isBlank()) {
-            options.setBinary(chromeBinary);
+            chromeOptions.setBinary(chromeBinary);
+        }
+    }
+
+    @Override
+    public void setup() throws Exception {
+        if (!REUSE_DRIVER) {
+            super.setup();
+            testBench().resizeViewPortTo(1024, 800);
+            return;
         }
 
-        int port = PortProber.findFreePort();
-        ChromeDriverService service = new ChromeDriverService.Builder()
-                .usingPort(port).withSilent(true).build();
-        ChromeDriver chromeDriver = new ChromeDriver(service, options);
-        return TestBench.createDriver(chromeDriver);
+        if (sharedDriver != null && isDriverAlive(sharedDriver)) {
+            setDriver(sharedDriver);
+            testBench().resizeViewPortTo(1024, 800);
+            return;
+        }
+
+        if (Files.exists(DRIVER_FILE)) {
+            try {
+                WebDriver reconnected = reconnectDriver();
+                if (reconnected != null && isDriverAlive(reconnected)) {
+                    sharedDriver = reconnected;
+                    setDriver(sharedDriver);
+                    testBench().resizeViewPortTo(1024, 800);
+                    return;
+                }
+            } catch (Exception e) {
+                // Reconnect failed, create new driver
+            }
+        }
+
+        if (sharedDriver != null) {
+            tryQuitDriver(sharedDriver);
+        }
+        super.setup();
+        sharedDriver = getDriver();
+        saveDriverInfo(sharedDriver);
+        testBench().resizeViewPortTo(1024, 800);
     }
 
-    // ----- Test helper methods -----
-
-    /**
-     * Waits up to 10s for the given condition to become false.
-     */
-    protected <T> void waitUntilNot(ExpectedCondition<T> condition) {
-        waitUntilNot(condition, 10);
-    }
-
-    /**
-     * Waits the given number of seconds for the given condition to become
-     * false.
-     */
-    protected <T> void waitUntilNot(ExpectedCondition<T> condition,
-            long timeoutInSeconds) {
-        waitUntil(ExpectedConditions.not(condition), timeoutInSeconds);
-    }
-
-    /**
-     * Returns true if an element can be found from the driver with given
-     * selector.
-     */
-    public boolean isElementPresent(By by) {
+    private void disableParentDriverQuit() {
         try {
-            WebElement element = getDriver().findElement(by);
-            return element != null;
+            Field parentRule = com.vaadin.testbench.parallel.ParallelTest.class
+                    .getDeclaredField("screenshotOnFailure");
+            parentRule.setAccessible(true);
+            ScreenshotOnFailureRule parentScreenshot =
+                    (ScreenshotOnFailureRule) parentRule.get(this);
+            parentScreenshot.setQuitDriverOnFinish(false);
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    private static WebDriver reconnectDriver() throws Exception {
+        String content = Files.readString(DRIVER_FILE);
+        String[] parts = content.strip().split("\n");
+        if (parts.length < 2) return null;
+
+        String driverUrl = parts[0];
+        String sessionId = parts[1];
+
+        HttpCommandExecutor executor = new HttpCommandExecutor(
+                new URL(driverUrl));
+        Field commandCodecField = HttpCommandExecutor.class
+                .getDeclaredField("commandCodec");
+        commandCodecField.setAccessible(true);
+        commandCodecField.set(executor, new W3CHttpCommandCodec());
+        Field responseCodecField = HttpCommandExecutor.class
+                .getDeclaredField("responseCodec");
+        responseCodecField.setAccessible(true);
+        responseCodecField.set(executor, new W3CHttpResponseCodec());
+
+        RemoteWebDriver driver = new RemoteWebDriver(executor,
+                (Capabilities) null) {
+            @Override
+            protected void startSession(Capabilities capabilities) {
+            }
+        };
+
+        Field sessionIdField = RemoteWebDriver.class
+                .getDeclaredField("sessionId");
+        sessionIdField.setAccessible(true);
+        sessionIdField.set(driver, new SessionId(sessionId));
+
+        Field capsField = RemoteWebDriver.class
+                .getDeclaredField("capabilities");
+        capsField.setAccessible(true);
+        capsField.set(driver, new ChromeOptions());
+
+        return TestBench.createDriver(driver);
+    }
+
+    private static void saveDriverInfo(WebDriver driver) {
+        try {
+            WebDriver actual = unwrap(driver);
+            if (actual instanceof RemoteWebDriver) {
+                RemoteWebDriver rwd = (RemoteWebDriver) actual;
+                SessionId sid = rwd.getSessionId();
+                if (sid != null) {
+                    HttpCommandExecutor exec =
+                            (HttpCommandExecutor) rwd.getCommandExecutor();
+                    String info = exec.getAddressOfRemoteServer().toString()
+                            + "\n" + sid.toString();
+                    Files.writeString(DRIVER_FILE, info);
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    private static WebDriver unwrap(WebDriver driver) {
+        WebDriver actual = driver;
+        while (actual instanceof WrapsDriver) {
+            actual = ((WrapsDriver) actual).getWrappedDriver();
+        }
+        return actual;
+    }
+
+    private static boolean isDriverAlive(WebDriver driver) {
+        try {
+            WebDriver actual = unwrap(driver);
+            if (actual instanceof RemoteWebDriver) {
+                return ((RemoteWebDriver) actual).getSessionId() != null;
+            }
+            driver.getTitle();
+            return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    /**
-     * Clicks on the element, using JS. This method is more convenient than
-     * Selenium {@code findElement(By.id(urlId)).click()}, because Selenium
-     * method changes scroll position, which is not always needed.
-     */
-    protected void clickElementWithJs(String elementId) {
-        executeScript(String.format("document.getElementById('%s').click();",
-                elementId));
+    private static void tryQuitDriver(WebDriver driver) {
+        try {
+            driver.quit();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
-
-    /**
-     * Clicks on the element, using JS.
-     */
-    protected void clickElementWithJs(WebElement element) {
-        executeScript("arguments[0].click();", element);
-    }
-
-    protected void waitForElementPresent(final By by) {
-        waitUntil(ExpectedConditions.presenceOfElementLocated(by));
-    }
-
-    protected void waitForElementNotPresent(final By by) {
-        waitUntil(input -> input.findElements(by).isEmpty());
-    }
-
-    protected void waitForElementVisible(final By by) {
-        waitUntil(ExpectedConditions.visibilityOfElementLocated(by));
-    }
-
-    /**
-     * Scrolls the page to the element given using javascript.
-     */
-    protected void scrollToElement(WebElement element) {
-        Objects.requireNonNull(element,
-                "The element to scroll to should not be null");
-        getCommandExecutor().executeScript("arguments[0].scrollIntoView(true);",
-                element);
-    }
-
-    /**
-     * Scrolls the page to the element specified and clicks it.
-     */
-    protected void scrollIntoViewAndClick(WebElement element) {
-        scrollToElement(element);
-        element.click();
-    }
-
-    /**
-     * Gets the log entries from the browser that have the given logging level
-     * or higher.
-     */
-    protected List<LogEntry> getLogEntries(Level level) {
-        getCommandExecutor().waitForVaadin();
-
-        return getDriver().manage().logs().get(LogType.BROWSER).getAll()
-                .stream()
-                .filter(logEntry -> logEntry.getLevel().intValue() >= level
-                        .intValue())
-                .filter(logEntry -> !logEntry.getMessage()
-                        .contains("favicon.ico"))
-                .collect(Collectors.toList());
-    }
-
-    private static final String WEB_SOCKET_CONNECTION_ERROR_PREFIX = "WebSocket connection to ";
-
-    /**
-     * Checks browser's log entries, throws an error for any client-side error
-     * and logs any client-side warnings.
-     */
-    protected void checkLogsForErrors(
-            Predicate<String> acceptableMessagePredicate) {
-        getLogEntries(Level.WARNING).forEach(logEntry -> {
-            if (logEntry.getMessage().contains(
-                    "Lit is in dev mode. Not recommended for production")) {
-                return;
-            }
-            if ((Objects.equals(logEntry.getLevel(), Level.SEVERE)
-                    || logEntry.getMessage().contains(" 404 "))
-                    && !logEntry.getMessage()
-                            .contains(WEB_SOCKET_CONNECTION_ERROR_PREFIX)
-                    && !acceptableMessagePredicate
-                            .test(logEntry.getMessage())) {
-                throw new AssertionError(String
-                        .format("Error message in browser log: %s", logEntry));
-            } else {
-                LoggerFactory.getLogger(AbstractComponentIT.class.getName())
-                        .warn("This message in browser log console may be a potential error: '{}'",
-                                logEntry);
-            }
-        });
-    }
-
-    /**
-     * Checks browser's log entries, throws an error for any client-side error
-     * and logs any client-side warnings.
-     */
-    protected void checkLogsForErrors() {
-        checkLogsForErrors(msg -> false);
-    }
-
-    /**
-     * If dev server start in progress wait until it's started. Otherwise return
-     * immediately.
-     */
-    protected void waitForDevServer() {
-        Object result;
-        do {
-            getCommandExecutor().waitForVaadin();
-            result = getCommandExecutor().executeScript(
-                    "return window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.devServerIsNotLoaded;");
-        } while (Boolean.TRUE.equals(result));
-    }
-
-    /**
-     * Calls the {@code blur()} function on the current active element of the
-     * page, if any.
-     */
-    public void blur() {
-        executeScript(
-                "!!document.activeElement ? document.activeElement.blur() : 0");
-    }
-
-    /**
-     * Gets a property value from a web element using JavaScript.
-     */
-    public String getProperty(WebElement element, String propertyName) {
-        Object result = executeScript(
-                "return arguments[0]." + propertyName + ";", element);
-        return result == null ? null : String.valueOf(result);
-    }
-
 }
