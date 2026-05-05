@@ -26,16 +26,13 @@ concurrency:
 
 env:
   FORK_COUNT: 4
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  setup:
-    name: Build & Package WAR
+  build:
+    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
-      matrix: ${{ steps.shards.outputs.matrix }}
-      has-tests: ${{ steps.shards.outputs.has-tests }}
       skip: ${{ steps.skip-ci.outputs.skip }}
       components: ${{ steps.components.outputs.elements }}
     steps:
@@ -66,8 +63,16 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Setup JDK 21
+      - name: Restore build cache
+        id: build-cache
         if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
+      - name: Setup JDK 21
+        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
@@ -75,13 +80,13 @@ jobs:
           cache: 'maven'
 
       - name: Setup Node
-        if: steps.skip-ci.outputs.skip != 'true'
+        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
       - name: Show environment info
-        if: steps.skip-ci.outputs.skip != 'true'
+        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
           java -version
           mvn -version
@@ -89,24 +94,6 @@ jobs:
           npm --version
           google-chrome --version
           chromedriver --version
-
-      - name: Restore build cache
-        id: build-cache
-        if: steps.skip-ci.outputs.skip != 'true'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install TestBench license
-        if: steps.skip-ci.outputs.skip != 'true' && env.TB_LICENSE != ''
-        env:
-          TB_LICENSE: ${{ secrets.TB_LICENSE }}
-        run: |
-          mkdir -p ~/.vaadin
-          user="${TB_LICENSE%%/*}"
-          key="${TB_LICENSE#*/}"
-          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Install artifacts
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -150,198 +137,12 @@ jobs:
           fi
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
-      - name: npm install
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: npm install --ignore-scripts --silent --quiet --no-progress
-
-      - name: Merge ITs
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: node scripts/mergeITs.js ${{ steps.components.outputs.elements }}
-
-      - name: Package integration-tests WAR
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: |
-          mvn package -pl integration-tests \
-            -Dvaadin.pnpm.enable -Drun-it -Drelease \
-            -Dvaadin.productionMode -Dvaadin.force.production.build=true \
-            -DskipTests -DskipJetty $MAVEN_ARGS
-
-      - name: Compile IT test sources
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
-
-      - name: Compute IT shards
-        id: shards
-        if: steps.skip-ci.outputs.skip != 'true'
-        env:
-          SHARDS: ${{ github.event.inputs.shards || '5' }}
-        run: |
-          mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
-          count=${#its[@]}
-          echo "Found $count IT classes"
-          if [ "$count" -eq 0 ]; then
-            echo "has-tests=false" >> "$GITHUB_OUTPUT"
-            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          n=$SHARDS
-          if [ "$n" -gt "$count" ]; then n=$count; fi
-          declare -a buckets
-          for i in $(seq 1 $n); do buckets[$i]=""; done
-          i=1
-          for t in "${its[@]}"; do
-            if [ -n "${buckets[$i]}" ]; then buckets[$i]+=","; fi
-            buckets[$i]+="$t"
-            i=$((i+1))
-            [ $i -gt $n ] && i=1
-          done
-          json='{"include":['
-          for k in $(seq 1 $n); do
-            [ $k -gt 1 ] && json+=','
-            json+='{"shard":"'"$k"'","tests":"'"${buckets[$k]}"'"}'
-          done
-          json+=']}'
-          echo "$json"
-          echo "matrix=$json" >> "$GITHUB_OUTPUT"
-          echo "has-tests=true" >> "$GITHUB_OUTPUT"
-
-      - name: Package setup bundle
-        if: steps.skip-ci.outputs.skip != 'true' && steps.shards.outputs.has-tests == 'true'
-        run: |
-          tar --zstd -cf it-module.tzst \
-            integration-tests/pom.xml \
-            integration-tests/target/*.war \
-            integration-tests/target/classes \
-            integration-tests/target/test-classes
-          # Only this repo's freshly-installed SNAPSHOT artifacts; framework
-          # release deps come from the setup-java Maven cache in each shard.
-          ( cd "$HOME/.m2/repository" && find com/vaadin -maxdepth 3 -type d -name '*-SNAPSHOT' ) > m2-snapshots.lst
-          tar --zstd -cf m2-vaadin.tzst -C "$HOME/.m2/repository" --files-from=m2-snapshots.lst
-          ls -lh it-module.tzst m2-vaadin.tzst
-
-      - uses: actions/upload-artifact@v6
-        if: steps.skip-ci.outputs.skip != 'true' && steps.shards.outputs.has-tests == 'true'
-        with:
-          name: it-setup-bundle
-          path: |
-            it-module.tzst
-            m2-vaadin.tzst
-          retention-days: 1
-          compression-level: 0
-
   unit-tests:
     name: Unit Tests
-    needs: setup
-    if: needs.setup.outputs.skip != 'true'
+    needs: build
+    if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    steps:
-      - name: Set Maven args
-        run: |
-          args="-ntp -B"
-          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
-          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
-
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
-          fetch-depth: 1
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Restore build cache
-        id: build-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
-
-      - name: Run unit tests
-        run: mvn test -Drelease -T $FORK_COUNT $MAVEN_ARGS
-
-      - name: Publish unit test results
-        if: always()
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
-        with:
-          name: Unit Tests
-          path: '**/target/surefire-reports/TEST-*.xml'
-          reporter: java-junit
-
-  wtr-tests:
-    name: WTR Tests
-    needs: setup
-    if: needs.setup.outputs.skip != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Set Maven args
-        run: |
-          args="-ntp -B"
-          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
-          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
-
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
-          fetch-depth: 1
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Restore build cache
-        id: build-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
-
-      - name: npm install
-        run: npm install --ignore-scripts --silent --quiet --no-progress
-
-      - name: Run WTR tests
-        run: node scripts/wtr.js ${{ needs.setup.outputs.components }}
-
-  it:
-    name: IT shard ${{ matrix.shard }}
-    needs: setup
-    if: needs.setup.outputs.skip != 'true' && needs.setup.outputs.has-tests == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - name: Set Maven args
         run: |
@@ -371,17 +172,296 @@ jobs:
           key="${TB_LICENSE#*/}"
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
-      - uses: actions/download-artifact@v6
+      - name: Restore build cache
+        id: build-cache
+        uses: actions/cache@v4
         with:
-          name: it-setup-bundle
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
 
-      - name: Restore setup bundle
+      - name: Install artifacts (cache miss)
+        if: steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          tar --zstd -xf it-module.tzst
-          mkdir -p "$HOME/.m2/repository"
-          tar --zstd -xf m2-vaadin.tzst -C "$HOME/.m2/repository"
-          rm -f it-module.tzst m2-vaadin.tzst
-          ls integration-tests/target/*.war
+          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
+            sleep 15
+            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+          }
+
+      - name: Run unit tests
+        run: mvn test -Drelease -T $FORK_COUNT $MAVEN_ARGS
+
+      - name: Publish unit test results
+        if: always()
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Unit Tests
+          path: '**/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+
+      - name: Cancel workflow on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
+  wtr-tests:
+    name: WTR Tests
+    needs: build
+    if: needs.build.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Set Maven args
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install TestBench license
+        if: env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
+
+      - name: Restore build cache
+        id: build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
+      - name: Install artifacts (cache miss)
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        run: |
+          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
+            sleep 15
+            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+          }
+
+      - name: npm install
+        run: npm install --ignore-scripts
+
+      - name: Run WTR tests
+        run: node scripts/wtr.js ${{ needs.build.outputs.components }}
+
+      - name: Cancel workflow on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
+  package-war:
+    name: Package WAR
+    needs: build
+    if: needs.build.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.shards.outputs.matrix }}
+      has-tests: ${{ steps.shards.outputs.has-tests }}
+      war-cache-key: ${{ steps.war-key.outputs.key }}
+    steps:
+      - name: Set Maven args
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: npm install
+        run: npm install --ignore-scripts
+
+      - name: Merge ITs
+        run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
+
+      - name: Compute WAR cache key
+        id: war-key
+        env:
+          KEY: ${{ runner.os }}-war-${{ hashFiles('integration-tests/pom.xml', 'integration-tests/src/**') }}
+        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Restore WAR cache
+        id: war-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            integration-tests/pom.xml
+            integration-tests/target
+          key: ${{ steps.war-key.outputs.key }}
+
+      - name: Setup JDK 21
+        if: steps.war-cache.outputs.cache-hit != 'true'
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install TestBench license
+        if: steps.war-cache.outputs.cache-hit != 'true' && env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
+
+      - name: Restore build cache
+        id: build-cache
+        if: steps.war-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
+      - name: Install artifacts (cache miss)
+        if: steps.war-cache.outputs.cache-hit != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        run: |
+          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
+            sleep 15
+            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+          }
+
+      - name: Package integration-tests WAR
+        if: steps.war-cache.outputs.cache-hit != 'true'
+        run: |
+          mvn package -pl integration-tests \
+            -Dvaadin.pnpm.enable -Drun-it -Drelease \
+            -Dvaadin.productionMode -Dvaadin.force.production.build=true \
+            -DskipTests -DskipJetty $MAVEN_ARGS
+
+      - name: Compile IT test sources
+        if: steps.war-cache.outputs.cache-hit != 'true'
+        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
+
+      - name: Compute IT shards
+        id: shards
+        env:
+          SHARDS: ${{ github.event.inputs.shards || '0' }}
+          TARGET_PER_SHARD: 35
+          MAX_SHARDS: 10
+        run: |
+          mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
+          count=${#its[@]}
+          echo "Found $count IT classes"
+          if [ "$count" -eq 0 ]; then
+            echo "has-tests=false" >> "$GITHUB_OUTPUT"
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          n=$SHARDS
+          if [ "$n" -eq 0 ]; then
+            n=$(( (count + TARGET_PER_SHARD - 1) / TARGET_PER_SHARD ))
+            [ "$n" -lt 1 ] && n=1
+            [ "$n" -gt "$MAX_SHARDS" ] && n=$MAX_SHARDS
+          fi
+          if [ "$n" -gt "$count" ]; then n=$count; fi
+          echo "$n shards for $count classes (~$(( count / n )) per shard)"
+          declare -a buckets
+          for i in $(seq 1 $n); do buckets[$i]=""; done
+          i=1
+          for t in "${its[@]}"; do
+            if [ -n "${buckets[$i]}" ]; then buckets[$i]+=","; fi
+            buckets[$i]+="$t"
+            i=$((i+1))
+            [ $i -gt $n ] && i=1
+          done
+          json='{"include":['
+          for k in $(seq 1 $n); do
+            [ $k -gt 1 ] && json+=','
+            json+='{"shard":"'"$k"'","tests":"'"${buckets[$k]}"'"}'
+          done
+          json+=']}'
+          echo "$json"
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          echo "has-tests=true" >> "$GITHUB_OUTPUT"
+
+  it:
+    name: IT shard ${{ matrix.shard }}
+    needs: package-war
+    if: needs.package-war.outputs.has-tests == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.package-war.outputs.matrix) }}
+    steps:
+      - name: Set Maven args
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install TestBench license
+        if: env.TB_LICENSE != ''
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          mkdir -p ~/.vaadin
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
+      - name: Restore WAR cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            integration-tests/pom.xml
+            integration-tests/target
+          key: ${{ needs.package-war.outputs.war-cache-key }}
+          fail-on-cache-miss: true
 
       - name: Run integration tests (shard ${{ matrix.shard }})
         env:
@@ -418,8 +498,8 @@ jobs:
 
   results:
     name: Collect Results
-    needs: [setup, unit-tests, wtr-tests, it]
-    if: always() && needs.setup.outputs.skip != 'true' && needs.setup.outputs.has-tests == 'true'
+    needs: [build, unit-tests, wtr-tests, package-war, it]
+    if: always() && needs.build.outputs.skip != 'true' && needs.package-war.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -470,7 +550,6 @@ jobs:
         run: |
           gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts" \
             --jq '.artifacts[] | select(
-              .name == "it-setup-bundle" or
               (.name | startswith("error-screenshots-")) or
               (.name | startswith("failsafe-reports-"))
             ) | "\(.id) \(.name)"' \
