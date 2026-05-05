@@ -1,5 +1,5 @@
 import { expect, fixtureSync } from '@open-wc/testing';
-import { comboBoxConnector, FlowComboBox, init, plainItems, rendererItems } from './shared.ts';
+import { comboBoxConnector, FlowComboBox, init, plainItems } from './shared.ts';
 import '@vaadin/combo-box';
 import * as sinon from 'sinon';
 
@@ -77,9 +77,7 @@ describe('combo-box connector', () => {
       comboBox.$connector.set(0, items, '');
       // The WC's data-provider-controller would normally populate
       // filteredItems via the dataProvider callback; mirror that so the
-      // connector's eviction logic (which inspects filteredItems[page *
-      // pageSize] to detect ComponentRenderer-rendered items) operates
-      // on realistic state.
+      // eviction-via-placeholder assertion sees realistic state.
       for (let i = 0; i < items.length; i++) {
         comboBox.filteredItems[i] = items[i];
       }
@@ -115,13 +113,13 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.setViewportRange).to.be.calledOnceWith(300, 50, '');
     });
 
-    it('evicts ComponentRenderer-rendered committed pages outside the new range', () => {
-      // Page 0 with renderer items (each has a `*_nodeid` property).
-      // The server passivates the rendered components when items leave
-      // the active set; the connector must reset those filteredItems
-      // to placeholders so the next scroll-back re-fetches with fresh
-      // node ids.
-      commitPage0(rendererItems(0, comboBox.pageSize));
+    it('evicts committed pages outside the new range when a renderer is set', () => {
+      // Renderers create server-side rendering state per item; that
+      // state gets passivated when items leave the KeyMapper's active
+      // set. The connector evicts the committed page so the next
+      // scroll-back re-fetches with fresh ids.
+      comboBox.renderer = () => {};
+      commitPage0();
       expect((comboBox.filteredItems[0] as { label: string }).label).to.equal('Item 0');
 
       comboBox.dataProvider!({ page: 6, pageSize: comboBox.pageSize, filter: '' }, () => {});
@@ -129,8 +127,9 @@ describe('combo-box connector', () => {
       expect(comboBox.filteredItems[0]).to.be.instanceOf((window as any).Vaadin.ComboBoxPlaceholder);
     });
 
-    it('keeps plain-data committed pages outside the new range', () => {
-      // No `*_nodeid` → no server-side components → no eviction.
+    it('keeps committed pages outside the new range when no renderer is set', () => {
+      // Without a renderer there is no server-side rendering state to
+      // invalidate, so committed pages stay valid in the cache.
       commitPage0();
 
       comboBox.dataProvider!({ page: 6, pageSize: comboBox.pageSize, filter: '' }, () => {});

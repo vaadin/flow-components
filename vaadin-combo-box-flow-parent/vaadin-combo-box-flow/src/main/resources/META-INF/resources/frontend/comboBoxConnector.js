@@ -174,22 +174,19 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         const startIndex = params.pageSize * newRangeMin;
         const endIndex = params.pageSize * (newRangeMax + 1);
 
-        // ComponentRenderer-rendered committed pages outside the new
-        // viewport carry node ids that point at server-side components
-        // already passivated when the items left the KeyMapper's
+        // When a renderer is set, committed pages outside the new
+        // viewport carry node ids pointing at server-side rendering
+        // state that gets passivated when items leave the KeyMapper's
         // active set — re-rendering from the cache would bind to
-        // detached virtual children. Evict so the next scroll-back
-        // re-fetches with fresh ids. Plain-data pages have no
-        // server-side components and stay valid in the cache.
-        const pagesToEvict = [...committedPages]
-          .filter((page) => {
-            const outOfRange = page < newRangeMin || page > newRangeMax;
-            const firstItem = comboBox.filteredItems[page * params.pageSize];
-            const hasRendererNodeId = firstItem && Object.keys(firstItem).some((k) => k.endsWith('_nodeid'));
-            return outOfRange && hasRendererNodeId;
-          })
-          .map(String);
-        clearPageCallbacks(pagesToEvict);
+        // detached state. Evict so the next scroll-back re-fetches
+        // with fresh ids. Plain-data combo-boxes (no renderer) keep
+        // their cache valid.
+        if (comboBox.renderer) {
+          const pagesToEvict = [...committedPages]
+            .filter((page) => page < newRangeMin || page > newRangeMax)
+            .map(String);
+          clearPageCallbacks(pagesToEvict);
+        }
 
         serverFacade.requestData(startIndex, endIndex, params);
       } else {
