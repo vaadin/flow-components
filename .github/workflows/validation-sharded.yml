@@ -4,6 +4,16 @@ on:
   pull_request:
     branches: ['main', '25.*', 'port-sharded-validation-workflow']
   merge_group:
+  workflow_dispatch:
+    inputs:
+      components:
+        description: 'Space-separated component names (e.g. "grid combo-box"), empty for all'
+        required: false
+        default: ''
+      shards:
+        description: 'Number of parallel IT shards'
+        required: false
+        default: '5'
 
 permissions:
   contents: read
@@ -28,7 +38,10 @@ jobs:
       skip: ${{ steps.skip-ci.outputs.skip }}
     steps:
       - name: Set Maven args
-        run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v6
         with:
@@ -82,6 +95,14 @@ jobs:
           google-chrome --version
           chromedriver --version
 
+      - name: Restore build cache
+        id: build-cache
+        if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/com/vaadin
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+
       - name: Install TestBench license
         if: steps.skip-ci.outputs.skip != 'true' && env.TB_LICENSE != ''
         env:
@@ -91,12 +112,12 @@ jobs:
           echo "$TB_LICENSE" > ~/.vaadin/proKey
 
       - name: Install and unit tests
-        if: steps.skip-ci.outputs.skip != 'true'
+        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -Drelease -T $FORK_COUNT || {
+          mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -Drelease -T $FORK_COUNT
+            mvn install -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Detect modified components
@@ -105,8 +126,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          elements=""
+          elements="${{ github.event.inputs.components || '' }}"
           changed_files=""
+          if [ -n "$elements" ]; then
+            echo "elements=$elements" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             pr_number="${{ github.event.pull_request.number }}"
             changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
@@ -146,17 +171,17 @@ jobs:
           mvn package -pl integration-tests \
             -Dvaadin.pnpm.enable -Drun-it -Drelease \
             -Dvaadin.productionMode -Dvaadin.force.production.build=true \
-            -DskipTests -DskipJetty
+            -DskipTests -DskipJetty $MAVEN_ARGS
 
       - name: Compile IT test sources
         if: steps.skip-ci.outputs.skip != 'true'
-        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests
+        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
 
       - name: Compute IT shards
         id: shards
         if: steps.skip-ci.outputs.skip != 'true'
         env:
-          SHARDS: 5
+          SHARDS: ${{ github.event.inputs.shards || '5' }}
         run: |
           mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
           count=${#its[@]}
@@ -211,6 +236,14 @@ jobs:
           retention-days: 1
           compression-level: 0
 
+      - name: Publish unit test results
+        if: always()
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Unit Tests
+          path: '**/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+
   it:
     name: IT shard ${{ matrix.shard }}
     needs: setup
@@ -222,7 +255,10 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - name: Set Maven args
-        run: echo "MAVEN_ARGS=-ntp -B" >> "$GITHUB_ENV"
+        run: |
+          args="-ntp -B"
+          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
+          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v6
         with:
@@ -269,31 +305,66 @@ jobs:
             -Dfailsafe.forkCount=$FORK_COUNT \
             -Dcom.vaadin.testbench.Parameters.testsInParallel=1 \
             -Dfailsafe.rerunFailingTestsCount=2 \
-            -Dit.test="$SHARD_TESTS"
+            -Dmaven.test.redirectTestOutputToFile=true \
+            -Dit.test="$SHARD_TESTS" \
+            $MAVEN_ARGS
 
-      - uses: actions/upload-artifact@v6
-        if: always()
+      - name: Upload error screenshots
+        if: failure()
+        uses: actions/upload-artifact@v6
         with:
           name: error-screenshots-${{ matrix.shard }}
-          path: integration-tests/error-screenshots/*.png
+          path: integration-tests/error-screenshots/
+          retention-days: 5
           if-no-files-found: ignore
 
-  collect:
-    name: Collect screenshots
+      - name: Upload failsafe reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: failsafe-reports-${{ matrix.shard }}
+          path: integration-tests/target/failsafe-reports/
+          retention-days: 1
+          if-no-files-found: ignore
+
+  results:
+    name: Collect Results
     needs: [setup, it]
     if: always() && needs.setup.outputs.skip != 'true' && needs.setup.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      actions: write
     steps:
       - uses: actions/download-artifact@v6
+        with:
+          pattern: failsafe-reports-*
+          merge-multiple: true
+          path: failsafe-reports
+
+      - name: Publish integration test results
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Integration Tests
+          path: failsafe-reports/TEST-*.xml
+          reporter: java-junit
+
+      - uses: actions/download-artifact@v6
+        if: needs.it.result != 'success'
+        continue-on-error: true
         with:
           pattern: error-screenshots-*
           merge-multiple: true
           path: error-screenshots
 
-      - uses: actions/upload-artifact@v6
+      - name: Upload merged error screenshots
+        if: needs.it.result != 'success'
+        uses: actions/upload-artifact@v6
         with:
           name: error-screenshots
-          path: error-screenshots/*.png
+          path: error-screenshots/
+          retention-days: 5
           if-no-files-found: ignore
 
       - name: Delete intermediate artifacts
@@ -304,8 +375,12 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts" \
-            --jq '.artifacts[] | select(.name == "it-setup-bundle" or (.name | startswith("error-screenshots-"))) | "\(.id) \(.name)"' \
-            | while read -r id name; do
-                echo "Deleting artifact $name (id=$id)"
-                gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
-              done
+            --jq '.artifacts[] | select(
+              .name == "it-setup-bundle" or
+              (.name | startswith("error-screenshots-")) or
+              (.name | startswith("failsafe-reports-"))
+            ) | "\(.id) \(.name)"' \
+          | while read -r id name; do
+              echo "Deleting artifact $name (id=$id)"
+              gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
+            done
