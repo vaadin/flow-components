@@ -109,7 +109,9 @@ jobs:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
           mkdir -p ~/.vaadin
-          echo "$TB_LICENSE" > ~/.vaadin/proKey
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Install and unit tests
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
