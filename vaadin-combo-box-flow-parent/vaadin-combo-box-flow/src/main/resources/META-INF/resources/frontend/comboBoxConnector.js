@@ -182,7 +182,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
           const pagesToEvict = [...committedPages]
             .filter((page) => (page < newRangeMin || page > newRangeMax) && page !== focusedPage)
             .map(String);
-          clearPageCallbacks(pagesToEvict);
+          // clearPageCallbacks(pagesToEvict);
         }
 
         serverFacade.requestData(startIndex, endIndex, params);
