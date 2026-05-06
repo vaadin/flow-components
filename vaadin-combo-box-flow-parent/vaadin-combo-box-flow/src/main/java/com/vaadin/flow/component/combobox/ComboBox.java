@@ -98,6 +98,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
+    private boolean focusSelectedItem;
+
     /**
      * A callback method for fetching items. The callback is provided with a
      * non-null string filter, offset index and limit.
@@ -164,6 +166,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
                 refreshValue();
             }
         });
+
+        getElement().addEventListener("vaadin-combo-box-dropdown-opened",
+                event -> focusSelectedItemOnOpen());
     }
 
     /**
@@ -366,6 +371,75 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
+    }
+
+    /**
+     * Sets whether the dropdown should scroll to and focus the currently
+     * selected item when it opens. Off by default.
+     * <p>
+     * Works out of the box for in-memory data. For a lazy data provider, the
+     * lazy data view must have an
+     * {@link com.vaadin.flow.data.provider.ItemIndexProvider ItemIndexProvider}
+     * configured via
+     * {@link com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView#setItemIndexProvider(com.vaadin.flow.data.provider.ItemIndexProvider)
+     * getLazyDataView().setItemIndexProvider(...)} so that the selected item's
+     * index can be resolved against the current sorting. Opening the dropdown
+     * throws {@link UnsupportedOperationException} otherwise.
+     * <p>
+     * The setting is a silent no-op when:
+     * <ul>
+     * <li>no value is currently selected,</li>
+     * <li>a filter is currently active (the user is narrowing down the list, so
+     * the dropdown opens at the top of the filtered results instead of jumping
+     * to the previously selected item), or</li>
+     * <li>the resolved index cannot be determined.</li>
+     * </ul>
+     *
+     * @param focusSelectedItem
+     *            {@code true} to scroll to and focus the selected item when the
+     *            dropdown opens, {@code false} to keep the default behavior of
+     *            opening at the top
+     */
+    public void setFocusSelectedItem(boolean focusSelectedItem) {
+        this.focusSelectedItem = focusSelectedItem;
+    }
+
+    /**
+     * Gets whether the dropdown scrolls to and focuses the currently selected
+     * item when it opens.
+     *
+     * @return {@code true} if the dropdown auto-focuses the selected item,
+     *         {@code false} otherwise
+     * @see #setFocusSelectedItem(boolean)
+     */
+    public boolean isFocusSelectedItem() {
+        return focusSelectedItem;
+    }
+
+    private void focusSelectedItemOnOpen() {
+        if (!focusSelectedItem || getValue() == null) {
+            return;
+        }
+        String filter = getFilter();
+        if (filter != null && !filter.isEmpty()) {
+            // The user is filtering — don't override their navigation by
+            // scrolling to the previously selected item.
+            return;
+        }
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider == null) {
+            return;
+        }
+        Integer index;
+        if (dataProvider.isInMemory()) {
+            index = getListDataView().getItemIndex(getValue()).orElse(null);
+        } else {
+            index = getLazyDataView().getItemIndex(getValue()).orElse(null);
+        }
+        if (index == null || index < 0) {
+            return;
+        }
+        getElement().callJsFunction("scrollToIndex", index);
     }
 
     /**

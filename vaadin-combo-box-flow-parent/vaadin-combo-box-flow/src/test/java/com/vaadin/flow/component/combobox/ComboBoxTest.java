@@ -33,7 +33,10 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -236,6 +239,40 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setOverlayWidth(100, Unit.PIXELS);
         Assertions.assertEquals("100.0px",
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+    }
+
+    @Test
+    void focusSelectedItem_defaultsToFalse() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
+    void setFocusSelectedItem_isFocusSelectedItem() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setFocusSelectedItem(true);
+        Assertions.assertTrue(comboBox.isFocusSelectedItem());
+        comboBox.setFocusSelectedItem(false);
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
+    void focusSelectedItem_lazyWithoutItemIndexProvider_open_throws() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems(query -> Stream.of("a", "b", "c")
+                .skip(query.getOffset()).limit(query.getLimit()), query -> 3);
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("a");
+
+        Element element = comboBox.getElement();
+        ElementListenerMap listeners = element.getNode()
+                .getFeature(ElementListenerMap.class);
+        DomEvent open = new DomEvent(element,
+                "vaadin-combo-box-dropdown-opened",
+                JacksonUtils.createObjectNode());
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> listeners.fireEvent(open));
     }
 
     @Test
