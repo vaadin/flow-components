@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -31,6 +33,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -97,6 +100,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+
+    private boolean focusSelectedItem = false;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -391,6 +396,79 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
         setOverlayWidth(HasSize.getCssSize(width, unit));
+    }
+
+    /**
+     * When set to {@code true}, the dropdown opens scrolled to the currently
+     * selected item (if any) and focuses it.
+     * <p>
+     * With an in-memory data source the selected item's index is resolved via
+     * the list data view. With a lazy data provider, an
+     * {@link ItemIndexProvider} should be set via
+     * {@link ComboBoxLazyDataView#setItemIndexProvider(ItemIndexProvider)} so
+     * the flat index can be computed authoritatively. When neither path can
+     * resolve an index — no {@link ItemIndexProvider} configured for a lazy
+     * data provider, or an in-memory dataset small enough for the browser to
+     * filter locally — the dropdown opens at the top with no scroll.
+     * <p>
+     * When a filter is active, the dropdown does not auto-scroll to the
+     * selected item: keyboard navigation begins from the top of the filtered
+     * list, even when the selected item is part of the filtered set.
+     *
+     * @param focusSelectedItem
+     *            whether to auto-scroll to the selected item on open
+     * @since 25.2
+     */
+    public void setFocusSelectedItem(boolean focusSelectedItem) {
+        this.focusSelectedItem = focusSelectedItem;
+        // $connector is registered during initLazy. Poll via microtask
+        // until it's available so attach order isn't load-bearing.
+        runBeforeClientResponse(ui -> getElement().executeJs(
+                "const apply = (val) => {" + "  if (this.$connector) {"
+                        + "    this.$connector.setFocusSelectedItem(val);"
+                        + "  } else {" + "    queueMicrotask(() => apply(val));"
+                        + "  }" + "};" + "apply($0);",
+                focusSelectedItem));
+    }
+
+    /**
+     * @return whether the dropdown auto-scrolls to the selected item on open
+     * @see #setFocusSelectedItem(boolean)
+     * @since 25.2
+     */
+    public boolean isFocusSelectedItem() {
+        return focusSelectedItem;
+    }
+
+    /**
+     * Called by the client-side connector when the dropdown opens. Returns the
+     * flat index of the current value under the current filter, or {@code null}
+     * if it cannot be resolved (no value, no data provider, or no
+     * {@link ItemIndexProvider} for a lazy data provider).
+     */
+    @ClientCallable
+    private Integer resolveSelectedItemIndex() {
+        T selected = getValue();
+        if (selected == null || getDataProvider() == null) {
+            return null;
+        }
+        try {
+            if (getDataProvider().isInMemory()) {
+                // With client-side filtering the server never receives the
+                // typed filter, so an index computed here would not match the
+                // filtered list shown in the dropdown. Returning null lets
+                // the dropdown open at the top with no scroll, which is the
+                // correct behavior when filtering is active anyway. The
+                // connector also skips this RPC when a filter is present.
+                if (getElement().getProperty("_clientSideFilter", false)) {
+                    return null;
+                }
+                return getListDataView().getItemIndex(selected).orElse(null);
+            }
+            return getLazyDataView().getItemIndex(selected).orElse(null);
+        } catch (UnsupportedOperationException e) {
+            return null;
+        }
     }
 
     /**
