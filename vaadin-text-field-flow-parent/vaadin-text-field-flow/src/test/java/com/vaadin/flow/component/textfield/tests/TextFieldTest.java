@@ -77,7 +77,7 @@ class TextFieldTest {
         Element element = new Element("vaadin-text-field");
         element.setProperty("value", "test");
 
-        Instantiator instantiator = Mockito.mock(Instantiator.class);
+        Instantiato instantiator = Mockito.mock(Instantiator.class);
 
         Mockito.when(ui.getService().getInstantiator())
                 .thenReturn(instantiator);
