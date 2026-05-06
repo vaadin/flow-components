@@ -66,7 +66,7 @@ jobs:
       - name: Restore build cache
         id: build-cache
         if: steps.skip-ci.outputs.skip != 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
@@ -174,7 +174,7 @@ jobs:
 
       - name: Restore build cache
         id: build-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
@@ -247,7 +247,7 @@ jobs:
 
       - name: Restore build cache
         id: build-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
@@ -314,7 +314,7 @@ jobs:
 
       - name: Restore WAR cache
         id: war-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             integration-tests/pom.xml
@@ -342,7 +342,7 @@ jobs:
       - name: Restore build cache
         id: build-cache
         if: steps.war-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
@@ -449,13 +449,13 @@ jobs:
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Restore build cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
 
       - name: Restore WAR cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             integration-tests/pom.xml
@@ -511,7 +511,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
           fetch-depth: 1
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           pattern: failsafe-reports-*
           merge-multiple: true
@@ -524,7 +524,7 @@ jobs:
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         if: needs.it.result != 'success'
         continue-on-error: true
         with:
