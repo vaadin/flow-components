@@ -199,12 +199,6 @@ jobs:
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
 
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
-
   wtr-tests:
     name: WTR Tests
     needs: build
@@ -267,9 +261,13 @@ jobs:
       - name: Run WTR tests
         run: node scripts/wtr.js ${{ needs.build.outputs.components }}
 
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
+  cancel-it:
+    name: Cancel IT shards on pre-IT failure
+    needs: [unit-tests, wtr-tests]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
           GH_TOKEN: ${{ github.token }}
         run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
 
