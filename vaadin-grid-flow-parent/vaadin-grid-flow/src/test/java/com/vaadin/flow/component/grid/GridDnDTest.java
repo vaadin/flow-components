@@ -84,8 +84,10 @@ class GridDnDTest {
 
         DropTarget.create(routerLink).addDropListener(eventCapture::set);
 
-        ComponentUtil.fireEvent(routerLink, new DropEvent<RouterLink>(
-                routerLink, true, EffectAllowed.ALL.getClientPropertyValue()));
+        ComponentUtil.fireEvent(routerLink,
+                new DropEvent<RouterLink>(routerLink, true,
+                        EffectAllowed.ALL.getClientPropertyValue(), 0, 0, 0,
+                        0));
 
         DropEvent<RouterLink> dropEvent = eventCapture.get();
 
