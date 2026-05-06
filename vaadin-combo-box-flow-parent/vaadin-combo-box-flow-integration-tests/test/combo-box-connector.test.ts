@@ -137,6 +137,18 @@ describe('combo-box connector', () => {
       expect((comboBox.filteredItems[0] as { label: string }).label).to.equal('Item 0');
     });
 
+    it('keeps the request range under the cap when pending pages span far apart', () => {
+      // Two non-contiguous pages pending simultaneously (e.g. a deferred
+      // page-0 re-fetch racing a deep scrollToIndex jump) would otherwise
+      // trip the server's 500-item-per-fetch cap and leave the far page's
+      // callback stuck on loading=true.
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, () => {});
+      comboBox.dataProvider!({ page: 99, pageSize: comboBox.pageSize, filter: '' }, () => {});
+
+      const lastCall = comboBox.$server.setViewportRange.lastCall;
+      expect(lastCall.args[1]).to.be.at.most(500);
+    });
+
     it('does not evict the page containing the focused index', () => {
       // The WC's `scrollIntoView` runs `_visibleItemsCount`, which
       // re-anchors the virtualizer at index 0. Any rendered placeholder
