@@ -17,6 +17,11 @@ export type FlowComboBox = ComboBox & {
   $server: ComboBoxServer;
   _filterTimeout: number;
   _filterDebouncer: unknown;
+  __dataProviderController: {
+    rootCache: {
+      pendingRequests: Record<string, (items: unknown[], size: number) => void>;
+    };
+  };
 };
 
 type Vaadin = {

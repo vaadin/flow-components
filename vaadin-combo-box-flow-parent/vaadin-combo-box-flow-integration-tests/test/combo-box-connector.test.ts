@@ -17,6 +17,61 @@ describe('combo-box connector', () => {
     expect(comboBox.$connector).to.equal(connector);
   });
 
+  describe('pending requests', () => {
+    it('should store data provider callbacks on the controllers pending requests', () => {
+      const callback = sinon.spy();
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, callback);
+
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(callback);
+    });
+
+    it('should clear pending requests on $connector.reset', () => {
+      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, sinon.spy());
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.exist;
+
+      comboBox.$connector.reset();
+
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests).to.deep.equal({});
+    });
+
+    describe('with filter debouncing', () => {
+      let clock: sinon.SinonFakeTimers;
+
+      beforeEach(() => {
+        clock = sinon.useFakeTimers({
+          toFake: ['setTimeout', 'clearTimeout']
+        });
+      });
+
+      afterEach(() => {
+        clock.restore();
+      });
+
+      it('should track the post-debounce callback in the controllers pending requests', () => {
+        const callback = sinon.spy();
+        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, callback);
+
+        clock.tick(500);
+
+        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(callback);
+      });
+
+      it('should clear stale pending requests when the filter changes', () => {
+        const stale = sinon.spy();
+        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, stale);
+        clock.tick(500);
+        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(stale);
+
+        const fresh = sinon.spy();
+        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'b' }, fresh);
+        clock.tick(500);
+
+        expect(stale).to.be.calledOnceWithExactly([], comboBox.size);
+        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(fresh);
+      });
+    });
+  });
+
   describe('filter debouncing', () => {
     let clock: sinon.SinonFakeTimers;
 

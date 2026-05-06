@@ -11,8 +11,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   comboBox.$connector = {};
 
-  // holds pageIndex -> callback pairs of subsequent indexes (current active range)
-  const pageCallbacks = {};
+  const getPendingRequests = () => comboBox.__dataProviderController.rootCache.pendingRequests;
   let cache = {};
   let lastFilter = '';
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
@@ -44,11 +43,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     };
   })();
 
-  const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
+  const clearPageCallbacks = (pages = Object.keys(getPendingRequests())) => {
     // Flush and empty the existing requests
+    const pendingRequests = getPendingRequests();
     pages.forEach((page) => {
-      pageCallbacks[page]([], comboBox.size);
-      delete pageCallbacks[page];
+      pendingRequests[page]([], comboBox.size);
+      delete pendingRequests[page];
 
       // Empty the comboBox's internal cache without invoking observers by filling
       // the filteredItems array with placeholders (comboBox will request for data when it
@@ -117,7 +117,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     // Postpone the execution of new callbacks if there is an active debouncer.
     // They will be executed when the page callbacks are cleared within the debouncer.
     if (comboBox._filterDebouncer) {
-      pageCallbacks[params.page] = callback;
+      getPendingRequests()[params.page] = callback;
       return;
     }
 
@@ -125,9 +125,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       // This may happen after skipping pages by scrolling fast
       commitPage(params.page, callback);
     } else {
-      pageCallbacks[params.page] = callback;
+      getPendingRequests()[params.page] = callback;
       const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
-      const activePages = Object.keys(pageCallbacks).map((page) => parseInt(page));
+      const activePages = Object.keys(getPendingRequests()).map((page) => parseInt(page));
       const rangeMin = Math.min(...activePages);
       const rangeMax = Math.max(...activePages);
 
@@ -174,7 +174,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
     }
 
-    if (index === 0 && items.length === 0 && pageCallbacks[0]) {
+    if (index === 0 && items.length === 0 && getPendingRequests()[0]) {
       // Makes sure that the dataProvider callback is called even when server
       // returns empty data set (no items match the filter).
       cache[0] = [];
@@ -234,12 +234,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     // We're done applying changes from this batch, resolve pending
     // callbacks
-    let activePages = Object.getOwnPropertyNames(pageCallbacks);
+    const pendingRequests = getPendingRequests();
+    let activePages = Object.getOwnPropertyNames(pendingRequests);
     for (let i = 0; i < activePages.length; i++) {
       let page = activePages[i];
 
       if (cache[page]) {
-        commitPage(page, pageCallbacks[page]);
+        commitPage(page, pendingRequests[page]);
       }
     }
 
