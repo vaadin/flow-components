@@ -114,17 +114,24 @@ public abstract class AbstractComponentIT
                 Boolean hasVaadin = (Boolean) executeScript(
                         "return !!(window.Vaadin && window.Vaadin.Flow)");
                 if (Boolean.TRUE.equals(hasVaadin)) {
-                    if (currentUrl != null && !currentUrl.contains(path)) {
+                    String currentPath = (String) executeScript(
+                            "return window.location.pathname");
+                    String normalizedPath = path.startsWith("/") ? path
+                            : "/" + path;
+                    boolean samePath = normalizedPath
+                            .equals(currentPath);
+                    if (!samePath) {
                         executeScript(
                                 "window.dispatchEvent(new CustomEvent("
                                 + "'vaadin-navigate', {detail:{url:arguments[0],"
                                 + "state:null, replace:false, callback:true}}))",
                                 path);
-                    } else {
-                        getDriver().get(url);
-                        waitForDevServer();
+                        getCommandExecutor().waitForVaadin();
+                        return;
                     }
-                    return;
+                    // Same route: clear cookies so the server creates
+                    // a fresh session, then fall through to full load.
+                    getDriver().manage().deleteAllCookies();
                 }
             } catch (Exception e) {
                 // Fall through to full load

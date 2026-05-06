@@ -85,8 +85,9 @@ public class AIOrchestratorIT extends AbstractComponentIT {
         waitUntil(driver -> getMessageCount() >= 2, 5);
         Assert.assertEquals(2, getMessageCount());
 
-        // Refresh the page - history should be auto-restored from session
-        open();
+        // Refresh the page (keep session) so history is auto-restored
+        getDriver().navigate().refresh();
+        waitForDevServer();
         messageList = $(MessageListElement.class).single();
 
         waitUntil(driver -> getMessageCount() >= 2, 5);
