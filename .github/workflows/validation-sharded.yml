@@ -275,6 +275,15 @@ jobs:
       - name: Run WTR tests
         run: node scripts/wtr.js ${{ needs.build.outputs.components }}
 
+      - name: Upload WTR reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: wtr-reports
+          path: '**/wtr-results.xml'
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Cancel workflow on failure
         if: failure()
         env:
@@ -542,6 +551,24 @@ jobs:
           list-suites: 'failed'
 
       - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: wtr-reports
+          path: wtr-reports
+
+      - name: Publish WTR results
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: WTR Tests
+          path: wtr-reports/**/wtr-results.xml
+          reporter: java-junit
+          collapsed: 'always'
+          list-files: 'failed'
+          list-tests: 'failed'
+          list-suites: 'failed'
+          fail-on-error: 'false'
+
+      - uses: actions/download-artifact@v8
         if: needs.it.result != 'success'
         continue-on-error: true
         with:
@@ -568,7 +595,8 @@ jobs:
           gh api --paginate "repos/$GH_REPO/actions/runs/$RUN_ID/artifacts" \
             --jq '.artifacts[] | select(
               (.name | startswith("error-screenshots-")) or
-              (.name | startswith("failsafe-reports-"))
+              (.name | startswith("failsafe-reports-")) or
+              .name == "wtr-reports"
             ) | "\(.id) \(.name)"' \
           | while read -r id name; do
               echo "Deleting artifact $name (id=$id)"
