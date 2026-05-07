@@ -71,7 +71,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final boolean REUSE_DRIVER =
             Boolean.getBoolean("test.reuseDriver");
 
-    private static WebDriver sharedDriver;
+    private static final ThreadLocal<WebDriver> sharedDriver = new ThreadLocal<>();
 
     @Rule
     public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
@@ -82,21 +82,21 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (!REUSE_DRIVER) {
             return;
         }
-        sharedDriver = createChromeDriver();
-        sharedDriver.manage().window().setSize(new Dimension(1024, 800));
-        sharedDriver.manage().timeouts()
-                .pageLoadTimeout(Duration.ofSeconds(10));
+        WebDriver driver = createChromeDriver();
+        driver.manage().window().setSize(new Dimension(1024, 800));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+        sharedDriver.set(driver);
     }
 
     @Before
     public void resetDriver() throws Exception {
         if (!REUSE_DRIVER) {
-            sharedDriver = createChromeDriver();
-            sharedDriver.manage().window().setSize(new Dimension(1024, 800));
-            sharedDriver.manage().timeouts()
-                    .pageLoadTimeout(Duration.ofSeconds(10));
+            WebDriver driver = createChromeDriver();
+            driver.manage().window().setSize(new Dimension(1024, 800));
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+            sharedDriver.set(driver);
         }
-        setDriver(sharedDriver);
+        setDriver(sharedDriver.get());
         getDriver().manage().deleteAllCookies();
         getDriver().navigate().to("about:blank");
     }
@@ -104,8 +104,8 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     @After
     public void quitDriverPerMethod() {
         if (!REUSE_DRIVER) {
-            tryQuitDriver(sharedDriver);
-            sharedDriver = null;
+            tryQuitDriver(sharedDriver.get());
+            sharedDriver.remove();
         }
     }
 
@@ -114,8 +114,8 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (!REUSE_DRIVER) {
             return;
         }
-        tryQuitDriver(sharedDriver);
-        sharedDriver = null;
+        tryQuitDriver(sharedDriver.get());
+        sharedDriver.remove();
     }
 
     // ----- Test path and URL resolution -----
