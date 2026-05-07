@@ -1520,6 +1520,7 @@ export const spreadsheetOverlayStyles = css`
     white-space: pre-wrap;
   }
   #spreadsheet-overlays .v-contextmenu {
+    border: unset;
     padding: 4px 4px;
     border-radius: 4px;
     background-color: white;
@@ -1574,6 +1575,7 @@ export const spreadsheetOverlayStyles = css`
   }
 
   #spreadsheet-overlays .v-spreadsheet-comment-overlay {
+    border: unset;
     padding: 4px 4px;
     border-radius: 4px;
     background-color: white;
@@ -1630,6 +1632,7 @@ export const spreadsheetOverlayStyles = css`
     margin-bottom: 7px;
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay {
+    border: unset;
     padding: 4px 4px;
     border-radius: 4px;
     background-color: var(--lumo-base-color, #fff);

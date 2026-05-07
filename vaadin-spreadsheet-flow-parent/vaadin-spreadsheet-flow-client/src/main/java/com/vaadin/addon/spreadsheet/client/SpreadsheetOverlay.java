@@ -38,14 +38,23 @@ public class SpreadsheetOverlay extends VOverlay {
 
     public SpreadsheetOverlay() {
         super();
+        getElement().setAttribute("popover", "manual");
     }
 
     public SpreadsheetOverlay(boolean autoHide, boolean modal) {
         super(autoHide, modal);
+        getElement().setAttribute("popover", "manual");
     }
 
     public SpreadsheetOverlay(boolean autoHide) {
         super(autoHide);
+        getElement().setAttribute("popover", "manual");
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        showPopover(getElement());
     }
 
     @Override
@@ -57,4 +66,14 @@ public class SpreadsheetOverlay extends VOverlay {
         Element overlays = DOM.getElementById("spreadsheet-overlays");
         return overlays == null ? RootPanel.getBodyElement() : overlays;
     }
+
+    // @formatter:off
+    private native void showPopover(Element el) 
+    /*-{
+        var fn = el && el.showPopover;
+        if (typeof fn === "function") {
+            fn.call(el);
+        }
+    }-*/;
+    // @formatter:on
 }
