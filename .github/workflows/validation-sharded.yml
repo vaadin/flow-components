@@ -188,11 +188,28 @@ jobs:
             mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
+      - name: Compile unit tests
+        id: unit-compile
+        run: |
+          mvn test-compile -Drelease -T $FORK_COUNT $MAVEN_ARGS 2>&1 | tee unit-compile.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Report unit compile error
+        if: failure() && steps.unit-compile.conclusion == 'failure'
+        run: |
+          {
+            echo "## Unit test compilation failed"
+            echo '```'
+            tail -n 200 unit-compile.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run unit tests
-        run: mvn test -Drelease -T $FORK_COUNT $MAVEN_ARGS
+        if: steps.unit-compile.outcome == 'success'
+        run: mvn surefire:test -Drelease -T $FORK_COUNT $MAVEN_ARGS
 
       - name: Publish unit test results
-        if: always()
+        if: always() && steps.unit-compile.outcome == 'success'
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Unit Tests
@@ -373,8 +390,21 @@ jobs:
             -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 
       - name: Compile IT test sources
+        id: it-compile
         if: steps.war-cache.outputs.cache-hit != 'true'
-        run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
+        run: |
+          mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS 2>&1 | tee it-compile.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Report IT compile error
+        if: failure() && steps.it-compile.conclusion == 'failure'
+        run: |
+          {
+            echo "## IT compilation failed"
+            echo '```'
+            tail -n 200 it-compile.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Compute IT shards
         id: shards
@@ -528,6 +558,7 @@ jobs:
           path: failsafe-reports
 
       - name: Publish integration test results
+        if: needs.it.result == 'success' || needs.it.result == 'failure'
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
