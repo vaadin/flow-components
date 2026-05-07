@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,6 +68,9 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractComponentIT.class);
 
+    private static final boolean REUSE_DRIVER =
+            Boolean.getBoolean("test.reuseDriver");
+
     private static WebDriver sharedDriver;
 
     @Rule
@@ -75,6 +79,9 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     @BeforeClass
     public static void createDriver() {
+        if (!REUSE_DRIVER) {
+            return;
+        }
         sharedDriver = createChromeDriver();
         sharedDriver.manage().window().setSize(new Dimension(1024, 800));
         sharedDriver.manage().timeouts()
@@ -83,13 +90,30 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     @Before
     public void resetDriver() throws Exception {
+        if (!REUSE_DRIVER) {
+            sharedDriver = createChromeDriver();
+            sharedDriver.manage().window().setSize(new Dimension(1024, 800));
+            sharedDriver.manage().timeouts()
+                    .pageLoadTimeout(Duration.ofSeconds(10));
+        }
         setDriver(sharedDriver);
         getDriver().manage().deleteAllCookies();
         getDriver().navigate().to("about:blank");
     }
 
+    @After
+    public void quitDriverPerMethod() {
+        if (!REUSE_DRIVER) {
+            tryQuitDriver(sharedDriver);
+            sharedDriver = null;
+        }
+    }
+
     @AfterClass
     public static void quitDriver() {
+        if (!REUSE_DRIVER) {
+            return;
+        }
         tryQuitDriver(sharedDriver);
         sharedDriver = null;
     }
