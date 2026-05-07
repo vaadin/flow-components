@@ -198,6 +198,8 @@ jobs:
           name: Unit Tests
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
+          collapsed: 'always'
+          list-files: 'failed'
           list-tests: 'failed'
           list-suites: 'failed'
 
@@ -523,6 +525,8 @@ jobs:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
+          collapsed: 'always'
+          list-files: 'failed'
           list-tests: 'failed'
           list-suites: 'failed'
 
