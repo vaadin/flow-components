@@ -63,6 +63,20 @@ public abstract class AbstractComponentIT
     public ScreenshotOnFailureRule screenshotOnFailure =
             new ScreenshotOnFailureRule(this, !REUSE_DRIVER);
 
+    // Ensures the shared driver is created and assigned before every test
+    // method, so subclasses that override setup() without calling super
+    // still get a valid driver.
+    @Rule
+    public TestRule assignSharedDriver = (base, description) -> new Statement() {
+        @Override
+        public void evaluate() throws Throwable {
+            if (REUSE_DRIVER) {
+                initSharedDriver();
+            }
+            base.evaluate();
+        }
+    };
+
     {
         if (REUSE_DRIVER) {
             disableParentDriverQuit();
@@ -165,14 +179,8 @@ public abstract class AbstractComponentIT
         }
     }
 
-    @Override
-    public void setup() throws Exception {
-        if (!REUSE_DRIVER) {
-            super.setup();
-            testBench().resizeViewPortTo(1024, 800);
-            return;
-        }
-
+    // Final so subclasses cannot accidentally skip driver initialization.
+    private final void initSharedDriver() throws Exception {
         if (sharedDriver != null && isDriverAlive(sharedDriver)) {
             setDriver(sharedDriver);
             testBench().resizeViewPortTo(1024, 800);
@@ -205,6 +213,16 @@ public abstract class AbstractComponentIT
             saveDriverInfo(sharedDriver);
         }
         testBench().resizeViewPortTo(1024, 800);
+    }
+
+    @Override
+    public void setup() throws Exception {
+        if (!REUSE_DRIVER) {
+            super.setup();
+            testBench().resizeViewPortTo(1024, 800);
+            return;
+        }
+        initSharedDriver();
     }
 
     private void disableParentDriverQuit() {
