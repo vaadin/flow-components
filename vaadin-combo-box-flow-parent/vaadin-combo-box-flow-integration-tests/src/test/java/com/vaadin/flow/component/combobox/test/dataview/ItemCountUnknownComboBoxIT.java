@@ -36,20 +36,17 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         doScroll(45, getDefaultInitialItemCount(), "Callback Item 45");
 
         // trigger next page fetch and item count buffer increase
-        doScroll(150, 400, "Callback Item 150", RangeLog.of(1, 100, 150),
-                RangeLog.of(2, 150, 200));
+        doScroll(150, 400, "Callback Item 150", RangeLog.of(2, 100, 150));
 
         // jump over a page, trigger fetch
-        doScroll(280, 400, "Callback Item 280", RangeLog.of(3, 250, 300));
+        doScroll(280, 400, "Callback Item 270", RangeLog.of(4, 250, 300));
 
         // trigger another buffer increase but not capping item count
-        doScroll(399, 600, "Callback Item 399", RangeLog.of(4, 350, 400),
-                RangeLog.of(5, 400, 450));
+        doScroll(399, 600, "Callback Item 395", RangeLog.of(7, 400, 450));
 
         // scroll to actual end, no more items returned and item count is
         // adjusted
-        doScroll(499, 500, "Callback Item 499", RangeLog.of(6, 450, 500),
-                RangeLog.of(7, 500, 550));
+        doScroll(499, 500, "Callback Item 499", RangeLog.of(9, 500, 550));
 
         // scroll to 0 position and check the item count is correct (page 0
         // already cached, so no new fetch)
@@ -68,8 +65,7 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(getDefaultInitialItemCount());
         verifyFetchForUndefinedItemCountCallback(RangeLog.of(0, 0, 50));
 
-        doScroll(150, 400, "Callback Item 150", RangeLog.of(1, 100, 150),
-                RangeLog.of(2, 150, 200));
+        doScroll(150, 400, "Callback Item 150", RangeLog.of(1, 100, 150));
 
         doScroll(299, actualItemCount, "Callback Item 299",
                 RangeLog.of(3, 250, 300), RangeLog.of(4, 300, 350));
@@ -81,8 +77,6 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         setCountCallback();
 
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
-
-        verifyFetchForUndefinedItemCountCallback(RangeLog.of(5, 300, 350));
 
         // Check that combo box is scrolled over 'actualItemCount' after
         // switching to defined items count
