@@ -138,7 +138,7 @@ jobs:
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
   unit-tests:
-    name: Unit Tests
+    name: Unit tests
     needs: build
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
@@ -200,7 +200,7 @@ jobs:
           reporter: java-junit
 
   wtr-tests:
-    name: WTR Tests
+    name: WTR tests
     needs: build
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
@@ -495,7 +495,7 @@ jobs:
           if-no-files-found: ignore
 
   results:
-    name: Collect Results
+    name: Collect IT results
     needs: [build, unit-tests, wtr-tests, package-war, it]
     if: always() && needs.build.outputs.skip != 'true' && needs.package-war.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
