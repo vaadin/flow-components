@@ -198,6 +198,8 @@ jobs:
           name: Unit Tests
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
+          list-tests: 'failed'
+          list-suites: 'failed'
 
   wtr-tests:
     name: WTR tests
@@ -521,6 +523,8 @@ jobs:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
+          list-tests: 'failed'
+          list-suites: 'failed'
 
       - uses: actions/download-artifact@v8
         if: needs.it.result != 'success'
