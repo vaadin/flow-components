@@ -18,7 +18,8 @@ import com.vaadin.tests.AbstractComponentIT;
 public abstract class AbstractChartIT extends AbstractComponentIT {
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
+        super.setup();
         open();
     }
 

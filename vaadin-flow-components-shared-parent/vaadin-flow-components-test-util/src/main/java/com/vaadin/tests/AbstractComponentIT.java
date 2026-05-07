@@ -63,20 +63,6 @@ public abstract class AbstractComponentIT
     public ScreenshotOnFailureRule screenshotOnFailure =
             new ScreenshotOnFailureRule(this, !REUSE_DRIVER);
 
-    // Ensures the shared driver is created and assigned before every test
-    // method, so subclasses that override setup() without calling super
-    // still get a valid driver.
-    @Rule
-    public TestRule assignSharedDriver = (base, description) -> new Statement() {
-        @Override
-        public void evaluate() throws Throwable {
-            if (REUSE_DRIVER) {
-                initSharedDriver();
-            }
-            base.evaluate();
-        }
-    };
-
     {
         if (REUSE_DRIVER) {
             disableParentDriverQuit();
