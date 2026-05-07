@@ -142,7 +142,6 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-      checks: write
       actions: write
     steps:
       - name: Set Maven args
@@ -192,17 +191,14 @@ jobs:
       - name: Run unit tests
         run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
 
-      - name: Publish unit test results
+      - name: Upload unit test reports
         if: always()
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        uses: actions/upload-artifact@v6
         with:
-          name: Unit Tests
+          name: surefire-reports
           path: '**/target/surefire-reports/TEST-*.xml'
-          reporter: java-junit
-          collapsed: 'always'
-          list-files: 'failed'
-          list-tests: 'failed'
-          list-suites: 'failed'
+          retention-days: 1
+          if-no-files-found: ignore
 
       - name: Cancel workflow on failure
         if: failure()
@@ -429,8 +425,8 @@ jobs:
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
-  it:
-    name: IT shard ${{ matrix.shard }}
+  its:
+    name: ITs (${{ matrix.shard }})
     needs: package-war
     if: needs.package-war.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
@@ -498,7 +494,7 @@ jobs:
             -Dmaven.test.redirectTestOutputToFile=true \
             -Dtest.reuseDriver=true \
             -Dit.test="$SHARD_TESTS" \
-            $MAVEN_ARGS
+            -B
 
       - name: Upload error screenshots
         if: failure()
@@ -519,9 +515,16 @@ jobs:
           if-no-files-found: ignore
 
   results:
-    name: Collect IT results
-    needs: [build, unit-tests, wtr-tests, package-war, it]
-    if: always() && needs.build.outputs.skip != 'true' && needs.package-war.outputs.has-tests == 'true'
+    name: Collect tests
+    needs: [build, unit-tests, wtr-tests, package-war, its]
+    if: >-
+      always() &&
+      needs.build.outputs.skip != 'true' &&
+      needs.package-war.outputs.has-tests == 'true' &&
+      needs.unit-tests.result != 'cancelled' &&
+      needs.wtr-tests.result != 'cancelled' &&
+      needs.package-war.result != 'cancelled' &&
+      needs.its.result != 'cancelled'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -534,21 +537,65 @@ jobs:
           fetch-depth: 1
 
       - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: surefire-reports
+          path: surefire-reports
+
+      - name: Check for unit test reports
+        id: unit-check
+        run: |
+          count=$(find surefire-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish unit test results
+        if: steps.unit-check.outputs.count != '0'
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Unit Tests
+          path: surefire-reports/**/TEST-*.xml
+          reporter: java-junit
+          collapsed: 'always'
+          list-tests: 'failed'
+          list-suites: 'none'
+          fail-on-error: 'false'
+
+      - name: Unit test compilation error
+        if: steps.unit-check.outputs.count == '0' && needs.unit-tests.result == 'failure'
+        run: |
+          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/download-artifact@v8
         with:
           pattern: failsafe-reports-*
           merge-multiple: true
           path: failsafe-reports
 
+      - name: Check for IT reports
+        id: it-check
+        run: |
+          count=$(find failsafe-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
+
       - name: Publish integration test results
+        if: steps.it-check.outputs.count != '0'
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
           collapsed: 'always'
-          list-files: 'failed'
           list-tests: 'failed'
-          list-suites: 'failed'
+          list-suites: 'none'
+
+      - name: IT compilation error
+        if: steps.it-check.outputs.count == '0' && needs.package-war.result == 'failure'
+        run: |
+          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         continue-on-error: true
@@ -556,20 +603,33 @@ jobs:
           name: wtr-reports
           path: wtr-reports
 
+      - name: Check for WTR reports
+        id: wtr-check
+        run: |
+          count=$(find wtr-reports -name 'wtr-results.xml' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
+
       - name: Publish WTR results
+        if: steps.wtr-check.outputs.count != '0'
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: WTR Tests
           path: wtr-reports/**/wtr-results.xml
           reporter: java-junit
           collapsed: 'always'
-          list-files: 'failed'
           list-tests: 'failed'
-          list-suites: 'failed'
+          list-suites: 'none'
           fail-on-error: 'false'
 
+      - name: WTR setup error
+        if: steps.wtr-check.outputs.count == '0' && needs.wtr-tests.result == 'failure'
+        run: |
+          echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
+
       - uses: actions/download-artifact@v8
-        if: needs.it.result != 'success'
+        if: needs.its.result != 'success'
         continue-on-error: true
         with:
           pattern: error-screenshots-*
@@ -577,7 +637,7 @@ jobs:
           path: error-screenshots
 
       - name: Upload merged error screenshots
-        if: needs.it.result != 'success'
+        if: needs.its.result != 'success'
         uses: actions/upload-artifact@v6
         with:
           name: error-screenshots
@@ -596,7 +656,8 @@ jobs:
             --jq '.artifacts[] | select(
               (.name | startswith("error-screenshots-")) or
               (.name | startswith("failsafe-reports-")) or
-              .name == "wtr-reports"
+              .name == "wtr-reports" or
+              .name == "surefire-reports"
             ) | "\(.id) \(.name)"' \
           | while read -r id name; do
               echo "Deleting artifact $name (id=$id)"
