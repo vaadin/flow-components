@@ -28,11 +28,24 @@ public class SpreadsheetOverlay extends VOverlay {
     public static class SpreadsheetContextMenu extends VContextMenu {
         public SpreadsheetContextMenu() {
             DOM.setElementProperty(getElement(), "id", "PID_VAADIN_CM");
+            getElement().setAttribute("popover", "manual");
         }
 
         @Override
         public Element getOverlayContainer() {
             return getOverlayContainerElement();
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            showPopover(getElement());
+        }
+
+        @Override
+        public void showAt(int x, int y) {
+            super.showAt(x, y);
+            showPopover(getElement());
         }
     }
 
@@ -68,7 +81,7 @@ public class SpreadsheetOverlay extends VOverlay {
     }
 
     // @formatter:off
-    private native void showPopover(Element el) 
+    private static native void showPopover(Element el) 
     /*-{
         var fn = el && el.showPopover;
         if (typeof fn === "function") {
