@@ -143,6 +143,7 @@ jobs:
     permissions:
       contents: read
       checks: write
+      actions: write
     steps:
       - name: Set Maven args
         run: |
@@ -203,6 +204,12 @@ jobs:
           list-tests: 'failed'
           list-suites: 'failed'
 
+      - name: Cancel workflow on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
+
   wtr-tests:
     name: WTR tests
     needs: build
@@ -211,6 +218,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      actions: write
     steps:
       - name: Set Maven args
         run: |
@@ -267,15 +275,9 @@ jobs:
       - name: Run WTR tests
         run: node scripts/wtr.js ${{ needs.build.outputs.components }}
 
-  cancel-it:
-    name: Cancel IT shards on pre-IT failure
-    needs: [unit-tests, wtr-tests]
-    if: failure()
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - env:
+      - name: Cancel workflow on failure
+        if: failure()
+        env:
           GH_TOKEN: ${{ github.token }}
         run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
 
