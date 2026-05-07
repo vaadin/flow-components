@@ -35,7 +35,7 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 public class TextFieldBasicValidationIT
         extends AbstractValidationIT<TextFieldElement> {
     @Test
-    public void fieldIsInitiallyValid() {
+    public vdoid fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
         assertErrorMessage(null);
