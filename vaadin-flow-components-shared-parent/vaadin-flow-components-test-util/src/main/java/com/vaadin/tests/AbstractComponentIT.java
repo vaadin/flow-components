@@ -68,8 +68,8 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractComponentIT.class);
 
-    private static final boolean REUSE_DRIVER =
-            Boolean.getBoolean("test.reuseDriver");
+    private static final boolean REUSE_DRIVER = Boolean
+            .getBoolean("test.reuseDriver");
 
     private static final ThreadLocal<WebDriver> sharedDriver = new ThreadLocal<>();
 
