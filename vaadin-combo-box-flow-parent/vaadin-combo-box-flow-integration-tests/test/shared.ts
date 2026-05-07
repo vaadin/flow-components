@@ -1,5 +1,6 @@
 import './env-setup.js';
 import { ComboBox } from '@vaadin/combo-box';
+import { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
 import '../frontend/generated/jar-resources/comboBoxConnector.js';
 import * as sinon from 'sinon';
 
@@ -17,11 +18,7 @@ export type FlowComboBox = ComboBox & {
   $server: ComboBoxServer;
   _filterTimeout: number;
   _filterDebouncer: unknown;
-  __dataProviderController: {
-    rootCache: {
-      pendingRequests: Record<string, (items: unknown[], size: number) => void>;
-    };
-  };
+  __dataProviderController: DataProviderController<unknown, Record<string, unknown>>;
 };
 
 type Vaadin = {

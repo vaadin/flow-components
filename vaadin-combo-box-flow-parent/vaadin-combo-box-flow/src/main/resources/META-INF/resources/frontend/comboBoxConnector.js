@@ -44,11 +44,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   })();
 
   const clearPageCallbacks = (pages = Object.keys(getPendingRequests())) => {
-    // Flush and empty the existing requests
+    // Flush the existing requests. Invoking the callback removes the entry
+    // from pendingRequests (the data provider controller does that inside
+    // the callback).
     const pendingRequests = getPendingRequests();
     pages.forEach((page) => {
       pendingRequests[page]([], comboBox.size);
-      delete pendingRequests[page];
 
       // Empty the comboBox's internal cache without invoking observers by filling
       // the filteredItems array with placeholders (comboBox will request for data when it
@@ -234,15 +235,11 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     // We're done applying changes from this batch, resolve pending
     // callbacks
-    const pendingRequests = getPendingRequests();
-    let activePages = Object.getOwnPropertyNames(pendingRequests);
-    for (let i = 0; i < activePages.length; i++) {
-      let page = activePages[i];
-
+    Object.entries(getPendingRequests()).forEach(([page, callback]) => {
       if (cache[page]) {
-        commitPage(page, pendingRequests[page]);
+        commitPage(page, callback);
       }
-    }
+    });
 
     // Let server know we're done
     comboBox.$server.confirmUpdate(id);
