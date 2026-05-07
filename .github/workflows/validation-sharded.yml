@@ -2,7 +2,7 @@ name: Validation (Sharded)
 
 on:
   pull_request:
-    branches: ['main', '25.*', 'port-sharded-validation-workflow']
+    branches: ['main', '25.*']
   merge_group:
   workflow_dispatch:
     inputs:
