@@ -26,7 +26,6 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -42,11 +41,10 @@ import com.vaadin.testbench.TestBench;
 /**
  * Base class for Flow component integration tests.
  * <p>
- * When {@code -Dtest.reuseDriver=true} is set, the browser is reused across
- * test methods (within a class) and across test classes (via file-based
- * ChromeDriver session reconnect). Navigation between different routes uses
- * SPA navigation ({@code vaadin-navigate} event), while same-route navigation
- * uses {@code location.reload()} to get a fresh view state.
+ * When {@code -Dtest.reuseDriver=true} is set, the Chrome browser process is
+ * reused across test classes, avoiding the per-class startup cost. Each call
+ * to {@link #open} still clears cookies and does a full page load so that
+ * Vaadin session state never leaks between tests.
  */
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
@@ -106,58 +104,10 @@ public abstract class AbstractComponentIT
 
     @Override
     protected void open(String... parameters) {
-        String url = getTestURL(parameters);
-        String path = getTestPath();
-
         if (REUSE_DRIVER) {
-            try {
-                String currentUrl = getDriver().getCurrentUrl();
-                Boolean hasVaadin = (Boolean) executeScript(
-                        "return !!(window.Vaadin && window.Vaadin.Flow)");
-                if (Boolean.TRUE.equals(hasVaadin)) {
-                    String currentPath = (String) executeScript(
-                            "return window.location.pathname");
-                    String normalizedPath = path.startsWith("/") ? path
-                            : "/" + path;
-                    boolean samePath = normalizedPath
-                            .equals(currentPath);
-                    if (!samePath) {
-                        executeScript(
-                                "window.dispatchEvent(new CustomEvent("
-                                + "'vaadin-navigate', {detail:{url:arguments[0],"
-                                + "state:null, replace:false, callback:true}}))",
-                                path);
-                        getCommandExecutor().waitForVaadin();
-                        // Wait for all custom elements to be defined, then
-                        // two rAF ticks so shadow DOM styles are flushed to
-                        // computed style before any test assertion reads them.
-                        try {
-                            waitUntil(d -> (Boolean) executeScript(
-                                    "return !document"
-                                    + ".querySelector(':not(:defined)')"),
-                                    5);
-                        } catch (Exception ignored) {
-                        }
-                        try {
-                            ((JavascriptExecutor) getDriver())
-                                    .executeAsyncScript(
-                                    "var c=arguments[0];"
-                                    + "requestAnimationFrame("
-                                    + "()=>requestAnimationFrame(c));");
-                        } catch (Exception ignored) {
-                        }
-                        return;
-                    }
-                    // Same route: clear cookies so the server creates
-                    // a fresh session, then fall through to full load.
-                    getDriver().manage().deleteAllCookies();
-                }
-            } catch (Exception e) {
-                // Fall through to full load
-            }
+            getDriver().manage().deleteAllCookies();
         }
-
-        getDriver().get(url);
+        getDriver().get(getTestURL(parameters));
         waitForDevServer();
     }
 
