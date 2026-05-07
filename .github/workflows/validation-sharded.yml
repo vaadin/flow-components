@@ -15,11 +15,6 @@ on:
         required: false
         default: '5'
 
-permissions:
-  contents: read
-  checks: write
-  actions: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
   cancel-in-progress: true
@@ -32,6 +27,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     outputs:
       skip: ${{ steps.skip-ci.outputs.skip }}
       components: ${{ steps.components.outputs.elements }}
@@ -143,6 +140,9 @@ jobs:
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      checks: write
     steps:
       - name: Set Maven args
         run: |
@@ -209,6 +209,8 @@ jobs:
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
       - name: Set Maven args
         run: |
@@ -270,6 +272,8 @@ jobs:
     needs: [unit-tests, wtr-tests]
     if: failure()
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -281,6 +285,8 @@ jobs:
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.shards.outputs.matrix }}
       has-tests: ${{ steps.shards.outputs.has-tests }}
@@ -418,6 +424,8 @@ jobs:
     if: needs.package-war.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.package-war.outputs.matrix) }}
