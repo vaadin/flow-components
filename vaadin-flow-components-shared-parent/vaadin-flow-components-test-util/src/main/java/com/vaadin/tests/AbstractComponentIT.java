@@ -127,6 +127,16 @@ public abstract class AbstractComponentIT
                                 + "state:null, replace:false, callback:true}}))",
                                 path);
                         getCommandExecutor().waitForVaadin();
+                        // Wait for all custom elements to be defined so
+                        // that shadow DOM styles are fully applied before
+                        // the test reads computed CSS values.
+                        try {
+                            waitUntil(d -> (Boolean) executeScript(
+                                    "return !document"
+                                    + ".querySelector(':not(:defined)')"),
+                                    5);
+                        } catch (Exception ignored) {
+                        }
                         return;
                     }
                     // Same route: clear cookies so the server creates
