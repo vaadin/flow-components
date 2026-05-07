@@ -98,10 +98,10 @@ jobs:
       - name: Install artifacts
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Detect modified components
@@ -182,10 +182,10 @@ jobs:
       - name: Install artifacts (cache miss)
         if: steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Run unit tests
@@ -249,10 +249,10 @@ jobs:
       - name: Install artifacts (cache miss)
         if: steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: npm install
@@ -348,10 +348,10 @@ jobs:
       - name: Install artifacts (cache miss)
         if: steps.war-cache.outputs.cache-hit != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         run: |
-          mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -DskipTests -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Package integration-tests WAR
@@ -360,7 +360,7 @@ jobs:
           mvn package -pl integration-tests \
             -Dvaadin.pnpm.enable -Drun-it -Drelease \
             -Dvaadin.productionMode -Dvaadin.force.production.build=true \
-            -DskipTests -DskipJetty $MAVEN_ARGS
+            -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 
       - name: Compile IT test sources
         if: steps.war-cache.outputs.cache-hit != 'true'
