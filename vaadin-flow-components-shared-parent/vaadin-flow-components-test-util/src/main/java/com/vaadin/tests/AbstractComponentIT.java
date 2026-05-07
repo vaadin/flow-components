@@ -26,6 +26,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -127,14 +128,22 @@ public abstract class AbstractComponentIT
                                 + "state:null, replace:false, callback:true}}))",
                                 path);
                         getCommandExecutor().waitForVaadin();
-                        // Wait for all custom elements to be defined so
-                        // that shadow DOM styles are fully applied before
-                        // the test reads computed CSS values.
+                        // Wait for all custom elements to be defined, then
+                        // two rAF ticks so shadow DOM styles are flushed to
+                        // computed style before any test assertion reads them.
                         try {
                             waitUntil(d -> (Boolean) executeScript(
                                     "return !document"
                                     + ".querySelector(':not(:defined)')"),
                                     5);
+                        } catch (Exception ignored) {
+                        }
+                        try {
+                            ((JavascriptExecutor) getDriver())
+                                    .executeAsyncScript(
+                                    "var c=arguments[0];"
+                                    + "requestAnimationFrame("
+                                    + "()=>requestAnimationFrame(c));");
                         } catch (Exception ignored) {
                         }
                         return;
