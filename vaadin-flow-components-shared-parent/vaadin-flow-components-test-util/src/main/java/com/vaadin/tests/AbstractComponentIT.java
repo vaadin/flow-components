@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.flow.testutil.net.PortProber;
+import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
@@ -80,7 +81,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final boolean USE_HUB = Boolean.getBoolean("test.use.hub");
 
     private static final String HUB_URL = System.getProperty("test.hub.url",
-            "http://localhost:4444/wd/hub");
+            "http://" + Parameters.getHubHostname() + ":4444/wd/hub");
 
     private static final ThreadLocal<WebDriver> sharedDriver = new ThreadLocal<>();
 
