@@ -200,12 +200,6 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
-
   wtr-tests:
     name: WTR tests
     needs: build
@@ -279,12 +273,6 @@ jobs:
           path: '**/wtr-results.xml'
           retention-days: 1
           if-no-files-found: ignore
-
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
 
   package-war:
     name: Package WAR
@@ -425,9 +413,9 @@ jobs:
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
-  its:
-    name: ITs (${{ matrix.shard }})
-    needs: package-war
+  integration-tests:
+    name: Integration Tests (${{ matrix.shard }})
+    needs: [unit-tests, wtr-tests, package-war]
     if: needs.package-war.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -515,8 +503,8 @@ jobs:
           if-no-files-found: ignore
 
   results:
-    name: Collect tests
-    needs: [build, unit-tests, wtr-tests, package-war, its]
+    name: Test Results
+    needs: [build, unit-tests, wtr-tests, package-war, integration-tests]
     if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -639,7 +627,7 @@ jobs:
           echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
-        if: needs.its.result != 'success'
+        if: needs.integration-tests.result != 'success'
         continue-on-error: true
         with:
           pattern: error-screenshots-*
@@ -647,7 +635,7 @@ jobs:
           path: error-screenshots
 
       - name: Upload merged error screenshots
-        if: needs.its.result != 'success'
+        if: needs.integration-tests.result != 'success'
         uses: actions/upload-artifact@v6
         with:
           name: error-screenshots
