@@ -16,12 +16,17 @@
 package com.vaadin.tests;
 
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -146,7 +151,48 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     protected String getRootURL() {
+        if (USE_HUB) {
+            return "http://" + getCurrentHostAddress() + ":8080";
+        }
+
         return "http://localhost:8080";
+    }
+
+    private String getCurrentHostAddress() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface
+                    .getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface nwInterface = interfaces.nextElement();
+                if (!nwInterface.isUp() || nwInterface.isLoopback()
+                        || nwInterface.isVirtual()) {
+                    continue;
+                }
+                String address = getHostAddress(nwInterface);
+                if (address != null) {
+                    return address;
+                }
+            }
+        } catch (SocketException e) {
+            throw new RuntimeException("Could not find the host name", e);
+        }
+        throw new RuntimeException(
+                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
+    }
+
+    private static String getHostAddress(
+            NetworkInterface nwInterface) {
+        Enumeration<InetAddress> addresses = nwInterface.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+            InetAddress address = addresses.nextElement();
+            if (address.isLoopbackAddress()) {
+                continue;
+            }
+            if (address.isSiteLocalAddress()) {
+                return address.getHostAddress();
+            }
+        }
+        return null;
     }
 
     protected String getTestURL(String... parameters) {
