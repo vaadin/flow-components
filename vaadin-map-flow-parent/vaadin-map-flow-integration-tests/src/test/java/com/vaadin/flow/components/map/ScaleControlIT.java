@@ -77,7 +77,6 @@ public class ScaleControlIT extends AbstractComponentIT {
                 .withoutClassName("ol-scale-bar-inner").first();
         Assert.assertTrue("Scale line inner should have no child elements",
                 inner.$(TestBenchElement.class).all().isEmpty());
-        waitUntil(driver -> !inner.getText().isEmpty());
         String text = inner.getText();
         Assert.assertTrue(
                 "Scale line text should contain unit '" + expectedUnit
@@ -93,7 +92,6 @@ public class ScaleControlIT extends AbstractComponentIT {
         TestBenchElement inner = scaleBar.$(TestBenchElement.class)
                 .withClassName("ol-scale-bar-inner")
                 .withoutClassName("ol-scale-line-inner").first();
-        waitUntil(driver -> !inner.getText().isEmpty());
         String text = inner.getText();
         Assert.assertTrue(
                 "Scale bar text should contain unit '" + expectedUnit

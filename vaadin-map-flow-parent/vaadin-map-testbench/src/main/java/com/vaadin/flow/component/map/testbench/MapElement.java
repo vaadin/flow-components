@@ -18,38 +18,12 @@ import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
-
-    private boolean mapReady = false;
-
-    private void ensureMapReady() {
-        if (!mapReady) {
-            // Flush Vaadin server state first so the connector synchronize()
-            // call has run and the OpenLayers view has center/zoom set.
-            getCommandExecutor().waitForVaadin();
-            // Then wait for OpenLayers to produce a render with a valid
-            // frameState. postrender fires even when frameState is null
-            // (no view resolution), so only count evt.frameState != null.
-            waitUntil(driver -> (Boolean) executeScript(
-                    "var el = arguments[0], c = el.configuration;"
-                    + "if (!c || !c.getSize()) return false;"
-                    + "if (el._mapReadyCount === undefined) {"
-                    + "  el._mapReadyCount = 0;"
-                    + "  c.on('postrender', function(evt) { if (evt.frameState) el._mapReadyCount++; });"
-                    + "  c.render();"
-                    + "}"
-                    + "return el._mapReadyCount > 0;",
-                    this));
-            mapReady = true;
-        }
-    }
-
     /**
      * Returns a {@link ConfigurationObjectReference} wrapper for the OpenLayers
      * map instance. Used to access nested configuration objects in the browser
      * and extract values from them to be used for assertions.
      */
     public MapReference getMapReference() {
-        ensureMapReady();
         ExpressionExecutor expressionExecutor = new ExpressionExecutor(this);
         return new MapReference(expressionExecutor, "map");
     }
@@ -108,7 +82,6 @@ public class MapElement extends TestBenchElement {
     @SuppressWarnings("unchecked")
     public PixelCoordinate getPixelCoordinates(double x, double y,
             boolean relativeToCenter) {
-        ensureMapReady();
         List<Number> coordinateList = (List<Number>) executeScript(
                 "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
                 this, x, y);
@@ -134,7 +107,6 @@ public class MapElement extends TestBenchElement {
      * @return attribution container div
      */
     public TestBenchElement getAttributionContainer() {
-        ensureMapReady();
         return $("div").withAttributeContainingWord("class", "ol-attribution")
                 .first();
     }
@@ -153,7 +125,6 @@ public class MapElement extends TestBenchElement {
      * double-click to zoom.
      */
     public void disableInteractions() {
-        ensureMapReady();
         String script = "const interactions = arguments[0].configuration.getInteractions();"
                 + "interactions.forEach(interaction => interaction.setActive && interaction.setActive(false));";
         executeScript(script, this);
