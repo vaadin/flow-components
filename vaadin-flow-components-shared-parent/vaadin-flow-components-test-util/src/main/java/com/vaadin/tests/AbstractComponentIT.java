@@ -23,10 +23,8 @@ import java.net.SocketException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -151,48 +149,34 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     protected String getRootURL() {
+        String host = "localhost";
         if (USE_HUB) {
-            return "http://" + getCurrentHostAddress() + ":8080";
+            host = findHostAddress();
         }
-
-        return "http://localhost:8080";
+        return "http://" + host + ":8080";
     }
 
-    private String getCurrentHostAddress() {
+    private String findHostAddress() {
         try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface
-                    .getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface nwInterface = interfaces.nextElement();
-                if (!nwInterface.isUp() || nwInterface.isLoopback()
-                        || nwInterface.isVirtual()) {
-                    continue;
-                }
-                String address = getHostAddress(nwInterface);
-                if (address != null) {
-                    return address;
-                }
-            }
+            return NetworkInterface.networkInterfaces()
+                    .filter((networkInterface) -> {
+                        try {
+                            return networkInterface.isUp()
+                                    && !networkInterface.isLoopback()
+                                    && !networkInterface.isVirtual();
+                        } catch (SocketException e) {
+                            return false;
+                        }
+                    }).flatMap(NetworkInterface::inetAddresses)
+                    .filter(InetAddress::isSiteLocalAddress)
+                    .map(InetAddress::getHostAddress).findFirst()
+                    .orElseThrow(() -> {
+                        return new RuntimeException(
+                                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
+                    });
         } catch (SocketException e) {
             throw new RuntimeException("Could not find the host name", e);
         }
-        throw new RuntimeException(
-                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
-    }
-
-    private static String getHostAddress(
-            NetworkInterface nwInterface) {
-        Enumeration<InetAddress> addresses = nwInterface.getInetAddresses();
-        while (addresses.hasMoreElements()) {
-            InetAddress address = addresses.nextElement();
-            if (address.isLoopbackAddress()) {
-                continue;
-            }
-            if (address.isSiteLocalAddress()) {
-                return address.getHostAddress();
-            }
-        }
-        return null;
     }
 
     protected String getTestURL(String... parameters) {
@@ -259,8 +243,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static WebDriver createWebDriver() {
         for (int i = 0; i < 3; i++) {
             try {
-                return USE_HUB ? tryCreateRemoteDriver()
-                        : tryCreateChromeDriver();
+                if (USE_HUB) {
+                    return tryCreateRemoteDriver();
+                }
+
+                return tryCreateChromeDriver();
             } catch (Exception e) {
                 logger.warn("Unable to create driver on attempt " + i, e);
             }
