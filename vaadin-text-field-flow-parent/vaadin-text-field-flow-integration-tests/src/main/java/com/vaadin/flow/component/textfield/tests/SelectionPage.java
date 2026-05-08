@@ -1,0 +1,80 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.textfield.tests;
+
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.shared.SelectionRange;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
+
+/**
+ * Test view for the {@code HasSelection} mixin on text fields.
+ */
+@Route("vaadin-text-field/selection-test")
+public class SelectionPage extends Div {
+
+    public SelectionPage() {
+        TextField textField = new TextField();
+        textField.setId("text-field");
+        textField.setValue("Hello world");
+
+        TextArea textArea = new TextArea();
+        textArea.setId("text-area");
+        textArea.setValue("Lorem ipsum dolor sit amet");
+
+        EmailField emailField = new EmailField();
+        emailField.setId("email-field");
+        emailField.setValue("user@example.com");
+
+        Div info = new Div();
+        info.setId("selection-info");
+        info.setText("(no selection)");
+        Signal.effect(this,
+                ctx -> info.setText(format(textField.selectionSignal().get())));
+
+        add(textField, textArea, emailField, info);
+
+        addButton("select-all", "Select all", () -> textField.selectAll());
+        addButton("set-range", "setSelectionRange(2, 7)",
+                () -> textField.setSelectionRange(2, 7));
+        addButton("set-cursor", "setCursorPosition(4)",
+                () -> textField.setCursorPosition(4));
+        addButton("deselect", "Deselect", () -> textField.deselect());
+        addButton("focus", "Focus", () -> textField.focus());
+
+        addButton("area-select-range", "Area setSelectionRange(0, 5)",
+                () -> textArea.setSelectionRange(0, 5));
+        addButton("area-focus", "Area focus", () -> textArea.focus());
+
+        addButton("email-select-all", "Email selectAll",
+                () -> emailField.selectAll());
+        addButton("email-focus", "Email focus", () -> emailField.focus());
+    }
+
+    private void addButton(String id, String label, Runnable action) {
+        NativeButton button = new NativeButton(label, e -> action.run());
+        button.setId(id);
+        add(button);
+    }
+
+    private static String format(SelectionRange r) {
+        return r.start() + "-" + r.end() + ":" + r.length() + ":" + r.content();
+    }
+}
