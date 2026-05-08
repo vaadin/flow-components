@@ -139,6 +139,8 @@ public class AttributionsIT extends AbstractComponentIT {
      * @param expectedNumber
      *            number of expected attribution items
      */
+    // getAttributionItems() calls ensureMapReady() via
+    // getAttributionContainer()
     public void waitUntilNumberOfAttributions(int expectedNumber) {
         waitUntil(driver -> {
             List<TestBenchElement> attributionItems = map.getAttributionItems();
