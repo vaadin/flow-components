@@ -517,14 +517,7 @@ jobs:
   results:
     name: Collect tests
     needs: [build, unit-tests, wtr-tests, package-war, its]
-    if: >-
-      always() &&
-      needs.build.outputs.skip != 'true' &&
-      needs.package-war.outputs.has-tests == 'true' &&
-      needs.unit-tests.result != 'cancelled' &&
-      needs.wtr-tests.result != 'cancelled' &&
-      needs.package-war.result != 'cancelled' &&
-      needs.its.result != 'cancelled'
+    if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -542,60 +535,12 @@ jobs:
           name: surefire-reports
           path: surefire-reports
 
-      - name: Check for unit test reports
-        id: unit-check
-        run: |
-          count=$(find surefire-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
-          echo "count=$count" >> $GITHUB_OUTPUT
-
-      - run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
-
-      - name: Publish unit test results
-        if: steps.unit-check.outputs.count != '0'
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
-        with:
-          name: Unit Tests
-          path: surefire-reports/**/TEST-*.xml
-          reporter: java-junit
-          collapsed: 'always'
-          list-tests: 'failed'
-          list-suites: 'none'
-          fail-on-error: 'false'
-
-      - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.unit-tests.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
-
       - uses: actions/download-artifact@v8
+        continue-on-error: true
         with:
           pattern: failsafe-reports-*
           merge-multiple: true
           path: failsafe-reports
-
-      - name: Check for IT reports
-        id: it-check
-        run: |
-          count=$(find failsafe-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
-          echo "count=$count" >> $GITHUB_OUTPUT
-
-      - run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
-
-      - name: Publish integration test results
-        if: steps.it-check.outputs.count != '0'
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
-        with:
-          name: Integration Tests
-          path: failsafe-reports/TEST-*.xml
-          reporter: java-junit
-          collapsed: 'always'
-          list-tests: 'failed'
-          list-suites: 'none'
-
-      - name: IT compilation error
-        if: steps.it-check.outputs.count == '0' && needs.package-war.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         continue-on-error: true
@@ -603,24 +548,89 @@ jobs:
           name: wtr-reports
           path: wtr-reports
 
+      - name: Remove passing test reports
+        run: |
+          for dir in surefire-reports failsafe-reports wtr-reports; do
+            [ -d "$dir" ] || continue
+            if grep -rqE '<failure|<error' "$dir" 2>/dev/null; then
+              find "$dir" -name '*.xml' | while read -r f; do
+                grep -qE '<failure|<error' "$f" || rm -f "$f"
+              done
+            fi
+          done
+
+      - run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for unit test reports
+        id: unit-check
+        run: |
+          count=$(find surefire-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - name: Publish unit test results
+        id: unit-dorny
+        if: steps.unit-check.outputs.count != '0'
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Unit Tests
+          path: surefire-reports/**/TEST-*.xml
+          reporter: java-junit
+          list-tests: 'failed'
+          list-suites: 'failed'
+          fail-on-error: 'false'
+
+      - name: Unit test compilation error
+        if: steps.unit-check.outputs.count == '0' && needs.unit-tests.result == 'failure'
+        run: |
+          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for IT reports
+        id: it-check
+        run: |
+          count=$(find failsafe-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
+      - name: Integration Tests header
+        if: steps.it-check.outputs.count != '0'
+        run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish integration test results
+        id: it-dorny
+        if: steps.it-check.outputs.count != '0'
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        with:
+          name: Integration Tests
+          path: failsafe-reports/TEST-*.xml
+          reporter: java-junit
+          list-tests: 'failed'
+          list-suites: 'failed'
+          fail-on-error: 'false'
+
+      - name: IT compilation error
+        if: steps.it-check.outputs.count == '0' && needs.package-war.result == 'failure'
+        run: |
+          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
+
       - name: Check for WTR reports
         id: wtr-check
         run: |
           count=$(find wtr-reports -name 'wtr-results.xml' 2>/dev/null | wc -l | tr -d ' ')
           echo "count=$count" >> $GITHUB_OUTPUT
 
-      - run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
+      - name: WTR Tests header
+        if: steps.wtr-check.outputs.count != '0'
+        run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish WTR results
+        id: wtr-dorny
         if: steps.wtr-check.outputs.count != '0'
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: WTR Tests
           path: wtr-reports/**/wtr-results.xml
           reporter: java-junit
-          collapsed: 'always'
           list-tests: 'failed'
-          list-suites: 'none'
+          list-suites: 'failed'
           fail-on-error: 'false'
 
       - name: WTR setup error
@@ -663,3 +673,12 @@ jobs:
               echo "Deleting artifact $name (id=$id)"
               gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
             done
+
+      - name: Fail if any test failed
+        if: always()
+        run: |
+          failed=false
+          [[ "${{ steps.unit-dorny.outputs.conclusion }}" == "failure" ]] && failed=true
+          [[ "${{ steps.wtr-dorny.outputs.conclusion }}"  == "failure" ]] && failed=true
+          [[ "${{ steps.it-dorny.outputs.conclusion }}"   == "failure" ]] && failed=true
+          [[ "$failed" == "true" ]] && exit 1 || exit 0
