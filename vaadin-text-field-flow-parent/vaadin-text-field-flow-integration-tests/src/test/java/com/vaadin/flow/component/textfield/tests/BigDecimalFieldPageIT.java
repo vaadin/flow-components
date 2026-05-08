@@ -152,7 +152,6 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
 
         WebElement input = field.$("input").first();
         input.sendKeys("300");
-        blur();
 
         field.clickClearButton();
 

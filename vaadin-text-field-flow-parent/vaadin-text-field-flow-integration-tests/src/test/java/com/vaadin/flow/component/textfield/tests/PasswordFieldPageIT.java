@@ -78,8 +78,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
         executeScript("arguments[0].removeAttribute(\"disabled\");",
                 passwordField);
-        passwordField.sendKeys("abc");
-        blur();
+        passwordField.sendKeys("abc", Keys.ENTER);
 
         message = findElement(By.id("disabled-password-field-message"));
         Assert.assertEquals("", message.getText());
@@ -106,25 +105,21 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         WebElement passwordField = findElement(
                 By.id("password-field-with-value-change-listener"));
 
-        updateValues(passwordFieldValueDiv, passwordField, true);
+        passwordField.sendKeys("a", Keys.TAB);
+        waitUntilTextsEqual("Password field value changed from '' to 'a'",
+                passwordFieldValueDiv);
+
+        passwordField.sendKeys(Keys.BACK_SPACE, Keys.TAB);
+        waitUntilTextsEqual("Password field value changed from 'a' to ''",
+                passwordFieldValueDiv);
 
         $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
-        updateValues(passwordFieldValueDiv, passwordField, false);
-    }
 
-    private void updateValues(WebElement passwordFieldValueDiv,
-            WebElement passwordField, boolean toggleBlur) {
         passwordField.sendKeys("a");
-        if (toggleBlur) {
-            blur();
-        }
         waitUntilTextsEqual("Password field value changed from '' to 'a'",
                 passwordFieldValueDiv);
 
         passwordField.sendKeys(Keys.BACK_SPACE);
-        if (toggleBlur) {
-            blur();
-        }
         waitUntilTextsEqual("Password field value changed from 'a' to ''",
                 passwordFieldValueDiv);
     }

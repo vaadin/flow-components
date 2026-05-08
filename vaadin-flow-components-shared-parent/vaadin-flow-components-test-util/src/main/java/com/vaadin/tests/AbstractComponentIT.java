@@ -437,15 +437,6 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     /**
-     * Calls the {@code blur()} function on the current active element of the
-     * page, if any.
-     */
-    public void blur() {
-        executeScript(
-                "!!document.activeElement ? document.activeElement.blur() : 0");
-    }
-
-    /**
      * Gets a property value from a web element using JavaScript.
      */
     public String getProperty(WebElement element, String propertyName) {

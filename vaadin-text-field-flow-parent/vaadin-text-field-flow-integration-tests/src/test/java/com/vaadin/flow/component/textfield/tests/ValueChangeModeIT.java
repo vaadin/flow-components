@@ -127,7 +127,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         field.sendKeys("1");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
-        blur();
+        field.sendKeys(Keys.TAB);
         waitUntilMessageUpdated();
 
         clickButton(componentName + "-on-blur");
@@ -140,7 +140,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         assertMessageNotUpdated(
                 "The value change events should not be sent with enter key when using ValueChangeMode.ON_BLUR");
 
-        blur();
+        field.sendKeys(Keys.TAB);
         waitUntilMessageUpdated();
 
         clickButton(componentName + "-eager");
@@ -148,14 +148,14 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
         waitUntilMessageUpdated();
 
-        blur();
+        field.sendKeys(Keys.TAB);
         assertMessageNotUpdated(
                 "The value change event should not be sent again on blur, because it was already sent eagerly when typing");
 
         WebElement changeTimeoutField = findElement(
                 By.id(componentName + "-set-change-timeout"));
         changeTimeoutField.sendKeys("1000");
-        blur();
+        field.sendKeys(Keys.TAB);
 
         testValueChangeTimeout(field, componentName);
     }
