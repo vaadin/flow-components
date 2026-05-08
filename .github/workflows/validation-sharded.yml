@@ -190,7 +190,7 @@ jobs:
           }
 
       - name: Run unit tests
-        run: mvn test -Drelease -T $FORK_COUNT $MAVEN_ARGS
+        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
 
       - name: Publish unit test results
         if: always()
@@ -484,9 +484,10 @@ jobs:
             -Dvaadin.productionMode \
             -DskipFrontend \
             -Dfailsafe.forkCount=$FORK_COUNT \
-            -Dcom.vaadin.testbench.Parameters.testsInParallel=1 \
+            -Dcom.vaadin.testbench.Parameters.testsInParallel=2 \
             -Dfailsafe.rerunFailingTestsCount=2 \
             -Dmaven.test.redirectTestOutputToFile=true \
+            -Dtest.reuseDriver=true \
             -Dit.test="$SHARD_TESTS" \
             $MAVEN_ARGS
 
