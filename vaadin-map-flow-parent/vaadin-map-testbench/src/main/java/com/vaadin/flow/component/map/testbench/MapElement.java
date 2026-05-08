@@ -31,7 +31,9 @@ public class MapElement extends TestBenchElement {
             // resolution yet), so only count evt.frameState != null.
             waitUntil(driver -> (Boolean) executeScript(
                     "var el = arguments[0], c = el.configuration;"
-                    + "if (!c || !c.getSize()) return false;"
+                    + "if (!c) return false;"
+                    + "var size = c.getSize();"
+                    + "if (!size || size[0] <= 0 || size[1] <= 0) return false;"
                     + "if (el._mapReadyCount === undefined) {"
                     + "  el._mapReadyCount = 0;"
                     + "  c.on('postrender', function(evt) { if (evt.frameState) el._mapReadyCount++; });"
