@@ -190,7 +190,7 @@ jobs:
           }
 
       - name: Run unit tests
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
+        run: mvn test -Drelease -T $FORK_COUNT $MAVEN_ARGS
 
       - name: Publish unit test results
         if: always()

@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import org.junit.Before;
-
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -17,8 +15,9 @@ import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractChartIT extends AbstractComponentIT {
 
-    @Before
-    public void setup() {
+    @Override
+    public void setup() throws Exception {
+        super.setup();
         open();
     }
 
