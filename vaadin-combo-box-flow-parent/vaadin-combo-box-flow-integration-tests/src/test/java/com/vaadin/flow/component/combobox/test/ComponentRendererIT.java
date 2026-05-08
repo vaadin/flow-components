@@ -68,7 +68,7 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void multiplePagesOfItems_scrollDown_close_itemsCachedOnReopen() {
+    public void multiplePagesOfItems_scrollDown_close_noItemsWhenReopened() {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("multiple-pages-of-items");
 
@@ -81,13 +81,10 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
 
         comboBox.closePopup();
 
-        // The connector keeps loaded pages cached for the lifetime of the
-        // session, so reopening renders an item immediately rather than
-        // briefly showing the empty (loading) state.
         String firstItemText = (String) executeScript("arguments[0].open();"
                 + "return document.querySelector('vaadin-combo-box-item')?.textContent;",
                 comboBox);
-        Assert.assertNotEquals("", firstItemText);
+        Assert.assertEquals("", firstItemText);
     }
 
     private void testItems(TestBenchElement comboBox) {

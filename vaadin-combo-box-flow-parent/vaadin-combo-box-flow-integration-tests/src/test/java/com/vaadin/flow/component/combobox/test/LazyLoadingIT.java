@@ -413,19 +413,19 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     // https://github.com/vaadin/vaadin-combo-box-flow/issues/227
     // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
-    public void setComponentRenderer_scrollDown_itemsRendered() {
+    public void setComponentRenderer_scrollDown_scrollUp_itemsRendered() {
         clickButton("component-renderer");
         beanBox.openPopup();
 
-        // Items rendered at the top with the new component renderer.
-        waitUntilTextInContent(beanBox, "<h4>Person 0</h4>");
-        assertComponentRendered(beanBox, "<h4>Person 0</h4>");
-
-        // Items rendered at a far-scrolled page with the new component
-        // renderer (regression guard for vaadin-combo-box-flow#227 / #232).
         scrollToItem(beanBox, 300);
         waitUntilTextInContent(beanBox, "<h4>Person 300</h4>");
-        assertComponentRendered(beanBox, "<h4>Person 300</h4>");
+
+        scrollToItem(beanBox, 0);
+        waitUntilTextInContent(beanBox, "<h4>Person 0</h4>");
+
+        assertComponentRendered(beanBox, "<h4>Person 0</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 4</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 7</h4>");
     }
 
     @Test
