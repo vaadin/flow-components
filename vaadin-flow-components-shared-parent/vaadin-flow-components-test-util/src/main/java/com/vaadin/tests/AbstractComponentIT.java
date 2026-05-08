@@ -16,6 +16,8 @@
 package com.vaadin.tests;
 
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.slf4j.Logger;
@@ -53,8 +56,11 @@ import com.vaadin.testbench.TestBenchTestCase;
 /**
  * Base class for Flow component integration tests.
  * <p>
- * Extends {@link TestBenchTestCase} directly and manages a local headless
- * Chrome driver that is reused across all test methods in the same test class.
+ * Extends {@link TestBenchTestCase} directly and manages a headless Chrome
+ * driver that is reused across all test methods in the same test class. By
+ * default the driver is started locally; setting {@code -Dtest.use.hub=true}
+ * routes driver creation to a Selenium Grid endpoint configured via
+ * {@code -Dtest.hub.url} (default {@code http://localhost:4444/wd/hub}).
  * <p>
  * This test setup does not support running tests in parallel. The only way to
  * parallelize tests is forking separate JVMs that run one suite at a time, for
@@ -71,6 +77,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final boolean REUSE_DRIVER = Boolean
             .getBoolean("test.reuseDriver");
 
+    private static final boolean USE_HUB = Boolean.getBoolean("test.use.hub");
+
+    private static final String HUB_URL = System.getProperty("test.hub.url",
+            "http://localhost:4444/wd/hub");
+
     private static final ThreadLocal<WebDriver> sharedDriver = new ThreadLocal<>();
 
     @Rule
@@ -82,7 +93,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (!REUSE_DRIVER) {
             return;
         }
-        WebDriver driver = createChromeDriver();
+        WebDriver driver = createWebDriver();
         driver.manage().window().setSize(new Dimension(1024, 800));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
         sharedDriver.set(driver);
@@ -91,7 +102,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     @Before
     public void resetDriver() throws Exception {
         if (!REUSE_DRIVER) {
-            WebDriver driver = createChromeDriver();
+            WebDriver driver = createWebDriver();
             driver.manage().window().setSize(new Dimension(1024, 800));
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
             sharedDriver.set(driver);
@@ -198,19 +209,20 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                 .toString().contains("jdwp");
     }
 
-    private static WebDriver createChromeDriver() {
+    private static WebDriver createWebDriver() {
         for (int i = 0; i < 3; i++) {
             try {
-                return tryCreateChromeDriver();
+                return USE_HUB ? tryCreateRemoteDriver()
+                        : tryCreateChromeDriver();
             } catch (Exception e) {
-                logger.warn("Unable to create chromedriver on attempt " + i, e);
+                logger.warn("Unable to create driver on attempt " + i, e);
             }
         }
         throw new RuntimeException(
-                "Gave up trying to create a chromedriver instance");
+                "Gave up trying to create a driver instance");
     }
 
-    private static WebDriver tryCreateChromeDriver() {
+    private static ChromeOptions buildChromeOptions() {
         ChromeOptions options = new ChromeOptions();
         if (!isJavaInDebugMode()) {
             options.addArguments("--headless=new", "--disable-gpu",
@@ -226,12 +238,24 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (chromeBinary != null && !chromeBinary.isBlank()) {
             options.setBinary(chromeBinary);
         }
+        return options;
+    }
 
+    private static WebDriver tryCreateChromeDriver() {
+        ChromeOptions options = buildChromeOptions();
         int port = PortProber.findFreePort();
         ChromeDriverService service = new ChromeDriverService.Builder()
                 .usingPort(port).withSilent(true).build();
         ChromeDriver chromeDriver = new ChromeDriver(service, options);
         return TestBench.createDriver(chromeDriver);
+    }
+
+    private static WebDriver tryCreateRemoteDriver()
+            throws MalformedURLException {
+        ChromeOptions options = buildChromeOptions();
+        RemoteWebDriver remoteDriver = new RemoteWebDriver(
+                URI.create(HUB_URL).toURL(), options);
+        return TestBench.createDriver(remoteDriver);
     }
 
     // ----- Test helper methods -----
