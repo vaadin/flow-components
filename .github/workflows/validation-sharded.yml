@@ -1,4 +1,4 @@
-name: Validation (Sharded)
+name: Validation
 
 on:
   pull_request:
@@ -552,20 +552,20 @@ jobs:
         run: |
           for dir in surefire-reports failsafe-reports wtr-reports; do
             [ -d "$dir" ] || continue
-            if grep -rqE '<failure|<error' "$dir" 2>/dev/null; then
-              find "$dir" -name '*.xml' | while read -r f; do
-                grep -qE '<failure|<error' "$f" || rm -f "$f"
-              done
-            fi
+            find "$dir" -name '*.xml' | while read -r f; do
+              grep -qE '<failure|<error' "$f" || rm -f "$f"
+            done
           done
-
-      - run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Check for unit test reports
         id: unit-check
         run: |
           count=$(find surefire-reports -name 'TEST-*.xml' 2>/dev/null | wc -l | tr -d ' ')
           echo "count=$count" >> $GITHUB_OUTPUT
+
+      - name: Unit Tests header
+        if: steps.unit-check.outputs.count != '0'
+        run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish unit test results
         id: unit-dorny
