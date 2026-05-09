@@ -16,7 +16,10 @@
 package com.vaadin.tests;
 
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
@@ -49,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.flow.testutil.net.PortProber;
+import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.ScreenshotOnFailureRule;
 import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchTestCase;
@@ -80,7 +84,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static final boolean USE_HUB = Boolean.getBoolean("test.use.hub");
 
     private static final String HUB_URL = System.getProperty("test.hub.url",
-            "http://localhost:4444/wd/hub");
+            "http://" + Parameters.getHubHostname() + ":4444/wd/hub");
 
     private static final ThreadLocal<WebDriver> sharedDriver = new ThreadLocal<>();
 
@@ -145,7 +149,34 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     protected String getRootURL() {
-        return "http://localhost:8080";
+        String host = "localhost";
+        if (USE_HUB) {
+            host = findHostAddress();
+        }
+        return "http://" + host + ":8080";
+    }
+
+    private String findHostAddress() {
+        try {
+            return NetworkInterface.networkInterfaces()
+                    .filter((networkInterface) -> {
+                        try {
+                            return networkInterface.isUp()
+                                    && !networkInterface.isLoopback()
+                                    && !networkInterface.isVirtual();
+                        } catch (SocketException e) {
+                            return false;
+                        }
+                    }).flatMap(NetworkInterface::inetAddresses)
+                    .filter(InetAddress::isSiteLocalAddress)
+                    .map(InetAddress::getHostAddress).findFirst()
+                    .orElseThrow(() -> {
+                        return new RuntimeException(
+                                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
+                    });
+        } catch (SocketException e) {
+            throw new RuntimeException("Could not find the host name", e);
+        }
     }
 
     protected String getTestURL(String... parameters) {
@@ -212,8 +243,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     private static WebDriver createWebDriver() {
         for (int i = 0; i < 3; i++) {
             try {
-                return USE_HUB ? tryCreateRemoteDriver()
-                        : tryCreateChromeDriver();
+                if (USE_HUB) {
+                    return tryCreateRemoteDriver();
+                }
+
+                return tryCreateChromeDriver();
             } catch (Exception e) {
                 logger.warn("Unable to create driver on attempt " + i, e);
             }
