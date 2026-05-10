@@ -16,20 +16,17 @@
 package com.vaadin.tests;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -41,10 +38,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -55,11 +49,7 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.SessionId;
-import org.openqa.selenium.remote.codec.w3c.W3CHttpCommandCodec;
-import org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.slf4j.Logger;
@@ -86,9 +76,8 @@ import com.vaadin.testbench.TestBenchTestCase;
  * <em>method</em>.</li>
  * <li>{@code -Dtest.shareDriver=true} — one Chrome window for the entire JVM
  * fork (all test classes). Implies {@code test.reuseDriver}. A health-check
- * guards against stale sessions. In debug (JDWP) mode the session is also
- * persisted to a temp file so the same browser can be reconnected on subsequent
- * runs.</li>
+ * guards against stale sessions. A JVM shutdown hook ensures the browser is
+ * always quit cleanly.</li>
  * <li>{@code -Dtest.useSpa=true} — when combined with {@code test.reuseDriver}
  * or {@code test.shareDriver}, navigate between routes via the Vaadin
  * {@code vaadin-navigate} client event instead of a full page load. Falls back
@@ -145,46 +134,46 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     private static volatile boolean shutdownHookRegistered = false;
 
-    /**
-     * File used to persist the ChromeDriver session across JVM restarts in
-     * local debug mode (JDWP present). One file per surefire fork.
-     */
-    private static final Path DRIVER_FILE = Path
-            .of(System.getProperty("java.io.tmpdir"), "vaadin-test-driver-"
-                    + System.getProperty("surefire.forkNumber", "0") + ".txt");
-
     // ----- Consecutive-failure abort (only meaningful with driver sharing)
     // -----
 
-    private static int consecutiveFailures = 0;
+    private static final AtomicInteger consecutiveFailures = new AtomicInteger(
+            0);
     private static final int MAX_CONSECUTIVE_FAILURES = 5;
 
+    /**
+     * JUnit rule that aborts the fork after too many consecutive failures when
+     * {@code test.shareDriver} is active, to avoid burning CI time on a dead
+     * driver.
+     */
     @Rule
-    public TestRule consecutiveFailureAbort = new TestRule() {
-        @Override
-        public Statement apply(Statement base, Description description) {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    if (SHARE_DRIVER
-                            && consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                        throw new AssumptionViolatedException("Aborting: "
-                                + consecutiveFailures
-                                + " consecutive failures, driver may be unstable");
-                    }
-                    try {
-                        base.evaluate();
-                        consecutiveFailures = 0;
-                    } catch (AssumptionViolatedException e) {
-                        throw e;
-                    } catch (Throwable t) {
-                        consecutiveFailures++;
-                        throw t;
-                    }
+    public TestRule consecutiveFailureAbort = (base,
+            description) -> base == null ? null
+                    : consecutiveFailureAbortStatement(base);
+
+    private static org.junit.runners.model.Statement consecutiveFailureAbortStatement(
+            org.junit.runners.model.Statement base) {
+        return new org.junit.runners.model.Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                if (SHARE_DRIVER && consecutiveFailures
+                        .get() >= MAX_CONSECUTIVE_FAILURES) {
+                    throw new AssumptionViolatedException("Aborting: "
+                            + consecutiveFailures.get()
+                            + " consecutive failures, driver may be unstable");
                 }
-            };
-        }
-    };
+                try {
+                    base.evaluate();
+                    consecutiveFailures.set(0);
+                } catch (AssumptionViolatedException e) {
+                    throw e;
+                } catch (Throwable t) {
+                    consecutiveFailures.incrementAndGet();
+                    throw t;
+                }
+            }
+        };
+    }
 
     @Rule
     public ScreenshotOnFailureRule screenshotOnFailure = new ScreenshotOnFailureRule(
@@ -197,42 +186,29 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (!REUSE_DRIVER && !SHARE_DRIVER) {
             return;
         }
-        if (SHARE_DRIVER) {
-            ensureShutdownHook();
-            // Reuse the existing driver if it is still alive.
-            WebDriver existing = sharedDriver.get();
-            if (existing != null && isDriverAlive(existing)) {
-                return;
-            }
-            if (existing != null) {
-                tryQuitDriver(existing);
-                sharedDriver.remove();
-            }
-            // Try to reconnect to a persisted session in local debug mode.
-            if (isDebugMode() && Files.exists(DRIVER_FILE)) {
-                try {
-                    WebDriver reconnected = reconnectDriver();
-                    if (reconnected != null && isDriverAlive(reconnected)) {
-                        sharedDriver.set(reconnected);
-                        allDrivers.put(Thread.currentThread().getId(),
-                                reconnected);
-                        return;
-                    }
-                } catch (Exception e) {
-                    // Reconnect failed; fall through to create a fresh driver.
-                }
-            }
+        if (SHARE_DRIVER && tryReuseExistingDriver()) {
+            return;
         }
         WebDriver driver = createWebDriver();
         driver.manage().window().setSize(new Dimension(1024, 800));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
         sharedDriver.set(driver);
         if (SHARE_DRIVER) {
-            allDrivers.put(Thread.currentThread().getId(), driver);
-            if (isDebugMode()) {
-                saveDriverInfo(driver);
-            }
+            allDrivers.put(Thread.currentThread().threadId(), driver);
         }
+    }
+
+    private static boolean tryReuseExistingDriver() {
+        ensureShutdownHook();
+        WebDriver existing = sharedDriver.get();
+        if (existing != null && isDriverAlive(existing)) {
+            return true;
+        }
+        if (existing != null) {
+            tryQuitDriver(existing);
+            sharedDriver.remove();
+        }
+        return false;
     }
 
     /**
@@ -295,10 +271,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     }
 
     protected String getRootURL() {
-        String host = "localhost";
-        if (USE_HUB) {
-            host = findHostAddress();
-        }
+        String host = USE_HUB ? findHostAddress() : "localhost";
         return "http://" + host + ":8080";
     }
 
@@ -316,10 +289,10 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                     }).flatMap(NetworkInterface::inetAddresses)
                     .filter(InetAddress::isSiteLocalAddress)
                     .map(InetAddress::getHostAddress).findFirst()
-                    .orElseThrow(() -> new RuntimeException(
+                    .orElseThrow(() -> new IllegalStateException(
                             "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found."));
         } catch (SocketException e) {
-            throw new RuntimeException("Could not find the host name", e);
+            throw new IllegalStateException("Could not find the host name", e);
         }
     }
 
@@ -354,10 +327,8 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     protected void open(String... parameters) {
         String url = getTestURL(parameters);
 
-        if (isReuseDriver() && USE_SPA) {
-            if (trySpaNavigation(getTestPath())) {
-                return;
-            }
+        if (isReuseDriver() && USE_SPA && trySpaNavigation(getTestPath())) {
+            return;
         }
 
         TimeoutException lastTimeout = null;
@@ -405,6 +376,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
             getCommandExecutor().waitForVaadin();
             return true;
         } catch (Exception e) {
+            logger.debug("SPA navigation failed, falling back to full load", e);
             return false;
         }
     }
@@ -416,6 +388,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
             driver.getTitle();
             return true;
         } catch (Exception e) {
+            logger.debug("Driver health check failed", e);
             return false;
         }
     }
@@ -424,7 +397,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         try {
             driver.quit();
         } catch (Exception e) {
-            // Ignore - driver may already be dead
+            logger.debug("Failed to quit driver", e);
         }
     }
 
@@ -449,84 +422,16 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         }
     }
 
-    private static WebDriver reconnectDriver() throws Exception {
-        String content = Files.readString(DRIVER_FILE);
-        String[] parts = content.strip().split("\n");
-        if (parts.length < 2) {
-            return null;
-        }
-        String driverUrl = parts[0];
-        String sessionId = parts[1];
-
-        HttpCommandExecutor executor = new HttpCommandExecutor(
-                new URL(driverUrl));
-        Field commandCodecField = HttpCommandExecutor.class
-                .getDeclaredField("commandCodec");
-        commandCodecField.setAccessible(true);
-        commandCodecField.set(executor, new W3CHttpCommandCodec());
-        Field responseCodecField = HttpCommandExecutor.class
-                .getDeclaredField("responseCodec");
-        responseCodecField.setAccessible(true);
-        responseCodecField.set(executor, new W3CHttpResponseCodec());
-
-        RemoteWebDriver driver = new RemoteWebDriver(executor,
-                (Capabilities) null) {
-            @Override
-            protected void startSession(Capabilities capabilities) {
-                // Do not start a new session; we are reconnecting.
-            }
-        };
-        Field sessionIdField = RemoteWebDriver.class
-                .getDeclaredField("sessionId");
-        sessionIdField.setAccessible(true);
-        sessionIdField.set(driver, new SessionId(sessionId));
-        Field capsField = RemoteWebDriver.class
-                .getDeclaredField("capabilities");
-        capsField.setAccessible(true);
-        capsField.set(driver, new ChromeOptions());
-
-        return TestBench.createDriver(driver);
-    }
-
-    private static void saveDriverInfo(WebDriver driver) {
-        try {
-            WebDriver actual = unwrap(driver);
-            if (actual instanceof RemoteWebDriver) {
-                RemoteWebDriver rwd = (RemoteWebDriver) actual;
-                SessionId sid = rwd.getSessionId();
-                if (sid != null) {
-                    HttpCommandExecutor exec = (HttpCommandExecutor) rwd
-                            .getCommandExecutor();
-                    String info = exec.getAddressOfRemoteServer().toString()
-                            + "\n" + sid.toString();
-                    Files.writeString(DRIVER_FILE, info);
-                }
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-    }
-
-    private static WebDriver unwrap(WebDriver driver) {
-        WebDriver actual = driver;
-        while (actual instanceof WrapsDriver) {
-            actual = ((WrapsDriver) actual).getWrappedDriver();
-        }
-        return actual;
-    }
-
     private static WebDriver createWebDriver() {
         for (int i = 0; i < 3; i++) {
             try {
-                if (USE_HUB) {
-                    return tryCreateRemoteDriver();
-                }
-                return tryCreateChromeDriver();
+                return USE_HUB ? tryCreateRemoteDriver()
+                        : tryCreateChromeDriver();
             } catch (Exception e) {
-                logger.warn("Unable to create driver on attempt " + i, e);
+                logger.warn("Unable to create driver on attempt {}", i, e);
             }
         }
-        throw new RuntimeException(
+        throw new IllegalStateException(
                 "Gave up trying to create a driver instance");
     }
 
@@ -564,6 +469,14 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         RemoteWebDriver remoteDriver = new RemoteWebDriver(
                 URI.create(HUB_URL).toURL(), options);
         return TestBench.createDriver(remoteDriver);
+    }
+
+    private static WebDriver unwrap(WebDriver driver) {
+        WebDriver actual = driver;
+        while (actual instanceof WrapsDriver wrapsDriver) {
+            actual = wrapsDriver.getWrappedDriver();
+        }
+        return actual;
     }
 
     // ----- Test helper methods -----
