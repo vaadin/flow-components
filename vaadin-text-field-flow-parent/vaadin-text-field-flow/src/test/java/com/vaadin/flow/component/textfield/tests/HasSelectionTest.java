@@ -47,12 +47,16 @@ class HasSelectionTest {
     }
 
     @Test
-    void selectAll_executesSelectAndFocusesByDefault() {
+    void selectAll_setsRangeAndFocusesByDefault() {
         textField.selectAll();
 
         PendingJavaScriptInvocation call = lastInvocation();
         String js = call.getInvocation().getExpression();
-        Assertions.assertTrue(js.contains("i.select()"), js);
+        // Uses setSelectionRange rather than HTMLInputElement.select() —
+        // select() implicitly focuses per the WHATWG spec, which would make
+        // the focus=false opt-out a lie.
+        Assertions.assertTrue(js.contains("i.setSelectionRange(0,"), js);
+        Assertions.assertFalse(js.contains("i.select()"), js);
         // Wrapped in setTimeout to defer past any pending value/focus
         // reflection that would otherwise wipe the selection.
         Assertions.assertTrue(js.contains("setTimeout"), js);

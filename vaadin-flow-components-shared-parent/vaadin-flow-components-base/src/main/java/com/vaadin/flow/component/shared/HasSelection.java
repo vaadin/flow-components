@@ -55,8 +55,12 @@ public interface HasSelection extends HasElement {
         // Defer with setTimeout so the call runs after any pending value or
         // focus reflection on the web component finishes — otherwise a
         // re-render of the input can wipe the selection we just set.
+        // Use setSelectionRange instead of HTMLInputElement.select(), which
+        // per the WHATWG spec always implicitly focuses the input and would
+        // therefore make the focus=false opt-out a lie. Apply the selection
+        // first, focus second, so the focus side-effects can't disturb it.
         getElement().executeJs(
-                "setTimeout(() => { const i = this.inputElement; if (i) { if ($0) i.focus(); i.select(); } }, 0)",
+                "setTimeout(() => { const i = this.inputElement; if (i) { i.setSelectionRange(0, (i.value || '').length); if ($0) i.focus(); } }, 0)",
                 focus);
     }
 
@@ -104,8 +108,10 @@ public interface HasSelection extends HasElement {
      */
     default void setSelectionRange(int selectionStart, int selectionEnd,
             boolean focus) {
+        // Apply selection first, focus second, so focus side-effects can't
+        // disturb the selection.
         getElement().executeJs(
-                "setTimeout(() => { const i = this.inputElement; if (i) { if ($2) i.focus(); i.setSelectionRange($0, $1); } }, 0)",
+                "setTimeout(() => { const i = this.inputElement; if (i) { i.setSelectionRange($0, $1); if ($2) i.focus(); } }, 0)",
                 selectionStart, selectionEnd, focus);
     }
 
