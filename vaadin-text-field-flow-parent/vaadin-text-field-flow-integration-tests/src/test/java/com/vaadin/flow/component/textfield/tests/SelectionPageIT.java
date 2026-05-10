@@ -22,7 +22,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -153,13 +153,14 @@ public class SelectionPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void emailField_inheritsHasSelection() {
-        EmailFieldElement email = $(EmailFieldElement.class).id("email-field");
-        clickButton("email-focus");
-        clickButton("email-select-all");
+    public void passwordField_implementsHasSelection() {
+        PasswordFieldElement password = $(PasswordFieldElement.class)
+                .id("password-field");
+        clickButton("password-focus");
+        clickButton("password-select-all");
 
-        Assert.assertEquals(0, selectionStart(email));
-        Assert.assertEquals("user@example.com".length(), selectionEnd(email));
+        Assert.assertEquals(0, selectionStart(password));
+        Assert.assertEquals("secret123".length(), selectionEnd(password));
     }
 
     private void clickButton(String id) {
