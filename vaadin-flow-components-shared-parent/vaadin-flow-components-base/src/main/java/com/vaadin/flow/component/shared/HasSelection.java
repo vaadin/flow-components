@@ -27,9 +27,6 @@ import com.vaadin.flow.signals.Signal;
  * {@code selectionStart} / {@code selectionEnd}: indices are zero-based, with
  * {@code selectionStart} the index of the first selected character and
  * {@code selectionEnd} the index after the last selected character.
- *
- * @author Vaadin Ltd
- * @since 25.1
  */
 public interface HasSelection extends HasElement {
 
