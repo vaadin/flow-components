@@ -34,25 +34,38 @@ import com.vaadin.flow.signals.Signal;
 public interface HasSelection extends HasElement {
 
     /**
-     * Selects the entire current value.
+     * Selects the entire current value and focuses the field.
      * <p>
      * The browser paints the selection in a faded color when the field does not
-     * have focus, so calling this method without first focusing the field may
-     * not produce a visible highlight. Focus the component before calling this
-     * method when invoking from a context where focus is not already on the
-     * field.
+     * have focus, so this method focuses the field by default to make the
+     * highlight visible. Use {@link #selectAll(boolean)} with {@code false} to
+     * apply the selection without moving focus.
      */
     default void selectAll() {
+        selectAll(true);
+    }
+
+    /**
+     * Selects the entire current value, optionally focusing the field.
+     *
+     * @param focus
+     *            {@code true} to focus the field so the selection is rendered
+     *            in the active color; {@code false} to leave focus untouched
+     *            (the selection will be painted in the browser's faded inactive
+     *            color)
+     */
+    default void selectAll(boolean focus) {
         // Defer with setTimeout so the call runs after any pending value or
         // focus reflection on the web component finishes — otherwise a
         // re-render of the input can wipe the selection we just set.
         getElement().executeJs(
-                "setTimeout(() => { this.inputElement && this.inputElement.select(); }, 0)");
+                "setTimeout(() => { const i = this.inputElement; if (i) { if ($0) i.focus(); i.select(); } }, 0)",
+                focus);
     }
 
     /**
      * Collapses the current selection at its end position, leaving the cursor
-     * there. Has no visible effect on the value.
+     * there. Has no visible effect on the value and does not change focus.
      */
     default void deselect() {
         getElement().executeJs(
@@ -60,12 +73,16 @@ public interface HasSelection extends HasElement {
     }
 
     /**
-     * Sets the text selection to the range {@code [selectionStart,
-     * selectionEnd)}. {@code selectionStart == selectionEnd} collapses the
-     * selection and moves the cursor to that position.
+     * Sets the text selection to the range
+     * {@code [selectionStart, selectionEnd)} and focuses the field.
+     * {@code selectionStart == selectionEnd} collapses the selection and moves
+     * the cursor to that position.
      * <p>
      * Indices outside the current value are clamped by the browser; passing
      * {@code 0, Integer.MAX_VALUE} therefore selects the whole value.
+     * <p>
+     * Use {@link #setSelectionRange(int, int, boolean)} with {@code false} to
+     * apply the selection without moving focus.
      *
      * @param selectionStart
      *            the index of the first selected character, inclusive
@@ -73,20 +90,54 @@ public interface HasSelection extends HasElement {
      *            the index after the last selected character, exclusive
      */
     default void setSelectionRange(int selectionStart, int selectionEnd) {
-        getElement().executeJs(
-                "setTimeout(() => { this.inputElement && this.inputElement.setSelectionRange($0, $1); }, 0)",
-                selectionStart, selectionEnd);
+        setSelectionRange(selectionStart, selectionEnd, true);
     }
 
     /**
-     * Moves the cursor to the given position, collapsing any current selection.
-     * Equivalent to {@code setSelectionRange(position, position)}.
+     * Sets the text selection to the range
+     * {@code [selectionStart, selectionEnd)}, optionally focusing the field.
+     *
+     * @param selectionStart
+     *            the index of the first selected character, inclusive
+     * @param selectionEnd
+     *            the index after the last selected character, exclusive
+     * @param focus
+     *            {@code true} to focus the field so the selection is rendered
+     *            in the active color; {@code false} to leave focus untouched
+     */
+    default void setSelectionRange(int selectionStart, int selectionEnd,
+            boolean focus) {
+        getElement().executeJs(
+                "setTimeout(() => { const i = this.inputElement; if (i) { if ($2) i.focus(); i.setSelectionRange($0, $1); } }, 0)",
+                selectionStart, selectionEnd, focus);
+    }
+
+    /**
+     * Moves the cursor to the given position, collapsing any current selection,
+     * and focuses the field. Equivalent to {@link #setSelectionRange(int, int)
+     * setSelectionRange(position, position)}.
      *
      * @param position
      *            the cursor position, zero-based
      */
     default void setCursorPosition(int position) {
-        setSelectionRange(position, position);
+        setCursorPosition(position, true);
+    }
+
+    /**
+     * Moves the cursor to the given position, collapsing any current selection,
+     * optionally focusing the field. Equivalent to
+     * {@link #setSelectionRange(int, int, boolean) setSelectionRange(position,
+     * position, focus)}.
+     *
+     * @param position
+     *            the cursor position, zero-based
+     * @param focus
+     *            {@code true} to focus the field; {@code false} to leave focus
+     *            untouched
+     */
+    default void setCursorPosition(int position, boolean focus) {
+        setSelectionRange(position, position, focus);
     }
 
     /**

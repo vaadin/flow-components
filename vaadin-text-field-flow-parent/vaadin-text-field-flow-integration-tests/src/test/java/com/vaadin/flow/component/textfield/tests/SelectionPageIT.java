@@ -44,30 +44,47 @@ public class SelectionPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectAll_selectsEntireValue() {
-        clickButton("focus");
+    public void selectAll_focusesAndSelectsEntireValue() {
         clickButton("select-all");
 
         Assert.assertEquals(0, selectionStart(textField));
         Assert.assertEquals("Hello world".length(), selectionEnd(textField));
+        Assert.assertTrue("selectAll should focus the field by default",
+                isFocused(textField));
     }
 
     @Test
-    public void setSelectionRange_appliesGivenRange() {
-        clickButton("focus");
+    public void setSelectionRange_focusesAndAppliesGivenRange() {
         clickButton("set-range");
 
         Assert.assertEquals(2, selectionStart(textField));
         Assert.assertEquals(7, selectionEnd(textField));
+        Assert.assertTrue("setSelectionRange should focus the field by default",
+                isFocused(textField));
     }
 
     @Test
-    public void setCursorPosition_collapsesAtPosition() {
-        clickButton("focus");
+    public void setSelectionRangeWithoutFocus_appliesRangeAndKeepsFocusElsewhere() {
+        // Move focus somewhere unrelated (the deselect button) to prove the
+        // server call doesn't yank focus back to the field when focus=false.
+        findElement(By.id("deselect")).click();
+
+        clickButton("set-range-no-focus");
+
+        Assert.assertEquals(2, selectionStart(textField));
+        Assert.assertEquals(7, selectionEnd(textField));
+        Assert.assertFalse(
+                "setSelectionRange(_, _, false) should not move focus",
+                isFocused(textField));
+    }
+
+    @Test
+    public void setCursorPosition_focusesAndCollapsesAtPosition() {
         clickButton("set-cursor");
 
         Assert.assertEquals(4, selectionStart(textField));
         Assert.assertEquals(4, selectionEnd(textField));
+        Assert.assertTrue(isFocused(textField));
     }
 
     @Test
@@ -182,5 +199,12 @@ public class SelectionPageIT extends AbstractComponentIT {
         return ((Long) executeScript(
                 "return arguments[0].inputElement.selectionEnd", element))
                 .intValue();
+    }
+
+    private boolean isFocused(TestBenchElement element) {
+        return Boolean.TRUE.equals(executeScript(
+                "return document.activeElement === arguments[0].inputElement"
+                        + " || arguments[0].contains(document.activeElement)",
+                element));
     }
 }

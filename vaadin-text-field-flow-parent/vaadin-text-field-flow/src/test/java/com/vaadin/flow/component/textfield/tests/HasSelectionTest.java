@@ -47,21 +47,32 @@ class HasSelectionTest {
     }
 
     @Test
-    void selectAll_executesInputElementSelect() {
+    void selectAll_executesSelectAndFocusesByDefault() {
         textField.selectAll();
 
         PendingJavaScriptInvocation call = lastInvocation();
         String js = call.getInvocation().getExpression();
-        Assertions.assertTrue(js.contains("this.inputElement.select()"), js);
+        Assertions.assertTrue(js.contains("i.select()"), js);
         // Wrapped in setTimeout to defer past any pending value/focus
         // reflection that would otherwise wipe the selection.
         Assertions.assertTrue(js.contains("setTimeout"), js);
-        Assertions.assertEquals(textField.getElement(),
+        Assertions.assertTrue(js.contains("i.focus()"), js);
+        // Default overload passes focus=true as the only parameter.
+        Assertions.assertEquals(true,
                 call.getInvocation().getParameters().get(0));
     }
 
     @Test
-    void deselect_executesCollapseAtSelectionEnd() {
+    void selectAllWithoutFocus_skipsFocus() {
+        textField.selectAll(false);
+
+        PendingJavaScriptInvocation call = lastInvocation();
+        Assertions.assertEquals(false,
+                call.getInvocation().getParameters().get(0));
+    }
+
+    @Test
+    void deselect_collapsesAtSelectionEndWithoutFocus() {
         textField.deselect();
 
         PendingJavaScriptInvocation call = lastInvocation();
@@ -69,28 +80,53 @@ class HasSelectionTest {
         Assertions.assertTrue(js.contains("selectionEnd"), js);
         Assertions.assertTrue(js.contains("setSelectionRange"), js);
         Assertions.assertTrue(js.contains("setTimeout"), js);
+        // deselect never moves focus.
+        Assertions.assertFalse(js.contains("focus()"), js);
     }
 
     @Test
-    void setSelectionRange_executesWithStartAndEndArguments() {
+    void setSelectionRange_appliesRangeAndFocusesByDefault() {
         textField.setSelectionRange(3, 8);
 
         PendingJavaScriptInvocation call = lastInvocation();
         String js = call.getInvocation().getExpression();
-        Assertions.assertTrue(
-                js.contains("this.inputElement.setSelectionRange($0, $1)"), js);
+        Assertions.assertTrue(js.contains("i.setSelectionRange($0, $1)"), js);
         Assertions.assertTrue(js.contains("setTimeout"), js);
+        Assertions.assertTrue(js.contains("i.focus()"), js);
         Assertions.assertEquals(3, call.getInvocation().getParameters().get(0));
         Assertions.assertEquals(8, call.getInvocation().getParameters().get(1));
+        // focus flag is the third parameter.
+        Assertions.assertEquals(true,
+                call.getInvocation().getParameters().get(2));
     }
 
     @Test
-    void setCursorPosition_collapsesAtPosition() {
+    void setSelectionRangeWithoutFocus_skipsFocus() {
+        textField.setSelectionRange(3, 8, false);
+
+        PendingJavaScriptInvocation call = lastInvocation();
+        Assertions.assertEquals(false,
+                call.getInvocation().getParameters().get(2));
+    }
+
+    @Test
+    void setCursorPosition_collapsesAtPositionAndFocusesByDefault() {
         textField.setCursorPosition(5);
 
         PendingJavaScriptInvocation call = lastInvocation();
         Assertions.assertEquals(5, call.getInvocation().getParameters().get(0));
         Assertions.assertEquals(5, call.getInvocation().getParameters().get(1));
+        Assertions.assertEquals(true,
+                call.getInvocation().getParameters().get(2));
+    }
+
+    @Test
+    void setCursorPositionWithoutFocus_skipsFocus() {
+        textField.setCursorPosition(5, false);
+
+        PendingJavaScriptInvocation call = lastInvocation();
+        Assertions.assertEquals(false,
+                call.getInvocation().getParameters().get(2));
     }
 
     @Test
