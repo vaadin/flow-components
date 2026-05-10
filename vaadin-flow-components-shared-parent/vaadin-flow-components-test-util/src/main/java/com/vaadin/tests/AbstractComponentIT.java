@@ -327,7 +327,11 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
     protected void open(String... parameters) {
         String url = getTestURL(parameters);
 
-        if (isReuseDriver() && USE_SPA && trySpaNavigation(getTestPath())) {
+        // Pass the relative URL (path + query string) so SPA navigation
+        // preserves query parameters used to configure the test view's
+        // initial state.
+        String relativeUrl = url.substring(getRootURL().length());
+        if (isReuseDriver() && USE_SPA && trySpaNavigation(relativeUrl)) {
             return;
         }
 
@@ -353,18 +357,21 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
      * @return {@code true} if navigation succeeded, {@code false} if a full
      *         page load is required
      */
-    private boolean trySpaNavigation(String path) {
+    private boolean trySpaNavigation(String relativeUrl) {
         try {
             Boolean hasVaadin = (Boolean) executeScript(
                     "return !!(window.Vaadin && window.Vaadin.Flow)");
             if (!Boolean.TRUE.equals(hasVaadin)) {
                 return false;
             }
-            String currentPath = (String) executeScript(
-                    "return window.location.pathname");
-            String normalizedPath = path.startsWith("/") ? path : "/" + path;
-            if (normalizedPath.equals(currentPath)) {
-                // Same route: clear cookies so the server creates a fresh
+            // Compare full path+query so tests with different query parameters
+            // get a fresh server-side view even when the path is the same.
+            String currentFullPath = (String) executeScript(
+                    "return window.location.pathname + window.location.search");
+            String normalizedUrl = relativeUrl.startsWith("/") ? relativeUrl
+                    : "/" + relativeUrl;
+            if (normalizedUrl.equals(currentFullPath)) {
+                // Same URL: clear cookies so the server creates a fresh
                 // session, then fall through to a full page load.
                 getDriver().manage().deleteAllCookies();
                 return false;
@@ -372,7 +379,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
             executeScript(
                     "window.dispatchEvent(new CustomEvent('vaadin-navigate',"
                             + "{detail:{url:arguments[0],state:null,replace:false,callback:true}}))",
-                    path);
+                    normalizedUrl);
             getCommandExecutor().waitForVaadin();
             return true;
         } catch (Exception e) {
