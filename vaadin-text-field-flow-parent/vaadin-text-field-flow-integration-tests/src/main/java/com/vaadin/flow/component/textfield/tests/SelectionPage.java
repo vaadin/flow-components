@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.shared.SelectionRange;
-import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -41,9 +41,9 @@ public class SelectionPage extends Div {
         textArea.setId("text-area");
         textArea.setValue("Lorem ipsum dolor sit amet");
 
-        EmailField emailField = new EmailField();
-        emailField.setId("email-field");
-        emailField.setValue("user@example.com");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setId("password-field");
+        passwordField.setValue("secret123");
 
         Div info = new Div();
         info.setId("selection-info");
@@ -51,7 +51,7 @@ public class SelectionPage extends Div {
         Signal.effect(this,
                 ctx -> info.setText(format(textField.selectionSignal().get())));
 
-        add(textField, textArea, emailField, info);
+        add(textField, textArea, passwordField, info);
 
         addButton("select-all", "Select all", () -> textField.selectAll());
         addButton("set-range", "setSelectionRange(2, 7)",
@@ -92,9 +92,10 @@ public class SelectionPage extends Div {
         });
         add(transformInfo);
 
-        addButton("email-select-all", "Email selectAll",
-                () -> emailField.selectAll());
-        addButton("email-focus", "Email focus", () -> emailField.focus());
+        addButton("password-select-all", "Password selectAll",
+                () -> passwordField.selectAll());
+        addButton("password-focus", "Password focus",
+                () -> passwordField.focus());
     }
 
     private void addButton(String id, String label, Runnable action) {

@@ -28,7 +28,6 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasSelection;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
@@ -52,9 +51,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasSelection, HasValidationProperties, HasValidator<TValue>,
-        HasValueChangeMode, HasPlaceholder, HasPrefix, HasSuffix, InputNotifier,
-        KeyNotifier,
+        HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
+        HasPlaceholder, HasPrefix, HasSuffix, InputNotifier, KeyNotifier,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;

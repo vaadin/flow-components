@@ -23,8 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.shared.HasSelection;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.tests.MockUIExtension;
@@ -90,28 +94,45 @@ class HasSelectionTest {
     }
 
     @Test
-    void textArea_inheritsHasSelection() {
+    void textArea_implementsHasSelection() {
         TextArea area = new TextArea();
         ui.add(area);
         area.selectAll();
-        // No exception, invocation queued
+        Assertions.assertTrue(area instanceof HasSelection);
         Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
-    void emailField_inheritsHasSelection() {
-        EmailField email = new EmailField();
-        ui.add(email);
-        email.setSelectionRange(1, 4);
+    void passwordField_implementsHasSelection() {
+        PasswordField password = new PasswordField();
+        ui.add(password);
+        password.setSelectionRange(1, 4);
+        Assertions.assertTrue(password instanceof HasSelection);
         Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test
-    void numberField_inheritsHasSelection() {
-        NumberField number = new NumberField();
-        ui.add(number);
-        number.setCursorPosition(2);
+    void bigDecimalField_implementsHasSelection() {
+        BigDecimalField field = new BigDecimalField();
+        ui.add(field);
+        field.setCursorPosition(2);
+        Assertions.assertTrue(field instanceof HasSelection);
         Assertions.assertFalse(ui.dumpPendingJavaScriptInvocations().isEmpty());
+    }
+
+    /**
+     * EmailField, NumberField, and IntegerField wrap input types ({@code email}
+     * / {@code number}) where the browser disallows {@code selectionStart} /
+     * {@code setSelectionRange} per the HTML spec — Chrome and Firefox throw
+     * {@code InvalidStateError}. The mixin is therefore deliberately not
+     * implemented on these classes so that the type system reflects what
+     * actually works at runtime.
+     */
+    @Test
+    void emailNumberInteger_doNotImplementHasSelection() {
+        Assertions.assertFalse(new EmailField() instanceof HasSelection);
+        Assertions.assertFalse(new NumberField() instanceof HasSelection);
+        Assertions.assertFalse(new IntegerField() instanceof HasSelection);
     }
 
     private PendingJavaScriptInvocation lastInvocation() {
