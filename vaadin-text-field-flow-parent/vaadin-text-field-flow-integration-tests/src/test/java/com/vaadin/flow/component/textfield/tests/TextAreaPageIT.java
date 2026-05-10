@@ -49,7 +49,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement field = $(TextAreaElement.class).id("clear-text-area");
 
         TestBenchElement input = field.$("textarea").first();
-        input.sendKeys("foo", Keys.ENTER);
+        input.sendKeys("foo", Keys.TAB);
 
         field.clickClearButton();
 

@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
@@ -151,7 +152,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         field = $(BigDecimalFieldElement.class).id("clear-big-decimal-field");
 
         WebElement input = field.$("input").first();
-        input.sendKeys("300");
+        input.sendKeys("300", Keys.TAB);
 
         field.clickClearButton();
 
