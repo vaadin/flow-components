@@ -35,9 +35,6 @@ import java.io.Serializable;
  * @param content
  *            the selected substring, or an empty string when the selection is
  *            collapsed
- *
- * @author Vaadin Ltd
- * @since 25.1
  */
 public record SelectionRange(int start, int end,
         String content) implements Serializable {
