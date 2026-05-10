@@ -491,7 +491,7 @@ jobs:
             -Dfailsafe.forkCount=$FORK_COUNT \
             -Dfailsafe.rerunFailingTestsCount=2 \
             -Dmaven.test.redirectTestOutputToFile=true \
-            -Dtest.shareDriver=true \
+            -Dtest.reuseDriver=true \
             -Dit.test="$SHARD_TESTS" \
             -B
 
