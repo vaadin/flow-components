@@ -388,7 +388,7 @@ jobs:
         env:
           SHARDS: ${{ github.event.inputs.shards || '0' }}
           TARGET_PER_SHARD: 35
-          MAX_SHARDS: 10
+          MAX_SHARDS: 8
         run: |
           mapfile -t its < <(find integration-tests/src/test/java -name '*IT.java' -printf '%P\n' | sed -e 's|/|.|g' -e 's|\.java$||' | sort)
           count=${#its[@]}
@@ -489,7 +489,6 @@ jobs:
             -Dvaadin.productionMode \
             -DskipFrontend \
             -Dfailsafe.forkCount=$FORK_COUNT \
-            -Dcom.vaadin.testbench.Parameters.testsInParallel=2 \
             -Dfailsafe.rerunFailingTestsCount=2 \
             -Dmaven.test.redirectTestOutputToFile=true \
             -Dtest.reuseDriver=true \
