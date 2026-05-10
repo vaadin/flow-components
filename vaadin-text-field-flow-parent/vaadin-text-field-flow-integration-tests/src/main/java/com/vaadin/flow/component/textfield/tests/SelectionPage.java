@@ -56,10 +56,14 @@ public class SelectionPage extends Div {
         addButton("select-all", "Select all", () -> textField.selectAll());
         addButton("set-range", "setSelectionRange(2, 7)",
                 () -> textField.setSelectionRange(2, 7));
+        addButton("set-range-no-focus", "setSelectionRange(2, 7, false)",
+                () -> textField.setSelectionRange(2, 7, false));
         addButton("set-cursor", "setCursorPosition(4)",
                 () -> textField.setCursorPosition(4));
         addButton("deselect", "Deselect", () -> textField.deselect());
         addButton("focus", "Focus", () -> textField.focus());
+        addButton("blur", "Blur",
+                () -> textField.getElement().executeJs("this.blur()"));
 
         addButton("area-select-range", "Area setSelectionRange(0, 5)",
                 () -> textArea.setSelectionRange(0, 5));
