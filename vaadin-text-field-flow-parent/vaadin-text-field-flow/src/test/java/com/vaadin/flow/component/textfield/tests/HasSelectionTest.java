@@ -47,10 +47,11 @@ class HasSelectionTest {
         textField.selectAll();
 
         PendingJavaScriptInvocation call = lastInvocation();
-        Assertions.assertTrue(
-                call.getInvocation().getExpression()
-                        .contains("this.inputElement.select()"),
-                call.getInvocation().getExpression());
+        String js = call.getInvocation().getExpression();
+        Assertions.assertTrue(js.contains("this.inputElement.select()"), js);
+        // Wrapped in setTimeout to defer past any pending value/focus
+        // reflection that would otherwise wipe the selection.
+        Assertions.assertTrue(js.contains("setTimeout"), js);
         Assertions.assertEquals(textField.getElement(),
                 call.getInvocation().getParameters().get(0));
     }
@@ -63,6 +64,7 @@ class HasSelectionTest {
         String js = call.getInvocation().getExpression();
         Assertions.assertTrue(js.contains("selectionEnd"), js);
         Assertions.assertTrue(js.contains("setSelectionRange"), js);
+        Assertions.assertTrue(js.contains("setTimeout"), js);
     }
 
     @Test
@@ -73,6 +75,7 @@ class HasSelectionTest {
         String js = call.getInvocation().getExpression();
         Assertions.assertTrue(
                 js.contains("this.inputElement.setSelectionRange($0, $1)"), js);
+        Assertions.assertTrue(js.contains("setTimeout"), js);
         Assertions.assertEquals(3, call.getInvocation().getParameters().get(0));
         Assertions.assertEquals(8, call.getInvocation().getParameters().get(1));
     }

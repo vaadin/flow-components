@@ -43,8 +43,11 @@ public interface HasSelection extends HasElement {
      * field.
      */
     default void selectAll() {
-        getElement()
-                .executeJs("this.inputElement && this.inputElement.select()");
+        // Defer with setTimeout so the call runs after any pending value or
+        // focus reflection on the web component finishes — otherwise a
+        // re-render of the input can wipe the selection we just set.
+        getElement().executeJs(
+                "setTimeout(() => { this.inputElement && this.inputElement.select(); }, 0)");
     }
 
     /**
@@ -53,7 +56,7 @@ public interface HasSelection extends HasElement {
      */
     default void deselect() {
         getElement().executeJs(
-                "const i=this.inputElement; if(i){const e=i.selectionEnd||0; i.setSelectionRange(e,e);}");
+                "setTimeout(() => { const i = this.inputElement; if (i) { const e = i.selectionEnd || 0; i.setSelectionRange(e, e); } }, 0)");
     }
 
     /**
@@ -71,7 +74,7 @@ public interface HasSelection extends HasElement {
      */
     default void setSelectionRange(int selectionStart, int selectionEnd) {
         getElement().executeJs(
-                "this.inputElement && this.inputElement.setSelectionRange($0, $1)",
+                "setTimeout(() => { this.inputElement && this.inputElement.setSelectionRange($0, $1); }, 0)",
                 selectionStart, selectionEnd);
     }
 
