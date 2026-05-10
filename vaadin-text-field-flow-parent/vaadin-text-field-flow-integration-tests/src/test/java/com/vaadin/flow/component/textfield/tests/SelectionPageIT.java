@@ -109,6 +109,49 @@ public class SelectionPageIT extends AbstractComponentIT {
         Assert.assertEquals(5, selectionEnd(area));
     }
 
+    /**
+     * Reproduces the scenario PR #3194 worried about with the async
+     * {@code getSelectionRange(callback)} API: user selects text, clicks a
+     * server-side button, and the handler must see the selection that was
+     * active at click time. With {@code selectionSignal().peek()} this is a
+     * synchronous read and the transform applies to exactly the selected
+     * substring.
+     */
+    @Test
+    public void selectionSignal_serverHandlerSeesSelectionAtClickTime() {
+        TextAreaElement area = $(TextAreaElement.class).id("text-area");
+        // Select "Lorem" (the first word, indices 0-5)
+        executeScript("arguments[0].inputElement.focus();"
+                + "arguments[0].inputElement.setSelectionRange(0, 5);"
+                + "arguments[0].inputElement.dispatchEvent(new Event('select'));",
+                area);
+        waitUntil(driver -> findElement(By.id("selection-info")).getText()
+                .startsWith("0-5:5:"));
+
+        clickButton("area-uppercase");
+
+        waitUntil(driver -> findElement(By.id("transform-info")).getText()
+                .equals("#1 0-5:Lorem"));
+        Assert.assertEquals("LOREM ipsum dolor sit amet", area.getValue());
+        Assert.assertEquals(0, selectionStart(area));
+        Assert.assertEquals(5, selectionEnd(area));
+
+        // Move the selection to "ipsum" (indices 6-11) and transform again.
+        // The second click must read the *new* selection, not the previous
+        // one — proving the signal stays current across user actions.
+        executeScript("arguments[0].inputElement.setSelectionRange(6, 11);"
+                + "arguments[0].inputElement.dispatchEvent(new Event('select'));",
+                area);
+        waitUntil(driver -> findElement(By.id("selection-info")).getText()
+                .startsWith("6-11:5:"));
+
+        clickButton("area-uppercase");
+
+        waitUntil(driver -> findElement(By.id("transform-info")).getText()
+                .equals("#2 6-11:ipsum"));
+        Assert.assertEquals("LOREM IPSUM dolor sit amet", area.getValue());
+    }
+
     @Test
     public void emailField_inheritsHasSelection() {
         EmailFieldElement email = $(EmailFieldElement.class).id("email-field");

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.shared.SelectionRange;
@@ -62,6 +64,33 @@ public class SelectionPage extends Div {
         addButton("area-select-range", "Area setSelectionRange(0, 5)",
                 () -> textArea.setSelectionRange(0, 5));
         addButton("area-focus", "Area focus", () -> textArea.focus());
+
+        // Mirrors UC6: server-side click handler reads the current selection
+        // synchronously via selectionSignal().peek() and replaces it in place.
+        // Proves the timing the PR #3194 thread was worried about: when the
+        // user selects text and clicks a server button, the handler sees the
+        // selection that was active at click time, with no extra roundtrip.
+        Div transformInfo = new Div();
+        transformInfo.setId("transform-info");
+        transformInfo.setText("(no transform yet)");
+        AtomicInteger transformCount = new AtomicInteger();
+        addButton("area-uppercase", "Uppercase area selection", () -> {
+            SelectionRange sel = textArea.selectionSignal().peek();
+            int n = transformCount.incrementAndGet();
+            if (sel.isEmpty()) {
+                transformInfo.setText("#" + n + " empty");
+                return;
+            }
+            String value = textArea.getValue();
+            String replaced = sel.content().toUpperCase();
+            textArea.setValue(value.substring(0, sel.start()) + replaced
+                    + value.substring(sel.end()));
+            textArea.setSelectionRange(sel.start(),
+                    sel.start() + replaced.length());
+            transformInfo.setText("#" + n + " " + sel.start() + "-" + sel.end()
+                    + ":" + sel.content());
+        });
+        add(transformInfo);
 
         addButton("email-select-all", "Email selectAll",
                 () -> emailField.selectAll());
