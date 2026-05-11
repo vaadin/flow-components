@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.combobox.test.dataview;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.test.AbstractComboBoxIT;
@@ -103,27 +103,19 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
 
     protected void verifyFetchForUndefinedItemCountCallback(
             RangeLog... rangeLogs) {
-        // The exact order/index of intermediate fetches varies with viewport
-        // height and scroll timing across environments, so check that each
-        // expected range appears somewhere in the server fetch log rather
-        // than at a specific index.
-        List<String> entries = new ArrayList<>();
-        for (int i = 0;; i++) {
+        Arrays.stream(rangeLogs).forEach(rangeLog -> {
+            int index = rangeLog.getIndex();
             try {
-                entries.add(findElement(By.id("log-" + i)).getText());
+                WebElement log = findElement(By.id("log-" + index));
+                Assert.assertEquals("Invalid range for index " + index,
+                        index + ":" + rangeLog.getRange().toString(),
+                        log.getText());
             } catch (NoSuchElementException e) {
-                break;
+                Assert.fail("Log element not found for index " + index
+                        + ", expected range: "
+                        + rangeLog.getRange().toString());
             }
-        }
-        for (RangeLog rangeLog : rangeLogs) {
-            String suffix = ":" + rangeLog.getRange().toString();
-            boolean fetched = entries.stream()
-                    .anyMatch(text -> text.endsWith(suffix));
-            Assert.assertTrue(
-                    "Expected server fetch for range " + rangeLog.getRange()
-                            + " but log only contains: " + entries,
-                    fetched);
-        }
+        });
     }
 
     protected static class RangeLog {
