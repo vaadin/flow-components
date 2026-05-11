@@ -134,160 +134,8 @@ jobs:
           fi
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
-  unit-tests:
-    name: Unit tests
-    needs: build
-    if: needs.build.outputs.skip != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - name: Set Maven args
-        run: |
-          args="-ntp -B"
-          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
-          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
-
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
-          fetch-depth: 1
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Install TestBench license
-        if: env.TB_LICENSE != ''
-        env:
-          TB_LICENSE: ${{ secrets.TB_LICENSE }}
-        run: |
-          mkdir -p ~/.vaadin
-          user="${TB_LICENSE%%/*}"
-          key="${TB_LICENSE#*/}"
-          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
-
-      - name: Restore build cache
-        id: build-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
-
-      - name: Run unit tests
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
-
-      - name: Upload unit test reports
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: surefire-reports
-          path: '**/target/surefire-reports/TEST-*.xml'
-          retention-days: 1
-          if-no-files-found: ignore
-
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
-
-  wtr-tests:
-    name: WTR tests
-    needs: build
-    if: needs.build.outputs.skip != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      actions: write
-    steps:
-      - name: Set Maven args
-        run: |
-          args="-ntp -B"
-          [ "${{ runner.debug }}" != "1" ] && args="$args -q"
-          echo "MAVEN_ARGS=$args" >> "$GITHUB_ENV"
-
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
-          fetch-depth: 1
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Install TestBench license
-        if: env.TB_LICENSE != ''
-        env:
-          TB_LICENSE: ${{ secrets.TB_LICENSE }}
-        run: |
-          mkdir -p ~/.vaadin
-          user="${TB_LICENSE%%/*}"
-          key="${TB_LICENSE#*/}"
-          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
-
-      - name: Restore build cache
-        id: build-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
-
-      - name: npm install
-        run: npm ci --ignore-scripts
-
-      - name: Run WTR tests
-        run: node scripts/wtr.js ${{ needs.build.outputs.components }}
-
-      - name: Upload WTR reports
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: wtr-reports
-          path: '**/wtr-results.xml'
-          retention-days: 1
-          if-no-files-found: ignore
-
-      - name: Cancel workflow on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }}
-
-  package-war:
-    name: Package WAR
+  fast-tests:
+    name: ${{ matrix.name }}
     needs: build
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
@@ -295,9 +143,19 @@ jobs:
     permissions:
       contents: read
     outputs:
-      matrix: ${{ steps.shards.outputs.matrix }}
-      has-tests: ${{ steps.shards.outputs.has-tests }}
+      matrix:        ${{ steps.shards.outputs.matrix }}
+      has-tests:     ${{ steps.shards.outputs.has-tests }}
       war-cache-key: ${{ steps.war-key.outputs.key }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: Unit tests
+            type: unit
+          - name: WTR tests
+            type: wtr
+          - name: Package WAR
+            type: war
     steps:
       - name: Set Maven args
         run: |
@@ -311,23 +169,28 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Node
+        if: matrix.type != 'unit'
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
       - name: npm install
+        if: matrix.type != 'unit'
         run: npm ci --ignore-scripts
 
       - name: Merge ITs
+        if: matrix.type == 'war'
         run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
 
       - name: Compute WAR cache key
+        if: matrix.type == 'war'
         id: war-key
         env:
           KEY: ${{ runner.os }}-war-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', 'integration-tests/src/test/java/**') }}
         run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
 
       - name: Restore WAR cache
+        if: matrix.type == 'war'
         id: war-cache
         uses: actions/cache@v5
         with:
@@ -345,7 +208,7 @@ jobs:
           cache: 'maven'
 
       - name: Install TestBench license
-        if: steps.war-cache.outputs.cache-hit != 'true' && env.TB_LICENSE != ''
+        if: env.TB_LICENSE != '' && steps.war-cache.outputs.cache-hit != 'true'
         env:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
@@ -355,15 +218,15 @@ jobs:
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Restore build cache
-        id: build-cache
         if: steps.war-cache.outputs.cache-hit != 'true'
+        id: build-cache
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
 
       - name: Install artifacts (cache miss)
-        if: steps.war-cache.outputs.cache-hit != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        if: steps.build-cache.outputs.cache-hit != 'true' && steps.war-cache.outputs.cache-hit != 'true'
         run: |
           mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
@@ -371,8 +234,34 @@ jobs:
             mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
+      - name: Run unit tests
+        if: matrix.type == 'unit'
+        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
+
+      - name: Upload unit test reports
+        if: always() && matrix.type == 'unit'
+        uses: actions/upload-artifact@v6
+        with:
+          name: surefire-reports
+          path: '**/target/surefire-reports/TEST-*.xml'
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Run WTR tests
+        if: matrix.type == 'wtr'
+        run: node scripts/wtr.js ${{ needs.build.outputs.components }}
+
+      - name: Upload WTR reports
+        if: always() && matrix.type == 'wtr'
+        uses: actions/upload-artifact@v6
+        with:
+          name: wtr-reports
+          path: '**/wtr-results.xml'
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Package integration-tests WAR
-        if: steps.war-cache.outputs.cache-hit != 'true'
+        if: matrix.type == 'war' && steps.war-cache.outputs.cache-hit != 'true'
         run: |
           mvn package -pl integration-tests \
             -Dvaadin.pnpm.enable -Drun-it -Drelease \
@@ -380,10 +269,11 @@ jobs:
             -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 
       - name: Compile IT test sources
-        if: steps.war-cache.outputs.cache-hit != 'true'
+        if: matrix.type == 'war' && steps.war-cache.outputs.cache-hit != 'true'
         run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
 
       - name: Compute IT shards
+        if: matrix.type == 'war'
         id: shards
         env:
           SHARDS: ${{ github.event.inputs.shards || '0' }}
@@ -427,15 +317,15 @@ jobs:
 
   its:
     name: ITs (${{ matrix.shard }})
-    needs: package-war
-    if: needs.package-war.outputs.has-tests == 'true'
+    needs: [fast-tests]
+    if: needs.fast-tests.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: read
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.package-war.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.fast-tests.outputs.matrix) }}
     steps:
       - name: Set Maven args
         run: |
@@ -477,7 +367,7 @@ jobs:
           path: |
             integration-tests/pom.xml
             integration-tests/target
-          key: ${{ needs.package-war.outputs.war-cache-key }}
+          key: ${{ needs.fast-tests.outputs.war-cache-key }}
           fail-on-cache-miss: true
 
       - name: Run integration tests (shard ${{ matrix.shard }})
@@ -516,7 +406,7 @@ jobs:
 
   results:
     name: Collect tests
-    needs: [build, unit-tests, wtr-tests, package-war, its]
+    needs: [build, fast-tests, its]
     if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -571,7 +461,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.unit-tests.result == 'failure'
+        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
         run: |
           echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
@@ -598,7 +488,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: IT compilation error
-        if: steps.it-check.outputs.count == '0' && needs.package-war.result == 'failure'
+        if: steps.it-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
         run: |
           echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
@@ -625,7 +515,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: WTR setup error
-        if: steps.wtr-check.outputs.count == '0' && needs.wtr-tests.result == 'failure'
+        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
         run: |
           echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
