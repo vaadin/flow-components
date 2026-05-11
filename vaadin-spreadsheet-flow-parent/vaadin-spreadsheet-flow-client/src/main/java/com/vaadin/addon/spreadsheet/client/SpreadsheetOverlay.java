@@ -21,14 +21,17 @@ import com.vaadin.client.ui.VOverlay;
 @SuppressWarnings("deprecation")
 public class SpreadsheetOverlay extends VOverlay {
 
+    private static final String POPOVER_ATTRIBUTE = "popover";
+
     /**
      * A VContextMenu Implementation that attaches the overlay to the container
      * added by vaadin-spreadsheet webcomponent
      */
     public static class SpreadsheetContextMenu extends VContextMenu {
+
         public SpreadsheetContextMenu() {
             DOM.setElementProperty(getElement(), "id", "PID_VAADIN_CM");
-            getElement().setAttribute("popover", "manual");
+            setPopover(getElement());
         }
 
         @Override
@@ -51,17 +54,23 @@ public class SpreadsheetOverlay extends VOverlay {
 
     public SpreadsheetOverlay() {
         super();
-        getElement().setAttribute("popover", "manual");
+        setPopover(getElement());
     }
 
     public SpreadsheetOverlay(boolean autoHide, boolean modal) {
         super(autoHide, modal);
-        getElement().setAttribute("popover", "manual");
+        setPopover(getElement());
     }
 
     public SpreadsheetOverlay(boolean autoHide) {
         super(autoHide);
-        getElement().setAttribute("popover", "manual");
+        setPopover(getElement());
+    }
+
+    private static void setPopover(Element el) {
+        if (el != null) {
+            el.setAttribute(POPOVER_ATTRIBUTE, "manual");
+        }
     }
 
     @Override
