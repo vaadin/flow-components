@@ -18,7 +18,7 @@ import com.vaadin.client.ui.VOverlay;
  * A VOverlay Implementation that attaches the overlay to the container added by
  * vaadin-spreadsheet webcomponent
  */
-@SuppressWarnings({ "deprecation", "java:S1699"} )
+@SuppressWarnings({ "deprecation", "java:S1699" })
 public class SpreadsheetOverlay extends VOverlay {
 
     private static final String POPOVER_ATTRIBUTE = "popover";
