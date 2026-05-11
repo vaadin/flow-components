@@ -548,15 +548,6 @@ jobs:
           name: wtr-reports
           path: wtr-reports
 
-      - name: Remove passing test reports
-        run: |
-          for dir in surefire-reports failsafe-reports wtr-reports; do
-            [ -d "$dir" ] || continue
-            find "$dir" -name '*.xml' | while read -r f; do
-              grep -qE '<failure|<error' "$f" || rm -f "$f"
-            done
-          done
-
       - name: Check for unit test reports
         id: unit-check
         run: |
@@ -575,8 +566,8 @@ jobs:
           name: Unit Tests
           path: surefire-reports/**/TEST-*.xml
           reporter: java-junit
-          list-tests: 'failed'
-          list-suites: 'failed'
+          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: Unit test compilation error
@@ -602,8 +593,8 @@ jobs:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
-          list-tests: 'failed'
-          list-suites: 'failed'
+          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: IT compilation error
@@ -629,8 +620,8 @@ jobs:
           name: WTR Tests
           path: wtr-reports/**/wtr-results.xml
           reporter: java-junit
-          list-tests: 'failed'
-          list-suites: 'failed'
+          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: WTR setup error
