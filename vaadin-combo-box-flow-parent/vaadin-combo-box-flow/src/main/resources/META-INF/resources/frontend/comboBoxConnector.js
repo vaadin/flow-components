@@ -13,8 +13,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   const getPendingRequests = () => comboBox.__dataProviderController.rootCache.pendingRequests;
   let cache = {};
-  let lastFilter = '';
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
+  let lastRequestedRange = [-1, -1];
+  let hasData = false;
+  let lastFilter = '';
+  let requestDebouncer;
+  let filterDebouncer;
 
   const serverFacade = (() => {
     // Private variables
@@ -44,9 +48,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   })();
 
   const clearPageCallbacks = (pages = Object.keys(getPendingRequests())) => {
-    // Flush the existing requests. Invoking the callback removes the entry
-    // from pendingRequests (the data provider controller does that inside
-    // the callback).
+    // Flush and empty the existing requests
     const pendingRequests = getPendingRequests();
     pages.forEach((page) => {
       pendingRequests[page]([], comboBox.size);
@@ -68,87 +70,55 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Invalid pageSize';
     }
 
-    if (comboBox._clientSideFilter) {
-      // For clientside filter we first make sure we have all data which we also
-      // filter based on comboBox.filter. While later we only filter clientside data.
-
-      if (cache[0]) {
-        performClientSideFilter(cache[0], params.filter, callback);
-        return;
-      } else {
-        // If client side filter is enabled then we need to first ask all data
-        // and filter it on client side, otherwise next time when user will
-        // input another filter, eg. continue to type, the local cache will be only
-        // what was received for the first filter, which may not be the whole
-        // data from server (keep in mind that client side filter is enabled only
-        // when the items count does not exceed one page).
-        params.filter = '';
-      }
-    }
-
-    const filterChanged = params.filter !== lastFilter;
-    if (filterChanged) {
-      cache = {};
+    if (params.filter !== lastFilter) {
       lastFilter = params.filter;
-      comboBox._filterDebouncer = Debouncer.debounce(
-        comboBox._filterDebouncer,
-        timeOut.after(comboBox._filterTimeout ?? 500),
-        () => {
-          if (serverFacade.getLastFilterSentToServer() === params.filter) {
-            // Fixes the case when the filter changes
-            // to something else and back to the original value
-            // within debounce timeout, and the
-            // DataCommunicator thinks it doesn't need to send data
-            serverFacade.needsDataCommunicatorReset();
-          }
-          if (params.filter !== lastFilter) {
-            throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
-          }
-          // Remove the debouncer before clearing page callbacks.
-          // This makes sure that they are executed.
-          comboBox._filterDebouncer = undefined;
-          // Call the method again after debounce.
-          clearPageCallbacks();
-          comboBox.dataProvider(params, callback);
+      cache = {};
+      lastRequestedRange = [-1, -1];
+      filterDebouncer = Debouncer.debounce(filterDebouncer, timeOut.after(comboBox._filterTimeout ?? 500), () => {
+        // Filter cycled back to previously sent value — force re-emit.
+        if (params.filter === serverFacade.getLastFilterSentToServer()) {
+          serverFacade.needsDataCommunicatorReset();
         }
-      );
+        comboBox.$connector.requestPage(params.page, params.filter);
+      });
       return;
     }
 
-    // Postpone the execution of new callbacks if there is an active debouncer.
-    // They will be executed when the page callbacks are cleared within the debouncer.
-    if (comboBox._filterDebouncer) {
-      getPendingRequests()[params.page] = callback;
+    if (filterDebouncer?.isActive()) {
       return;
     }
 
-    if (cache[params.page]) {
-      // This may happen after skipping pages by scrolling fast
-      commitPage(params.page, callback);
-    } else {
-      getPendingRequests()[params.page] = callback;
-      const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
-      const activePages = Object.keys(getPendingRequests()).map((page) => parseInt(page));
-      const rangeMin = Math.min(...activePages);
-      const rangeMax = Math.max(...activePages);
+    requestDebouncer = Debouncer.debounce(requestDebouncer, timeOut.after(hasData ? 150 : 0), () => {
+      comboBox.$connector.requestPage(params.page, params.filter);
+    });
+  };
 
-      if (activePages.length * params.pageSize > maxRangeCount) {
-        if (params.page === rangeMin) {
-          clearPageCallbacks([String(rangeMax)]);
-        } else {
-          clearPageCallbacks([String(rangeMin)]);
-        }
-        comboBox.dataProvider(params, callback);
-      } else if (rangeMax - rangeMin + 1 !== activePages.length) {
-        // Wasn't a sequential page index, clear the cache so combo-box will request for new pages
-        clearPageCallbacks();
-      } else {
-        // The requested page was sequential, extend the requested range
-        const startIndex = params.pageSize * rangeMin;
-        const endIndex = params.pageSize * (rangeMax + 1);
+  comboBox.$connector.getViewportRange = function () {
+    return [comboBox._scroller.__virtualizer.firstVisibleIndex, comboBox._scroller.__virtualizer.lastVisibleIndex];
+  };
 
-        serverFacade.requestData(startIndex, endIndex, params);
-      }
+  comboBox.$connector.requestPage = function (page, filter) {
+    let viewportRange = comboBox.$connector.getViewportRange();
+    const buffer = viewportRange[1] - viewportRange[0];
+    viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
+    viewportRange[1] = Math.min(viewportRange[1] + buffer, comboBox.size);
+
+    let viewportPageRange = [
+      Math.floor(viewportRange[0] / comboBox.pageSize),
+      Math.floor(viewportRange[1] / comboBox.pageSize)
+    ];
+
+    // Collapse to the requested page when it's outside the current viewport,
+    // so confirm() can resolve callbacks left behind by fast scrolling.
+    if (page < viewportPageRange[0] || page > viewportPageRange[1]) {
+      viewportPageRange = [page, page];
+    }
+
+    if (lastRequestedRange[0] != viewportPageRange[0] || lastRequestedRange[1] != viewportPageRange[1]) {
+      lastRequestedRange = viewportPageRange;
+      const startIndex = viewportPageRange[0] * comboBox.pageSize;
+      const endIndex = (viewportPageRange[1] + 1) * comboBox.pageSize;
+      serverFacade.requestData(startIndex, endIndex, { filter });
     }
   };
 
@@ -158,6 +128,11 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
       delete cache[i];
+      for (let j = i * comboBox.pageSize; j < (i + 1) * comboBox.pageSize; j++) {
+        if (comboBox.filteredItems[j]) {
+          comboBox.filteredItems[j] = placeHolder;
+        }
+      }
     }
   };
 
@@ -167,7 +142,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.set = (index, items, filter) => {
-    if (filter != serverFacade.getLastFilterSentToServer()) {
+    if (filter !== lastFilter) {
       return;
     }
 
@@ -190,6 +165,10 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       let slice = items.slice(i * comboBox.pageSize, (i + 1) * comboBox.pageSize);
 
       cache[page] = slice;
+    }
+
+    if (items.length > 0) {
+      hasData = true;
     }
   };
 
@@ -216,20 +195,18 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.reset = function () {
-    // Cancel pending requests, as clearCache below will set the combo
-    // in a state where it will always request new data, regardless
-    // what is in the cache already.
-    if (comboBox._filterDebouncer) {
-      comboBox._filterDebouncer.cancel();
-      comboBox._filterDebouncer = undefined;
-    }
+    filterDebouncer?.cancel();
+    requestDebouncer?.cancel();
     clearPageCallbacks();
     cache = {};
+    lastRequestedRange = [-1, -1];
+    hasData = false;
+    lastFilter = '';
     comboBox.clearCache();
   };
 
   comboBox.$connector.confirm = function (id, filter) {
-    if (filter != serverFacade.getLastFilterSentToServer()) {
+    if (filter !== lastFilter) {
       return;
     }
 
@@ -240,6 +217,15 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         commitPage(page, callback);
       }
     });
+
+    // Resolve callbacks left pending for pages outside the requested range
+    // so `comboBox.loading` doesn't stay true after fast scrolling.
+    const stalePages = Object.keys(getPendingRequests()).filter(
+      (page) => +page < lastRequestedRange[0] || +page > lastRequestedRange[1]
+    );
+    if (stalePages.length > 0) {
+      clearPageCallbacks(stalePages);
+    }
 
     // Let server know we're done
     comboBox.$server.confirmUpdate(id);
