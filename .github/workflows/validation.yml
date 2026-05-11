@@ -324,7 +324,7 @@ jobs:
       - name: Compute WAR cache key
         id: war-key
         env:
-          KEY: ${{ runner.os }}-war-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', 'integration-tests/src/**') }}
+          KEY: ${{ runner.os }}-war-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', 'integration-tests/src/test/java/**') }}
         run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
 
       - name: Restore WAR cache
