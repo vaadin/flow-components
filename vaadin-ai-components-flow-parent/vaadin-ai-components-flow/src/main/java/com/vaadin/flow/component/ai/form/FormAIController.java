@@ -464,7 +464,13 @@ public class FormAIController implements AIController {
         e.previousValueCaptured = true;
         @SuppressWarnings({ "rawtypes", "unchecked" })
         HasValue raw = e.field;
-        raw.setValue(converted);
+        form.getElement().getNode().runWhenAttached((d) -> {
+            d.access(() -> {
+                raw.setValue(converted);
+            });
+            
+        });
+        
     }
 
     private void revertValue(FormFieldEntry e) {
