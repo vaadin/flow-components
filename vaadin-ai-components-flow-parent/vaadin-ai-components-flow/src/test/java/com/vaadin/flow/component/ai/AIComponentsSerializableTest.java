@@ -75,6 +75,9 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // ChartAIController — intentionally not serializable;
                 // restored via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController(\\$\\d+)?",
+                // FormAIController and its helpers — intentionally not
+                // serializable; restored via reconnect()
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\..*",
                 // Build-time generator — not a runtime component
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.PlotOptionsSchemaGenerator"));
     }

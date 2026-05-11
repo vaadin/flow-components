@@ -50,6 +50,24 @@ public interface AIController {
     List<LLMProvider.ToolSpec> getTools();
 
     /**
+     * Called by the orchestrator when a user prompt has been received but
+     * before the request is dispatched to the LLM.
+     * <p>
+     * The orchestrator invokes this method on the UI thread under the session
+     * lock, regardless of the trigger (input component submit, programmatic
+     * {@link AIOrchestrator#prompt(String) prompt(...)}, file submit, or a
+     * paste handler). Controllers can use it to prepare for the upcoming turn,
+     * for example by locking UI surfaces the LLM is about to write to.
+     * </p>
+     * <p>
+     * The default implementation does nothing. Any exception thrown is caught
+     * by the orchestrator and reported to the user as a generic error message.
+     * </p>
+     */
+    default void onRequestStart() {
+    }
+
+    /**
      * Called by the orchestrator when an LLM request cycle has completed.
      * <p>
      * This method is invoked after all tool executions for a given user request
@@ -65,4 +83,23 @@ public interface AIController {
      * </p>
      */
     void onResponseComplete();
+
+    /**
+     * Called by the orchestrator when an LLM request cycle has failed, for
+     * example after an error or a timeout.
+     * <p>
+     * The orchestrator invokes this method on the UI thread under the session
+     * lock. It does not fire for successful turns; for those, use
+     * {@link #onResponseComplete()}.
+     * </p>
+     * <p>
+     * The default implementation does nothing. Any exception thrown is caught
+     * by the orchestrator and reported to the user as a generic error message.
+     * </p>
+     *
+     * @param error
+     *            the error that ended the turn, never {@code null}
+     */
+    default void onResponseFailed(Throwable error) {
+    }
 }

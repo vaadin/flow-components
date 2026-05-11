@@ -365,6 +365,7 @@ public class AIOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
+            fireResponseFailed(error, ui);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -400,6 +401,14 @@ public class AIOrchestrator implements Serializable {
             // stay stuck and the orchestrator would refuse every later
             // prompt.
             isProcessing.set(false);
+            if (controller != null) {
+                try {
+                    controller.onResponseFailed(e);
+                } catch (Exception listenerError) {
+                    LOGGER.error("Error in controller onResponseFailed",
+                            listenerError);
+                }
+            }
             throw e;
         }
     }
@@ -407,6 +416,14 @@ public class AIOrchestrator implements Serializable {
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
+
+        if (controller != null) {
+            try {
+                controller.onRequestStart();
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onRequestStart", e);
+            }
+        }
 
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
@@ -466,6 +483,18 @@ public class AIOrchestrator implements Serializable {
         LOGGER.debug("Processing prompt with {} attachments",
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
+    }
+
+    private void fireResponseFailed(Throwable error, UI ui) {
+        if (controller != null) {
+            ui.access(() -> {
+                try {
+                    controller.onResponseFailed(error);
+                } catch (Exception e) {
+                    LOGGER.error("Error in controller onResponseFailed", e);
+                }
+            });
+        }
     }
 
     private void fireResponseCompleteListener(String responseText, UI ui) {
