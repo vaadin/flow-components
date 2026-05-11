@@ -49,8 +49,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement field = $(TextAreaElement.class).id("clear-text-area");
 
         TestBenchElement input = field.$("textarea").first();
-        input.sendKeys("foo");
-        blur();
+        input.sendKeys("foo", Keys.TAB);
 
         field.clickClearButton();
 
@@ -79,8 +78,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         Assert.assertEquals("", message.getText());
 
         executeScript("arguments[0].removeAttribute(\"disabled\");", textArea);
-        textArea.sendKeys("abc");
-        blur();
+        textArea.sendKeys("abc", Keys.ENTER);
 
         message = findElement(By.id("disabled-text-area-message"));
         Assert.assertEquals("", message.getText());
@@ -88,30 +86,27 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
     @Test
     public void valueChangeListenerReportsCorrectValues() {
-        WebElement textFieldValueDiv = findElement(By.id("text-area-value"));
+        WebElement textAreaValueDiv = findElement(By.id("text-area-value"));
         WebElement textArea = findElement(
                 By.id("text-area-with-value-change-listener"));
 
-        updateValues(textFieldValueDiv, textArea, true);
-        $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
-        updateValues(textFieldValueDiv, textArea, false);
-    }
-
-    private void updateValues(WebElement textFieldValueDiv, WebElement textArea,
-            boolean toggleBlur) {
-        textArea.sendKeys("a");
-        if (toggleBlur) {
-            blur();
-        }
+        textArea.sendKeys("a", Keys.TAB);
         waitUntilTextsEqual("Text area value changed from '' to 'a'",
-                textFieldValueDiv);
+                textAreaValueDiv);
+
+        textArea.sendKeys(Keys.BACK_SPACE, Keys.TAB);
+        waitUntilTextsEqual("Text area value changed from 'a' to ''",
+                textAreaValueDiv);
+
+        $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
+
+        textArea.sendKeys("a");
+        waitUntilTextsEqual("Text area value changed from '' to 'a'",
+                textAreaValueDiv);
 
         textArea.sendKeys(Keys.BACK_SPACE);
-        if (toggleBlur) {
-            blur();
-        }
         waitUntilTextsEqual("Text area value changed from 'a' to ''",
-                textFieldValueDiv);
+                textAreaValueDiv);
     }
 
     private void waitUntilTextsEqual(String expected, WebElement valueDiv) {

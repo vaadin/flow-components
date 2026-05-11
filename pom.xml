@@ -73,7 +73,7 @@
     </scm>
     <properties>
         <flow.version>25.2-SNAPSHOT</flow.version>
-        <testbench.version>10.2.0-alpha4</testbench.version>
+        <testbench.version>10.2.0-alpha5</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -86,7 +86,7 @@
         <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <spotless.plugin.version>3.4.0</spotless.plugin.version>
-        <checkstyle.version>13.4.0</checkstyle.version>
+        <checkstyle.version>13.4.2</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -103,7 +103,7 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.0.5</spring-data-commons.version>
         <reactor-core.version>3.8.5</reactor-core.version>
-        <langchain4j.version>1.14.0</langchain4j.version>
+        <langchain4j.version>1.14.1</langchain4j.version>
         <spring-ai.version>2.0.0-M5</spring-ai.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>6.0.3</junit.jupiter.version>
