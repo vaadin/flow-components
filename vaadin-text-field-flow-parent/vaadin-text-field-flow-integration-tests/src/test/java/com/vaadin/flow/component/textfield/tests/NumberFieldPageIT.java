@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.NumberField;
@@ -107,8 +108,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
                 .id("clear-number-field");
 
         WebElement input = field.$("input").first();
-        input.sendKeys("300");
-        blur();
+        input.sendKeys("300", Keys.ENTER);
 
         field.clickClearButton();
 

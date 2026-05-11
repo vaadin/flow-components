@@ -201,8 +201,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     public void assertValueWithoutListener() {
         TextFieldElement field = $(TextFieldElement.class).id("value-change");
         WebElement input = field.$("input").first();
-        input.sendKeys("foo");
-        blur();
+        input.sendKeys("foo", Keys.ENTER);
         WebElement button = findElement(By.id("get-value"));
         new Actions(getDriver())
                 .moveToElement(button, button.getSize().getWidth() / 2,
@@ -218,8 +217,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         TextFieldElement field = $(TextFieldElement.class)
                 .id("clear-text-field");
         WebElement input = field.$("input").first();
-        input.sendKeys("foo");
-        blur();
+        input.sendKeys("foo", Keys.ENTER);
 
         field.clickClearButton();
 
@@ -234,8 +232,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         Assert.assertEquals("", message.getText());
 
         executeScript("arguments[0].removeAttribute(\"disabled\");", textField);
-        textField.sendKeys("abc");
-        blur();
+        textField.sendKeys("abc", Keys.ENTER);
 
         message = findElement(By.id("disabled-text-field-message"));
         Assert.assertEquals("", message.getText());
@@ -246,9 +243,24 @@ public class TextFieldPageIT extends AbstractComponentIT {
         WebElement textFieldValueDiv = findElement(By.id("text-field-value"));
         WebElement textField = findElement(
                 By.id("text-field-with-value-change-listener"));
-        updateValues(textFieldValueDiv, textField, true);
+
+        textField.sendKeys("a", Keys.TAB);
+        waitUntilTextsEqual("Text field value changed from '' to 'a'",
+                textFieldValueDiv);
+
+        textField.sendKeys(Keys.BACK_SPACE, Keys.TAB);
+        waitUntilTextsEqual("Text field value changed from 'a' to ''",
+                textFieldValueDiv);
+
         $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
-        updateValues(textFieldValueDiv, textField, false);
+
+        textField.sendKeys("a");
+        waitUntilTextsEqual("Text field value changed from '' to 'a'",
+                textFieldValueDiv);
+
+        textField.sendKeys(Keys.BACK_SPACE);
+        waitUntilTextsEqual("Text field value changed from 'a' to ''",
+                textFieldValueDiv);
     }
 
     @Test
@@ -299,23 +311,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textFieldElement.getHelperComponent());
-    }
-
-    private void updateValues(WebElement textFieldValueDiv,
-            WebElement textField, boolean toggleBlur) {
-        textField.sendKeys("a");
-        if (toggleBlur) {
-            blur();
-        }
-        waitUntilTextsEqual("Text field value changed from '' to 'a'",
-                textFieldValueDiv);
-
-        textField.sendKeys(Keys.BACK_SPACE);
-        if (toggleBlur) {
-            blur();
-        }
-        waitUntilTextsEqual("Text field value changed from 'a' to ''",
-                textFieldValueDiv);
     }
 
     private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
