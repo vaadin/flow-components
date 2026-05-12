@@ -56,7 +56,7 @@ describe('combo-box connector', () => {
         expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(callback);
       });
 
-      it('should clear stale pending requests when the filter changes', () => {
+      it('should replace stale pending requests when the filter changes', () => {
         const stale = sinon.spy();
         comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, stale);
         clock.tick(500);
@@ -66,7 +66,7 @@ describe('combo-box connector', () => {
         comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'b' }, fresh);
         clock.tick(500);
 
-        expect(stale).to.be.calledOnceWithExactly([], comboBox.size);
+        expect(stale).to.not.be.called;
         expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(fresh);
       });
     });

@@ -69,8 +69,16 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Invalid pageSize';
     }
 
+    if (comboBox._clientSideFilter) {
+      if (cache[0]) {
+        performClientSideFilter(cache[0], params.filter, callback);
+        return;
+      }
+      // First fetch: ignore the typed filter so we get the full dataset
+      params = { ...params, filter: '' };
+    }
+
     if (params.filter !== lastFilter) {
-      clearPageCallbacks();
       lastFilter = params.filter;
       cache = {};
       lastRequestedRange = [-1, -1];
@@ -138,11 +146,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
       delete cache[i];
-      for (let j = i * comboBox.pageSize; j < (i + 1) * comboBox.pageSize; j++) {
-        if (comboBox.filteredItems[j]) {
-          comboBox.filteredItems[j] = placeHolder;
-        }
-      }
     }
   };
 
