@@ -47,6 +47,15 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
+    public void noInitialOpenedChangeEvent() {
+        // Polymer's initial opened-changed notification must not surface as a
+        // server-side OpenedChangeEvent. Only the close event from @Before
+        // should be logged.
+        Assert.assertEquals(1, $(TestBenchElement.class).id(ACCORDION_EVENTS)
+                .$("span").all().size());
+    }
+
+    @Test
     public void programmaticOpenByIndex() {
         getTestButton("1").click();
         Assert.assertEquals(1, $(AccordionElement.class).first()
