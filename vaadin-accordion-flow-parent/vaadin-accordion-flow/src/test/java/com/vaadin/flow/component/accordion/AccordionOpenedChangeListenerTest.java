@@ -53,11 +53,6 @@ class AccordionOpenedChangeListenerTest {
     }
 
     @Test
-    void noInitialEvent() {
-        Mockito.verifyNoInteractions(mockListener);
-    }
-
-    @Test
     void openFromClient() {
         fakeClientPropertyChange("opened", 2);
 

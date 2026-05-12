@@ -44,8 +44,6 @@ public class BasicIT extends AbstractComponentIT {
 
     @Test
     public void noInitialOpenedChangeEvent() {
-        // Polymer's initial opened-changed notification must not surface as a
-        // server-side OpenedChangeEvent.
         Assert.assertEquals(0, $(TestBenchElement.class).id(ACCORDION_EVENTS)
                 .$("span").all().size());
     }
