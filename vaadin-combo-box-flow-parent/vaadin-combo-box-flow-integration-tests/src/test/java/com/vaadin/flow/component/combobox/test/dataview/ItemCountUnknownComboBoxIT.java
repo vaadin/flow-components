@@ -48,12 +48,10 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // adjusted
         doScroll(499, 500, "Callback Item 499", RangeLog.of(10, 500, 550));
 
-        // scroll to 0 position and check the item count is correct (page 0
-        // already cached, so no new fetch)
+        // scroll to 0 position and check the item count is correct
         doScroll(0, 500, "Callback Item 0", RangeLog.of(11, 0, 50));
 
-        // scroll back to a previously visited page (already cached, no new
-        // fetch)
+        // scroll back to a previously visited page
         doScroll(450, 500, "Callback Item 450", RangeLog.of(15, 450, 500));
     }
 
@@ -78,6 +76,9 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
+        // Web component requests first page (dropdown opened)
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(9, 0, 50));
+
         // Check that combo box is scrolled over 'actualItemCount' after
         // switching to defined items count
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
@@ -87,6 +88,9 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         setUnknownCount();
 
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
+
+        // Dropdown opened, since requested first page
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(15, 0, 50));
 
         // Page already cached, no new fetch on reopen
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
