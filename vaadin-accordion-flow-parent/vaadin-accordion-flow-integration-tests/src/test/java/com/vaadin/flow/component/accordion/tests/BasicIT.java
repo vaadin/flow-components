@@ -35,10 +35,6 @@ public class BasicIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        // Close the initially opened panel, otherwise the panel can fire a
-        // close event after opening a different panel, breaking some assertions
-        $(AccordionElement.class).first().$(AccordionPanelElement.class).first()
-                .click();
     }
 
     @Test
@@ -49,14 +45,14 @@ public class BasicIT extends AbstractComponentIT {
     @Test
     public void noInitialOpenedChangeEvent() {
         // Polymer's initial opened-changed notification must not surface as a
-        // server-side OpenedChangeEvent. Only the close event from @Before
-        // should be logged.
-        Assert.assertEquals(1, $(TestBenchElement.class).id(ACCORDION_EVENTS)
+        // server-side OpenedChangeEvent.
+        Assert.assertEquals(0, $(TestBenchElement.class).id(ACCORDION_EVENTS)
                 .$("span").all().size());
     }
 
     @Test
     public void programmaticOpenByIndex() {
+        closeInitialPanel();
         getTestButton("1").click();
         Assert.assertEquals(1, $(AccordionElement.class).first()
                 .getOpenedIndex().orElseThrow());
@@ -72,6 +68,7 @@ public class BasicIT extends AbstractComponentIT {
 
     @Test
     public void programmaticOpenByPanel() {
+        closeInitialPanel();
         getTestButton("green").click();
 
         final AccordionPanelElement secondPanel = $(AccordionElement.class)
@@ -97,6 +94,7 @@ public class BasicIT extends AbstractComponentIT {
 
     @Test
     public void userOpen() {
+        closeInitialPanel();
         $(AccordionElement.class).first().$(AccordionPanelElement.class).last()
                 .click();
         Assert.assertEquals("Panel Blue opened", getLastEvent(PANEL_EVENTS));
@@ -171,6 +169,14 @@ public class BasicIT extends AbstractComponentIT {
                 .$(AccordionPanelElement.class).all().size());
         Assert.assertEquals("Disabled", $(AccordionElement.class).first()
                 .$(AccordionPanelElement.class).last().getSummaryText());
+    }
+
+    private void closeInitialPanel() {
+        // Close the initially opened panel, otherwise the panel can fire a
+        // close event after opening a different panel, breaking some
+        // assertions.
+        $(AccordionElement.class).first().$(AccordionPanelElement.class).first()
+                .click();
     }
 
     private ButtonElement getTestButton(String id) {
