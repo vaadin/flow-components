@@ -100,6 +100,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     getPendingRequests()[params.page] = callback;
+    // If buffer-prefetch already cached this page, commit it without a server
+    // round-trip; otherwise ask the server.
+    if (cache[params.page]) {
+      commitPage(params.page, callback);
+      return;
+    }
     comboBox.$connector.requestPage(params.page, params.filter);
   };
 
