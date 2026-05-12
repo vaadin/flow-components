@@ -15,9 +15,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   let cache = {};
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
   let lastRequestedRange = [-1, -1];
-  let hasData = false;
   let lastFilter = '';
-  let requestDebouncer;
 
   const serverFacade = (() => {
     // Private variables
@@ -102,9 +100,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     getPendingRequests()[params.page] = callback;
-    requestDebouncer = Debouncer.debounce(requestDebouncer, timeOut.after(hasData ? 150 : 0), () => {
-      comboBox.$connector.requestPage(params.page, params.filter);
-    });
+    comboBox.$connector.requestPage(params.page, params.filter);
   };
 
   comboBox.$connector.getViewportRange = function () {
@@ -117,7 +113,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   comboBox.$connector.requestPage = function (page, filter) {
     let viewportRange = comboBox.$connector.getViewportRange();
-    const buffer = viewportRange[1] - viewportRange[0];
+    const buffer = Math.max(viewportRange[1] - viewportRange[0], comboBox.pageSize);
     viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
     viewportRange[1] = Math.min(viewportRange[1] + buffer, comboBox.size);
 
@@ -146,6 +142,11 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
       delete cache[i];
+      for (let j = i * comboBox.pageSize; j < (i + 1) * comboBox.pageSize; j++) {
+        if (comboBox.filteredItems[j]) {
+          comboBox.filteredItems[j] = placeHolder;
+        }
+      }
     }
   };
 
@@ -179,10 +180,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
       cache[page] = slice;
     }
-
-    if (items.length > 0) {
-      hasData = true;
-    }
   };
 
   comboBox.$connector.updateData = (items) => {
@@ -210,11 +207,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   comboBox.$connector.reset = function () {
     comboBox._filterDebouncer?.cancel();
     comboBox._filterDebouncer = null;
-    requestDebouncer?.cancel();
     clearPageCallbacks();
     cache = {};
     lastRequestedRange = [-1, -1];
-    hasData = false;
     lastFilter = '';
     comboBox.clearCache();
   };
