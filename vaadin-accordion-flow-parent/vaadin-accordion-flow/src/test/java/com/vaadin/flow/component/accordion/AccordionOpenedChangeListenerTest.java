@@ -1,0 +1,121 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.accordion;
+
+import java.io.Serializable;
+import java.util.OptionalInt;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.accordion.Accordion.OpenedChangeEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.dataprovider.MockUI;
+
+public class AccordionOpenedChangeListenerTest {
+
+    private MockUI ui;
+
+    @SuppressWarnings("unchecked")
+    private ComponentEventListener<OpenedChangeEvent> mockListener = Mockito
+            .mock(ComponentEventListener.class);
+
+    private ArgumentCaptor<OpenedChangeEvent> eventCaptor = ArgumentCaptor
+            .forClass(OpenedChangeEvent.class);
+
+    private Accordion accordion;
+
+    @Before
+    public void setup() {
+        ui = new MockUI();
+        accordion = new Accordion();
+        accordion.add("Panel 0", new Span("Content 0"));
+        accordion.add("Panel 1", new Span("Content 1"));
+        accordion.add("Panel 2", new Span("Content 2"));
+        accordion.addOpenedChangeListener(mockListener);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+        VaadinSession.setCurrent(null);
+    }
+
+    @Test
+    public void openFromClient() {
+        fakeClientPropertyChange("opened", 2);
+
+        Mockito.verify(mockListener).onComponentEvent(eventCaptor.capture());
+        OpenedChangeEvent event = eventCaptor.getValue();
+        Assert.assertTrue(event.isFromClient());
+        Assert.assertEquals(OptionalInt.of(2), event.getOpenedIndex());
+    }
+
+    @Test
+    public void closeFromClient() {
+        fakeClientPropertyChange("opened", 2);
+        Mockito.reset(mockListener);
+
+        fakeClientPropertyChange("opened", null);
+
+        Mockito.verify(mockListener).onComponentEvent(eventCaptor.capture());
+        OpenedChangeEvent event = eventCaptor.getValue();
+        Assert.assertTrue(event.isFromClient());
+        Assert.assertEquals(OptionalInt.empty(), event.getOpenedIndex());
+    }
+
+    @Test
+    public void openFromServer() {
+        accordion.open(1);
+
+        Mockito.verify(mockListener).onComponentEvent(eventCaptor.capture());
+        OpenedChangeEvent event = eventCaptor.getValue();
+        Assert.assertFalse(event.isFromClient());
+        Assert.assertEquals(OptionalInt.of(1), event.getOpenedIndex());
+    }
+
+    @Test
+    public void closeFromServer() {
+        accordion.open(1);
+        Mockito.reset(mockListener);
+
+        accordion.close();
+
+        Mockito.verify(mockListener).onComponentEvent(eventCaptor.capture());
+        OpenedChangeEvent event = eventCaptor.getValue();
+        Assert.assertFalse(event.isFromClient());
+        Assert.assertEquals(OptionalInt.empty(), event.getOpenedIndex());
+    }
+
+    private void fakeClientPropertyChange(String property, Serializable value) {
+        try {
+            accordion.getElement().getNode()
+                    .getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient(property, value).run();
+        } catch (PropertyChangeDeniedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
