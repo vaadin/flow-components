@@ -75,7 +75,8 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         assertLoadedCountWithinBuffer(pageSize);
     }
 
-    private void scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded(int pageSize) {
+    private void scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded(
+            int pageSize) {
         comboBox.openPopup();
 
         int lastIndex = ITEMS_COUNT - 1;
@@ -100,8 +101,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     // covers at most 4 pageSize-aligned pages around the current viewport.
     private void assertLoadedCountWithinBuffer(int pageSize) {
         int loaded = getLoadedItems(comboBox).size();
-        Assert.assertTrue(
-                "Items should load after scrolling but was " + loaded,
+        Assert.assertTrue("Items should load after scrolling but was " + loaded,
                 loaded > 0);
         Assert.assertTrue(
                 "Loaded items should stay within the connector's buffer ("
