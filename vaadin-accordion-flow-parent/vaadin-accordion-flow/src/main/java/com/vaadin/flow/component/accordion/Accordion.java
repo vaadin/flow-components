@@ -22,9 +22,6 @@ import java.util.OptionalInt;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -58,6 +55,21 @@ public class Accordion extends Component implements HasSize, HasStyle {
 
     private static final String OPENED_PROPERTY = "opened";
     private static final String OPENED_CHANGED_DOM_EVENT = "opened-changed";
+
+    /**
+     * Initializes a new Accordion component.
+     */
+    public Accordion() {
+        if (getElement().getPropertyRaw(OPENED_PROPERTY) == null) {
+            getElement().setProperty(OPENED_PROPERTY, 0);
+        }
+
+        getElement().addPropertyChangeListener(OPENED_PROPERTY, event -> {
+            OptionalInt openedIndex = getOpenedIndex();
+            fireEvent(new OpenedChangeEvent(this, event.isUserOriginated(),
+                    openedIndex.isPresent() ? openedIndex.getAsInt() : null));
+        });
+    }
 
     /**
      * Adds a panel created from the given title and content.
@@ -214,15 +226,12 @@ public class Accordion extends Component implements HasSize, HasStyle {
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
-                listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**
      * An event fired when an Accordion is opened or closed.
      */
-    @DomEvent(OPENED_CHANGED_DOM_EVENT)
     public static class OpenedChangeEvent extends ComponentEvent<Accordion> {
 
         private final Integer index;
@@ -240,7 +249,7 @@ public class Accordion extends Component implements HasSize, HasStyle {
          *            closed
          */
         public OpenedChangeEvent(Accordion source, boolean fromClient,
-                @EventData("event.detail.value") Integer index) {
+                Integer index) {
             super(source, fromClient);
             this.index = index;
         }
