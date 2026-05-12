@@ -18,7 +18,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   let hasData = false;
   let lastFilter = '';
   let requestDebouncer;
-  let filterDebouncer;
 
   const serverFacade = (() => {
     // Private variables
@@ -71,30 +70,41 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     if (params.filter !== lastFilter) {
+      clearPageCallbacks();
       lastFilter = params.filter;
       cache = {};
       lastRequestedRange = [-1, -1];
-      filterDebouncer = Debouncer.debounce(filterDebouncer, timeOut.after(comboBox._filterTimeout ?? 500), () => {
-        // Filter cycled back to previously sent value — force re-emit.
-        if (params.filter === serverFacade.getLastFilterSentToServer()) {
-          serverFacade.needsDataCommunicatorReset();
+      getPendingRequests()[params.page] = callback;
+      comboBox._filterDebouncer = Debouncer.debounce(
+        comboBox._filterDebouncer,
+        timeOut.after(comboBox._filterTimeout ?? 500),
+        () => {
+          // Filter cycled back to previously sent value — force re-emit.
+          if (params.filter === serverFacade.getLastFilterSentToServer()) {
+            serverFacade.needsDataCommunicatorReset();
+          }
+          comboBox.$connector.requestPage(params.page, params.filter);
         }
-        comboBox.$connector.requestPage(params.page, params.filter);
-      });
+      );
       return;
     }
 
-    if (filterDebouncer?.isActive()) {
+    if (comboBox._filterDebouncer?.isActive()) {
       return;
     }
 
+    getPendingRequests()[params.page] = callback;
     requestDebouncer = Debouncer.debounce(requestDebouncer, timeOut.after(hasData ? 150 : 0), () => {
       comboBox.$connector.requestPage(params.page, params.filter);
     });
   };
 
   comboBox.$connector.getViewportRange = function () {
-    return [comboBox._scroller.__virtualizer.firstVisibleIndex, comboBox._scroller.__virtualizer.lastVisibleIndex];
+    const virtualizer = comboBox._scroller?.__virtualizer;
+    if (!virtualizer) {
+      return [0, 0];
+    }
+    return [virtualizer.firstVisibleIndex, virtualizer.lastVisibleIndex];
   };
 
   comboBox.$connector.requestPage = function (page, filter) {
@@ -195,7 +205,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.reset = function () {
-    filterDebouncer?.cancel();
+    comboBox._filterDebouncer?.cancel();
+    comboBox._filterDebouncer = null;
     requestDebouncer?.cancel();
     clearPageCallbacks();
     cache = {};
