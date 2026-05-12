@@ -24,9 +24,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
@@ -46,16 +47,20 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SVGGeneratorTest {
 
+    // Shared generator: created once for all tests that do not need to close it.
+    // Creating a new SVGGenerator copies a 3.5 MiB bundle file per instance, so
+    // reusing one instance avoids 13 unnecessary copies across the 14 tests.
     private SVGGenerator svgGenerator;
 
-    @BeforeEach
+    @BeforeAll
     void setup() throws IOException {
         svgGenerator = new SVGGenerator();
     }
 
-    @AfterEach
+    @AfterAll
     void cleanup() throws IOException {
         if (!svgGenerator.isClosed()) {
             svgGenerator.close();
@@ -72,18 +77,22 @@ class SVGGeneratorTest {
     @Test
     void throwIllegalStateExceptionOnClosedGenerator()
             throws IOException, InterruptedException {
-        svgGenerator.close();
-        // it should check to see if the generator is closed before it checks if
-        // the config is null
-        assertThrows(IllegalStateException.class,
-                () -> svgGenerator.generate(null));
+        // Uses a local generator so the shared one stays open for other tests.
+        try (SVGGenerator localGenerator = new SVGGenerator()) {
+            localGenerator.close();
+            assertThrows(IllegalStateException.class,
+                    () -> localGenerator.generate(null));
+        }
     }
 
     @Test
     void shouldKnowWhenItIsClosed() throws IOException {
-        assertFalse(svgGenerator.isClosed());
-        svgGenerator.close();
-        assertTrue(svgGenerator.isClosed());
+        // Uses a local generator so the shared one stays open for other tests.
+        try (SVGGenerator localGenerator = new SVGGenerator()) {
+            assertFalse(localGenerator.isClosed());
+            localGenerator.close();
+            assertTrue(localGenerator.isClosed());
+        }
     }
 
     @Test

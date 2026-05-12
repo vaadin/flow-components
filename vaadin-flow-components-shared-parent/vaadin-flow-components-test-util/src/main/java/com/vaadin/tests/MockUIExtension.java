@@ -47,6 +47,9 @@ import com.vaadin.flow.server.VaadinSession;
  */
 public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
 
+    private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace
+            .create(MockUIExtension.class);
+
     // Keep the session and UI as fields to ensure they are not garbage
     // collected during the test
     private UI ui;
@@ -56,14 +59,22 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     @Override
     @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     public void beforeEach(ExtensionContext context) {
-        service = Mockito.mock(VaadinService.class);
-        DeploymentConfiguration deploymentConfig = Mockito
-                .mock(DeploymentConfiguration.class);
-        Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
-        Mockito.when(service.getDeploymentConfiguration())
-                .thenReturn(deploymentConfig);
-
-        session = Mockito.spy(new AlwaysLockedVaadinSession(service));
+        // Retrieve or create service and session once per test class. Creating
+        // Mockito mocks and spies is expensive, and these objects are
+        // effectively stateless across tests, so sharing them is safe.
+        // context may be null when called from replaceUI() / clearUI().
+        if (context != null) {
+            var store = context.getParent().orElse(context).getStore(NAMESPACE);
+            String prefix = context.getRequiredTestClass().getName();
+            service = store.getOrComputeIfAbsent(prefix + ".service",
+                    key -> createService(), VaadinService.class);
+            session = store.getOrComputeIfAbsent(prefix + ".session",
+                    key -> Mockito.spy(new AlwaysLockedVaadinSession(service)),
+                    VaadinSession.class);
+        } else if (service == null) {
+            service = createService();
+            session = Mockito.spy(new AlwaysLockedVaadinSession(service));
+        }
 
         ui = new UI();
         ui.getInternals().setSession(session);
@@ -82,6 +93,16 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         removeAll();
         UI.setCurrent(null);
         VaadinSession.setCurrent(null);
+    }
+
+    private VaadinService createService() {
+        VaadinService svc = Mockito.mock(VaadinService.class);
+        DeploymentConfiguration deploymentConfig = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
+        Mockito.when(svc.getDeploymentConfiguration())
+                .thenReturn(deploymentConfig);
+        return svc;
     }
 
     /**

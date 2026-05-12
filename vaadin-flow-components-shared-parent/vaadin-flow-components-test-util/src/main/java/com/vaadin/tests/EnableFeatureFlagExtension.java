@@ -37,6 +37,10 @@ import com.vaadin.experimental.FeatureFlags;
  */
 public class EnableFeatureFlagExtension
         implements BeforeEachCallback, AfterEachCallback {
+
+    private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace
+            .create(EnableFeatureFlagExtension.class);
+
     private final Feature feature;
     private FeatureFlags mockFeatureFlags;
     private MockedStatic<FeatureFlags> mockFeatureFlagsStatic;
@@ -47,24 +51,57 @@ public class EnableFeatureFlagExtension
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        mockFeatureFlags = Mockito.mock(FeatureFlags.class);
-        Mockito.when(mockFeatureFlags.isEnabled(feature)).thenReturn(true);
-        Mockito.when(mockFeatureFlags.isEnabled(feature.getId()))
-                .thenReturn(true);
-
-        mockFeatureFlagsStatic = Mockito.mockStatic(FeatureFlags.class);
-        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(Mockito.any()))
-                .thenReturn(mockFeatureFlags);
+        // Create the Mockito static mock once per test class and reuse it.
+        // Mockito.mockStatic is expensive, and the mock state does not need to
+        // be reset between tests in the same class.
+        var store = context.getParent().orElse(context).getStore(NAMESPACE);
+        String key = context.getRequiredTestClass().getName() + "."
+                + feature.getId();
+        var holder = store.getOrComputeIfAbsent(key,
+                k -> createMocks(), MockHolder.class);
+        mockFeatureFlags = holder.featureFlags;
+        mockFeatureFlagsStatic = holder.staticMock;
+        // Reset to enabled state before each test: a previous test may have
+        // called disableFeature(), and that state would otherwise leak.
+        enableFeature();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        mockFeatureFlagsStatic.close();
+        // Do nothing: the mock is kept alive for the whole test class.
+        // JUnit 5 closes MockHolder (a CloseableResource) when the store scope
+        // ends after all tests in the class have run.
     }
 
     public void disableFeature() {
         Mockito.when(mockFeatureFlags.isEnabled(feature)).thenReturn(false);
         Mockito.when(mockFeatureFlags.isEnabled(feature.getId()))
                 .thenReturn(false);
+    }
+
+    public void enableFeature() {
+        Mockito.when(mockFeatureFlags.isEnabled(feature)).thenReturn(true);
+        Mockito.when(mockFeatureFlags.isEnabled(feature.getId()))
+                .thenReturn(true);
+    }
+
+    private MockHolder createMocks() {
+        FeatureFlags flags = Mockito.mock(FeatureFlags.class);
+        Mockito.when(flags.isEnabled(feature)).thenReturn(true);
+        Mockito.when(flags.isEnabled(feature.getId())).thenReturn(true);
+        MockedStatic<FeatureFlags> staticMock = Mockito
+                .mockStatic(FeatureFlags.class);
+        staticMock.when(() -> FeatureFlags.get(Mockito.any()))
+                .thenReturn(flags);
+        return new MockHolder(flags, staticMock);
+    }
+
+    private record MockHolder(FeatureFlags featureFlags,
+            MockedStatic<FeatureFlags> staticMock)
+            implements ExtensionContext.Store.CloseableResource {
+        @Override
+        public void close() {
+            staticMock.close();
+        }
     }
 }
