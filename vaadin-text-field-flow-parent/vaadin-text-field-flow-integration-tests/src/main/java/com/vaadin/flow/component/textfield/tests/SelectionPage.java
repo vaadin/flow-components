@@ -51,7 +51,13 @@ public class SelectionPage extends Div {
         Signal.effect(this,
                 ctx -> info.setText(format(textField.selectionSignal().get())));
 
-        add(textField, textArea, passwordField, info);
+        Div areaInfo = new Div();
+        areaInfo.setId("area-selection-info");
+        areaInfo.setText("(no selection)");
+        Signal.effect(this, ctx -> areaInfo
+                .setText(format(textArea.selectionSignal().get())));
+
+        add(textField, textArea, passwordField, info, areaInfo);
 
         addButton("select-all", "Select all", () -> textField.selectAll());
         addButton("set-range", "setSelectionRange(2, 7)",

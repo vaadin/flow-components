@@ -142,8 +142,7 @@ public class SelectionPageIT extends AbstractComponentIT {
                 + "arguments[0].inputElement.setSelectionRange(0, 5);"
                 + "arguments[0].inputElement.dispatchEvent(new Event('select'));",
                 area);
-        waitUntil(driver -> findElement(By.id("selection-info")).getText()
-                .startsWith("0-5:5:"));
+        waitUntil(driver -> areaInfoText().startsWith("0-5:5:"));
 
         clickButton("area-uppercase");
 
@@ -159,8 +158,7 @@ public class SelectionPageIT extends AbstractComponentIT {
         executeScript("arguments[0].inputElement.setSelectionRange(6, 11);"
                 + "arguments[0].inputElement.dispatchEvent(new Event('select'));",
                 area);
-        waitUntil(driver -> findElement(By.id("selection-info")).getText()
-                .startsWith("6-11:5:"));
+        waitUntil(driver -> areaInfoText().startsWith("6-11:5:"));
 
         clickButton("area-uppercase");
 
@@ -186,6 +184,11 @@ public class SelectionPageIT extends AbstractComponentIT {
 
     private String infoText() {
         WebElement info = findElement(By.id("selection-info"));
+        return info.getText();
+    }
+
+    private String areaInfoText() {
+        WebElement info = findElement(By.id("area-selection-info"));
         return info.getText();
     }
 
