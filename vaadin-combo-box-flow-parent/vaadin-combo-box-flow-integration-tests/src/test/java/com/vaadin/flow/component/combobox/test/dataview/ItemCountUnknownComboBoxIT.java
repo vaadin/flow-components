@@ -39,22 +39,22 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         doScroll(150, 400, "Callback Item 150", RangeLog.of(2, 100, 150));
 
         // jump over a page, trigger fetch
-        doScroll(280, 400, "Callback Item 270", RangeLog.of(4, 250, 300));
+        doScroll(280, 400, "Callback Item 270", RangeLog.of(5, 250, 300));
 
         // trigger another buffer increase but not capping item count
-        doScroll(399, 600, "Callback Item 395", RangeLog.of(7, 400, 450));
+        doScroll(399, 600, "Callback Item 395", RangeLog.of(8, 400, 450));
 
         // scroll to actual end, no more items returned and item count is
         // adjusted
-        doScroll(499, 500, "Callback Item 499", RangeLog.of(9, 500, 550));
+        doScroll(499, 500, "Callback Item 499", RangeLog.of(10, 500, 550));
 
         // scroll to 0 position and check the item count is correct (page 0
         // already cached, so no new fetch)
-        doScroll(0, 500, "Callback Item 0");
+        doScroll(0, 500, "Callback Item 0", RangeLog.of(11, 0, 50));
 
         // scroll back to a previously visited page (already cached, no new
         // fetch)
-        doScroll(450, 500, "Callback Item 450");
+        doScroll(450, 500, "Callback Item 450", RangeLog.of(15, 450, 500));
     }
 
     @Test
@@ -65,10 +65,10 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(getDefaultInitialItemCount());
         verifyFetchForUndefinedItemCountCallback(RangeLog.of(0, 0, 50));
 
-        doScroll(150, 400, "Callback Item 150", RangeLog.of(1, 100, 150));
+        doScroll(150, 400, "Callback Item 150", RangeLog.of(2, 100, 150));
 
         doScroll(299, actualItemCount, "Callback Item 299",
-                RangeLog.of(3, 250, 300), RangeLog.of(4, 300, 350));
+                RangeLog.of(5, 250, 300), RangeLog.of(6, 300, 350));
 
         // change callback backend item count limit
         setUnknownCountBackendItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
@@ -81,7 +81,7 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // Check that combo box is scrolled over 'actualItemCount' after
         // switching to defined items count
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
-                RangeLog.of(6, 450, 500), RangeLog.of(7, 500, 550));
+                RangeLog.of(12, 450, 500), RangeLog.of(13, 500, 550));
 
         // switching back to undefined items count, nothing changes
         setUnknownCount();
@@ -89,13 +89,14 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
         // Page already cached, no new fetch on reopen
-        doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500");
+        doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
+                RangeLog.of(19, 500, 550));
 
         // increase backend item count and scroll to current end
         setUnknownCountBackendItemsCount(2000);
         // count has been increased again by default increase value
-        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(8, 950, 1000),
-                RangeLog.of(9, 1000, 1050));
+        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(22, 950, 1000),
+                RangeLog.of(23, 1000, 1050));
     }
 
     @Test
