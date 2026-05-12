@@ -64,14 +64,11 @@ public class Accordion extends Component implements HasSize, HasStyle {
             getElement().setProperty(OPENED_PROPERTY, 0);
         }
 
-        getElement().addPropertyChangeListener(OPENED_PROPERTY,
-                event -> {
-                    OptionalInt openedIndex = getOpenedIndex();
-                    fireEvent(new OpenedChangeEvent(this,
-                            event.isUserOriginated(),
-                            openedIndex.isPresent() ? openedIndex.getAsInt()
-                                    : null));
-                });
+        getElement().addPropertyChangeListener(OPENED_PROPERTY, event -> {
+            OptionalInt openedIndex = getOpenedIndex();
+            fireEvent(new OpenedChangeEvent(this, event.isUserOriginated(),
+                    openedIndex.isPresent() ? openedIndex.getAsInt() : null));
+        });
     }
 
     /**

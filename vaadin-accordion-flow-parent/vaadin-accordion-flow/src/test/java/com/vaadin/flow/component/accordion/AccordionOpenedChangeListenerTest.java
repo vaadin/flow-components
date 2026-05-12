@@ -37,9 +37,11 @@ class AccordionOpenedChangeListenerTest {
     MockUIExtension ui = new MockUIExtension();
 
     @SuppressWarnings("unchecked")
-    private ComponentEventListener<OpenedChangeEvent> mockListener = Mockito.mock(ComponentEventListener.class);
+    private ComponentEventListener<OpenedChangeEvent> mockListener = Mockito
+            .mock(ComponentEventListener.class);
 
-    private ArgumentCaptor<OpenedChangeEvent> eventCaptor = ArgumentCaptor.forClass(OpenedChangeEvent.class);
+    private ArgumentCaptor<OpenedChangeEvent> eventCaptor = ArgumentCaptor
+            .forClass(OpenedChangeEvent.class);
 
     private Accordion accordion;
 
