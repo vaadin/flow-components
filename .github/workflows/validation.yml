@@ -438,6 +438,30 @@ jobs:
           name: wtr-reports
           path: wtr-reports
 
+      - name: Remove passing test reports
+        run: |
+          # Detect real failures via testsuite attributes (flaky retries leave
+          # <flakyError> tags but keep failures="0" errors="0" on the suite).
+          has_failures=false
+          for dir in surefire-reports failsafe-reports wtr-reports; do
+            [ -d "$dir" ] || continue
+            if find "$dir" -name '*.xml' | xargs grep -lE 'failures="[1-9]|errors="[1-9]' 2>/dev/null | grep -q .; then
+              has_failures=true
+              break
+            fi
+          done
+          echo "has_failures=$has_failures" >> $GITHUB_ENV
+          # Red build: keep only failing reports so dorny focuses on failures.
+          # Green build: keep all reports so every suite shows as passed.
+          if [ "$has_failures" = "true" ]; then
+            for dir in surefire-reports failsafe-reports wtr-reports; do
+              [ -d "$dir" ] || continue
+              find "$dir" -name '*.xml' | while read -r f; do
+                grep -qE 'failures="[1-9]|errors="[1-9]' "$f" || rm -f "$f"
+              done
+            done
+          fi
+
       - name: Check for unit test reports
         id: unit-check
         run: |
@@ -456,8 +480,8 @@ jobs:
           name: Unit Tests
           path: surefire-reports/**/TEST-*.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: Unit test compilation error
@@ -483,8 +507,8 @@ jobs:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: IT compilation error
@@ -510,8 +534,8 @@ jobs:
           name: WTR Tests
           path: wtr-reports/**/wtr-results.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: WTR setup error
