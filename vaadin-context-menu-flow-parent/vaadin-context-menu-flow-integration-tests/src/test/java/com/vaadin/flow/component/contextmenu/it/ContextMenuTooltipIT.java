@@ -82,11 +82,10 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
 
         ContextMenuElement.openByRightClick(target);
 
-        contextMenu.getMenuItems().get(0).hover();
+        var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         Assert.assertEquals("Item 0 / Updated Tooltip",
                 contextMenuTooltip.getText());
 
-        var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         subMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0-0 / Updated Tooltip",
                 contextMenuTooltip.getText());
@@ -98,10 +97,9 @@ public class ContextMenuTooltipIT extends AbstractComponentIT {
 
         ContextMenuElement.openByRightClick(target);
 
-        contextMenu.getMenuItems().get(0).hover();
+        var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         Assert.assertEquals("Item 0 / Tooltip", contextMenuTooltip.getText());
 
-        var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         subMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0-0 / Tooltip", contextMenuTooltip.getText());
     }
