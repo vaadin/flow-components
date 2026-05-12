@@ -33,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
@@ -1854,6 +1855,227 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withController_callsOnRequestStartBeforeStream() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var controller = mockController();
+        orchestratorWith(controller).prompt("Hello");
+
+        var inOrder = Mockito.inOrder(controller, mockProvider);
+        inOrder.verify(controller).onRequestStart();
+        inOrder.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void inputSubmit_callsOnRequestStartBeforeStream() {
+        // The input submit path must reach doPrompt the same way prompt(...)
+        // does — both go through processUserInput.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var controller = mockController();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withInput(mockInput)
+                .withController(controller).build();
+
+        var captor = ArgumentCaptor.forClass(SerializableConsumer.class);
+        Mockito.verify(mockInput).addSubmitListener(captor.capture());
+        captor.getValue().accept("Hi from input");
+
+        var inOrder = Mockito.inOrder(controller, mockProvider);
+        inOrder.verify(controller).onRequestStart();
+        inOrder.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void builder_withController_callsOnResponseFailedOnGenericStreamError() {
+        stubAddMessage();
+        var thrown = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(thrown));
+
+        var controller = mockController();
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(controller).onResponseFailed(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+    }
+
+    @Test
+    void builder_withController_callsOnResponseFailedOnTimeoutException() {
+        stubAddMessage();
+        var timeout = new TimeoutException("simulated");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(timeout));
+
+        var controller = mockController();
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(controller).onResponseFailed(timeout);
+        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+    }
+
+    @Test
+    void builder_withController_onRequestStartThrows_firesOnResponseFailedAndSkipsStream() {
+        stubAddMessage();
+        var thrown = new RuntimeException("controller refused");
+        var controller = mockController();
+        Mockito.doThrow(thrown).when(controller).onRequestStart();
+
+        var orchestrator = orchestratorWith(controller);
+        var caught = Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertSame(thrown, caught);
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Mockito.verify(controller).onResponseFailed(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+    }
+
+    @Test
+    void builder_withController_onResponseFailedThrows_isCaughtAndLogged() {
+        // A misbehaving hook must not propagate; it gets logged so the
+        // failure is operator-visible instead.
+        stubAddMessage();
+        var streamError = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponseFailed(Mockito.any());
+
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(controller).onResponseFailed(streamError);
+        var logged = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .equals("Error in controller onResponseFailed"))
+                .findFirst();
+        Assertions.assertTrue(logged.isPresent(),
+                "Expected an error log entry for the onResponseFailed throw");
+    }
+
+    @Test
+    void builder_withController_preStreamThrow_firesOnResponseFailed() {
+        stubAddMessage();
+        var thrown = new IllegalStateException(
+                "provider exploded before returning a stream");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenThrow(thrown);
+
+        var controller = mockController();
+        var orchestrator = orchestratorWith(controller);
+        var caught = Assertions.assertThrows(IllegalStateException.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertSame(thrown, caught);
+
+        Mockito.verify(controller).onResponseFailed(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+    }
+
+    @Test
+    void preStreamThrow_controllerCanRetryFromOnResponseFailed() {
+        // Order invariant: isProcessing must be released BEFORE
+        // onResponseFailed fires, otherwise a controller's recovery
+        // prompt is silently dropped at the CAS-false branch.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenThrow(new IllegalStateException("first turn dies"))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestratorRef = new AtomicReference<AIOrchestrator>();
+        var controller = mockController();
+        Mockito.doAnswer(invocation -> {
+            orchestratorRef.get().prompt("retry");
+            return null;
+        }).when(controller).onResponseFailed(Mockito.any());
+
+        var orchestrator = orchestratorWith(controller);
+        orchestratorRef.set(orchestrator);
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> orchestrator.prompt("first"));
+
+        Mockito.verify(mockProvider, Mockito.times(2))
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Mockito.verify(controller).onResponseFailed(Mockito.any());
+        Mockito.verify(controller).onResponseComplete();
+    }
+
+    @Test
+    void preStreamThrow_firesOnResponseFailedForErrorSubtypes() {
+        // onResponseFailed must fire for any Throwable, not just
+        // Exception — controllers need to release per-turn state
+        // (snapshots, pending writes, locks) regardless of which
+        // failure mode killed the turn.
+        stubAddMessage();
+        var thrown = new AssertionError("simulated assertion in provider");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenThrow(thrown);
+
+        var controller = mockController();
+        var orchestrator = orchestratorWith(controller);
+        var caught = Assertions.assertThrows(AssertionError.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertSame(thrown, caught);
+
+        Mockito.verify(controller).onResponseFailed(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+    }
+
+    @Test
+    void doPrompt_hangSafety_releasesProcessingFlagOnNonExceptionThrowable() {
+        // Error subtypes (OOM, AssertionError) must still release
+        // isProcessing, otherwise every later prompt is silently
+        // dropped at the CAS-false branch.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenThrow(new AssertionError("simulated fatal"))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        Assertions.assertThrows(AssertionError.class,
+                () -> orchestrator.prompt("first"));
+
+        orchestrator.prompt("second");
+        Mockito.verify(mockProvider, Mockito.times(2))
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void builder_withController_successfulTurnDoesNotFireOnResponseFailed() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var controller = mockController();
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(controller).onResponseComplete();
+        Mockito.verify(controller, Mockito.never())
+                .onResponseFailed(Mockito.any());
+    }
+
+    @Test
     void builder_withNoControllers_explicitToolsIsEmpty() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -2266,6 +2488,25 @@ class AIOrchestratorTest {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .build();
+    }
+
+    private void stubAddMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+    }
+
+    private AIController mockController() {
+        var controller = Mockito.mock(AIController.class);
+        Mockito.when(controller.getTools()).thenReturn(List.of());
+        return controller;
+    }
+
+    private AIOrchestrator orchestratorWith(AIController controller) {
+        return AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
                 .build();
     }
 

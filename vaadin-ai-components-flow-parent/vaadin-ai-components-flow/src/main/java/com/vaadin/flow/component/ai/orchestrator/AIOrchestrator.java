@@ -365,6 +365,7 @@ public class AIOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
+            fireResponseFailed(error, ui);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -393,20 +394,32 @@ public class AIOrchestrator implements Serializable {
         }
         try {
             processUserInput(userMessage);
-        } catch (Exception e) {
-            // streamResponseToMessage's doFinally only fires after
-            // subscription. If processUserInput throws before that (e.g. an
-            // AttachmentSubmitListener failure), the flag would
-            // stay stuck and the orchestrator would refuse every later
-            // prompt.
+        } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
+            // Reset the flag before firing the hook so a controller can
+            // retry from onResponseFailed, matching the async paths where
+            // doFinally clears the flag before the hook runs. Catching
+            // Throwable rather than Exception covers Error subtypes (OOM,
+            // AssertionError) — otherwise the flag would stay stuck and
+            // every later prompt would be dropped. Firing the hook for
+            // any Throwable mirrors the async onError consumer.
             isProcessing.set(false);
-            throw e;
+            // null only if UI.getCurrentOrThrow inside processUserInput
+            // failed first — in which case nothing past it executed.
+            var currentUi = UI.getCurrent();
+            if (currentUi != null) {
+                fireResponseFailed(t, currentUi);
+            }
+            throw t;
         }
     }
 
     private void processUserInput(String userMessage) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
+
+        if (controller != null) {
+            controller.onRequestStart();
+        }
 
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
@@ -466,6 +479,19 @@ public class AIOrchestrator implements Serializable {
         LOGGER.debug("Processing prompt with {} attachments",
                 attachments.size());
         streamResponseToMessage(request, assistantMessage, ui);
+    }
+
+    private void fireResponseFailed(Throwable error, UI ui) {
+        if (controller == null) {
+            return;
+        }
+        ui.access(() -> {
+            try {
+                controller.onResponseFailed(error);
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onResponseFailed", e);
+            }
+        });
     }
 
     private void fireResponseCompleteListener(String responseText, UI ui) {

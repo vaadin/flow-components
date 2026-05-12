@@ -20,13 +20,9 @@ import java.util.List;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 
 /**
- * Interface for AI controllers that extend orchestrator capabilities by
- * providing tools that the LLM can use.
- * <p>
- * Controllers provide domain-specific tools and functionality to the AI
- * orchestrator. Tools are functions that the AI can call to perform actions
- * like querying databases, creating visualizations, filling forms, etc.
- * </p>
+ * Contributes tools and lifecycle hooks to an {@link AIOrchestrator} —
+ * domain-specific behaviour like populating a grid, building a chart, or
+ * filling a form from natural-language requests.
  * <p>
  * Controllers are <b>not serialized</b> with the orchestrator. After
  * deserialization, restore controllers via
@@ -39,30 +35,55 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 public interface AIController {
 
     /**
-     * Returns the tools this controller provides to the LLM.
-     * <p>
-     * Tools are functions that the AI can call to perform actions. Each tool
-     * should have a clear name, description, and parameter schema.
-     * </p>
+     * Returns the tools this controller exposes to the LLM.
      *
      * @return list of tools, or empty list if controller provides no tools
      */
     List<LLMProvider.ToolSpec> getTools();
 
     /**
-     * Called by the orchestrator when an LLM request cycle has completed.
+     * Called synchronously on the UI thread at the start of every LLM turn,
+     * before the orchestrator opens the LLM stream. Implementations can prepare
+     * for the turn — locking UI surfaces, snapshotting state the tool
+     * definitions depend on, and so on.
      * <p>
-     * This method is invoked after all tool executions for a given user request
-     * have finished and the LLM has generated its final response. Controllers
-     * can use this callback to perform deferred operations, such as rendering
-     * UI updates or committing state changes.
+     * The default does nothing. Throwing from this method aborts the turn: the
+     * LLM stream is not opened, {@link #onResponseFailed(Throwable)} fires with
+     * the thrown exception so per-turn state captured before the throw can
+     * still be released, and the user sees a generic error message.
      * </p>
+     */
+    default void onRequestStart() {
+    }
+
+    /**
+     * Called on the UI thread under the session lock when the LLM stream
+     * completes successfully — after all tool calls for the turn have run and
+     * the LLM has produced its final response. Use it for deferred UI updates
+     * or to commit staged state.
      * <p>
-     * The orchestrator invokes this method on the UI thread under the session
-     * lock, so implementations may update UI components directly. Any exception
-     * thrown is caught by the orchestrator and reported to the user as a
-     * generic error message.
+     * Mutually exclusive with {@link #onResponseFailed(Throwable)}: every turn
+     * fires exactly one of the two. Exceptions thrown from the hook are caught
+     * and the user sees a generic error message; Errors propagate.
      * </p>
      */
     void onResponseComplete();
+
+    /**
+     * Called on the UI thread under the session lock when an LLM turn fails —
+     * stream error, timeout, or any throw between {@link #onRequestStart()} and
+     * the start of the stream. Implementations should release per-turn state
+     * captured in {@code onRequestStart} (locks, pending writes, snapshots).
+     * <p>
+     * Mutually exclusive with {@link #onResponseComplete()}: every turn fires
+     * exactly one of the two. The default does nothing. Exceptions thrown from
+     * the hook are caught and logged; Errors propagate.
+     * </p>
+     *
+     * @param error
+     *            the cause of the failure (Exception or Error), never
+     *            {@code null}
+     */
+    default void onResponseFailed(Throwable error) {
+    }
 }
