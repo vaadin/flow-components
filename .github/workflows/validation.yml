@@ -65,7 +65,7 @@ jobs:
         id: build-key
         if: steps.skip-ci.outputs.skip != 'true'
         env:
-          KEY: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/*.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json') }}
+          KEY: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/*.js') }}
         run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
 
       - name: Restore build cache
