@@ -417,10 +417,6 @@ public class AIOrchestrator implements Serializable {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
 
-        if (controller != null) {
-            controller.onRequestStart();
-        }
-
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
         var userAIMessage = messageList == null ? null
@@ -497,19 +493,6 @@ public class AIOrchestrator implements Serializable {
                 return controllerTools;
             }
         };
-    }
-
-    private void fireResponseFailed(Throwable error, UI ui) {
-        if (controller == null) {
-            return;
-        }
-        ui.access(() -> {
-            try {
-                controller.onResponseFailed(error);
-            } catch (Exception e) {
-                LOGGER.error("Error in controller onResponseFailed", e);
-            }
-        });
     }
 
     private void fireResponseFailed(Throwable error, UI ui) {
