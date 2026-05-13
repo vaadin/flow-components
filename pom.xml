@@ -606,6 +606,35 @@
     </build>
     <profiles>
         <profile>
+            <!-- Propagates -DchromeOptions=... to Failsafe forked JVMs so that
+                 TestBench's LocalDriver.createDriver() receives the flags via
+                 Parameters.getChromeOptions(). Maven -D properties are NOT
+                 forwarded to forked JVMs automatically; systemPropertyVariables is
+                 the correct mechanism. Profile activates only when -DchromeOptions
+                 is explicitly set (e.g. in GHA: --no-sandbox,--disable-dev-shm-usage). -->
+            <id>ci-chrome-options</id>
+            <activation>
+                <property>
+                    <name>chromeOptions</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <systemPropertyVariables>
+                                    <chromeOptions>${chromeOptions}</chromeOptions>
+                                </systemPropertyVariables>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
             <id>merged-it</id>
             <activation>
                 <property>
