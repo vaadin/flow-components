@@ -47,52 +47,10 @@ public class FilteringIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void itemsLessThanPageSize_clientSideFiltering() {
-        box.openPopup();
-        assertClientSideFilter(true);
-    }
-
-    @Test
-    public void clientSideFiltering_lowerCaseContains() {
-        box.openPopup();
-        List<String> filteredItems = setFilterAndGetImmediateResults("item 20");
-        Assert.assertEquals(
-                "Expected one item to match the client-side filtering 'item 20'.",
-                1, filteredItems.size());
-        Assert.assertEquals("Unexpected item to match the filter.", "Item 20",
-                filteredItems.get(0));
-
-        filteredItems = setFilterAndGetImmediateResults("M 10");
-        Assert.assertEquals(
-                "Expected one item to match the client-side filtering 'M 10'.",
-                1, filteredItems.size());
-        Assert.assertEquals("Unexpected item to match the filter.", "Item 10",
-                filteredItems.get(0));
-    }
-
-    @Test
     public void itemsMoreThanPageSize_serverSideFiltering() {
         clickButton("add-items");
         box.openPopup();
-        assertClientSideFilter(false);
-    }
-
-    @Test
-    public void loadItems_addItemsToCrossPageSize_switchToServerSideFiltering() {
-        box.openPopup();
-        clickButton("add-items");
-        box.openPopup();
-        assertRendered(box, "Item 8");
-        assertClientSideFilter(false);
-    }
-
-    @Test
-    public void removeItemsToCrossPageSize_switchToClientSideFiltering() {
-        clickButton("add-items");
-        box.openPopup();
-        clickButton("remove-items");
-        box.openPopup();
-        assertClientSideFilter(true);
+        assertServerSideFilter("3");
     }
 
     @Test
@@ -115,19 +73,6 @@ public class FilteringIT extends AbstractComboBoxIT {
         getNonEmptyOverlayContents(box).forEach(item -> Assert.assertTrue(
                 "Unexpected item found after filtering.",
                 item.startsWith("Item 2")));
-    }
-
-    @Test
-    public void biggerPageSize_clientSideFilteringWithMoreItems() {
-        box = $(ComboBoxElement.class).id("page-size-60");
-
-        clickButton("add-items");
-        box.openPopup();
-        assertClientSideFilter(true, "3", 15);
-
-        clickButton("add-items");
-        box.openPopup();
-        assertClientSideFilter(false, "3", 17);
     }
 
     @Test
@@ -257,44 +202,21 @@ public class FilteringIT extends AbstractComboBoxIT {
         }
     }
 
-    private void assertClientSideFilter(boolean clientSide) {
-        assertClientSideFilter(clientSide, "3", 13);
-    }
-
-    private void assertClientSideFilter(boolean clientSide, String filter,
-            int expectedCount) {
-
+    private void assertServerSideFilter(String filter) {
         List<String> items = setFilterAndGetImmediateResults(filter);
 
-        if (clientSide) {
-            Assert.assertEquals("Unexpected amount of filtered items. "
-                    + "Expected the items to be already filtered synchronously in client-side.",
-                    expectedCount, items.size());
-            items.forEach(item -> {
-                Assert.assertTrue(
-                        "Found an item which doesn't match the filter. "
-                                + "Expected the items to be already filtered synchronously in client-side.",
-                        item.contains(filter));
-            });
-        } else {
-            Assert.assertEquals("Expected server-side filtering, so there "
-                    + "should be no filtered items until server has responded.",
-                    0, items.size());
+        Assert.assertEquals(
+                "Expected server-side filtering, so there should be no "
+                        + "filtered items until server has responded.",
+                0, items.size());
 
-            waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
-            getNonEmptyOverlayContents(box).forEach(rendered -> {
-                Assert.assertTrue(
-                        "Item which doesn't match the filter was found after server-side filtering.",
-                        rendered.contains(filter));
-            });
-        }
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
+        getNonEmptyOverlayContents(box).forEach(rendered -> Assert.assertTrue(
+                "Item which doesn't match the filter was found after server-side filtering.",
+                rendered.contains(filter)));
     }
 
     private List<String> setFilterAndGetImmediateResults(String filter) {
-        /*
-         * If combo box is doing client-side filtering, filteredItems is changed
-         * synchronously after changing the filter.
-         */
         String script = String.format("const box = arguments[0];" //
                 + "box.filter = '%s';" //
                 + "return box.filteredItems.map(item => item.label);", filter);

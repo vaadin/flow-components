@@ -45,17 +45,8 @@ import tools.jackson.databind.node.ObjectNode;
  * scrolls down the overlay. The number of items in one page is by default 50,
  * and can be changed with {@link #setPageSize(int)}.
  * <p>
- * ComboBox can do filtering either in the browser or in the server. When
- * ComboBox has only a relatively small set of items, the filtering will happen
- * in the browser, allowing smooth user-experience. When the size of the data
- * set is larger than the {@code pageSize}, the webcomponent doesn't necessarily
- * have all the data available, and it will make requests to the server to
- * handle the filtering. Also, if you have defined custom filtering logic, with
- * eg. {@link #setItems(ItemFilter, Collection)}, filtering will happen in the
- * server. To enable client-side filtering with larger data sets, you can
- * override the {@code pageSize} to be bigger than the size of your data set.
- * However, then the full data set will be sent to the client immediately, and
- * you will lose the benefits of lazy loading.
+ * Filtering is always performed on the server. Every change to the filter
+ * triggers a request that returns the matching items for the current viewport.
  * <h2>Validation</h2>
  * <p>
  * Combo Box comes with a built-in validation mechanism that verifies that the
@@ -136,10 +127,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * Creates an empty combo box with the defined page size for lazy loading.
      * <p>
      * The default page size is 50.
-     * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
      *
      * @param pageSize
      *            the amount of items to request at a time for lazy loading

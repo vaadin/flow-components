@@ -58,12 +58,6 @@ public class FilteringPage extends Div {
         });
         addButton.setId("add-items");
 
-        NativeButton removeButton = new NativeButton("Remove 20 items", e -> {
-            items.removeAll(items.subList(items.size() - 20, items.size()));
-            dp.refreshAll();
-        });
-        removeButton.setId("remove-items");
-
         NativeButton itemFilterButton = new NativeButton(
                 "Set items with ItemFilter", e -> {
                     ItemFilter<String> itemFilter = (item, filter) -> item
@@ -72,13 +66,7 @@ public class FilteringPage extends Div {
                 });
         itemFilterButton.setId("item-filter");
 
-        add(comboBox, addButton, removeButton, itemFilterButton);
-
-        ComboBox<String> pageSizeBox = new ComboBox<>(60);
-        pageSizeBox.setItems(dp);
-        pageSizeBox.setLabel("Page size 60");
-        pageSizeBox.setId("page-size-60");
-        add(new Div(), pageSizeBox);
+        add(comboBox, addButton, itemFilterButton);
 
         ComboBox<String> comboBoxWithFilterableDataProvider = new ComboBox<>();
         comboBoxWithFilterableDataProvider.setId("filterable-data-provider");

@@ -24,8 +24,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
@@ -42,7 +40,6 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
-import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -138,8 +135,6 @@ class ComboBoxDataController<TItem>
 
     private UserProvidedFilter userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
-    private boolean shouldForceServerSideFiltering = false;
-
     // Filter set by the client when requesting data. It's sent back to client
     // together with the response so client may know for what filter data is
     // provided.
@@ -161,15 +156,10 @@ class ComboBoxDataController<TItem>
      * @param localeSupplier
      *            supplier for the current locale of the combo box
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
-
-        // Update client side filtering when data provider size changes
-        ComponentUtil.addListener(comboBox, ItemCountChangeEvent.class,
-                (ComponentEventListener) (e -> updateClientSideFiltering()));
     }
 
     /**
@@ -205,7 +195,6 @@ class ComboBoxDataController<TItem>
             dataCommunicator.setPageSize(pageSize);
         }
         reset();
-        updateClientSideFiltering();
     }
 
     /**
@@ -555,10 +544,8 @@ class ComboBoxDataController<TItem>
             }
         };
 
-        shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
         reset();
-        updateClientSideFiltering();
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
@@ -571,23 +558,10 @@ class ComboBoxDataController<TItem>
         }
     }
 
-    private void updateClientSideFiltering() {
-        if (dataCommunicator != null) {
-            setClientSideFilter(
-                    !this.shouldForceServerSideFiltering && dataCommunicator
-                            .getItemCount() <= comboBox.getPageSize());
-        }
-    }
-
-    private void setClientSideFilter(boolean clientSideFilter) {
-        comboBox.getElement().setProperty("_clientSideFilter",
-                clientSideFilter);
-    }
-
     private void clearFilterOnClose(PropertyChangeEvent event) {
         if (Boolean.FALSE.equals(event.getValue())) {
             if (lastFilter != null && !lastFilter.isEmpty()) {
-                clearClientSideFilterAndUpdateInMemoryFilter();
+                resetWithEmptyFilter();
             }
         }
     }
@@ -622,10 +596,10 @@ class ComboBoxDataController<TItem>
             SerializablePredicate<TItem> filter,
             SerializableComparator<TItem> sortComparator) {
         dataCommunicator.setInMemorySorting(sortComparator);
-        clearClientSideFilterAndUpdateInMemoryFilter();
+        resetWithEmptyFilter();
     }
 
-    private void clearClientSideFilterAndUpdateInMemoryFilter() {
+    private void resetWithEmptyFilter() {
         lastFilter = null;
         filterSlot.accept("");
         reset();

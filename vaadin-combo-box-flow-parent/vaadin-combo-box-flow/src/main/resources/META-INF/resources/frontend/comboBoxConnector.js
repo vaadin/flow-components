@@ -67,24 +67,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Invalid pageSize';
     }
 
-    if (comboBox._clientSideFilter) {
-      // For clientside filter we first make sure we have all data which we also
-      // filter based on comboBox.filter. While later we only filter clientside data.
-
-      if (cache[0]) {
-        performClientSideFilter(cache[0], params.filter, callback);
-        return;
-      } else {
-        // If client side filter is enabled then we need to first ask all data
-        // and filter it on client side, otherwise next time when user will
-        // input another filter, eg. continue to type, the local cache will be only
-        // what was received for the first filter, which may not be the whole
-        // data from server (keep in mind that client side filter is enabled only
-        // when the items count does not exceed one page).
-        params.filter = '';
-      }
-    }
-
     const filterChanged = params.filter !== lastFilter;
     if (filterChanged) {
       cache = {};
@@ -160,11 +142,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
   };
 
-  comboBox.$connector.filter = (item, filter) => {
-    filter = filter ? filter.toString().toLowerCase() : '';
-    return comboBox._getItemLabel(item, comboBox.itemLabelPath).toString().toLowerCase().indexOf(filter) > -1;
-  };
-
   comboBox.$connector.set = (index, items, filter) => {
     if (filter != serverFacade.getLastFilterSentToServer()) {
       return;
@@ -201,17 +178,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.updateSize = function (newSize) {
-    if (!comboBox._clientSideFilter) {
-      // FIXME: It may be that this size set is unnecessary, since when
-      // providing data to combobox via callback we may use data's size.
-      // However, if this size reflect the whole data size, including
-      // data not fetched yet into client side, and combobox expect it
-      // to be set as such, the at least, we don't need it in case the
-      // filter is clientSide only, since it'll increase the height of
-      // the popup at only at first user filter to this size, while the
-      // filtered items count are less.
-      comboBox.size = newSize;
-    }
+    comboBox.size = newSize;
   };
 
   comboBox.$connector.reset = function () {
@@ -249,32 +216,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   const commitPage = function (page, callback) {
     let data = cache[page];
-
-    if (comboBox._clientSideFilter) {
-      performClientSideFilter(data, comboBox.filter, callback);
-    } else {
-      // Remove the data if server-side filtering, but keep it for client-side
-      // filtering
-      delete cache[page];
-
-      // FIXME: It may be that we ought to provide data.length instead of
-      // comboBox.size and remove updateSize function.
-      callback(data, comboBox.size);
-    }
-  };
-
-  // Perform filter on client side (here) using the items from specified page
-  // and submitting the filtered items to specified callback.
-  // The filter used is the one from combobox, not the lastFilter stored since
-  // that may not reflect user's input.
-  const performClientSideFilter = function (page, filter, callback) {
-    let filteredItems = page;
-
-    if (filter) {
-      filteredItems = page.filter((item) => comboBox.$connector.filter(item, filter));
-    }
-
-    callback(filteredItems, filteredItems.length);
+    delete cache[page];
+    callback(data, comboBox.size);
   };
 
   // Prevent setting the custom value as the 'value'-prop automatically

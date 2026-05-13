@@ -236,10 +236,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Gets the page size, which is the number of items fetched at a time from
      * the data provider.
      * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
-     * <p>
      * The default page size is 50.
      *
      * @return the maximum number of items sent per request
@@ -254,10 +250,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * the data provider. This does not guarantee a maximum query size to the
      * backend; when the overlay has room to render more new items than the page
      * size, multiple "pages" will be requested at once.
-     * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
      * <p>
      * Setting the page size after the ComboBox has been rendered effectively
      * resets the component, and the current page(s) and sent over again.
@@ -690,11 +682,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * you can configure with
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
      * <p>
-     * Filtering will be handled in the client-side if the size of the data set
-     * is less than the page size. To force client-side filtering with a larger
-     * data set (at the cost of increased network traffic), you can increase the
-     * page size with {@link #setPageSize(int)}.
-     * <p>
      * Setting the items resets the combo box's value to {@code null}.
      */
     @Override
@@ -706,10 +693,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Sets the data items of this combo box and a filtering function for
      * defining which items are displayed when user types into the combo box.
      * <p>
-     * Note that defining a custom filter will force the component to make
-     * server roundtrips to handle the filtering. Otherwise it can handle
-     * filtering in the client-side, if the size of the data set is less than
-     * the {@link #setPageSize(int) pageSize}.
+     * Filtering is always performed on the server.
      * <p>
      * Setting the items resets the combo box's value to {@code null}.
      * <p>
@@ -735,10 +719,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Sets the data items of this combo box and a filtering function for
      * defining which items are displayed when user types into the combo box.
      * <p>
-     * Note that defining a custom filter will force the component to make
-     * server roundtrips to handle the filtering. Otherwise it can handle
-     * filtering in the client-side, if the size of the data set is less than
-     * the {@link #setPageSize(int) pageSize}.
+     * Filtering is always performed on the server.
      * <p>
      * Setting the items resets the combo box's value to {@code null}.
      * <p>
@@ -765,10 +746,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Sets a ListDataProvider for this combo box and a filtering function for
      * defining which items are displayed when user types into the combo box.
      * <p>
-     * Note that defining a custom filter will force the component to make
-     * server roundtrips to handle the filtering. Otherwise it can handle
-     * filtering in the client-side, if the size of the data set is less than
-     * the {@link #setPageSize(int) pageSize}.
+     * Filtering is always performed on the server.
      * <p>
      * Setting the items resets the combo box's value to {@code null}.
      * <p>
@@ -1188,11 +1166,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * name predicate:
      * {@code (String nameFilter) -> person -> person.getName().equalsIgnoreCase
      * (nameFilter);}
-     * <p>
-     * Filtering will be handled in the client-side if the size of the data set
-     * is less than the page size. To force client-side filtering with a larger
-     * data set (at the cost of increased network traffic), you can increase the
-     * page size with {@link #setPageSize(int)}.
      * <p>
      * Note! Using a {@link ListDataProvider} instead of a
      * {@link InMemoryDataProvider} is recommended to get access to
