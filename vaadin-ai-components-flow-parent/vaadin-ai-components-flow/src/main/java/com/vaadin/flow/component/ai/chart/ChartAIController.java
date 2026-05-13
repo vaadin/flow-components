@@ -62,6 +62,13 @@ import tools.jackson.databind.JsonNode;
  * {@link Chart} component, so it survives serialization.
  * </p>
  * <p>
+ * If the LLM turn fails, the orchestrator fires
+ * {@link #onResponseFailed(Throwable)} instead — pending configuration is
+ * discarded and queries set during the failed turn are rolled back to the
+ * snapshot taken in {@link #onRequestStart()}, so the chart keeps its last
+ * successfully-rendered state.
+ * </p>
+ * <p>
  * Data conversion from SQL query results to chart series is handled by a
  * {@link DataConverter}. A default implementation is used unless overridden via
  * {@link #setDataConverter(DataConverter)}.
@@ -138,6 +145,7 @@ public class ChartAIController implements AIController {
     private final DatabaseProvider databaseProvider;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
+    private List<String> queriesBeforeTurn;
 
     /**
      * Creates a new AI chart controller.
@@ -301,6 +309,16 @@ public class ChartAIController implements AIController {
     }
 
     @Override
+    public void onRequestStart() {
+        var entry = ChartEntry.get(chart);
+        // Snapshot queries at the start of every turn so a failed turn can roll
+        // the entry back instead of leaving the chart pointing at queries the
+        // LLM never finished configuring.
+        queriesBeforeTurn = entry == null ? List.of()
+                : List.copyOf(entry.getQueries());
+    }
+
+    @Override
     public void onResponseComplete() {
         ChartEntry entry = ChartEntry.get(chart);
         if (entry == null || !entry.hasPendingState()) {
@@ -322,6 +340,17 @@ public class ChartAIController implements AIController {
         // is not required: Configuration is server-side state and any JS
         // calls are queued by Flow until the chart attaches.
         render(entry, queries, configJson, true);
+    }
+
+    @Override
+    public void onResponseFailed(Throwable error) {
+        var entry = ChartEntry.get(chart);
+        if (entry != null) {
+            if (queriesBeforeTurn != null) {
+                entry.setQueries(queriesBeforeTurn);
+            }
+            entry.clearPendingState();
+        }
     }
 
     private void render(ChartEntry entry, List<String> queries,

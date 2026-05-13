@@ -610,6 +610,88 @@ class ChartAIControllerTest {
     }
 
     @Nested
+    class OnResponseFailed {
+
+        @Test
+        void failedFirstTurnDoesNotEstablishState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+
+            controller.onRequestStart();
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // A subsequent successful turn with no tool calls must not
+            // pick up the failed turn's staged configuration or queries.
+            controller.onRequestStart();
+            controller.onResponseComplete();
+
+            Assertions.assertNull(controller.getState());
+        }
+
+        @Test
+        void failedTurnStagedConfigurationDoesNotLeakIntoNextTurn() {
+            // Establish a baseline turn with chart type "bar".
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+            controller.onRequestStart();
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponseComplete();
+
+            var baselineType = chart.getConfiguration().getChart().getType();
+
+            // Second turn stages a different chart type, then fails.
+            controller.onRequestStart();
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // Third turn fires onResponseComplete with no tool calls.
+            // The failed turn's chart type must not be applied.
+            controller.onRequestStart();
+            controller.onResponseComplete();
+
+            Assertions.assertEquals(baselineType,
+                    chart.getConfiguration().getChart().getType());
+        }
+
+        @Test
+        void failedTurnRollsBackToPreviousSuccessfulQueries() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+
+            controller.onRequestStart();
+            findTool(tools, "update_chart_data_source").execute(
+                    json("{\"queries\": [\"SELECT good FROM baseline\"]}"));
+            controller.onResponseComplete();
+
+            controller.onRequestStart();
+            findTool(tools, "update_chart_data_source").execute(
+                    json("{\"queries\": [\"SELECT bad FROM half_baked\"]}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // A third turn fires onResponseComplete with nothing staged.
+            // The bad query must not bleed through; the baseline stands.
+            controller.onRequestStart();
+            controller.onResponseComplete();
+
+            var state = controller.getState();
+            Assertions.assertNotNull(state);
+            Assertions.assertEquals(List.of("SELECT good FROM baseline"),
+                    state.queries());
+        }
+    }
+
+    @Nested
     class DetachedChart {
 
         @BeforeEach
