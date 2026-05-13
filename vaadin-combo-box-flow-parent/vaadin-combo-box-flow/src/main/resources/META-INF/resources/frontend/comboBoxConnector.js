@@ -217,7 +217,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       const items = cache[page];
 
       if (comboBox._clientSideFilter) {
-        if (page === 0) {
+        if (items) {
           performClientSideFilter(items, comboBox.filter, callback);
         } else {
           callback([], comboBox.size);
