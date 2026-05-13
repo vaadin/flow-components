@@ -321,7 +321,7 @@ jobs:
 
   its:
     name: ITs (${{ matrix.shard }})
-    needs: [fast-tests]
+    needs: [build, fast-tests]
     if: needs.fast-tests.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
