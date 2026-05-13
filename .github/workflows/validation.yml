@@ -32,6 +32,7 @@ jobs:
     outputs:
       skip: ${{ steps.skip-ci.outputs.skip }}
       components: ${{ steps.components.outputs.elements }}
+      build-cache-key: ${{ steps.build-key.outputs.key }}
     steps:
       - name: Set Maven args
         run: |
@@ -60,6 +61,13 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Compute build cache key
+        id: build-key
+        if: steps.skip-ci.outputs.skip != 'true'
+        env:
+          KEY: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/*.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json') }}
+        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+
       - name: Restore build cache
         id: build-cache
         if: steps.skip-ci.outputs.skip != 'true'
@@ -68,7 +76,7 @@ jobs:
           path: |
             ~/.m2/repository/com/vaadin
             vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
+          key: ${{ steps.build-key.outputs.key }}
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -227,7 +235,7 @@ jobs:
           path: |
             ~/.m2/repository/com/vaadin
             vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
+          key: ${{ needs.build.outputs.build-cache-key }}
           fail-on-cache-miss: true
 
       - name: Run unit tests
@@ -357,7 +365,7 @@ jobs:
           path: |
             ~/.m2/repository/com/vaadin
             vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
+          key: ${{ needs.build.outputs.build-cache-key }}
           fail-on-cache-miss: true
 
       - name: Restore WAR cache
