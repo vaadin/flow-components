@@ -137,7 +137,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     for (let index = firstPage * pageSize; index < lastPage * pageSize; index++) {
-      comboBox.filteredItems[index] = placeHolder;
+      if (comboBox.filteredItems[index]) {
+        comboBox.filteredItems[index] = placeHolder;
+      }
     }
   };
 
