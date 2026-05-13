@@ -607,11 +607,11 @@
     <profiles>
         <profile>
             <!-- Propagates -DchromeOptions=... to Failsafe forked JVMs so that
-                 TestBench's LocalDriver.createDriver() receives the flags via
+                 TestBench LocalDriver.createDriver() receives the flags via
                  Parameters.getChromeOptions(). Maven -D properties are NOT
                  forwarded to forked JVMs automatically; systemPropertyVariables is
                  the correct mechanism. Profile activates only when -DchromeOptions
-                 is explicitly set (e.g. in GHA: --no-sandbox,--disable-dev-shm-usage). -->
+                 is explicitly set (e.g. no-sandbox,disable-dev-shm-usage in GHA). -->
             <id>ci-chrome-options</id>
             <activation>
                 <property>
