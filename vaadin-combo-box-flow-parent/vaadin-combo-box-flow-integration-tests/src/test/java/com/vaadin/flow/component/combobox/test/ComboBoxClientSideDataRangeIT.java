@@ -36,76 +36,78 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void defaultPageSize_scrollUpAndDown_itemsRender_loadedCountBounded() {
-        scrollUpAndDown_itemsRender_loadedCountBounded(50);
+    public void defaultPageSize_scrollUpAndDown_loadedCountWithinBuffer() {
+        scrollUpAndDown_loadedCountWithinBuffer(50);
     }
 
     @Test
-    public void defaultPageSize_scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded() {
-        scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded(50);
+    public void defaultPageSize_scrollToEnd_scrollUpAndDown_loadedCountWithinBuffer() {
+        scrollToEnd_scrollUpAndDown_loadedCountWithinBuffer(50);
     }
 
     @Test
-    public void setGreatPageSize_scrollUpAndDown_itemsRender_loadedCountBounded() {
+    public void setGreatPageSize_scrollUpAndDown_loadedCountWithinBuffer() {
         $("input").id("set-page-size").sendKeys("300", Keys.ENTER);
-        scrollUpAndDown_itemsRender_loadedCountBounded(300);
+
+        scrollUpAndDown_loadedCountWithinBuffer(300);
     }
 
     @Test
-    public void setGreatPageSize_scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded() {
+    public void setGreatPageSize_scrollToEnd_scrollUpAndDown_loadedCountWithinBuffer() {
         $("input").id("set-page-size").sendKeys("300", Keys.ENTER);
-        scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded(300);
+
+        scrollToEnd_scrollUpAndDown_loadedCountWithinBuffer(300);
     }
 
-    private void scrollUpAndDown_itemsRender_loadedCountBounded(int pageSize) {
+    private void scrollUpAndDown_loadedCountWithinBuffer(int pageSize) {
         comboBox.openPopup();
 
-        // Scroll forward; each visited position renders its item.
+        // Scroll to the end page by page.
         for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
             scrollToItem(comboBox, i);
             waitUntilTextInContent(comboBox, "Item " + i);
+            assertLoadedCountWithinBuffer(pageSize);
         }
-        assertLoadedCountWithinBuffer(pageSize);
 
-        // Scroll back; each position renders again after re-fetch.
+        // Scroll to the beginning page by page.
         for (int i = ITEMS_COUNT - 1; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
             waitUntilTextInContent(comboBox, "Item " + i);
+            assertLoadedCountWithinBuffer(pageSize);
         }
-        assertLoadedCountWithinBuffer(pageSize);
     }
 
-    private void scrollToEnd_scrollUpAndDown_itemsRender_loadedCountBounded(
+    private void scrollToEnd_scrollUpAndDown_loadedCountWithinBuffer(
             int pageSize) {
         comboBox.openPopup();
 
+        // Scroll to the end.
         int lastIndex = ITEMS_COUNT - 1;
         scrollToItem(comboBox, lastIndex);
         waitUntilTextInContent(comboBox, "Item " + lastIndex);
         assertLoadedCountWithinBuffer(pageSize);
 
+        // Scroll to the beginning page by page.
         for (int i = lastIndex; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
             waitUntilTextInContent(comboBox, "Item " + i);
+            assertLoadedCountWithinBuffer(pageSize);
         }
-        assertLoadedCountWithinBuffer(pageSize);
 
+        // Scroll to the end page by page.
         for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
             scrollToItem(comboBox, i);
             waitUntilTextInContent(comboBox, "Item " + i);
+            assertLoadedCountWithinBuffer(pageSize);
         }
-        assertLoadedCountWithinBuffer(pageSize);
     }
 
-    // The connector requests `viewport ± pageSize` so the active range
-    // covers at most 4 pageSize-aligned pages around the current viewport.
     private void assertLoadedCountWithinBuffer(int pageSize) {
         int loaded = getLoadedItems(comboBox).size();
         Assert.assertTrue("Items should load after scrolling but was " + loaded,
-                loaded > 0);
-        Assert.assertTrue(
-                "Loaded items should stay within the connector's buffer ("
-                        + (pageSize * 4) + ") but was " + loaded,
-                loaded <= pageSize * 4);
+                loaded >= pageSize);
+        Assert.assertTrue("Loaded items should stay within ~2 pages ("
+                + (pageSize * 2) + ") but was " + loaded,
+                loaded <= pageSize * 2);
     }
 }

@@ -154,7 +154,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBox.openPopup();
         scrollToItem(stringBox, 60);
         assertLoadedItemsCount(
-                "No new items should be loaded for disabled ComboBox.", 100,
+                "No new items should be loaded for disabled ComboBox.", 50,
                 stringBox);
     }
 

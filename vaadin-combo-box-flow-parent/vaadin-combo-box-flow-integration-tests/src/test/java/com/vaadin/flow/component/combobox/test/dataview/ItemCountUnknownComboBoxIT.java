@@ -51,8 +51,9 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         // scroll to 0 position and check the item count is correct
         doScroll(0, 500, "Callback Item 0", RangeLog.of(11, 0, 50));
 
-        // scroll back to a previously visited page
-        doScroll(450, 500, "Callback Item 450", RangeLog.of(15, 450, 500));
+        // scroll again to the end of list and check the item count
+        doScroll(450, 500, "Callback Item 450", RangeLog.of(12, 400, 450),
+                RangeLog.of(13, 450, 500));
     }
 
     @Test
@@ -63,10 +64,10 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(getDefaultInitialItemCount());
         verifyFetchForUndefinedItemCountCallback(RangeLog.of(0, 0, 50));
 
-        doScroll(150, 400, "Callback Item 150", RangeLog.of(2, 100, 150));
+        doScroll(150, 400, "Callback Item 150", RangeLog.of(1, 100, 150));
 
         doScroll(299, actualItemCount, "Callback Item 299",
-                RangeLog.of(5, 250, 300), RangeLog.of(6, 300, 350));
+                RangeLog.of(3, 250, 300), RangeLog.of(4, 300, 350));
 
         // change callback backend item count limit
         setUnknownCountBackendItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
@@ -77,12 +78,12 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
         // Web component requests first page (dropdown opened)
-        verifyFetchForUndefinedItemCountCallback(RangeLog.of(9, 0, 50));
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(6, 0, 50));
 
         // Check that combo box is scrolled over 'actualItemCount' after
         // switching to defined items count
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
-                RangeLog.of(12, 450, 500), RangeLog.of(13, 500, 550));
+                RangeLog.of(7, 450, 500), RangeLog.of(8, 500, 550));
 
         // switching back to undefined items count, nothing changes
         setUnknownCount();
@@ -90,17 +91,16 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(DEFAULT_DATA_PROVIDER_SIZE);
 
         // Dropdown opened, since requested first page
-        verifyFetchForUndefinedItemCountCallback(RangeLog.of(15, 0, 50));
+        verifyFetchForUndefinedItemCountCallback(RangeLog.of(9, 0, 50));
 
-        // Page already cached, no new fetch on reopen
         doScroll(500, DEFAULT_DATA_PROVIDER_SIZE, "Callback Item 500",
-                RangeLog.of(19, 500, 550));
+                RangeLog.of(10, 450, 500), RangeLog.of(11, 500, 550));
 
         // increase backend item count and scroll to current end
         setUnknownCountBackendItemsCount(2000);
         // count has been increased again by default increase value
-        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(22, 950, 1000),
-                RangeLog.of(23, 1000, 1050));
+        doScroll(1000, 1200, "Callback Item 999", RangeLog.of(12, 950, 1000),
+                RangeLog.of(13, 1000, 1050));
     }
 
     @Test

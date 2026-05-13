@@ -91,15 +91,19 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.getViewportRange = function () {
-    const virtualizer = comboBox._scroller?.__virtualizer;
-    const first = virtualizer?.firstVisibleIndex;
-    const last = virtualizer?.lastVisibleIndex;
-    return [Number.isFinite(first) ? first : 0, Number.isFinite(last) ? last : 0];
+    const indices = Array.from(comboBox._scroller?.children ?? [])
+      .map((child) => child.index)
+      .filter((index) => Number.isFinite(index))
+      .sort((a, b) => a - b);
+    if (indices.length === 0) {
+      return [0, 0];
+    }
+    return [indices[0], indices[indices.length - 1]];
   };
 
   comboBox.$connector.requestPage = function (page, filter) {
     let viewportRange = comboBox.$connector.getViewportRange();
-    const buffer = Math.max(viewportRange[1] - viewportRange[0], comboBox.pageSize);
+    const buffer = viewportRange[1] - viewportRange[0];
     const sizeLimit = Number.isFinite(comboBox.size) ? comboBox.size : Number.POSITIVE_INFINITY;
     viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
     viewportRange[1] = Math.min(viewportRange[1] + buffer, sizeLimit);
