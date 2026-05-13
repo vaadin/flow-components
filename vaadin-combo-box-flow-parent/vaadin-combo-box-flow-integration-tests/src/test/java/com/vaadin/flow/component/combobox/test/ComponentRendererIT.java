@@ -68,7 +68,7 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void multiplePagesOfItems_scrollDown_close_itemsRenderOnReopen() {
+    public void multiplePagesOfItems_scrollDown_close_noItemsWhenReopened() {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("multiple-pages-of-items");
 
@@ -81,9 +81,10 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
 
         comboBox.closePopup();
 
-        comboBox.openPopup();
-        waitUntilTextInContent(comboBox, "Song");
-        assertRendered(comboBox, "<span>Song 0</span>");
+        String firstItemText = (String) executeScript("arguments[0].open();"
+                + "return document.querySelector('vaadin-combo-box-item')?.textContent;",
+                comboBox);
+        Assert.assertEquals("", firstItemText);
     }
 
     private void testItems(TestBenchElement comboBox) {
