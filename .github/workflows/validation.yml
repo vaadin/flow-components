@@ -224,15 +224,7 @@ jobs:
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true' && steps.war-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
+          fail-on-cache-miss: true
 
       - name: Run unit tests
         if: matrix.type == 'unit'
@@ -360,6 +352,7 @@ jobs:
         with:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          fail-on-cache-miss: true
 
       - name: Restore WAR cache
         uses: actions/cache@v5
