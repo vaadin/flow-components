@@ -65,8 +65,10 @@ jobs:
         if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -222,13 +224,15 @@ jobs:
         id: build-cache
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
           fail-on-cache-miss: true
 
       - name: Run unit tests
         if: matrix.type == 'unit'
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
+        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
 
       - name: Upload unit test reports
         if: always() && matrix.type == 'unit'
@@ -350,8 +354,10 @@ jobs:
       - name: Restore build cache
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/jsdom-exporter.js', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/package-lock.json', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/customWidthsMap.js') }}
           fail-on-cache-miss: true
 
       - name: Restore WAR cache
