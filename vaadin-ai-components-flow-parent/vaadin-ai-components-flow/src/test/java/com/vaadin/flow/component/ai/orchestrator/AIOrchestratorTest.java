@@ -1945,10 +1945,8 @@ class AIOrchestratorTest {
 
     @Test
     void streamError_setsErrorMessageOnAssistantPlaceholderExactlyOnce() {
-        // Pre-stream and async paths must not both set the placeholder
-        // text — the async onError consumer already handles this case,
-        // and our pre-stream catch is reached only when subscribe was
-        // never opened.
+        // Async errors and the pre-stream catch target the same text; the
+        // two paths must not stack.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1964,12 +1962,76 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void attachmentListenerThrows_doesNotCommitToHistory() {
+        // Listener fires in the commit phase before history.add — a
+        // listener throw must not leave the user message in history.
+        stubAddMessage();
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("a.txt")));
+
+        AttachmentSubmitListener listener = event -> {
+            throw new RuntimeException("listener failed");
+        };
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver)
+                .withAttachmentSubmitListener(listener).build();
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+
+        Assertions.assertTrue(orchestrator.getHistory().isEmpty(),
+                "Attachment listener throw must not commit user message to history");
+    }
+
+    @Test
+    void preStreamThrow_withoutMessageList_doesNotCrash() {
+        // No messageList means no assistant placeholder; the catch block
+        // must skip the setText update without an NPE.
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller refused"))
+                .when(controller).onRequestStart();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withController(controller).build();
+
+        var caught = Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertEquals("controller refused", caught.getMessage());
+    }
+
+    @Test
+    void onRequestStartThrows_doesNotCommitToHistoryOrNotifyAttachmentListener() {
+        // No orphan state from a turn that never reached the LLM.
+        stubAddMessage();
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("a.txt")));
+
+        var attachmentListener = Mockito.mock(AttachmentSubmitListener.class);
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller refused"))
+                .when(controller).onRequestStart();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withController(controller)
+                .withAttachmentSubmitListener(attachmentListener).build();
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+
+        Assertions.assertTrue(orchestrator.getHistory().isEmpty(),
+                "Pre-stream throw must not commit user message to history");
+        Mockito.verify(attachmentListener, Mockito.never())
+                .onAttachmentSubmit(Mockito.any());
+    }
+
+    @Test
     void preStreamThrow_setsErrorMessageOnAssistantPlaceholder() {
-        // Any synchronous pre-stream failure (onRequestStart here, but
-        // also the attachment listener or a synchronous provider throw)
-        // updates the assistant placeholder with a generic error message,
-        // matching the async stream-error path so every failure mode
-        // surfaces in chat.
+        // Synchronous pre-stream failures (onRequestStart, attachment
+        // listener, sync provider throw) update the placeholder, matching
+        // the async stream-error path.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
