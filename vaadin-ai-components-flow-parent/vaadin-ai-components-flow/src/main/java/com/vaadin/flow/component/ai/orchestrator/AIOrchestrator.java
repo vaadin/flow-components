@@ -365,6 +365,7 @@ public class AIOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
+            fireResponseFailed(error, ui);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -393,14 +394,22 @@ public class AIOrchestrator implements Serializable {
         }
         try {
             processUserInput(userMessage);
-        } catch (Exception e) {
-            // streamResponseToMessage's doFinally only fires after
-            // subscription. If processUserInput throws before that (e.g. an
-            // AttachmentSubmitListener failure), the flag would
-            // stay stuck and the orchestrator would refuse every later
-            // prompt.
+        } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
+            // Reset the flag before firing the hook so a controller can
+            // retry from onResponseFailed, matching the async paths where
+            // doFinally clears the flag before the hook runs. Catching
+            // Throwable rather than Exception covers Error subtypes (OOM,
+            // AssertionError) — otherwise the flag would stay stuck and
+            // every later prompt would be dropped. Firing the hook for
+            // any Throwable mirrors the async onError consumer.
             isProcessing.set(false);
-            throw e;
+            // null only if UI.getCurrentOrThrow inside processUserInput
+            // failed first — in which case nothing past it executed.
+            var currentUi = UI.getCurrent();
+            if (currentUi != null) {
+                fireResponseFailed(t, currentUi);
+            }
+            throw t;
         }
     }
 
@@ -412,31 +421,52 @@ public class AIOrchestrator implements Serializable {
                 : List.<AIAttachment> of();
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
-
-        var messageId = UUID.randomUUID().toString();
-        conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
-                userMessage, messageId, Instant.now()));
-        if (userAIMessage != null) {
-            itemToMessageId.put(userAIMessage, messageId);
-        }
-
-        if (!attachments.isEmpty() && attachmentSubmitListener != null) {
-            var attachmentsCopy = List.copyOf(attachments);
-            attachmentSubmitListener.onAttachmentSubmit(
-                    new AttachmentSubmitListener.AttachmentSubmitEvent(
-                            messageId, attachmentsCopy));
-        }
-
         var assistantMessage = createAssistantMessagePlaceholder();
-        String effectiveSystemPrompt = null;
-        if (systemPrompt != null && !systemPrompt.isBlank()) {
-            effectiveSystemPrompt = systemPrompt.trim();
+
+        try {
+            if (controller != null) {
+                controller.onRequestStart();
+            }
+
+            var request = buildRequest(userMessage, attachments);
+            LOGGER.debug("Processing prompt with {} attachments",
+                    attachments.size());
+
+            var messageId = UUID.randomUUID().toString();
+            if (!attachments.isEmpty() && attachmentSubmitListener != null) {
+                attachmentSubmitListener.onAttachmentSubmit(
+                        new AttachmentSubmitListener.AttachmentSubmitEvent(
+                                messageId, List.copyOf(attachments)));
+            }
+            conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
+                    userMessage, messageId, Instant.now()));
+            if (userAIMessage != null) {
+                itemToMessageId.put(userAIMessage, messageId);
+            }
+
+            streamResponseToMessage(request, assistantMessage, ui);
+        } catch (Throwable t) { // NOSONAR — Throwable to surface UI on any
+                                // throw
+            // Single update — stream errors are async and never reach this
+            // catch; onResponseComplete throws are handled inside
+            // fireResponseCompleteListener (which appends rather than
+            // rewrites).
+            if (assistantMessage != null) {
+                assistantMessage
+                        .setText("An error occurred. Please try again.");
+            }
+            throw t;
         }
-        final var finalSystemPrompt = effectiveSystemPrompt;
+    }
+
+    private LLMProvider.LLMRequest buildRequest(String userMessage,
+            List<AIAttachment> attachments) {
+        final var effectiveSystemPrompt = systemPrompt != null
+                && !systemPrompt.isBlank() ? systemPrompt.trim() : null;
         var controllerTools = controller != null
                 && controller.getTools() != null ? controller.getTools()
                         : List.<LLMProvider.ToolSpec> of();
-        var request = new LLMProvider.LLMRequest() {
+        return new LLMProvider.LLMRequest() {
 
             @Override
             public String userMessage() {
@@ -450,7 +480,7 @@ public class AIOrchestrator implements Serializable {
 
             @Override
             public String systemPrompt() {
-                return finalSystemPrompt;
+                return effectiveSystemPrompt;
             }
 
             @Override
@@ -463,9 +493,19 @@ public class AIOrchestrator implements Serializable {
                 return controllerTools;
             }
         };
-        LOGGER.debug("Processing prompt with {} attachments",
-                attachments.size());
-        streamResponseToMessage(request, assistantMessage, ui);
+    }
+
+    private void fireResponseFailed(Throwable error, UI ui) {
+        if (controller == null) {
+            return;
+        }
+        ui.access(() -> {
+            try {
+                controller.onResponseFailed(error);
+            } catch (Exception e) {
+                LOGGER.error("Error in controller onResponseFailed", e);
+            }
+        });
     }
 
     private void fireResponseCompleteListener(String responseText, UI ui) {
