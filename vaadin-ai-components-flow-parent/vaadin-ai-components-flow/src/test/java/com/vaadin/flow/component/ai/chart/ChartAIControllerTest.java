@@ -238,23 +238,20 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void updateData_setsPendingDataUpdate() {
+        void updateData_stagesQueriesAppliedOnResponseComplete() {
             databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
 
             var tools = controller.getTools();
-            var dataTool = tools.stream()
-                    .filter(t -> t.getName().equals("update_chart_data_source"))
-                    .findFirst().get();
-
-            String result = dataTool
+            String result = findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
             Assertions.assertTrue(result.contains("updated"));
 
-            // Verify queries are stored via get_chart_state
-            var stateTool = tools.stream()
-                    .filter(t -> t.getName().equals("get_chart_state"))
-                    .findFirst().get();
-            String state = stateTool.execute(json("{}"));
+            // Queries are committed only after onResponseComplete; before
+            // that, get_chart_state returns the previously-committed view.
+            controller.onResponseComplete();
+
+            String state = findTool(tools, "get_chart_state")
+                    .execute(json("{}"));
             Assertions.assertTrue(state.contains("SELECT 1"));
         }
     }
@@ -326,6 +323,23 @@ class ChartAIControllerTest {
             Assertions.assertEquals(
                     chart.getConfiguration().getChart().getType(),
                     state.configuration().getChart().getType());
+        }
+
+        @Test
+        void afterFailedRender_returnsNull() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onResponseComplete());
+
+            // Render threw before setQueries could commit, so the chart
+            // stays in its previous (uninitialized) state.
+            Assertions.assertNull(controller.getState());
         }
 
         @Test
@@ -606,6 +620,78 @@ class ChartAIControllerTest {
             controller.onResponseComplete();
 
             Assertions.assertNull(captured.get());
+        }
+    }
+
+    @Nested
+    class OnResponseFailed {
+
+        @Test
+        void failedFirstTurnDoesNotEstablishState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // Subsequent successful turn with no tool calls must not pick
+            // up the failed turn's staged configuration or queries.
+            controller.onResponseComplete();
+
+            Assertions.assertNull(controller.getState());
+        }
+
+        @Test
+        void failedTurnStagedConfigurationDoesNotLeakIntoNextTurn() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponseComplete();
+
+            var baselineType = chart.getConfiguration().getChart().getType();
+
+            findTool(tools, "update_chart_configuration").execute(json(
+                    "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // Subsequent successful turn with no tool calls — the failed
+            // turn's pending chart type must not be applied.
+            controller.onResponseComplete();
+
+            Assertions.assertEquals(baselineType,
+                    chart.getConfiguration().getChart().getType());
+        }
+
+        @Test
+        void failedTurnDoesNotLeakPendingQueriesIntoNextOnResponseComplete() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            var tools = controller.getTools();
+
+            findTool(tools, "update_chart_data_source").execute(
+                    json("{\"queries\": [\"SELECT good FROM baseline\"]}"));
+            controller.onResponseComplete();
+
+            findTool(tools, "update_chart_data_source").execute(
+                    json("{\"queries\": [\"SELECT bad FROM half_baked\"]}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // Subsequent successful turn with no tool calls — the failed
+            // turn's staged queries must not bleed through.
+            controller.onResponseComplete();
+
+            var state = controller.getState();
+            Assertions.assertNotNull(state);
+            Assertions.assertEquals(List.of("SELECT good FROM baseline"),
+                    state.queries());
         }
     }
 
