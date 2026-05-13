@@ -25,6 +25,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.Div;
 
 class FormAIControllerTest {
@@ -180,6 +181,8 @@ class FormAIControllerTest {
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.allowedValues(null, List.of()));
             Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.queryable(null, (f, l) -> List.of()));
+            Assertions.assertThrows(NullPointerException.class,
                     () -> controller.ignore(null));
         }
 
@@ -192,6 +195,20 @@ class FormAIControllerTest {
                     () -> controller.describe(field, null));
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.allowedValues(field, null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.queryable(field, null));
+        }
+    }
+
+    @Nested
+    class GetTools {
+
+        @Test
+        void exposesQueryFieldOptionsTool() {
+            var controller = new FormAIController(new Div(new TestField()));
+            var names = controller.getTools().stream()
+                    .map(LLMProvider.ToolSpec::getName).toList();
+            Assertions.assertEquals(List.of("query_field_options"), names);
         }
     }
 }

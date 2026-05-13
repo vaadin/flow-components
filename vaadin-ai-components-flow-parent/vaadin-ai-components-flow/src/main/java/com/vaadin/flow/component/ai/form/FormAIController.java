@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -121,6 +122,28 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Registers a callback that the LLM can invoke through the
+     * {@code query_field_options} tool to narrow large or backend-loaded option
+     * sets. The function receives a filter string and a limit and returns
+     * matching options, rendered to the LLM via each item's {@code toString()}.
+     * Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may query, not {@code null}
+     * @param query
+     *            the filter callback, not {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController queryable(HasValue<?, ?> field,
+            BiFunction<String, Integer, ? extends List<?>> query) {
+        Objects.requireNonNull(query, "Query function must not be null");
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        BiFunction<String, Integer, List<Object>> erased = (BiFunction) query;
+        requireFillable(field).queryable = erased;
+        return this;
+    }
+
+    /**
      * Hides the given field from the LLM. The field is excluded from the tool
      * surface and is not locked during a fill. Use this for fields the AI must
      * not read or write (password fields, internal IDs, PII).
@@ -136,7 +159,7 @@ public class FormAIController implements AIController {
 
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
-        return List.of();
+        return FormAITools.createAll(new ToolCallbacks());
     }
 
     @Override
@@ -177,5 +200,19 @@ public class FormAIController implements AIController {
             ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
+    }
+
+    private final class ToolCallbacks implements FormAITools.Callbacks {
+
+        @Override
+        public List<Object> queryFieldOptions(String fieldId, String filter,
+                int limit) {
+            var hints = hintsById.get(fieldId);
+            if (hints == null || hints.queryable == null) {
+                throw new IllegalArgumentException(
+                        "Field is not queryable: " + fieldId);
+            }
+            return new ArrayList<>(hints.queryable.apply(filter, limit));
+        }
     }
 }

@@ -80,6 +80,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 // FormAIController and its helpers — intentionally not
                 // serializable; restored via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormAIController(\\$\\d+)?",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormAITools(\\$\\d+)?",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldDiscovery(\\$\\d+)?",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldHints(\\$\\d+)?"));
     }
