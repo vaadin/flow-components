@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -58,6 +61,7 @@ public class FormAIController implements AIController {
     private static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
     private final Component form;
+    private final Map<String, FormFieldHints> hintsById = new HashMap<>();
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -76,6 +80,59 @@ public class FormAIController implements AIController {
         this.form = form;
     }
 
+    /**
+     * Adds a free-form description that the LLM sees alongside the field when
+     * deciding what to fill in. Use it to add business semantics that are not
+     * implied by the field's label, helper text, or component type (for example
+     * clarifying that a numeric field expects a percentage rather than an
+     * absolute amount). Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field to describe, not {@code null}
+     * @param description
+     *            the description text, not {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController describe(HasValue<?, ?> field, String description) {
+        Objects.requireNonNull(description, "Description must not be null");
+        requireFillable(field).description = description;
+        return this;
+    }
+
+    /**
+     * Restricts the field's accepted values to the given list. The LLM is told
+     * to pick one of these and the controller rejects anything else. Later
+     * calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field to constrain, not {@code null}
+     * @param values
+     *            the allowed values, not {@code null}; a defensive copy is
+     *            taken
+     * @param <T>
+     *            the field's value type
+     * @return this controller, for chaining
+     */
+    public <T> FormAIController allowedValues(HasValue<?, T> field,
+            List<? extends T> values) {
+        requireFillable(field).allowedValues = new ArrayList<>(values);
+        return this;
+    }
+
+    /**
+     * Hides the given field from the LLM. The field is excluded from the tool
+     * surface and is not locked during a fill. Use this for fields the AI must
+     * not read or write (password fields, internal IDs, PII).
+     *
+     * @param field
+     *            the field to hide, not {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController ignore(HasValue<?, ?> field) {
+        requireFillable(field).ignored = true;
+        return this;
+    }
+
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         return List.of();
@@ -92,6 +149,12 @@ public class FormAIController implements AIController {
     public void onResponseComplete() {
     }
 
+    private FormFieldHints requireFillable(HasValue<?, ?> field) {
+        Objects.requireNonNull(field, "Field must not be null");
+        return hintsById.computeIfAbsent(getOrCreateId(field),
+                k -> new FormFieldHints());
+    }
+
     /**
      * Walks the form tree and ensures every discovered field has an id
      * attached. Ids already attached are left untouched so they stay stable
@@ -99,15 +162,17 @@ public class FormAIController implements AIController {
      */
     private void attachIds() {
         FormFieldDiscovery.collectFields(form)
-                .forEach(FormAIController::attachId);
+                .forEach(FormAIController::getOrCreateId);
     }
 
-    private static void attachId(HasValue<?, ?> field) {
+    private static String getOrCreateId(HasValue<?, ?> field) {
         // Fields come from Component.getChildren(), so the cast is safe.
         var component = (Component) field;
-        if (ComponentUtil.getData(component, FIELD_ID_KEY) == null) {
-            ComponentUtil.setData(component, FIELD_ID_KEY,
-                    UUID.randomUUID().toString());
+        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+            ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
+        return id;
     }
 }
