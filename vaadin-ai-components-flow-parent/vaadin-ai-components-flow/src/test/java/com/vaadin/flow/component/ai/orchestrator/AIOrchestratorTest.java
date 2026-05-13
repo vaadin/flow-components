@@ -1944,6 +1944,50 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void streamError_setsErrorMessageOnAssistantPlaceholderExactlyOnce() {
+        // Pre-stream and async paths must not both set the placeholder
+        // text — the async onError consumer already handles this case,
+        // and our pre-stream catch is reached only when subscribe was
+        // never opened.
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API died")));
+
+        orchestratorWith(mockController()).prompt("Hello");
+
+        Mockito.verify(mockMessage, Mockito.times(1))
+                .setText("An error occurred. Please try again.");
+    }
+
+    @Test
+    void preStreamThrow_setsErrorMessageOnAssistantPlaceholder() {
+        // Any synchronous pre-stream failure (onRequestStart here, but
+        // also the attachment listener or a synchronous provider throw)
+        // updates the assistant placeholder with a generic error message,
+        // matching the async stream-error path so every failure mode
+        // surfaces in chat.
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+
+        var thrown = new RuntimeException("simulated onRequestStart failure");
+        var controller = mockController();
+        Mockito.doThrow(thrown).when(controller).onRequestStart();
+
+        var orchestrator = orchestratorWith(controller);
+        Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
+    }
+
+    @Test
     void builder_withController_onResponseFailedThrows_isCaughtAndLogged() {
         // A misbehaving hook must not propagate; it gets logged so the
         // failure is operator-visible instead.

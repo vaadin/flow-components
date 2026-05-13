@@ -417,10 +417,6 @@ public class AIOrchestrator implements Serializable {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
 
-        if (controller != null) {
-            controller.onRequestStart();
-        }
-
         var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
                 : List.<AIAttachment> of();
         var userAIMessage = messageList == null ? null
@@ -433,52 +429,70 @@ public class AIOrchestrator implements Serializable {
             itemToMessageId.put(userAIMessage, messageId);
         }
 
-        if (!attachments.isEmpty() && attachmentSubmitListener != null) {
-            var attachmentsCopy = List.copyOf(attachments);
-            attachmentSubmitListener.onAttachmentSubmit(
-                    new AttachmentSubmitListener.AttachmentSubmitEvent(
-                            messageId, attachmentsCopy));
-        }
-
         var assistantMessage = createAssistantMessagePlaceholder();
-        String effectiveSystemPrompt = null;
-        if (systemPrompt != null && !systemPrompt.isBlank()) {
-            effectiveSystemPrompt = systemPrompt.trim();
+
+        try {
+            if (!attachments.isEmpty() && attachmentSubmitListener != null) {
+                var attachmentsCopy = List.copyOf(attachments);
+                attachmentSubmitListener.onAttachmentSubmit(
+                        new AttachmentSubmitListener.AttachmentSubmitEvent(
+                                messageId, attachmentsCopy));
+            }
+
+            if (controller != null) {
+                controller.onRequestStart();
+            }
+
+            String effectiveSystemPrompt = null;
+            if (systemPrompt != null && !systemPrompt.isBlank()) {
+                effectiveSystemPrompt = systemPrompt.trim();
+            }
+            final var finalSystemPrompt = effectiveSystemPrompt;
+            var controllerTools = controller != null
+                    && controller.getTools() != null ? controller.getTools()
+                            : List.<LLMProvider.ToolSpec> of();
+            var request = new LLMProvider.LLMRequest() {
+
+                @Override
+                public String userMessage() {
+                    return userMessage;
+                }
+
+                @Override
+                public List<AIAttachment> attachments() {
+                    return attachments;
+                }
+
+                @Override
+                public String systemPrompt() {
+                    return finalSystemPrompt;
+                }
+
+                @Override
+                public Object[] tools() {
+                    return tools == null ? new Object[0] : tools;
+                }
+
+                @Override
+                public List<LLMProvider.ToolSpec> explicitTools() {
+                    return controllerTools;
+                }
+            };
+            LOGGER.debug("Processing prompt with {} attachments",
+                    attachments.size());
+            streamResponseToMessage(request, assistantMessage, ui);
+        } catch (Throwable t) { // NOSONAR — Throwable to surface UI on any
+                                // throw
+            // Single update — stream errors are async and never reach this
+            // catch; onResponseComplete throws are handled inside
+            // fireResponseCompleteListener (which appends rather than
+            // rewrites).
+            if (assistantMessage != null) {
+                assistantMessage
+                        .setText("An error occurred. Please try again.");
+            }
+            throw t;
         }
-        final var finalSystemPrompt = effectiveSystemPrompt;
-        var controllerTools = controller != null
-                && controller.getTools() != null ? controller.getTools()
-                        : List.<LLMProvider.ToolSpec> of();
-        var request = new LLMProvider.LLMRequest() {
-
-            @Override
-            public String userMessage() {
-                return userMessage;
-            }
-
-            @Override
-            public List<AIAttachment> attachments() {
-                return attachments;
-            }
-
-            @Override
-            public String systemPrompt() {
-                return finalSystemPrompt;
-            }
-
-            @Override
-            public Object[] tools() {
-                return tools == null ? new Object[0] : tools;
-            }
-
-            @Override
-            public List<LLMProvider.ToolSpec> explicitTools() {
-                return controllerTools;
-            }
-        };
-        LOGGER.debug("Processing prompt with {} attachments",
-                attachments.size());
-        streamResponseToMessage(request, assistantMessage, ui);
     }
 
     private void fireResponseFailed(Throwable error, UI ui) {

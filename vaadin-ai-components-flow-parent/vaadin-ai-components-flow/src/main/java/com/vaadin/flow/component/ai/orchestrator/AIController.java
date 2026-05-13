@@ -42,15 +42,19 @@ public interface AIController {
     List<LLMProvider.ToolSpec> getTools();
 
     /**
-     * Called synchronously on the UI thread at the start of every LLM turn,
-     * before the orchestrator opens the LLM stream. Implementations can prepare
-     * for the turn — locking UI surfaces, snapshotting state the tool
-     * definitions depend on, and so on.
+     * Called synchronously on the UI thread just before the LLM stream opens.
+     * By the time this method fires, the user message and an empty assistant
+     * placeholder are already in the message list and the user message is in
+     * the conversation history. Implementations can prepare for the turn —
+     * locking UI surfaces, snapshotting state the tool definitions depend on,
+     * and so on.
      * <p>
      * The default does nothing. Throwing from this method aborts the turn: the
-     * LLM stream is not opened, {@link #onResponseFailed(Throwable)} fires with
-     * the thrown exception so per-turn state captured before the throw can
-     * still be released, and the user sees a generic error message.
+     * LLM stream is not opened, the assistant placeholder is updated to a
+     * generic error message in the chat, {@link #onResponseFailed(Throwable)}
+     * fires with the thrown exception so per-turn state captured before the
+     * throw can still be released, and the exception propagates back to the
+     * caller of the prompt entry point.
      * </p>
      */
     default void onRequestStart() {
