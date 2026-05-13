@@ -240,7 +240,7 @@ jobs:
 
       - name: Run unit tests
         if: matrix.type == 'unit'
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
+        run: mvn test -Drelease -T $FORK_COUNT -DskipSvgChartsBuild $MAVEN_ARGS
 
       - name: Upload unit test reports
         if: always() && matrix.type == 'unit'
@@ -380,16 +380,17 @@ jobs:
       - name: Run integration tests (shard ${{ matrix.shard }})
         env:
           SHARD_TESTS: ${{ matrix.tests }}
+          TESTBENCH_CHROME_EXTRA_ARGS: --no-sandbox --disable-dev-shm-usage
         run: |
           mvn -pl integration-tests -Drun-it \
             jetty:start-war failsafe:integration-test jetty:stop failsafe:verify \
             -Dvaadin.productionMode \
             -DskipFrontend \
             -Dfailsafe.forkCount=$FORK_COUNT \
-            -Dcom.vaadin.testbench.Parameters.testsInParallel=2 \
+            -Dcom.vaadin.testbench.Parameters.testsInParallel=1 \
             -Dfailsafe.rerunFailingTestsCount=2 \
             -Dmaven.test.redirectTestOutputToFile=true \
-            -Dtest.reuseDriver=true \
+            -DchromeOptions="--no-sandbox,--disable-dev-shm-usage" \
             -Dit.test="$SHARD_TESTS" \
             -B
 
