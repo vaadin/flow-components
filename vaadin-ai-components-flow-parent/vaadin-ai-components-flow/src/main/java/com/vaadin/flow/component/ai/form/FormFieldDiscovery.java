@@ -53,10 +53,12 @@ final class FormFieldDiscovery {
     private static void collect(Component component,
             List<HasValue<?, ?>> sink) {
         component.getChildren().forEach(child -> {
+            // A component that is both HasValue and HasComponents is treated
+            // as a leaf field — its children are considered part of the
+            // field's internal composition, not separate form fields.
             if (child instanceof HasValue<?, ?> hv) {
                 sink.add(hv);
-            }
-            if (child instanceof HasComponents) {
+            } else if (child instanceof HasComponents) {
                 collect(child, sink);
             }
         });

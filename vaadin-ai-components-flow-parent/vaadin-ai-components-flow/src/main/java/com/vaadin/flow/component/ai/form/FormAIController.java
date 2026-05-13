@@ -78,10 +78,14 @@ public class FormAIController implements AIController {
 
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
+        return List.of();
+    }
+
+    @Override
+    public void onRequestStart() {
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
-        return List.of();
     }
 
     @Override
@@ -95,20 +99,15 @@ public class FormAIController implements AIController {
      */
     private void attachIds() {
         FormFieldDiscovery.collectFields(form)
-                .forEach(FormAIController::getOrCreateId);
+                .forEach(FormAIController::attachId);
     }
 
-    private static String getOrCreateId(HasValue<?, ?> field) {
-        if (!(field instanceof Component component)) {
-            throw new IllegalArgumentException(
-                    "Field must be a Component to carry an attached id: "
-                            + field.getClass().getName());
+    private static void attachId(HasValue<?, ?> field) {
+        // Fields come from Component.getChildren(), so the cast is safe.
+        var component = (Component) field;
+        if (ComponentUtil.getData(component, FIELD_ID_KEY) == null) {
+            ComponentUtil.setData(component, FIELD_ID_KEY,
+                    UUID.randomUUID().toString());
         }
-        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
-        if (id == null) {
-            id = UUID.randomUUID().toString();
-            ComponentUtil.setData(component, FIELD_ID_KEY, id);
-        }
-        return id;
     }
 }

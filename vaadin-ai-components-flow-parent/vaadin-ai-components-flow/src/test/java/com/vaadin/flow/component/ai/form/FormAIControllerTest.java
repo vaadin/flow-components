@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 
@@ -37,6 +39,24 @@ class FormAIControllerTest {
     private static class TestField extends AbstractField<TestField, String> {
         TestField() {
             super("");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+    }
+
+    /**
+     * Composite field that is both {@link com.vaadin.flow.component.HasValue}
+     * and {@link HasComponents} — used to verify that discovery stops at the
+     * field and does not descend into the field's internal composition.
+     */
+    @Tag("composite-field")
+    private static class CompositeField extends
+            AbstractField<CompositeField, String> implements HasComponents {
+        CompositeField(Component... children) {
+            super("");
+            add(children);
         }
 
         @Override
@@ -121,6 +141,21 @@ class FormAIControllerTest {
 
             Assertions.assertEquals(List.of(field),
                     FormFieldDiscovery.collectFields(form));
+        }
+
+        @Test
+        void compositeFieldIsTreatedAsLeafAndItsChildrenAreNotDiscovered() {
+            var innerChild = new TestField();
+            var composite = new CompositeField(innerChild);
+            var sibling = new TestField();
+            var form = new Div(composite, sibling);
+
+            Assertions.assertEquals(List.of(composite, sibling),
+                    FormFieldDiscovery.collectFields(form),
+                    "A component that is both HasValue and HasComponents "
+                            + "should be discovered as a single field; its "
+                            + "internal children should not be exposed as "
+                            + "separate form fields");
         }
 
         @Test
