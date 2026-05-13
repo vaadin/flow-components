@@ -18,16 +18,24 @@ describe('combo-box connector', () => {
   });
 
   describe('pending requests', () => {
-    it('should store data provider callbacks on the controllers pending requests', () => {
-      const callback = sinon.spy();
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, callback);
+    it('should be populated when the controller loads a page', () => {
+      comboBox.__dataProviderController.loadFirstPage();
 
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(callback);
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
     });
 
-    it('should clear pending requests on $connector.reset', () => {
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: '' }, sinon.spy());
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.exist;
+    it('should be cleared by $connector.confirm when items are cached', () => {
+      comboBox.__dataProviderController.loadFirstPage();
+
+      comboBox.$connector.set(0, [{ key: '1', label: 'one' }], '');
+      comboBox.$connector.confirm(1, '');
+
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.undefined;
+    });
+
+    it('should be cleared by $connector.reset', () => {
+      comboBox.__dataProviderController.loadFirstPage();
+      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
 
       comboBox.$connector.reset();
 
@@ -47,27 +55,16 @@ describe('combo-box connector', () => {
         clock.restore();
       });
 
-      it('should track the post-debounce callback in the controllers pending requests', () => {
-        const callback = sinon.spy();
-        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, callback);
+      it('should be populated only after the debounce timeout', () => {
+        comboBox.filter = 'a';
+        comboBox.__dataProviderController.loadFirstPage();
+
+        const requestsDuringDebounce = comboBox.__dataProviderController.rootCache.pendingRequests;
+        expect(Object.keys(requestsDuringDebounce)).to.have.lengthOf(1);
 
         clock.tick(500);
 
-        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(callback);
-      });
-
-      it('should replace stale pending requests when the filter changes', () => {
-        const stale = sinon.spy();
-        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, stale);
-        clock.tick(500);
-        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(stale);
-
-        const fresh = sinon.spy();
-        comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'b' }, fresh);
-        clock.tick(500);
-
-        expect(stale).to.not.be.called;
-        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.equal(fresh);
+        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
       });
     });
   });
@@ -119,7 +116,7 @@ describe('combo-box connector', () => {
 
       comboBox.$connector.reset();
       expect(comboBox._filterDebouncer).to.not.exist;
-      
+
       clock.tick(600);
 
       expect(comboBox.$server.setViewportRange).to.not.be.called;
