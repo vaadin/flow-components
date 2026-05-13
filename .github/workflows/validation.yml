@@ -178,6 +178,10 @@ jobs:
         if: matrix.type != 'unit'
         run: npm ci --ignore-scripts
 
+      - name: Merge ITs
+        if: matrix.type == 'war'
+        run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
+
       - name: Compute WAR cache key
         if: matrix.type == 'war'
         id: war-key
@@ -221,10 +225,6 @@ jobs:
           path: ~/.m2/repository/com/vaadin
           key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
           fail-on-cache-miss: true
-
-      - name: Merge ITs
-        if: matrix.type == 'war' && steps.war-cache.outputs.cache-hit != 'true'
-        run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
 
       - name: Run unit tests
         if: matrix.type == 'unit'
