@@ -105,7 +105,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     if (cache[params.page]) {
       // This may happen after skipping pages by scrolling fast
-      commitPage(params.page, callback);
+      const data = cache[params.page];
+      delete cache[params.page];
+      callback(data, comboBox.size);
     } else {
       pageCallbacks[params.page] = callback;
       const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
@@ -206,18 +208,14 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       let page = activePages[i];
 
       if (cache[page]) {
-        commitPage(page, pageCallbacks[page]);
+        const data = cache[page];
+        delete cache[page];
+        pageCallbacks[page](data, comboBox.size);
       }
     }
 
     // Let server know we're done
     comboBox.$server.confirmUpdate(id);
-  };
-
-  const commitPage = function (page, callback) {
-    let data = cache[page];
-    delete cache[page];
-    callback(data, comboBox.size);
   };
 
   // Prevent setting the custom value as the 'value'-prop automatically
