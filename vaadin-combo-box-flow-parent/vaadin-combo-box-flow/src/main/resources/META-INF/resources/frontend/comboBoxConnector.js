@@ -17,6 +17,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   let lastFilter = '';
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
 
+  // Client-side filter applies when the full data set fits one page and the
+  // server hasn't requested server-side filtering (e.g. user-provided filter).
+  // Relies on comboBox.size being undefined until the first updateSize call.
+  const isClientSideFilter = () =>
+    !comboBox._forceServerSideFilter && comboBox.size <= comboBox.pageSize;
+
   const serverFacade = (() => {
     // Private variables
     let lastFilterSentToServer = '';
@@ -67,7 +73,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Invalid pageSize';
     }
 
-    if (comboBox._clientSideFilter) {
+    if (isClientSideFilter()) {
       // For clientside filter we first make sure we have all data which we also
       // filter based on comboBox.filter. While later we only filter clientside data.
 
@@ -201,17 +207,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.updateSize = function (newSize) {
-    if (!comboBox._clientSideFilter) {
-      // FIXME: It may be that this size set is unnecessary, since when
-      // providing data to combobox via callback we may use data's size.
-      // However, if this size reflect the whole data size, including
-      // data not fetched yet into client side, and combobox expect it
-      // to be set as such, the at least, we don't need it in case the
-      // filter is clientSide only, since it'll increase the height of
-      // the popup at only at first user filter to this size, while the
-      // filtered items count are less.
-      comboBox.size = newSize;
-    }
+    comboBox.size = newSize;
   };
 
   comboBox.$connector.reset = function () {
@@ -250,7 +246,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   const commitPage = function (page, callback) {
     let data = cache[page];
 
-    if (comboBox._clientSideFilter) {
+    if (isClientSideFilter()) {
       performClientSideFilter(data, comboBox.filter, callback);
     } else {
       // Remove the data if server-side filtering, but keep it for client-side

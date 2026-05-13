@@ -30,7 +30,7 @@ class MultiSelectComboBoxFilteringTest {
     MockUIExtension ui = new MockUIExtension();
 
     @Test
-    void filter_addAndRefreshItems_doesNotToggleClientSideFiltering() {
+    void noUserProvidedFilter_doesNotForceServerSideFiltering() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         ui.add(comboBox);
 
@@ -41,13 +41,13 @@ class MultiSelectComboBoxFilteringTest {
         comboBox.getDataController().setViewportRange(0, 50, "foo");
         ui.fakeClientCommunication();
         Assertions.assertFalse((Boolean) comboBox.getElement()
-                .getPropertyRaw("_clientSideFilter"));
+                .getPropertyRaw("_forceServerSideFilter"));
 
         items.add("foo");
         comboBox.getDataProvider().refreshAll();
         comboBox.getDataController().setViewportRange(0, 50, "");
         ui.fakeClientCommunication();
         Assertions.assertFalse((Boolean) comboBox.getElement()
-                .getPropertyRaw("_clientSideFilter"));
+                .getPropertyRaw("_forceServerSideFilter"));
     }
 }
