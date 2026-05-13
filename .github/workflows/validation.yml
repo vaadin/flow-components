@@ -66,7 +66,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -223,7 +223,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
 
       - name: Install artifacts (cache miss)
         if: steps.build-cache.outputs.cache-hit != 'true' && steps.war-cache.outputs.cache-hit != 'true'
@@ -359,7 +359,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**') }}
 
       - name: Restore WAR cache
         uses: actions/cache@v5
