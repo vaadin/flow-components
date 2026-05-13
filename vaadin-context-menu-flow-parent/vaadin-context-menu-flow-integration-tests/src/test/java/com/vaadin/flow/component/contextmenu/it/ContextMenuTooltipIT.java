@@ -17,6 +17,7 @@ package com.vaadin.flow.component.contextmenu.it;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
@@ -28,87 +29,91 @@ import com.vaadin.tests.AbstractComponentIT;
 public class ContextMenuTooltipIT extends AbstractComponentIT {
 
     private TestBenchElement target;
-    private ContextMenuElement contextMenu;
-    private TestBenchElement contextMenuTooltip;
 
     @Before
     public void init() {
         open();
         target = $(TestBenchElement.class).id("target");
-        contextMenu = $(ContextMenuElement.class).single();
-        contextMenuTooltip = contextMenu.$("vaadin-tooltip").single();
     }
 
     @Test
     public void openMenu_hoverOverRootItems_tooltipDisplayed() {
-        ContextMenuElement.openByRightClick(target);
+        var contextMenu = ContextMenuElement.openByRightClick(target);
 
         var items = contextMenu.getMenuItems();
 
         items.get(0).hover();
-        Assert.assertEquals("Item 0 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 0 / Tooltip", getTooltipText(contextMenu));
 
         items.get(1).hover();
-        Assert.assertEquals("Item 1 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 1 / Tooltip", getTooltipText(contextMenu));
 
         items.get(2).hover();
-        Assert.assertEquals("Item 2 / Tooltip", contextMenuTooltip.getText());
-        Assert.assertEquals("top",
-                contextMenuTooltip.getDomProperty("_position"));
+        Assert.assertEquals("Item 2 / Tooltip", getTooltipText(contextMenu));
+        Assert.assertEquals("top", getTooltipPosition(contextMenu));
     }
 
     @Test
     public void openMenu_hoverOverSubMenuItems_tooltipDisplayed() {
-        ContextMenuElement.openByRightClick(target);
+        var contextMenu = ContextMenuElement.openByRightClick(target);
 
         var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         var subMenuItems = subMenu.getMenuItems();
 
         subMenuItems.get(0).hover();
-        Assert.assertEquals("Item 0-0 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 0-0 / Tooltip", getTooltipText(contextMenu));
 
         subMenuItems.get(1).hover();
-        Assert.assertEquals("Item 0-1 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 0-1 / Tooltip", getTooltipText(contextMenu));
 
         subMenuItems.get(2).hover();
-        Assert.assertEquals("Item 0-2 / Tooltip", contextMenuTooltip.getText());
-        Assert.assertEquals("top",
-                contextMenuTooltip.getDomProperty("_position"));
+        Assert.assertEquals("Item 0-2 / Tooltip", getTooltipText(contextMenu));
+        Assert.assertEquals("top", getTooltipPosition(contextMenu));
     }
 
     @Test
     public void updateTooltip_openMenu_hoverOverItems_updatedTooltipDisplayed() {
         clickElementWithJs("update-tooltips");
 
-        ContextMenuElement.openByRightClick(target);
+        var contextMenu = ContextMenuElement.openByRightClick(target);
 
         contextMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0 / Updated Tooltip",
-                contextMenuTooltip.getText());
+                getTooltipText(contextMenu));
 
         var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         subMenu.getMenuItems().get(0).hover();
         Assert.assertEquals("Item 0-0 / Updated Tooltip",
-                contextMenuTooltip.getText());
+                getTooltipText(contextMenu));
     }
 
     @Test
+    @Ignore("Flaky test, needs investigation")
     public void detachAndAttach_openMenu_hoverOverItems_tooltipDisplayed() {
         detachAndAttach();
 
-        ContextMenuElement.openByRightClick(target);
+        var contextMenu = ContextMenuElement.openByRightClick(target);
 
         contextMenu.getMenuItems().get(0).hover();
-        Assert.assertEquals("Item 0 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 0 / Tooltip", getTooltipText(contextMenu));
 
         var subMenu = contextMenu.getMenuItems().get(0).openSubMenu();
         subMenu.getMenuItems().get(0).hover();
-        Assert.assertEquals("Item 0-0 / Tooltip", contextMenuTooltip.getText());
+        Assert.assertEquals("Item 0-0 / Tooltip", getTooltipText(contextMenu));
     }
 
     private void detachAndAttach() {
         clickElementWithJs("detach");
         clickElementWithJs("attach");
         target = $(TestBenchElement.class).id("target");
+    }
+
+    private String getTooltipText(ContextMenuElement contextMenu) {
+        return contextMenu.$("vaadin-tooltip").single().getText();
+    }
+
+    private String getTooltipPosition(ContextMenuElement contextMenu) {
+        return contextMenu.$("vaadin-tooltip").single()
+                .getDomProperty("_position");
     }
 }

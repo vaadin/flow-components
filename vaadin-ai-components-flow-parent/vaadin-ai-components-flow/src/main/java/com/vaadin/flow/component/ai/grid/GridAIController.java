@@ -71,6 +71,11 @@ import tools.jackson.databind.JsonNode;
  * {@link Grid} component, so it survives serialization.
  * </p>
  * <p>
+ * If the LLM turn fails, the orchestrator fires
+ * {@link #onResponseFailed(Throwable)} instead — pending changes are discarded
+ * and the grid keeps its last successfully-rendered state.
+ * </p>
+ * <p>
  * <b>Serialization:</b> This controller is not serialized with the
  * orchestrator. After deserialization, create a new controller and restore
  * transient dependencies via {@link AIOrchestrator#reconnect(LLMProvider)
@@ -220,6 +225,14 @@ public class GridAIController implements AIController {
         // server-side and syncs to the client on attach.
         render(entry, query, true);
         LOGGER.info("Grid updated successfully");
+    }
+
+    @Override
+    public void onResponseFailed(Throwable error) {
+        var entry = GridEntry.get(grid);
+        if (entry != null) {
+            entry.clearPendingState();
+        }
     }
 
     /**

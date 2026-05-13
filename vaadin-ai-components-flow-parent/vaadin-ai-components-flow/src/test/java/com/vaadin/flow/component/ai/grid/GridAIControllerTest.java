@@ -224,6 +224,43 @@ class GridAIControllerTest {
                 stateTool.execute(json("{}")).contains("SELECT a FROM t"));
     }
 
+    @Nested
+    class OnResponseFailed {
+
+        @Test
+        void failedTurnDoesNotLeakPendingQueryIntoNextOnResponseComplete() {
+            // Establish a baseline successful turn.
+            dbProvider.queryResults = List.of(row("a", 1));
+            simulateUpdate("SELECT a FROM good");
+
+            // A second turn stages a query, then fails before completion.
+            findTool("update_grid_data")
+                    .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            // A third turn fires onResponseComplete without staging anything
+            // (LLM responded conversationally). The bad query must not be
+            // rendered.
+            controller.onResponseComplete();
+
+            Assertions.assertEquals("SELECT a FROM good",
+                    controller.getState().query());
+        }
+
+        @Test
+        void failedFirstTurnDoesNotEstablishState() {
+            // No prior successful turn — the failed turn is the first one.
+            dbProvider.queryResults = List.of(row("a", 1));
+            findTool("update_grid_data")
+                    .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
+            controller.onResponseFailed(new RuntimeException("stream error"));
+
+            controller.onResponseComplete();
+
+            Assertions.assertNull(controller.getState());
+        }
+    }
+
     // --- GridState serialization ---
 
     @Test
