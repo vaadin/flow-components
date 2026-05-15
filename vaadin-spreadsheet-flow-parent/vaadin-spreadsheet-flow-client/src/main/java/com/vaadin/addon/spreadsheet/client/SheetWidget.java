@@ -2264,7 +2264,7 @@ public class SheetWidget extends Panel {
     }
 
     private String getColumnDisplayString(int columnIndex) {
-        return actionHandler.isColumnHidden(columnIndex) ? "display:none;" : "";
+        return actionHandler.isColumnHidden(columnIndex) ? "display:none !important;" : "";
     }
 
     private void resetRowAndColumnStyles() {
