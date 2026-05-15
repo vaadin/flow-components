@@ -21,13 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-checkbox} component.
  */
 public enum CheckboxVariant implements ThemeVariant {
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    /**
-     * @deprecated Use {@link #HELPER_ABOVE} instead.
-     */
-    @Deprecated
-    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
-    HELPER_ABOVE("helper-above-field");
+    AURA_SMALL("small");
 
     private final String variant;
 
