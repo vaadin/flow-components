@@ -28,6 +28,6 @@ final class FormFieldHints {
 
     String description;
     List<Object> allowedValues;
-    BiFunction<String, Integer, List<Object>> queryable;
+    BiFunction<String, Integer, List<String>> queryable;
     boolean ignored;
 }

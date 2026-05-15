@@ -125,8 +125,9 @@ public class FormAIController implements AIController {
      * Registers a callback that the LLM can invoke through the
      * {@code query_field_options} tool to narrow large or backend-loaded option
      * sets. The function receives a filter string and a limit and returns
-     * matching options, rendered to the LLM via each item's {@code toString()}.
-     * Later calls for the same field overwrite earlier ones.
+     * matching options as the strings the LLM should see; rendering domain
+     * objects to strings is the caller's responsibility. Later calls for the
+     * same field overwrite earlier ones.
      *
      * @param field
      *            the field whose options the LLM may query, not {@code null}
@@ -135,11 +136,9 @@ public class FormAIController implements AIController {
      * @return this controller, for chaining
      */
     public FormAIController queryable(HasValue<?, ?> field,
-            BiFunction<String, Integer, ? extends List<?>> query) {
+            BiFunction<String, Integer, List<String>> query) {
         Objects.requireNonNull(query, "Query function must not be null");
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        BiFunction<String, Integer, List<Object>> erased = (BiFunction) query;
-        requireFillable(field).queryable = erased;
+        hintsFor(field).queryable = query;
         return this;
     }
 
@@ -205,7 +204,7 @@ public class FormAIController implements AIController {
     private final class ToolCallbacks implements FormAITools.Callbacks {
 
         @Override
-        public List<Object> queryFieldOptions(String fieldId, String filter,
+        public List<String> queryFieldOptions(String fieldId, String filter,
                 int limit) {
             var hints = hintsById.get(fieldId);
             if (hints == null || hints.queryable == null) {

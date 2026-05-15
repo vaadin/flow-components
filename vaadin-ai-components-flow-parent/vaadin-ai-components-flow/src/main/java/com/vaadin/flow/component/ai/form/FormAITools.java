@@ -47,11 +47,12 @@ public final class FormAITools {
     public interface Callbacks extends Serializable {
 
         /**
-         * Invokes the queryable callback for the given field. Implementations
-         * should throw if the field is unknown or not queryable; the message is
-         * surfaced to the LLM verbatim.
+         * Invokes the queryable callback for the given field and returns the
+         * option labels the LLM should see. Implementations should throw if the
+         * field is unknown or not queryable; the message is surfaced to the LLM
+         * verbatim.
          */
-        List<Object> queryFieldOptions(String fieldId, String filter,
+        List<String> queryFieldOptions(String fieldId, String filter,
                 int limit);
     }
 
@@ -81,22 +82,22 @@ public final class FormAITools {
             public String getParametersSchema() {
                 return """
                         {
-                        "type": "object",
-                        "properties": {
-                            "field": {
-                            "type": "string",
-                            "description": "Field id (from get_form_state) to query."
+                            "type": "object",
+                            "properties": {
+                                "field": {
+                                    "type": "string",
+                                    "description": "Field id (from get_form_state) to query."
+                                },
+                                "filter": {
+                                    "type": "string",
+                                    "description": "User-typed-style search string; empty for a top-N sample."
+                                },
+                                "limit": {
+                                    "type": "integer",
+                                    "description": "Maximum number of items to return; capped server-side."
+                                }
                             },
-                            "filter": {
-                            "type": "string",
-                            "description": "User-typed-style search string; empty for a top-N sample."
-                            },
-                            "limit": {
-                            "type": "integer",
-                            "description": "Maximum number of items to return; capped server-side."
-                            }
-                        },
-                        "required": ["field", "filter"]
+                            "required": ["field", "filter"]
                         }""";
             }
 
@@ -120,7 +121,7 @@ public final class FormAITools {
                     limit = QUERY_OPTIONS_MAX_LIMIT;
                     truncated = true;
                 }
-                List<Object> items;
+                List<String> items;
                 try {
                     items = callbacks.queryFieldOptions(fieldId, filter, limit);
                 } catch (Exception ex) {
@@ -132,7 +133,7 @@ public final class FormAITools {
                 }
                 var b = new StringBuilder();
                 for (var item : items) {
-                    b.append(String.valueOf(item)).append('\n');
+                    b.append(item).append('\n');
                 }
                 if (truncated) {
                     b.append("(truncated to ").append(QUERY_OPTIONS_MAX_LIMIT)

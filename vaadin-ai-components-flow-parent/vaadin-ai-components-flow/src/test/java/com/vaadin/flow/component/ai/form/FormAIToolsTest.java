@@ -82,25 +82,14 @@ class FormAIToolsTest {
     }
 
     @Test
-    void executeRendersItemsViaToString() {
-        record Project(String code, String name) {
-            @Override
-            public String toString() {
-                return name + " #" + code;
-            }
-        }
-        var p1 = new Project("P-1", "Apollo");
-        var p2 = new Project("P-2", "Polaris");
+    void executePassesLabelsThroughOneLinePerItem() {
         var callbacks = (FormAITools.Callbacks) (id, filter, limit) -> List
-                .of(p1, p2);
+                .of("Apollo #P-1", "Polaris #P-2");
 
         var result = FormAITools.queryFieldOptions(callbacks)
                 .execute(json("{\"field\":\"f-1\",\"filter\":\"\"}"));
 
-        Assertions.assertTrue(result.contains("Apollo #P-1"),
-                "Result should include the first item, got: " + result);
-        Assertions.assertTrue(result.contains("Polaris #P-2"),
-                "Result should include the second item, got: " + result);
+        Assertions.assertEquals("Apollo #P-1\nPolaris #P-2\n", result);
     }
 
     @Test
