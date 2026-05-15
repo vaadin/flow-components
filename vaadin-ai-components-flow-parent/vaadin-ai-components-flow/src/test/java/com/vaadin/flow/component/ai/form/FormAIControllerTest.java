@@ -167,4 +167,31 @@ class FormAIControllerTest {
                     FormFieldDiscovery.collectFields(form));
         }
     }
+
+    @Nested
+    class HintApi {
+
+        @Test
+        void hintMethodsRejectNullField() {
+            var controller = new FormAIController(new Div());
+
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.describe(null, "x"));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.allowedValues(null, List.of()));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.ignore(null));
+        }
+
+        @Test
+        void hintMethodsRejectNullPayload() {
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.describe(field, null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.allowedValues(field, null));
+        }
+    }
 }
