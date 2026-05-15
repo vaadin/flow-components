@@ -44,6 +44,17 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * </p>
  *
  * <p>
+ * <b>Field locking:</b> while a fill is in progress, every non-ignored field
+ * that wasn't already read-only is set to read-only so the user cannot type
+ * into a field the AI is about to overwrite. Locks are released when the turn
+ * ends, successfully or otherwise. Application code that changes a field's
+ * read-only state mid-turn (e.g. from a value-change listener reacting to the
+ * LLM's writes) will be overridden when the controller releases its own locks
+ * at turn end — applications should avoid toggling read-only state during a
+ * fill turn, or reapply it after the turn completes.
+ * </p>
+ *
+ * <p>
  * <b>Serialization:</b> the controller is not serialized with the orchestrator.
  * After deserialization, create a new controller against the same form and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
@@ -62,6 +73,7 @@ public class FormAIController implements AIController {
 
     private final Component form;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
+    private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -144,10 +156,65 @@ public class FormAIController implements AIController {
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
+        lockFields();
     }
 
     @Override
     public void onResponseComplete() {
+        unlockFields();
+    }
+
+    @Override
+    public void onResponseFailed(Throwable error) {
+        unlockFields();
+    }
+
+    /**
+     * Puts every discovered, non-ignored, currently editable field into
+     * read-only state so the user cannot type into a field the AI is about to
+     * overwrite. Fields that were already read-only when the turn started are
+     * left untouched and will not be unlocked at turn end.
+     */
+    private void lockFields() {
+        for (var field : collectActiveFields()) {
+            if (field.isReadOnly()) {
+                continue;
+            }
+            field.setReadOnly(true);
+            lockedFields.add(field);
+        }
+    }
+
+    /**
+     * Returns the discovered fields the controller acts on — every
+     * {@link HasValue} in the form tree minus those hidden via
+     * {@link #ignore(HasValue)}. Use this anywhere the LLM-visible field set
+     * matters (locking, tool inputs and outputs).
+     */
+    private List<HasValue<?, ?>> collectActiveFields() {
+        return FormFieldDiscovery.collectFields(form).stream()
+                .filter(field -> !isIgnored(field)).toList();
+    }
+
+    /**
+     * Restores fields locked by {@link #lockFields()} to read-write. Fields the
+     * application set to read-only before the turn started are not touched
+     * (they were skipped at lock time).
+     */
+    private void unlockFields() {
+        for (var field : lockedFields) {
+            field.setReadOnly(false);
+        }
+        lockedFields.clear();
+    }
+
+    private boolean isIgnored(HasValue<?, ?> field) {
+        if (!(field instanceof Component component)) {
+            return false;
+        }
+        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        var hints = hintsById.get(id);
+        return hints != null && hints.ignored;
     }
 
     private FormFieldHints hintsFor(HasValue<?, ?> field) {
