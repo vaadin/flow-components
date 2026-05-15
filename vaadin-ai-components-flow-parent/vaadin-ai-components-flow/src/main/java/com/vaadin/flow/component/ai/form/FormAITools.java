@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.ai.form;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 
@@ -27,15 +28,14 @@ import tools.jackson.databind.JsonNode;
  * Factory for the {@link LLMProvider.ToolSpec ToolSpec} instances exposed by
  * {@link FormAIController}.
  * <p>
- * Tools delegate back to the controller through a {@link Callbacks} instance,
- * keeping the JSON serialization concerns here and the field map and side
- * effects in the controller.
- * <p>
  * Intended only for internal use and can be removed in the future.
  *
  * @author Vaadin Ltd
  */
-public final class FormAITools {
+final class FormAITools {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FormAITools.class);
 
     private FormAITools() {
     }
@@ -44,13 +44,13 @@ public final class FormAITools {
      * Callback contract used by the tools to talk back to the controller
      * without needing direct access to the field map.
      */
-    public interface Callbacks extends Serializable {
+    public interface Callbacks {
 
         /**
-         * Invokes the queryable callback for the given field and returns the
-         * option labels the LLM should see. Implementations should throw if the
-         * field is unknown or not queryable; the message is surfaced to the LLM
-         * verbatim.
+         * Invokes the value-options query callback for the given field and
+         * returns the option labels the LLM should see. Implementations should
+         * throw if the field is unknown or has no value options registered; the
+         * message is surfaced to the LLM verbatim.
          */
         List<String> queryFieldOptions(String fieldId, String filter,
                 int limit);
@@ -60,7 +60,6 @@ public final class FormAITools {
      * Creates the {@code query_field_options} tool spec.
      */
     static LLMProvider.ToolSpec queryFieldOptions(Callbacks callbacks) {
-        Objects.requireNonNull(callbacks, "callbacks must not be null");
         return new LLMProvider.ToolSpec() {
 
             static final int QUERY_OPTIONS_DEFAULT_LIMIT = 50;
@@ -74,7 +73,7 @@ public final class FormAITools {
             @Override
             public String getDescription() {
                 return """
-                        Look up option labels for a queryable field. Use the field id \
+                        Look up value-option labels for a field. Use the field id \
                         from get_form_state. Pass an empty filter for a top-N sample.""";
             }
 
@@ -116,27 +115,31 @@ public final class FormAITools {
                 if (limit <= 0) {
                     limit = QUERY_OPTIONS_DEFAULT_LIMIT;
                 }
-                var truncated = false;
                 if (limit > QUERY_OPTIONS_MAX_LIMIT) {
                     limit = QUERY_OPTIONS_MAX_LIMIT;
-                    truncated = true;
                 }
                 List<String> items;
                 try {
                     items = callbacks.queryFieldOptions(fieldId, filter, limit);
                 } catch (Exception ex) {
-                    return "Error: queryable failed: " + ex.getMessage();
+                    LOGGER.warn("Value-options query failed for field {}",
+                            fieldId, ex);
+                    return "Error: value-options query failed.";
                 }
-                if (items.size() > QUERY_OPTIONS_MAX_LIMIT) {
-                    items = items.subList(0, QUERY_OPTIONS_MAX_LIMIT);
+                var truncated = false;
+                if (items.size() > limit) {
+                    items = items.subList(0, limit);
                     truncated = true;
+                }
+                if (items.isEmpty()) {
+                    return "(no matches)\n";
                 }
                 var b = new StringBuilder();
                 for (var item : items) {
-                    b.append(item).append('\n');
+                    b.append(escapeLabel(item)).append('\n');
                 }
                 if (truncated) {
-                    b.append("(truncated to ").append(QUERY_OPTIONS_MAX_LIMIT)
+                    b.append("(truncated to ").append(limit)
                             .append(" items)\n");
                 }
                 return b.toString();
@@ -147,8 +150,11 @@ public final class FormAITools {
     /**
      * Creates all form tools for the given callbacks.
      */
-    public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
-        Objects.requireNonNull(callbacks, "callbacks must not be null");
+    static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
         return List.of(queryFieldOptions(callbacks));
+    }
+
+    private static String escapeLabel(String label) {
+        return label.replace("\\", "\\\\").replace("\n", "\\n");
     }
 }

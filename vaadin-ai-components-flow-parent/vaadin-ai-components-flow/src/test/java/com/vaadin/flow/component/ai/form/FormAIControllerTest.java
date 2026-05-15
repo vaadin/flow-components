@@ -15,7 +15,12 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
@@ -23,10 +28,15 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
 
 class FormAIControllerTest {
 
@@ -178,12 +188,41 @@ class FormAIControllerTest {
 
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describe(null, "x"));
+            Assertions.assertThrows(NullPointerException.class, () -> controller
+                    .valueOptions(null, (f, l) -> List.of(), Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.allowedValues(null, List.of()));
-            Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.queryable(null, (f, l) -> List.of()));
+                    () -> controller.valueOptions(null, List.of(), Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.ignore(null));
+        }
+
+        @Test
+        void fixedOptionsFilterRestrictsResultsByLabelSubstring() {
+            // The Collection overload of valueOptions builds a case-
+            // insensitive 'contains' filter on the supplied labels. Pin the
+            // behavior by capturing the BiFunction the controller passes to
+            // the BiFunction overload and exercising it directly.
+            var captured = new AtomicReference<BiFunction<String, Integer, List<String>>>();
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field)) {
+                @Override
+                public <T> FormAIController valueOptions(HasValue<?, T> f,
+                        BiFunction<String, Integer, List<String>> query,
+                        Function<String, T> toValue) {
+                    captured.set(query);
+                    return super.valueOptions(f, query, toValue);
+                }
+            };
+            controller.valueOptions(field, List.of("apple", "banana", "cherry"),
+                    Function.identity());
+
+            Assertions.assertEquals(List.of("banana"),
+                    captured.get().apply("an", 10),
+                    "Filter must restrict results to options containing the "
+                            + "filter substring");
+            Assertions.assertEquals(List.of("apple", "banana", "cherry"),
+                    captured.get().apply("", 10),
+                    "Empty filter must return all options up to the limit");
         }
 
         @Test
@@ -194,9 +233,15 @@ class FormAIControllerTest {
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describe(field, null));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.allowedValues(field, null));
+                    () -> controller.valueOptions(field,
+                            (BiFunction<String, Integer, List<String>>) null,
+                            Function.identity()));
+            Assertions.assertThrows(NullPointerException.class, () -> controller
+                    .valueOptions(field, (f, l) -> List.of(), null));
+            Assertions.assertThrows(NullPointerException.class, () -> controller
+                    .valueOptions(field, (Collection<String>) null, Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.queryable(field, null));
+                    () -> controller.valueOptions(field, List.of(), null));
         }
     }
 
@@ -210,5 +255,72 @@ class FormAIControllerTest {
                     .map(LLMProvider.ToolSpec::getName).toList();
             Assertions.assertEquals(List.of("query_field_options"), names);
         }
+
+        @Test
+        void queryFieldOptionsReturnsRegisteredOptions() {
+            // End-to-end: register valueOptions on a field, then drive the
+            // tool the way an LLM would — call getTools().execute(...) with
+            // the field id. Pins the wiring from valueOptions registration
+            // through ToolCallbacks to the query function.
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("apple", "banana", "cherry"),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "an", 10);
+
+            Assertions.assertTrue(result.contains("banana"),
+                    "Expected the registered option matching the filter to "
+                            + "be returned, got: " + result);
+            Assertions.assertFalse(result.startsWith("Error"),
+                    "Tool must not error for a field that was registered "
+                            + "with valueOptions, got: " + result);
+        }
+
+        @Test
+        void queryFieldOptionsRecoversToDefaultLimitForNonPositiveLimit() {
+            // A misbehaving LLM may send limit=0 (or negative). The tool
+            // must recover to the default rather than forward the bogus
+            // value to the query callback. Drive end-to-end via the same
+            // path the LLM uses.
+            var field = new TestField();
+            var capturedLimit = new AtomicInteger();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> {
+                capturedLimit.set(limit);
+                return List.of();
+            }, Function.identity());
+            controller.onRequestStart();
+
+            executeQueryFieldOptions(controller, field, "", 0);
+
+            Assertions.assertEquals(50, capturedLimit.get(),
+                    "Non-positive limit must be coerced to the default "
+                            + "before reaching the query callback, got: "
+                            + capturedLimit.get());
+        }
+
+        private static String executeQueryFieldOptions(
+                FormAIController controller, HasValue<?, ?> field,
+                String filter, int limit) {
+            var fieldId = (String) ComponentUtil.getData((Component) field,
+                    FormAIController.FIELD_ID_KEY);
+            return findTool(controller.getTools(), "query_field_options")
+                    .execute(json("{\"field\":\"" + fieldId + "\",\"filter\":\""
+                            + filter + "\",\"limit\":" + limit + "}"));
+        }
+    }
+
+    // --- Helpers ---
+
+    private static LLMProvider.ToolSpec findTool(
+            List<LLMProvider.ToolSpec> tools, String name) {
+        return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
+                .orElseThrow();
+    }
+
+    private static JsonNode json(String text) {
+        return JacksonUtils.readTree(text);
     }
 }
