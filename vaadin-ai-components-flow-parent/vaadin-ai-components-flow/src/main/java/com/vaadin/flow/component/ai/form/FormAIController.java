@@ -95,7 +95,7 @@ public class FormAIController implements AIController {
      */
     public FormAIController describe(HasValue<?, ?> field, String description) {
         Objects.requireNonNull(description, "Description must not be null");
-        requireFillable(field).description = description;
+        hintsFor(field).description = description;
         return this;
     }
 
@@ -115,7 +115,8 @@ public class FormAIController implements AIController {
      */
     public <T> FormAIController allowedValues(HasValue<?, T> field,
             List<? extends T> values) {
-        requireFillable(field).allowedValues = new ArrayList<>(values);
+        Objects.requireNonNull(values, "Values must not be null");
+        hintsFor(field).allowedValues = new ArrayList<>(values);
         return this;
     }
 
@@ -129,7 +130,7 @@ public class FormAIController implements AIController {
      * @return this controller, for chaining
      */
     public FormAIController ignore(HasValue<?, ?> field) {
-        requireFillable(field).ignored = true;
+        hintsFor(field).ignored = true;
         return this;
     }
 
@@ -149,7 +150,7 @@ public class FormAIController implements AIController {
     public void onResponseComplete() {
     }
 
-    private FormFieldHints requireFillable(HasValue<?, ?> field) {
+    private FormFieldHints hintsFor(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
         return hintsById.computeIfAbsent(getOrCreateId(field),
                 k -> new FormFieldHints());
@@ -166,8 +167,10 @@ public class FormAIController implements AIController {
     }
 
     private static String getOrCreateId(HasValue<?, ?> field) {
-        // Fields come from Component.getChildren(), so the cast is safe.
-        var component = (Component) field;
+        if (!(field instanceof Component component)) {
+            throw new IllegalArgumentException(
+                    "Field must be a Component: " + field.getClass().getName());
+        }
         var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
         if (id == null) {
             id = UUID.randomUUID().toString();

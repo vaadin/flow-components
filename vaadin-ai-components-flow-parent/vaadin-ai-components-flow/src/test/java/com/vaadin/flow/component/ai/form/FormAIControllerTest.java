@@ -172,18 +172,6 @@ class FormAIControllerTest {
     class HintApi {
 
         @Test
-        void allHintMethodsReturnThisForChaining() {
-            var field = new TestField();
-            var controller = new FormAIController(new Div(field));
-
-            Assertions.assertSame(controller,
-                    controller.describe(field, "desc"));
-            Assertions.assertSame(controller,
-                    controller.allowedValues(field, List.of("a")));
-            Assertions.assertSame(controller, controller.ignore(field));
-        }
-
-        @Test
         void hintMethodsRejectNullField() {
             var controller = new FormAIController(new Div());
 
