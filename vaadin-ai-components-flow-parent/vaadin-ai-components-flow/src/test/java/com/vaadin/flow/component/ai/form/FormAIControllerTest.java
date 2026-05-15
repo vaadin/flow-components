@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -188,10 +190,11 @@ class FormAIControllerTest {
 
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describe(null, "x"));
-            Assertions.assertThrows(NullPointerException.class, () -> controller
-                    .valueOptions(null, (f, l) -> List.of(), Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(null, List.of(), Function.identity()));
+                    () -> controller.valueOptions(null, (f, l) -> List.of(),
+                            Function.identity()));
+            Assertions.assertThrows(NullPointerException.class, () -> controller
+                    .valueOptions(null, List.of(), Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.ignore(null));
         }
@@ -199,30 +202,21 @@ class FormAIControllerTest {
         @Test
         void fixedOptionsFilterRestrictsResultsByLabelSubstring() {
             // The Collection overload of valueOptions builds a case-
-            // insensitive 'contains' filter on the supplied labels. Pin the
-            // behavior by capturing the BiFunction the controller passes to
-            // the BiFunction overload and exercising it directly.
-            var captured = new AtomicReference<BiFunction<String, Integer, List<String>>>();
+            // insensitive 'contains' filter on the supplied labels.
             var field = new TestField();
-            var controller = new FormAIController(new Div(field)) {
-                @Override
-                public <T> FormAIController valueOptions(HasValue<?, T> f,
-                        BiFunction<String, Integer, List<String>> query,
-                        Function<String, T> toValue) {
-                    captured.set(query);
-                    return super.valueOptions(f, query, toValue);
-                }
-            };
+            var controller = new FormAIController(new Div(field));
             controller.valueOptions(field, List.of("apple", "banana", "cherry"),
                     Function.identity());
+            controller.onRequestStart();
 
-            Assertions.assertEquals(List.of("banana"),
-                    captured.get().apply("an", 10),
-                    "Filter must restrict results to options containing the "
-                            + "filter substring");
-            Assertions.assertEquals(List.of("apple", "banana", "cherry"),
-                    captured.get().apply("", 10),
-                    "Empty filter must return all options up to the limit");
+            Assertions.assertEquals("banana\n",
+                    executeQueryFieldOptions(controller, field, "an", 10),
+                    "Filter must restrict results to options containing "
+                            + "the filter substring");
+            Assertions.assertEquals("apple\nbanana\ncherry\n",
+                    executeQueryFieldOptions(controller, field, "", 10),
+                    "Empty filter must return all options up to the "
+                            + "limit");
         }
 
         @Test
@@ -238,8 +232,9 @@ class FormAIControllerTest {
                             Function.identity()));
             Assertions.assertThrows(NullPointerException.class, () -> controller
                     .valueOptions(field, (f, l) -> List.of(), null));
-            Assertions.assertThrows(NullPointerException.class, () -> controller
-                    .valueOptions(field, (Collection<String>) null, Function.identity()));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.valueOptions(field,
+                            (Collection<String>) null, Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.valueOptions(field, List.of(), null));
         }
@@ -247,14 +242,6 @@ class FormAIControllerTest {
 
     @Nested
     class GetTools {
-
-        @Test
-        void exposesQueryFieldOptionsTool() {
-            var controller = new FormAIController(new Div(new TestField()));
-            var names = controller.getTools().stream()
-                    .map(LLMProvider.ToolSpec::getName).toList();
-            Assertions.assertEquals(List.of("query_field_options"), names);
-        }
 
         @Test
         void queryFieldOptionsReturnsRegisteredOptions() {
@@ -273,9 +260,51 @@ class FormAIControllerTest {
             Assertions.assertTrue(result.contains("banana"),
                     "Expected the registered option matching the filter to "
                             + "be returned, got: " + result);
-            Assertions.assertFalse(result.startsWith("Error"),
+            Assertions.assertFalse(result.contains("Error"),
                     "Tool must not error for a field that was registered "
                             + "with valueOptions, got: " + result);
+        }
+
+        @Test
+        void queryFieldOptionsReportsUnknownFieldId() {
+            // When the LLM sends a field id the controller doesn't recognize
+            // (hallucinated, stale, or for a field that was registered with
+            // describe()/ignore() but not valueOptions), the tool must
+            // surface a specific 'unknown field id' error including the id
+            // itself so the LLM can correlate parallel tool calls and
+            // recover.
+            var registered = new TestField();
+            var unregistered = new TestField();
+            var controller = new FormAIController(
+                    new Div(registered, unregistered));
+            controller.valueOptions(registered, List.of("apple"),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var resultUnknownId = executeQueryFieldOptions(controller,
+                    json("{\"field\":\"not-a-real-id\",\"filter\":\"\"}"));
+
+            Assertions.assertTrue(resultUnknownId.contains("Unknown field id"),
+                    "Hallucinated field id should produce the unknown-id "
+                            + "error message, got: " + resultUnknownId);
+            Assertions.assertTrue(resultUnknownId.contains("not-a-real-id"),
+                    "Error message should echo the offending id so the LLM "
+                            + "can correlate, got: " + resultUnknownId);
+
+            var unregisteredId = (String) ComponentUtil.getData(unregistered,
+                    FormAIController.FIELD_ID_KEY);
+            var resultFieldWithoutOptions = executeQueryFieldOptions(controller,
+                    unregistered, "", 10);
+
+            Assertions.assertTrue(
+                    resultFieldWithoutOptions.contains("Unknown field id"),
+                    "Field that was never registered with valueOptions "
+                            + "should produce the same unknown-id error, "
+                            + "got: " + resultFieldWithoutOptions);
+            Assertions.assertTrue(
+                    resultFieldWithoutOptions.contains(unregisteredId),
+                    "Error message should echo the offending id, got: "
+                            + resultFieldWithoutOptions);
         }
 
         @Test
@@ -301,18 +330,240 @@ class FormAIControllerTest {
                             + capturedLimit.get());
         }
 
-        private static String executeQueryFieldOptions(
-                FormAIController controller, HasValue<?, ?> field,
-                String filter, int limit) {
-            var fieldId = (String) ComponentUtil.getData((Component) field,
-                    FormAIController.FIELD_ID_KEY);
-            return findTool(controller.getTools(), "query_field_options")
-                    .execute(json("{\"field\":\"" + fieldId + "\",\"filter\":\""
-                            + filter + "\",\"limit\":" + limit + "}"));
+        @Test
+        void queryFieldOptionsReturnsErrorForMissingFieldArgument() {
+            var controller = new FormAIController(new Div(new TestField()));
+
+            var result = executeQueryFieldOptions(controller,
+                    json("{\"filter\":\"\"}"));
+
+            Assertions.assertTrue(result.startsWith("Error"));
+            Assertions.assertTrue(result.contains("field"));
         }
+
+        @Test
+        void queryFieldOptionsReturnsErrorForNullArguments() {
+            var controller = new FormAIController(new Div(new TestField()));
+
+            var result = executeQueryFieldOptions(controller, null);
+
+            Assertions.assertTrue(result.startsWith("Error"));
+        }
+
+        @Test
+        void queryFieldOptionsDefaultsFilterToEmptyAndLimitToFifty() {
+            var field = new TestField();
+            var capturedFilter = new AtomicReference<String>();
+            var capturedLimit = new AtomicInteger();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> {
+                capturedFilter.set(filter);
+                capturedLimit.set(limit);
+                return List.of();
+            }, Function.identity());
+            controller.onRequestStart();
+
+            var fieldId = (String) ComponentUtil.getData(field,
+                    FormAIController.FIELD_ID_KEY);
+            executeQueryFieldOptions(controller,
+                    json("{\"field\":\"" + fieldId + "\"}"));
+
+            Assertions.assertEquals("", capturedFilter.get());
+            Assertions.assertEquals(50, capturedLimit.get());
+        }
+
+        @Test
+        void queryFieldOptionsForwardsFilterAndLimitToTheRegisteredQuery() {
+            var field = new TestField();
+            var capturedFilter = new AtomicReference<String>();
+            var capturedLimit = new AtomicInteger();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> {
+                capturedFilter.set(filter);
+                capturedLimit.set(limit);
+                return List.of();
+            }, Function.identity());
+            controller.onRequestStart();
+
+            executeQueryFieldOptions(controller, field, "acme", 7);
+
+            Assertions.assertEquals("acme", capturedFilter.get());
+            Assertions.assertEquals(7, capturedLimit.get());
+        }
+
+        @Test
+        void queryFieldOptionsEmitsOneLinePerLabel() {
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field,
+                    List.of("Apollo #P-1", "Polaris #P-2"),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "", 50);
+
+            Assertions.assertEquals("Apollo #P-1\nPolaris #P-2\n", result);
+        }
+
+        @Test
+        void queryFieldOptionsClampsLimitToTwoHundred() {
+            var field = new TestField();
+            var capturedLimit = new AtomicInteger();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> {
+                capturedLimit.set(limit);
+                // Return more items than the cap so truncation kicks in.
+                var items = new ArrayList<String>(201);
+                for (var i = 0; i < 201; i++) {
+                    items.add("item-" + i);
+                }
+                return items;
+            }, Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "", 9999);
+
+            Assertions.assertEquals(200, capturedLimit.get());
+            Assertions.assertTrue(result.contains("(truncated to 200 items)"),
+                    "Result should signal truncation, got: " + result);
+            var dataLines = Arrays.stream(result.split("\n"))
+                    .filter(s -> !s.isEmpty()).filter(s -> !s.startsWith("("))
+                    .count();
+            Assertions.assertEquals(200, dataLines,
+                    "Output must not contain more data lines than the "
+                            + "clamped limit even when the callback returns "
+                            + "more items, got: " + dataLines);
+        }
+
+        @Test
+        void queryFieldOptionsDoesNotClaimTruncationWhenResultsFitUnderLimit() {
+            // When the LLM requests a limit above the server cap, the cap
+            // kicks in — but if the callback returns far fewer items than
+            // the cap, the result was not actually truncated. The
+            // "(truncated to ... items)" message should only appear when
+            // items were dropped.
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field,
+                    (filter, limit) -> List.of("only-one"),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "", 9999);
+
+            Assertions.assertFalse(result.contains("truncated"),
+                    "Result must not claim truncation when fewer items "
+                            + "than the cap were returned, got: " + result);
+        }
+
+        @Test
+        void queryFieldOptionsSignalsEmptyResultExplicitly() {
+            // An empty body is indistinguishable from a broken tool to the
+            // LLM. When the query returns zero items, the result should
+            // carry an explicit signal rather than just "".
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> List.of(),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "zzz", 10);
+
+            Assertions.assertFalse(result.isEmpty(),
+                    "Empty match set must produce an explicit signal to "
+                            + "the LLM, not an empty string");
+        }
+
+        @Test
+        void queryFieldOptionsEscapesNewlinesInLabels() {
+            // Labels are emitted one-per-line. A label containing '\n'
+            // would silently corrupt the format, leaving the LLM unable to
+            // recover the original options. The tool escapes '\n' (and the
+            // escape char itself) in labels so a naive split by '\n'
+            // yields one entry per original label.
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field,
+                    (filter, limit) -> List.of("first\nsecond", "third"),
+                    Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "", 10);
+
+            var lines = java.util.Arrays.stream(result.split("\n"))
+                    .filter(s -> !s.isEmpty()).toList();
+            Assertions.assertEquals(List.of("first\\nsecond", "third"), lines,
+                    "Labels containing newlines must be escaped so the "
+                            + "output format stays parseable, got: " + result);
+        }
+
+        @Test
+        void queryFieldOptionsDoesNotLeakRawExceptionContent() {
+            // Exception messages from a user-supplied query callback can
+            // contain sensitive data (JDBC URLs, file paths, upstream API
+            // bodies, tokens). The tool must not echo ex.getMessage() (or
+            // any uncontrolled exception content) into the response handed
+            // to the LLM.
+            var sentinel = "jdbc:postgresql://prod-db.internal:5432/secrets "
+                    + "TOKEN=abc123";
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, (filter, limit) -> {
+                throw new IllegalStateException(sentinel);
+            }, Function.identity());
+            controller.onRequestStart();
+
+            var result = executeQueryFieldOptions(controller, field, "", 10);
+
+            Assertions.assertTrue(result.startsWith("Error"),
+                    "Failures should surface as an error to the LLM, got: "
+                            + result);
+            Assertions.assertFalse(result.contains(sentinel),
+                    "Raw exception message must not be forwarded to the "
+                            + "LLM verbatim — it can leak internal "
+                            + "details. Got: " + result);
+            Assertions.assertFalse(
+                    result.contains("jdbc:") || result.contains("TOKEN="),
+                    "Fragments of the exception message must not leak "
+                            + "either, got: " + result);
+        }
+
+        @Test
+        void queryFieldOptionsSchemaIsStatic() {
+            // The parameters schema is built once and does not enumerate
+            // field ids — clients can cache it across requests.
+            var controller = new FormAIController(new Div(new TestField()));
+            var first = findTool(controller.getTools(), "query_field_options")
+                    .getParametersSchema();
+            var second = findTool(controller.getTools(), "query_field_options")
+                    .getParametersSchema();
+            Assertions.assertEquals(first, second);
+
+            var schema = json(first);
+            Assertions.assertTrue(
+                    schema.path("properties").path("field").path("enum")
+                            .isMissingNode(),
+                    "Static schema should not encode field ids as an enum");
+        }
+
     }
 
     // --- Helpers ---
+
+    private static String executeQueryFieldOptions(FormAIController controller,
+            HasValue<?, ?> field, String filter, int limit) {
+        var fieldId = (String) ComponentUtil.getData((Component) field,
+                FormAIController.FIELD_ID_KEY);
+        return executeQueryFieldOptions(controller,
+                json("{\"field\":\"" + fieldId + "\",\"filter\":\"" + filter
+                        + "\",\"limit\":" + limit + "}"));
+    }
+
+    private static String executeQueryFieldOptions(FormAIController controller,
+            JsonNode arguments) {
+        return findTool(controller.getTools(), "query_field_options")
+                .execute(arguments);
+    }
 
     private static LLMProvider.ToolSpec findTool(
             List<LLMProvider.ToolSpec> tools, String name) {

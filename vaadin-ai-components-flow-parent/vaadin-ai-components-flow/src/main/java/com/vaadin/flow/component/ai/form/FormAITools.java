@@ -48,12 +48,30 @@ final class FormAITools {
 
         /**
          * Invokes the value-options query callback for the given field and
-         * returns the option labels the LLM should see. Implementations should
-         * throw if the field is unknown or has no value options registered; the
-         * message is surfaced to the LLM verbatim.
+         * returns the option labels the LLM should see. Throw
+         * {@link ToolException} to surface a curated error message to the LLM
+         * (for example when the field id is unknown); other exceptions are
+         * caught and replaced with a generic error so internal details are not
+         * leaked.
          */
         List<String> queryFieldOptions(String fieldId, String filter,
                 int limit);
+    }
+
+    /**
+     * Thrown by a {@link Callbacks} implementation to surface a curated message
+     * to the LLM. The exception {@link #getMessage() message} is forwarded
+     * verbatim as the tool's error output, so callers must ensure it is safe to
+     * expose: no PII, no internal identifiers other than what the LLM already
+     * sent, no third-party error text. For any uncontrolled failure throw a
+     * regular {@link RuntimeException} instead — the tool will log it and
+     * return a generic error.
+     */
+    public static class ToolException extends RuntimeException {
+
+        public ToolException(String llmFacingMessage) {
+            super(llmFacingMessage);
+        }
     }
 
     /**
@@ -121,6 +139,10 @@ final class FormAITools {
                 List<String> items;
                 try {
                     items = callbacks.queryFieldOptions(fieldId, filter, limit);
+                } catch (ToolException ex) {
+                    LOGGER.warn("Tool reported user-facing error for field {}",
+                            fieldId, ex);
+                    return "Error: " + ex.getMessage();
                 } catch (Exception ex) {
                     LOGGER.warn("Value-options query failed for field {}",
                             fieldId, ex);

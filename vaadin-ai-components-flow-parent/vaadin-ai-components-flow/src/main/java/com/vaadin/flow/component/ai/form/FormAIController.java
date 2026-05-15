@@ -232,8 +232,8 @@ public class FormAIController implements AIController {
                 int limit) {
             var hints = hintsById.get(fieldId);
             if (hints == null || hints.valueOptionsQuery == null) {
-                throw new IllegalArgumentException(
-                        "Field has no value options: " + fieldId);
+                throw new FormAITools.ToolException(
+                        "Unknown field id: " + fieldId);
             }
             return new ArrayList<>(
                     hints.valueOptionsQuery.apply(filter, limit));
