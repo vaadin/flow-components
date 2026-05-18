@@ -21,6 +21,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -50,6 +51,15 @@ public class GridViewClickListenersPage extends LegacyTestView {
         grid.addColumn(new ComponentRenderer<>(person -> {
             return new Button(VaadinIcon.PENCIL.create());
         })).setHeader("Button");
+        grid.addColumn(new ComponentRenderer<>(person -> {
+            Select<String> select = new Select<>();
+            select.setItems("Most recent first", "Rating: high to low",
+                    "Rating: low to high", "Price: high to low",
+                    "Price: low to high");
+            select.setValue("Most recent first");
+            return select;
+
+        })).setHeader("Select");
 
         // Disable selection: will receive only click events instead
         grid.setSelectionMode(SelectionMode.NONE);
