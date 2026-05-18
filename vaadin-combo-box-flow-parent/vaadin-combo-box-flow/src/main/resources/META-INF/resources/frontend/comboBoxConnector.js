@@ -38,9 +38,13 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       lastTypedFilter = params.filter;
       lastRequestedRange = [-1, -1];
 
-      comboBox._filterDebouncer = Debouncer.debounce(comboBox._filterDebouncer, timeOut.after(comboBox._filterTimeout ?? 500), () => {
-        comboBox.clearCache();
-      });
+      comboBox._filterDebouncer = Debouncer.debounce(
+        comboBox._filterDebouncer,
+        timeOut.after(comboBox._filterTimeout ?? 500),
+        () => {
+          comboBox.clearCache();
+        }
+      );
       return;
     }
 
