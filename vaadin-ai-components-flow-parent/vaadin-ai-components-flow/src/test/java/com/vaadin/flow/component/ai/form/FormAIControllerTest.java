@@ -198,6 +198,77 @@ class FormAIControllerTest {
     }
 
     /**
+     * A {@link Component} that implements {@link HasValue} directly — not via
+     * {@link AbstractField}. Used to verify that
+     * {@link FormFieldType#classify(HasValue)} resolves the value type when the
+     * {@code HasValue<?, V>} parameterization sits at the class declaration
+     * itself rather than several layers up the hierarchy.
+     */
+    @Tag("direct-integer-field")
+    private static class DirectIntegerField extends Component
+            implements HasValue<DirectIntegerField.ChangeEvent, Integer> {
+
+        private Integer value;
+
+        @Override
+        public void setValue(Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public Integer getValue() {
+            return value;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                HasValue.ValueChangeListener<? super ChangeEvent> listener) {
+            return () -> {
+            };
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+
+        @Override
+        public void setReadOnly(boolean readOnly) {
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return false;
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(boolean visible) {
+        }
+
+        static class ChangeEvent implements HasValue.ValueChangeEvent<Integer> {
+            @Override
+            public HasValue<?, Integer> getHasValue() {
+                return null;
+            }
+
+            @Override
+            public boolean isFromClient() {
+                return false;
+            }
+
+            @Override
+            public Integer getOldValue() {
+                return null;
+            }
+
+            @Override
+            public Integer getValue() {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Single-select field. Implements {@link HasItems} so the controller
      * classifies it as a selection component, and exposes
      * {@code getDataProvider()}/{@code getItemLabelGenerator()} reflectively so
@@ -1097,6 +1168,16 @@ class FormAIControllerTest {
         @Test
         void getFormStateMapsIntegerValueTypeToTypeInteger() {
             assertTypeOnly(typeNodeFor(new IntField()), "integer");
+        }
+
+        @Test
+        void getFormStateClassifiesDirectHasValueImplementation() {
+            // All other tests reach HasValue<?, V> through AbstractField →
+            // HasValueAndElement → HasValue, exercising type-variable
+            // propagation. This test covers the simpler case: a Component
+            // that declares its V argument directly on HasValue, with no
+            // intermediate generic chain.
+            assertTypeOnly(typeNodeFor(new DirectIntegerField()), "integer");
         }
 
         @Test
