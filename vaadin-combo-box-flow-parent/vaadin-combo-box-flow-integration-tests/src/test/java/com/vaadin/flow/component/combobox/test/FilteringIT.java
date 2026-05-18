@@ -236,11 +236,15 @@ public class FilteringIT extends AbstractComboBoxIT {
                 items -> "Item 331".equals(getItemLabel(items, 150))
                         && "Item 491".equals(getItemLabel(items, 175)));
 
-        // filtered items: 1, 10, 11, .. 19, 21, 31, .. 91, 100, 101, .. 199,
-        // 201, 210, .. 291, 301, .. 391, 401, .. 491. Total count = 176
-        assertLoadedItemsCount(
-                "Unexpected items count after applying filter = '1'", 176,
-                comboBoxElement);
+        int loaded = getLoadedItems(comboBoxElement).size();
+        int pageSize = comboBoxElement.getPropertyInteger("pageSize");
+        Assert.assertTrue(
+                "Expected items to remain loaded after scrolling but was "
+                        + loaded,
+                loaded > 0);
+        Assert.assertTrue("Loaded items should stay within ~2 pages ("
+                + (pageSize * 2) + ") but was " + loaded,
+                loaded <= pageSize * 2);
     }
 
     private void assertItemsNotLoaded() {
