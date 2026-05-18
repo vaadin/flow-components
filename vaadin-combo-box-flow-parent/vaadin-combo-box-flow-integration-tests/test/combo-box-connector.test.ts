@@ -18,28 +18,34 @@ describe('combo-box connector', () => {
   });
 
   describe('pending requests', () => {
-    it('should be populated when the controller loads a page', () => {
-      comboBox.__dataProviderController.loadFirstPage();
+    let dataProviderController: FlowComboBox['__dataProviderController'];
 
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
+    beforeEach(() => {
+      dataProviderController = comboBox.__dataProviderController;
+    });
+
+    it('should be populated when the controller loads a page', () => {
+      dataProviderController.loadFirstPage();
+
+      expect(dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
     });
 
     it('should be cleared by $connector.confirm when items are cached', () => {
-      comboBox.__dataProviderController.loadFirstPage();
+      dataProviderController.loadFirstPage();
 
       comboBox.$connector.set(0, [{ key: '1', label: 'one' }], '');
       comboBox.$connector.confirm(1, '');
 
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.undefined;
+      expect(dataProviderController.rootCache.pendingRequests[0]).to.be.undefined;
     });
 
     it('should be cleared by $connector.reset', () => {
-      comboBox.__dataProviderController.loadFirstPage();
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
+      dataProviderController.loadFirstPage();
+      expect(dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
 
       comboBox.$connector.reset();
 
-      expect(comboBox.__dataProviderController.rootCache.pendingRequests).to.deep.equal({});
+      expect(dataProviderController.rootCache.pendingRequests).to.deep.equal({});
     });
 
     describe('with filter debouncing', () => {
@@ -57,14 +63,14 @@ describe('combo-box connector', () => {
 
       it('should be populated only after the debounce timeout', () => {
         comboBox.filter = 'a';
-        comboBox.__dataProviderController.loadFirstPage();
+        dataProviderController.loadFirstPage();
 
-        const requestsDuringDebounce = comboBox.__dataProviderController.rootCache.pendingRequests;
+        const requestsDuringDebounce = dataProviderController.rootCache.pendingRequests;
         expect(Object.keys(requestsDuringDebounce)).to.have.lengthOf(1);
 
         clock.tick(500);
 
-        expect(comboBox.__dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
+        expect(dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
       });
     });
   });

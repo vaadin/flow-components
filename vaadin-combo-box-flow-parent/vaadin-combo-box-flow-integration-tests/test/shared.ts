@@ -7,6 +7,8 @@ import * as sinon from 'sinon';
 export type ComboBoxConnector = {
   initLazy: (comboBox: ComboBox) => void;
   reset: () => void;
+  set: (index: number, items: unknown[], filter: string) => void;
+  confirm: (id: number, filter: string) => void;
 };
 
 export type ComboBoxServer = {
