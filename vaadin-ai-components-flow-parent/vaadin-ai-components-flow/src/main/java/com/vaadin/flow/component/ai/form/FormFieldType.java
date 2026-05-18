@@ -37,28 +37,26 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * Classifies a {@link HasValue} field into the {@link FormAIController}'s
  * internal type taxonomy.
  * <p>
- * Detection is purely contract-based: the value type is resolved by walking the
- * field's class hierarchy and reading the type argument of
+ * Detection is primarily contract-based: the value type is resolved by walking
+ * the field's class hierarchy and reading the type argument of
  * {@code HasValue<?, V>}, and the selection variants are picked up via the
  * framework-level marker interfaces {@link MultiSelect},
  * {@link HasListDataView}, {@link HasLazyDataView}, {@link HasDataView}, and
- * {@link HasItems}. No concrete Vaadin component classes are referenced, so any
- * custom {@code HasValue} can flow through unchanged.
+ * {@link HasItems}. Two component-specific cases are recognised by class name
+ * because their behaviour cannot be inferred from {@code HasValue}'s contract:
+ * {@code PasswordField} is auto-ignored to keep secret values out of LLM tool
+ * payloads, and {@code EmailField} is marked with {@code format=email} for the
+ * schema. The lookups are class-hierarchy walks against fully-qualified names,
+ * not {@code instanceof} on imported classes, so this module does not pull in
+ * the text-field component module at compile time.
  * <p>
- * Two component-specific behaviours that the previous class-name detection
- * provided are not recoverable from type information alone:
- * <ul>
- * <li>{@code EmailField} can no longer be marked with {@code format=email}
- * automatically (its value type is {@code String}, the same as
- * {@code TextField}). Convey the hint via {@code describe(...)}.</li>
- * <li>{@code PasswordField} is no longer auto-ignored. To keep password values
- * out of LLM tool payloads the developer must opt in with
- * {@link FormAIController#ignore(HasValue)}. The same applies to
- * {@code CustomField}.</li>
- * </ul>
+ * For any other custom {@code HasValue}, classification works without
+ * registration: the value type is resolved through the hierarchy and mapped to
+ * the closest primitive variant, or falls back to {@link #STRING}.
  */
 enum FormFieldType {
     STRING,
+    EMAIL,
     BIG_DECIMAL,
     NUMBER,
     INTEGER,
@@ -76,9 +74,19 @@ enum FormFieldType {
      */
     static final String BIG_DECIMAL_PATTERN = "^-?\\d+(\\.\\d+)?$";
 
+    private static final String PASSWORD_FIELD_FQN = "com.vaadin.flow.component.textfield.PasswordField";
+    private static final String EMAIL_FIELD_FQN = "com.vaadin.flow.component.textfield.EmailField";
+
     static FormFieldType classify(HasValue<?, ?> field) {
         if (field == null) {
             return UNSUPPORTED;
+        }
+        var fieldClass = field.getClass();
+        if (isAssignableTo(fieldClass, PASSWORD_FIELD_FQN)) {
+            return UNSUPPORTED;
+        }
+        if (isAssignableTo(fieldClass, EMAIL_FIELD_FQN)) {
+            return EMAIL;
         }
         if (field instanceof MultiSelect<?, ?>) {
             return MULTI_SELECT;
@@ -89,7 +97,7 @@ enum FormFieldType {
                 || field instanceof HasItems<?>) {
             return SINGLE_SELECT;
         }
-        var valueType = resolveValueType(field.getClass());
+        var valueType = resolveValueType(fieldClass);
         if (valueType == Boolean.class) {
             return BOOLEAN;
         }
@@ -190,5 +198,21 @@ enum FormFieldType {
             t = bound;
         }
         return t;
+    }
+
+    /**
+     * Walks the class hierarchy looking for a superclass with the given
+     * fully-qualified name. Used by the {@code PasswordField} / {@code
+     * EmailField} special cases so this module does not need a compile-time
+     * dependency on {@code vaadin-text-field-flow}.
+     */
+    private static boolean isAssignableTo(Class<?> type, String superTypeName) {
+        for (var c = type; c != null
+                && c != Object.class; c = c.getSuperclass()) {
+            if (c.getName().equals(superTypeName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

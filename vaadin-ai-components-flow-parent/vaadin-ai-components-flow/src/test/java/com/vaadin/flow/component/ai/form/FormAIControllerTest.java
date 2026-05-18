@@ -45,6 +45,8 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.HasItems;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -1017,6 +1019,41 @@ class FormAIControllerTest {
             Assertions.assertEquals(1, fields.size());
             Assertions.assertEquals(idOf(visible),
                     fields.get(0).get("id").asString());
+        }
+
+        @Test
+        void getFormStateAutoIgnoresPasswordField() {
+            // PasswordField is treated as UNSUPPORTED so secret values do
+            // not flow into the LLM tool payload by default. The developer
+            // does not have to remember to call .ignore() for every form
+            // that happens to include one.
+            var visible = new TestField();
+            var password = new PasswordField();
+            var controller = new FormAIController(new Div(visible, password));
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(1, fields.size(),
+                    "PasswordField must never appear in the form-state "
+                            + "result, got: " + fields);
+            Assertions.assertEquals(idOf(visible),
+                    fields.get(0).get("id").asString());
+        }
+
+        @Test
+        void getFormStateMarksEmailFieldWithEmailFormat() {
+            // EmailField shares String as its value type with TextField, so
+            // the format=email distinction has to come from a class-name
+            // exception in the classifier rather than from HasValue's
+            // generic parameter.
+            var field = new EmailField();
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("string", f.path("type").asString());
+            Assertions.assertEquals("email", f.path("format").asString(),
+                    "EmailField must carry format=email, got: " + f);
         }
 
         @Test

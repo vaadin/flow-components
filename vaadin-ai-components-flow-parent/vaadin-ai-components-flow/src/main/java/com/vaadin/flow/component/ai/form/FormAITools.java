@@ -39,9 +39,6 @@ final class FormAITools {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAITools.class);
 
-    static final String FORM_STATE_TOOL = "get_form_state";
-    static final String QUERY_OPTIONS_TOOL = "query_field_options";
-
     private FormAITools() {
     }
 
@@ -110,7 +107,7 @@ final class FormAITools {
 
             @Override
             public String getName() {
-                return FORM_STATE_TOOL;
+                return "get_form_state";
             }
 
             @Override
@@ -152,7 +149,7 @@ final class FormAITools {
 
             @Override
             public String getName() {
-                return QUERY_OPTIONS_TOOL;
+                return "query_field_options";
             }
 
             @Override
