@@ -624,6 +624,15 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const cell = path[idx];
     const content = path.slice(0, idx);
 
+    // Do not fire item click event if the click originated inside a Vaadin overlay
+    // (Select, ComboBox, DatePicker, MenuBar, ContextMenu, ...). The overlay's
+    // menu/list lives in the host component's light DOM, so its clicks bubble
+    // through the cell — but by the time we get here, the overlay has typically
+    // been hidden synchronously, defeating the offsetParent-based isFocusable check.
+    if (content.some((node) => typeof node.localName === 'string' && node.localName.endsWith('-overlay'))) {
+      return;
+    }
+
     // Do not fire item click event if cell content contains focusable elements.
     // Use this instead of event.target to detect cases like icon inside button.
     // See https://github.com/vaadin/flow-components/issues/4065
