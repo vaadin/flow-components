@@ -105,7 +105,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     const buffer = viewportRange[1] - viewportRange[0];
     const sizeLimit = Number.isFinite(comboBox.size) ? comboBox.size : Number.POSITIVE_INFINITY;
     viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
-    viewportRange[1] = Math.min(viewportRange[1] + buffer, sizeLimit);
+    viewportRange[1] = Math.min(viewportRange[1] + buffer, sizeLimit - 1);
 
     let viewportPageRange = [
       Math.floor(viewportRange[0] / comboBox.pageSize),
