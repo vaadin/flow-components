@@ -11,7 +11,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   comboBox.$connector = {};
 
-  const getPendingRequests = () => comboBox.__dataProviderController.rootCache.pendingRequests;
   let cache = {};
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
   let lastRequestedRange = [-1, -1];
@@ -157,7 +156,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
       throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
     }
 
-    if (index === 0 && items.length === 0 && getPendingRequests()[0]) {
+    const { pendingRequests } = comboBox.__dataProviderController.rootCache;
+    if (index === 0 && items.length === 0 && pendingRequests[0]) {
       // Makes sure that the dataProvider callback is called even when server
       // returns empty data set (no items match the filter).
       cache[0] = [];
@@ -213,7 +213,8 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     // We're done applying changes from this batch, resolve pending
     // callbacks
-    Object.entries(getPendingRequests()).forEach(([page, callback]) => {
+    const { pendingRequests } = comboBox.__dataProviderController.rootCache;
+    Object.entries(pendingRequests).forEach(([page, callback]) => {
       const items = cache[page];
 
       if (comboBox._clientSideFilter) {
