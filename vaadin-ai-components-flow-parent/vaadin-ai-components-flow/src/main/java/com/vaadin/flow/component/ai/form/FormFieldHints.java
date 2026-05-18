@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Mutable per-field hint state held by {@link FormAIController}, keyed by the
@@ -26,6 +28,7 @@ import java.util.List;
 final class FormFieldHints {
 
     String description;
-    List<Object> allowedValues;
+    BiFunction<String, Integer, List<String>> valueOptionsQuery;
+    Function<String, ?> valueOptionsToValue;
     boolean ignored;
 }

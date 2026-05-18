@@ -16,11 +16,15 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -58,7 +62,7 @@ public class FormAIController implements AIController {
      * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
      * removing and re-adding the field within a session.
      */
-    private static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
+    static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
     private final Component form;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
@@ -100,24 +104,102 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Restricts the field's accepted values to the given list. The LLM is told
-     * to pick one of these and the controller rejects anything else. Later
-     * calls for the same field overwrite earlier ones.
+     * Declares the set of values the LLM may pick for the field. The query
+     * callback receives a filter string and a limit and returns matching
+     * options as the labels the LLM should see; the {@code toValue} function
+     * converts a chosen label back to the field's value type. Later calls for
+     * the same field overwrite earlier ones.
      *
      * @param field
-     *            the field to constrain, not {@code null}
-     * @param values
-     *            the allowed values, not {@code null}; a defensive copy is
-     *            taken
+     *            the field whose options the LLM may query, not {@code null}
+     * @param query
+     *            the filter callback returning labels for the LLM, not
+     *            {@code null}
+     * @param toValue
+     *            converts a chosen label to the field's value type, not
+     *            {@code null}
      * @param <T>
      *            the field's value type
      * @return this controller, for chaining
      */
-    public <T> FormAIController allowedValues(HasValue<?, T> field,
-            List<? extends T> values) {
-        Objects.requireNonNull(values, "Values must not be null");
-        hintsFor(field).allowedValues = new ArrayList<>(values);
+    public <T> FormAIController valueOptions(HasValue<?, T> field,
+            BiFunction<String, Integer, List<String>> query,
+            Function<String, T> toValue) {
+        Objects.requireNonNull(query, "Query function must not be null");
+        Objects.requireNonNull(toValue, "Value converter must not be null");
+        var hints = hintsFor(field);
+        hints.valueOptionsQuery = query;
+        hints.valueOptionsToValue = toValue;
         return this;
+    }
+
+    /**
+     * Declares the set of values the LLM may pick for a {@link String}-typed
+     * field. The query callback receives a filter string and a limit and
+     * returns matching options; each label is used as the field value as-is.
+     * Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may query, not {@code null}
+     * @param query
+     *            the filter callback returning labels for the LLM, not
+     *            {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController valueOptions(HasValue<?, String> field,
+            BiFunction<String, Integer, List<String>> query) {
+        return valueOptions(field, query, Function.identity());
+    }
+
+    /**
+     * Declares a fixed set of labels the LLM may pick for the field. The
+     * {@code toValue} function converts a chosen label back to the field's
+     * value type. Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may pick from, not
+     *            {@code null}
+     * @param options
+     *            the labels the LLM may pick from, not {@code null}; a
+     *            defensive copy is taken
+     * @param toValue
+     *            converts a chosen label to the field's value type, not
+     *            {@code null}
+     * @param <T>
+     *            the field's value type
+     * @return this controller, for chaining
+     */
+    public <T> FormAIController valueOptions(HasValue<?, T> field,
+            Collection<String> options, Function<String, T> toValue) {
+        Objects.requireNonNull(options, "Options must not be null");
+        var snapshot = List.copyOf(options);
+        return valueOptions(field, (filter, limit) -> {
+            var matches = snapshot.stream();
+            if (filter != null && !filter.isEmpty()) {
+                var needle = filter.toLowerCase(Locale.ROOT);
+                matches = matches.filter(
+                        o -> o.toLowerCase(Locale.ROOT).contains(needle));
+            }
+            return matches.limit(limit).toList();
+        }, toValue);
+    }
+
+    /**
+     * Declares a fixed set of labels the LLM may pick for a
+     * {@link String}-typed field. Each chosen label is used as the field value
+     * as-is. Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may pick from, not
+     *            {@code null}
+     * @param options
+     *            the labels the LLM may pick from, not {@code null}; a
+     *            defensive copy is taken
+     * @return this controller, for chaining
+     */
+    public FormAIController valueOptions(HasValue<?, String> field,
+            Collection<String> options) {
+        return valueOptions(field, options, Function.identity());
     }
 
     /**
@@ -136,7 +218,7 @@ public class FormAIController implements AIController {
 
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
-        return List.of();
+        return FormAITools.createAll(new ToolCallbacks());
     }
 
     @Override
@@ -177,5 +259,20 @@ public class FormAIController implements AIController {
             ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
+    }
+
+    private final class ToolCallbacks implements FormAITools.Callbacks {
+
+        @Override
+        public List<String> queryFieldOptions(String fieldId, String filter,
+                int limit) {
+            var hints = hintsById.get(fieldId);
+            if (hints == null || hints.valueOptionsQuery == null) {
+                throw new FormAITools.ToolException(
+                        "Unknown field id: " + fieldId);
+            }
+            return new ArrayList<>(
+                    hints.valueOptionsQuery.apply(filter, limit));
+        }
     }
 }
