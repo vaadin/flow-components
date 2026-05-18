@@ -217,16 +217,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     Object.entries(pendingRequests).forEach(([page, callback]) => {
       const items = cache[page];
 
-      if (items) {
-        if (comboBox._clientSideFilter) {
-          performClientSideFilter(items, comboBox.filter, callback);
-        } else {
-          callback(items, comboBox.size);
-        }
-      } else {
-        callback([], comboBox.size);
+      if (comboBox._clientSideFilter && items) {
+        performClientSideFilter(items, comboBox.filter, callback);
+        return;
       }
 
+      callback(items ?? [], comboBox.size);
       delete cache[page];
     });
 
