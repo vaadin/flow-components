@@ -21,6 +21,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -43,18 +44,29 @@ final class FormAITools {
     }
 
     /**
+     * Carrier passed from {@link FormAIController} to {@link FormAITools} for
+     * one visible (non-ignored) form field. The id is the opaque UUID assigned
+     * at discovery time; the {@link FormFieldHints} reference is live so live
+     * label, helper text, current value, and any post-construction hint updates
+     * are read fresh on each tool call.
+     */
+    record FormFieldDescriptor(String id, HasValue<?, ?> field,
+            FormFieldType type, FormFieldHints hints) {
+    }
+
+    /**
      * Callback contract used by the tools to talk back to the controller
      * without needing direct access to the field map.
      */
     public interface Callbacks {
 
         /**
-         * Returns the entries the tools should expose to the LLM, in document
-         * order. Ignored fields and fields whose type is
+         * Returns the descriptors the tools should expose to the LLM, in
+         * document order. Ignored fields and fields whose type is
          * {@link FormFieldType#UNSUPPORTED} must be filtered out by the
          * implementation.
          */
-        List<FormFieldEntry> visibleEntries();
+        List<FormFieldDescriptor> visibleFields();
 
         /**
          * Invokes the value-options query callback for the given field and
@@ -93,18 +105,6 @@ final class FormAITools {
     static LLMProvider.ToolSpec formState(Callbacks callbacks) {
         return new LLMProvider.ToolSpec() {
 
-            static final String DESCRIPTION = """
-                    Returns the current form as JSON: every fillable field's id, \
-                    description, type metadata (type/format/pattern/enum/queryable/\
-                    array/items), and current value. Call this first so you know \
-                    which ids exist and what each one means.""";
-
-            static final String SCHEMA = """
-                    {
-                        "type": "object",
-                        "properties": {}
-                    }""";
-
             @Override
             public String getName() {
                 return "get_form_state";
@@ -112,12 +112,20 @@ final class FormAITools {
 
             @Override
             public String getDescription() {
-                return DESCRIPTION;
+                return """
+                        Returns the current form as JSON: every fillable field's id, \
+                        description, type metadata (type/format/pattern/enum/queryable/\
+                        array/items), and current value. Call this first so you know \
+                        which ids exist and what each one means.""";
             }
 
             @Override
             public String getParametersSchema() {
-                return SCHEMA;
+                return """
+                        {
+                            "type": "object",
+                            "properties": {}
+                        }""";
             }
 
             @Override
@@ -125,9 +133,9 @@ final class FormAITools {
                 var root = JacksonUtils.createObjectNode();
                 var fields = root.putArray("fields");
                 try {
-                    for (var e : callbacks.visibleEntries()) {
-                        fields.add(FormFieldSchema.build(e.id(), e.field(),
-                                e.type(), e.hints()));
+                    for (var d : callbacks.visibleFields()) {
+                        fields.add(FormFieldSchema.build(d.id(), d.field(),
+                                d.type(), d.hints()));
                     }
                 } catch (Exception ex) {
                     LOGGER.warn("get_form_state failed", ex);

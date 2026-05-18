@@ -142,7 +142,7 @@ public class FormAIController implements AIController {
         var hints = hintsFor(field);
         hints.valueOptionsQuery = query;
         hints.valueOptionsToValue = toValue;
-        hints.fixedOptions = null;
+        hints.fixedOptions = false;
         return this;
     }
 
@@ -195,7 +195,7 @@ public class FormAIController implements AIController {
             }
             return matches.limit(limit).toList();
         }, toValue);
-        hintsFor(field).fixedOptions = snapshot;
+        hintsFor(field).fixedOptions = true;
         return this;
     }
 
@@ -307,6 +307,26 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Returns the discovered fields the controller acts on — every
+     * {@link HasValue} in the form tree minus those hidden via
+     * {@link #ignore(HasValue)}. Use this anywhere the LLM-visible field set
+     * matters (tool inputs and outputs).
+     */
+    private List<HasValue<?, ?>> collectActiveFields() {
+        return FormFieldDiscovery.collectFields(form).stream()
+                .filter(field -> !isIgnored(field)).toList();
+    }
+
+    private boolean isIgnored(HasValue<?, ?> field) {
+        if (!(field instanceof Component component)) {
+            return false;
+        }
+        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        var hints = hintsById.get(id);
+        return hints != null && hints.ignored;
+    }
+
+    /**
      * Walks the form tree and ensures every discovered field has an id
      * attached. Ids already attached are left untouched so they stay stable
      * across removals, re-additions, and discovery walks.
@@ -332,21 +352,18 @@ public class FormAIController implements AIController {
     private final class ToolCallbacks implements FormAITools.Callbacks {
 
         @Override
-        public List<FormFieldEntry> visibleEntries() {
-            var entries = new ArrayList<FormFieldEntry>();
-            for (var field : FormFieldDiscovery.collectFields(form)) {
-                var id = getOrCreateId(field);
-                var hints = hintsById.get(id);
-                if (hints != null && hints.ignored) {
-                    continue;
-                }
+        public List<FormAITools.FormFieldDescriptor> visibleFields() {
+            var descriptors = new ArrayList<FormAITools.FormFieldDescriptor>();
+            for (var field : collectActiveFields()) {
                 var type = FormFieldType.classify(field);
                 if (type == FormFieldType.UNSUPPORTED) {
                     continue;
                 }
-                entries.add(new FormFieldEntry(id, field, type, hints));
+                var id = getOrCreateId(field);
+                descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
+                        type, hintsById.get(id)));
             }
-            return entries;
+            return descriptors;
         }
 
         @Override

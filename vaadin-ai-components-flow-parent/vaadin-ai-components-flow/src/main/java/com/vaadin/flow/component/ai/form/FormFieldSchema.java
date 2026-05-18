@@ -97,9 +97,10 @@ final class FormFieldSchema {
 
     private static void applySelectionOptions(ObjectNode target,
             HasValue<?, ?> field, FormFieldHints hints) {
-        if (hints != null && hints.fixedOptions != null) {
+        if (hints != null && hints.fixedOptions) {
             var arr = target.putArray("enum");
-            hints.fixedOptions.forEach(arr::add);
+            hints.valueOptionsQuery.apply("", Integer.MAX_VALUE)
+                    .forEach(arr::add);
             return;
         }
         if (hints != null && hints.valueOptionsQuery != null) {
@@ -194,8 +195,9 @@ final class FormFieldSchema {
      * {@code queryable} or with no option metadata.
      */
     static List<String> enumLabels(HasValue<?, ?> field, FormFieldHints hints) {
-        if (hints != null && hints.fixedOptions != null) {
-            return List.copyOf(hints.fixedOptions);
+        if (hints != null && hints.fixedOptions) {
+            return List.copyOf(
+                    hints.valueOptionsQuery.apply("", Integer.MAX_VALUE));
         }
         if (hints != null && hints.valueOptionsQuery != null) {
             return null;
