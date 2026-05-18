@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -35,7 +37,24 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
@@ -767,6 +786,415 @@ class FormAIControllerTest {
                     "Static schema should not encode field ids as an enum");
         }
 
+    }
+
+    @Nested
+    class FormState {
+
+        @Test
+        void getFormStateReturnsAllVisibleFieldsInDocumentOrder() {
+            var a = new TextField();
+            var b = new NumberField();
+            var c = new Checkbox();
+            var nested = new Div(b, c);
+            var form = new Div(a, nested);
+            var controller = new FormAIController(form);
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(3, fields.size());
+            Assertions.assertEquals(idOf(a),
+                    fields.get(0).get("id").asString());
+            Assertions.assertEquals(idOf(b),
+                    fields.get(1).get("id").asString());
+            Assertions.assertEquals(idOf(c),
+                    fields.get(2).get("id").asString());
+        }
+
+        @Test
+        void getFormStateOmitsIgnoredFields() {
+            var visible = new TextField();
+            var hidden = new TextField();
+            var controller = new FormAIController(new Div(visible, hidden));
+            controller.ignore(hidden);
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(1, fields.size());
+            Assertions.assertEquals(idOf(visible),
+                    fields.get(0).get("id").asString());
+        }
+
+        @Test
+        void getFormStateAutoIgnoresPasswordField() {
+            var visible = new TextField();
+            var password = new PasswordField();
+            var controller = new FormAIController(new Div(visible, password));
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(1, fields.size(),
+                    "PasswordField must never appear in the form-state result");
+            Assertions.assertEquals(idOf(visible),
+                    fields.get(0).get("id").asString());
+        }
+
+        @Test
+        void getFormStateMergesLabelDescriptionAndHelperText() {
+            var field = new TextField();
+            field.setLabel("Merchant");
+            field.setHelperText("As shown on the receipt");
+            var controller = new FormAIController(new Div(field));
+            controller.describe(field, "The vendor name");
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals(
+                    "Merchant. The vendor name. As shown on the receipt",
+                    f.get("description").asString(),
+                    "label, registered description, and helper text must be "
+                            + "joined in that order");
+        }
+
+        @Test
+        void getFormStateOmitsBlankDescriptionEntirely() {
+            var field = new TextField();
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertFalse(f.has("description"),
+                    "Empty merged description must be omitted, got: " + f);
+        }
+
+        @Test
+        void getFormStateReportsTypeFormatPerComponentType() {
+            // One assertion per row in the RFC's field-types table.
+            var text = new TextField();
+            var area = new TextArea();
+            var email = new EmailField();
+            var number = new NumberField();
+            var integer = new IntegerField();
+            var bigDecimal = new BigDecimalField();
+            var date = new DatePicker();
+            var dateTime = new DateTimePicker();
+            var time = new TimePicker();
+            var checkbox = new Checkbox();
+            var combo = new ComboBox<String>();
+            var select = new Select<String>();
+            var radio = new RadioButtonGroup<String>();
+            var multi = new MultiSelectComboBox<String>();
+            var checkGroup = new CheckboxGroup<String>();
+            var controller = new FormAIController(new Div(text, area, email,
+                    number, integer, bigDecimal, date, dateTime, time, checkbox,
+                    combo, select, radio, multi, checkGroup));
+
+            var fields = formStateFields(controller);
+
+            assertTypeOnly(fields.get(0), "string");
+            assertTypeOnly(fields.get(1), "string");
+            assertTypeAndFormat(fields.get(2), "string", "email");
+            assertTypeOnly(fields.get(3), "number");
+            assertTypeOnly(fields.get(4), "integer");
+            assertTypeAndPattern(fields.get(5), "string", "^-?\\d+(\\.\\d+)?$");
+            assertTypeAndFormat(fields.get(6), "string", "date");
+            assertTypeAndFormat(fields.get(7), "string", "date-time");
+            assertTypeAndFormat(fields.get(8), "string", "time");
+            assertTypeOnly(fields.get(9), "boolean");
+            assertTypeOnly(fields.get(10), "string");
+            assertTypeOnly(fields.get(11), "string");
+            assertTypeOnly(fields.get(12), "string");
+            Assertions.assertTrue(fields.get(13).path("array").asBoolean(),
+                    "MultiSelectComboBox must be encoded with array=true");
+            Assertions.assertEquals("string",
+                    fields.get(13).path("items").path("type").asString());
+            Assertions.assertTrue(fields.get(14).path("array").asBoolean(),
+                    "CheckboxGroup must be encoded with array=true");
+            Assertions.assertEquals("string",
+                    fields.get(14).path("items").path("type").asString());
+        }
+
+        @Test
+        void getFormStateEncodesEnumForFixedValueOptions() {
+            var field = new TextField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("EUR", "USD", "GBP"));
+
+            // TextField is not a selection component, so the fixed
+            // valueOptions registration is not surfaced as an enum in the
+            // JSON output — the LLM still calls query_field_options. Use a
+            // ComboBox here instead to exercise the selection-component
+            // path.
+            var combo = new ComboBox<String>();
+            var controller2 = new FormAIController(new Div(combo));
+            controller2.valueOptions(combo, List.of("EUR", "USD", "GBP"));
+
+            var f = formStateFields(controller2).get(0);
+
+            Assertions.assertEquals("string", f.path("type").asString());
+            Assertions.assertTrue(f.path("queryable").isMissingNode(),
+                    "Fixed-options field must not carry queryable=true");
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("EUR", "USD", "GBP"), values);
+        }
+
+        @Test
+        void getFormStateEncodesQueryableForBiFunctionValueOptions() {
+            var combo = new ComboBox<String>();
+            var controller = new FormAIController(new Div(combo));
+            controller.valueOptions(combo,
+                    (filter, limit) -> List.of("Apollo", "Polaris"));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("queryable").asBoolean(),
+                    "Queryable-options field must carry queryable=true, "
+                            + "got: " + f);
+            Assertions.assertTrue(f.path("enum").isMissingNode(),
+                    "Queryable-options field must not enumerate options "
+                            + "inline, got: " + f);
+        }
+
+        @Test
+        void getFormStateExposesListDataProviderItemsAsEnum() {
+            var combo = new ComboBox<String>();
+            combo.setItems("alpha", "beta", "gamma");
+            var controller = new FormAIController(new Div(combo));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("alpha", "beta", "gamma"), values,
+                    "ListDataProvider items must populate the enum when no "
+                            + "valueOptions hint is registered");
+        }
+
+        @Test
+        void getFormStateBackendDataProviderProducesNoEnum() {
+            var combo = new ComboBox<String>();
+            combo.setItems(new CallbackDataProvider<String, String>(
+                    q -> List.of("a", "b").stream(), q -> 2));
+            var controller = new FormAIController(new Div(combo));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("string", f.path("type").asString());
+            Assertions.assertTrue(f.path("enum").isMissingNode(),
+                    "Backend data provider must not contribute an enum");
+            Assertions.assertTrue(f.path("queryable").isMissingNode(),
+                    "Backend data provider alone must not flag queryable");
+        }
+
+        @Test
+        void getFormStateRendersCurrentValuesPerType() {
+            var text = new TextField();
+            text.setValue("Trattoria");
+            var integer = new IntegerField();
+            integer.setValue(42);
+            var number = new NumberField();
+            number.setValue(58.4);
+            var bigDecimal = new BigDecimalField();
+            bigDecimal.setValue(new java.math.BigDecimal("58.40"));
+            var date = new DatePicker();
+            date.setValue(LocalDate.of(2026, 5, 4));
+            var bool = new Checkbox();
+            bool.setValue(true);
+            var combo = new ComboBox<String>();
+            combo.setItems("Meals", "Travel");
+            combo.setValue("Meals");
+            var controller = new FormAIController(new Div(text, integer, number,
+                    bigDecimal, date, bool, combo));
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals("Trattoria",
+                    fields.get(0).get("value").asString());
+            Assertions.assertEquals(42, fields.get(1).get("value").asInt());
+            Assertions.assertEquals(58.4, fields.get(2).get("value").asDouble(),
+                    1e-9);
+            Assertions.assertEquals("58.40",
+                    fields.get(3).get("value").asString());
+            Assertions.assertEquals("2026-05-04",
+                    fields.get(4).get("value").asString());
+            Assertions.assertTrue(fields.get(5).get("value").asBoolean());
+            Assertions.assertEquals("Meals",
+                    fields.get(6).get("value").asString());
+        }
+
+        @Test
+        void getFormStateRendersNullForEmptyValues() {
+            var text = new TextField();
+            var date = new DatePicker();
+            var multi = new MultiSelectComboBox<String>();
+            var controller = new FormAIController(new Div(text, date, multi));
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertTrue(fields.get(0).get("value").isNull(),
+                    "Empty text value must serialize as JSON null");
+            Assertions.assertTrue(fields.get(1).get("value").isNull(),
+                    "Empty date value must serialize as JSON null");
+            Assertions.assertTrue(fields.get(2).get("value").isNull(),
+                    "Empty multi-select value must serialize as JSON null");
+        }
+
+        @Test
+        void getFormStateMultiSelectUsesItemsBlock() {
+            var multi = new MultiSelectComboBox<String>();
+            multi.setItems("a", "b", "c");
+            multi.setValue(Set.of("a", "c"));
+            var controller = new FormAIController(new Div(multi));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("array").asBoolean());
+            Assertions.assertEquals("string",
+                    f.path("items").path("type").asString());
+            var enumValues = new ArrayList<String>();
+            f.path("items").path("enum")
+                    .forEach(n -> enumValues.add(n.asString()));
+            Assertions.assertTrue(
+                    enumValues.containsAll(List.of("a", "b", "c")),
+                    "Items block must enumerate the data-provider labels, "
+                            + "got: " + enumValues);
+            var rendered = new ArrayList<String>();
+            f.path("value").forEach(n -> rendered.add(n.asString()));
+            Assertions.assertTrue(
+                    rendered.containsAll(List.of("a", "c"))
+                            && rendered.size() == 2,
+                    "Multi-select value must render as a JSON array of label "
+                            + "strings, got: " + rendered);
+        }
+
+        @Test
+        void getFormStateMultiSelectQueryableUsesItemsQueryable() {
+            var multi = new MultiSelectComboBox<String>();
+            var controller = new FormAIController(new Div(multi));
+            controller.valueOptions(multi, (filter, limit) -> List.of("x"),
+                    Set::of);
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("array").asBoolean());
+            Assertions.assertTrue(f.path("items").path("queryable").asBoolean(),
+                    "Queryable multi-select must carry queryable=true on the "
+                            + "items block, got: " + f);
+            Assertions.assertTrue(f.path("items").path("enum").isMissingNode(),
+                    "Queryable multi-select must not enumerate options "
+                            + "inline, got: " + f);
+        }
+
+        @Test
+        void getFormStateSchemaIsStaticAndEmpty() {
+            var controller = new FormAIController(new Div(new TextField()));
+
+            var schema = findTool(controller.getTools(), "get_form_state")
+                    .getParametersSchema();
+            var node = json(schema);
+
+            Assertions.assertEquals("object", node.path("type").asString());
+            Assertions.assertTrue(node.path("properties").isObject());
+            Assertions.assertEquals(0, node.path("properties").size(),
+                    "get_form_state must take no parameters");
+        }
+
+        @Test
+        void getFormStateReflectsLiveLabelChanges() {
+            var field = new TextField();
+            field.setLabel("Old");
+            var controller = new FormAIController(new Div(field));
+
+            Assertions.assertEquals("Old", formStateFields(controller).get(0)
+                    .get("description").asString());
+
+            field.setLabel("New");
+
+            Assertions.assertEquals("New",
+                    formStateFields(controller).get(0).get("description")
+                            .asString(),
+                    "description must be re-read from the live field on each "
+                            + "call");
+        }
+
+        @Test
+        void getFormStateAssignsStableIdAcrossCalls() {
+            var field = new TextField();
+            var controller = new FormAIController(new Div(field));
+
+            var firstId = formStateFields(controller).get(0).get("id")
+                    .asString();
+            var secondId = formStateFields(controller).get(0).get("id")
+                    .asString();
+
+            Assertions.assertEquals(firstId, secondId);
+            Assertions.assertEquals(firstId, idOf(field),
+                    "id in get_form_state must match the id stored on the "
+                            + "component");
+        }
+
+        @Test
+        void getToolsAlwaysIncludesFormState() {
+            // Unlike query_field_options, the form-state tool is always
+            // present — there is no per-field configuration that gates it.
+            var controllerNoHints = new FormAIController(new Div());
+            Assertions.assertTrue(
+                    controllerNoHints.getTools().stream().anyMatch(
+                            t -> t.getName().equals("get_form_state")),
+                    "get_form_state must be exposed even when the form has "
+                            + "no fields");
+
+            var field = new TextField();
+            var controllerWithIgnored = new FormAIController(new Div(field));
+            controllerWithIgnored.ignore(field);
+            Assertions.assertTrue(
+                    controllerWithIgnored.getTools().stream().anyMatch(
+                            t -> t.getName().equals("get_form_state")),
+                    "get_form_state must be exposed even when every field "
+                            + "is ignored");
+        }
+
+        // ---- helpers scoped to FormState ----
+
+        private List<JsonNode> formStateFields(FormAIController controller) {
+            var result = findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode());
+            var root = json(result);
+            var out = new ArrayList<JsonNode>();
+            root.path("fields").forEach(out::add);
+            return out;
+        }
+
+        private String idOf(HasValue<?, ?> field) {
+            return (String) ComponentUtil.getData((Component) field,
+                    FormAIController.FIELD_ID_KEY);
+        }
+
+        private void assertTypeOnly(JsonNode field, String expectedType) {
+            Assertions.assertEquals(expectedType, field.path("type").asString(),
+                    "Expected type=" + expectedType + " for " + field);
+            Assertions.assertTrue(field.path("format").isMissingNode(),
+                    "Expected no format for " + field);
+            Assertions.assertTrue(field.path("pattern").isMissingNode(),
+                    "Expected no pattern for " + field);
+        }
+
+        private void assertTypeAndFormat(JsonNode field, String expectedType,
+                String expectedFormat) {
+            Assertions.assertEquals(expectedType,
+                    field.path("type").asString());
+            Assertions.assertEquals(expectedFormat,
+                    field.path("format").asString());
+        }
+
+        private void assertTypeAndPattern(JsonNode field, String expectedType,
+                String expectedPattern) {
+            Assertions.assertEquals(expectedType,
+                    field.path("type").asString());
+            Assertions.assertEquals(expectedPattern,
+                    field.path("pattern").asString());
+        }
     }
 
     // --- Helpers ---

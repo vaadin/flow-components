@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -30,5 +31,13 @@ final class FormFieldHints {
     String description;
     BiFunction<String, Integer, List<String>> valueOptionsQuery;
     Function<String, ?> valueOptionsToValue;
+    /**
+     * Snapshot of the labels passed to the fixed-collection
+     * {@code valueOptions} overloads. {@code null} when the field was
+     * registered with a query callback (queryable) or has no value-options hint
+     * at all. Used by {@link FormFieldSchema} to choose {@code enum} vs
+     * {@code queryable} in the {@code get_form_state} JSON.
+     */
+    Collection<String> fixedOptions;
     boolean ignored;
 }

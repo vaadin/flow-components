@@ -15,12 +15,14 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
@@ -37,6 +39,9 @@ final class FormAITools {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAITools.class);
 
+    static final String FORM_STATE_TOOL = "get_form_state";
+    static final String QUERY_OPTIONS_TOOL = "query_field_options";
+
     private FormAITools() {
     }
 
@@ -45,6 +50,14 @@ final class FormAITools {
      * without needing direct access to the field map.
      */
     public interface Callbacks {
+
+        /**
+         * Returns the entries the tools should expose to the LLM, in document
+         * order. Ignored fields and fields whose type is
+         * {@link FormFieldType#UNSUPPORTED} must be filtered out by the
+         * implementation.
+         */
+        List<FormFieldEntry> visibleEntries();
 
         /**
          * Invokes the value-options query callback for the given field and
@@ -75,6 +88,60 @@ final class FormAITools {
     }
 
     /**
+     * Creates the {@code get_form_state} tool spec. Takes no parameters and
+     * returns a JSON document listing every visible field with its id, merged
+     * description, type metadata (type/format/pattern/enum/queryable/array/
+     * items), and current value.
+     */
+    static LLMProvider.ToolSpec formState(Callbacks callbacks) {
+        return new LLMProvider.ToolSpec() {
+
+            static final String DESCRIPTION = """
+                    Returns the current form as JSON: every fillable field's id, \
+                    description, type metadata (type/format/pattern/enum/queryable/\
+                    array/items), and current value. Call this first so you know \
+                    which ids exist and what each one means.""";
+
+            static final String SCHEMA = """
+                    {
+                        "type": "object",
+                        "properties": {}
+                    }""";
+
+            @Override
+            public String getName() {
+                return FORM_STATE_TOOL;
+            }
+
+            @Override
+            public String getDescription() {
+                return DESCRIPTION;
+            }
+
+            @Override
+            public String getParametersSchema() {
+                return SCHEMA;
+            }
+
+            @Override
+            public String execute(JsonNode arguments) {
+                var root = JacksonUtils.createObjectNode();
+                var fields = root.putArray("fields");
+                try {
+                    for (var e : callbacks.visibleEntries()) {
+                        fields.add(FormFieldSchema.build(e.id(), e.field(),
+                                e.type(), e.hints()));
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn("get_form_state failed", ex);
+                    return "{\"error\":\"get_form_state failed.\"}";
+                }
+                return root.toString();
+            }
+        };
+    }
+
+    /**
      * Creates the {@code query_field_options} tool spec.
      */
     static LLMProvider.ToolSpec queryFieldOptions(Callbacks callbacks) {
@@ -85,7 +152,7 @@ final class FormAITools {
 
             @Override
             public String getName() {
-                return "query_field_options";
+                return QUERY_OPTIONS_TOOL;
             }
 
             @Override
@@ -173,7 +240,10 @@ final class FormAITools {
      * Creates all form tools for the given callbacks.
      */
     static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
-        return List.of(queryFieldOptions(callbacks));
+        var tools = new ArrayList<LLMProvider.ToolSpec>();
+        tools.add(formState(callbacks));
+        tools.add(queryFieldOptions(callbacks));
+        return tools;
     }
 
     private static String escapeLabel(String label) {
