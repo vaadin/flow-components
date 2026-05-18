@@ -1444,6 +1444,87 @@ class FormAIControllerTest {
         }
 
         @Test
+        void getFormStateProducesCompletePayloadForRealisticForm() {
+            // End-to-end smoke test that mirrors the RFC's expense-form
+            // example. Catches regressions in how the per-field slices
+            // interact when N > 1 — schema/value/description leaks across
+            // fields, ordering bugs that only surface with multiple
+            // entries, hint registrations affecting the wrong id.
+            var merchant = new LabeledStringField();
+            merchant.setLabel("Merchant");
+            merchant.setHelperText("As shown on the receipt");
+            merchant.setValue("Trattoria Toscana");
+
+            var amount = new DoubleField();
+            var currency = new SingleSelectField<String>();
+            var date = new DateField();
+            var category = new SingleSelectField<String>();
+            var notes = new TestField();
+
+            var form = new Div(merchant, amount, currency, date, category,
+                    notes);
+            var controller = new FormAIController(form)
+                    .describe(merchant, "The vendor name")
+                    .valueOptions(currency, List.of("EUR", "USD", "GBP"))
+                    .valueOptions(category, List.of("Travel", "Meals",
+                            "Software", "Office", "Other"));
+
+            // Execute first so the controller walks the form and assigns
+            // ids to fields that had no hints registered.
+            var actual = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode()));
+
+            var expected = json(
+                    """
+                            {
+                              "fields": [
+                                {
+                                  "id": "<merchant>",
+                                  "description": "Merchant. The vendor name. As shown on the receipt",
+                                  "type": "string",
+                                  "value": "Trattoria Toscana"
+                                },
+                                {
+                                  "id": "<amount>",
+                                  "type": "number",
+                                  "value": null
+                                },
+                                {
+                                  "id": "<currency>",
+                                  "type": "string",
+                                  "enum": ["EUR", "USD", "GBP"],
+                                  "value": null
+                                },
+                                {
+                                  "id": "<date>",
+                                  "type": "string",
+                                  "format": "date",
+                                  "value": null
+                                },
+                                {
+                                  "id": "<category>",
+                                  "type": "string",
+                                  "enum": ["Travel", "Meals", "Software", "Office", "Other"],
+                                  "value": null
+                                },
+                                {
+                                  "id": "<notes>",
+                                  "type": "string",
+                                  "value": null
+                                }
+                              ]
+                            }"""
+                            .replace("<merchant>", idOf(merchant))
+                            .replace("<amount>", idOf(amount))
+                            .replace("<currency>", idOf(currency))
+                            .replace("<date>", idOf(date))
+                            .replace("<category>", idOf(category))
+                            .replace("<notes>", idOf(notes)));
+
+            Assertions.assertEquals(expected, actual);
+        }
+
+        @Test
         void getToolsAlwaysIncludesFormState() {
             // Unlike query_field_options, the form-state tool is always
             // present — there is no per-field configuration that gates it.
