@@ -72,6 +72,25 @@ describe('combo-box connector', () => {
 
         expect(dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
       });
+
+      it('should not be resolved by a stale-filter $connector.confirm after the filter changed', () => {
+        // Filter "a" — controller schedules a fetch, debouncer fires, "a" is sent to the server.
+        comboBox.filter = 'a';
+        dataProviderController.loadFirstPage();
+        clock.tick(500);
+
+        // User types "b" while the "a" response is still in flight; the connector
+        // synchronously moves on to "b".
+        comboBox.filter = 'b';
+        dataProviderController.loadFirstPage();
+
+        // Late response for filter "a" arrives — must be dropped because the
+        // connector has already advanced to "b".
+        comboBox.$connector.set(0, [{ key: '1', label: 'a-one' }], 'a');
+        comboBox.$connector.confirm(1, 'a');
+
+        expect(dataProviderController.rootCache.pendingRequests[0]).to.be.a('function');
+      });
     });
   });
 
