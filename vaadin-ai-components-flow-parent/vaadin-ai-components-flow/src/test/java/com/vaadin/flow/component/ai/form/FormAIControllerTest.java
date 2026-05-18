@@ -1281,6 +1281,53 @@ class FormAIControllerTest {
         }
 
         @Test
+        void getFormStateEnumIsCappedForLargeListDataProvider() {
+            var combo = new SingleSelectField<String>();
+            var items = new ArrayList<String>();
+            for (var i = 0; i < 250; i++) {
+                items.add("item-" + i);
+            }
+            combo.setItems(items);
+            var controller = new FormAIController(new Div(combo));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("enum").size() <= 200,
+                    "ListDataProvider items must be capped at 200 entries "
+                            + "to match the query_field_options cap, got: "
+                            + f.path("enum").size());
+        }
+
+        @Test
+        void getFormStateBigDecimalValueMatchesPatternForScientificInput() {
+            var field = new BigDecField();
+            field.setValue(new java.math.BigDecimal("1E2"));
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+            var rendered = f.get("value").asString();
+
+            Assertions.assertTrue(rendered.matches("^-?\\d+(\\.\\d+)?$"),
+                    "Rendered BigDecimal value must satisfy the schema "
+                            + "pattern, got: " + rendered);
+        }
+
+        @Test
+        void getFormStateRendersNumericInfinityAsFiniteJsonNumber() {
+            var field = new DoubleField();
+            field.setValue(Double.POSITIVE_INFINITY);
+            var controller = new FormAIController(new Div(field));
+
+            var raw = findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode());
+
+            Assertions.assertFalse(
+                    raw.contains("Infinity") || raw.contains("NaN"),
+                    "Tool result must not embed non-standard JSON tokens "
+                            + "for non-finite doubles, got: " + raw);
+        }
+
+        @Test
         void getFormStateBackendDataProviderProducesNoEnum() {
             var combo = new SingleSelectField<String>();
             combo.setDataProvider(new CallbackDataProvider<String, String>(

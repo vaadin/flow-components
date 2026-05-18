@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,6 +34,13 @@ import tools.jackson.databind.node.ObjectNode;
  * definition itself stays static across requests.
  */
 final class FormFieldSchema {
+
+    /**
+     * Maximum number of entries emitted into an {@code enum} array. Matches the
+     * cap applied by {@code query_field_options} so the LLM never sees more
+     * than this many options for any single field regardless of source.
+     */
+    static final int ENUM_MAX_ITEMS = 200;
 
     private FormFieldSchema() {
     }
@@ -99,8 +107,8 @@ final class FormFieldSchema {
             HasValue<?, ?> field, FormFieldHints hints) {
         if (hints != null && hints.fixedOptions) {
             var arr = target.putArray("enum");
-            hints.valueOptionsQuery.apply("", Integer.MAX_VALUE)
-                    .forEach(arr::add);
+            hints.valueOptionsQuery.apply("", ENUM_MAX_ITEMS).stream()
+                    .limit(ENUM_MAX_ITEMS).forEach(arr::add);
             return;
         }
         if (hints != null && hints.valueOptionsQuery != null) {
@@ -112,9 +120,8 @@ final class FormFieldSchema {
             return;
         }
         var arr = target.putArray("enum");
-        for (var item : items) {
-            arr.add(FormValueConverter.renderItem(field, item));
-        }
+        items.stream().limit(ENUM_MAX_ITEMS).forEach(
+                item -> arr.add(FormValueConverter.renderItem(field, item)));
     }
 
     private static void applyValue(ObjectNode node, HasValue<?, ?> field,
@@ -126,8 +133,14 @@ final class FormFieldSchema {
         }
         switch (type) {
         case NUMBER -> {
-            if (value instanceof Number n) {
+            if (value instanceof Number n && Double.isFinite(n.doubleValue())) {
                 node.put("value", n.doubleValue());
+            } else if (value instanceof Number) {
+                // NaN / ±Infinity are valid Java doubles but not legal
+                // JSON numbers; surface as null rather than corrupting
+                // the payload with a non-standard token or a string in
+                // a number-typed slot.
+                node.putNull("value");
             } else {
                 node.put("value", value.toString());
             }
@@ -135,6 +148,18 @@ final class FormFieldSchema {
         case INTEGER -> {
             if (value instanceof Number n) {
                 node.put("value", n.longValue());
+            } else {
+                node.put("value", value.toString());
+            }
+        }
+        case BIG_DECIMAL -> {
+            // BigDecimal.toString() emits scientific notation for values
+            // with negative scale or adjusted exponent < -6, which
+            // violates the BIG_DECIMAL pattern declared in the schema.
+            // toPlainString() always produces the canonical decimal
+            // representation.
+            if (value instanceof BigDecimal bd) {
+                node.put("value", bd.toPlainString());
             } else {
                 node.put("value", value.toString());
             }
