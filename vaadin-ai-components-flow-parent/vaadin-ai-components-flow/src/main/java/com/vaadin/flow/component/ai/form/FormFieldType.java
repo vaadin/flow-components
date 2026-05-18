@@ -15,20 +15,50 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.data.binder.HasItems;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.selection.MultiSelect;
 
 /**
- * Classifies a {@link HasValue} field component into the
- * {@link FormAIController}'s internal type taxonomy.
+ * Classifies a {@link HasValue} field into the {@link FormAIController}'s
+ * internal type taxonomy.
  * <p>
- * Detection is done by walking the field's class hierarchy and matching on
- * class names so this module does not need to declare Maven dependencies on
- * every individual Vaadin input component module.
+ * Detection is purely contract-based: the value type is resolved by walking the
+ * field's class hierarchy and reading the type argument of
+ * {@code HasValue<?, V>}, and the selection variants are picked up via the
+ * framework-level marker interfaces {@link MultiSelect},
+ * {@link HasListDataView}, {@link HasLazyDataView}, {@link HasDataView}, and
+ * {@link HasItems}. No concrete Vaadin component classes are referenced, so any
+ * custom {@code HasValue} can flow through unchanged.
+ * <p>
+ * Two component-specific behaviours that the previous class-name detection
+ * provided are not recoverable from type information alone:
+ * <ul>
+ * <li>{@code EmailField} can no longer be marked with {@code format=email}
+ * automatically (its value type is {@code String}, the same as
+ * {@code TextField}). Convey the hint via {@code describe(...)}.</li>
+ * <li>{@code PasswordField} is no longer auto-ignored. To keep password values
+ * out of LLM tool payloads the developer must opt in with
+ * {@link FormAIController#ignore(HasValue)}. The same applies to
+ * {@code CustomField}.</li>
+ * </ul>
  */
 enum FormFieldType {
     STRING,
-    EMAIL,
     BIG_DECIMAL,
     NUMBER,
     INTEGER,
@@ -41,68 +71,124 @@ enum FormFieldType {
     UNSUPPORTED;
 
     /**
-     * Pattern accepted for {@link BIG_DECIMAL} string payloads. Rejects locale
+     * Pattern accepted for {@link #BIG_DECIMAL} string payloads. Rejects locale
      * separators and scientific notation at the JSON-protocol layer.
      */
     static final String BIG_DECIMAL_PATTERN = "^-?\\d+(\\.\\d+)?$";
-
-    private static final String PKG = "com.vaadin.flow.component.";
 
     static FormFieldType classify(HasValue<?, ?> field) {
         if (field == null) {
             return UNSUPPORTED;
         }
-        var type = field.getClass();
-        if (isAssignableTo(type, PKG + "textfield.PasswordField")
-                || isAssignableTo(type, PKG + "customfield.CustomField")) {
-            return UNSUPPORTED;
-        }
-        if (isAssignableTo(type, PKG + "textfield.EmailField")) {
-            return EMAIL;
-        }
-        if (isAssignableTo(type, PKG + "textfield.BigDecimalField")) {
-            return BIG_DECIMAL;
-        }
-        if (isAssignableTo(type, PKG + "textfield.IntegerField")) {
-            return INTEGER;
-        }
-        if (isAssignableTo(type, PKG + "textfield.NumberField")) {
-            return NUMBER;
-        }
-        if (isAssignableTo(type, PKG + "checkbox.Checkbox")) {
-            return BOOLEAN;
-        }
-        if (isAssignableTo(type, PKG + "datetimepicker.DateTimePicker")) {
-            return DATE_TIME;
-        }
-        if (isAssignableTo(type, PKG + "datepicker.DatePicker")) {
-            return DATE;
-        }
-        if (isAssignableTo(type, PKG + "timepicker.TimePicker")) {
-            return TIME;
-        }
-        if (isAssignableTo(type, PKG + "textfield.TextArea")
-                || isAssignableTo(type, PKG + "textfield.TextField")) {
-            return STRING;
-        }
         if (field instanceof MultiSelect<?, ?>) {
             return MULTI_SELECT;
         }
-        if (isAssignableTo(type, PKG + "combobox.ComboBox")
-                || isAssignableTo(type, PKG + "select.Select")
-                || isAssignableTo(type, PKG + "radiobutton.RadioButtonGroup")) {
+        if (field instanceof HasListDataView<?, ?>
+                || field instanceof HasLazyDataView<?, ?, ?>
+                || field instanceof HasDataView<?, ?, ?>
+                || field instanceof HasItems<?>) {
             return SINGLE_SELECT;
+        }
+        var valueType = resolveValueType(field.getClass());
+        if (valueType == Boolean.class) {
+            return BOOLEAN;
+        }
+        if (valueType == Integer.class || valueType == Long.class
+                || valueType == Short.class || valueType == Byte.class
+                || valueType == BigInteger.class) {
+            return INTEGER;
+        }
+        if (valueType == Double.class || valueType == Float.class) {
+            return NUMBER;
+        }
+        if (valueType == BigDecimal.class) {
+            return BIG_DECIMAL;
+        }
+        if (valueType == LocalDate.class) {
+            return DATE;
+        }
+        if (valueType == LocalDateTime.class) {
+            return DATE_TIME;
+        }
+        if (valueType == LocalTime.class) {
+            return TIME;
         }
         return STRING;
     }
 
-    private static boolean isAssignableTo(Class<?> type, String superTypeName) {
-        for (var c = type; c != null
-                && c != Object.class; c = c.getSuperclass()) {
-            if (c.getName().equals(superTypeName)) {
-                return true;
+    /**
+     * Walks the class hierarchy of the given concrete field class to find the
+     * {@code V} type argument of {@code HasValue<?, V>}, resolving type
+     * variables through any intermediate generic superclasses and
+     * super-interfaces. Returns {@code null} when {@code V} cannot be narrowed
+     * to a concrete {@link Class} (for example {@code ComboBox<T>} where
+     * {@code T} is left generic).
+     */
+    private static Class<?> resolveValueType(Class<?> startClass) {
+        var bindings = new HashMap<TypeVariable<?>, Type>();
+        Class<?> c = startClass;
+        while (c != null && c != Object.class) {
+            for (var iface : c.getGenericInterfaces()) {
+                var found = findHasValueValueArg(iface, bindings);
+                if (found != null) {
+                    return found;
+                }
+            }
+            var superType = c.getGenericSuperclass();
+            if (superType instanceof ParameterizedType pt) {
+                bindTypeArgs((Class<?>) pt.getRawType(),
+                        pt.getActualTypeArguments(), bindings);
+            }
+            c = c.getSuperclass();
+        }
+        return null;
+    }
+
+    private static Class<?> findHasValueValueArg(Type iface,
+            Map<TypeVariable<?>, Type> bindings) {
+        if (iface instanceof ParameterizedType pt) {
+            var raw = (Class<?>) pt.getRawType();
+            if (raw == HasValue.class) {
+                var resolved = resolveType(pt.getActualTypeArguments()[1],
+                        bindings);
+                return resolved instanceof Class<?> cls ? cls : null;
+            }
+            var deeper = new HashMap<>(bindings);
+            bindTypeArgs(raw, pt.getActualTypeArguments(), deeper);
+            for (var sub : raw.getGenericInterfaces()) {
+                var found = findHasValueValueArg(sub, deeper);
+                if (found != null) {
+                    return found;
+                }
+            }
+        } else if (iface instanceof Class<?> cls) {
+            for (var sub : cls.getGenericInterfaces()) {
+                var found = findHasValueValueArg(sub, bindings);
+                if (found != null) {
+                    return found;
+                }
             }
         }
-        return false;
+        return null;
+    }
+
+    private static void bindTypeArgs(Class<?> raw, Type[] args,
+            Map<TypeVariable<?>, Type> bindings) {
+        var vars = raw.getTypeParameters();
+        for (var i = 0; i < vars.length && i < args.length; i++) {
+            bindings.put(vars[i], resolveType(args[i], bindings));
+        }
+    }
+
+    private static Type resolveType(Type t,
+            Map<TypeVariable<?>, Type> bindings) {
+        while (t instanceof TypeVariable<?> tv) {
+            var bound = bindings.get(tv);
+            if (bound == null || bound == tv) {
+                return tv;
+            }
+            t = bound;
+        }
+        return t;
     }
 }

@@ -15,10 +15,14 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,28 +38,21 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.HasItems;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.JsonNode;
 
@@ -109,6 +106,203 @@ class FormAIControllerTest {
 
         @Override
         protected void setPresentationValue(Integer value) {
+        }
+    }
+
+    @Tag("double-field")
+    private static class DoubleField
+            extends AbstractField<DoubleField, Double> {
+        DoubleField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(Double value) {
+        }
+    }
+
+    @Tag("bigdec-field")
+    private static class BigDecField
+            extends AbstractField<BigDecField, BigDecimal> {
+        BigDecField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(BigDecimal value) {
+        }
+    }
+
+    @Tag("bool-field")
+    private static class BoolField extends AbstractField<BoolField, Boolean> {
+        BoolField() {
+            super(false);
+        }
+
+        @Override
+        protected void setPresentationValue(Boolean value) {
+        }
+    }
+
+    @Tag("date-field")
+    private static class DateField extends AbstractField<DateField, LocalDate> {
+        DateField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(LocalDate value) {
+        }
+    }
+
+    @Tag("datetime-field")
+    private static class DateTimeField
+            extends AbstractField<DateTimeField, LocalDateTime> {
+        DateTimeField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(LocalDateTime value) {
+        }
+    }
+
+    @Tag("time-field")
+    private static class TimeField extends AbstractField<TimeField, LocalTime> {
+        TimeField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(LocalTime value) {
+        }
+    }
+
+    /**
+     * String-valued field that also implements {@link HasLabel} and
+     * {@link HasHelper}, used by the description-merging test.
+     */
+    @Tag("labeled-string-field")
+    private static class LabeledStringField
+            extends AbstractField<LabeledStringField, String>
+            implements HasLabel, HasHelper {
+        LabeledStringField() {
+            super("");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+    }
+
+    /**
+     * Single-select field. Implements {@link HasItems} so the controller
+     * classifies it as a selection component, and exposes
+     * {@code getDataProvider()}/{@code getItemLabelGenerator()} reflectively so
+     * {@link FormValueConverter} can read items and labels.
+     */
+    @Tag("single-select-field")
+    private static class SingleSelectField<T> extends
+            AbstractField<SingleSelectField<T>, T> implements HasItems<T> {
+
+        private DataProvider<T, ?> provider = DataProvider
+                .ofCollection(List.of());
+        private ItemLabelGenerator<T> labelGenerator;
+
+        SingleSelectField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(T value) {
+        }
+
+        @Override
+        public void setItems(Collection<T> items) {
+            provider = DataProvider.ofCollection(items);
+        }
+
+        @SafeVarargs
+        @SuppressWarnings("varargs")
+        @Override
+        public final void setItems(T... items) {
+            setItems(Arrays.asList(items));
+        }
+
+        void setDataProvider(DataProvider<T, ?> provider) {
+            this.provider = provider;
+        }
+
+        public DataProvider<T, ?> getDataProvider() {
+            return provider;
+        }
+
+        public ItemLabelGenerator<T> getItemLabelGenerator() {
+            return labelGenerator;
+        }
+
+        public void setItemLabelGenerator(ItemLabelGenerator<T> generator) {
+            this.labelGenerator = generator;
+        }
+    }
+
+    /**
+     * Multi-select field. Implements {@link MultiSelect} so the controller
+     * classifies it as a multi-select, and exposes the same reflective
+     * accessors as {@link SingleSelectField} for items and label generation.
+     */
+    @Tag("multi-select-field")
+    private static class MultiSelectField<T>
+            extends AbstractField<MultiSelectField<T>, Set<T>>
+            implements MultiSelect<MultiSelectField<T>, T> {
+
+        private ListDataProvider<T> provider = DataProvider
+                .ofCollection(List.of());
+        private ItemLabelGenerator<T> labelGenerator;
+
+        MultiSelectField() {
+            super(Set.of());
+        }
+
+        @Override
+        protected void setPresentationValue(Set<T> value) {
+        }
+
+        @SafeVarargs
+        final void setItems(T... items) {
+            provider = DataProvider.ofCollection(Arrays.asList(items));
+        }
+
+        @Override
+        public void updateSelection(Set<T> added, Set<T> removed) {
+            var next = new HashSet<>(getValue());
+            next.addAll(added);
+            next.removeAll(removed);
+            setValue(next);
+        }
+
+        @Override
+        public Set<T> getSelectedItems() {
+            return getValue();
+        }
+
+        @Override
+        public Registration addSelectionListener(
+                MultiSelectionListener<MultiSelectField<T>, T> listener) {
+            return () -> {
+            };
+        }
+
+        public ListDataProvider<T> getDataProvider() {
+            return provider;
+        }
+
+        public ItemLabelGenerator<T> getItemLabelGenerator() {
+            return labelGenerator;
+        }
+
+        public void setItemLabelGenerator(ItemLabelGenerator<T> generator) {
+            this.labelGenerator = generator;
         }
     }
 
@@ -793,9 +987,9 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateReturnsAllVisibleFieldsInDocumentOrder() {
-            var a = new TextField();
-            var b = new NumberField();
-            var c = new Checkbox();
+            var a = new TestField();
+            var b = new DoubleField();
+            var c = new BoolField();
             var nested = new Div(b, c);
             var form = new Div(a, nested);
             var controller = new FormAIController(form);
@@ -813,8 +1007,8 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateOmitsIgnoredFields() {
-            var visible = new TextField();
-            var hidden = new TextField();
+            var visible = new TestField();
+            var hidden = new TestField();
             var controller = new FormAIController(new Div(visible, hidden));
             controller.ignore(hidden);
 
@@ -826,22 +1020,8 @@ class FormAIControllerTest {
         }
 
         @Test
-        void getFormStateAutoIgnoresPasswordField() {
-            var visible = new TextField();
-            var password = new PasswordField();
-            var controller = new FormAIController(new Div(visible, password));
-
-            var fields = formStateFields(controller);
-
-            Assertions.assertEquals(1, fields.size(),
-                    "PasswordField must never appear in the form-state result");
-            Assertions.assertEquals(idOf(visible),
-                    fields.get(0).get("id").asString());
-        }
-
-        @Test
         void getFormStateMergesLabelDescriptionAndHelperText() {
-            var field = new TextField();
+            var field = new LabeledStringField();
             field.setLabel("Merchant");
             field.setHelperText("As shown on the receipt");
             var controller = new FormAIController(new Div(field));
@@ -858,7 +1038,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateOmitsBlankDescriptionEntirely() {
-            var field = new TextField();
+            var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
             var f = formStateFields(controller).get(0);
@@ -868,68 +1048,79 @@ class FormAIControllerTest {
         }
 
         @Test
-        void getFormStateReportsTypeFormatPerComponentType() {
-            // One assertion per row in the RFC's field-types table.
-            var text = new TextField();
-            var area = new TextArea();
-            var email = new EmailField();
-            var number = new NumberField();
-            var integer = new IntegerField();
-            var bigDecimal = new BigDecimalField();
-            var date = new DatePicker();
-            var dateTime = new DateTimePicker();
-            var time = new TimePicker();
-            var checkbox = new Checkbox();
-            var combo = new ComboBox<String>();
-            var select = new Select<String>();
-            var radio = new RadioButtonGroup<String>();
-            var multi = new MultiSelectComboBox<String>();
-            var checkGroup = new CheckboxGroup<String>();
-            var controller = new FormAIController(new Div(text, area, email,
-                    number, integer, bigDecimal, date, dateTime, time, checkbox,
-                    combo, select, radio, multi, checkGroup));
+        void getFormStateMapsStringValueTypeToTypeString() {
+            assertTypeOnly(typeNodeFor(new TestField()), "string");
+        }
 
-            var fields = formStateFields(controller);
+        @Test
+        void getFormStateMapsDoubleValueTypeToTypeNumber() {
+            assertTypeOnly(typeNodeFor(new DoubleField()), "number");
+        }
 
-            assertTypeOnly(fields.get(0), "string");
-            assertTypeOnly(fields.get(1), "string");
-            assertTypeAndFormat(fields.get(2), "string", "email");
-            assertTypeOnly(fields.get(3), "number");
-            assertTypeOnly(fields.get(4), "integer");
-            assertTypeAndPattern(fields.get(5), "string", "^-?\\d+(\\.\\d+)?$");
-            assertTypeAndFormat(fields.get(6), "string", "date");
-            assertTypeAndFormat(fields.get(7), "string", "date-time");
-            assertTypeAndFormat(fields.get(8), "string", "time");
-            assertTypeOnly(fields.get(9), "boolean");
-            assertTypeOnly(fields.get(10), "string");
-            assertTypeOnly(fields.get(11), "string");
-            assertTypeOnly(fields.get(12), "string");
-            Assertions.assertTrue(fields.get(13).path("array").asBoolean(),
-                    "MultiSelectComboBox must be encoded with array=true");
+        @Test
+        void getFormStateMapsIntegerValueTypeToTypeInteger() {
+            assertTypeOnly(typeNodeFor(new IntField()), "integer");
+        }
+
+        @Test
+        void getFormStateMapsBigDecimalValueTypeToStringWithPattern() {
+            assertTypeAndPattern(typeNodeFor(new BigDecField()), "string",
+                    "^-?\\d+(\\.\\d+)?$");
+        }
+
+        @Test
+        void getFormStateMapsBooleanValueTypeToTypeBoolean() {
+            assertTypeOnly(typeNodeFor(new BoolField()), "boolean");
+        }
+
+        @Test
+        void getFormStateMapsLocalDateValueTypeToStringWithDateFormat() {
+            assertTypeAndFormat(typeNodeFor(new DateField()), "string", "date");
+        }
+
+        @Test
+        void getFormStateMapsLocalDateTimeValueTypeToStringWithDateTimeFormat() {
+            assertTypeAndFormat(typeNodeFor(new DateTimeField()), "string",
+                    "date-time");
+        }
+
+        @Test
+        void getFormStateMapsLocalTimeValueTypeToStringWithTimeFormat() {
+            assertTypeAndFormat(typeNodeFor(new TimeField()), "string", "time");
+        }
+
+        @Test
+        void getFormStateMapsSingleSelectFieldToStringType() {
+            // A selection component without registered options or items
+            // surfaces as bare "type": "string" — no enum, no queryable.
+            var f = typeNodeFor(new SingleSelectField<String>());
+
+            Assertions.assertEquals("string", f.path("type").asString());
+            Assertions.assertTrue(f.path("enum").isMissingNode());
+            Assertions.assertTrue(f.path("queryable").isMissingNode());
+        }
+
+        @Test
+        void getFormStateMapsMultiSelectFieldToArrayWithItemsBlock() {
+            var f = typeNodeFor(new MultiSelectField<String>());
+
+            Assertions.assertTrue(f.path("array").asBoolean(),
+                    "MultiSelect must be encoded with array=true");
             Assertions.assertEquals("string",
-                    fields.get(13).path("items").path("type").asString());
-            Assertions.assertTrue(fields.get(14).path("array").asBoolean(),
-                    "CheckboxGroup must be encoded with array=true");
-            Assertions.assertEquals("string",
-                    fields.get(14).path("items").path("type").asString());
+                    f.path("items").path("type").asString());
         }
 
         @Test
         void getFormStateEncodesEnumForFixedValueOptions() {
-            var field = new TextField();
-            var controller = new FormAIController(new Div(field));
-            controller.valueOptions(field, List.of("EUR", "USD", "GBP"));
+            // Fixed valueOptions registered against a selection component
+            // surface in the JSON output as enum. The same registration
+            // against a non-selection field would not (LLM uses
+            // query_field_options instead).
+            var combo = new SingleSelectField<String>();
+            var controller = new FormAIController(new Div(combo));
+            controller.valueOptions(combo, List.of("EUR", "USD", "GBP"));
 
-            // TextField is not a selection component, so the fixed
-            // valueOptions registration is not surfaced as an enum in the
-            // JSON output — the LLM still calls query_field_options. Use a
-            // ComboBox here instead to exercise the selection-component
-            // path.
-            var combo = new ComboBox<String>();
-            var controller2 = new FormAIController(new Div(combo));
-            controller2.valueOptions(combo, List.of("EUR", "USD", "GBP"));
-
-            var f = formStateFields(controller2).get(0);
+            var f = formStateFields(controller).get(0);
 
             Assertions.assertEquals("string", f.path("type").asString());
             Assertions.assertTrue(f.path("queryable").isMissingNode(),
@@ -941,7 +1132,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateEncodesQueryableForBiFunctionValueOptions() {
-            var combo = new ComboBox<String>();
+            var combo = new SingleSelectField<String>();
             var controller = new FormAIController(new Div(combo));
             controller.valueOptions(combo,
                     (filter, limit) -> List.of("Apollo", "Polaris"));
@@ -958,7 +1149,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateExposesListDataProviderItemsAsEnum() {
-            var combo = new ComboBox<String>();
+            var combo = new SingleSelectField<String>();
             combo.setItems("alpha", "beta", "gamma");
             var controller = new FormAIController(new Div(combo));
 
@@ -973,8 +1164,8 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateBackendDataProviderProducesNoEnum() {
-            var combo = new ComboBox<String>();
-            combo.setItems(new CallbackDataProvider<String, String>(
+            var combo = new SingleSelectField<String>();
+            combo.setDataProvider(new CallbackDataProvider<String, String>(
                     q -> List.of("a", "b").stream(), q -> 2));
             var controller = new FormAIController(new Div(combo));
 
@@ -989,19 +1180,19 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateRendersCurrentValuesPerType() {
-            var text = new TextField();
+            var text = new TestField();
             text.setValue("Trattoria");
-            var integer = new IntegerField();
+            var integer = new IntField();
             integer.setValue(42);
-            var number = new NumberField();
+            var number = new DoubleField();
             number.setValue(58.4);
-            var bigDecimal = new BigDecimalField();
-            bigDecimal.setValue(new java.math.BigDecimal("58.40"));
-            var date = new DatePicker();
+            var bigDecimal = new BigDecField();
+            bigDecimal.setValue(new BigDecimal("58.40"));
+            var date = new DateField();
             date.setValue(LocalDate.of(2026, 5, 4));
-            var bool = new Checkbox();
+            var bool = new BoolField();
             bool.setValue(true);
-            var combo = new ComboBox<String>();
+            var combo = new SingleSelectField<String>();
             combo.setItems("Meals", "Travel");
             combo.setValue("Meals");
             var controller = new FormAIController(new Div(text, integer, number,
@@ -1025,9 +1216,9 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateRendersNullForEmptyValues() {
-            var text = new TextField();
-            var date = new DatePicker();
-            var multi = new MultiSelectComboBox<String>();
+            var text = new TestField();
+            var date = new DateField();
+            var multi = new MultiSelectField<String>();
             var controller = new FormAIController(new Div(text, date, multi));
 
             var fields = formStateFields(controller);
@@ -1042,7 +1233,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateMultiSelectUsesItemsBlock() {
-            var multi = new MultiSelectComboBox<String>();
+            var multi = new MultiSelectField<String>();
             multi.setItems("a", "b", "c");
             multi.setValue(Set.of("a", "c"));
             var controller = new FormAIController(new Div(multi));
@@ -1070,7 +1261,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateMultiSelectQueryableUsesItemsQueryable() {
-            var multi = new MultiSelectComboBox<String>();
+            var multi = new MultiSelectField<String>();
             var controller = new FormAIController(new Div(multi));
             controller.valueOptions(multi, (filter, limit) -> List.of("x"),
                     Set::of);
@@ -1088,7 +1279,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateSchemaIsStaticAndEmpty() {
-            var controller = new FormAIController(new Div(new TextField()));
+            var controller = new FormAIController(new Div(new TestField()));
 
             var schema = findTool(controller.getTools(), "get_form_state")
                     .getParametersSchema();
@@ -1102,7 +1293,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateReflectsLiveLabelChanges() {
-            var field = new TextField();
+            var field = new LabeledStringField();
             field.setLabel("Old");
             var controller = new FormAIController(new Div(field));
 
@@ -1120,7 +1311,7 @@ class FormAIControllerTest {
 
         @Test
         void getFormStateAssignsStableIdAcrossCalls() {
-            var field = new TextField();
+            var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
             var firstId = formStateFields(controller).get(0).get("id")
@@ -1145,7 +1336,7 @@ class FormAIControllerTest {
                     "get_form_state must be exposed even when the form has "
                             + "no fields");
 
-            var field = new TextField();
+            var field = new TestField();
             var controllerWithIgnored = new FormAIController(new Div(field));
             controllerWithIgnored.ignore(field);
             Assertions.assertTrue(
@@ -1156,6 +1347,11 @@ class FormAIControllerTest {
         }
 
         // ---- helpers scoped to FormState ----
+
+        private JsonNode typeNodeFor(HasValue<?, ?> field) {
+            var controller = new FormAIController(new Div((Component) field));
+            return formStateFields(controller).get(0);
+        }
 
         private List<JsonNode> formStateFields(FormAIController controller) {
             var result = findTool(controller.getTools(), "get_form_state")

@@ -58,10 +58,6 @@ final class FormFieldSchema {
             FormFieldType type, FormFieldHints hints) {
         switch (type) {
         case STRING -> node.put("type", "string");
-        case EMAIL -> {
-            node.put("type", "string");
-            node.put("format", "email");
-        }
         case BIG_DECIMAL -> {
             node.put("type", "string");
             node.put("pattern", FormFieldType.BIG_DECIMAL_PATTERN);
