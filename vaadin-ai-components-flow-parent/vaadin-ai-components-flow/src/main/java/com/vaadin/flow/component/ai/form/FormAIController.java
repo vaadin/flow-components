@@ -134,6 +134,24 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Declares the set of values the LLM may pick for a {@link String}-typed
+     * field. The query callback receives a filter string and a limit and
+     * returns matching options; each label is used as the field value as-is.
+     * Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may query, not {@code null}
+     * @param query
+     *            the filter callback returning labels for the LLM, not
+     *            {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController valueOptions(HasValue<?, String> field,
+            BiFunction<String, Integer, List<String>> query) {
+        return valueOptions(field, query, Function.identity());
+    }
+
+    /**
      * Declares a fixed set of labels the LLM may pick for the field. The
      * {@code toValue} function converts a chosen label back to the field's
      * value type. Later calls for the same field overwrite earlier ones.
@@ -164,6 +182,24 @@ public class FormAIController implements AIController {
             }
             return matches.limit(limit).toList();
         }, toValue);
+    }
+
+    /**
+     * Declares a fixed set of labels the LLM may pick for a
+     * {@link String}-typed field. Each chosen label is used as the field value
+     * as-is. Later calls for the same field overwrite earlier ones.
+     *
+     * @param field
+     *            the field whose options the LLM may pick from, not
+     *            {@code null}
+     * @param options
+     *            the labels the LLM may pick from, not {@code null}; a
+     *            defensive copy is taken
+     * @return this controller, for chaining
+     */
+    public FormAIController valueOptions(HasValue<?, String> field,
+            Collection<String> options) {
+        return valueOptions(field, options, Function.identity());
     }
 
     /**

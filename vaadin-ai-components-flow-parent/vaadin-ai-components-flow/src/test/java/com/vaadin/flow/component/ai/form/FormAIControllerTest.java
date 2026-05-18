@@ -77,6 +77,22 @@ class FormAIControllerTest {
         }
     }
 
+    /**
+     * Integer-valued field used to exercise {@code valueOptions} with a
+     * non-{@link String} value type, where {@code toValue} must convert the
+     * chosen label into the field's actual value type.
+     */
+    @Tag("int-field")
+    private static class IntField extends AbstractField<IntField, Integer> {
+        IntField() {
+            super(0);
+        }
+
+        @Override
+        protected void setPresentationValue(Integer value) {
+        }
+    }
+
     @Nested
     class Construction {
 
@@ -237,6 +253,44 @@ class FormAIControllerTest {
                             (Collection<String>) null, Function.identity()));
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.valueOptions(field, List.of(), null));
+        }
+
+        @Test
+        void valueOptionsAcceptsNonStringFieldWithToValueConverter() {
+            // valueOptions is generic over the field's value type — verify
+            // that an Integer-valued field can be registered with a label
+            // -> Integer converter, and that the labels still flow through
+            // the query tool unchanged.
+            var field = new IntField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("1", "2", "3"),
+                    Integer::parseInt);
+            controller.onRequestStart();
+
+            Assertions.assertEquals("1\n2\n3\n",
+                    executeQueryFieldOptions(controller, field, "", 10));
+        }
+
+        @Test
+        void stringOverloadsUseLabelsAsValuesDirectly() {
+            // The two-arg valueOptions overloads omit toValue: for String
+            // fields the chosen label is the value as-is. Smoke-test both
+            // shapes (query callback and fixed collection) to pin the
+            // delegation to the three-arg methods.
+            var queriedField = new TestField();
+            var fixedField = new TestField();
+            var controller = new FormAIController(
+                    new Div(queriedField, fixedField));
+            controller.valueOptions(queriedField,
+                    (filter, limit) -> List.of("alpha", "beta"));
+            controller.valueOptions(fixedField,
+                    List.of("apple", "banana", "cherry"));
+            controller.onRequestStart();
+
+            Assertions.assertEquals("alpha\nbeta\n",
+                    executeQueryFieldOptions(controller, queriedField, "", 10));
+            Assertions.assertEquals("banana\n",
+                    executeQueryFieldOptions(controller, fixedField, "an", 10));
         }
     }
 
