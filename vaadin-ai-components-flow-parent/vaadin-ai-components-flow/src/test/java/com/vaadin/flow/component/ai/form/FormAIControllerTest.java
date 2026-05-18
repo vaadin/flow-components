@@ -229,6 +229,9 @@ class FormAIControllerTest {
                     executeQueryFieldOptions(controller, field, "an", 10),
                     "Filter must restrict results to options containing "
                             + "the filter substring");
+            Assertions.assertEquals("banana\n",
+                    executeQueryFieldOptions(controller, field, "AN", 10),
+                    "Filter must match labels regardless of filter case");
             Assertions.assertEquals("apple\nbanana\ncherry\n",
                     executeQueryFieldOptions(controller, field, "", 10),
                     "Empty filter must return all options up to the "
