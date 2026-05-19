@@ -64,6 +64,22 @@ final class FormFieldSchema {
 
     private static void applyType(ObjectNode node, HasValue<?, ?> field,
             FormFieldType type, FormFieldHints hints) {
+        if (type == FormFieldType.MULTI_SELECT) {
+            node.put("array", true);
+            var items = node.putObject("items");
+            items.put("type", "string");
+            applySelectionOptions(items, field, hints);
+            return;
+        }
+        // valueOptions turns any field into a constrained-choice field from
+        // the LLM's perspective: the LLM picks a label, valueOptionsToValue
+        // converts back. Emit type=string + enum/queryable so the LLM sees the
+        // signal regardless of the underlying value type.
+        if (type == FormFieldType.SINGLE_SELECT || hasValueOptions(hints)) {
+            node.put("type", "string");
+            applySelectionOptions(node, field, hints);
+            return;
+        }
         switch (type) {
         case STRING -> node.put("type", "string");
         case EMAIL -> {
@@ -89,18 +105,12 @@ final class FormFieldSchema {
             node.put("type", "string");
             node.put("format", "time");
         }
-        case SINGLE_SELECT -> {
-            node.put("type", "string");
-            applySelectionOptions(node, field, hints);
-        }
-        case MULTI_SELECT -> {
-            node.put("array", true);
-            var items = node.putObject("items");
-            items.put("type", "string");
-            applySelectionOptions(items, field, hints);
-        }
         default -> node.put("type", "string");
         }
+    }
+
+    private static boolean hasValueOptions(FormFieldHints hints) {
+        return hints != null && hints.valueOptionsQuery != null;
     }
 
     private static void applySelectionOptions(ObjectNode target,

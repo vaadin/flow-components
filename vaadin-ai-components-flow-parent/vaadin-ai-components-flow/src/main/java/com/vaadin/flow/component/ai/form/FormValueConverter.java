@@ -80,7 +80,8 @@ final class FormValueConverter {
             return String.valueOf(item);
         }
         try {
-            return gen.apply(item);
+            var label = gen.apply(item);
+            return label != null ? label : String.valueOf(item);
         } catch (Exception ex) {
             return String.valueOf(item);
         }

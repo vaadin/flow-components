@@ -1315,6 +1315,44 @@ class FormAIControllerTest {
         }
 
         @Test
+        void getFormStateExposesEnumForFixedValueOptionsOnStringField() {
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("EUR", "USD", "GBP"));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("EUR", "USD", "GBP"), values);
+        }
+
+        @Test
+        void getFormStateExposesQueryableForBiFunctionValueOptionsOnStringField() {
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field,
+                    (filter, limit) -> List.of("Apollo", "Polaris"));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("queryable").asBoolean());
+        }
+
+        @Test
+        void getFormStateUsesFallbackWhenLabelGeneratorReturnsNull() {
+            var combo = new SingleSelectField<String>();
+            combo.setItems("only");
+            combo.setItemLabelGenerator(item -> null);
+            combo.setValue("only");
+            var controller = new FormAIController(new Div(combo));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertFalse(f.path("value").isNull());
+        }
+
+        @Test
         void getFormStateExposesListDataProviderItemsAsEnum() {
             var combo = new SingleSelectField<String>();
             combo.setItems("alpha", "beta", "gamma");
