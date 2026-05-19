@@ -123,6 +123,18 @@ class FormAIControllerTest {
         }
     }
 
+    @Tag("bigint-field")
+    private static class BigIntField
+            extends AbstractField<BigIntField, java.math.BigInteger> {
+        BigIntField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(java.math.BigInteger value) {
+        }
+    }
+
     @Tag("bigdec-field")
     private static class BigDecField
             extends AbstractField<BigDecField, BigDecimal> {
@@ -1084,6 +1096,43 @@ class FormAIControllerTest {
             var hidden = new TestField();
             var controller = new FormAIController(new Div(visible, hidden));
             controller.ignore(hidden);
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(1, fields.size());
+            Assertions.assertEquals(idOf(visible),
+                    fields.get(0).get("id").asString());
+        }
+
+        @Test
+        void getFormStateReturnsEmptyFieldsArrayForEmptyForm() {
+            var controller = new FormAIController(new Div());
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(0, fields.size());
+        }
+
+        @Test
+        void getFormStateRendersBigIntegerWithoutOverflow() {
+            var field = new BigIntField();
+            var huge = new java.math.BigInteger("99999999999999999999");
+            field.setValue(huge);
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals(huge, f.get("value").bigIntegerValue());
+        }
+
+        @Test
+        void getFormStateAutoIgnoresPasswordFieldEvenWithHints() {
+            var visible = new TestField();
+            var password = new PasswordField();
+            password.setValue("secret");
+            var controller = new FormAIController(new Div(visible, password))
+                    .describe(password, "Account password")
+                    .valueOptions(password, List.of("hunter2"));
 
             var fields = formStateFields(controller);
 

@@ -16,8 +16,8 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
-import java.util.List;
 
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -146,7 +146,12 @@ final class FormFieldSchema {
             }
         }
         case INTEGER -> {
-            if (value instanceof Number n) {
+            // BigInteger values can exceed Long.MAX_VALUE; routing them
+            // through Number.longValue() silently truncates. Jackson
+            // supports BigInteger as a JSON number with full precision.
+            if (value instanceof BigInteger bi) {
+                node.put("value", bi);
+            } else if (value instanceof Number n) {
                 node.put("value", n.longValue());
             } else {
                 node.put("value", value.toString());
@@ -174,13 +179,15 @@ final class FormFieldSchema {
         case SINGLE_SELECT ->
             node.put("value", FormValueConverter.renderItem(field, value));
         case MULTI_SELECT -> {
+            // MULTI_SELECT is only assigned when the field implements
+            // MultiSelect, whose contract guarantees getValue() returns a
+            // Set. A non-Collection value would be a contract violation
+            // and produces an empty array here as graceful degradation.
             var arr = node.putArray("value");
             if (value instanceof Collection<?> coll) {
                 for (var v : coll) {
                     arr.add(FormValueConverter.renderItem(field, v));
                 }
-            } else {
-                arr.add(FormValueConverter.renderItem(field, value));
             }
         }
         default -> node.put("value", value.toString());
@@ -214,24 +221,4 @@ final class FormFieldSchema {
         return field instanceof HasHelper hh ? hh.getHelperText() : null;
     }
 
-    /**
-     * For tests: returns the labels that would be emitted in {@code enum} for
-     * the given field, or {@code null} when the field would render as
-     * {@code queryable} or with no option metadata.
-     */
-    static List<String> enumLabels(HasValue<?, ?> field, FormFieldHints hints) {
-        if (hints != null && hints.fixedOptions) {
-            return List.copyOf(
-                    hints.valueOptionsQuery.apply("", Integer.MAX_VALUE));
-        }
-        if (hints != null && hints.valueOptionsQuery != null) {
-            return null;
-        }
-        var items = FormValueConverter.listDataProviderItems(field);
-        if (items == null) {
-            return null;
-        }
-        return items.stream().map(v -> FormValueConverter.renderItem(field, v))
-                .toList();
-    }
 }

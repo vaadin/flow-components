@@ -77,24 +77,40 @@ enum FormFieldType {
     private static final String PASSWORD_FIELD_FQN = "com.vaadin.flow.component.textfield.PasswordField";
     private static final String EMAIL_FIELD_FQN = "com.vaadin.flow.component.textfield.EmailField";
 
+    /**
+     * Memoizes the {@code Class -> FormFieldType} mapping so the generic
+     * hierarchy walk in {@link #resolveValueType} and the marker-interface
+     * checks run at most once per concrete field class for the lifetime of the
+     * classloader.
+     */
+    private static final ClassValue<FormFieldType> CLASSIFY_CACHE = new ClassValue<>() {
+        @Override
+        protected FormFieldType computeValue(Class<?> type) {
+            return doClassify(type);
+        }
+    };
+
     static FormFieldType classify(HasValue<?, ?> field) {
         if (field == null) {
             return UNSUPPORTED;
         }
-        var fieldClass = field.getClass();
+        return CLASSIFY_CACHE.get(field.getClass());
+    }
+
+    private static FormFieldType doClassify(Class<?> fieldClass) {
         if (isAssignableTo(fieldClass, PASSWORD_FIELD_FQN)) {
             return UNSUPPORTED;
         }
         if (isAssignableTo(fieldClass, EMAIL_FIELD_FQN)) {
             return EMAIL;
         }
-        if (field instanceof MultiSelect<?, ?>) {
+        if (MultiSelect.class.isAssignableFrom(fieldClass)) {
             return MULTI_SELECT;
         }
-        if (field instanceof HasListDataView<?, ?>
-                || field instanceof HasLazyDataView<?, ?, ?>
-                || field instanceof HasDataView<?, ?, ?>
-                || field instanceof HasItems<?>) {
+        if (HasListDataView.class.isAssignableFrom(fieldClass)
+                || HasLazyDataView.class.isAssignableFrom(fieldClass)
+                || HasDataView.class.isAssignableFrom(fieldClass)
+                || HasItems.class.isAssignableFrom(fieldClass)) {
             return SINGLE_SELECT;
         }
         var valueType = resolveValueType(fieldClass);

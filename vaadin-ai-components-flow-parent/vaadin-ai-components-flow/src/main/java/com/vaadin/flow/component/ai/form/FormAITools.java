@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.ai.form;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -245,10 +244,7 @@ final class FormAITools {
      * Creates all form tools for the given callbacks.
      */
     static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
-        var tools = new ArrayList<LLMProvider.ToolSpec>();
-        tools.add(formState(callbacks));
-        tools.add(queryFieldOptions(callbacks));
-        return tools;
+        return List.of(formState(callbacks), queryFieldOptions(callbacks));
     }
 
     private static String escapeLabel(String label) {

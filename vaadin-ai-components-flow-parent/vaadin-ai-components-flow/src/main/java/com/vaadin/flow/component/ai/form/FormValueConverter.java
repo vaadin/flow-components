@@ -15,9 +15,13 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -35,6 +39,16 @@ import com.vaadin.flow.data.provider.ListDataProvider;
  * carries the read path needed by {@code get_form_state}.
  */
 final class FormValueConverter {
+
+    /**
+     * Caches the {@link Method} resolved for a given (concrete class, method
+     * name) pair. {@link Optional#empty()} marks lookups that fell off the
+     * superclass chain so the negative result is not re-computed either.
+     */
+    private static final Map<MethodKey, Optional<Method>> METHOD_CACHE = new ConcurrentHashMap<>();
+
+    private record MethodKey(Class<?> type, String name) {
+    }
 
     private FormValueConverter() {
     }
@@ -101,18 +115,30 @@ final class FormValueConverter {
     }
 
     private static Object invokeNoArg(Object target, String methodName) {
-        for (var c = target.getClass(); c != null
+        var method = METHOD_CACHE.computeIfAbsent(
+                new MethodKey(target.getClass(), methodName),
+                FormValueConverter::lookupMethod);
+        if (method.isEmpty()) {
+            return null;
+        }
+        try {
+            return method.get().invoke(target);
+        } catch (ReflectiveOperationException ex) {
+            return null;
+        }
+    }
+
+    private static Optional<Method> lookupMethod(MethodKey key) {
+        for (var c = key.type(); c != null
                 && c != Object.class; c = c.getSuperclass()) {
             try {
-                var method = c.getDeclaredMethod(methodName);
+                var method = c.getDeclaredMethod(key.name());
                 method.setAccessible(true);
-                return method.invoke(target);
+                return Optional.of(method);
             } catch (NoSuchMethodException ignored) {
                 // try the next superclass
-            } catch (ReflectiveOperationException ex) {
-                return null;
             }
         }
-        return null;
+        return Optional.empty();
     }
 }
