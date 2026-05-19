@@ -156,7 +156,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     range[1] = Math.ceil(range[1] / grid.pageSize) * grid.pageSize;
 
     if (requestedViewportRange[0] !== range[0] || requestedViewportRange[1] !== range[1]) {
-      grid.$server.setViewportRange(range[0], range[1] - range[0] + grid.pageSize);
+      grid.$server.setViewportRange(range[0], range[1] - range[0]);
       requestedViewportRange = range;
     }
   };
