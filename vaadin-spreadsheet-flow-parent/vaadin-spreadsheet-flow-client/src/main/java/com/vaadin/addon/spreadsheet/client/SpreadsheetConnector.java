@@ -215,6 +215,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private SpreadsheetServerRpcImpl serverRPC;
 
     private Element host;
+    private Element overlayContainer;
 
     private HashMap<String, Slot> customEditors = null;
 
@@ -231,6 +232,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     @Override
     protected void init() {
         super.init();
+        getConnection().setContextMenu(
+                new SpreadsheetOverlay.SpreadsheetContextMenu(overlayContainer));
         getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
         getWidget().setCommsTrigger(new CommsTrigger() {
@@ -610,8 +613,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
-    public void setHost(Element host, Node renderRoot) {
+    public void setHost(Element host, Node renderRoot,
+            Element overlayContainer) {
         this.host = host;
-        getWidget().setHost(host, renderRoot);
+        this.overlayContainer = overlayContainer;
+        getWidget().setHost(host, renderRoot, overlayContainer);
+    }
+
+    public Element getOverlayContainer() {
+        return overlayContainer;
     }
 }

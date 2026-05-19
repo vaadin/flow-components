@@ -156,7 +156,7 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   render() {
-    return html``;
+    return html`<slot name="overlays"></slot>`;
   }
 
   connectedCallback() {
@@ -172,22 +172,20 @@ export class VaadinSpreadsheet extends LitElement {
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
-    let overlays = document.getElementById('spreadsheet-overlays');
     if (!this.api) {
-      if (!overlays) {
-        overlays = document.createElement('div');
-        overlays.id = 'spreadsheet-overlays';
-        document.body.appendChild(overlays);
-      }
+      const overlays = document.createElement('div');
+      overlays.id = 'spreadsheet-overlays';
+      overlays.slot = 'overlays';
+      this.appendChild(overlays);
 
-      this.api = new Spreadsheet(this, this.renderRoot);
+      this.api = new Spreadsheet(this, this.renderRoot, overlays);
       this.api.setHeight('100%');
       this.api.setWidth('100%');
       this.createCallbacks();
 
       initial = true;
     }
-    overlays.setAttribute('theme', this.getAttribute('theme'));
+    this.querySelector(':scope > #spreadsheet-overlays').setAttribute('theme', this.getAttribute('theme'));
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {

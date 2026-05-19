@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetOverlay;
 import com.vaadin.client.ApplicationConfiguration.ErrorMessage;
 import com.vaadin.client.communication.ConnectionStateHandler;
 import com.vaadin.client.communication.Heartbeat;
@@ -849,16 +848,26 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Singleton method to get instance of app's context menu.
+     * Returns the context menu associated with this connection, previously set
+     * via {@link #setContextMenu(VContextMenu)}.
      *
-     * @return VContextMenu object
+     * @return VContextMenu object, or {@code null} if not yet assigned
      */
     public VContextMenu getContextMenu() {
-        if (contextMenu == null) {
-            contextMenu = new SpreadsheetOverlay.SpreadsheetContextMenu();
-            contextMenu.setOwner(uIConnector.getWidget());
-        }
         return contextMenu;
+    }
+
+    /**
+     * Assigns the context menu instance for this connection and wires its
+     * owner to the connection's UI widget. Called by the spreadsheet
+     * connector once the overlay container is known.
+     *
+     * @param contextMenu
+     *            the context menu instance, not null
+     */
+    public void setContextMenu(VContextMenu contextMenu) {
+        this.contextMenu = contextMenu;
+        contextMenu.setOwner(uIConnector.getWidget());
     }
 
     /**

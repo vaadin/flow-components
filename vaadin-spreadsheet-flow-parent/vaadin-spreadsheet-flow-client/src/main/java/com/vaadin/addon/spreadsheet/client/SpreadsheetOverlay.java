@@ -8,35 +8,47 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.vaadin.client.ui.VContextMenu;
 import com.vaadin.client.ui.VOverlay;
 
 /**
- * A VOverlay Implementation that attaches the overlay to the container added by
- * vaadin-spreadsheet webcomponent
+ * A VOverlay implementation that attaches the overlay to the per-instance
+ * container created by the {@code <vaadin-spreadsheet>} custom element. The
+ * container lives inside the spreadsheet element (light DOM), so the overlay
+ * inherits {@code pointer-events: auto} from a containing modal Dialog overlay
+ * — fixing the regression where context menus were visually shown (via native
+ * popover) but not clickable.
  */
 @SuppressWarnings({ "deprecation", "java:S1699" })
 public class SpreadsheetOverlay extends VOverlay {
 
     private static final String POPOVER_ATTRIBUTE = "popover";
 
+    private Element overlayContainer;
+
     /**
-     * A VContextMenu Implementation that attaches the overlay to the container
-     * added by vaadin-spreadsheet webcomponent
+     * A VContextMenu implementation that attaches the overlay to the
+     * per-instance container.
      */
     public static class SpreadsheetContextMenu extends VContextMenu {
 
-        public SpreadsheetContextMenu() {
+        private Element overlayContainer;
+
+        public SpreadsheetContextMenu(Element overlayContainer) {
+            this.overlayContainer = overlayContainer;
             DOM.setElementProperty(getElement(), "id", "PID_VAADIN_CM");
             setPopover(getElement());
         }
 
         @Override
-        public Element getOverlayContainer() {
-            return getOverlayContainerElement();
+        public com.google.gwt.user.client.Element getOverlayContainer() {
+            return asUserElement(overlayContainer);
+        }
+
+        public void setOverlayContainer(Element overlayContainer) {
+            this.overlayContainer = overlayContainer;
         }
 
         @Override
@@ -67,10 +79,13 @@ public class SpreadsheetOverlay extends VOverlay {
         setPopover(getElement());
     }
 
-    private static void setPopover(Element el) {
-        if (el != null) {
-            el.setAttribute(POPOVER_ATTRIBUTE, "manual");
-        }
+    public void setOverlayContainer(Element overlayContainer) {
+        this.overlayContainer = overlayContainer;
+    }
+
+    @Override
+    public com.google.gwt.user.client.Element getOverlayContainer() {
+        return asUserElement(overlayContainer);
     }
 
     @Override
@@ -79,18 +94,20 @@ public class SpreadsheetOverlay extends VOverlay {
         showPopover(getElement());
     }
 
-    @Override
-    public Element getOverlayContainer() {
-        return getOverlayContainerElement();
+    private static void setPopover(Element el) {
+        if (el != null) {
+            el.setAttribute(POPOVER_ATTRIBUTE, "manual");
+        }
     }
 
-    private static Element getOverlayContainerElement() {
-        Element overlays = DOM.getElementById("spreadsheet-overlays");
-        return overlays == null ? RootPanel.getBodyElement() : overlays;
+    private static com.google.gwt.user.client.Element asUserElement(
+            Element el) {
+        return el == null ? null
+                : el.<com.google.gwt.user.client.Element> cast();
     }
 
     // @formatter:off
-    private static native void showPopover(Element el) 
+    private static native void showPopover(Element el)
     /*-{
         var fn = el && el.showPopover;
         if (typeof fn === "function") {

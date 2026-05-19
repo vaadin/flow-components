@@ -19,7 +19,10 @@ import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
+import com.vaadin.flow.component.ModalityMode;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
@@ -89,6 +92,9 @@ public class SpreadsheetDialogPage extends VerticalLayout {
 
         spreadsheet.setSelectionRange(2, 7, 2 + 5, 7 + 3);
 
+        Div lastAction = new Div();
+        lastAction.setId("last-action");
+
         var action0 = new Action("Test", VaadinIcon.ABACUS.create());
         var action1 = new Action("Other", VaadinIcon.CARET_DOWN.create());
         spreadsheet.getContextMenuManager().addActionHandler(new Handler() {
@@ -104,11 +110,7 @@ public class SpreadsheetDialogPage extends VerticalLayout {
             @Override
             public void handleAction(Action action, Object sender,
                     Object target) {
-                if (action == action0) {
-                    System.out.println("Test!");
-                } else if (action == action1) {
-                    System.out.println("Other!");
-                }
+                lastAction.setText(action.getCaption());
             }
 
         });
@@ -116,7 +118,18 @@ public class SpreadsheetDialogPage extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.add(spreadsheet);
         dialog.setSizeFull();
-        dialog.open();
+
+        Button openDialog = new Button("Open dialog", e -> dialog.open());
+        openDialog.setId("open-dialog");
+
+        Button toggleModality = new Button("Toggle modality",
+                e -> dialog
+                        .setModality(dialog.getModality() == ModalityMode.STRICT
+                                ? ModalityMode.MODELESS
+                                : ModalityMode.STRICT));
+        toggleModality.setId("toggle-modality");
+
+        add(openDialog, toggleModality, lastAction);
     }
 
 }

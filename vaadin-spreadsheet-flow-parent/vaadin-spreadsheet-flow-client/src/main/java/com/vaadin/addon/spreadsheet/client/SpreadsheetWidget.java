@@ -2186,8 +2186,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarWidget.setNamedRanges(namedRanges);
     }
 
-    public void setHost(Element host, Node renderRoot) {
-        sheetWidget.setHost(host, renderRoot);
+    public void setHost(Element host, Node renderRoot,
+            Element overlayContainer) {
+        sheetWidget.setHost(host, renderRoot, overlayContainer);
     }
 
     /**
