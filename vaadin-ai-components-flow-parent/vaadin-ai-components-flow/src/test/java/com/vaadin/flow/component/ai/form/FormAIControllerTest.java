@@ -209,6 +209,23 @@ class FormAIControllerTest {
         }
     }
 
+    @Tag("throwing-field")
+    private static class ThrowingField
+            extends AbstractField<ThrowingField, String> {
+        ThrowingField() {
+            super("");
+        }
+
+        @Override
+        public String getValue() {
+            throw new RuntimeException("boom");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+    }
+
     /**
      * A {@link Component} that implements {@link HasValue} directly — not via
      * {@link AbstractField}. Used to verify that
@@ -1464,6 +1481,56 @@ class FormAIControllerTest {
             Assertions.assertTrue(fields.get(5).get("value").asBoolean());
             Assertions.assertEquals("Meals",
                     fields.get(6).get("value").asString());
+        }
+
+        @Test
+        void getFormStateContinuesPastFieldWhoseGetValueThrows() {
+            var good = new TestField();
+            good.setValue("ok");
+            var bad = new ThrowingField();
+            var trailing = new TestField();
+            trailing.setValue("trailing");
+            var controller = new FormAIController(new Div(good, bad, trailing));
+
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(3, fields.size(),
+                    "Failing field must still produce an entry so the LLM "
+                            + "can see that the field exists");
+            Assertions.assertEquals("ok",
+                    fields.get(0).path("value").asString(),
+                    "Fields before a failing field must still be present");
+            Assertions.assertEquals("trailing",
+                    fields.get(2).path("value").asString(),
+                    "Fields after a failing field must still be present");
+            Assertions.assertEquals(idOf(bad),
+                    fields.get(1).path("id").asString(),
+                    "Failed field entry must carry its id so the LLM can "
+                            + "correlate, got: " + fields.get(1));
+            Assertions.assertFalse(fields.get(1).path("error").isMissingNode(),
+                    "Failed field entry must carry an error marker, got: "
+                            + fields.get(1));
+        }
+
+        @Test
+        void getFormStateRendersStringValueWhenValueOptionsOverrideType() {
+            // valueOptions on a non-String field rewrites the schema type to
+            // "string" + enum, but applyValue keeps following the field's
+            // original FormFieldType — so the value half of the payload
+            // disagrees with the schema half. A strict consumer validating
+            // type=string against a JSON integer would reject the result.
+            var field = new IntField();
+            field.setValue(2);
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("1", "2", "3"),
+                    Integer::parseInt);
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("string", f.path("type").asString());
+            Assertions.assertTrue(f.path("value").isString(),
+                    "value must match the declared schema type, got: "
+                            + f.path("value"));
         }
 
         @Test

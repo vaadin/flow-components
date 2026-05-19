@@ -131,14 +131,18 @@ final class FormAITools {
             public String execute(JsonNode arguments) {
                 var root = JacksonUtils.createObjectNode();
                 var fields = root.putArray("fields");
-                try {
-                    for (var d : callbacks.visibleFields()) {
+                for (var d : callbacks.visibleFields()) {
+                    try {
                         fields.add(FormFieldSchema.build(d.id(), d.field(),
                                 d.type(), d.hints()));
+                    } catch (Exception ex) {
+                        LOGGER.warn("get_form_state failed for field {}",
+                                d.id(), ex);
+                        var errorNode = JacksonUtils.createObjectNode();
+                        errorNode.put("id", d.id());
+                        errorNode.put("error", "Failed to build field state.");
+                        fields.add(errorNode);
                     }
-                } catch (Exception ex) {
-                    LOGGER.warn("get_form_state failed", ex);
-                    return "{\"error\":\"get_form_state failed.\"}";
                 }
                 return root.toString();
             }

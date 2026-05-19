@@ -58,7 +58,7 @@ final class FormFieldSchema {
             node.put("description", description);
         }
         applyType(node, field, type, hints);
-        applyValue(node, field, type);
+        applyValue(node, field, type, hints);
         return node;
     }
 
@@ -135,10 +135,18 @@ final class FormFieldSchema {
     }
 
     private static void applyValue(ObjectNode node, HasValue<?, ?> field,
-            FormFieldType type) {
+            FormFieldType type, FormFieldHints hints) {
         var value = field.getValue();
         if (FormValueConverter.isEmpty(value)) {
             node.putNull("value");
+            return;
+        }
+        // valueOptions rewrites the schema type to "string" + enum/queryable
+        // for non-selection fields; render the value as a string so the two
+        // halves of the payload agree.
+        if (hasValueOptions(hints) && type != FormFieldType.SINGLE_SELECT
+                && type != FormFieldType.MULTI_SELECT) {
+            node.put("value", FormValueConverter.renderItem(field, value));
             return;
         }
         switch (type) {
