@@ -232,8 +232,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     @Override
     protected void init() {
         super.init();
-        getConnection().setContextMenu(
-                new SpreadsheetOverlay.SpreadsheetContextMenu(overlayContainer));
+        getConnection()
+                .setContextMenu(new SpreadsheetOverlay.SpreadsheetContextMenu(
+                        overlayContainer));
         getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
         getWidget().setCommsTrigger(new CommsTrigger() {

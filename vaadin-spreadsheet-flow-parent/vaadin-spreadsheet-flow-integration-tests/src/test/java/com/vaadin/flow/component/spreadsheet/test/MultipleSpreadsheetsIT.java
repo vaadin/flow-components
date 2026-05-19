@@ -42,10 +42,9 @@ public class MultipleSpreadsheetsIT extends AbstractComponentIT {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).id(id);
         new Actions(getDriver()).contextClick(spreadsheet.getCellAt(2, 2))
                 .perform();
-        getDriver()
-                .findElement(By.xpath(
-                        "//div[@class='popupContent']//*[normalize-space(text())='"
-                                + actionLabel + "']"))
+        getDriver().findElement(By.xpath(
+                "//div[@class='popupContent']//*[normalize-space(text())='"
+                        + actionLabel + "']"))
                 .click();
     }
 

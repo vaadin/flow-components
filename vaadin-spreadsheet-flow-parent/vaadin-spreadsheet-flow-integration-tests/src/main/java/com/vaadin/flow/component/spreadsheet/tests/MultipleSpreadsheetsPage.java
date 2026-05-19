@@ -17,10 +17,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * Two independent spreadsheets on the same page, each with its own context
- * menu action and its own observable output. Verifies that the per-instance
- * overlay container introduced for {@code <vaadin-spreadsheet>} keeps the
- * two instances isolated.
+ * Two independent spreadsheets on the same page, each with its own context menu
+ * action and its own observable output. Verifies that the per-instance overlay
+ * container introduced for {@code <vaadin-spreadsheet>} keeps the two instances
+ * isolated.
  */
 @Route("multiple-spreadsheets")
 @PageTitle("Multiple spreadsheets")

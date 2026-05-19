@@ -69,8 +69,7 @@ public class SpreadsheetJsApi {
         }
     }
 
-    private void init(Element host, Node renderRoot,
-            Element overlayContainer) {
+    private void init(Element host, Node renderRoot, Element overlayContainer) {
         spreadsheetConnector = new SpreadsheetConnector();
         spreadsheetConnector.setHost(host, renderRoot, overlayContainer);
         spreadsheetConnector.doInit("1", new ApplicationConnection());

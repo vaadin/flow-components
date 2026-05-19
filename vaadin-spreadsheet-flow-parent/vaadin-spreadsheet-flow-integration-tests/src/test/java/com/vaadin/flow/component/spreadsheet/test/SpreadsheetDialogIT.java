@@ -53,7 +53,7 @@ public class SpreadsheetDialogIT extends AbstractSpreadsheetIT {
 
         WebElement lastAction = findElement(By.id("last-action"));
         Assert.assertEquals(
-                "Context menu action should fire and update the page",
-                action, lastAction.getText());
+                "Context menu action should fire and update the page", action,
+                lastAction.getText());
     }
 }

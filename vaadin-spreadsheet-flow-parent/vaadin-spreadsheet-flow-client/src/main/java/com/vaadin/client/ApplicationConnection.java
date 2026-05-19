@@ -858,9 +858,9 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Assigns the context menu instance for this connection and wires its
-     * owner to the connection's UI widget. Called by the spreadsheet
-     * connector once the overlay container is known.
+     * Assigns the context menu instance for this connection and wires its owner
+     * to the connection's UI widget. Called by the spreadsheet connector once
+     * the overlay container is known.
      *
      * @param contextMenu
      *            the context menu instance, not null
