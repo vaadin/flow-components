@@ -5,6 +5,10 @@ import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
 
+function isRangeEqual(range1, range2) {
+  return new Set(range1).difference(new Set(range2)).size === 0;
+}
+
 window.Vaadin.Flow.gridConnector = {};
 window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   // Check whether the connector was already initialized for the grid
@@ -16,7 +20,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   const requestDebouncerDelay = 150;
   let requestDebouncer;
-  let requestedViewportRange = [-1, -1];
+  let requestedRange = null;
 
   const validSelectionModes = ['SINGLE', 'NONE', 'MULTI'];
   let selectedKeys = {};
@@ -142,7 +146,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return [renderedRows.at(0)?.index ?? 0, renderedRows.at(-1)?.index ?? 0];
   };
 
-  grid.$connector.requestViewportRange = function () {
+  grid.$connector.getFetchRange = function () {
     // Get the range of currently rendered rows
     let range = grid.$connector.getRenderedRange();
 
@@ -156,9 +160,44 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     range[0] = Math.floor(range[0] / grid.pageSize) * grid.pageSize;
     range[1] = (Math.floor(range[1] / grid.pageSize) + 1) * grid.pageSize;
 
-    if (requestedViewportRange[0] !== range[0] || requestedViewportRange[1] !== range[1]) {
-      grid.$server.setViewportRange(range[0], range[1] - range[0]);
-      requestedViewportRange = range;
+    return range;
+  };
+
+  grid.$connector.fetchRange = async (range) => {
+    if (isRangeEqual(range, requestedRange)) {
+      // Skip duplicate requests for the same range.
+      return;
+    }
+
+    requestedRange = range;
+
+    await grid.$server.setViewportRange(range[0], range[1] - range[0]);
+
+    if (!isRangeEqual(range, requestedRange)) {
+      // While awaiting, fetchRange may have been called again with
+      // a different range, so do not process this stale response.
+      return;
+    }
+
+    // Set a flag so the grid re-checks all rendered rows after the pending
+    // callbacks below are resolved, and requests any that are still missing,
+    // not just the ones covered by the resolved callbacks.
+    grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
+
+    // Resolve pending callbacks. This may synchronously trigger new ones to be
+    // created or reissued.
+    const { rootCache } = dataProviderController;
+    Object.values(rootCache.pendingRequests).forEach((callback) => {
+      callback([]);
+    });
+
+    // If no new data provider requests came in while resolving the callbacks
+    // above, clear the current requested range and cancel the active request
+    // debouncer (if any) to avoid sending a server request that is no longer
+    // needed.
+    if (Object.values(rootCache.pendingRequests).length === 0) {
+      requestDebouncer?.cancel();
+      requestedRange = null;
     }
   };
 
@@ -179,10 +218,15 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    const timeout = grid._hasData ? requestDebouncerDelay : 0;
-    requestDebouncer = Debouncer.debounce(requestDebouncer, timeOut.after(timeout), () => {
-      grid.$connector.requestViewportRange();
-    });
+    requestDebouncer = Debouncer.debounce(
+      requestDebouncer,
+      timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
+      () => {
+        const range = grid.$connector.getFetchRange();
+
+        grid.$connector.fetchRange(range);
+      }
+    );
   };
 
   grid.$connector.setSorterDirections = function (directions) {
@@ -334,7 +378,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.reset = function () {
     dataProviderController.clearCache();
-    requestedViewportRange = [-1, -1];
+    requestedRange = null;
     requestDebouncer?.cancel();
     grid.__updateVisibleRows();
   };
@@ -344,26 +388,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
-    const { rootCache } = dataProviderController;
-
-    // Flag the grid to request any rows that are still missing after resolving
-    // the pending callbacks below.
-    grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
-
-    // Resolve the pending callbacks. This may trigger new ones to be created or
-    // reissued synchronously.
-    Object.values(rootCache.pendingRequests).forEach((callback) => {
-      callback([]);
-    });
-
-    // If no new data provider requests came in while resolving the callbacks,
-    // clear the current requested range and cancel the active request debouncer
-    // (if any) to avoid sending a server request that is no longer needed.
-    if (Object.values(rootCache.pendingRequests).length === 0) {
-      requestDebouncer?.cancel();
-      requestedViewportRange = [-1, -1];
-    }
-
     grid.$server.confirmUpdate(id);
   };
 

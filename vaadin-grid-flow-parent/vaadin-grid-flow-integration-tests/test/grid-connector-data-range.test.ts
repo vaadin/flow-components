@@ -136,4 +136,12 @@ describe('grid connector - data range', () => {
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([0, PAGE_SIZE]);
   });
+
+  it('should clear loading state when server resolves setViewportRange without calling confirm', async () => {
+    grid.scrollToIndex(rootSize - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    // Let the awaited setViewportRange promise settle and pending callbacks resolve
+    await nextFrame();
+    expect(grid.hasAttribute('loading')).to.be.false;
+  });
 });
