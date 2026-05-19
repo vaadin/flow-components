@@ -1204,10 +1204,34 @@ class FormAIControllerTest {
             var f = formStateFields(controller).get(0);
 
             Assertions.assertEquals(
-                    "Merchant. The vendor name. As shown on the receipt",
+                    "Merchant | The vendor name | As shown on the receipt",
                     f.get("description").asString(),
                     "label, registered description, and helper text must be "
                             + "joined in that order");
+        }
+
+        @Test
+        void getFormStateMergeDescriptionKeepsTrailingPeriodsVerbatim() {
+            // Real-world labels and helper texts often end in '.', and
+            // user-supplied descriptions almost always do. The merge
+            // separator must not collide with trailing punctuation: a
+            // '. ' separator would produce "Merchant.. The vendor..".
+            // Pin that each part appears intact and no '..' shows up.
+            var field = new LabeledStringField();
+            field.setLabel("Merchant.");
+            field.setHelperText("As shown on the receipt.");
+            var controller = new FormAIController(new Div(field));
+            controller.describe(field, "The vendor name.");
+
+            var f = formStateFields(controller).get(0);
+            var desc = f.get("description").asString();
+
+            Assertions.assertFalse(desc.contains(".."),
+                    "Merge separator must not collide with trailing "
+                            + "periods, got: " + desc);
+            Assertions.assertTrue(desc.contains("Merchant."));
+            Assertions.assertTrue(desc.contains("The vendor name."));
+            Assertions.assertTrue(desc.contains("As shown on the receipt."));
         }
 
         @Test
@@ -1681,7 +1705,7 @@ class FormAIControllerTest {
                               "fields": [
                                 {
                                   "id": "<merchant>",
-                                  "description": "Merchant. The vendor name. As shown on the receipt",
+                                  "description": "Merchant | The vendor name | As shown on the receipt",
                                   "type": "string",
                                   "value": "Trattoria Toscana"
                                 },

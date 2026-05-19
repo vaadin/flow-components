@@ -226,7 +226,10 @@ final class FormFieldSchema {
             return;
         }
         if (target.length() > 0) {
-            target.append(". ");
+            // Pipe rather than '. ' so labels or helper texts that
+            // already end in '.' (common) do not produce '..' in the
+            // merged description.
+            target.append(" | ");
         }
         target.append(part);
     }
