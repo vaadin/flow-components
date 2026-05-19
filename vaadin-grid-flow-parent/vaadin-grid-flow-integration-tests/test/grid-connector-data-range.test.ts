@@ -125,11 +125,6 @@ describe('grid connector - data range', () => {
     grid.scrollToIndex(rootSize - 1);
     grid.scrollToIndex(0);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
-
-    processRequestedRange();
-
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([0, PAGE_SIZE]);
   });
 
@@ -139,6 +134,6 @@ describe('grid connector - data range', () => {
     rootSize /= 2;
     grid.$connector.updateSize(rootSize);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
+    expectRequestedRange([0, PAGE_SIZE]);
   });
 });

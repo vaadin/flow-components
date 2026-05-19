@@ -151,9 +151,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     range[0] = Math.max(range[0] - buffer, 0);
     range[1] = Math.min(range[1] + buffer, grid.size);
 
-    // Align the range to page boundaries
+    // Align the range to page boundaries. range[1] is inclusive of the last
+    // rendered row, so round it up to the end of that row's page.
     range[0] = Math.floor(range[0] / grid.pageSize) * grid.pageSize;
-    range[1] = Math.ceil(range[1] / grid.pageSize) * grid.pageSize;
+    range[1] = (Math.floor(range[1] / grid.pageSize) + 1) * grid.pageSize;
 
     if (requestedViewportRange[0] !== range[0] || requestedViewportRange[1] !== range[1]) {
       grid.$server.setViewportRange(range[0], range[1] - range[0]);
