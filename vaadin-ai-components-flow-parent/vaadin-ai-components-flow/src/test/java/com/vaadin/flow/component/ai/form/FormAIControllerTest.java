@@ -50,6 +50,9 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.HasItems;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -189,6 +192,255 @@ class FormAIControllerTest {
 
         @Override
         protected void setPresentationValue(LocalTime value) {
+        }
+    }
+
+    /**
+     * Domain-typed item record used to exercise label-generator-driven
+     * rendering of selection options. Non-String item types are what makes the
+     * {@code ItemLabelGenerator} path observable in tests.
+     */
+    private record Project(String code, String name) {
+    }
+
+    @Tag("long-field")
+    private static class LongField extends AbstractField<LongField, Long> {
+        LongField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(Long value) {
+        }
+    }
+
+    @Tag("short-field")
+    private static class ShortField extends AbstractField<ShortField, Short> {
+        ShortField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(Short value) {
+        }
+    }
+
+    @Tag("byte-field")
+    private static class ByteField extends AbstractField<ByteField, Byte> {
+        ByteField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(Byte value) {
+        }
+    }
+
+    @Tag("float-field")
+    private static class FloatField extends AbstractField<FloatField, Float> {
+        FloatField() {
+            super(null);
+        }
+
+        @Override
+        protected void setPresentationValue(Float value) {
+        }
+    }
+
+    /**
+     * Non-generic interface that pre-binds {@link HasValue}'s value type to
+     * {@link Integer}. Used to exercise the {@code findHasValueValueArg} walk
+     * when an intermediate interface in the hierarchy is not parameterized: the
+     * recursion must propagate the resolved type out of the raw-class branch
+     * instead of dropping it.
+     */
+    private interface IntegerSelectableField
+            extends HasValue<HasValue.ValueChangeEvent<Integer>, Integer> {
+    }
+
+    /**
+     * Field that implements {@link IntegerSelectableField} (a raw class in the
+     * {@code getGenericInterfaces()} view of this class) instead of
+     * {@code HasValue<?, Integer>} directly. Without the recursive
+     * {@code return found;} in {@code findHasValueValueArg}, the walk would
+     * find {@code Integer} but discard it, leaving the field classified as
+     * {@link FormFieldType#STRING}.
+     */
+    @Tag("integer-via-non-generic")
+    private static class IntegerViaNonGenericInterfaceField extends Component
+            implements IntegerSelectableField {
+
+        private Integer value;
+
+        @Override
+        public void setValue(Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public Integer getValue() {
+            return value;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<Integer>> listener) {
+            return () -> {
+            };
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+
+        @Override
+        public void setReadOnly(boolean readOnly) {
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return false;
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(boolean visible) {
+        }
+    }
+
+    /**
+     * Minimal field that implements {@link HasLazyDataView} but
+     * <strong>not</strong> {@link HasItems}. Real Vaadin selection components
+     * (e.g. {@code ComboBox}) follow this shape — they expose the data-view
+     * marker interfaces but not {@code HasItems}. The classifier must recognise
+     * such fields as {@link FormFieldType#SINGLE_SELECT} via the data-view
+     * markers; falling back to {@link HasItems} alone would misclassify them as
+     * {@link FormFieldType#STRING}, suppressing the {@code enum} block built
+     * from the backing {@link ListDataProvider}.
+     */
+    @Tag("lazy-data-view-field")
+    private static class LazyDataViewField
+            extends AbstractField<LazyDataViewField, String> implements
+            HasLazyDataView<String, String, com.vaadin.flow.data.provider.LazyDataView<String>> {
+
+        private ListDataProvider<String> provider = DataProvider
+                .ofCollection(List.of());
+
+        LazyDataViewField() {
+            super("");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.LazyDataView<String> setItems(
+                com.vaadin.flow.data.provider.BackEndDataProvider<String, String> dataProvider) {
+            return null;
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.LazyDataView<String> getLazyDataView() {
+            return null;
+        }
+
+        void supplyItems(String... items) {
+            provider = DataProvider.ofCollection(Arrays.asList(items));
+        }
+
+        @SuppressWarnings("unused")
+        public DataProvider<String, ?> getDataProvider() {
+            return provider;
+        }
+    }
+
+    /**
+     * Minimal field that implements only {@link HasListDataView}. Pinning each
+     * data-view marker separately catches regressions where one interface is
+     * dropped from the classifier's marker list while the others stay.
+     */
+    @Tag("list-data-view-field")
+    private static class ListDataViewField
+            extends AbstractField<ListDataViewField, String> implements
+            HasListDataView<String, com.vaadin.flow.data.provider.ListDataView<String, ?>> {
+
+        private ListDataProvider<String> provider = DataProvider
+                .ofCollection(List.of());
+
+        ListDataViewField() {
+            super("");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.ListDataView<String, ?> setItems(
+                ListDataProvider<String> dataProvider) {
+            return null;
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.ListDataView<String, ?> getListDataView() {
+            return null;
+        }
+
+        void supplyItems(String... items) {
+            provider = DataProvider.ofCollection(Arrays.asList(items));
+        }
+
+        @SuppressWarnings("unused")
+        public DataProvider<String, ?> getDataProvider() {
+            return provider;
+        }
+    }
+
+    /**
+     * Minimal field that implements only {@link HasDataView}. See
+     * {@link LazyDataViewField} for rationale.
+     */
+    @Tag("data-view-field")
+    private static class DataViewField
+            extends AbstractField<DataViewField, String> implements
+            HasDataView<String, String, com.vaadin.flow.data.provider.DataView<String>> {
+
+        private ListDataProvider<String> provider = DataProvider
+                .ofCollection(List.of());
+
+        DataViewField() {
+            super("");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.DataView<String> setItems(
+                DataProvider<String, String> dataProvider) {
+            return null;
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.DataView<String> setItems(
+                com.vaadin.flow.data.provider.InMemoryDataProvider<String> dataProvider) {
+            return null;
+        }
+
+        @Override
+        public com.vaadin.flow.data.provider.DataView<String> getGenericDataView() {
+            return null;
+        }
+
+        void supplyItems(String... items) {
+            provider = DataProvider.ofCollection(Arrays.asList(items));
+        }
+
+        @SuppressWarnings("unused")
+        public DataProvider<String, ?> getDataProvider() {
+            return provider;
         }
     }
 
@@ -779,6 +1031,31 @@ class FormAIControllerTest {
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, fixedField, "an", 10));
         }
+
+        @Test
+        void reregisteringWithBiFunctionClearsPriorFixedOptionsFlag() {
+            // Each valueOptions call replaces the previous registration for
+            // the same field. The fixed-collection overload sets a flag that
+            // makes the schema render options as 'enum'; re-registering with
+            // a BiFunction must reset that flag so the schema rendering
+            // matches the new registration (queryable, not enum).
+            var combo = new SingleSelectField<String>();
+            var controller = new FormAIController(new Div(combo));
+            controller.valueOptions(combo, List.of("EUR", "USD"));
+            controller.valueOptions(combo,
+                    (filter, limit) -> List.of("EUR", "USD"));
+
+            var schema = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode()));
+            var field = schema.path("fields").get(0);
+
+            Assertions.assertTrue(field.path("queryable").asBoolean(),
+                    "Re-registering valueOptions with a BiFunction must "
+                            + "make the field queryable, got: " + field);
+            Assertions.assertTrue(field.path("enum").isMissingNode(),
+                    "Stale enum block must not survive re-registration with "
+                            + "a BiFunction, got: " + field);
+        }
     }
 
     @Nested
@@ -1300,6 +1577,278 @@ class FormAIControllerTest {
         @Test
         void getFormStateMapsLocalTimeValueTypeToStringWithTimeFormat() {
             assertTypeAndFormat(typeNodeFor(new TimeField()), "string", "time");
+        }
+
+        @Test
+        void getFormStateMapsLongValueTypeToTypeInteger() {
+            // Integer is the obvious INTEGER case; Long is the case that
+            // breaks when the classifier narrows its INTEGER detection to
+            // Integer + BigInteger only. Pin Long classification separately
+            // so a regression there cannot hide behind the IntField test.
+            assertTypeOnly(typeNodeFor(new LongField()), "integer");
+        }
+
+        @Test
+        void getFormStateMapsShortValueTypeToTypeInteger() {
+            assertTypeOnly(typeNodeFor(new ShortField()), "integer");
+        }
+
+        @Test
+        void getFormStateMapsByteValueTypeToTypeInteger() {
+            assertTypeOnly(typeNodeFor(new ByteField()), "integer");
+        }
+
+        @Test
+        void getFormStateMapsFloatValueTypeToTypeNumber() {
+            // Float-valued HasValue fields must classify the same as Double
+            // (NUMBER) — both round-trip through JSON's number type. A
+            // classifier that recognises only Double would silently demote
+            // Float fields to STRING.
+            assertTypeOnly(typeNodeFor(new FloatField()), "number");
+        }
+
+        @Test
+        void getFormStateResolvesValueTypeThroughNonGenericIntermediateInterface() {
+            // The reflective walk that resolves HasValue's V argument has
+            // two branches: one for parameterized intermediate interfaces,
+            // one for raw classes that themselves extend a parameterized
+            // HasValue (e.g. `interface MyField extends HasValue<E, Integer>
+            // {}`). The raw-class branch must propagate the found type out
+            // of the recursive call; if it discards the result, the field
+            // is silently misclassified as STRING.
+            assertTypeOnly(
+                    typeNodeFor(new IntegerViaNonGenericInterfaceField()),
+                    "integer");
+        }
+
+        @Test
+        void getFormStateClassifiesHasLazyDataViewFieldAsSingleSelect() {
+            // Real Vaadin selection components implement the data-view
+            // marker interfaces (HasLazyDataView / HasListDataView /
+            // HasDataView) but not HasItems. The classifier must accept
+            // any of these markers as a selection signal — otherwise the
+            // field is treated as STRING and applyType skips the path
+            // that enumerates the ListDataProvider's items as `enum`.
+            // The visible-from-tests difference is precisely that enum
+            // block.
+            var field = new LazyDataViewField();
+            field.supplyItems("alpha", "beta");
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("alpha", "beta"), values,
+                    "Field with HasLazyDataView marker must enumerate its "
+                            + "ListDataProvider items as `enum`; an empty "
+                            + "or missing enum means the field fell through "
+                            + "to the non-selection branch. Got: " + f);
+        }
+
+        @Test
+        void getFormStateClassifiesHasListDataViewFieldAsSingleSelect() {
+            var field = new ListDataViewField();
+            field.supplyItems("apple", "banana");
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("apple", "banana"), values,
+                    "Field with HasListDataView marker must enumerate its "
+                            + "ListDataProvider items as `enum`. Got: " + f);
+        }
+
+        @Test
+        void getFormStateClassifiesHasDataViewFieldAsSingleSelect() {
+            var field = new DataViewField();
+            field.supplyItems("x", "y");
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("x", "y"), values,
+                    "Field with HasDataView marker must enumerate its "
+                            + "ListDataProvider items as `enum`. Got: " + f);
+        }
+
+        @Test
+        void getFormStateMultiSelectDoesNotSetTypeAtNodeLevel() {
+            // MultiSelect's schema lives entirely in the items block:
+            // `{ array: true, items: { type: "string", ... } }`. The node
+            // itself must not also carry `type` — a duplicate type at the
+            // node level would conflict with the array shape and confuse
+            // strict schema consumers.
+            var f = typeNodeFor(new MultiSelectField<String>());
+
+            Assertions.assertTrue(f.path("array").asBoolean());
+            Assertions.assertTrue(f.path("type").isMissingNode(),
+                    "Multi-select must not duplicate type at the node level "
+                            + "(it belongs inside items), got: " + f);
+        }
+
+        @Test
+        void getFormStateMultiSelectWithValueOptionsKeepsNodeShape() {
+            // Combining multi-select with valueOptions must still leave the
+            // node-level shape clean: array=true, no node-level type, and
+            // queryable/enum sit inside the items block.
+            var multi = new MultiSelectField<String>();
+            var controller = new FormAIController(new Div(multi));
+            controller.valueOptions(multi, (filter, limit) -> List.of("a", "b"),
+                    Set::of);
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("array").asBoolean());
+            Assertions.assertTrue(f.path("type").isMissingNode(),
+                    "Multi-select with valueOptions must not set node-level "
+                            + "type, got: " + f);
+            Assertions.assertTrue(f.path("queryable").isMissingNode(),
+                    "queryable must live inside items, not on the node, "
+                            + "got: " + f);
+            Assertions.assertTrue(f.path("items").path("queryable").asBoolean(),
+                    "Queryable signal must sit on items, got: " + f);
+        }
+
+        @Test
+        void getFormStateMultiSelectWithValueOptionsRendersValueAsArray() {
+            // Multi-select value is a Set; serialising it as a single
+            // string (the path taken when valueOptions on non-selection
+            // fields rewrites to string) would corrupt the payload. Pin
+            // that multi-select wins over the valueOptions value-rewrite.
+            var multi = new MultiSelectField<String>();
+            multi.setItems("a", "b", "c");
+            multi.setValue(Set.of("a", "c"));
+            var controller = new FormAIController(new Div(multi));
+            controller.valueOptions(multi,
+                    (filter, limit) -> List.of("a", "b", "c"), Set::of);
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("value").isArray(),
+                    "Multi-select with valueOptions must still render its "
+                            + "value as a JSON array, got: " + f.path("value"));
+            var rendered = new ArrayList<String>();
+            f.path("value").forEach(n -> rendered.add(n.asString()));
+            Assertions.assertEquals(2, rendered.size());
+            Assertions.assertTrue(rendered.containsAll(List.of("a", "c")),
+                    "Array must carry the selected labels, got: " + rendered);
+        }
+
+        @Test
+        void getFormStateSingleSelectWithValueOptionsRendersValueAsLabel() {
+            // The mirror case for the multi-select test above: the
+            // selection-aware path must keep using the field's own label
+            // renderer for the current value, not the generic valueOptions
+            // value-rewrite branch.
+            var combo = new SingleSelectField<Project>();
+            combo.setItems(new Project("P-1", "Alpha"),
+                    new Project("P-2", "Beta"));
+            combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
+            combo.setValue(new Project("P-2", "Beta"));
+            var controller = new FormAIController(new Div(combo));
+            controller.valueOptions(combo,
+                    (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta"),
+                    label -> null);
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("P-2 Beta", f.path("value").asString(),
+                    "Single-select value must come from the field's label "
+                            + "generator, not Object#toString(), got: "
+                            + f.path("value"));
+        }
+
+        @Test
+        void getFormStateDescribedFieldHasNoQueryableFlag() {
+            // describe() registers a hint without a valueOptions callback.
+            // The schema must distinguish "has a hint entry" from "has a
+            // query callback": only the latter is queryable. Otherwise the
+            // LLM would call query_field_options against a field that has
+            // no registered query and get a generic error back.
+            // Use a selection-typed field so applySelectionOptions runs;
+            // a plain STRING field skips that branch entirely and would
+            // not exercise this regression.
+            var combo = new SingleSelectField<String>();
+            var controller = new FormAIController(new Div(combo));
+            controller.describe(combo, "Some descriptive text");
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("queryable").isMissingNode(),
+                    "A field with describe() but no valueOptions must not "
+                            + "carry queryable=true, got: " + f);
+        }
+
+        @Test
+        void getFormStateQueryableFieldDoesNotMixListDataProviderEnum() {
+            // When valueOptions(BiFunction) is registered on a selection
+            // component whose backing ListDataProvider also has items,
+            // queryable=true must short-circuit before the data-provider
+            // items would be enumerated as enum. Both signals in the same
+            // payload would tell the LLM "either query me, or pick from
+            // this list" — the registration says only one is authoritative.
+            var combo = new SingleSelectField<String>();
+            combo.setItems("apple", "banana", "cherry");
+            var controller = new FormAIController(new Div(combo));
+            controller.valueOptions(combo,
+                    (filter, limit) -> List.of("apple", "banana"),
+                    Function.identity());
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.path("queryable").asBoolean());
+            Assertions.assertTrue(f.path("enum").isMissingNode(),
+                    "queryable signal must suppress the ListDataProvider "
+                            + "enum fallback, got: " + f);
+        }
+
+        @Test
+        void getFormStateRendersNonFiniteNumericValueAsExplicitJsonNull() {
+            // Sister test to getFormStateRendersNumericInfinityAsFinite-
+            // JsonNumber: that one only checks the raw output lacks
+            // "Infinity"/"NaN" tokens, which is also satisfied by emitting
+            // no value key at all. Pin explicitly that the key is present
+            // and JSON null, so missing-key regressions don't slip through.
+            var field = new DoubleField();
+            field.setValue(Double.NaN);
+            var controller = new FormAIController(new Div(field));
+
+            var f = formStateFields(controller).get(0);
+
+            Assertions.assertTrue(f.has("value"),
+                    "value key must be present even for non-finite numerics, "
+                            + "got: " + f);
+            Assertions.assertTrue(f.path("value").isNull(),
+                    "Non-finite numeric must serialize as JSON null, got: "
+                            + f.path("value"));
+        }
+
+        @Test
+        void getFormStateRendersListDataProviderItemsViaLabelGenerator() {
+            // ListDataProvider items typically aren't strings — a
+            // ComboBox<Project> backed by a list of Project records needs
+            // its ItemLabelGenerator to be invoked when the enum block is
+            // built. Without the generator, items render via toString(),
+            // which leaks Java internals (e.g. "Project[code=P-1, ...]") to
+            // the LLM.
+            var combo = new SingleSelectField<Project>();
+            combo.setItems(new Project("P-1", "Alpha"),
+                    new Project("P-2", "Beta"));
+            combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
+            var controller = new FormAIController(new Div(combo));
+
+            var f = formStateFields(controller).get(0);
+
+            var values = new ArrayList<String>();
+            f.path("enum").forEach(n -> values.add(n.asString()));
+            Assertions.assertEquals(List.of("P-1 Alpha", "P-2 Beta"), values,
+                    "Enum entries must use the field's label generator "
+                            + "output, got: " + values);
         }
 
         @Test

@@ -81,7 +81,6 @@ final class FormFieldSchema {
             return;
         }
         switch (type) {
-        case STRING -> node.put("type", "string");
         case EMAIL -> {
             node.put("type", "string");
             node.put("format", "email");
@@ -151,16 +150,13 @@ final class FormFieldSchema {
         }
         switch (type) {
         case NUMBER -> {
+            // NaN / ±Infinity are valid Java doubles but not legal JSON
+            // numbers; surface as null rather than corrupting the payload
+            // with a non-standard token in a number-typed slot.
             if (value instanceof Number n && Double.isFinite(n.doubleValue())) {
                 node.put("value", n.doubleValue());
-            } else if (value instanceof Number) {
-                // NaN / ±Infinity are valid Java doubles but not legal
-                // JSON numbers; surface as null rather than corrupting
-                // the payload with a non-standard token or a string in
-                // a number-typed slot.
-                node.putNull("value");
             } else {
-                node.put("value", value.toString());
+                node.putNull("value");
             }
         }
         case INTEGER -> {
@@ -169,31 +165,18 @@ final class FormFieldSchema {
             // supports BigInteger as a JSON number with full precision.
             if (value instanceof BigInteger bi) {
                 node.put("value", bi);
-            } else if (value instanceof Number n) {
-                node.put("value", n.longValue());
             } else {
-                node.put("value", value.toString());
+                node.put("value", ((Number) value).longValue());
             }
         }
-        case BIG_DECIMAL -> {
+        case BIG_DECIMAL ->
             // BigDecimal.toString() emits scientific notation for values
             // with negative scale or adjusted exponent < -6, which
             // violates the BIG_DECIMAL pattern declared in the schema.
             // toPlainString() always produces the canonical decimal
             // representation.
-            if (value instanceof BigDecimal bd) {
-                node.put("value", bd.toPlainString());
-            } else {
-                node.put("value", value.toString());
-            }
-        }
-        case BOOLEAN -> {
-            if (value instanceof Boolean b) {
-                node.put("value", b);
-            } else {
-                node.put("value", value.toString());
-            }
-        }
+            node.put("value", ((BigDecimal) value).toPlainString());
+        case BOOLEAN -> node.put("value", (Boolean) value);
         case SINGLE_SELECT ->
             node.put("value", FormValueConverter.renderItem(field, value));
         case MULTI_SELECT -> {

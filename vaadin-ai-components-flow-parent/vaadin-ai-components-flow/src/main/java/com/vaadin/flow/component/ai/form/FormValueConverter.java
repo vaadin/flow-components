@@ -130,11 +130,9 @@ final class FormValueConverter {
     }
 
     private static Optional<Method> lookupMethod(MethodKey key) {
-        for (var c = key.type(); c != null
-                && c != Object.class; c = c.getSuperclass()) {
+        for (var c = key.type(); c != null; c = c.getSuperclass()) {
             try {
                 var method = c.getDeclaredMethod(key.name());
-                method.setAccessible(true);
                 return Optional.of(method);
             } catch (NoSuchMethodException ignored) {
                 // try the next superclass

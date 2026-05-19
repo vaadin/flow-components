@@ -91,9 +91,6 @@ enum FormFieldType {
     };
 
     static FormFieldType classify(HasValue<?, ?> field) {
-        if (field == null) {
-            return UNSUPPORTED;
-        }
         return CLASSIFY_CACHE.get(field.getClass());
     }
 
@@ -207,11 +204,7 @@ enum FormFieldType {
     private static Type resolveType(Type t,
             Map<TypeVariable<?>, Type> bindings) {
         while (t instanceof TypeVariable<?> tv) {
-            var bound = bindings.get(tv);
-            if (bound == null || bound == tv) {
-                return tv;
-            }
-            t = bound;
+            t = bindings.get(tv);
         }
         return t;
     }
