@@ -343,18 +343,21 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
-    // Force the grid to request not loaded rows after resolving callbacks.
+    const { rootCache } = dataProviderController;
+
+    // Flag the grid to request any rows that are still missing after resolving
+    // the pending callbacks below.
     grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
 
-    // Resolve all pending callbacks and see whether any new ones come in again.
-    const { rootCache } = dataProviderController;
+    // Resolve the pending callbacks. This may trigger new ones to be created or
+    // reissued synchronously.
     Object.values(rootCache.pendingRequests).forEach((callback) => {
       callback([]);
     });
 
-    // If no new data provider requests have been received after the callbacks were
-    // resolved, clear the current requested range and cancel the request debouncer
-    // (if it's active) to avoid sending a server request that is no longer needed.
+    // If no new data provider requests came in while resolving the callbacks,
+    // clear the current requested range and cancel the active request debouncer
+    // (if any) to avoid sending a server request that is no longer needed.
     if (Object.values(rootCache.pendingRequests).length === 0) {
       requestDebouncer?.cancel();
       requestedViewportRange = [-1, -1];
