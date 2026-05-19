@@ -209,10 +209,8 @@ public class FormAIController implements AIController {
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
-        if (!(field instanceof Component component)) {
-            return false;
-        }
-        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        var id = (String) ComponentUtil.getData((Component) field,
+                FIELD_ID_KEY);
         var hints = hintsById.get(id);
         return hints != null && hints.ignored;
     }
