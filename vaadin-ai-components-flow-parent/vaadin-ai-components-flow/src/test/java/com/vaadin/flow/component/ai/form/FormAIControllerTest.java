@@ -335,10 +335,12 @@ class FormAIControllerTest {
             this.provider = provider;
         }
 
+        @SuppressWarnings("unused")
         public DataProvider<T, ?> getDataProvider() {
             return provider;
         }
 
+        @SuppressWarnings("unused")
         public ItemLabelGenerator<T> getItemLabelGenerator() {
             return labelGenerator;
         }
@@ -395,14 +397,17 @@ class FormAIControllerTest {
             };
         }
 
+        @SuppressWarnings("unused")
         public ListDataProvider<T> getDataProvider() {
             return provider;
         }
 
+        @SuppressWarnings("unused")
         public ItemLabelGenerator<T> getItemLabelGenerator() {
             return labelGenerator;
         }
 
+        @SuppressWarnings("unused")
         public void setItemLabelGenerator(ItemLabelGenerator<T> generator) {
             this.labelGenerator = generator;
         }
