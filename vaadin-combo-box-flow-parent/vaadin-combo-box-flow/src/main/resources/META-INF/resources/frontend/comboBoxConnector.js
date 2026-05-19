@@ -13,35 +13,11 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   let cache = {};
   const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
+
+  let lastTypedFilter = '';
   let lastRequestedRange = [-1, -1];
-  let lastFilter = '';
-
-  const serverFacade = (() => {
-    // Private variables
-    let lastFilterSentToServer = '';
-    let dataCommunicatorResetNeeded = false;
-
-    // Public methods
-    const needsDataCommunicatorReset = () => (dataCommunicatorResetNeeded = true);
-    const getLastFilterSentToServer = () => lastFilterSentToServer;
-    const requestData = (startIndex, endIndex, params) => {
-      const count = endIndex - startIndex;
-      const filter = params.filter;
-
-      comboBox.$server.setViewportRange(startIndex, count, filter);
-      lastFilterSentToServer = filter;
-      if (dataCommunicatorResetNeeded) {
-        comboBox.$server.resetDataCommunicator();
-        dataCommunicatorResetNeeded = false;
-      }
-    };
-
-    return {
-      needsDataCommunicatorReset,
-      getLastFilterSentToServer,
-      requestData
-    };
-  })();
+  let lastRequestedFilter = '';
+  let needsDataCommunicatorReset = false;
 
   comboBox.dataProvider = function (params, callback) {
     if (params.pageSize != comboBox.pageSize) {
@@ -53,23 +29,26 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         performClientSideFilter(cache[0], params.filter, callback);
         return;
       }
+
       // First fetch: ignore the typed filter so we get the full dataset
       params = { ...params, filter: '' };
     }
 
-    if (params.filter !== lastFilter) {
-      lastFilter = params.filter;
+    if (lastTypedFilter !== params.filter) {
       cache = {};
+      lastTypedFilter = params.filter;
       lastRequestedRange = [-1, -1];
+
       comboBox._filterDebouncer = Debouncer.debounce(
         comboBox._filterDebouncer,
         timeOut.after(comboBox._filterTimeout ?? 500),
         () => {
-          // Filter cycled back to previously sent value — force re-emit.
-          if (params.filter === serverFacade.getLastFilterSentToServer()) {
-            serverFacade.needsDataCommunicatorReset();
+          // Filter cycled back to what server last received — force re-emit.
+          if (params.filter === lastRequestedFilter) {
+            needsDataCommunicatorReset = true;
           }
-          comboBox.$connector.requestPage(params.page, params.filter);
+
+          comboBox.clearCache();
         }
       );
       return;
@@ -119,11 +98,18 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     if (lastRequestedRange[0] != viewportPageRange[0] || lastRequestedRange[1] != viewportPageRange[1]) {
-      lastRequestedRange = viewportPageRange;
       const startIndex = viewportPageRange[0] * comboBox.pageSize;
       const endIndex = (viewportPageRange[1] + 1) * comboBox.pageSize;
-      serverFacade.requestData(startIndex, endIndex, { filter });
+      comboBox.$server.setViewportRange(startIndex, endIndex - startIndex, filter);
     }
+
+    if (needsDataCommunicatorReset) {
+      comboBox.$server.resetDataCommunicator();
+      needsDataCommunicatorReset = false;
+    }
+
+    lastRequestedRange = viewportPageRange;
+    lastRequestedFilter = filter;
   };
 
   comboBox.$connector.clear = (start, length) => {
@@ -148,7 +134,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   };
 
   comboBox.$connector.set = (index, items, filter) => {
-    if (filter !== lastFilter) {
+    if (filter !== lastTypedFilter) {
       return;
     }
 
@@ -202,12 +188,12 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     comboBox._filterDebouncer = null;
     cache = {};
     lastRequestedRange = [-1, -1];
-    lastFilter = '';
+    lastTypedFilter = '';
     comboBox.clearCache();
   };
 
   comboBox.$connector.confirm = function (id, filter) {
-    if (filter !== lastFilter) {
+    if (filter !== lastTypedFilter) {
       return;
     }
 

@@ -1,4 +1,5 @@
 import { expect, fixtureSync } from '@open-wc/testing';
+import { sendKeys } from '@web/test-runner-commands';
 import { comboBoxConnector, FlowComboBox, init } from './shared.ts';
 import '@vaadin/combo-box';
 import * as sinon from 'sinon';
@@ -97,37 +98,38 @@ describe('combo-box connector', () => {
   describe('filter debouncing', () => {
     let clock: sinon.SinonFakeTimers;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers({
         toFake: ['setTimeout', 'clearTimeout']
       });
+      comboBox.inputElement.focus();
     });
 
     afterEach(() => {
       clock.restore();
     });
 
-    it('should debounce filter requests with default timeout', () => {
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, () => {});
+    it('should debounce filter requests with default timeout', async () => {
+      await sendKeys({ type: 'a' });
       expect(comboBox.$server.setViewportRange).to.be.not.called;
       clock.tick(500);
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
 
       comboBox.$server.setViewportRange.resetHistory();
 
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'ab' }, () => {});
+      await sendKeys({ type: 'b' });
       clock.tick(250);
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'abc' }, () => {});
+      await sendKeys({ type: 'c' });
       clock.tick(250);
       expect(comboBox.$server.setViewportRange).to.be.not.called;
       clock.tick(250);
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
     });
 
-    it('should debounce filter requests with custom timeout', () => {
+    it('should debounce filter requests with custom timeout', async () => {
       comboBox._filterTimeout = 1000;
 
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'a' }, () => {});
+      await sendKeys({ type: 'a' });
       expect(comboBox.$server.setViewportRange).to.be.not.called;
       clock.tick(500);
       expect(comboBox.$server.setViewportRange).to.be.not.called;
@@ -135,16 +137,16 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
     });
 
-    it('should cancel filter request when the connector is reset', () => {
-      comboBox.dataProvider!({ page: 0, pageSize: comboBox.pageSize, filter: 'test' }, () => {});
-      expect(comboBox._filterDebouncer).to.exist;
+    it('should cancel filter request when the connector is reset', async () => {
+      await sendKeys({ type: 'test' });
+      expect(comboBox.$server.setViewportRange).to.be.not.called;
 
       comboBox.$connector.reset();
-      expect(comboBox._filterDebouncer).to.not.exist;
-
       clock.tick(600);
 
-      expect(comboBox.$server.setViewportRange).to.not.be.called;
+      // Reset triggers a single fresh fetch; the cancelled debounced fetch
+      // must not also fire.
+      expect(comboBox.$server.setViewportRange).to.be.calledOnce;
     });
   });
 });
