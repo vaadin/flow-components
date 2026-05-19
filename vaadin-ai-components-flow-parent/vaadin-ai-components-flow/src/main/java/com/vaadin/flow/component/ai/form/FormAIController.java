@@ -307,26 +307,6 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Returns the discovered fields the controller acts on — every
-     * {@link HasValue} in the form tree minus those hidden via
-     * {@link #ignore(HasValue)}. Use this anywhere the LLM-visible field set
-     * matters (tool inputs and outputs).
-     */
-    private List<HasValue<?, ?>> collectActiveFields() {
-        return FormFieldDiscovery.collectFields(form).stream()
-                .filter(field -> !isIgnored(field)).toList();
-    }
-
-    private boolean isIgnored(HasValue<?, ?> field) {
-        if (!(field instanceof Component component)) {
-            return false;
-        }
-        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
-        var hints = hintsById.get(id);
-        return hints != null && hints.ignored;
-    }
-
-    /**
      * Walks the form tree and ensures every discovered field has an id
      * attached. Ids already attached are left untouched so they stay stable
      * across removals, re-additions, and discovery walks.
