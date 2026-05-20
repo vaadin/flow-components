@@ -1,8 +1,9 @@
 const benderBaseUrl = 'https://bender.vaadin.com';
 const benderBuildType = {
-  snapshot: 'FlowComponents_Snapshot',
-  latestWc: 'VaadinFlowComponents_WcFcNightlyValidation'
+  snapshot: 'FlowComponents_Snapshot'
 };
+const ghRepo = 'vaadin/flow-components';
+const ghWorkflow = 'validation.yml';
 const branches = process.env.CHECK_SNAPSHOT_STATUS_BRANCHES;
 const benderToken = process.env.CHECK_SNAPSHOT_STATUS_BENDER_TOKEN;
 const slackWebhookUrl = process.env.CHECK_SNAPSHOT_STATUS_SLACK_WEBHOOK_URL;
@@ -14,14 +15,27 @@ async function getBuildStatus() {
   const branchUrls = branchNames.map((branch) =>
     `${baseBuildUrl}${benderBuildType.snapshot},branch:${branch}`
   );
-  branchUrls.push(`${baseBuildUrl}${benderBuildType.latestWc}`);
 
-  const buildPromises = branchUrls.map((url) => getLatestBuild(url));
-  const buildResults = await Promise.all(buildPromises);
-
+  const buildResults = await Promise.all(branchUrls.map((url) => getLatestBuild(url)));
   const status = buildResults.filter(build => !!build).map((latestBuild) => getBuildDetails(latestBuild));
 
+  const ghaStatus = await getGhaScheduleStatus();
+  if (ghaStatus) status.push(ghaStatus);
+
   return status;
+}
+
+async function getGhaScheduleStatus() {
+  const url = `https://api.github.com/repos/${ghRepo}/actions/workflows/${ghWorkflow}/runs?event=schedule&per_page=1`;
+  const response = await fetch(url, { headers: { Accept: 'application/vnd.github+json' } });
+  const data = await response.json();
+  const run = data.workflow_runs?.[0];
+  if (!run) return null;
+  return {
+    branch: 'Nightly validation (GHA)',
+    branchUrl: run.html_url,
+    status: run.conclusion === 'success' ? 'SUCCESS' : 'FAILURE'
+  };
 }
 
 async function getLatestBuild(url) {
