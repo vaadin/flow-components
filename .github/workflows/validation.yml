@@ -1,6 +1,8 @@
 name: Validation
 
 on:
+  schedule:
+    - cron: '30 23 * * *'
   pull_request:
     branches: ['main', '25.*']
   merge_group:
@@ -14,6 +16,11 @@ on:
         description: 'Number of parallel IT shards'
         required: false
         default: '5'
+      local-wc-validation:
+        description: 'Run validation against local web-components checkout'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
@@ -184,9 +191,35 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Checkout web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        uses: actions/checkout@v6
+        with:
+          repository: vaadin/web-components
+          ref: main
+          path: web-components
+
+      - name: Install web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        run: yarn install --ignore-engines --ignore-scripts
+        working-directory: web-components
+
+      - name: Configure local web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
+
       - name: npm install
         if: matrix.type != 'unit'
         run: npm ci --ignore-scripts
+
+      - name: Detect @NpmPackage version changes
+        if: matrix.type != 'unit'
+        run: |
+          base="${{ github.base_ref || 'main' }}"
+          if git fetch --depth=1 origin "$base" 2>/dev/null && \
+             git diff FETCH_HEAD -- '*.java' | grep -q '@NpmPackage'; then
+            echo "MAVEN_OPTS=${MAVEN_OPTS} -Dvaadin.npm.minimumFrontendPackageAgeDays=0" >> "$GITHUB_ENV"
+          fi
 
       - name: Merge ITs
         if: matrix.type == 'war'
