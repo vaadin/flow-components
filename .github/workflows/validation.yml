@@ -187,7 +187,7 @@ jobs:
           node-version: '24'
 
       - name: Checkout web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v6
         with:
           repository: vaadin/web-components
@@ -195,12 +195,12 @@ jobs:
           path: web-components
 
       - name: Install web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: yarn install --ignore-engines
         working-directory: web-components
 
       - name: Configure local web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
 
       - name: npm install
