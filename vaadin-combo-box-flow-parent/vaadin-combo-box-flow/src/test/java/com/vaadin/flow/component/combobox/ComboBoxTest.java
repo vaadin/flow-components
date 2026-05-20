@@ -276,6 +276,25 @@ class ComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
+    void focusSelectedItem_filterActive_open_doesNotScrollToSelected() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems(query -> Stream.of("a", "b", "c")
+                .skip(query.getOffset()).limit(query.getLimit()), query -> 3);
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("a");
+        comboBox.getElement().setProperty("filter", "a");
+
+        Element element = comboBox.getElement();
+        ElementListenerMap listeners = element.getNode()
+                .getFeature(ElementListenerMap.class);
+        DomEvent open = new DomEvent(element,
+                "vaadin-combo-box-dropdown-opened",
+                JacksonUtils.createObjectNode());
+        Assertions.assertDoesNotThrow(() -> listeners.fireEvent(open));
+    }
+
+    @Test
     void setFilterTimeout_getFilterTimeout() {
         ComboBox<String> comboBox = new ComboBox<>();
         Assertions.assertEquals(500, comboBox.getFilterTimeout());
