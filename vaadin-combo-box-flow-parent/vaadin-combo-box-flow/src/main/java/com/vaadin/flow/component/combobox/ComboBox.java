@@ -168,7 +168,11 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         });
 
         getElement().addEventListener("vaadin-combo-box-dropdown-opened",
-                event -> focusSelectedItemOnOpen());
+                event -> {
+                    if (focusSelectedItem) {
+                        scrollToSelectedItem();
+                    }
+                });
     }
 
     /**
@@ -416,8 +420,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return focusSelectedItem;
     }
 
-    private void focusSelectedItemOnOpen() {
-        if (!focusSelectedItem || getValue() == null) {
+    private void scrollToSelectedItem() {
+        if (getValue() == null) {
             return;
         }
         String filter = getFilter();
