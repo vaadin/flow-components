@@ -16,6 +16,11 @@ on:
         description: 'Number of parallel IT shards'
         required: false
         default: '5'
+      local-wc-validation:
+        description: 'Run validation against local web-components checkout'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
@@ -187,7 +192,7 @@ jobs:
           node-version: '24'
 
       - name: Checkout web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
         uses: actions/checkout@v6
         with:
           repository: vaadin/web-components
@@ -195,12 +200,12 @@ jobs:
           path: web-components
 
       - name: Install web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
         run: yarn install --ignore-engines
         working-directory: web-components
 
       - name: Configure local web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
         run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
 
       - name: npm install
