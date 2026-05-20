@@ -1,6 +1,8 @@
 name: Validation
 
 on:
+  schedule:
+    - cron: '30 23 * * *'
   pull_request:
     branches: ['main', '25.*']
   merge_group:
@@ -183,6 +185,23 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
+
+      - name: Checkout web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        uses: actions/checkout@v6
+        with:
+          repository: vaadin/web-components
+          ref: main
+          path: web-components
+
+      - name: Install web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        run: yarn install --ignore-engines
+        working-directory: web-components
+
+      - name: Configure local web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule'
+        run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
 
       - name: npm install
         if: matrix.type != 'unit'
