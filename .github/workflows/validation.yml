@@ -139,7 +139,7 @@ jobs:
 
       - name: npm install
         if: steps.skip-ci.outputs.skip != 'true'
-        run: npm install --ignore-scripts --silent --quiet --no-progress
+        run: npm ci --ignore-scripts
 
       - name: Merge ITs
         if: steps.skip-ci.outputs.skip != 'true'
