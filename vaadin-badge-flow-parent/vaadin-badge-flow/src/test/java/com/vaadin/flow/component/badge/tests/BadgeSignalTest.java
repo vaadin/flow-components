@@ -18,21 +18,14 @@ package com.vaadin.flow.component.badge.tests;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.badge.Badge;
-import com.vaadin.flow.component.badge.BadgeFeatureFlagProvider;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 
 class BadgeSignalTest extends AbstractSignalsTest {
-
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            BadgeFeatureFlagProvider.BADGE_COMPONENT);
 
     private ValueSignal<String> textSignal;
     private ValueSignal<Integer> numberSignal;
