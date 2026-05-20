@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;
@@ -99,14 +98,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
-    private static final String FOCUS_SELECTED_ITEM_TICK = """
-            const tick = () => {
-              if (this.loading) { requestAnimationFrame(tick); return; }
-              this.$server.focusSelectedItemOnOpen();
-            };
-            tick();
-            """;
-
     private boolean focusSelectedItem;
 
     /**
@@ -178,21 +169,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
         getElement().addEventListener("vaadin-combo-box-dropdown-opened",
                 event -> focusSelectedItemOnOpen());
-        getElement().addPropertyChangeListener("filter", event -> {
-            String oldFilter = (String) event.getOldValue();
-            String newFilter = (String) event.getValue();
-            boolean clearedWhileOpen = isOpened() && oldFilter != null
-                    && !oldFilter.isEmpty()
-                    && (newFilter == null || newFilter.isEmpty());
-            if (!clearedWhileOpen) {
-                return;
-            }
-            // The viewport-range request that pushes the new filter to the
-            // data communicator arrives in a later round-trip, so the data
-            // view can't resolve the index yet. Defer until the client
-            // reports loading finished.
-            getElement().executeJs(FOCUS_SELECTED_ITEM_TICK);
-        });
     }
 
     /**
@@ -440,7 +416,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return focusSelectedItem;
     }
 
-    @ClientCallable
     private void focusSelectedItemOnOpen() {
         if (!focusSelectedItem || getValue() == null) {
             return;

@@ -77,17 +77,6 @@ public class ComboBoxFocusSelectedItemIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void lazyWithProvider_filterThenClear_open_scrollsToSelected() {
-        ComboBoxElement combo = $(ComboBoxElement.class)
-                .id("lazy-with-provider");
-        combo.setFilter("5");
-        assertLoadingStateResolved(combo);
-        combo.setFilter("");
-        assertLoadingStateResolved(combo);
-        assertOverlayContains(combo, "Item 5000");
-    }
-
-    @Test
     public void lazyToggleOff_runtimeToggleOn_open_scrollsToSelected() {
         clickButton("lazy-toggle-off-toggle-on");
         openAndAssertContains("lazy-toggle-off", "Item 5000");
