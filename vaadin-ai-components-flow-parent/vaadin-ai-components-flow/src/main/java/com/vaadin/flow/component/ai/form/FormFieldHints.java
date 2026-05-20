@@ -30,5 +30,13 @@ final class FormFieldHints {
     String description;
     BiFunction<String, Integer, List<String>> valueOptionsQuery;
     Function<String, ?> valueOptionsToValue;
+    /**
+     * {@code true} when the field was registered with the fixed-collection
+     * {@code valueOptions} overload; {@code false} when registered with a query
+     * callback (queryable) or with no value-options hint at all. Used by
+     * {@link FormFieldSchema} to choose {@code enum} vs {@code queryable} in
+     * the {@code get_form_state} JSON.
+     */
+    boolean fixedOptions;
     boolean ignored;
 }

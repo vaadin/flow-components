@@ -142,6 +142,7 @@ public class FormAIController implements AIController {
         var hints = hintsFor(field);
         hints.valueOptionsQuery = query;
         hints.valueOptionsToValue = toValue;
+        hints.fixedOptions = false;
         return this;
     }
 
@@ -185,7 +186,7 @@ public class FormAIController implements AIController {
             Collection<String> options, Function<String, T> toValue) {
         Objects.requireNonNull(options, "Options must not be null");
         var snapshot = List.copyOf(options);
-        return valueOptions(field, (filter, limit) -> {
+        valueOptions(field, (filter, limit) -> {
             var matches = snapshot.stream();
             if (filter != null && !filter.isEmpty()) {
                 var needle = filter.toLowerCase(Locale.ROOT);
@@ -194,6 +195,8 @@ public class FormAIController implements AIController {
             }
             return matches.limit(limit).toList();
         }, toValue);
+        hintsFor(field).fixedOptions = true;
+        return this;
     }
 
     /**
@@ -327,6 +330,21 @@ public class FormAIController implements AIController {
     }
 
     private final class ToolCallbacks implements FormAITools.Callbacks {
+
+        @Override
+        public List<FormAITools.FormFieldDescriptor> visibleFields() {
+            var descriptors = new ArrayList<FormAITools.FormFieldDescriptor>();
+            for (var field : collectActiveFields()) {
+                var type = FormFieldType.classify(field);
+                if (type == FormFieldType.UNSUPPORTED) {
+                    continue;
+                }
+                var id = getOrCreateId(field);
+                descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
+                        type, hintsById.get(id)));
+            }
+            return descriptors;
+        }
 
         @Override
         public List<String> queryFieldOptions(String fieldId, String filter,
