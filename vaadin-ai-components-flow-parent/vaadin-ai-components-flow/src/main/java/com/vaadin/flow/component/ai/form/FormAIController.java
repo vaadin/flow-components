@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -33,6 +34,8 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Binder.Binding;
 
 /**
  * Populates a layout's fields with values an LLM extracts from a user prompt or
@@ -48,6 +51,26 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * </p>
  *
  * <p>
+ * <b>Field identifiers:</b> the controller assigns an opaque UUID to each field
+ * at discovery time and uses that UUID as the field's id in every tool call the
+ * LLM makes. Developers never see UUIDs; the LLM never sees field labels in the
+ * id slot. Semantic meaning travels through each field's <i>description</i> —
+ * the field's label, helper text, and the {@link #describe(HasValue, String)}
+ * hint.
+ * </p>
+ *
+ * <p>
+ * <b>Binder integration:</b> the two-argument constructor accepts a
+ * {@link Binder}. For every named binding ({@code bind("propertyName")},
+ * {@code bindInstanceFields(this)}, or {@code @PropertyId}) the property name
+ * is used as a default field description so the LLM can refer to the field by
+ * its bean-side name. The default only applies when no explicit
+ * {@link #describe(HasValue, String)} has been registered; calling
+ * {@code describe(...)} always wins. Lambda-bound bindings carry no property
+ * name and contribute no default.
+ * </p>
+ *
+ * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * that wasn't already read-only is set to read-only so the user cannot type
  * into a field the AI is about to overwrite. Locks are released when the turn
@@ -60,7 +83,8 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  *
  * <p>
  * <b>Serialization:</b> the controller is not serialized with the orchestrator.
- * After deserialization, create a new controller against the same form and call
+ * After deserialization, create a new controller against the same form (and
+ * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
  * </p>
  *
@@ -76,6 +100,7 @@ public class FormAIController implements AIController {
     static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
     private final Component form;
+    private final Binder<?> binder;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
 
@@ -94,6 +119,57 @@ public class FormAIController implements AIController {
     public <T extends Component & HasComponents> FormAIController(T form) {
         Objects.requireNonNull(form, "Form must not be null");
         this.form = form;
+        this.binder = null;
+    }
+
+    /**
+     * Creates a new form AI controller for the given container and binder. For
+     * every named binding on the binder, the bean property name is used as a
+     * default {@link #describe(HasValue, String) description} when the
+     * developer has not registered one explicitly; the controller itself still
+     * uses an opaque UUID as the field's tool-call id. Lambda-bound bindings
+     * carry no property name and contribute no default. A field that is part of
+     * the layout but not bound to the supplied binder behaves the same as in
+     * the no-binder constructor.
+     *
+     * @param form
+     *            the container whose fields the LLM may populate, not
+     *            {@code null}
+     * @param binder
+     *            the binder whose property names default the field
+     *            descriptions, not {@code null}; use the single-argument
+     *            constructor for the no-binder case
+     * @param <T>
+     *            the container type
+     * @throws NullPointerException
+     *             if {@code form} or {@code binder} is {@code null}
+     */
+    public <T extends Component & HasComponents> FormAIController(T form,
+            Binder<?> binder) {
+        Objects.requireNonNull(form, "Form must not be null");
+        Objects.requireNonNull(binder, "Binder must not be null");
+        this.form = form;
+        this.binder = binder;
+    }
+
+    /**
+     * Returns the {@link Binding} registered for the given field on the binder
+     * supplied to this controller. Returns an empty optional for unbound fields
+     * and for controllers constructed without a binder. The lookup is live
+     * against the binder's current state, not a snapshot taken at construction.
+     *
+     * @param field
+     *            the field, not {@code null}
+     * @return the binding, or empty if the field is not bound
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     */
+    Optional<Binding<?, ?>> findBinding(HasValue<?, ?> field) {
+        Objects.requireNonNull(field, "Field must not be null");
+        if (binder == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(BinderReflection.findBinding(binder, field));
     }
 
     /**
@@ -241,6 +317,7 @@ public class FormAIController implements AIController {
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
+        seedDescriptionsFromBinder();
         lockFields();
     }
 
@@ -252,6 +329,31 @@ public class FormAIController implements AIController {
     @Override
     public void onResponseFailed(Throwable error) {
         unlockFields();
+    }
+
+    /**
+     * Walks the binder's property names and defaults {@code hints.description}
+     * for any bound field that does not already have an explicit description.
+     * Called at the start of every turn so bindings added or removed between
+     * turns are reflected; an explicit {@link #describe(HasValue, String)}
+     * always wins because the seeding only fills in nulls.
+     */
+    private void seedDescriptionsFromBinder() {
+        if (binder == null) {
+            return;
+        }
+        var propertyNames = BinderReflection.collectPropertyNames(binder);
+        for (var entry : propertyNames.entrySet()) {
+            var field = entry.getKey();
+            var name = entry.getValue();
+            if (name == null || !(field instanceof Component)) {
+                continue;
+            }
+            var hints = hintsFor(field);
+            if (hints.description == null) {
+                hints.description = name;
+            }
+        }
     }
 
     /**

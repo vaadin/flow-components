@@ -28,11 +28,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.internal.JacksonUtils;
 
 /**
@@ -43,6 +47,46 @@ import com.vaadin.flow.internal.JacksonUtils;
  * stays focused on controller behaviour rather than schema details.
  */
 class FormAIControllerTest {
+
+    /** {@link TestField} variant that also exposes a label. */
+    @Tag("labeled-field")
+    private static class LabeledField
+            extends AbstractField<LabeledField, String> implements HasLabel {
+        LabeledField(String label) {
+            super("");
+            setLabel(label);
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+    }
+
+    /** Bean used by binder integration tests. */
+    private static class TestBean {
+        private String name;
+        private String email;
+
+        @SuppressWarnings("unused")
+        public String getName() {
+            return name;
+        }
+
+        @SuppressWarnings("unused")
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @SuppressWarnings("unused")
+        public String getEmail() {
+            return email;
+        }
+
+        @SuppressWarnings("unused")
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
 
     @Nested
     class Construction {
@@ -57,6 +101,27 @@ class FormAIControllerTest {
         void nullFormThrows() {
             Assertions.assertThrows(NullPointerException.class,
                     () -> new FormAIController(null));
+        }
+
+        @Test
+        void constructionWithBinderSucceeds() {
+            var form = new Div(new TestField());
+            var binder = new Binder<>(TestBean.class);
+            Assertions.assertDoesNotThrow(
+                    () -> new FormAIController(form, binder));
+        }
+
+        @Test
+        void nullFormForBinderConstructorThrows() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new FormAIController(null,
+                            new Binder<>(TestBean.class)));
+        }
+
+        @Test
+        void nullBinderForBinderConstructorThrows() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new FormAIController(new Div(), null));
         }
     }
 
@@ -434,6 +499,76 @@ class FormAIControllerTest {
             Assertions.assertTrue(field.path("enum").isMissingNode(),
                     "Stale enum block must not survive re-registration with "
                             + "a BiFunction, got: " + field);
+        }
+    }
+
+    @Nested
+    class FindBinding {
+
+        @Test
+        void findBindingReturnsBindingForBoundField() {
+            // Pins that findBinding resolves a named binding via reflection.
+            // The returned Binding's getField() must be the same reference the
+            // caller passed in.
+            var field = new LabeledField("Name");
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(field).bind("name");
+            var controller = new FormAIController(new Div(field), binder);
+
+            var binding = controller.findBinding(field);
+
+            Assertions.assertTrue(binding.isPresent(),
+                    "findBinding should resolve a bound field's binding");
+            Assertions.assertSame(field, binding.get().getField(),
+                    "Resolved binding must reference the same field instance");
+        }
+
+        @Test
+        void findBindingReturnsEmptyForUnboundField() {
+            var bound = new LabeledField("Name");
+            var unbound = new LabeledField("Email");
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(bound).bind("name");
+            var controller = new FormAIController(new Div(bound, unbound),
+                    binder);
+
+            Assertions.assertTrue(controller.findBinding(unbound).isEmpty());
+        }
+
+        @Test
+        void findBindingReturnsEmptyWhenNoBinderSupplied() {
+            // No-binder constructor: findBinding always returns empty so
+            // downstream callers cleanly skip fields with no binding.
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+
+            Assertions.assertTrue(controller.findBinding(field).isEmpty());
+        }
+
+        @Test
+        void findBindingRejectsNullField() {
+            var controller = new FormAIController(new Div(new TestField()),
+                    new Binder<>(TestBean.class));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.findBinding(null));
+        }
+
+        @Test
+        void findBindingIsLiveAfterRebinding() {
+            // findBinding reflects the binder's current state, not a
+            // construction-time snapshot. A field bound after the controller
+            // is created shows up; a field whose binding is removed
+            // disappears.
+            var field = new LabeledField("Name");
+            var binder = new Binder<>(TestBean.class);
+            var controller = new FormAIController(new Div(field), binder);
+
+            Assertions.assertTrue(controller.findBinding(field).isEmpty(),
+                    "Pre-bind: no binding");
+
+            binder.forField(field).bind("name");
+            Assertions.assertTrue(controller.findBinding(field).isPresent(),
+                    "Post-bind: binding resolved");
         }
     }
 }
