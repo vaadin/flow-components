@@ -317,9 +317,6 @@ public class FormAIController implements AIController {
      * always wins because the seeding only fills in nulls.
      */
     private void seedDescriptionsFromBinder() {
-        if (binder == null) {
-            return;
-        }
         var propertyNames = BinderReflection.collectPropertyNames(binder);
         for (var entry : propertyNames.entrySet()) {
             var field = entry.getKey();
