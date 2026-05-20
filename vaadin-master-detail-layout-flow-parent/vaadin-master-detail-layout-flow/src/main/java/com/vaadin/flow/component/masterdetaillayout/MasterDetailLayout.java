@@ -19,7 +19,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -31,7 +30,6 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -217,7 +215,6 @@ public class MasterDetailLayout extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
         updateDetails();
         attachEvent.getUI().beforeClientResponse(this, executionContext -> {
             this.hasInitialized = true;
@@ -702,25 +699,6 @@ public class MasterDetailLayout extends Component
     @Override
     public void removeRouterLayoutContent(HasElement oldContent) {
         doSetDetail(null);
-    }
-
-    /**
-     * Checks whether the Master Detail Layout component feature flag is active.
-     * Succeeds if the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MASTER_DETAIL_LAYOUT_COMPONENT}
-     *             feature is not enabled
-     */
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        boolean enabled = featureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
     }
 
     /**
