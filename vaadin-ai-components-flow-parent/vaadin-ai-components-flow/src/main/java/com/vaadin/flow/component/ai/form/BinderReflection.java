@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,14 +31,13 @@ import com.vaadin.flow.data.binder.Binder.Binding;
 /**
  * Reflection access to {@link Binder} internals.
  * <p>
- * {@link FormAIController} needs two pieces of information that {@link Binder}
- * does not expose publicly: the property name supplied when a binding was
- * created, and the binding instance for a given {@link HasValue}. Both live in
- * private fields ({@code boundProperties} and {@code bindings}); this class
- * reads them reflectively and caches the {@link Field} references at static
- * init. If a future {@code Binder} renames or removes either field, the helper
- * logs a warning and returns empty results so callers degrade to the non-binder
- * code path rather than throwing.
+ * {@link FormAIController} needs the property name supplied when a binding was
+ * created, which {@link Binder} does not expose publicly. The property names
+ * live in a private {@code boundProperties} field; this class reads it
+ * reflectively and caches the {@link Field} reference at static init. If a
+ * future {@code Binder} renames or removes the field, the helper logs a warning
+ * and returns an empty map so callers degrade to the non-binder code path
+ * rather than throwing.
  * </p>
  */
 final class BinderReflection {
@@ -48,7 +46,6 @@ final class BinderReflection {
             .getLogger(BinderReflection.class);
 
     private static final Field BOUND_PROPERTIES_FIELD = getBoundPropertiesField();
-    private static final Field BINDINGS_FIELD = getBindingsField();
 
     private BinderReflection() {
     }
@@ -77,29 +74,6 @@ final class BinderReflection {
         return Collections.emptyMap();
     }
 
-    /**
-     * Returns the {@link Binding} registered for the given field, or
-     * {@code null} if no binding matches. Matches by reference equality so the
-     * same {@code HasValue} added to two binders does not cross-pollute.
-     *
-     * @param binder
-     *            the binder, not {@code null}
-     * @param field
-     *            the field, not {@code null}
-     * @return the matching binding, or {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    static Binding<?, ?> findBinding(Binder<?> binder, HasValue<?, ?> field) {
-        try {
-            return ((Collection<Binding<?, ?>>) BINDINGS_FIELD.get(binder))
-                    .stream().filter(binding -> binding.getField() == field)
-                    .findFirst().orElse(null);
-        } catch (Exception ex) {
-            LOGGER.warn("Could not read bindings from Binder.", ex);
-        }
-        return null;
-    }
-
     private static Field getBoundPropertiesField() {
         try {
             var field = Binder.class.getDeclaredField("boundProperties");
@@ -107,21 +81,8 @@ final class BinderReflection {
             return field;
         } catch (Exception e) {
             LOGGER.warn("Could not access Binder.boundProperties; bound "
-                    + "fields will not contribute a property-name alias to "
-                    + "the LLM's view of the form.", e);
-        }
-        return null;
-    }
-
-    private static Field getBindingsField() {
-        try {
-            var field = Binder.class.getDeclaredField("bindings");
-            field.setAccessible(true);
-            return field;
-        } catch (Exception e) {
-            LOGGER.warn("Could not access Binder.bindings; "
-                    + "FormAIController.findBinding(...) will always return "
-                    + "empty.", e);
+                    + "fields will not seed the LLM-facing description from "
+                    + "their bean property name.", e);
         }
         return null;
     }

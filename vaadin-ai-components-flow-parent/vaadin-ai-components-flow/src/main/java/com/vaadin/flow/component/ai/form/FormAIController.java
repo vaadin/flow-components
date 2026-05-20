@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -35,7 +34,6 @@ import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.Binder.Binding;
 
 /**
  * Populates a layout's fields with values an LLM extracts from a user prompt or
@@ -150,26 +148,6 @@ public class FormAIController implements AIController {
         Objects.requireNonNull(binder, "Binder must not be null");
         this.form = form;
         this.binder = binder;
-    }
-
-    /**
-     * Returns the {@link Binding} registered for the given field on the binder
-     * supplied to this controller. Returns an empty optional for unbound fields
-     * and for controllers constructed without a binder. The lookup is live
-     * against the binder's current state, not a snapshot taken at construction.
-     *
-     * @param field
-     *            the field, not {@code null}
-     * @return the binding, or empty if the field is not bound
-     * @throws NullPointerException
-     *             if {@code field} is {@code null}
-     */
-    Optional<Binding<?, ?>> findBinding(HasValue<?, ?> field) {
-        Objects.requireNonNull(field, "Field must not be null");
-        if (binder == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(BinderReflection.findBinding(binder, field));
     }
 
     /**
@@ -345,13 +323,12 @@ public class FormAIController implements AIController {
         var propertyNames = BinderReflection.collectPropertyNames(binder);
         for (var entry : propertyNames.entrySet()) {
             var field = entry.getKey();
-            var name = entry.getValue();
-            if (name == null || !(field instanceof Component)) {
+            if (!(field instanceof Component)) {
                 continue;
             }
             var hints = hintsFor(field);
             if (hints.description == null) {
-                hints.description = name;
+                hints.description = entry.getValue();
             }
         }
     }
