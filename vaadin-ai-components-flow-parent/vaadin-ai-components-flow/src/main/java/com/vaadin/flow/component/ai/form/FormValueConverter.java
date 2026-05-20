@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -39,6 +42,9 @@ import com.vaadin.flow.data.provider.ListDataProvider;
  * carries the read path needed by {@code get_form_state}.
  */
 final class FormValueConverter {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FormValueConverter.class);
 
     /**
      * Caches the {@link Method} resolved for a given (concrete class, method
@@ -83,22 +89,23 @@ final class FormValueConverter {
             var label = gen.apply(item);
             return label != null ? label : String.valueOf(item);
         } catch (Exception ex) {
+            LOGGER.warn("Item label generator threw for {}", item.getClass(),
+                    ex);
             return String.valueOf(item);
         }
     }
 
     /**
      * Returns the items of the field's data provider when it is in-memory, or
-     * {@code null} for backend-loaded providers or fields that do not have a
+     * an empty list for backend-loaded providers or fields that do not have a
      * data provider at all.
      */
-    @SuppressWarnings("unchecked")
     static List<Object> listDataProviderItems(HasValue<?, ?> field) {
         var provider = dataProvider(field);
         if (provider instanceof ListDataProvider<?> ldp) {
-            return new ArrayList<>((Collection<Object>) ldp.getItems());
+            return new ArrayList<>(ldp.getItems());
         }
-        return null;
+        return List.of();
     }
 
     @SuppressWarnings("unchecked")
@@ -125,6 +132,8 @@ final class FormValueConverter {
         try {
             return method.get().invoke(target);
         } catch (ReflectiveOperationException ex) {
+            LOGGER.debug("Reflective call to {}#{} failed",
+                    target.getClass().getName(), methodName, ex);
             return null;
         }
     }

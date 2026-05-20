@@ -168,26 +168,33 @@ enum FormFieldType {
     private static Class<?> findHasValueValueArg(Type iface,
             Map<TypeVariable<?>, Type> bindings) {
         if (iface instanceof ParameterizedType pt) {
-            var raw = (Class<?>) pt.getRawType();
-            if (raw == HasValue.class) {
-                var resolved = resolveType(pt.getActualTypeArguments()[1],
-                        bindings);
-                return resolved instanceof Class<?> cls ? cls : null;
-            }
-            var deeper = new HashMap<>(bindings);
-            bindTypeArgs(raw, pt.getActualTypeArguments(), deeper);
-            for (var sub : raw.getGenericInterfaces()) {
-                var found = findHasValueValueArg(sub, deeper);
-                if (found != null) {
-                    return found;
-                }
-            }
-        } else if (iface instanceof Class<?> cls) {
-            for (var sub : cls.getGenericInterfaces()) {
-                var found = findHasValueValueArg(sub, bindings);
-                if (found != null) {
-                    return found;
-                }
+            return findInParameterizedInterface(pt, bindings);
+        }
+        if (iface instanceof Class<?> cls) {
+            return findInSuperInterfaces(cls.getGenericInterfaces(), bindings);
+        }
+        return null;
+    }
+
+    private static Class<?> findInParameterizedInterface(ParameterizedType pt,
+            Map<TypeVariable<?>, Type> bindings) {
+        var raw = (Class<?>) pt.getRawType();
+        if (raw == HasValue.class) {
+            var resolved = resolveType(pt.getActualTypeArguments()[1],
+                    bindings);
+            return resolved instanceof Class<?> cls ? cls : null;
+        }
+        var deeper = new HashMap<>(bindings);
+        bindTypeArgs(raw, pt.getActualTypeArguments(), deeper);
+        return findInSuperInterfaces(raw.getGenericInterfaces(), deeper);
+    }
+
+    private static Class<?> findInSuperInterfaces(Type[] interfaces,
+            Map<TypeVariable<?>, Type> bindings) {
+        for (var sub : interfaces) {
+            var found = findHasValueValueArg(sub, bindings);
+            if (found != null) {
+                return found;
             }
         }
         return null;

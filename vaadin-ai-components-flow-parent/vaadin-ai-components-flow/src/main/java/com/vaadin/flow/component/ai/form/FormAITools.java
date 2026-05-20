@@ -64,6 +64,9 @@ final class FormAITools {
          * document order. Ignored fields and fields whose type is
          * {@link FormFieldType#UNSUPPORTED} must be filtered out by the
          * implementation.
+         *
+         * @return the visible field descriptors in document order, never
+         *         {@code null}
          */
         List<FormFieldDescriptor> visibleFields();
 

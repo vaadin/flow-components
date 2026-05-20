@@ -42,6 +42,11 @@ final class FormFieldSchema {
      */
     static final int ENUM_MAX_ITEMS = 200;
 
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_FORMAT = "format";
+    private static final String FIELD_VALUE = "value";
+    private static final String TYPE_STRING = "string";
+
     private FormFieldSchema() {
     }
 
@@ -67,7 +72,7 @@ final class FormFieldSchema {
         if (type == FormFieldType.MULTI_SELECT) {
             node.put("array", true);
             var items = node.putObject("items");
-            items.put("type", "string");
+            items.put(FIELD_TYPE, TYPE_STRING);
             applySelectionOptions(items, field, hints);
             return;
         }
@@ -76,35 +81,35 @@ final class FormFieldSchema {
         // converts back. Emit type=string + enum/queryable so the LLM sees the
         // signal regardless of the underlying value type.
         if (type == FormFieldType.SINGLE_SELECT || hasValueOptions(hints)) {
-            node.put("type", "string");
+            node.put(FIELD_TYPE, TYPE_STRING);
             applySelectionOptions(node, field, hints);
             return;
         }
         switch (type) {
         case EMAIL -> {
-            node.put("type", "string");
-            node.put("format", "email");
+            node.put(FIELD_TYPE, TYPE_STRING);
+            node.put(FIELD_FORMAT, "email");
         }
         case BIG_DECIMAL -> {
-            node.put("type", "string");
+            node.put(FIELD_TYPE, TYPE_STRING);
             node.put("pattern", FormFieldType.BIG_DECIMAL_PATTERN);
         }
-        case NUMBER -> node.put("type", "number");
-        case INTEGER -> node.put("type", "integer");
-        case BOOLEAN -> node.put("type", "boolean");
+        case NUMBER -> node.put(FIELD_TYPE, "number");
+        case INTEGER -> node.put(FIELD_TYPE, "integer");
+        case BOOLEAN -> node.put(FIELD_TYPE, "boolean");
         case DATE -> {
-            node.put("type", "string");
-            node.put("format", "date");
+            node.put(FIELD_TYPE, TYPE_STRING);
+            node.put(FIELD_FORMAT, "date");
         }
         case DATE_TIME -> {
-            node.put("type", "string");
-            node.put("format", "date-time");
+            node.put(FIELD_TYPE, TYPE_STRING);
+            node.put(FIELD_FORMAT, "date-time");
         }
         case TIME -> {
-            node.put("type", "string");
-            node.put("format", "time");
+            node.put(FIELD_TYPE, TYPE_STRING);
+            node.put(FIELD_FORMAT, "time");
         }
-        default -> node.put("type", "string");
+        default -> node.put(FIELD_TYPE, TYPE_STRING);
         }
     }
 
@@ -125,7 +130,7 @@ final class FormFieldSchema {
             return;
         }
         var items = FormValueConverter.listDataProviderItems(field);
-        if (items == null || items.isEmpty()) {
+        if (items.isEmpty()) {
             return;
         }
         var arr = target.putArray("enum");
@@ -137,7 +142,7 @@ final class FormFieldSchema {
             FormFieldType type, FormFieldHints hints) {
         var value = field.getValue();
         if (FormValueConverter.isEmpty(value)) {
-            node.putNull("value");
+            node.putNull(FIELD_VALUE);
             return;
         }
         // valueOptions rewrites the schema type to "string" + enum/queryable
@@ -145,53 +150,60 @@ final class FormFieldSchema {
         // halves of the payload agree.
         if (hasValueOptions(hints) && type != FormFieldType.SINGLE_SELECT
                 && type != FormFieldType.MULTI_SELECT) {
-            node.put("value", FormValueConverter.renderItem(field, value));
+            node.put(FIELD_VALUE, FormValueConverter.renderItem(field, value));
             return;
         }
         switch (type) {
-        case NUMBER -> {
-            // NaN / ±Infinity are valid Java doubles but not legal JSON
-            // numbers; surface as null rather than corrupting the payload
-            // with a non-standard token in a number-typed slot.
-            if (value instanceof Number n && Double.isFinite(n.doubleValue())) {
-                node.put("value", n.doubleValue());
-            } else {
-                node.putNull("value");
-            }
-        }
-        case INTEGER -> {
-            // BigInteger values can exceed Long.MAX_VALUE; routing them
-            // through Number.longValue() silently truncates. Jackson
-            // supports BigInteger as a JSON number with full precision.
-            if (value instanceof BigInteger bi) {
-                node.put("value", bi);
-            } else {
-                node.put("value", ((Number) value).longValue());
-            }
-        }
+        case NUMBER -> applyNumberValue(node, value);
+        case INTEGER -> applyIntegerValue(node, value);
         case BIG_DECIMAL ->
             // BigDecimal.toString() emits scientific notation for values
             // with negative scale or adjusted exponent < -6, which
             // violates the BIG_DECIMAL pattern declared in the schema.
             // toPlainString() always produces the canonical decimal
             // representation.
-            node.put("value", ((BigDecimal) value).toPlainString());
-        case BOOLEAN -> node.put("value", (Boolean) value);
+            node.put(FIELD_VALUE, ((BigDecimal) value).toPlainString());
+        case BOOLEAN -> node.put(FIELD_VALUE, (Boolean) value);
         case SINGLE_SELECT ->
-            node.put("value", FormValueConverter.renderItem(field, value));
-        case MULTI_SELECT -> {
-            // MULTI_SELECT is only assigned when the field implements
-            // MultiSelect, whose contract guarantees getValue() returns a
-            // Set. A non-Collection value would be a contract violation
-            // and produces an empty array here as graceful degradation.
-            var arr = node.putArray("value");
-            if (value instanceof Collection<?> coll) {
-                for (var v : coll) {
-                    arr.add(FormValueConverter.renderItem(field, v));
-                }
-            }
+            node.put(FIELD_VALUE, FormValueConverter.renderItem(field, value));
+        case MULTI_SELECT -> applyMultiSelectValue(node, field, value);
+        default -> node.put(FIELD_VALUE, value.toString());
         }
-        default -> node.put("value", value.toString());
+    }
+
+    private static void applyNumberValue(ObjectNode node, Object value) {
+        // NaN / ±Infinity are valid Java doubles but not legal JSON numbers;
+        // surface as null rather than corrupting the payload with a
+        // non-standard token in a number-typed slot.
+        if (value instanceof Number n && Double.isFinite(n.doubleValue())) {
+            node.put(FIELD_VALUE, n.doubleValue());
+        } else {
+            node.putNull(FIELD_VALUE);
+        }
+    }
+
+    private static void applyIntegerValue(ObjectNode node, Object value) {
+        // BigInteger values can exceed Long.MAX_VALUE; routing them through
+        // Number.longValue() silently truncates. Jackson supports BigInteger
+        // as a JSON number with full precision.
+        if (value instanceof BigInteger bi) {
+            node.put(FIELD_VALUE, bi);
+        } else {
+            node.put(FIELD_VALUE, ((Number) value).longValue());
+        }
+    }
+
+    private static void applyMultiSelectValue(ObjectNode node,
+            HasValue<?, ?> field, Object value) {
+        // MULTI_SELECT is only assigned when the field implements MultiSelect,
+        // whose contract guarantees getValue() returns a Set. A non-Collection
+        // value would be a contract violation and produces an empty array
+        // here as graceful degradation.
+        var arr = node.putArray(FIELD_VALUE);
+        if (value instanceof Collection<?> coll) {
+            for (var v : coll) {
+                arr.add(FormValueConverter.renderItem(field, v));
+            }
         }
     }
 
@@ -208,7 +220,7 @@ final class FormFieldSchema {
         if (part == null || part.isBlank()) {
             return;
         }
-        if (target.length() > 0) {
+        if (!target.isEmpty()) {
             // Pipe rather than '. ' so labels or helper texts that
             // already end in '.' (common) do not produce '..' in the
             // merged description.

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,18 +58,31 @@ final class FormTestFields {
     }
 
     /**
+     * Base class for the simple {@link AbstractField}-derived test fixtures.
+     * Concentrates the {@code setPresentationValue} no-op in one place — test
+     * fixtures have no DOM presentation to update.
+     */
+    private abstract static class StubField<C extends AbstractField<C, T>, T>
+            extends AbstractField<C, T> {
+        StubField(T defaultValue) {
+            super(defaultValue);
+        }
+
+        @Override
+        protected final void setPresentationValue(T value) {
+            // No DOM in tests, so there is nothing to render.
+        }
+    }
+
+    /**
      * Minimal {@link HasValue} component used by the discovery tests.
      * {@link AbstractField} ships with flow-server, so exercising discovery
      * does not require any concrete Vaadin input component module.
      */
     @Tag("test-field")
-    static class TestField extends AbstractField<TestField, String> {
+    static class TestField extends StubField<TestField, String> {
         TestField() {
             super("");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
     }
 
@@ -78,15 +92,11 @@ final class FormTestFields {
      * into the field's internal composition.
      */
     @Tag("composite-field")
-    static class CompositeField extends AbstractField<CompositeField, String>
+    static class CompositeField extends StubField<CompositeField, String>
             implements HasComponents {
         CompositeField(Component... children) {
             super("");
             add(children);
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
     }
 
@@ -96,136 +106,86 @@ final class FormTestFields {
      * chosen label into the field's actual value type.
      */
     @Tag("int-field")
-    static class IntField extends AbstractField<IntField, Integer> {
+    static class IntField extends StubField<IntField, Integer> {
         IntField() {
             super(0);
-        }
-
-        @Override
-        protected void setPresentationValue(Integer value) {
         }
     }
 
     @Tag("double-field")
-    static class DoubleField extends AbstractField<DoubleField, Double> {
+    static class DoubleField extends StubField<DoubleField, Double> {
         DoubleField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(Double value) {
         }
     }
 
     @Tag("bigint-field")
-    static class BigIntField
-            extends AbstractField<BigIntField, java.math.BigInteger> {
+    static class BigIntField extends StubField<BigIntField, BigInteger> {
         BigIntField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(java.math.BigInteger value) {
         }
     }
 
     @Tag("bigdec-field")
-    static class BigDecField extends AbstractField<BigDecField, BigDecimal> {
+    static class BigDecField extends StubField<BigDecField, BigDecimal> {
         BigDecField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(BigDecimal value) {
         }
     }
 
     @Tag("bool-field")
-    static class BoolField extends AbstractField<BoolField, Boolean> {
+    static class BoolField extends StubField<BoolField, Boolean> {
         BoolField() {
             super(false);
-        }
-
-        @Override
-        protected void setPresentationValue(Boolean value) {
         }
     }
 
     @Tag("date-field")
-    static class DateField extends AbstractField<DateField, LocalDate> {
+    static class DateField extends StubField<DateField, LocalDate> {
         DateField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(LocalDate value) {
         }
     }
 
     @Tag("datetime-field")
-    static class DateTimeField
-            extends AbstractField<DateTimeField, LocalDateTime> {
+    static class DateTimeField extends StubField<DateTimeField, LocalDateTime> {
         DateTimeField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(LocalDateTime value) {
         }
     }
 
     @Tag("time-field")
-    static class TimeField extends AbstractField<TimeField, LocalTime> {
+    static class TimeField extends StubField<TimeField, LocalTime> {
         TimeField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(LocalTime value) {
         }
     }
 
     @Tag("long-field")
-    static class LongField extends AbstractField<LongField, Long> {
+    static class LongField extends StubField<LongField, Long> {
         LongField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(Long value) {
         }
     }
 
     @Tag("short-field")
-    static class ShortField extends AbstractField<ShortField, Short> {
+    static class ShortField extends StubField<ShortField, Short> {
         ShortField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(Short value) {
         }
     }
 
     @Tag("byte-field")
-    static class ByteField extends AbstractField<ByteField, Byte> {
+    static class ByteField extends StubField<ByteField, Byte> {
         ByteField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(Byte value) {
         }
     }
 
     @Tag("float-field")
-    static class FloatField extends AbstractField<FloatField, Float> {
+    static class FloatField extends StubField<FloatField, Float> {
         FloatField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(Float value) {
         }
     }
 
@@ -235,14 +195,10 @@ final class FormTestFields {
      */
     @Tag("labeled-string-field")
     static class LabeledStringField
-            extends AbstractField<LabeledStringField, String>
+            extends StubField<LabeledStringField, String>
             implements HasLabel, HasHelper {
         LabeledStringField() {
             super("");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
     }
 
@@ -251,7 +207,7 @@ final class FormTestFields {
      * error fallback in {@code get_form_state}.
      */
     @Tag("throwing-field")
-    static class ThrowingField extends AbstractField<ThrowingField, String> {
+    static class ThrowingField extends StubField<ThrowingField, String> {
         ThrowingField() {
             super("");
         }
@@ -259,10 +215,6 @@ final class FormTestFields {
         @Override
         public String getValue() {
             throw new RuntimeException("boom");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
     }
 
@@ -323,6 +275,7 @@ final class FormTestFields {
 
         @Override
         public void setReadOnly(boolean readOnly) {
+            // Read-only state is not exercised by these tests.
         }
 
         @Override
@@ -332,6 +285,7 @@ final class FormTestFields {
 
         @Override
         public void setRequiredIndicatorVisible(boolean visible) {
+            // Required-indicator state is not exercised by these tests.
         }
     }
 
@@ -372,6 +326,7 @@ final class FormTestFields {
 
         @Override
         public void setReadOnly(boolean readOnly) {
+            // Read-only state is not exercised by these tests.
         }
 
         @Override
@@ -381,6 +336,7 @@ final class FormTestFields {
 
         @Override
         public void setRequiredIndicatorVisible(boolean visible) {
+            // Required-indicator state is not exercised by these tests.
         }
 
         static class ChangeEvent implements HasValue.ValueChangeEvent<Integer> {
@@ -413,8 +369,8 @@ final class FormTestFields {
      * {@link FormValueConverter} can read items and labels.
      */
     @Tag("single-select-field")
-    static class SingleSelectField<T> extends
-            AbstractField<SingleSelectField<T>, T> implements HasItems<T> {
+    static class SingleSelectField<T> extends StubField<SingleSelectField<T>, T>
+            implements HasItems<T> {
 
         private DataProvider<T, ?> provider = DataProvider
                 .ofCollection(List.of());
@@ -422,10 +378,6 @@ final class FormTestFields {
 
         SingleSelectField() {
             super(null);
-        }
-
-        @Override
-        protected void setPresentationValue(T value) {
         }
 
         @Override
@@ -466,7 +418,7 @@ final class FormTestFields {
      */
     @Tag("multi-select-field")
     static class MultiSelectField<T>
-            extends AbstractField<MultiSelectField<T>, Set<T>>
+            extends StubField<MultiSelectField<T>, Set<T>>
             implements MultiSelect<MultiSelectField<T>, T> {
 
         private ListDataProvider<T> provider = DataProvider
@@ -475,10 +427,6 @@ final class FormTestFields {
 
         MultiSelectField() {
             super(Set.of());
-        }
-
-        @Override
-        protected void setPresentationValue(Set<T> value) {
         }
 
         @SafeVarargs
@@ -533,8 +481,8 @@ final class FormTestFields {
      * from the backing {@link ListDataProvider}.
      */
     @Tag("lazy-data-view-field")
-    static class LazyDataViewField
-            extends AbstractField<LazyDataViewField, String> implements
+    static class LazyDataViewField extends StubField<LazyDataViewField, String>
+            implements
             HasLazyDataView<String, String, com.vaadin.flow.data.provider.LazyDataView<String>> {
 
         private ListDataProvider<String> provider = DataProvider
@@ -542,10 +490,6 @@ final class FormTestFields {
 
         LazyDataViewField() {
             super("");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
 
         @Override
@@ -575,8 +519,8 @@ final class FormTestFields {
      * dropped from the classifier's marker list while the others stay.
      */
     @Tag("list-data-view-field")
-    static class ListDataViewField
-            extends AbstractField<ListDataViewField, String> implements
+    static class ListDataViewField extends StubField<ListDataViewField, String>
+            implements
             HasListDataView<String, com.vaadin.flow.data.provider.ListDataView<String, ?>> {
 
         private ListDataProvider<String> provider = DataProvider
@@ -584,10 +528,6 @@ final class FormTestFields {
 
         ListDataViewField() {
             super("");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
 
         @Override
@@ -616,7 +556,7 @@ final class FormTestFields {
      * {@link LazyDataViewField} for rationale.
      */
     @Tag("data-view-field")
-    static class DataViewField extends AbstractField<DataViewField, String>
+    static class DataViewField extends StubField<DataViewField, String>
             implements
             HasDataView<String, String, com.vaadin.flow.data.provider.DataView<String>> {
 
@@ -625,10 +565,6 @@ final class FormTestFields {
 
         DataViewField() {
             super("");
-        }
-
-        @Override
-        protected void setPresentationValue(String value) {
         }
 
         @Override
