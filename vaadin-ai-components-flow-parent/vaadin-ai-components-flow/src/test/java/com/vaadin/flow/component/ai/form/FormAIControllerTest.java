@@ -17,6 +17,8 @@ package com.vaadin.flow.component.ai.form;
 
 import static com.vaadin.flow.component.ai.form.FormTestSupport.executeQueryFieldOptions;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
 import java.util.Collection;
@@ -28,12 +30,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.PropertyId;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Tests covering {@link FormAIController}'s construction, container traversal,
@@ -43,6 +52,46 @@ import com.vaadin.flow.internal.JacksonUtils;
  * stays focused on controller behaviour rather than schema details.
  */
 class FormAIControllerTest {
+
+    /** {@link TestField} variant that also exposes a label. */
+    @Tag("labeled-field")
+    private static class LabeledField
+            extends AbstractField<LabeledField, String> implements HasLabel {
+        LabeledField(String label) {
+            super("");
+            setLabel(label);
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+        }
+    }
+
+    /** Bean used by binder integration tests. */
+    private static class TestBean {
+        private String name;
+        private String email;
+
+        @SuppressWarnings("unused")
+        public String getName() {
+            return name;
+        }
+
+        @SuppressWarnings("unused")
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @SuppressWarnings("unused")
+        public String getEmail() {
+            return email;
+        }
+
+        @SuppressWarnings("unused")
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
 
     @Nested
     class Construction {
@@ -57,6 +106,27 @@ class FormAIControllerTest {
         void nullFormThrows() {
             Assertions.assertThrows(NullPointerException.class,
                     () -> new FormAIController(null));
+        }
+
+        @Test
+        void constructionWithBinderSucceeds() {
+            var form = new Div(new TestField());
+            var binder = new Binder<>(TestBean.class);
+            Assertions.assertDoesNotThrow(
+                    () -> new FormAIController(form, binder));
+        }
+
+        @Test
+        void nullFormForBinderConstructorThrows() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new FormAIController(null,
+                            new Binder<>(TestBean.class)));
+        }
+
+        @Test
+        void nullBinderForBinderConstructorThrows() {
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> new FormAIController(new Div(), null));
         }
     }
 
@@ -434,6 +504,254 @@ class FormAIControllerTest {
             Assertions.assertTrue(field.path("enum").isMissingNode(),
                     "Stale enum block must not survive re-registration with "
                             + "a BiFunction, got: " + field);
+        }
+    }
+
+    @Nested
+    class BinderDescriptionSeeding {
+
+        @Test
+        void boundFieldPropertyNameSurfacesInDescription() {
+            // A named binding contributes the bean property name as the
+            // default description; with no label or helper text, that's the
+            // entire description string the LLM sees.
+            var field = new TestField();
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(field).bind("name");
+            var controller = new FormAIController(new Div(field), binder);
+
+            controller.onRequestStart();
+            var entry = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("name",
+                    entry.path("description").asString(),
+                    "Bean property name should default the description");
+        }
+
+        @Test
+        void labelAndPropertyNameMergeInDescription() {
+            // When both label and property name are available, the merged
+            // description is `label | propertyName`, in that order.
+            var field = new LabeledField("Customer Name");
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(field).bind("name");
+            var controller = new FormAIController(new Div(field), binder);
+
+            controller.onRequestStart();
+            var entry = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("Customer Name | name",
+                    entry.path("description").asString());
+        }
+
+        @Test
+        void describeOverridesBinderSeeding() {
+            // Explicit describe() always wins: seeding only fills nulls, so
+            // a developer's description suppresses the bean property name.
+            var field = new LabeledField("Customer Name");
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(field).bind("name");
+            var controller = new FormAIController(new Div(field), binder);
+            controller.describe(field, "Full legal name");
+
+            controller.onRequestStart();
+            var entry = formStateFields(controller).get(0);
+
+            var description = entry.path("description").asString();
+            Assertions.assertEquals("Customer Name | Full legal name",
+                    description);
+            Assertions.assertFalse(description.contains("name | "),
+                    "Property name must not appear when describe() set "
+                            + "the description explicitly, got: "
+                            + description);
+        }
+
+        @Test
+        void lambdaBoundFieldHasNoSeededDescription() {
+            // Lambda-bound bindings carry no property name; the description
+            // falls back to whatever label/helper/describe() provides — here
+            // just the label.
+            var field = new LabeledField("Email");
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(field).bind(TestBean::getEmail, TestBean::setEmail);
+            var controller = new FormAIController(new Div(field), binder);
+
+            controller.onRequestStart();
+            var entry = formStateFields(controller).get(0);
+
+            Assertions.assertEquals("Email",
+                    entry.path("description").asString(),
+                    "Lambda-bound field has no property name to seed; "
+                            + "description should be the label alone");
+        }
+
+        @Test
+        void unboundFieldHasNoSeededDescription() {
+            // A field present in the form but not registered with the binder
+            // contributes no seeded property name. With no label either, the
+            // description is omitted entirely from the JSON.
+            var bound = new LabeledField("Customer Name");
+            var unbound = new TestField();
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(bound).bind("name");
+            var controller = new FormAIController(new Div(bound, unbound),
+                    binder);
+
+            controller.onRequestStart();
+            var entries = formStateFields(controller);
+            var unboundEntry = entries.stream()
+                    .filter(e -> e.path("id").asString().equals(idOf(unbound)))
+                    .findFirst().orElseThrow();
+
+            Assertions.assertTrue(
+                    unboundEntry.path("description").isMissingNode(),
+                    "Unbound field with no label / helper / describe() must "
+                            + "have no description, got: " + unboundEntry);
+        }
+
+        @Test
+        void bindInstanceFieldsWithPropertyIdSurfacesPropertyName() {
+            // bindInstanceFields walks the holder's declared fields and binds
+            // each to the matching bean property. @PropertyId re-targets a
+            // Java field whose name doesn't match the bean property —
+            // emailField → "email". The seeded description should reflect
+            // the bean property name, not the Java field name.
+            var holder = new InstanceFieldsHolder();
+            var binder = new Binder<>(TestBean.class);
+            binder.bindInstanceFields(holder);
+            var controller = new FormAIController(holder, binder);
+
+            controller.onRequestStart();
+            var entries = formStateFields(controller);
+
+            var nameEntry = entries.stream().filter(
+                    e -> e.path("id").asString().equals(idOf(holder.name)))
+                    .findFirst().orElseThrow();
+            var emailEntry = entries.stream()
+                    .filter(e -> e.path("id").asString()
+                            .equals(idOf(holder.emailField)))
+                    .findFirst().orElseThrow();
+
+            Assertions.assertEquals("Customer Name | name",
+                    nameEntry.path("description").asString());
+            var emailDescription = emailEntry.path("description").asString();
+            Assertions.assertEquals("Address Of Email | email",
+                    emailDescription,
+                    "@PropertyId should surface the bean property name "
+                            + "(\"email\"), not the Java field name "
+                            + "(\"emailField\")");
+            Assertions.assertFalse(emailDescription.contains("emailField"),
+                    "Java field name must not leak into the description");
+        }
+
+        @Test
+        void bindingsAddedBetweenTurnsAppearOnNextRequest() {
+            // Seeding runs every turn, so a binding added after the
+            // controller is constructed surfaces in the next get_form_state.
+            var field = new TestField();
+            var binder = new Binder<>(TestBean.class);
+            var controller = new FormAIController(new Div(field), binder);
+
+            controller.onRequestStart();
+            Assertions.assertTrue(
+                    formStateFields(controller).get(0).path("description")
+                            .isMissingNode(),
+                    "First turn: not yet bound, no seeded description");
+
+            binder.forField(field).bind("name");
+            controller.onRequestStart();
+
+            Assertions.assertEquals("name",
+                    formStateFields(controller).get(0).path("description")
+                            .asString(),
+                    "Second turn: binding added between turns surfaces as "
+                            + "the seeded description");
+        }
+
+        @Test
+        void seedingSkipsNonComponentHasValue() {
+            // Binder.forField accepts any HasValue, including custom
+            // adapters that aren't Components. Such fields cannot carry the
+            // controller's UUID id and cannot appear in the LLM-facing
+            // tools, so the seeding skips them silently rather than throwing
+            // out of the per-turn lifecycle. Pins that contract: a
+            // non-Component bound HasValue must not break onRequestStart.
+            var nonComponentField = new NonComponentField();
+            var formField = new TestField();
+            var binder = new Binder<>(TestBean.class);
+            binder.forField(nonComponentField).bind("name");
+            var controller = new FormAIController(new Div(formField), binder);
+
+            Assertions.assertDoesNotThrow(controller::onRequestStart,
+                    "Seeding must not crash on a non-Component bound field");
+            // The non-Component field never participates in discovery
+            // either, so the LLM-facing form state lists only the real
+            // component.
+            Assertions.assertEquals(1, formStateFields(controller).size());
+        }
+    }
+
+    /**
+     * Minimal {@link HasValue} implementation that is <strong>not</strong> a
+     * {@link Component}. Used to pin the seeding contract for bound HasValues
+     * that can't carry the controller's UUID id.
+     */
+    private static class NonComponentField
+            implements HasValue<HasValue.ValueChangeEvent<String>, String> {
+
+        private String value = "";
+
+        @Override
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                ValueChangeListener<? super ValueChangeEvent<String>> listener) {
+            return () -> {
+            };
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+
+        @Override
+        public void setReadOnly(boolean readOnly) {
+            // No-op; the controller does not lock a non-Component field.
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return false;
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(boolean visible) {
+            // No-op; not exercised by these tests.
+        }
+    }
+
+    /**
+     * Form-holder used by {@code bindInstanceFields} tests. {@link PropertyId}
+     * on {@code emailField} re-targets the binding to the bean's {@code email}
+     * property; without it the Java field name {@code emailField} would not
+     * match any bean property.
+     */
+    private static class InstanceFieldsHolder extends Div {
+        final LabeledField name = new LabeledField("Customer Name");
+        @PropertyId("email")
+        final LabeledField emailField = new LabeledField("Address Of Email");
+
+        InstanceFieldsHolder() {
+            add(name, emailField);
         }
     }
 }
