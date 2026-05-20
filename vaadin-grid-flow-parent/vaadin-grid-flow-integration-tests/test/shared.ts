@@ -31,7 +31,7 @@ export type GridServer = {
   deselectAll: () => void & sinon.SinonSpy;
   setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
   updateExpandedState: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
-  setViewportRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
+  setViewportRange: ((firstIndex: number, size: number) => Promise<void>) & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
   sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
   setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
 };
@@ -93,7 +93,11 @@ export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector):
     deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
     updateExpandedState: sinon.spy(),
-    setViewportRange: sinon.spy(),
+    setViewportRange: sinon.spy(() => {
+      const promise = sinon.promise<void>();
+      grid.$server.setViewportRange.promise = promise;
+      return promise;
+    }),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
   };
