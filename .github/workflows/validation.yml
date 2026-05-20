@@ -2,7 +2,7 @@ name: Validation
 
 on:
   schedule:
-    - cron: '14 10 * * *'
+    - cron: '30 23 * * *'
   pull_request:
     branches: ['main', '25.*']
   merge_group:
@@ -201,7 +201,7 @@ jobs:
 
       - name: Install web-components
         if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
-        run: yarn install --ignore-engines
+        run: yarn install --ignore-engines --ignore-scripts
         working-directory: web-components
 
       - name: Configure local web-components
