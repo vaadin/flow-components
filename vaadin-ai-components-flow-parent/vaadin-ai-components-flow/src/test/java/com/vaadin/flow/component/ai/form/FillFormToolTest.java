@@ -314,7 +314,7 @@ class FillFormToolTest {
         password.setValue("untouched");
         var controller = controllerFor(password);
 
-        // onRequestStart already stamped an id (attachIds walks every
+        // onRequest already stamped an id (attachIds walks every
         // discovered field, UNSUPPORTED included). Forge it into the
         // payload to verify the controller still skips it.
         var args = JacksonUtils.createObjectNode();
@@ -900,9 +900,9 @@ class FillFormToolTest {
 
     private FormAIController controllerFor(Component... fields) {
         var controller = newController(fields);
-        // Drive onRequestStart() so each discovered field has its UUID id
+        // Drive onRequest() so each discovered field has its UUID id
         // stamped — payload helpers use idOf() to look the id up.
-        controller.onRequestStart();
+        controller.onRequest();
         return controller;
     }
 

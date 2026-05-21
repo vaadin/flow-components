@@ -559,7 +559,7 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
-            Assertions.assertDoesNotThrow(controller::onRequestStart);
+            Assertions.assertDoesNotThrow(controller::onRequest);
             // And no description got seeded — the no-binder path simply
             // didn't run.
             Assertions.assertTrue(
@@ -738,7 +738,7 @@ class FormAIControllerTest {
             // controller's UUID id and cannot appear in the LLM-facing
             // tools, so the seeding skips them silently rather than throwing
             // out of the per-turn lifecycle. Pins that contract: a
-            // non-Component bound HasValue must not break onRequestStart.
+            // non-Component bound HasValue must not break onRequest.
             var nonComponentField = new NonComponentField();
             var formField = new TestField();
             var binder = new Binder<>(TestBean.class);
