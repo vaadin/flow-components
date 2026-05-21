@@ -163,7 +163,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return range;
   };
 
-  grid.$connector.fetchRange = async (range) => {
+  grid.$connector.fetchCurrentRange = async () => {
+    const range = grid.$connector.getFetchRange();
+
     if (isRangeEqual(range, requestedRange)) {
       // Skip duplicate requests for the same range.
       return;
@@ -173,21 +175,29 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     await grid.$server.setViewportRange(range[0], range[1] - range[0]);
 
-    if (!isRangeEqual(range, requestedRange)) {
-      // While awaiting, fetchRange may have been called again with
-      // a different range, so do not process this stale response.
-      return;
+    if (isRangeEqual(range, requestedRange)) {
+      // If requestedRange is still set and matches the current range, it means
+      // the server responded with no new data and $connector.confirm wasn't called
+      // because the server assumes all the data is already on the client. This can
+      // happen, for example, when scrolling quickly back and forth so that the grid
+      // returns to a position whose data has already been delivered and is cached.
+      // In this case, just resolve the callbacks so the grid can exit the loading
+      // state correctly.
+      grid.$connector.resolvePendingCallbacks();
     }
+  };
 
-    // Set a flag so the grid re-checks all rendered rows after the pending
-    // callbacks below are resolved, and requests any that are still missing,
-    // not just the ones covered by the resolved callbacks.
-    grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
-
-    // Resolve pending callbacks. This may synchronously trigger new ones to be
-    // created or reissued.
+  grid.$connector.resolvePendingCallbacks = () => {
     const { rootCache } = dataProviderController;
+
     Object.values(rootCache.pendingRequests).forEach((callback) => {
+      // Set a flag so the grid re-checks all rendered rows after all callbacks
+      // are resolved, and requests any that are still missing, not just the ones
+      // covered by this resolved callback.
+      grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
+
+      // Resolve this pending callback. This may synchronously trigger new ones
+      // to be created or reissued.
       callback([]);
     });
 
@@ -222,9 +232,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       requestDebouncer,
       timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
       () => {
-        const range = grid.$connector.getFetchRange();
-
-        grid.$connector.fetchRange(range);
+        grid.$connector.fetchCurrentRange();
       }
     );
   };
@@ -388,6 +396,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
+    grid.$connector.resolvePendingCallbacks();
     grid.$server.confirmUpdate(id);
   };
 
