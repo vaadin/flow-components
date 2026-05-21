@@ -83,8 +83,7 @@ public class AIOrchestratorPage extends UploadDropZone {
 
         var builder = AIOrchestrator.builder(new EchoLLMProvider(), null)
                 .withMessageList(messageList).withInput(messageInput)
-                .withFileReceiver(uploadManager)
-                .withAttachmentSubmitListener(event -> {
+                .withFileReceiver(uploadManager).withRequestListener(event -> {
                     attachmentStorage.put(event.getMessageId(),
                             event.getAttachments());
                 }).withAttachmentClickListener(event -> {
@@ -96,7 +95,7 @@ public class AIOrchestratorPage extends UploadDropZone {
                         clickedAttachmentInfo.setText(attachment.name() + " | "
                                 + attachment.mimeType());
                     }
-                }).withResponseCompleteListener(event -> {
+                }).withResponseListener(event -> {
                     VaadinSession.getCurrent().setAttribute(HISTORY_SESSION_KEY,
                             orchestrator.getHistory());
                     VaadinSession.getCurrent().setAttribute(
@@ -112,9 +111,8 @@ public class AIOrchestratorPage extends UploadDropZone {
             if (savedAttachments != null) {
                 attachmentStorage.putAll(savedAttachments);
             }
-            builder.withHistory(savedHistory,
-                    savedAttachments != null ? savedAttachments
-                            : Collections.emptyMap());
+            builder.withHistory(savedHistory, savedAttachments != null
+                    ? savedAttachments : Collections.emptyMap());
         }
 
         orchestrator = builder.build();
