@@ -1,6 +1,8 @@
 name: Validation
 
 on:
+  push:
+    branches: ['fix/validation-summary-false-positives']
   schedule:
     - cron: '30 23 * * *'
   pull_request:
@@ -524,10 +526,6 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
         id: it-check
@@ -551,10 +549,6 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: IT compilation error
-        if: steps.it-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for WTR reports
         id: wtr-check
@@ -578,10 +572,10 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: WTR setup error
-        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
+      - name: WTR job failure
+        if: steps.wtr-check.outputs.count != '0' && needs.fast-tests.result == 'failure' && steps.wtr-dorny.outputs.conclusion == 'success'
         run: |
-          echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
+          echo ":x: WTR job failed despite all tests passing. Check the **WTR tests** job for setup issues." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'
