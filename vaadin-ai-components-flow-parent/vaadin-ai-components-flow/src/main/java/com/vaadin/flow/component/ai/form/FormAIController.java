@@ -315,7 +315,7 @@ public class FormAIController implements AIController {
     }
 
     @Override
-    public void onRequestStart() {
+    public void onRequest() {
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
@@ -324,12 +324,10 @@ public class FormAIController implements AIController {
     }
 
     @Override
-    public void onResponseComplete() {
-        unlockFields();
-    }
-
-    @Override
-    public void onResponseFailed(Throwable error) {
+    public void onResponse(Throwable error) {
+        // Unlock regardless of success or failure: locks set in onRequest
+        // must be released so the user can edit again. The failure path
+        // doesn't have any committed state to discard.
         unlockFields();
     }
 

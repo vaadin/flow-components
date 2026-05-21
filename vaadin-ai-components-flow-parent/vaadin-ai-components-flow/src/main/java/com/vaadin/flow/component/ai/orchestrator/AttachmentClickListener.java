@@ -44,10 +44,10 @@ public interface AttachmentClickListener extends Serializable {
 
         /**
          * Gets the unique identifier for the message containing the clicked
-         * attachment. This is the same ID provided in
-         * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
+         * attachment. This is the same id provided in
+         * {@link RequestListener.RequestEvent#getMessageId()}.
          *
-         * @return the message ID
+         * @return the message id
          */
         public String getMessageId() {
             return messageId;

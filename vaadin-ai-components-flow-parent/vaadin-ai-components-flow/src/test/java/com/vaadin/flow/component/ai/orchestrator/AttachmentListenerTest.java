@@ -67,11 +67,11 @@ class AttachmentListenerTest {
                 .thenReturn(Collections.emptyList());
     }
 
-    // --- AttachmentSubmitListener tests ---
+    // --- RequestListener tests ---
 
     @Test
     void submitListener_withAttachments_isCalled() {
-        var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
         var attachment = createAttachment("file.txt");
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(attachment));
@@ -79,7 +79,7 @@ class AttachmentListenerTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(receivedEvent::set).build();
+                .withRequestListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
         Assertions.assertNotNull(receivedEvent.get());
@@ -91,7 +91,7 @@ class AttachmentListenerTest {
 
     @Test
     void submitListener_withMultipleAttachments_receivesAll() {
-        var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("a.txt"),
                         createAttachment("b.txt"), createAttachment("c.txt")));
@@ -99,23 +99,58 @@ class AttachmentListenerTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(receivedEvent::set).build();
+                .withRequestListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
         Assertions.assertEquals(3, receivedEvent.get().getAttachments().size());
     }
 
     @Test
-    void submitListener_withoutAttachments_isNotCalled() {
-        var receivedEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
+    void requestListener_withoutAttachments_firesWithEmptyAttachmentList() {
+        // RequestListener fires on every prompt, regardless of whether
+        // attachments are present. When none are attached the event carries
+        // an empty list — same generic "request being submitted" hook
+        // listener users get, replacing the old "only fires with
+        // attachments" semantics.
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(receivedEvent::set).build();
+                .withRequestListener(receivedEvent::set).build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertNull(receivedEvent.get());
+        Assertions.assertNotNull(receivedEvent.get(),
+                "RequestListener must fire on every prompt");
+        Assertions.assertTrue(receivedEvent.get().getAttachments().isEmpty(),
+                "Attachments list must be empty when no files were uploaded");
+        Assertions.assertEquals("Hello", receivedEvent.get().getUserMessage());
+    }
+
+    @Test
+    void requestListener_messageId_equalsStoredChatMessageMessageId() {
+        // The listener's whole reason to ship a messageId is downstream
+        // correlation — the same id must end up on the user ChatMessage in
+        // history, so a developer keying attachment storage by the listener's
+        // id can find it later via history.
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("file.txt")));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver)
+                .withRequestListener(receivedEvent::set).build();
+        orchestrator.prompt("Hello");
+
+        var listenerId = receivedEvent.get().getMessageId();
+        var historyIds = orchestrator.getHistory().stream()
+                .map(msg -> msg.messageId()).filter(java.util.Objects::nonNull)
+                .toList();
+        Assertions.assertTrue(historyIds.contains(listenerId),
+                "RequestEvent.messageId must match the ChatMessage.messageId "
+                        + "stored in history. Listener got: " + listenerId
+                        + "; history has: " + historyIds);
     }
 
     @Test
@@ -133,7 +168,7 @@ class AttachmentListenerTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(event -> {
+                .withRequestListener(event -> {
                     if (callCount[0]++ == 0) {
                         firstId.set(event.getMessageId());
                     } else {
@@ -173,7 +208,7 @@ class AttachmentListenerTest {
 
     @Test
     void clickCallback_translatesMessageToMessageId() {
-        var receivedSubmitEvent = new AtomicReference<AttachmentSubmitListener.AttachmentSubmitEvent>();
+        var receivedSubmitEvent = new AtomicReference<RequestListener.RequestEvent>();
         var receivedClickEvent = new AtomicReference<AttachmentClickListener.AttachmentClickEvent>();
 
         Mockito.when(mockFileReceiver.takeAttachments())
@@ -185,7 +220,7 @@ class AttachmentListenerTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(receivedSubmitEvent::set)
+                .withRequestListener(receivedSubmitEvent::set)
                 .withAttachmentClickListener(receivedClickEvent::set).build();
 
         Mockito.verify(mockMessageList)
