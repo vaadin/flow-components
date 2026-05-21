@@ -31,7 +31,6 @@ public class ComboBoxFocusSelectedItemIT extends AbstractComboBoxIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("vaadin-combo-box"));
     }
 
     @Test

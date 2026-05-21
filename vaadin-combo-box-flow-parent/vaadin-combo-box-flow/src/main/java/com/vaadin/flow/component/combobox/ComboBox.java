@@ -390,11 +390,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * index can be resolved against the current sorting. Opening the dropdown
      * throws {@link UnsupportedOperationException} otherwise.
      * <p>
-     * The setting is a silent no-op when:
-     * <ul>
-     * <li>no value is currently selected, or</li>
-     * <li>the resolved index cannot be determined.</li>
-     * </ul>
      *
      * @param focusSelectedItem
      *            {@code true} to scroll to and focus the selected item when the

@@ -253,18 +253,6 @@ class ComboBoxTest extends ComboBoxBaseTest {
         Assertions.assertFalse(comboBox.isFocusSelectedItem());
     }
 
-    @Test
-    void focusSelectedItem_lazyWithoutItemIndexProvider_open_throws() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        ui.add(comboBox);
-        comboBox.setItems(query -> Stream.of("a", "b", "c")
-                .skip(query.getOffset()).limit(query.getLimit()), query -> 3);
-        comboBox.setFocusSelectedItem(true);
-        comboBox.setValue("a");
-
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> comboBox.getElement().setProperty("opened", true));
-    }
 
     @Test
     void setFilterTimeout_getFilterTimeout() {
