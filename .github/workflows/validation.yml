@@ -165,6 +165,8 @@ jobs:
       matrix:        ${{ steps.shards.outputs.matrix }}
       has-tests:     ${{ steps.shards.outputs.has-tests }}
       war-cache-key: ${{ steps.war-key.outputs.key }}
+      unit-failed:   ${{ steps.type-failed.outputs.unit }}
+      wtr-failed:    ${{ steps.type-failed.outputs.wtr }}
     strategy:
       fail-fast: true
       matrix:
@@ -354,6 +356,11 @@ jobs:
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
+      - name: Record job type on failure
+        id: type-failed
+        if: always() && failure()
+        run: echo "${{ matrix.type }}=true" >> "$GITHUB_OUTPUT"
+
   its:
     name: ITs (${{ matrix.shard }})
     needs: [build, fast-tests]
@@ -526,6 +533,9 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
+      - name: Unit test compilation error
+        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.outputs.unit-failed == 'true'
+        run: echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
         id: it-check
@@ -572,6 +582,9 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
+      - name: WTR setup error
+        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.outputs.wtr-failed == 'true'
+        run: echo ":x: WTR tests did not produce results. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'
