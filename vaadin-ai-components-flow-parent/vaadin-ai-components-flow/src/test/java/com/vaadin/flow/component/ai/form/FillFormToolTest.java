@@ -680,8 +680,8 @@ class FillFormToolTest {
 
     /**
      * Executes the {@code fill_form} tool with a field-id → value map. Wraps
-     * the map in the {@code values} key the tool's parameter schema requires
-     * so individual tests can stay focused on the field map.
+     * the map in the {@code values} key the tool's parameter schema requires so
+     * individual tests can stay focused on the field map.
      */
     private static String fillFormPayload(FormAIController controller,
             JsonNode fieldMap) {

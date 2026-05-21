@@ -280,14 +280,13 @@ final class FormAITools {
      * that cache prompt prefixes (system prompt + tool defs) hit the cache on
      * every subsequent prompt. The LLM discovers per-field shape via
      * {@code get_form_state} on each turn; this keeps the two tools' view of
-     * the form coherent and lets structural changes between tool calls within
-     * a single turn surface on the next {@code get_form_state} call (the
-     * dynamic per-field shape would freeze at stream open and silently miss
-     * such changes).
+     * the form coherent and lets structural changes between tool calls within a
+     * single turn surface on the next {@code get_form_state} call (the dynamic
+     * per-field shape would freeze at stream open and silently miss such
+     * changes).
      * <p>
-     * The {@code values} wrapper exists so future top-level parameters
-     * (e.g. a {@code dryRun} flag) can be added without breaking the
-     * field-map shape.
+     * The {@code values} wrapper exists so future top-level parameters (e.g. a
+     * {@code dryRun} flag) can be added without breaking the field-map shape.
      * <p>
      * Per-field type validation is enforced server-side by
      * {@code FormValueConverter.convert(...)} — failures surface in the
