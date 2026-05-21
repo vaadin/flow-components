@@ -518,12 +518,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Unit Tests header
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish unit test results
         id: unit-dorny
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Unit Tests
@@ -534,7 +534,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Unit test compilation error
-        if: needs.fast-tests.outputs.unit-failed == 'true' && steps.unit-dorny.outputs.conclusion != 'failure'
+        if: needs.fast-tests.outputs.unit-failed == 'true' && env.has_failures != 'true'
         run: |
           echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
