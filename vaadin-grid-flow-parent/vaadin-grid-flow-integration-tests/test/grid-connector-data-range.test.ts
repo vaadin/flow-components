@@ -14,6 +14,8 @@ describe('grid connector - data range', () => {
   let rootSize: number;
 
   function setRootItemsRange(start: number, count: number) {
+    const items = Array.from({ length: rootSize }, (_, i) => ({ key: `${i}`, name: `Item-${i}` }));
+
     grid.$connector.updateSize(rootSize);
 
     count = Math.min(count, rootSize - start);
@@ -24,10 +26,6 @@ describe('grid connector - data range', () => {
     if (lastRequestedRange) {
       grid.$connector.clear(lastRequestedRange[0], lastRequestedRange[1]);
     }
-
-    const items = Array.from({ length: rootSize }, (_, i) => {
-      return { key: `${i}`, name: `Item-${i}` };
-    });
 
     grid.$connector.set(start, items.slice(start, start + count));
     grid.$connector.confirm(-1);
