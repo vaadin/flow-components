@@ -511,6 +511,26 @@ class FormAIControllerTest {
     class BinderDescriptionSeeding {
 
         @Test
+        void noBinderControllerSeedingIsNoOpAndDoesNotThrow() {
+            // The 1-arg constructor leaves binder == null; the per-turn
+            // seeding must short-circuit before reflection tries to read
+            // Binder.boundProperties off a null receiver — otherwise every
+            // turn for every plain-form controller would NPE inside
+            // Field.get(null) (caught by BinderReflection's outer try /
+            // catch, but log-spammed at WARN every onRequestStart).
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+
+            Assertions.assertDoesNotThrow(controller::onRequestStart);
+            // And no description got seeded — the no-binder path simply
+            // didn't run.
+            Assertions.assertTrue(
+                    formStateFields(controller).get(0).path("description")
+                            .isMissingNode(),
+                    "No-binder controller must not seed any description");
+        }
+
+        @Test
         void boundFieldPropertyNameSurfacesInDescription() {
             // A named binding contributes the bean property name as the
             // default description; with no label or helper text, that's the

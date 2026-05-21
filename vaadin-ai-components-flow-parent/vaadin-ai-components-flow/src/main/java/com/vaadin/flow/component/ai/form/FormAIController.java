@@ -23,17 +23,28 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
+import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Populates a layout's fields with values an LLM extracts from a user prompt or
@@ -89,6 +100,9 @@ import com.vaadin.flow.data.binder.Binder;
  * @author Vaadin Ltd
  */
 public class FormAIController implements AIController {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FormAIController.class);
 
     /**
      * Key under which a field's opaque id is stored on the field component via
@@ -317,6 +331,11 @@ public class FormAIController implements AIController {
      * always wins because the seeding only fills in nulls.
      */
     private void seedDescriptionsFromBinder() {
+        if (binder == null) {
+            // Controllers created with the no-binder constructor have
+            // nothing to seed.
+            return;
+        }
         var propertyNames = BinderReflection.collectPropertyNames(binder);
         for (var entry : propertyNames.entrySet()) {
             var field = entry.getKey();
@@ -432,6 +451,111 @@ public class FormAIController implements AIController {
             }
             return new ArrayList<>(
                     hints.valueOptionsQuery.apply(filter, limit));
+        }
+
+        @Override
+        public String executeFill(JsonNode arguments) {
+            var ui = form.getUI().orElse(null);
+            // Run inline when there's no UI to hop to (unit tests, detached
+            // form) or when the calling thread is already that UI's thread
+            // (e.g. a click handler). Only background reactor threads need
+            // the ui.access + wait hop.
+            if (ui == null || UI.getCurrent() == ui) {
+                return doFill(arguments);
+            }
+            var future = new CompletableFuture<String>();
+            ui.access(() -> {
+                try {
+                    future.complete(doFill(arguments));
+                } catch (Throwable t) {
+                    future.completeExceptionally(t);
+                }
+            });
+            try {
+                return future.get();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return "Error: fill interrupted.";
+            } catch (ExecutionException ex) {
+                LOGGER.warn("fill_form execution failed", ex.getCause());
+                return "Error: fill failed.";
+            }
+        }
+
+        private String doFill(JsonNode arguments) {
+            var written = new ArrayList<String>();
+            var rejected = new ArrayList<String>();
+            for (var field : visibleFields()) {
+                if (!arguments.has(field.id())) {
+                    continue;
+                }
+                applyValue(field, arguments.get(field.id()), written, rejected);
+            }
+            return formatWriteSummary(written, rejected);
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        private void applyValue(FormFieldDescriptor field, JsonNode value,
+                List<String> written, List<String> rejected) {
+            Object converted;
+            try {
+                converted = FormValueConverter.convert(field, value);
+            } catch (RejectedValueException ex) {
+                LOGGER.debug("Rejected value for field {}: {}", field.id(),
+                        ex.getMessage());
+                rejected.add(displayName(field) + " (" + ex.getMessage() + ")");
+                return;
+            }
+            @SuppressWarnings({ "rawtypes" })
+            HasValue raw = field.field();
+            try {
+                raw.setValue(converted);
+                written.add(displayName(field) + ": "
+                        + FormValueConverter.displayValue(field));
+            } catch (Exception ex) {
+                LOGGER.debug("setValue rejected for field {}: {}", field.id(),
+                        ex.getMessage());
+                rejected.add(displayName(field));
+            }
+        }
+
+        private String formatWriteSummary(List<String> written,
+                List<String> rejected) {
+            if (written.isEmpty() && rejected.isEmpty()) {
+                return "No changes.";
+            }
+            var b = new StringBuilder();
+            if (!written.isEmpty()) {
+                b.append("Written:\n");
+                written.forEach(
+                        line -> b.append("  ").append(line).append('\n'));
+            }
+            if (!rejected.isEmpty()) {
+                b.append("Rejected:\n");
+                rejected.forEach(
+                        line -> b.append("  ").append(line).append('\n'));
+            }
+            return b.toString();
+        }
+
+        /**
+         * Returns the line label the {@code Written:} / {@code Rejected:}
+         * blocks use — the field's label when set, otherwise its description
+         * hint, otherwise the opaque UUID id as a last-resort fallback so every
+         * line still carries something the LLM can correlate.
+         */
+        private String displayName(FormFieldDescriptor field) {
+            if (field.field() instanceof HasLabel hl) {
+                var label = hl.getLabel();
+                if (label != null && !label.isBlank()) {
+                    return label;
+                }
+            }
+            if (field.hints() != null && field.hints().description != null
+                    && !field.hints().description.isBlank()) {
+                return field.hints().description;
+            }
+            return field.id();
         }
     }
 }
