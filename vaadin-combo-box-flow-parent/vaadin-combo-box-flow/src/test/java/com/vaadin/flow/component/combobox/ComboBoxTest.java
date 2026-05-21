@@ -239,6 +239,21 @@ class ComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
+    void focusSelectedItem_defaultsToFalse() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
+    void setFocusSelectedItem_isFocusSelectedItem() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setFocusSelectedItem(true);
+        Assertions.assertTrue(comboBox.isFocusSelectedItem());
+        comboBox.setFocusSelectedItem(false);
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
     void setFilterTimeout_getFilterTimeout() {
         ComboBox<String> comboBox = new ComboBox<>();
         Assertions.assertEquals(500, comboBox.getFilterTimeout());
