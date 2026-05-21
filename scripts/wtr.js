@@ -25,7 +25,32 @@ async function computeModules() {
 
 const wtrTestsFolderName = 'test';
 
-function runTests() {
+async function appendSessionError(xmlPath, error) {
+  let xml;
+  if (fs.existsSync(xmlPath)) {
+    xml = await xml2js.parseStringPromise(fs.readFileSync(xmlPath, 'utf8'));
+    if (!xml.testsuites.testsuite) {
+      xml.testsuites.testsuite = [];
+    }
+  } else {
+    xml = { testsuites: { $: {}, testsuite: [] } };
+  }
+  const hasFailures = xml.testsuites.testsuite?.some(
+    (s) => parseInt(s.$.failures || '0') > 0 || parseInt(s.$.errors || '0') > 0
+  );
+  if (hasFailures) return;
+
+  xml.testsuites.testsuite.push({
+    $: { name: 'WTR Session', tests: '1', failures: '1', errors: '0', skipped: '0', time: '0' },
+    testcase: [{
+      $: { name: 'Browser session completed cleanly', classname: 'WTR Session', time: '0' },
+      failure: [{ _: `WTR exited with code ${error.status}: ${error.message}`, $: { message: 'WTR session error' } }]
+    }]
+  });
+  fs.writeFileSync(xmlPath, new xml2js.Builder().buildObject(xml));
+}
+
+async function runTests() {
   for (const module of modules) {
     const id = module.replace('-parent', '');
     const itFolder = `${module}/${id}-integration-tests`;
@@ -79,13 +104,21 @@ function runTests() {
 
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
+      let wtrError = null;
       try {
         execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve --config wtr-ci.config.mjs`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
+      } catch (e) {
+        wtrError = e;
       } finally {
         fs.unlinkSync(ciConfigPath);
+      }
+
+      if (wtrError) {
+        await appendSessionError(`${itFolder}/wtr-results.xml`, wtrError);
+        throw wtrError;
       }
     }
   }
@@ -93,7 +126,7 @@ function runTests() {
 
 async function main() {
   await computeModules();
-  runTests();
+  await runTests();
 }
 
 main();
