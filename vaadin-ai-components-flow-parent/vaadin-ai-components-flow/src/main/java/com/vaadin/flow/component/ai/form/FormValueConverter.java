@@ -23,10 +23,12 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +46,11 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * The read path — emptiness check, single-item rendering via
  * {@link ItemLabelGenerator}, and {@link ListDataProvider} extraction — backs
- * the {@code get_form_state} JSON output. The write path — JSON-to-typed
- * conversion plus {@code Current state:} rendering — backs the
- * {@code fill_form} tool. Reflective lookups are used for the data-view /
- * label-generator accessors so this module does not need a compile-time
- * dependency on every individual selection-component module.
+ * the {@code get_form_state} JSON output. The write path —
+ * {@link #convert(FormFieldDescriptor, JsonNode) JSON-to-typed conversion} —
+ * backs the {@code fill_form} tool. Reflective lookups are used for the
+ * data-view / label-generator accessors so this module does not need a
+ * compile-time dependency on every individual selection-component module.
  */
 final class FormValueConverter {
 
@@ -161,11 +163,12 @@ final class FormValueConverter {
 
     /**
      * Signals that an LLM-supplied value could not be applied to a field. The
-     * {@link #getMessage() message} is surfaced verbatim in the
-     * {@code Rejected:} block of the {@code fill_form} tool result so the LLM
-     * sees the same reason that's logged; the field stays on its prior value.
-     * Reason text is written here in {@link FormValueConverter} and is curated
-     * for LLM consumption (no PII, no internal state).
+     * {@link #getMessage() message} is surfaced verbatim as the {@code reason}
+     * of the matching entry in the {@code fill_form} tool's {@code rejected}
+     * array, so the LLM sees the same reason that's logged; the field stays on
+     * its prior value. Reason text is written here in
+     * {@link FormValueConverter} and is curated for LLM consumption (no PII, no
+     * internal state).
      */
     static final class RejectedValueException extends RuntimeException {
         RejectedValueException(String message) {
@@ -178,11 +181,36 @@ final class FormValueConverter {
      * {@link HasValue#setValue}. Returns the field's empty value when the JSON
      * node is {@code null} or a JSON {@code null}. Throws
      * {@link RejectedValueException} when the JSON shape doesn't match the
-     * field's type.
+     * field's type, or when the registered {@code valueOptions} cannot resolve
+     * a label.
+     * <p>
+     * <b>Selection and {@code valueOptions} routing:</b> when a field has a
+     * {@code valueOptionsToValue} registered, the LLM sees the field as an
+     * {@code enum} or {@code queryable} string in {@code get_form_state} and
+     * picks one or more labels. The label-to-value resolution happens here so
+     * the resulting object matches the field's value type before
+     * {@link HasValue#setValue} sees it. Multi-select fields expect a JSON
+     * array of labels; single-select and other label-routed fields expect a
+     * single string. Selection fields without a {@code valueOptions}
+     * registration are rejected with a curated reason naming the missing
+     * registration.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
             return field.field().getEmptyValue();
+        }
+        // Multi-select takes an array of labels and applies toValue per
+        // element; handled before the valueOptions check so the array shape
+        // is enforced even on fields whose value type is itself a String set.
+        if (field.type() == FormFieldType.MULTI_SELECT) {
+            return convertMultiSelect(field, value);
+        }
+        // Once valueOptions is registered the LLM picks a label, regardless
+        // of the field's underlying value type — type-driven parsing would
+        // hand setValue a raw String and the field would reject it.
+        var hints = field.hints();
+        if (hints != null && hints.valueOptionsToValue != null) {
+            return convertSingleLabel(value, hints.valueOptionsToValue);
         }
         return switch (field.type()) {
         case STRING, EMAIL -> convertString(value);
@@ -193,9 +221,92 @@ final class FormValueConverter {
         case DATE -> convertDate(value);
         case DATE_TIME -> convertDateTime(value);
         case TIME -> convertTime(value);
+        case SINGLE_SELECT -> throw new RejectedValueException(
+                "Selection field has no value options registered — register "
+                        + "options via FormAIController.valueOptions(...) "
+                        + "so the AI knows what to pick.");
         default -> throw new RejectedValueException(
                 "Unsupported field type: " + field.type());
         };
+    }
+
+    private static Object convertSingleLabel(JsonNode value,
+            Function<String, ?> toValue) {
+        if (!value.isString()) {
+            throw new RejectedValueException(
+                    "Expected string label, got " + value);
+        }
+        return resolveLabel(value.asString(), toValue);
+    }
+
+    private static Object convertMultiSelect(FormFieldDescriptor field,
+            JsonNode value) {
+        var hints = field.hints();
+        var toValue = hints != null ? hints.valueOptionsToValue : null;
+        if (toValue == null) {
+            throw new RejectedValueException(
+                    "Multi-select field has no value options registered — "
+                            + "register options via "
+                            + "FormAIController.valueOptions(...) so the AI "
+                            + "knows what to pick.");
+        }
+        if (!value.isArray()) {
+            throw new RejectedValueException(
+                    "Expected array of string labels, got " + value);
+        }
+        // Empty array is the LLM clearing the field; defer to the field's
+        // own emptyValue() so the type matches what setValue expects (Vaadin
+        // multi-selects return Set.of()).
+        if (value.isEmpty()) {
+            return field.field().getEmptyValue();
+        }
+        var result = new LinkedHashSet<>();
+        for (var node : value) {
+            if (!node.isString()) {
+                throw new RejectedValueException(
+                        "Expected string label, got " + node);
+            }
+            var resolved = resolveLabel(node.asString(), toValue);
+            // valueOptions' typed signature forces toValue to return the
+            // field's value type, which for a multi-select is Set<Item>.
+            // Flatten the per-label Set into the aggregate so callers can
+            // naturally write `label -> Set.of(items.get(label))`. A non-
+            // Collection result (developer dropped the Set wrap by casting
+            // the field argument to a raw HasValue) is added directly. The
+            // runtime branch absorbs the API-typing friction so multi-
+            // select works through the existing valueOptions API without
+            // forcing a new method on the controller.
+            if (resolved instanceof Collection<?> c) {
+                result.addAll(c);
+            } else {
+                result.add(resolved);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Resolves one LLM-supplied label via the application's
+     * {@code valueOptionsToValue}. Wraps the application's throw and the
+     * application's {@code null} return into curated rejection reasons — both
+     * surface back to the LLM verbatim through the {@code rejected} block, so
+     * the message must not leak third-party detail.
+     */
+    private static Object resolveLabel(String label,
+            Function<String, ?> toValue) {
+        Object resolved;
+        try {
+            resolved = toValue.apply(label);
+        } catch (RuntimeException ex) {
+            LOGGER.debug("valueOptionsToValue threw for label {}", label, ex);
+            throw new RejectedValueException(
+                    "Could not resolve label '" + label + "' to a value.");
+        }
+        if (resolved == null) {
+            throw new RejectedValueException(
+                    "No matching option for label: " + label);
+        }
+        return resolved;
     }
 
     private static String convertString(JsonNode value) {
@@ -281,29 +392,4 @@ final class FormValueConverter {
         }
     }
 
-    /**
-     * Renders the field's current value for the {@code fill_form} tool's
-     * {@code Written:} write-summary block. Returns {@code <empty>} for null /
-     * empty inputs, comma-separates collections, and falls through to
-     * {@link String#valueOf} for the rest.
-     */
-    static String displayValue(FormFieldDescriptor field) {
-        var value = field.field().getValue();
-        if (isEmpty(value)) {
-            return "<empty>";
-        }
-        if (value instanceof Collection<?> coll) {
-            var b = new StringBuilder();
-            var first = true;
-            for (var v : coll) {
-                if (!first) {
-                    b.append(", ");
-                }
-                b.append(renderItem(field.field(), v));
-                first = false;
-            }
-            return b.toString();
-        }
-        return renderItem(field.field(), value);
-    }
 }

@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.form;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,15 +35,14 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
 
@@ -189,6 +189,16 @@ public class FormAIController implements AIController {
      * options as the labels the LLM should see; the {@code toValue} function
      * converts a chosen label back to the field's value type. Later calls for
      * the same field overwrite earlier ones.
+     * <p>
+     * <b>Multi-select fields:</b> a multi-select's value type is
+     * {@code Set<Item>}, so the typed signature forces {@code toValue} to
+     * return {@code Set<Item>}. Write {@code toValue} to return a single-item
+     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}); the
+     * orchestrator aggregates the per-label sets into the final selection
+     * before calling {@link HasValue#setValue setValue}. A
+     * {@code Function<String, Item>} also works through an unchecked cast on
+     * the {@code field} argument, dropping the {@code Set} wrap; the
+     * orchestrator collects single items into the aggregate set the same way.
      *
      * @param field
      *            the field whose options the LLM may query, not {@code null}
@@ -328,14 +338,11 @@ public class FormAIController implements AIController {
      * for any bound field that does not already have an explicit description.
      * Called at the start of every turn so bindings added or removed between
      * turns are reflected; an explicit {@link #describe(HasValue, String)}
-     * always wins because the seeding only fills in nulls.
+     * always wins because the seeding only fills in nulls. Safe to call when
+     * the controller was built without a binder — {@link BinderReflection}
+     * returns an empty map for a {@code null} binder.
      */
     private void seedDescriptionsFromBinder() {
-        if (binder == null) {
-            // Controllers created with the no-binder constructor have
-            // nothing to seed.
-            return;
-        }
         var propertyNames = BinderReflection.collectPropertyNames(binder);
         for (var entry : propertyNames.entrySet()) {
             var field = entry.getKey();
@@ -455,14 +462,18 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            var ui = form.getUI().orElse(null);
-            // Run inline when there's no UI to hop to (unit tests, detached
-            // form) or when the calling thread is already that UI's thread
-            // (e.g. a click handler). Only background reactor threads need
-            // the ui.access + wait hop.
-            if (ui == null || UI.getCurrent() == ui) {
-                return doFill(arguments);
-            }
+            // The fill always hops through ui.access so writes land on the
+            // UI thread with CurrentInstance bound, regardless of whether
+            // the LLM provider invoked the tool from a reactor scheduler
+            // thread (the production path) or directly from the UI thread
+            // itself (in which case ui.access runs the lambda synchronously
+            // and future.get() returns immediately, so the hop is a no-op).
+            // A controller whose form isn't attached to a UI is a
+            // configuration error — fail fast rather than write silently
+            // to a detached state tree.
+            var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
+                    "fill_form invoked on a controller whose form is not "
+                            + "attached to a UI"));
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
@@ -483,79 +494,83 @@ public class FormAIController implements AIController {
         }
 
         private String doFill(JsonNode arguments) {
+            // Snapshot the visible-field set once and iterate the payload so
+            // every id the LLM sent ends up either in 'written' or
+            // 'rejected'. Iterating visibleFields() instead would silently
+            // drop unknown ids — the LLM would have no way to learn that an
+            // id from a previous turn is stale and trigger a refresh.
+            var byId = new LinkedHashMap<String, FormFieldDescriptor>();
+            for (var descriptor : visibleFields()) {
+                byId.put(descriptor.id(), descriptor);
+            }
             var written = new ArrayList<String>();
-            var rejected = new ArrayList<String>();
-            for (var field : visibleFields()) {
-                if (!arguments.has(field.id())) {
+            var rejected = new ArrayList<RejectedEntry>();
+            for (var id : arguments.propertyNames()) {
+                var field = byId.get(id);
+                if (field == null) {
+                    rejected.add(new RejectedEntry(id,
+                            "Unknown field id '" + id
+                                    + "'. Call get_form_state to refresh the "
+                                    + "id list and retry only this entry."));
                     continue;
                 }
-                applyValue(field, arguments.get(field.id()), written, rejected);
+                applyValue(field, arguments.get(id), written, rejected);
             }
-            return formatWriteSummary(written, rejected);
+            return formatResult(written, rejected);
         }
 
-        @SuppressWarnings({ "unchecked" })
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private void applyValue(FormFieldDescriptor field, JsonNode value,
-                List<String> written, List<String> rejected) {
+                List<String> written, List<RejectedEntry> rejected) {
             Object converted;
             try {
                 converted = FormValueConverter.convert(field, value);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());
-                rejected.add(displayName(field) + " (" + ex.getMessage() + ")");
+                rejected.add(new RejectedEntry(field.id(), ex.getMessage()));
                 return;
             }
-            @SuppressWarnings({ "rawtypes" })
             HasValue raw = field.field();
             try {
                 raw.setValue(converted);
-                written.add(displayName(field) + ": "
-                        + FormValueConverter.displayValue(field));
+                written.add(field.id());
             } catch (Exception ex) {
                 LOGGER.debug("setValue rejected for field {}: {}", field.id(),
                         ex.getMessage());
-                rejected.add(displayName(field));
+                // setValue's exception text comes from third-party / Vaadin
+                // code — drop it and surface a curated reason so the LLM
+                // gets nothing the application didn't sanction.
+                rejected.add(new RejectedEntry(field.id(),
+                        "Field rejected the value."));
             }
-        }
-
-        private String formatWriteSummary(List<String> written,
-                List<String> rejected) {
-            if (written.isEmpty() && rejected.isEmpty()) {
-                return "No changes.";
-            }
-            var b = new StringBuilder();
-            if (!written.isEmpty()) {
-                b.append("Written:\n");
-                written.forEach(
-                        line -> b.append("  ").append(line).append('\n'));
-            }
-            if (!rejected.isEmpty()) {
-                b.append("Rejected:\n");
-                rejected.forEach(
-                        line -> b.append("  ").append(line).append('\n'));
-            }
-            return b.toString();
         }
 
         /**
-         * Returns the line label the {@code Written:} / {@code Rejected:}
-         * blocks use — the field's label when set, otherwise its description
-         * hint, otherwise the opaque UUID id as a last-resort fallback so every
-         * line still carries something the LLM can correlate.
+         * Builds the {@code fill_form} tool's JSON response:
+         * {@code {"success": bool, "written": [ids], "rejected": [{"id",
+         * "reason"}]}}. {@code success} is {@code true} iff {@code rejected} is
+         * empty. Ids are the only stable per-field reference (labels can
+         * collide, descriptions get truncated), so the LLM has unambiguous
+         * attribution for a retry of only the rejected entries.
          */
-        private String displayName(FormFieldDescriptor field) {
-            if (field.field() instanceof HasLabel hl) {
-                var label = hl.getLabel();
-                if (label != null && !label.isBlank()) {
-                    return label;
-                }
+        private String formatResult(List<String> written,
+                List<RejectedEntry> rejected) {
+            var root = JacksonUtils.createObjectNode();
+            root.put("success", rejected.isEmpty());
+            var writtenArr = root.putArray("written");
+            written.forEach(writtenArr::add);
+            var rejectedArr = root.putArray("rejected");
+            for (var entry : rejected) {
+                var node = rejectedArr.addObject();
+                node.put("id", entry.id());
+                node.put("reason", entry.reason());
             }
-            if (field.hints() != null && field.hints().description != null
-                    && !field.hints().description.isBlank()) {
-                return field.hints().description;
-            }
-            return field.id();
+            return root.toString();
         }
+    }
+
+    /** One rejected entry in the {@code fill_form} JSON response. */
+    private record RejectedEntry(String id, String reason) {
     }
 }

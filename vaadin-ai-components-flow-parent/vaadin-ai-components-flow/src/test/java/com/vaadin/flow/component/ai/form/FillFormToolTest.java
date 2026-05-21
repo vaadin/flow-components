@@ -22,9 +22,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -35,39 +40,44 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DateTimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
+import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
 
 /**
- * Tests for {@link FormAIController}'s {@code fill_form} tool. Each test drives
- * the tool the way the LLM would — finds the tool, executes a JSON payload
- * keyed by each field's id, and asserts the field's {@link HasValue#getValue()}
- * reflects the conversion. The tool's response is a plain-text write-summary
- * with {@code Written:} and {@code Rejected:} blocks; tests assert against it
- * where it matters.
+ * Tests for {@link FormAIController}'s {@code fill_form} tool. The tool returns
+ * a JSON object the LLM reads back —
+ * {@code {"success": <bool>, "written": [field-ids], "rejected": [{"id":
+ * <field-id>, "reason": "..."}]}}. Each test drives the tool the way the LLM
+ * would and asserts on the parsed response (success flag, per-id attribution)
+ * plus the field state. Tests that pin error strings outside the JSON happy
+ * path (e.g. malformed {@code arguments}) assert against the raw response
+ * string directly.
  */
 class FillFormToolTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
     void fillForm_writesStringValueToTextField() {
         var field = new LabeledStringField();
         field.setLabel("Name");
-        var result = fillFormPayload(controllerFor(field),
+        var result = fillFormResult(controllerFor(field),
                 payload(field, "\"Acme Corp\""));
 
         Assertions.assertEquals("Acme Corp", field.getValue());
-        Assertions.assertTrue(result.startsWith("Written:"),
-                "Result must start with the Written: block, got: " + result);
-        Assertions.assertTrue(result.contains("Name: Acme Corp"),
-                "Result must reflect the written value, got: " + result);
-        Assertions.assertFalse(result.contains("Rejected:"),
-                "Successful write must not produce a Rejected: block, got: "
-                        + result);
+        Assertions.assertTrue(success(result), "Result: " + result);
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertTrue(rejectedIds(result).isEmpty(),
+                "No rejections expected, got: " + result);
     }
 
     @Test
@@ -202,25 +212,40 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_unknownFieldIdInPayloadIsIgnored() {
-        // The LLM may hallucinate a field id (stale, mistyped, or fabricated).
-        // The tool must not throw — it iterates over visibleFields() and
-        // skips ids that aren't in the payload, and ignores keys in the
-        // payload that don't match any visible field.
+    void fillForm_unknownFieldIdInPayloadProducesRejectedEntry() {
+        // The LLM may send a field id that doesn't match any visible field
+        // (stale from a prior get_form_state, mistyped, ignored field
+        // forgery). The tool must reject that entry with a curated reason
+        // pointing back at get_form_state — silently dropping the entry
+        // would leave the LLM thinking the write succeeded.
         var field = new TestField();
         field.setValue("untouched");
         var controller = controllerFor(field);
         var args = JacksonUtils.createObjectNode();
         args.put("not-a-real-id", "garbage");
 
-        Assertions.assertDoesNotThrow(() -> fillFormPayload(controller, args));
-        Assertions.assertEquals("untouched", field.getValue());
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("untouched", field.getValue(),
+                "Unknown id must not move any field");
+        Assertions.assertFalse(success(result),
+                "Unknown id must mark the turn unsuccessful, got: " + result);
+        Assertions.assertTrue(writtenIds(result).isEmpty());
+        Assertions.assertEquals(List.of("not-a-real-id"), rejectedIds(result));
+        var reason = rejectionReason(result, "not-a-real-id");
+        Assertions.assertTrue(reason.contains("not-a-real-id"),
+                "Reason must name the unknown id; got: " + reason);
+        Assertions.assertTrue(reason.contains("get_form_state"),
+                "Reason must direct the LLM to refresh via "
+                        + "get_form_state; got: " + reason);
     }
 
     @Test
-    void fillForm_partialSuccessWritesValidFieldAndSkipsBadOne() {
+    void fillForm_partialSuccessLeavesBadFieldOnPriorValue() {
         // Mixed payload: name converts cleanly, amount fails. The valid
-        // field must land; the failed field must stay at its prior value.
+        // field must land; the failed field must stay on its prior value.
+        // The JSON response shape is covered separately by
+        // fillForm_partialSuccessHasWrittenAndRejectedSideBySide.
         var name = new TestField();
         var amount = new DoubleField();
         amount.setValue(99.0);
@@ -238,11 +263,14 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_ignoredFieldIsNotWrittenAndAbsentFromSummary() {
+    void fillForm_ignoredFieldIsNeverWrittenAndDoesNotLeakLabelOrValue() {
         // Ignored fields don't appear in get_form_state, so the LLM never
-        // learns the id. Even if the LLM forges the id into the payload,
-        // visibleFields() filters it out before any write attempt — and
-        // the field is absent from the write-summary either way.
+        // learns the id. If the LLM somehow forges the id (forged or
+        // carried over from a state it should no longer trust), the
+        // controller treats it the same as any unknown id: the rejected
+        // entry uses the generic "Unknown field id" wording, never
+        // anything that would acknowledge the field's existence (e.g.
+        // "ignored" or the label).
         var visible = new LabeledStringField();
         visible.setLabel("Visible");
         var secret = new LabeledStringField();
@@ -254,33 +282,34 @@ class FillFormToolTest {
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(visible), "set");
         args.put(idOf(secret), "leaked");
-        var result = fillFormPayload(controller, args);
+        var raw = fillFormPayload(controller, args);
+        var result = parseResult(raw);
 
         Assertions.assertEquals("set", visible.getValue());
         Assertions.assertEquals("original", secret.getValue(),
                 "Ignored field must never be written, even when its id "
                         + "appears in the payload");
-        // The forged id must not surface in either summary block: not in
-        // Written: (it wasn't written) and not in Rejected: (we don't even
-        // acknowledge that the LLM tried to address it). Pin both the id
-        // and the display label.
-        Assertions.assertFalse(result.contains(idOf(secret)),
-                "Ignored field's id must not appear in the write-summary, "
-                        + "got: " + result);
-        Assertions.assertFalse(result.contains("Secret"),
-                "Ignored field's display label must not appear in the "
-                        + "write-summary, got: " + result);
-        Assertions.assertFalse(result.contains("leaked"),
+        Assertions.assertEquals(List.of(idOf(secret)), rejectedIds(result),
+                "Forged id must surface in rejected as if it were unknown");
+        var reason = rejectionReason(result, idOf(secret));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "Reason must use the generic unknown-id wording, not a "
+                        + "special 'ignored field' message that would leak "
+                        + "the field's existence; got: " + reason);
+        Assertions.assertFalse(raw.contains("Secret"),
+                "Ignored field's label must not appear in the response, "
+                        + "got: " + raw);
+        Assertions.assertFalse(raw.contains("leaked"),
                 "The forged payload value targeting the ignored field "
-                        + "must not be echoed back, got: " + result);
+                        + "must not be echoed back, got: " + raw);
     }
 
     @Test
-    void fillForm_passwordFieldIsNeverWrittenEvenWithPayload() {
+    void fillForm_passwordFieldIsNeverWrittenAndDoesNotLeakLabelOrValue() {
         // PasswordField classifies as UNSUPPORTED so visibleFields() never
-        // includes it. Same protection as ignore(): get_form_state doesn't
-        // surface the id, and even if the LLM forges it into the payload,
-        // visibleFields() filters it out before any write attempt.
+        // includes it. Same protection as ignore(): forged ids surface as
+        // generic "Unknown field id" rejections — the label, value, and
+        // even the UNSUPPORTED classification stay out of the response.
         var password = new PasswordField("Password");
         password.setValue("untouched");
         var controller = controllerFor(password);
@@ -290,25 +319,25 @@ class FillFormToolTest {
         // payload to verify the controller still skips it.
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(password), "leaked");
-        var result = fillFormPayload(controller, args);
+        var raw = fillFormPayload(controller, args);
+        var result = parseResult(raw);
 
         Assertions.assertEquals("untouched", password.getValue());
-        // The PasswordField's id, label, and the forged value must not
-        // appear in the write-summary — the LLM must not see the field's
-        // existence acknowledged via either block.
-        Assertions.assertFalse(result.contains(idOf(password)),
-                "PasswordField's id must not appear in the write-summary, "
-                        + "got: " + result);
-        Assertions.assertFalse(result.contains("Password"),
-                "PasswordField's label must not appear in the "
-                        + "write-summary, got: " + result);
-        Assertions.assertFalse(result.contains("leaked"),
+        Assertions.assertEquals(List.of(idOf(password)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(password));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "Reason must use the generic unknown-id wording, not a "
+                        + "special 'unsupported' message; got: " + reason);
+        Assertions.assertFalse(raw.contains("Password"),
+                "PasswordField's label must not appear in the response, "
+                        + "got: " + raw);
+        Assertions.assertFalse(raw.contains("leaked"),
                 "The forged payload value targeting the PasswordField "
-                        + "must not be echoed back, got: " + result);
+                        + "must not be echoed back, got: " + raw);
     }
 
     @Test
-    void fillForm_writtenBlockListsAllWrittenFieldsWithValues() {
+    void fillForm_allWrittenIdsAppearInWrittenArray() {
         var name = new LabeledStringField();
         name.setLabel("Name");
         var amount = new DoubleField();
@@ -317,20 +346,22 @@ class FillFormToolTest {
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(name), "Acme");
         args.put(idOf(amount), 58.4);
-        var result = fillFormPayload(controller, args);
+        var result = fillFormResult(controller, args);
 
-        Assertions.assertTrue(result.contains("Name: Acme"),
-                "Written: block must list the name field, got: " + result);
-        Assertions.assertTrue(result.contains("58.4"),
-                "Written: block must list the amount value, got: " + result);
+        Assertions.assertTrue(success(result), "Result: " + result);
+        Assertions.assertTrue(writtenIds(result).contains(idOf(name)),
+                "Written must include the name id; got: " + result);
+        Assertions.assertTrue(writtenIds(result).contains(idOf(amount)),
+                "Written must include the amount id; got: " + result);
+        Assertions.assertTrue(rejectedIds(result).isEmpty());
     }
 
     @Test
-    void fillForm_writeSummaryDoesNotLeakUntouchedFields() {
-        // The write-summary lists only the fields the LLM attempted to
-        // write. Untouched fields — including ones that already have a
-        // user-typed value — must not appear so the tool result doesn't
-        // leak data the LLM never asked about.
+    void fillForm_writeResultDoesNotLeakUntouchedFields() {
+        // The response surfaces only ids the LLM attempted to write.
+        // Untouched fields — including ones that hold user-typed values —
+        // must not appear so the response doesn't disclose data the LLM
+        // never asked about.
         var written = new LabeledStringField();
         written.setLabel("Name");
         var untouched = new LabeledStringField();
@@ -340,124 +371,120 @@ class FillFormToolTest {
 
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(written), "Acme");
-        var result = fillFormPayload(controller, args);
+        var raw = fillFormPayload(controller, args);
+        var result = parseResult(raw);
 
-        Assertions.assertTrue(result.contains("Name: Acme"),
-                "Attempted field must appear in Written:, got: " + result);
-        Assertions.assertFalse(result.contains("Notes"),
-                "Untouched field must not appear in the write-summary, got: "
-                        + result);
-        Assertions.assertFalse(result.contains("user-typed secret"),
-                "Untouched field's value must never appear in the "
-                        + "write-summary, got: " + result);
+        Assertions.assertEquals(List.of(idOf(written)), writtenIds(result));
+        Assertions.assertTrue(rejectedIds(result).isEmpty());
+        Assertions.assertFalse(raw.contains(idOf(untouched)),
+                "Untouched field's id must not appear in the response, "
+                        + "got: " + raw);
+        Assertions.assertFalse(raw.contains("Notes"),
+                "Untouched field's label must not appear, got: " + raw);
+        Assertions.assertFalse(raw.contains("user-typed secret"),
+                "Untouched field's value must not appear, got: " + raw);
     }
 
     @Test
-    void fillForm_emptyPayloadReportsNoChanges() {
-        // When the LLM sends an empty payload, the tool didn't attempt any
-        // write. The response signals that explicitly so the LLM doesn't
-        // confuse a no-op with a missing response.
+    void fillForm_emptyPayloadReturnsSuccessWithEmptyArrays() {
+        // No payload means no writes attempted — success is true (no
+        // failures), both arrays are empty. The LLM uses the JSON shape
+        // to confirm it didn't accidentally fire a malformed turn.
         var name = new LabeledStringField();
         name.setLabel("Name");
         var controller = controllerFor(name);
 
-        var result = fillFormPayload(controller,
+        var result = fillFormResult(controller,
                 JacksonUtils.createObjectNode());
 
-        Assertions.assertEquals("No changes.", result.trim(),
-                "Empty payload must produce the No changes. sentinel, got: "
-                        + result);
+        Assertions.assertTrue(success(result),
+                "Empty payload is a no-op, not a failure; got: " + result);
+        Assertions.assertTrue(writtenIds(result).isEmpty());
+        Assertions.assertTrue(rejectedIds(result).isEmpty());
     }
 
     @Test
-    void fillForm_emptiedFieldStillAppearsInWrittenBlock() {
+    void fillForm_clearingFieldStillCountsAsWrite() {
         // JSON null clears a field — that's still a write the LLM made,
-        // and the write-summary must report it (as <empty>) so the LLM
-        // can confirm the clear landed.
+        // and the response must report it so the LLM can confirm the
+        // clear landed. The field's value is now empty.
         var name = new LabeledStringField();
         name.setLabel("Name");
         name.setValue("previous");
         var controller = controllerFor(name);
 
-        var result = fillFormPayload(controller, payload(name, "null"));
+        var result = fillFormResult(controller, payload(name, "null"));
 
         Assertions.assertEquals("", name.getValue());
-        Assertions.assertTrue(result.contains("Name: <empty>"),
-                "A cleared field must appear in Written: as <empty>, got: "
-                        + result);
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
     }
 
     @Test
-    void fillForm_rejectedBlockListsConversionFailureWithReason() {
-        // A type-mismatch lands the field in Rejected: with the converter's
-        // reason text verbatim — the LLM can use the message to fix its
-        // next attempt.
+    void fillForm_conversionFailureSurfacesIdAndReason() {
+        // A type-mismatch lands the field in 'rejected' with the
+        // converter's reason text verbatim — the LLM can use the message
+        // to fix its next attempt, and the entry is keyed by the field's
+        // opaque id so the LLM can match it back to its own payload.
         var amount = new DoubleField();
         amount.setValue(42.0);
         var controller = controllerFor(amount);
 
-        var result = fillFormPayload(controller,
+        var result = fillFormResult(controller,
                 payload(amount, "\"not a number\""));
 
         Assertions.assertEquals(42.0, amount.getValue(),
                 "Rejected payload must leave the field unchanged");
-        Assertions.assertTrue(result.contains("Rejected:"),
-                "Rejected: block must appear, got: " + result);
-        Assertions.assertTrue(result.contains("Expected number"),
-                "Rejected: line must surface the converter's reason, got: "
-                        + result);
+        Assertions.assertFalse(success(result));
+        Assertions.assertTrue(writtenIds(result).isEmpty());
+        Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(amount))
+                        .contains("Expected number"),
+                "Reason must surface the converter's text; got: "
+                        + rejectionReason(result, idOf(amount)));
     }
 
     @Test
-    void fillForm_partialSuccessProducesBothBlocks() {
-        // Mixed payload: one field writes cleanly, another is rejected.
-        // The summary contains both Written: and Rejected: blocks, in
-        // that order.
-        var name = new LabeledStringField();
-        name.setLabel("Name");
-        var amount = new LabeledStringField();
-        amount.setLabel("Amount");
-        // Treat amount as a DoubleField for typing — quickest: use a real
-        // DoubleField with a separately-set label is not supported by the
-        // stub, so use DoubleField directly.
-        var doubleAmount = new DoubleField();
-        var controller = controllerFor(name, doubleAmount);
+    void fillForm_partialSuccessHasWrittenAndRejectedSideBySide() {
+        // Mixed payload: one writes cleanly, another is rejected.
+        // success=false because at least one entry was rejected; written
+        // and rejected each carry their own ids.
+        var name = new TestField();
+        var amount = new DoubleField();
+        var controller = controllerFor(name, amount);
 
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(name), "Acme");
-        args.put(idOf(doubleAmount), "not a number");
-        var result = fillFormPayload(controller, args);
+        args.put(idOf(amount), "not a number");
+        var result = fillFormResult(controller, args);
 
-        Assertions.assertTrue(result.startsWith("Written:"),
-                "Written: block must come before Rejected:, got: " + result);
-        Assertions.assertTrue(result.contains("Name: Acme"),
-                "Successful write must be in Written:, got: " + result);
-        Assertions.assertTrue(result.contains("Rejected:"),
-                "Rejected: block must follow, got: " + result);
-        Assertions.assertTrue(result.contains("Expected number"),
-                "Rejected: must include the failure reason, got: " + result);
+        Assertions.assertFalse(success(result), "Result: " + result);
+        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
+        Assertions.assertTrue(rejectionReason(result, idOf(amount))
+                .contains("Expected number"));
     }
 
     @Test
-    void fillForm_setValueThrowAppearsInRejectedBlockWithoutLeakingMessage() {
+    void fillForm_setValueThrowSurfacesRejectionWithoutLeakingMessage() {
         // A user-supplied HasValue can throw any RuntimeException from
-        // setValue with arbitrary message text. The summary must report
-        // the rejection but must not echo the exception message
-        // verbatim — that's where a leaky third-party message would land.
+        // setValue with arbitrary message text. The response must report
+        // the rejection but the reason must NOT echo the third-party
+        // exception text — that's where leaks would land.
         var throwing = new ThrowingSetValueField();
         var controller = controllerFor(throwing);
 
-        var result = fillFormPayload(controller,
+        var raw = fillFormPayload(controller,
                 payload(throwing, "\"anything\""));
+        var result = parseResult(raw);
 
-        Assertions.assertTrue(result.contains("Rejected:"),
-                "setValue failure must land in Rejected:, got: " + result);
-        Assertions.assertFalse(
-                result.contains("setValue rejected the " + "converted value: "),
-                "Generic line must not concatenate the raw exception "
-                        + "message");
-        Assertions.assertFalse(result.contains("internal-detail-from-setvalue"),
-                "Raw exception message must not leak, got: " + result);
+        Assertions.assertEquals(List.of(idOf(throwing)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(throwing));
+        Assertions.assertNotNull(reason);
+        Assertions.assertFalse(raw.contains("internal-detail-from-setvalue"),
+                "Raw exception message must not leak anywhere in the "
+                        + "response; got: " + raw);
     }
 
     @Test
@@ -562,6 +589,230 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_callbackThrowingToolException_surfacesMessageVerbatim() {
+        // ToolException is the curated, LLM-facing failure channel — its
+        // message is allowed to leak into the response (callers must scrub
+        // it themselves before throwing). Pins the ToolException catch in
+        // FormAITools.fillForm.execute().
+        var tool = FormAITools
+                .fillForm(throwingCallbacks(new FormAITools.ToolException(
+                        "field 'foo' is no longer addressable")));
+
+        var result = tool.execute(wrappedValues());
+
+        Assertions.assertEquals("Error: field 'foo' is no longer addressable",
+                result);
+    }
+
+    @Test
+    void fillForm_callbackThrowingRuntimeException_returnsGenericError() {
+        // Anything that isn't a ToolException is an uncontrolled failure —
+        // the catch must return a generic message so internal exception
+        // text (potentially carrying PII or stack-trace detail) does not
+        // leak to the LLM.
+        var tool = FormAITools.fillForm(throwingCallbacks(
+                new RuntimeException("internal-detail-that-must-not-leak")));
+
+        var result = tool.execute(wrappedValues());
+
+        Assertions.assertEquals("Error: fill failed.", result);
+        Assertions.assertFalse(
+                result.contains("internal-detail-that-must-not-leak"),
+                "Generic catch must not echo the raw exception message; "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_singleSelect_writesResolvedValueViaValueOptionsToValue() {
+        // The LLM speaks in labels for SINGLE_SELECT fields with
+        // valueOptions registered. The tool must apply toValue so the
+        // field gets the domain instance, not the raw label string.
+        var field = new SingleSelectField<Project>();
+        var projects = Map.of("Apollo", new Project("P-1", "Apollo"));
+        var controller = newController(field);
+        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
+                projects::get);
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(new Project("P-1", "Apollo"), field.getValue(),
+                "Field must receive the resolved domain object, not the "
+                        + "raw label string");
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+    }
+
+    @Test
+    void fillForm_singleSelect_withoutValueOptionsIsRejectedWithHint() {
+        // SINGLE_SELECT without a valueOptions registration means the
+        // LLM has no labels to pick and the converter has no toValue to
+        // resolve. The fill must fail loudly with a reason that points
+        // at the missing registration so the developer can fix it.
+        var field = new SingleSelectField<Project>();
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertNull(field.getValue());
+        Assertions.assertFalse(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("valueOptions"),
+                "Reason must point at the missing valueOptions "
+                        + "registration; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_singleSelect_unknownLabelIsRejected() {
+        // toValue returning null is the agreed signal for "label doesn't
+        // match any option". The orchestrator must reject rather than
+        // pass null to setValue (which would silently clear the field).
+        var field = new SingleSelectField<Project>();
+        var controller = newController(field);
+        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
+                label -> null);
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller, payload(field, "\"Unknown\""));
+
+        Assertions.assertNull(field.getValue(),
+                "Unknown label must not silently clear the field");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("Unknown"),
+                "Reason must name the unmatched label; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithSetWrap() {
+        // The typed valueOptions signature forces toValue to return the
+        // field's value type (Set<Project> for MultiSelectField<Project>).
+        // The application wraps each per-label lookup in Set.of(...); the
+        // orchestrator flat-unions the per-label sets into the final
+        // selection.
+        var field = new MultiSelectField<Project>();
+        var controller = newController(field);
+        controller.valueOptions(field,
+                (filter, limit) -> List.of("Apollo", "Vega"),
+                label -> Set.of(new Project(label, label)));
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"Apollo\", \"Vega\"]"));
+
+        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
+                new Project("Vega", "Vega")), field.getValue());
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithRawCast() {
+        // Alternative caller pattern: drop the Set wrap by raw-casting the
+        // field argument so toValue is Function<String, Item>. The
+        // orchestrator detects the non-Collection return at runtime and
+        // adds each resolved item directly to the aggregate set, so both
+        // caller patterns produce the same final value on the field.
+        var field = new MultiSelectField<Project>();
+        var controller = newController(field);
+        controller.valueOptions((HasValue) field,
+                (filter, limit) -> List.of("Apollo", "Vega"),
+                label -> new Project((String) label, (String) label));
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"Apollo\", \"Vega\"]"));
+
+        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
+                new Project("Vega", "Vega")), field.getValue());
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+    }
+
+    @Test
+    void fillForm_multiSelect_withoutValueOptionsIsRejectedWithHint() {
+        var field = new MultiSelectField<Project>();
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "[\"Apollo\"]"));
+
+        Assertions.assertEquals(Set.of(), field.getValue());
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("valueOptions"));
+    }
+
+    @Test
+    void fillForm_multiSelect_emptyArrayClearsField() {
+        // Empty array is the LLM clearing the multi-select; the resulting
+        // value matches the field's own empty value (Set.of() for Vaadin
+        // multi-selects), so other code observing the field sees the
+        // shape it expects.
+        var field = new MultiSelectField<Project>();
+        var existing = new Project("X", "X");
+        field.setValue(Set.of(existing));
+        var controller = newController(field);
+        controller.valueOptions(field, (filter, limit) -> List.of(),
+                label -> Set.of(existing));
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller, payload(field, "[]"));
+
+        Assertions.assertEquals(Set.of(), field.getValue());
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+    }
+
+    @Test
+    void fillForm_valueOptionsOnPrimitiveTypeUsesToValueNotTypeDrivenParsing() {
+        // Registering valueOptions(...) on a non-SELECT field still makes
+        // the LLM speak in labels (the schema advertises an enum/queryable
+        // string). The converter must apply toValue and skip type-driven
+        // parsing — otherwise the field would receive a raw String and a
+        // typed setValue (e.g. ComboBox<Project>) would reject it.
+        var field = new IntField();
+        var controller = newController(field);
+        controller.valueOptions(field,
+                (filter, limit) -> List.of("low", "high"),
+                label -> "low".equals(label) ? 1 : 10);
+        controller.onRequestStart();
+
+        var result = fillFormResult(controller, payload(field, "\"high\""));
+
+        Assertions.assertEquals(10, field.getValue());
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+    }
+
+    @Test
+    void fillForm_mixedKnownAndUnknownIds_producesCombinedJsonResult() {
+        // Real-world scenario: the LLM sends one stale id plus one valid
+        // id. The valid write lands; the stale entry is rejected with a
+        // get_form_state hint. success=false because at least one entry
+        // was rejected, even though the other one succeeded.
+        var field = new TestField();
+        var controller = controllerFor(field);
+
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(field), "Acme");
+        args.put("stale-id-from-prior-turn", "garbage");
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("Acme", field.getValue());
+        Assertions.assertFalse(success(result));
+        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of("stale-id-from-prior-turn"),
+                rejectedIds(result));
+        Assertions
+                .assertTrue(rejectionReason(result, "stale-id-from-prior-turn")
+                        .contains("get_form_state"));
+    }
+
+    @Test
     void fillForm_toolIsExposedByCreateAll() {
         // The fill_form tool must be discoverable by name in the
         // controller's tool list — the rest of these tests rely on
@@ -574,6 +825,29 @@ class FillFormToolTest {
                 controller.getTools().stream()
                         .anyMatch(t -> "fill_form".equals(t.getName())),
                 "fill_form must be exposed via FormAIController.getTools()");
+    }
+
+    @Test
+    void fillForm_detachedFormSurfacesAsGenericError() {
+        // executeFill demands an attached UI (its writes must land on the
+        // UI thread). When the form isn't attached the controller throws
+        // IllegalStateException; the fill_form tool's outer execute()
+        // catch maps it to the generic "Error: fill failed." so the LLM
+        // sees a curated error rather than the orchestrator's internal
+        // state diagnostic. Pin the fail-fast contract here.
+        var field = new TestField();
+        var detachedForm = new Div(field);
+        // No ui.add(detachedForm) — form is intentionally detached.
+        var controller = new FormAIController(detachedForm);
+        controller.onRequestStart();
+
+        var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
+
+        Assertions.assertEquals("Error: fill failed.", raw,
+                "Detached form must surface as the generic fill_form "
+                        + "error; got: " + raw);
+        Assertions.assertEquals("", field.getValue(),
+                "Detached form must not be written to");
     }
 
     @Test
@@ -596,49 +870,8 @@ class FillFormToolTest {
                         + "next field's write");
     }
 
-    @Test
-    void fillForm_writeSummaryUsesFieldLabelWhenAvailable() {
-        // Line-label precedence: HasLabel#getLabel() > hints.description >
-        // opaque id. With a label set, the label wins.
-        var labeled = new LabeledStringField();
-        labeled.setLabel("Customer Name");
-        var controller = controllerFor(labeled);
-
-        var result = fillFormPayload(controller, payload(labeled, "\"Acme\""));
-
-        Assertions.assertTrue(result.contains("Customer Name: Acme"),
-                "When the field has a label, the Written: line must use "
-                        + "it, got: " + result);
-    }
-
-    @Test
-    void fillForm_writeSummaryFallsBackToDescriptionWhenNoLabel() {
-        // No label → hints.description (set via describe()) wins.
-        var unlabeled = new TestField();
-        var controller = controllerFor(unlabeled);
-        controller.describe(unlabeled, "Customer ref");
-
-        var result = fillFormPayload(controller,
-                payload(unlabeled, "\"Acme\""));
-
-        Assertions.assertTrue(result.contains("Customer ref: Acme"),
-                "Without a label, the description hint must be used as "
-                        + "the line label, got: " + result);
-    }
-
-    @Test
-    void fillForm_writeSummaryFallsBackToIdWhenNoLabelAndNoDescription() {
-        // No label, no describe() → last-resort fallback is the opaque
-        // UUID. Pins the final branch of displayName.
-        var bare = new TestField();
-        var controller = controllerFor(bare);
-
-        var result = fillFormPayload(controller, payload(bare, "\"Acme\""));
-
-        Assertions.assertTrue(result.contains(idOf(bare) + ": Acme"),
-                "Without a label or description, the UUID must surface "
-                        + "as the line label so the LLM can still "
-                        + "correlate, got: " + result);
+    /** Domain-typed item used by the select-field tests. */
+    private record Project(String code, String name) {
     }
 
     /**
@@ -665,12 +898,25 @@ class FillFormToolTest {
 
     // --- helpers ---
 
-    private static FormAIController controllerFor(Component... fields) {
-        var controller = new FormAIController(new Div(fields));
+    private FormAIController controllerFor(Component... fields) {
+        var controller = newController(fields);
         // Drive onRequestStart() so each discovered field has its UUID id
         // stamped — payload helpers use idOf() to look the id up.
         controller.onRequestStart();
         return controller;
+    }
+
+    /**
+     * Builds a controller around a form attached to {@code MockUIExtension}'s
+     * UI but stops short of {@code onRequestStart()} so callers can register
+     * {@code valueOptions} before the first turn. Attaching the form is
+     * required: {@code executeFill} throws {@link IllegalStateException} on a
+     * detached form, matching the production contract.
+     */
+    private FormAIController newController(Component... fields) {
+        var form = new Div(fields);
+        ui.add(form);
+        return new FormAIController(form);
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
@@ -679,14 +925,100 @@ class FillFormToolTest {
     }
 
     /**
-     * Executes the {@code fill_form} tool with a field-id → value map. Wraps
-     * the map in the {@code values} key the tool's parameter schema requires so
-     * individual tests can stay focused on the field map.
+     * Executes the {@code fill_form} tool with a field-id → value map and
+     * returns the raw response string. Wraps the map in the {@code values} key
+     * the tool's parameter schema requires so individual tests can stay focused
+     * on the field map.
      */
     private static String fillFormPayload(FormAIController controller,
             JsonNode fieldMap) {
         var wrapped = JacksonUtils.createObjectNode();
         wrapped.set("values", fieldMap);
         return findTool(controller.getTools(), "fill_form").execute(wrapped);
+    }
+
+    /**
+     * Same as {@link #fillFormPayload(FormAIController, JsonNode)} but parses
+     * the response as JSON. Use for happy-path tests asserting on the
+     * {@code success}/{@code written}/{@code rejected} structure.
+     */
+    private static JsonNode fillFormResult(FormAIController controller,
+            JsonNode fieldMap) {
+        return parseResult(fillFormPayload(controller, fieldMap));
+    }
+
+    private static JsonNode parseResult(String response) {
+        try {
+            return JacksonUtils.getMapper().readTree(response);
+        } catch (Exception ex) {
+            throw new AssertionError("Response is not valid JSON: " + response,
+                    ex);
+        }
+    }
+
+    private static boolean success(JsonNode result) {
+        return result.path("success").asBoolean();
+    }
+
+    private static List<String> writtenIds(JsonNode result) {
+        var ids = new ArrayList<String>();
+        result.path("written").forEach(node -> ids.add(node.asString()));
+        return ids;
+    }
+
+    private static List<String> rejectedIds(JsonNode result) {
+        var ids = new ArrayList<String>();
+        result.path("rejected")
+                .forEach(node -> ids.add(node.path("id").asString()));
+        return ids;
+    }
+
+    /**
+     * Returns the rejection reason recorded for the given id, or {@code null}
+     * if the id is not in {@code rejected}.
+     */
+    private static String rejectionReason(JsonNode result, String id) {
+        for (var entry : result.path("rejected")) {
+            if (id.equals(entry.path("id").asString())) {
+                return entry.path("reason").asString();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link FormAITools.Callbacks} whose {@code executeFill} throws
+     * the given exception — lets a test pin the outer execute() catches in
+     * {@link FormAITools#fillForm(FormAITools.Callbacks)} without going through
+     * the controller layer.
+     */
+    private static FormAITools.Callbacks throwingCallbacks(
+            RuntimeException toThrow) {
+        return new FormAITools.Callbacks() {
+            @Override
+            public List<FormAITools.FormFieldDescriptor> visibleFields() {
+                return List.of();
+            }
+
+            @Override
+            public List<String> queryFieldOptions(String fieldId, String filter,
+                    int limit) {
+                throw new AssertionError(
+                        "queryFieldOptions must not be called from "
+                                + "fill_form execute()");
+            }
+
+            @Override
+            public String executeFill(JsonNode arguments) {
+                throw toThrow;
+            }
+        };
+    }
+
+    /** Minimal valid {@code fill_form} arguments — an empty values object. */
+    private static JsonNode wrappedValues() {
+        var args = JacksonUtils.createObjectNode();
+        args.set("values", JacksonUtils.createObjectNode());
+        return args;
     }
 }
