@@ -535,7 +535,8 @@ jobs:
 
       - name: Unit test compilation error
         if: needs.fast-tests.outputs.unit-failed == 'true' && steps.unit-dorny.outputs.conclusion != 'failure'
-        run: echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
         id: it-check
@@ -584,7 +585,8 @@ jobs:
 
       - name: WTR setup error
         if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.outputs.wtr-failed == 'true'
-        run: echo ":x: WTR tests did not produce results. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo ":x: WTR tests did not produce results. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'
