@@ -238,12 +238,11 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_ignoredFieldIsNotInSchemaAndNotWritten() {
-        // Ignored fields don't appear in get_form_state, and the fill_form
-        // schema is built from the same visibleFields() snapshot, so the
-        // LLM never sees the id. Even if the LLM forges the id into the
-        // payload, the field gets skipped because visibleFields() filters
-        // it out.
+    void fillForm_ignoredFieldIsNotWrittenAndAbsentFromSummary() {
+        // Ignored fields don't appear in get_form_state, so the LLM never
+        // learns the id. Even if the LLM forges the id into the payload,
+        // visibleFields() filters it out before any write attempt — and
+        // the field is absent from the write-summary either way.
         var visible = new LabeledStringField();
         visible.setLabel("Visible");
         var secret = new LabeledStringField();
@@ -279,8 +278,9 @@ class FillFormToolTest {
     @Test
     void fillForm_passwordFieldIsNeverWrittenEvenWithPayload() {
         // PasswordField classifies as UNSUPPORTED so visibleFields() never
-        // includes it. Same protection as ignore(): the id can't be reached
-        // from the schema, and forging it in the payload is a no-op.
+        // includes it. Same protection as ignore(): get_form_state doesn't
+        // surface the id, and even if the LLM forges it into the payload,
+        // visibleFields() filters it out before any write attempt.
         var password = new PasswordField("Password");
         password.setValue("untouched");
         var controller = controllerFor(password);
@@ -461,23 +461,44 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_schemaIsBuiltFreshOnEverySchemaCall() {
-        // The orchestrator may call getParametersSchema() multiple times
-        // per turn; each call must reflect the field's current value via
-        // the per-field "value" key.
+    void fillForm_schemaIsStaticAndOpenKeyed() {
+        // The schema does NOT enumerate per-field properties. It's open-
+        // keyed so the tool definition stays byte-identical across the
+        // session — LLM providers that cache prompt prefixes (system
+        // prompt + tool defs) hit the cache on every subsequent prompt.
+        // Per-field shape comes from get_form_state on each turn. The
+        // field map lives under a single "values" property so future
+        // top-level params (e.g. dryRun) can be added without breaking
+        // the field-map shape.
         var name = new TestField();
         var controller = controllerFor(name);
         var tool = findTool(controller.getTools(), "fill_form");
 
-        var first = tool.getParametersSchema();
+        var before = tool.getParametersSchema();
         name.setValue("Acme");
-        var second = tool.getParametersSchema();
+        var after = tool.getParametersSchema();
 
-        Assertions.assertFalse(first.contains("\"value\":\"Acme\""),
-                "Schema before setValue must not carry the new value");
-        Assertions.assertTrue(second.contains("\"value\":\"Acme\""),
-                "Schema after setValue must reflect the new value, got: "
-                        + second);
+        Assertions.assertEquals(before, after,
+                "Schema must be byte-identical across calls so providers "
+                        + "can cache the tool definition. Before: " + before
+                        + " / after: " + after);
+        Assertions.assertFalse(before.contains(idOf(name)),
+                "Schema must not enumerate field ids — the LLM discovers "
+                        + "them via get_form_state. Got: " + before);
+        Assertions.assertFalse(before.contains("Acme"),
+                "Schema must not embed current field values, which would "
+                        + "force cache misses every turn. Got: " + before);
+        Assertions.assertTrue(before.contains("\"values\""),
+                "Schema must declare a top-level 'values' wrapper so "
+                        + "future top-level params can be added without "
+                        + "breaking the field-map shape. Got: " + before);
+        // additionalProperties on the values object tells the LLM that any
+        // keys it sends inside values are accepted; the orchestrator routes
+        // them per id at execute() time.
+        Assertions.assertTrue(before.contains("\"additionalProperties\""),
+                "Schema must declare additionalProperties on the values "
+                        + "wrapper so the LLM knows arbitrary field ids "
+                        + "are accepted. Got: " + before);
     }
 
     @Test
@@ -487,6 +508,39 @@ class FillFormToolTest {
 
         Assertions.assertTrue(result.startsWith("Error"),
                 "Null arguments must produce an error result, got: " + result);
+    }
+
+    @Test
+    void fillForm_returnsErrorWhenValuesKeyMissing() {
+        // The static schema wraps field-id → value pairs under a "values"
+        // key. If the LLM emits a top-level object without that wrapper,
+        // execute() must surface a clear error so the LLM can correct on
+        // the next turn rather than silently no-oping.
+        var controller = controllerFor(new TestField());
+        var args = JacksonUtils.createObjectNode();
+        args.put("not-values", "x");
+        var result = findTool(controller.getTools(), "fill_form").execute(args);
+
+        Assertions.assertTrue(result.startsWith("Error"),
+                "Missing 'values' key must produce an error result, got: "
+                        + result);
+        Assertions.assertTrue(result.contains("values"),
+                "Error must name the 'values' key so the LLM can correct, "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_returnsErrorWhenValuesIsNotObject() {
+        // Pins the second branch of the values-shape guard: 'values' is
+        // present but not a JSON object (e.g. an array or scalar).
+        var controller = controllerFor(new TestField());
+        var args = JacksonUtils.createObjectNode();
+        args.put("values", "not-an-object");
+        var result = findTool(controller.getTools(), "fill_form").execute(args);
+
+        Assertions.assertTrue(result.startsWith("Error"),
+                "'values' that isn't an object must produce an error result, "
+                        + "got: " + result);
     }
 
     @Test
@@ -520,46 +574,6 @@ class FillFormToolTest {
                 controller.getTools().stream()
                         .anyMatch(t -> "fill_form".equals(t.getName())),
                 "fill_form must be exposed via FormAIController.getTools()");
-    }
-
-    @Test
-    void fillForm_schemaOmitsIgnoredFieldId() {
-        // The fill_form parameter schema is built from the same
-        // visibleFields() snapshot as get_form_state. Ignored fields don't
-        // appear there, so the LLM never gets the id; this complements the
-        // "ignored field is not written" test by pinning the schema-side
-        // protection (no id to forge in the first place).
-        var visible = new TestField();
-        var secret = new TestField();
-        var controller = controllerFor(visible, secret);
-        controller.ignore(secret);
-        controller.onRequestStart(); // re-seed after ignore
-
-        var schema = findTool(controller.getTools(), "fill_form")
-                .getParametersSchema();
-
-        Assertions.assertTrue(schema.contains(idOf(visible)),
-                "Schema must include the visible field's id, got: " + schema);
-        Assertions.assertFalse(schema.contains(idOf(secret)),
-                "Schema must omit the ignored field's id so the LLM can't "
-                        + "see it, got: " + schema);
-    }
-
-    @Test
-    void fillForm_schemaOmitsPasswordFieldId() {
-        // PasswordField classifies as UNSUPPORTED so visibleFields() skips
-        // it; the schema mustn't expose its id either.
-        var visible = new TestField();
-        var password = new PasswordField("Password");
-        var controller = controllerFor(visible, password);
-
-        var schema = findTool(controller.getTools(), "fill_form")
-                .getParametersSchema();
-
-        Assertions.assertTrue(schema.contains(idOf(visible)),
-                "Schema must include the visible field's id, got: " + schema);
-        Assertions.assertFalse(schema.contains(idOf(password)),
-                "Schema must omit the PasswordField's id, got: " + schema);
     }
 
     @Test
@@ -664,8 +678,15 @@ class FillFormToolTest {
                 .readTree("{\"" + idOf(field) + "\":" + jsonValue + "}");
     }
 
+    /**
+     * Executes the {@code fill_form} tool with a field-id → value map. Wraps
+     * the map in the {@code values} key the tool's parameter schema requires
+     * so individual tests can stay focused on the field map.
+     */
     private static String fillFormPayload(FormAIController controller,
-            JsonNode arguments) {
-        return findTool(controller.getTools(), "fill_form").execute(arguments);
+            JsonNode fieldMap) {
+        var wrapped = JacksonUtils.createObjectNode();
+        wrapped.set("values", fieldMap);
+        return findTool(controller.getTools(), "fill_form").execute(wrapped);
     }
 }
