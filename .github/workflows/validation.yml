@@ -545,12 +545,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Integration Tests header
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish integration test results
         id: it-dorny
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
@@ -568,12 +568,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: WTR Tests header
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish WTR results
         id: wtr-dorny
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: WTR Tests
