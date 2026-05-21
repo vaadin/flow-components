@@ -534,7 +534,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.outputs.unit-failed == 'true'
+        if: needs.fast-tests.outputs.unit-failed == 'true' && steps.unit-dorny.outputs.conclusion != 'failure'
         run: echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
