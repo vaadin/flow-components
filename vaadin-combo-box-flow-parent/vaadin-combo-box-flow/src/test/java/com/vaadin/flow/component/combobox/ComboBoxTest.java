@@ -33,10 +33,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
-import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -265,33 +262,8 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setFocusSelectedItem(true);
         comboBox.setValue("a");
 
-        Element element = comboBox.getElement();
-        ElementListenerMap listeners = element.getNode()
-                .getFeature(ElementListenerMap.class);
-        DomEvent open = new DomEvent(element,
-                "vaadin-combo-box-dropdown-opened",
-                JacksonUtils.createObjectNode());
         Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> listeners.fireEvent(open));
-    }
-
-    @Test
-    void focusSelectedItem_filterActive_open_doesNotScrollToSelected() {
-        ComboBox<String> comboBox = new ComboBox<>();
-        ui.add(comboBox);
-        comboBox.setItems(query -> Stream.of("a", "b", "c")
-                .skip(query.getOffset()).limit(query.getLimit()), query -> 3);
-        comboBox.setFocusSelectedItem(true);
-        comboBox.setValue("a");
-        comboBox.getElement().setProperty("filter", "a");
-
-        Element element = comboBox.getElement();
-        ElementListenerMap listeners = element.getNode()
-                .getFeature(ElementListenerMap.class);
-        DomEvent open = new DomEvent(element,
-                "vaadin-combo-box-dropdown-opened",
-                JacksonUtils.createObjectNode());
-        Assertions.assertDoesNotThrow(() -> listeners.fireEvent(open));
+                () -> comboBox.getElement().setProperty("opened", true));
     }
 
     @Test

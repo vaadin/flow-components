@@ -167,12 +167,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
             }
         });
 
-        getElement().addEventListener("vaadin-combo-box-dropdown-opened",
-                event -> {
-                    if (focusSelectedItem) {
-                        scrollToSelectedItem();
-                    }
-                });
+        getElement().addPropertyChangeListener("opened", event -> {
+            var isOpened = (boolean) event.getValue();
+            if (isOpened && focusSelectedItem) {
+                scrollToSelectedItem();
+            }
+        });
     }
 
     /**
@@ -392,10 +392,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * <p>
      * The setting is a silent no-op when:
      * <ul>
-     * <li>no value is currently selected,</li>
-     * <li>a filter is currently active (the user is narrowing down the list, so
-     * the dropdown opens at the top of the filtered results instead of jumping
-     * to the previously selected item), or</li>
+     * <li>no value is currently selected, or</li>
      * <li>the resolved index cannot be determined.</li>
      * </ul>
      *
@@ -422,12 +419,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     private void scrollToSelectedItem() {
         if (getValue() == null) {
-            return;
-        }
-        String filter = getFilter();
-        if (filter != null && !filter.isEmpty()) {
-            // The user is filtering — don't override their navigation by
-            // scrolling to the previously selected item.
             return;
         }
         DataProvider<T, ?> dataProvider = getDataProvider();
