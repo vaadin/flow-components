@@ -12,7 +12,8 @@ export type ComboBoxConnector = {
 };
 
 export type ComboBoxServer = {
-  setViewportRange: sinon.SinonSpy;
+  setViewportRange: ((start: number, length: number, filter: string) => Promise<void>) &
+    sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
   confirmUpdate: sinon.SinonSpy;
   resetDataCommunicator: sinon.SinonSpy;
 };
@@ -37,7 +38,11 @@ export const comboBoxConnector = Vaadin.Flow.comboBoxConnector;
 
 export function init(comboBox: FlowComboBox): void {
   comboBox.$server = {
-    setViewportRange: sinon.spy(),
+    setViewportRange: sinon.spy(() => {
+      const promise = sinon.promise<void>();
+      comboBox.$server.setViewportRange.promise = promise;
+      return promise;
+    }),
     confirmUpdate: sinon.spy(),
     resetDataCommunicator: sinon.spy()
   };
