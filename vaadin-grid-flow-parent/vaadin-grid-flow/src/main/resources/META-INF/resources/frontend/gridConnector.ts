@@ -396,7 +396,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
+    // We're done applying changes from this batch, resolve pending
+    // callbacks
     grid.$connector.resolvePendingCallbacks();
+
+    // Let server know we're done
     grid.$server.confirmUpdate(id);
   };
 

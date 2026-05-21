@@ -29,7 +29,6 @@ describe('grid connector - data range', () => {
 
     grid.$connector.set(start, items.slice(start, start + count));
     grid.$connector.confirm(-1);
-
     lastRequestedRange = [start, count];
   }
 
