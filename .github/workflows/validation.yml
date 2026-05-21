@@ -572,10 +572,6 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: WTR job failure
-        if: steps.wtr-check.outputs.count != '0' && needs.fast-tests.result == 'failure' && steps.wtr-dorny.outputs.conclusion == 'success'
-        run: |
-          echo ":x: WTR job failed despite all tests passing. Check the **WTR tests** job for setup issues." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'
