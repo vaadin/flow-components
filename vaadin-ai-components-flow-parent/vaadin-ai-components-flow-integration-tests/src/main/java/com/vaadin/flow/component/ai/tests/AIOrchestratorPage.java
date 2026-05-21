@@ -111,8 +111,9 @@ public class AIOrchestratorPage extends UploadDropZone {
             if (savedAttachments != null) {
                 attachmentStorage.putAll(savedAttachments);
             }
-            builder.withHistory(savedHistory, savedAttachments != null
-                    ? savedAttachments : Collections.emptyMap());
+            builder.withHistory(savedHistory,
+                    savedAttachments != null ? savedAttachments
+                            : Collections.emptyMap());
         }
 
         orchestrator = builder.build();
