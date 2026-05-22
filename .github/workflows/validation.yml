@@ -1,8 +1,6 @@
 name: Validation
 
 on:
-  push:
-    branches: ['fix/validation-summary-false-positives']
   schedule:
     - cron: '30 23 * * *'
   pull_request:
