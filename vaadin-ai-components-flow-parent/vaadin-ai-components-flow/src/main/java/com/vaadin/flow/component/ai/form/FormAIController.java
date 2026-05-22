@@ -508,10 +508,10 @@ public class FormAIController implements AIController {
             for (var id : arguments.propertyNames()) {
                 var field = byId.get(id);
                 if (field == null) {
-                    rejected.add(new RejectedEntry(id,
-                            "Unknown field id '" + id
-                                    + "'. Call get_form_state to refresh the "
-                                    + "id list and retry only this entry."));
+                    rejected.add(new RejectedEntry(id, "Unknown field id '" + id
+                            + "'. Call get_form_state to refresh the "
+                            + "id list and retry only entries that are "
+                            + "rejected with the reason unknown field id."));
                     continue;
                 }
                 applyValue(field, arguments.get(id), written, rejected);
