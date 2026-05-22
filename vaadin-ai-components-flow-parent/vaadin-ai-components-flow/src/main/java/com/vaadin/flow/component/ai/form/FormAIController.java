@@ -193,12 +193,7 @@ public class FormAIController implements AIController {
      * <b>Multi-select fields:</b> a multi-select's value type is
      * {@code Set<Item>}, so the typed signature forces {@code toValue} to
      * return {@code Set<Item>}. Write {@code toValue} to return a single-item
-     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}); the
-     * orchestrator aggregates the per-label sets into the final selection
-     * before calling {@link HasValue#setValue setValue}. A
-     * {@code Function<String, Item>} also works through an unchecked cast on
-     * the {@code field} argument, dropping the {@code Set} wrap; the
-     * orchestrator collects single items into the aggregate set the same way.
+     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}).
      *
      * @param field
      *            the field whose options the LLM may query, not {@code null}
@@ -246,6 +241,11 @@ public class FormAIController implements AIController {
      * Declares a fixed set of labels the LLM may pick for the field. The
      * {@code toValue} function converts a chosen label back to the field's
      * value type. Later calls for the same field overwrite earlier ones.
+     * <p>
+     * <b>Multi-select fields:</b> a multi-select's value type is
+     * {@code Set<Item>}, so the typed signature forces {@code toValue} to
+     * return {@code Set<Item>}. Write {@code toValue} to return a single-item
+     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}).
      *
      * @param field
      *            the field whose options the LLM may pick from, not
