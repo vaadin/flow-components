@@ -220,8 +220,13 @@ public class AIOrchestrator implements Serializable {
      * component.
      * </p>
      * <p>
-     * If a request is already being processed, this method will log a warning
-     * and return without processing the new prompt.
+     * Attachments are taken from a configured {@link AIFileReceiver} (if any).
+     * To send a prompt with caller-supplied attachments, use
+     * {@link #prompt(String, List)}.
+     * </p>
+     * <p>
+     * If a request is already being processed, this method logs a warning and
+     * returns without processing the new prompt.
      * </p>
      *
      * @param userMessage
@@ -232,7 +237,50 @@ public class AIOrchestrator implements Serializable {
      *             {@link #reconnect(LLMProvider)})
      */
     public void prompt(String userMessage) {
-        doPrompt(userMessage);
+        doPrompt(userMessage, null);
+    }
+
+    /**
+     * Sends a prompt with caller-supplied attachments. Useful for programmatic
+     * flows where attachments are produced server-side — generated files,
+     * fetched data, content from non-Upload sources — rather than uploaded
+     * through a UI component.
+     * <p>
+     * Behaves like {@link #prompt(String)} otherwise: the message and
+     * attachments appear in the message list, the request listener fires with
+     * the {@code messageId} also recorded in the conversation history, and the
+     * attachments are forwarded to the {@link LLMProvider.LLMRequest}.
+     * </p>
+     * <p>
+     * <b>Interaction with a configured {@link AIFileReceiver}:</b> this
+     * overload uses only the supplied list and does <b>not</b> drain the
+     * receiver. Attachments pending in the receiver stay there for the next
+     * call to {@link #prompt(String)} (or the user's next submit through a
+     * connected input). To merge UI-driven and programmatic attachments, the
+     * caller must drain the receiver explicitly and pass the combined list.
+     * </p>
+     * <p>
+     * If a request is already being processed, this method logs a warning and
+     * returns without processing the new prompt.
+     * </p>
+     *
+     * @param userMessage
+     *            the prompt to send to the AI
+     * @param attachments
+     *            the attachments to send with the prompt; pass an empty list
+     *            for none. Copied defensively — subsequent mutations of the
+     *            caller's list have no effect.
+     * @throws NullPointerException
+     *             if {@code attachments} is {@code null} or contains
+     *             {@code null} elements
+     * @throws IllegalStateException
+     *             if no UI context is available, or if the orchestrator needs
+     *             to be reconnected after deserialization (see
+     *             {@link #reconnect(LLMProvider)})
+     */
+    public void prompt(String userMessage, List<AIAttachment> attachments) {
+        Objects.requireNonNull(attachments, "attachments cannot be null");
+        doPrompt(userMessage, List.copyOf(attachments));
     }
 
     /**
@@ -376,7 +424,8 @@ public class AIOrchestrator implements Serializable {
         });
     }
 
-    private void doPrompt(String userMessage) {
+    private void doPrompt(String userMessage,
+            List<AIAttachment> explicitAttachments) {
         if (userMessage == null || userMessage.isBlank()) {
             return;
         }
@@ -391,7 +440,7 @@ public class AIOrchestrator implements Serializable {
             return;
         }
         try {
-            processUserInput(userMessage);
+            processUserInput(userMessage, explicitAttachments);
         } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
             // Reset the flag before firing the hook so a controller can
             // retry from onResponse, matching the async paths where
@@ -411,12 +460,16 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    private void processUserInput(String userMessage) {
+    private void processUserInput(String userMessage,
+            List<AIAttachment> explicitAttachments) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
 
-        var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
-                : List.<AIAttachment> of();
+        // Explicit list wins; the receiver buffer stays untouched in that
+        // case (see prompt(String, List) JavaDoc).
+        var attachments = explicitAttachments != null ? explicitAttachments
+                : fileReceiver != null ? fileReceiver.takeAttachments()
+                        : List.<AIAttachment> of();
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
         var assistantMessage = createAssistantMessagePlaceholder();
@@ -1091,7 +1144,8 @@ public class AIOrchestrator implements Serializable {
             orchestrator.responseListener = responseListener;
             try {
                 if (input != null) {
-                    input.addSubmitListener(orchestrator::doPrompt);
+                    input.addSubmitListener(
+                            msg -> orchestrator.doPrompt(msg, null));
                 }
 
                 if (attachmentClickListener != null && messageList != null) {
