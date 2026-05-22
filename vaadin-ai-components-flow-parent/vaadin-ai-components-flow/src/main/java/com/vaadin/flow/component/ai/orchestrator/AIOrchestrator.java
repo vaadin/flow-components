@@ -465,11 +465,7 @@ public class AIOrchestrator implements Serializable {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
 
-        // Explicit list wins; the receiver buffer stays untouched in that
-        // case (see prompt(String, List) JavaDoc).
-        var attachments = explicitAttachments != null ? explicitAttachments
-                : fileReceiver != null ? fileReceiver.takeAttachments()
-                        : List.<AIAttachment> of();
+        var attachments = getAttachmentsToProcess(explicitAttachments);
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
         var assistantMessage = createAssistantMessagePlaceholder();
@@ -510,6 +506,19 @@ public class AIOrchestrator implements Serializable {
             }
             throw t;
         }
+    }
+
+    private List<AIAttachment> getAttachmentsToProcess(
+            List<AIAttachment> explicitAttachments) {
+        // Explicit list wins; the receiver buffer stays untouched in that
+        // case (see prompt(String, List) JavaDoc).
+        if (explicitAttachments != null) {
+            return explicitAttachments;
+        }
+        if (fileReceiver != null) {
+            return fileReceiver.takeAttachments();
+        }
+        return List.of();
     }
 
     private LLMProvider.LLMRequest buildRequest(String userMessage,
