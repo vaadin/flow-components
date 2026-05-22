@@ -19,13 +19,10 @@ import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -115,23 +112,6 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         setMax(max);
         setStep(fromDouble.apply(DEFAULT_STEP));
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
-    }
-
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        boolean enabled = featureFlags
-                .isEnabled(SliderFeatureFlagProvider.SLIDER_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
     }
 
     /**
