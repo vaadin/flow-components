@@ -632,7 +632,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
                 projects::get);
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -673,7 +673,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
                 label -> null);
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
 
@@ -698,7 +698,7 @@ class FillFormToolTest {
         controller.valueOptions(field,
                 (filter, limit) -> List.of("Apollo", "Vega"),
                 label -> Set.of(new Project(label, label)));
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller,
                 payload(field, "[\"Apollo\", \"Vega\"]"));
@@ -722,7 +722,7 @@ class FillFormToolTest {
         controller.valueOptions((HasValue) field,
                 (filter, limit) -> List.of("Apollo", "Vega"),
                 label -> new Project((String) label, (String) label));
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller,
                 payload(field, "[\"Apollo\", \"Vega\"]"));
@@ -758,7 +758,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.valueOptions(field, (filter, limit) -> List.of(),
                 label -> Set.of(existing));
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "[]"));
 
@@ -779,7 +779,7 @@ class FillFormToolTest {
         controller.valueOptions(field,
                 (filter, limit) -> List.of("low", "high"),
                 label -> "low".equals(label) ? 1 : 10);
-        controller.onRequestStart();
+        controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"high\""));
 
@@ -839,7 +839,7 @@ class FillFormToolTest {
         var detachedForm = new Div(field);
         // No ui.add(detachedForm) — form is intentionally detached.
         var controller = new FormAIController(detachedForm);
-        controller.onRequestStart();
+        controller.onRequest();
 
         var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
 
@@ -908,7 +908,7 @@ class FillFormToolTest {
 
     /**
      * Builds a controller around a form attached to {@code MockUIExtension}'s
-     * UI but stops short of {@code onRequestStart()} so callers can register
+     * UI but stops short of {@code onRequest()} so callers can register
      * {@code valueOptions} before the first turn. Attaching the form is
      * required: {@code executeFill} throws {@link IllegalStateException} on a
      * detached form, matching the production contract.

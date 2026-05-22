@@ -1566,7 +1566,7 @@ class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.error(streamError));
 
-        var capturedEvent = new java.util.concurrent.atomic.AtomicReference<ResponseListener.ResponseEvent>();
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
@@ -1617,7 +1617,7 @@ class AIOrchestratorTest {
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("ok"));
 
-        var capturedEvent = new java.util.concurrent.atomic.AtomicReference<ResponseListener.ResponseEvent>();
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withResponseListener(capturedEvent::set).build();
@@ -1690,12 +1690,27 @@ class AIOrchestratorTest {
                     throw new RuntimeException("Listener error");
                 }).build();
 
-        // Should not throw
         orchestrator.prompt("Hello");
 
-        // History should still be recorded
-        var history = orchestrator.getHistory();
-        Assertions.assertEquals(2, history.size());
+        Assertions.assertEquals(2, orchestrator.getHistory().size());
+    }
+
+    @Test
+    void onFailurePath_responseListenerThrow_stillFiresControllerOnResponse() {
+        stubAddMessage();
+        var streamError = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+
+        var controller = mockController();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(event -> {
+                    throw new RuntimeException("listener died");
+                }).build().prompt("Hello");
+
+        Mockito.verify(controller).onResponse(streamError);
     }
 
     // --- AIController tests ---
@@ -2115,6 +2130,24 @@ class AIOrchestratorTest {
                 .findFirst();
         Assertions.assertTrue(logged.isPresent(),
                 "Expected an error log entry for the onResponse throw");
+    }
+
+    @Test
+    void onResponseThrows_onFailurePath_doesNotAddSeparateErrorMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API died")));
+
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponse(Mockito.any());
+
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
+                Mockito.eq("An error occurred. Please try again."),
+                Mockito.anyString(), Mockito.anyList());
     }
 
     @Test
