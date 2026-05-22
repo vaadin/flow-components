@@ -163,6 +163,8 @@ jobs:
       matrix:        ${{ steps.shards.outputs.matrix }}
       has-tests:     ${{ steps.shards.outputs.has-tests }}
       war-cache-key: ${{ steps.war-key.outputs.key }}
+      unit-failed:   ${{ steps.type-failed.outputs.unit }}
+      wtr-failed:    ${{ steps.type-failed.outputs.wtr }}
     strategy:
       fail-fast: true
       matrix:
@@ -352,6 +354,11 @@ jobs:
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
+      - name: Record job type on failure
+        id: type-failed
+        if: always() && failure()
+        run: echo "${{ matrix.type }}=true" >> "$GITHUB_OUTPUT"
+
   its:
     name: ITs (${{ matrix.shard }})
     needs: [build, fast-tests]
@@ -509,12 +516,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Unit Tests header
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish unit test results
         id: unit-dorny
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Unit Tests
@@ -525,9 +532,9 @@ jobs:
           fail-on-error: 'false'
 
       - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
+        if: needs.fast-tests.outputs.unit-failed == 'true' && env.has_failures != 'true'
         run: |
-          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
+          echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
         id: it-check
@@ -536,12 +543,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Integration Tests header
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish integration test results
         id: it-dorny
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
@@ -551,10 +558,6 @@ jobs:
           list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: IT compilation error
-        if: steps.it-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for WTR reports
         id: wtr-check
@@ -563,12 +566,12 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: WTR Tests header
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish WTR results
         id: wtr-dorny
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: WTR Tests
@@ -579,9 +582,9 @@ jobs:
           fail-on-error: 'false'
 
       - name: WTR setup error
-        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
+        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.outputs.wtr-failed == 'true'
         run: |
-          echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
+          echo ":x: WTR tests did not produce results. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'
