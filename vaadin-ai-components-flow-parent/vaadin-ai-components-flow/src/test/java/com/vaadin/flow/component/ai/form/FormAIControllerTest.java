@@ -227,14 +227,14 @@ class FormAIControllerTest {
     class FieldLocking {
 
         @Test
-        void onRequestStartLocksAllDiscoveredFields() {
+        void onRequestLocksAllDiscoveredFields() {
             var a = new TestField();
             var b = new TestField();
             var nested = new TestField();
             var form = new Div(a, new Div(b, nested));
             var controller = new FormAIController(form);
 
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertTrue(a.isReadOnly());
             Assertions.assertTrue(b.isReadOnly());
@@ -242,26 +242,26 @@ class FormAIControllerTest {
         }
 
         @Test
-        void onResponseCompleteReleasesLockedFields() {
+        void onResponseReleasesLockedFieldsOnSuccess() {
             var a = new TestField();
             var b = new TestField();
             var controller = new FormAIController(new Div(a, b));
 
-            controller.onRequestStart();
-            controller.onResponseComplete();
+            controller.onRequest();
+            controller.onResponse(null);
 
             Assertions.assertFalse(a.isReadOnly());
             Assertions.assertFalse(b.isReadOnly());
         }
 
         @Test
-        void onResponseFailedReleasesLockedFields() {
+        void onResponseReleasesLockedFieldsOnFailure() {
             var a = new TestField();
             var b = new TestField();
             var controller = new FormAIController(new Div(a, b));
 
-            controller.onRequestStart();
-            controller.onResponseFailed(new RuntimeException("boom"));
+            controller.onRequest();
+            controller.onResponse(new RuntimeException("boom"));
 
             Assertions.assertFalse(a.isReadOnly());
             Assertions.assertFalse(b.isReadOnly());
@@ -274,7 +274,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(visible, hidden));
             controller.ignore(hidden);
 
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertTrue(visible.isReadOnly());
             Assertions.assertFalse(hidden.isReadOnly(),
@@ -293,11 +293,11 @@ class FormAIControllerTest {
             var controller = new FormAIController(
                     new Div(editable, preReadOnly));
 
-            controller.onRequestStart();
+            controller.onRequest();
             Assertions.assertTrue(editable.isReadOnly());
             Assertions.assertTrue(preReadOnly.isReadOnly());
 
-            controller.onResponseComplete();
+            controller.onResponse(null);
             Assertions.assertFalse(editable.isReadOnly());
             Assertions.assertTrue(preReadOnly.isReadOnly(),
                     "A field that was already read-only before the fill "
@@ -314,7 +314,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(described));
             controller.describe(described, "the merchant name");
 
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertTrue(described.isReadOnly(),
                     "A field with a description hint but no ignore() call "
@@ -330,13 +330,13 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
-            controller.onRequestStart();
-            controller.onResponseComplete();
+            controller.onRequest();
+            controller.onResponse(null);
 
             field.setReadOnly(true);
 
-            controller.onRequestStart();
-            controller.onResponseComplete();
+            controller.onRequest();
+            controller.onResponse(null);
 
             Assertions.assertTrue(field.isReadOnly(),
                     "A field the application set read-only between turns "
@@ -350,13 +350,13 @@ class FormAIControllerTest {
             var form = new Div(initial);
             var controller = new FormAIController(form);
 
-            controller.onRequestStart();
-            controller.onResponseComplete();
+            controller.onRequest();
+            controller.onResponse(null);
 
             var added = new TestField();
             form.add(added);
 
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertTrue(initial.isReadOnly());
             Assertions.assertTrue(added.isReadOnly(),
@@ -375,11 +375,11 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
-            controller.onRequestStart();
-            controller.onResponseComplete();
+            controller.onRequest();
+            controller.onResponse(null);
 
             controller.ignore(field);
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertFalse(field.isReadOnly(),
                     "A field ignored after a previous turn must not be "
@@ -413,7 +413,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(field));
             controller.valueOptions(field, List.of("apple", "banana", "cherry"),
                     Function.identity());
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, field, "an", 10),
@@ -457,7 +457,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(field));
             controller.valueOptions(field, List.of("1", "2", "3"),
                     Integer::parseInt);
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertEquals("1\n2\n3\n",
                     executeQueryFieldOptions(controller, field, "", 10));
@@ -477,7 +477,7 @@ class FormAIControllerTest {
                     (filter, limit) -> List.of("alpha", "beta"));
             controller.valueOptions(fixedField,
                     List.of("apple", "banana", "cherry"));
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertEquals("alpha\nbeta\n",
                     executeQueryFieldOptions(controller, queriedField, "", 10));
@@ -559,7 +559,7 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
 
-            Assertions.assertDoesNotThrow(controller::onRequestStart);
+            Assertions.assertDoesNotThrow(controller::onRequest);
             // And no description got seeded — the no-binder path simply
             // didn't run.
             Assertions.assertTrue(
@@ -583,7 +583,7 @@ class FormAIControllerTest {
             binder.forField(field).bind("name");
             var controller = new FormAIController(new Div(field), binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entry = formStateFields(controller).get(0);
 
             Assertions.assertEquals("name",
@@ -600,7 +600,7 @@ class FormAIControllerTest {
             binder.forField(field).bind("name");
             var controller = new FormAIController(new Div(field), binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entry = formStateFields(controller).get(0);
 
             Assertions.assertEquals("Customer Name | name",
@@ -617,7 +617,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(field), binder);
             controller.describe(field, "Full legal name");
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entry = formStateFields(controller).get(0);
 
             var description = entry.path("description").asString();
@@ -639,7 +639,7 @@ class FormAIControllerTest {
             binder.forField(field).bind(TestBean::getEmail, TestBean::setEmail);
             var controller = new FormAIController(new Div(field), binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entry = formStateFields(controller).get(0);
 
             Assertions.assertEquals("Email",
@@ -660,7 +660,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(bound, unbound),
                     binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entries = formStateFields(controller);
             var unboundEntry = entries.stream()
                     .filter(e -> e.path("id").asString().equals(idOf(unbound)))
@@ -684,7 +684,7 @@ class FormAIControllerTest {
             binder.bindInstanceFields(holder);
             var controller = new FormAIController(holder, binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             var entries = formStateFields(controller);
 
             var nameEntry = entries.stream().filter(
@@ -715,14 +715,14 @@ class FormAIControllerTest {
             var binder = new Binder<>(TestBean.class);
             var controller = new FormAIController(new Div(field), binder);
 
-            controller.onRequestStart();
+            controller.onRequest();
             Assertions.assertTrue(
                     formStateFields(controller).get(0).path("description")
                             .isMissingNode(),
                     "First turn: not yet bound, no seeded description");
 
             binder.forField(field).bind("name");
-            controller.onRequestStart();
+            controller.onRequest();
 
             Assertions.assertEquals("name",
                     formStateFields(controller).get(0).path("description")
@@ -738,14 +738,14 @@ class FormAIControllerTest {
             // controller's UUID id and cannot appear in the LLM-facing
             // tools, so the seeding skips them silently rather than throwing
             // out of the per-turn lifecycle. Pins that contract: a
-            // non-Component bound HasValue must not break onRequestStart.
+            // non-Component bound HasValue must not break onRequest.
             var nonComponentField = new NonComponentField();
             var formField = new TestField();
             var binder = new Binder<>(TestBean.class);
             binder.forField(nonComponentField).bind("name");
             var controller = new FormAIController(new Div(formField), binder);
 
-            Assertions.assertDoesNotThrow(controller::onRequestStart,
+            Assertions.assertDoesNotThrow(controller::onRequest,
                     "Seeding must not crash on a non-Component bound field");
             // The non-Component field never participates in discovery
             // either, so the LLM-facing form state lists only the real

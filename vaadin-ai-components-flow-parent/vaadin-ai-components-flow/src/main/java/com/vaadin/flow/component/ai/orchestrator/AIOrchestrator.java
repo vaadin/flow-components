@@ -88,7 +88,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
- *         .withResponseCompleteListener(e -&gt; save(e.getResponse())) // optional
+ *         .withResponseListener(e -&gt; save(e.getResponse())) // optional
  *         .withHistory(savedHistory, savedAttachments) // optional, for restore
  *         .build();
  * </pre>
@@ -98,7 +98,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * to obtain a snapshot and {@link Builder#withHistory(List, Map)} to restore
  * conversation state (including attachments) across sessions. To persist
  * history automatically after each exchange, use
- * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)}.
+ * {@link Builder#withResponseListener(ResponseListener)}.
  * </p>
  * <p>
  * <b>Serialization:</b> The LLM provider and tool objects are not serialized
@@ -171,9 +171,9 @@ public class AIOrchestrator implements Serializable {
     private transient AIController controller;
     private String userName;
     private String assistantName;
-    private AttachmentSubmitListener attachmentSubmitListener;
+    private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
-    private ResponseCompleteListener responseCompleteListener;
+    private ResponseListener responseListener;
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
     private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
@@ -282,17 +282,15 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * The returned list contains all user and assistant messages exchanged
      * through this orchestrator. User messages include a
-     * {@link ChatMessage#messageId()} matching the ID provided to the
-     * {@link AttachmentSubmitListener}, which can be used to correlate with
-     * externally stored attachment data.
+     * {@link ChatMessage#messageId()} matching the id provided to the
+     * {@link RequestListener}, which can be used to correlate with externally
+     * stored attachment data.
      * <p>
      * <b>Note:</b> This method returns a point-in-time snapshot. If a streaming
      * response is in progress, the snapshot may contain the user message
      * without its corresponding assistant response. For automatic persistence,
-     * use
-     * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)} to
-     * be notified at the right time, then call {@code getHistory()} from that
-     * callback.
+     * use {@link Builder#withResponseListener(ResponseListener)} to be notified
+     * at the right time, then call {@code getHistory()} from that callback.
      *
      * @return an unmodifiable copy of the conversation history, never
      *         {@code null}
@@ -365,7 +363,7 @@ public class AIOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
-            fireResponseFailed(error, ui);
+            fireResponseListener("", error, ui);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -373,7 +371,7 @@ public class AIOrchestrator implements Serializable {
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
             }
-            fireResponseCompleteListener(responseText, ui);
+            fireResponseListener(responseText, null, ui);
             LOGGER.debug("LLM streaming completed successfully");
         });
     }
@@ -396,7 +394,7 @@ public class AIOrchestrator implements Serializable {
             processUserInput(userMessage);
         } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
             // Reset the flag before firing the hook so a controller can
-            // retry from onResponseFailed, matching the async paths where
+            // retry from onResponse, matching the async paths where
             // doFinally clears the flag before the hook runs. Catching
             // Throwable rather than Exception covers Error subtypes (OOM,
             // AssertionError) — otherwise the flag would stay stuck and
@@ -407,7 +405,7 @@ public class AIOrchestrator implements Serializable {
             // failed first — in which case nothing past it executed.
             var currentUi = UI.getCurrent();
             if (currentUi != null) {
-                fireResponseFailed(t, currentUi);
+                fireResponseListener("", t, currentUi);
             }
             throw t;
         }
@@ -425,7 +423,7 @@ public class AIOrchestrator implements Serializable {
 
         try {
             if (controller != null) {
-                controller.onRequestStart();
+                controller.onRequest();
             }
 
             var request = buildRequest(userMessage, attachments);
@@ -433,10 +431,13 @@ public class AIOrchestrator implements Serializable {
                     attachments.size());
 
             var messageId = UUID.randomUUID().toString();
-            if (!attachments.isEmpty() && attachmentSubmitListener != null) {
-                attachmentSubmitListener.onAttachmentSubmit(
-                        new AttachmentSubmitListener.AttachmentSubmitEvent(
-                                messageId, List.copyOf(attachments)));
+            if (requestListener != null) {
+                // Fires on every prompt with the user message, assigned
+                // messageId, and attachments (empty list when none) — the
+                // generic "request being submitted" hook for listener users,
+                // counterpart to AIController.onRequest().
+                requestListener.onRequest(new RequestListener.RequestEvent(
+                        userMessage, messageId, List.copyOf(attachments)));
             }
             conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
                     userMessage, messageId, Instant.now()));
@@ -448,9 +449,8 @@ public class AIOrchestrator implements Serializable {
         } catch (Throwable t) { // NOSONAR — Throwable to surface UI on any
                                 // throw
             // Single update — stream errors are async and never reach this
-            // catch; onResponseComplete throws are handled inside
-            // fireResponseCompleteListener (which appends rather than
-            // rewrites).
+            // catch; onResponse throws are handled inside
+            // fireResponseListener (which appends rather than rewrites).
             if (assistantMessage != null) {
                 assistantMessage
                         .setText("An error occurred. Please try again.");
@@ -495,41 +495,30 @@ public class AIOrchestrator implements Serializable {
         };
     }
 
-    private void fireResponseFailed(Throwable error, UI ui) {
-        if (controller == null) {
-            return;
-        }
-        ui.access(() -> {
+    private void fireResponseListener(String responseText, Throwable error,
+            UI ui) {
+        if (responseListener != null) {
             try {
-                controller.onResponseFailed(error);
+                responseListener.onResponse(new ResponseListener.ResponseEvent(
+                        responseText, error));
             } catch (Exception e) {
-                LOGGER.error("Error in controller onResponseFailed", e);
-            }
-        });
-    }
-
-    private void fireResponseCompleteListener(String responseText, UI ui) {
-        if (responseCompleteListener != null) {
-            try {
-                responseCompleteListener.onResponseComplete(
-                        new ResponseCompleteListener.ResponseCompleteEvent(
-                                responseText));
-            } catch (Exception e) {
-                LOGGER.error("Error in response complete listener", e);
+                LOGGER.error("Error in response listener", e);
             }
         }
         if (controller != null) {
             ui.access(() -> {
                 try {
-                    controller.onResponseComplete();
+                    controller.onResponse(error);
                 } catch (Exception e) {
-                    LOGGER.error("Error in controller onResponseComplete", e);
+                    LOGGER.error("Error in controller onResponse", e);
                     // Append a separate assistant message instead of
                     // rewriting the LLM's response. By the time this
                     // runs, the response is already in the provider's
                     // chat memory and in our history; rewriting either
                     // would misrepresent what the LLM actually said.
-                    if (messageList != null) {
+                    // Only on the success path — the failure path already
+                    // rewrote the placeholder to a generic error message.
+                    if (error == null && messageList != null) {
                         messageList.addMessage(
                                 "An error occurred. Please try again.",
                                 assistantName, Collections.emptyList());
@@ -647,8 +636,8 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * Attachments are not stored in the orchestrator's conversation
          * history. If the application persisted attachment data via
-         * {@link AttachmentSubmitListener} before serialization, pass it here
-         * so the new provider can reconstruct multimodal context. Pass
+         * {@link RequestListener} before serialization, pass it here so the new
+         * provider can reconstruct multimodal context. Pass
          * {@link Collections#emptyMap()} (the default) if there are no
          * attachments to restore.
          * <p>
@@ -719,10 +708,14 @@ public class AIOrchestrator implements Serializable {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
-     * <li>{@link #withResponseCompleteListener(ResponseCompleteListener)} –
-     * registers a callback that fires after each successful exchange with the
-     * assistant's response text, enabling persistence via
-     * {@link AIOrchestrator#getHistory()} or follow-up actions.</li>
+     * <li>{@link #withRequestListener(RequestListener)} – registers a callback
+     * that fires on every prompt with the user message, the assigned message
+     * id, and any attachments.</li>
+     * <li>{@link #withResponseListener(ResponseListener)} – registers a
+     * callback that fires after each exchange with the assistant's response
+     * text and an optional error (success and failure use the same listener),
+     * enabling persistence via {@link AIOrchestrator#getHistory()} or follow-up
+     * actions.</li>
      * <li>{@link #withHistory(List, Map)} – restores a previously saved
      * conversation history with attachments (from
      * {@link AIOrchestrator#getHistory()}).</li>
@@ -744,9 +737,9 @@ public class AIOrchestrator implements Serializable {
         private AIController controller;
         private String userName;
         private String assistantName;
-        private AttachmentSubmitListener attachmentSubmitListener;
+        private RequestListener requestListener;
         private AttachmentClickListener attachmentClickListener;
-        private ResponseCompleteListener responseCompleteListener;
+        private ResponseListener responseListener;
         private List<ChatMessage> history;
         private Map<String, List<AIAttachment>> historyAttachments;
 
@@ -963,22 +956,26 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Sets a listener that is called when a message with attachments is
-         * submitted to the LLM provider. This allows you to store attachment
-         * data in your own storage. The listener receives a unique message ID
-         * that can later be used to identify the attachments when they are
-         * clicked or when restoring conversation history via
+         * Sets a listener that is called on every prompt, just before the LLM
+         * stream opens. The listener receives the user message, the assigned
+         * {@code messageId}, and the attachments included with the message
+         * (empty list when none). Same lifecycle moment as
+         * {@link AIController#onRequest()}.
+         * <p>
+         * Typical use: persist attachment data in your own storage keyed by
+         * {@code messageId}, so the same id can be used later to look the
+         * attachment up via
+         * {@link AttachmentClickListener.AttachmentClickEvent#getMessageId()}
+         * or when restoring conversation history via
          * {@link #withHistory(List, Map)}.
          *
          * @param listener
-         *            the listener to call on attachment submit
+         *            the listener to call on each prompt
          * @return this builder
          */
-        public Builder withAttachmentSubmitListener(
-                AttachmentSubmitListener listener) {
-            warnIfAlreadySet(this.attachmentSubmitListener,
-                    "Attachment submit listener");
-            this.attachmentSubmitListener = listener;
+        public Builder withRequestListener(RequestListener listener) {
+            warnIfAlreadySet(this.requestListener, "Request listener");
+            this.requestListener = listener;
             return this;
         }
 
@@ -987,7 +984,7 @@ public class AIOrchestrator implements Serializable {
          * is clicked. The listener receives the message ID and attachment
          * index, allowing you to retrieve attachment data from your own storage
          * using the same message ID provided in
-         * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
+         * {@link RequestListener.RequestEvent#getMessageId()}.
          * <p>
          * Note: This listener requires a message list to be configured via
          * {@link #withMessageList(MessageList)}. If no message list is set, the
@@ -1006,36 +1003,39 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Sets a listener that is called after each successful exchange — when
-         * the assistant's stream has completed without error. This is the
+         * Sets a listener that is called once per turn when the assistant's
+         * stream has completed — successfully or with an error. This is the
          * recommended hook for persisting conversation state (via
          * {@link AIOrchestrator#getHistory()}), triggering follow-up actions,
-         * or updating UI elements.
+         * or surfacing errors to the user. Same lifecycle moment as
+         * {@link AIController#onResponse(Throwable)}.
          * <p>
-         * The response text passed to the listener may be empty if the model
-         * emitted only tool calls or otherwise stopped without producing
-         * visible content. Such turns are still successful exchanges; check
+         * On success the response text may be empty if the model emitted only
+         * tool calls or otherwise stopped without producing visible content.
+         * Such turns are still successful exchanges; check
          * {@code event.getResponse().isEmpty()} if your listener should only
          * react to text-bearing responses. Empty responses are <i>not</i>
          * appended to the conversation history.
+         * <p>
+         * On failure {@code event.getError()} carries the cause and the
+         * response text is empty or a partial stream that was received before
+         * the failure.
          * <p>
          * The listener is called from a background thread (Reactor scheduler).
          * It is safe to perform blocking I/O (e.g. database writes) directly.
          * To update Vaadin UI components from this listener, use
          * {@code ui.access()}.
          * <p>
-         * The listener is not called when the LLM response fails or times out,
-         * nor when history is restored via {@link #withHistory(List, Map)}.
+         * The listener is not called when history is restored via
+         * {@link #withHistory(List, Map)}.
          *
          * @param listener
-         *            the listener to call after each successful exchange
+         *            the listener to call after each exchange
          * @return this builder
          */
-        public Builder withResponseCompleteListener(
-                ResponseCompleteListener listener) {
-            warnIfAlreadySet(this.responseCompleteListener,
-                    "Response complete listener");
-            this.responseCompleteListener = listener;
+        public Builder withResponseListener(ResponseListener listener) {
+            warnIfAlreadySet(this.responseListener, "Response listener");
+            this.responseListener = listener;
             return this;
         }
 
@@ -1086,9 +1086,9 @@ public class AIOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
-            orchestrator.attachmentSubmitListener = attachmentSubmitListener;
+            orchestrator.requestListener = requestListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
-            orchestrator.responseCompleteListener = responseCompleteListener;
+            orchestrator.responseListener = responseListener;
             try {
                 if (input != null) {
                     input.addSubmitListener(orchestrator::doPrompt);

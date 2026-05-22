@@ -353,11 +353,6 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
             public List<LLMProvider.ToolSpec> getTools() {
                 return List.of(tools);
             }
-
-            @Override
-            public void onResponseComplete() {
-                // Test controller doesn't need to handle request completion
-            }
         };
     }
 
