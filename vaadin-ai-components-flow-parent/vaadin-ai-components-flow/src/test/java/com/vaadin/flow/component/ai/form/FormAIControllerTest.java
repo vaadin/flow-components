@@ -23,13 +23,18 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.event.Level;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
@@ -505,10 +510,68 @@ class FormAIControllerTest {
                     "Stale enum block must not survive re-registration with "
                             + "a BiFunction, got: " + field);
         }
+
+        @Test
+        void valueOptionsOnMultiSelectFixedCollectionRendersAsItemsEnum() {
+            // valueOptions on a MultiSelectField registers a Set-returning
+            // toValue (the typed signature requires it because T =
+            // Set<String> for a multi-select). In get_form_state the
+            // labels surface inside items.enum (multi-select schema)
+            // rather than at the node level — pin that the same nesting
+            // path applies whether or not the field is multi-select.
+            var field = new FormTestFields.MultiSelectField<String>();
+            var controller = new FormAIController(new Div(field));
+            controller.valueOptions(field, List.of("alpha", "beta"), Set::of);
+
+            var schema = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode()));
+            var entry = schema.path("fields").get(0);
+            var items = entry.path("items");
+
+            Assertions.assertTrue(entry.path("array").asBoolean());
+            var labels = new java.util.ArrayList<String>();
+            items.path("enum").forEach(node -> labels.add(node.asString()));
+            Assertions.assertEquals(List.of("alpha", "beta"), labels);
+            Assertions.assertTrue(items.path("queryable").isMissingNode(),
+                    "Fixed-collection registration must surface as enum, "
+                            + "not queryable; got items: " + items);
+        }
     }
 
     @Nested
     class BinderDescriptionSeeding {
+
+        private final TestLogger binderReflectionLogger = TestLoggerFactory
+                .getTestLogger(BinderReflection.class);
+
+        @BeforeEach
+        void clearLogger() {
+            binderReflectionLogger.clear();
+        }
+
+        @Test
+        void noBinderController_seedingIsNoOpAndDoesNotThrow() {
+            // The 1-arg constructor leaves binder == null; the per-turn
+            // seeding must short-circuit silently. Without the short-circuit
+            // every plain-form controller would log a WARN on every
+            // onRequestStart (BinderReflection catches the resulting
+            // Field.get(null) NPE but logs the failure).
+            var field = new TestField();
+            var controller = new FormAIController(new Div(field));
+
+            Assertions.assertDoesNotThrow(controller::onRequestStart);
+            // And no description got seeded — the no-binder path simply
+            // didn't run.
+            Assertions.assertTrue(
+                    formStateFields(controller).get(0).path("description")
+                            .isMissingNode(),
+                    "No-binder controller must not seed any description");
+            var warnings = binderReflectionLogger.getLoggingEvents().stream()
+                    .filter(event -> event.getLevel() == Level.WARN).toList();
+            Assertions.assertTrue(warnings.isEmpty(),
+                    "No-binder seeding must run silently — no WARN should "
+                            + "be logged. Got: " + warnings);
+        }
 
         @Test
         void boundFieldPropertyNameSurfacesInDescription() {

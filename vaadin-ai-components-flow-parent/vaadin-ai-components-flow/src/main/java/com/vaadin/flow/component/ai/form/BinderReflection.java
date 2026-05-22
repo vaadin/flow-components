@@ -53,14 +53,22 @@ final class BinderReflection {
     /**
      * Builds a {@code HasValue → propertyName} map of every binding that
      * carries a property name. Lambda-bound bindings are excluded because the
-     * binder records no name for them.
+     * binder records no name for them. Returns an empty map when {@code binder}
+     * is {@code null} or when the {@link Binder#getClass() Binder} version at
+     * runtime no longer exposes the {@code boundProperties} field — callers can
+     * call the method unconditionally and the no-binder controller path then
+     * runs silently rather than logging a warning on every prompt.
      *
      * @param binder
-     *            the binder, not {@code null}
-     * @return the map, never {@code null}; empty if reflection is unavailable
+     *            the binder, may be {@code null}
+     * @return the map, never {@code null}; empty when binder is {@code null} or
+     *         reflection is unavailable
      */
     @SuppressWarnings("unchecked")
     static Map<HasValue<?, ?>, String> collectPropertyNames(Binder<?> binder) {
+        if (binder == null || BOUND_PROPERTIES_FIELD == null) {
+            return Collections.emptyMap();
+        }
         try {
             return ((Map<String, Binding<?, ?>>) BOUND_PROPERTIES_FIELD
                     .get(binder))
@@ -74,6 +82,12 @@ final class BinderReflection {
         return Collections.emptyMap();
     }
 
+    /**
+     * Looks up {@link Binder}'s private {@code boundProperties} field and makes
+     * it accessible. Returns {@code null} (with a warning) when the field does
+     * not exist on the {@code Binder} version on the classpath — callers
+     * degrade to the no-binder code path rather than failing.
+     */
     private static Field getBoundPropertiesField() {
         try {
             var field = Binder.class.getDeclaredField("boundProperties");
