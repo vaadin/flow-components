@@ -540,6 +540,16 @@ public class FormAIController implements AIController {
                 rejected.add(
                         new RejectedEntry(field.id(), value, ex.getMessage()));
                 return;
+            } catch (Exception ex) {
+                // Anything other than RejectedValueException is an uncontrolled
+                // converter failure — surface a curated rejection so a single
+                // bad field doesn't collapse the whole turn into a generic
+                // error and erase the other fields' writes and rejections.
+                LOGGER.warn("Converter threw unexpectedly for field {}",
+                        field.id(), ex);
+                rejected.add(new RejectedEntry(field.id(), value,
+                        "Field rejected the value."));
+                return;
             }
             HasValue raw = field.field();
             try {

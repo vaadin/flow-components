@@ -52,8 +52,25 @@ class BeanPropertySchemaTest {
 
         private Tier tier;
 
+        private LabeledTier labeledTier;
+
         public enum Tier {
             BRONZE, SILVER, GOLD
+        }
+
+        public enum LabeledTier {
+            BRONZE {
+                @Override
+                public String toString() {
+                    return "Bronze!";
+                }
+            },
+            SILVER {
+                @Override
+                public String toString() {
+                    return "Silver!";
+                }
+            };
         }
 
         public String getName() {
@@ -86,6 +103,14 @@ class BeanPropertySchemaTest {
 
         public void setTier(Tier tier) {
             this.tier = tier;
+        }
+
+        public LabeledTier getLabeledTier() {
+            return labeledTier;
+        }
+
+        public void setLabeledTier(LabeledTier labeledTier) {
+            this.labeledTier = labeledTier;
         }
     }
 
@@ -152,6 +177,26 @@ class BeanPropertySchemaTest {
         Assertions.assertEquals(List.of("BRONZE", "SILVER", "GOLD"), values,
                 "Enum-typed bean property must enumerate its constants, "
                         + "got: " + f);
+    }
+
+    @Test
+    void enumPropertySurfacesNamesEvenWhenToStringIsOverridden() {
+        var field = new TestField();
+        var binder = new Binder<>(TypedBean.class);
+        binder.forField(field).withConverter(
+                v -> v.isEmpty() ? null : TypedBean.LabeledTier.valueOf(v),
+                v -> v == null ? "" : v.name()).bind("labeledTier");
+        var controller = new FormAIController(new Div(field), binder);
+
+        var f = formStateFields(controller).get(0);
+
+        var values = new ArrayList<String>();
+        f.path("enum").forEach(n -> values.add(n.asString()));
+        Assertions.assertEquals(List.of("BRONZE", "SILVER"), values,
+                "Enum constants must surface as Enum.name() so the LLM "
+                        + "picks values the canonical Enum.valueOf converter "
+                        + "accepts; toString labels can diverge from names "
+                        + "and break the round-trip. Got: " + f);
     }
 
     @Test

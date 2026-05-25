@@ -1038,6 +1038,37 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
+        // FormValueConverter.convert delegates to field.getEmptyValue() for
+        // JSON null. A field whose getEmptyValue() throws produces an
+        // exception that is NOT a RejectedValueException; the controller's
+        // applyValue only catches RejectedValueException, so the throw
+        // propagates all the way out of doFill. The response must still be
+        // a structured JSON document so the LLM can attribute the failure
+        // to the offending field and retry the rest — collapsing the entire
+        // turn into a generic "Error: fill failed." erases every other
+        // field's write and rejection record.
+        var bad = new EmptyValueThrowingField();
+        var ok = new TestField();
+        var controller = controllerFor(bad, ok);
+
+        var args = JacksonUtils.createObjectNode();
+        args.putNull(idOf(bad));
+        args.put(idOf(ok), "landed");
+        var raw = fillFormPayload(controller, args);
+
+        Assertions.assertFalse(raw.startsWith("Error"),
+                "Unexpected converter throw must not collapse the entire "
+                        + "turn into a raw error string, got: " + raw);
+        var result = parseResult(raw);
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(bad)),
+                "Bad field must surface in rejected, got: " + result);
+        Assertions.assertNotNull(fieldEntry(result, idOf(ok)),
+                "Other fields must still appear in the fields block, got: "
+                        + result);
+    }
+
+    @Test
     void fillForm_setValueThrowingLeavesOtherFieldsIntact() {
         // ThrowingField's setValue throws RuntimeException. The controller
         // catches the throw, logs at DEBUG, and continues with the next
@@ -1090,6 +1121,29 @@ class FillFormToolTest {
         @Override
         public void setValue(String value) {
             throw new RuntimeException("internal-detail-from-setvalue");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field whose {@link #getEmptyValue} throws — exercises the path where
+     * {@code FormValueConverter.convert} raises a non-{@code
+     * RejectedValueException} for a JSON {@code null} payload.
+     */
+    @com.vaadin.flow.component.Tag("empty-value-throwing-field")
+    private static class EmptyValueThrowingField extends
+            com.vaadin.flow.component.AbstractField<EmptyValueThrowingField, String> {
+        EmptyValueThrowingField() {
+            super("");
+        }
+
+        @Override
+        public String getEmptyValue() {
+            throw new RuntimeException("internal-detail-from-getemptyvalue");
         }
 
         @Override

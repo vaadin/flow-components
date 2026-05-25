@@ -72,7 +72,7 @@ final class BeanPropertyMetadata {
             }
             var enumConstants = current.isEnum()
                     ? Arrays.stream(current.getEnumConstants())
-                            .map(Object::toString).toList()
+                            .map(e -> ((Enum<?>) e).name()).toList()
                     : List.<String> of();
             return new BeanPropertyMetadata(current, enumConstants);
         } catch (Exception ex) {
