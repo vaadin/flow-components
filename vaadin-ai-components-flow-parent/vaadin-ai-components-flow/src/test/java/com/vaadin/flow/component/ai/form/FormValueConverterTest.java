@@ -259,6 +259,44 @@ class FormValueConverterTest {
     }
 
     @Test
+    void convert_singleSelectFromItems_nonStringJsonRejected() {
+        // Eager-items SINGLE_SELECT (no valueOptions registered, items
+        // populated via setItems) must reject a non-string JSON shape
+        // before reaching renderItem-based matching — otherwise a JSON
+        // boolean true coincidentally renders to "true" and could match
+        // an item whose label happens to be "true", silently writing a
+        // wrong-shape value.
+        var field = new SingleSelectField<String>();
+        field.setItems("true", "false");
+
+        var json = json("true");
+        var ex = Assertions.assertThrows(RejectedValueException.class,
+                () -> FormValueConverter.convert(
+                        wrap(field, FormFieldType.SINGLE_SELECT), json));
+        Assertions.assertTrue(ex.getMessage().contains("string label"),
+                "Rejection reason must name the type mismatch, not the "
+                        + "label match path; got: " + ex.getMessage());
+    }
+
+    @Test
+    void convert_multiSelectFromItems_nonStringArrayElementRejected() {
+        // Symmetric to convert_singleSelectFromItems_nonStringJsonRejected:
+        // each element of a multi-select array must be a JSON string
+        // before reaching renderItem-based matching against the field's
+        // eager items.
+        var field = new MultiSelectField<String>();
+        field.setItems("true", "false");
+
+        var json = json("[true]");
+        var ex = Assertions.assertThrows(RejectedValueException.class,
+                () -> FormValueConverter.convert(
+                        wrap(field, FormFieldType.MULTI_SELECT), json));
+        Assertions.assertTrue(ex.getMessage().contains("string label"),
+                "Rejection reason must name the type mismatch, not the "
+                        + "label match path; got: " + ex.getMessage());
+    }
+
+    @Test
     void convert_singleSelectWithValueOptionsToValue_resolvesLabel() {
         // The LLM sends a label string; the registered toValue resolves it
         // to the field's actual value type. Verifies the converter routes

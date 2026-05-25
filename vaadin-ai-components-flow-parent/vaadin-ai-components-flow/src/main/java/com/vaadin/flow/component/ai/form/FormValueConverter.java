@@ -221,13 +221,39 @@ final class FormValueConverter {
         case DATE -> convertDate(value);
         case DATE_TIME -> convertDateTime(value);
         case TIME -> convertTime(value);
-        case SINGLE_SELECT -> throw new RejectedValueException(
-                "Selection field has no value options registered — register "
-                        + "options via FormAIController.valueOptions(...) "
-                        + "so the AI knows what to pick.");
+        case SINGLE_SELECT -> convertSingleSelectFromItems(field, value);
         default -> throw new RejectedValueException(
                 "Unsupported field type: " + field.type());
         };
+    }
+
+    /**
+     * Fallback resolver for a SINGLE_SELECT field that has no
+     * {@code valueOptions(...)} registered: matches the LLM-supplied label
+     * against the field's in-memory items via {@link #renderItem}. This is the
+     * inverse of the schema path that emits the same items as an {@code enum}
+     * array — both sides agree on the label set, so the LLM can write through
+     * an eager {@code setItems(...)} field without the developer wiring up
+     * {@code valueOptions(...)} too.
+     */
+    private static Object convertSingleSelectFromItems(
+            FormFieldDescriptor field, JsonNode value) {
+        if (!value.isString()) {
+            throw new RejectedValueException(
+                    "Expected string label, got " + value);
+        }
+        var items = listDataProviderItems(field.field());
+        if (items.isEmpty()) {
+            // No items and no valueOptions — the field has no option source at
+            // all. Point the developer at the missing wiring rather than the
+            // missing match, since the model couldn't have picked any label.
+            throw new RejectedValueException(
+                    "Selection field has no value options registered — register "
+                            + "options via FormAIController.valueOptions(...) "
+                            + "or call setItems(...) so the AI knows what to "
+                            + "pick.");
+        }
+        return resolveLabelAgainstItems(field.field(), value.asString(), items);
     }
 
     private static Object convertSingleLabel(JsonNode value,
@@ -241,15 +267,6 @@ final class FormValueConverter {
 
     private static Object convertMultiSelect(FormFieldDescriptor field,
             JsonNode value) {
-        var hints = field.hints();
-        var toValue = hints != null ? hints.valueOptionsToValue : null;
-        if (toValue == null) {
-            throw new RejectedValueException(
-                    "Multi-select field has no value options registered — "
-                            + "register options via "
-                            + "FormAIController.valueOptions(...) so the AI "
-                            + "knows what to pick.");
-        }
         if (!value.isArray()) {
             throw new RejectedValueException(
                     "Expected array of string labels, got " + value);
@@ -259,6 +276,11 @@ final class FormValueConverter {
         // multi-selects return Set.of()).
         if (value.isEmpty()) {
             return field.field().getEmptyValue();
+        }
+        var hints = field.hints();
+        var toValue = hints != null ? hints.valueOptionsToValue : null;
+        if (toValue == null) {
+            return convertMultiSelectFromItems(field, value);
         }
         var result = new LinkedHashSet<>();
         for (var node : value) {
@@ -283,6 +305,53 @@ final class FormValueConverter {
             }
         }
         return result;
+    }
+
+    /**
+     * Fallback resolver for a MULTI_SELECT field that has no
+     * {@code valueOptions(...)} registered: matches each LLM-supplied label
+     * against the field's in-memory items via {@link #renderItem}. Mirrors
+     * {@link #convertSingleSelectFromItems} so eager-items
+     * {@code MultiSelectComboBox<T>} and {@code CheckboxGroup<T>} are writable
+     * without the developer wiring up {@code valueOptions(...)} too.
+     */
+    private static Object convertMultiSelectFromItems(FormFieldDescriptor field,
+            JsonNode value) {
+        var items = listDataProviderItems(field.field());
+        if (items.isEmpty()) {
+            throw new RejectedValueException(
+                    "Multi-select field has no value options registered — "
+                            + "register options via "
+                            + "FormAIController.valueOptions(...) or call "
+                            + "setItems(...) so the AI knows what to pick.");
+        }
+        var result = new LinkedHashSet<>();
+        for (var node : value) {
+            if (!node.isString()) {
+                throw new RejectedValueException(
+                        "Expected string label, got " + node);
+            }
+            result.add(resolveLabelAgainstItems(field.field(), node.asString(),
+                    items));
+        }
+        return result;
+    }
+
+    /**
+     * Walks the field's in-memory items list and returns the first item whose
+     * {@link #renderItem} matches the LLM-supplied label. The matching mirrors
+     * what the schema sent the LLM under {@code enum}, so both halves of the
+     * tool protocol agree on the label set.
+     */
+    private static Object resolveLabelAgainstItems(HasValue<?, ?> field,
+            String label, List<Object> items) {
+        for (var item : items) {
+            if (label.equals(renderItem(field, item))) {
+                return item;
+            }
+        }
+        throw new RejectedValueException(
+                "No matching option for label: " + label);
     }
 
     /**
