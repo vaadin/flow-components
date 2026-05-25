@@ -580,6 +580,22 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_bindingValidatorBlankMessageIsStillSurfacedAsRejection() {
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> false, "").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result),
+                "Validator that fails with a blank message must still "
+                        + "produce a rejected entry; otherwise the LLM "
+                        + "thinks the write succeeded while the field is "
+                        + "in an invalid state. Got: " + result);
+    }
+
+    @Test
     void fillForm_hasValidatorRejectionForUnboundFieldSurfacesInRejected() {
         // Unbound fields fall back to HasValidator's default validator. The
         // fill_form path must hit the same FormFieldValidation hook that

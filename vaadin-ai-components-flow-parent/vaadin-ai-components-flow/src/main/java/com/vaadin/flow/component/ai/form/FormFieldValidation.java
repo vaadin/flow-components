@@ -81,8 +81,12 @@ final class FormFieldValidation {
             // and updated the field's invalid indicator. This call is only
             // here to read the message — re-firing would just duplicate
             // the status-change notifications the application already saw.
-            return binding.validate(false).getMessage()
-                    .filter(message -> !message.isBlank());
+            var status = binding.validate(false);
+            if (!status.isError()) {
+                return Optional.empty();
+            }
+            return Optional.of(status.getMessage().filter(m -> !m.isBlank())
+                    .orElse(GENERIC_REJECTION_MESSAGE));
         } catch (Exception ex) {
             LOGGER.warn("Binding validation threw for {}",
                     binding.getField().getClass(), ex);
@@ -106,11 +110,15 @@ final class FormFieldValidation {
             if (outcome == null || !outcome.isError()) {
                 return Optional.empty();
             }
-            return Optional.of(outcome.getErrorMessage())
-                    .filter(message -> !message.isBlank());
+            var message = outcome.getErrorMessage();
+            return Optional.of(message == null || message.isBlank()
+                    ? GENERIC_REJECTION_MESSAGE
+                    : message);
         } catch (Exception ex) {
             LOGGER.warn("Default validator threw for {}", field.getClass(), ex);
             return Optional.empty();
         }
     }
+
+    private static final String GENERIC_REJECTION_MESSAGE = "Field rejected the value.";
 }
