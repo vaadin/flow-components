@@ -83,36 +83,19 @@ async function runTests() {
         stdio: 'inherit'
       });
 
-      // Generate a CI config that adds the JUnit reporter on top of the existing config
-      const hasBaseConfig = fs.existsSync(`${itFolder}/web-test-runner.config.mjs`);
-      const ciConfigPath = `${itFolder}/wtr-ci.config.mjs`;
-      fs.writeFileSync(ciConfigPath, [
-        `import { defaultReporter, summaryReporter } from '@web/test-runner';`,
-        `import { junitReporter } from '@web/test-runner-junit-reporter';`,
-        hasBaseConfig ? `import baseConfig from './web-test-runner.config.mjs';` : '',
-        `export default {`,
-        hasBaseConfig ? `  ...baseConfig,` : '',
-        `  reporters: [defaultReporter(), summaryReporter(), junitReporter({ outputPath: 'wtr-results.xml', reportLogs: true })],`,
-        `};`,
-      ].filter(Boolean).join('\n'));
-
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
-      let wtrError = null;
       try {
-        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve --config wtr-ci.config.mjs`, {
+        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
       } catch (e) {
-        wtrError = e;
-      } finally {
-        fs.unlinkSync(ciConfigPath);
-      }
+        if (process.env.GITHUB_ACTIONS) {
+          await appendSessionError(`${itFolder}/wtr-results.xml`, e);
+        }
 
-      if (wtrError) {
-        await appendSessionError(`${itFolder}/wtr-results.xml`, wtrError);
-        throw wtrError;
+        throw e;
       }
     }
   }
