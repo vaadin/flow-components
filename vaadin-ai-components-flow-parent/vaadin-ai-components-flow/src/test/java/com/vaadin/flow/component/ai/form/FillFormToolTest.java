@@ -706,6 +706,28 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_singleSelect_eagerItemsResolveLabelViaItemLabelGenerator() {
+        // The symmetry between schema (emits `enum`) and converter
+        // (matches by label) rides on FormValueConverter.renderItem.
+        // String items collapse to Object#toString, so an item type with
+        // a custom ItemLabelGenerator is what actually exercises the
+        // generator path on both halves of the protocol.
+        var field = new SingleSelectField<Project>();
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        field.setItems(apollo, vega);
+        field.setItemLabelGenerator(Project::name);
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Eager-items SINGLE_SELECT must match via the custom "
+                        + "ItemLabelGenerator, not via toString()");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
     void fillForm_singleSelect_unknownLabelIsRejected() {
         // toValue returning null is the agreed signal for "label doesn't
         // match any option". The orchestrator must reject rather than
@@ -828,6 +850,28 @@ class FillFormToolTest {
                 rejectionReason(result, idOf(field)).contains("Quantum"),
                 "Reason must name the unmatched label; got: "
                         + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_multiSelect_eagerItemsResolveLabelsViaItemLabelGenerator() {
+        // Same lock as the SINGLE_SELECT variant: a typed item with a
+        // custom ItemLabelGenerator exercises renderItem on both the
+        // schema-emit side and the converter-resolve side, so the test
+        // catches drift if either side stops honoring the generator.
+        var field = new MultiSelectField<Project>();
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        field.setItems(apollo, vega);
+        field.setItemLabelGenerator(Project::name);
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"Apollo\", \"Vega\"]"));
+
+        Assertions.assertEquals(Set.of(apollo, vega), field.getValue(),
+                "Eager-items MULTI_SELECT must match via the custom "
+                        + "ItemLabelGenerator, not via toString()");
+        Assertions.assertTrue(success(result));
     }
 
     @Test

@@ -270,9 +270,11 @@ class FormValueConverterTest {
         field.setItems("true", "false");
 
         var json = json("true");
-        var ex = Assertions.assertThrows(RejectedValueException.class,
-                () -> FormValueConverter.convert(
-                        wrap(field, FormFieldType.SINGLE_SELECT), json));
+        var ex = Assertions
+                .assertThrows(RejectedValueException.class,
+                        () -> FormValueConverter.convert(
+                                wrap(field, FormFieldType.SINGLE_SELECT),
+                                json));
         Assertions.assertTrue(ex.getMessage().contains("string label"),
                 "Rejection reason must name the type mismatch, not the "
                         + "label match path; got: " + ex.getMessage());
