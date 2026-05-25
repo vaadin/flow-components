@@ -59,26 +59,8 @@ async function runTests() {
     if (fs.existsSync(`${itFolder}/${wtrTestsFolderName}`)) {
       console.log(`Installing dependencies in ${itFolder}`);
 
-      // Set up an empty node_modules and package.json before running Flow build
-      // Those will get cleaned up by `flow:build-frontend` unless they existed
-      // before, but we need them for running web-test-runner
-      const nodeModules = `${itFolder}/node_modules`;
-      const packageJson = `${itFolder}/package.json`;
-      if (!fs.existsSync(nodeModules)) {
-        fs.mkdirSync(nodeModules);
-      }
-      if (!fs.existsSync(packageJson)) {
-        fs.writeFileSync(packageJson, '{}');
-      }
-
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
-
-      // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install --ignore-scripts @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @web/test-runner-junit-reporter @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
+      execSync(`mvn flow:prepare-frontend flow:build-frontend -DskipTests -DcleanFrontendFiles=false`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
