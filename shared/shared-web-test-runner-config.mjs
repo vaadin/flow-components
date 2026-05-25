@@ -12,6 +12,7 @@ export const sharedConfig = {
     }
   },
   testRunnerHtml: (testFramework) => `
+    <!DOCTYPE html>
     <html>
       <body>
         <script type="module">
