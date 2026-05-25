@@ -217,10 +217,29 @@ jobs:
       - name: Detect @NpmPackage version changes
         id: npm-changes
         if: matrix.type != 'unit'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
-          base="${{ github.base_ref || 'main' }}"
-          if git fetch --depth=1 origin "$base" 2>/dev/null && \
-             git diff FETCH_HEAD -- '*.java' | grep -q '@NpmPackage'; then
+          changed=false
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Use the PR files API so we diff against the merge base, not against
+            # main's current tip — otherwise unrelated @NpmPackage commits already
+            # merged into main since the PR branched would trigger a false positive.
+            if gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
+                 --jq '.[] | select(.filename | endswith(".java")) | .patch // ""' \
+               | grep -qE '^\+.*@NpmPackage'; then
+              changed=true
+            fi
+          else
+            base="${{ github.base_ref || 'main' }}"
+            if git fetch --depth=1 origin "$base" 2>/dev/null && \
+               git diff FETCH_HEAD -- '*.java' | grep -q '@NpmPackage'; then
+              changed=true
+            fi
+          fi
+          if [ "$changed" = "true" ]; then
             echo "MAVEN_OPTS=${MAVEN_OPTS} -Dvaadin.npm.minimumFrontendPackageAgeDays=0" >> "$GITHUB_ENV"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
