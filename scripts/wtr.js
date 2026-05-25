@@ -77,12 +77,6 @@ async function runTests() {
         stdio: 'inherit'
       });
 
-      // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install --ignore-scripts @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @web/test-runner-junit-reporter @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
-
       // Install Playwright Chromium
       execSync(`npx playwright install chromium`, {
         cwd: itFolder,
