@@ -2,8 +2,20 @@
   "name": "vaadin-flow-components",
   "version": "1.0.0",
   "devDependencies": {
+    "@open-wc/testing": "^2.5.33",
+    "@types/mocha": "^9.1.1",
+    "@vaadin/testing-helpers": "^1.0.0",
+    "@web/dev-server-esbuild": "^0.3.0",
+    "@web/test-runner-junit-reporter": "^0.6.0",
+    "@web/test-runner-playwright": "^0.8.0",
+    "@web/test-runner": "^0.13.18",
     "replace-in-file": "6.1.0",
-    "xml2js": "^0.4.23"
+    "sinon": "^14.0.0",
+    "xml2js": "^0.6.2"
+  },
+  "overrides": {
+    "playwright": "1.61.0",
+    "playwright-core": "1.61.0"
   },
   "license": "APACHE"
 }
