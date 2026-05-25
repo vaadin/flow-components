@@ -5,7 +5,7 @@
     "@open-wc/testing": "^2.5.33",
     "@types/mocha": "^9.1.1",
     "@vaadin/testing-helpers": "^1.0.0",
-    "@web/dev-server-esbuild": "^0.3.0",
+    "@web/dev-server-esbuild": "^1.0.5",
     "@web/test-runner-junit-reporter": "^0.6.0",
     "@web/test-runner-playwright": "^0.8.0",
     "@web/test-runner": "^0.13.18",
