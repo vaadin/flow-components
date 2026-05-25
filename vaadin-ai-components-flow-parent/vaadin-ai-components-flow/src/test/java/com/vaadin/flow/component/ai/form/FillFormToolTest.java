@@ -616,6 +616,75 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_hasValidatorWarningLevelResultEmitsNoRejection() {
+        // ValidationResult with ErrorLevel.WARNING isError()=false; the
+        // early return in errorFromHasValidator's non-error branch is what
+        // keeps the message from being surfaced as a rejection. The
+        // outer-catch safety net hides the bug for ValidationResult.ok()
+        // because getErrorMessage() throws there, but a non-error result
+        // with a real message does not throw — the rejection leaks out.
+        var field = new ValidatedField();
+        field.setDefaultValidator((value,
+                ctx) -> com.vaadin.flow.data.binder.ValidationResult.create(
+                        "soft-warning",
+                        com.vaadin.flow.data.binder.ErrorLevel.WARNING));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertTrue(rejectedIds(result).isEmpty(),
+                "Non-error ValidationResult (INFO/WARNING) must not produce "
+                        + "a rejection, got: " + result);
+    }
+
+    @Test
+    void fillForm_hasValidatorReceivesComponentInValueContext() {
+        // Pins that FormFieldValidation builds the ValueContext with the
+        // field as the Component so locale-aware validators (and anything
+        // else reading ctx.getComponent()) sees the source component, not
+        // an empty Optional.
+        var field = new ValidatedField();
+        field.setDefaultValidator((value,
+                ctx) -> com.vaadin.flow.data.binder.ValidationResult.error(
+                        "component-was-" + ctx.getComponent().isPresent()));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals("component-was-true",
+                rejectionReason(result, idOf(field)),
+                "Validator must receive a ValueContext carrying the field "
+                        + "as its Component; got: " + result);
+    }
+
+    @Test
+    void firstError_bindingValidateThrows_returnsEmptyNotNull() {
+        // FormFieldValidation.errorFromBinding's catch must return
+        // Optional.empty(), not null; the caller chains .ifPresent(...) on
+        // the result and null breaks the chain. The fill_form pipeline
+        // intercepts validator throws at setValue (the binder triggers
+        // validation through the value-change listener), so the catch is
+        // only reachable when firstError is called directly with a binding
+        // whose validate(false) still throws — pin the contract here.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field)
+                .withValidator(
+                        (com.vaadin.flow.data.binder.Validator<String>) (value,
+                                ctx) -> {
+                            throw new RuntimeException("validator-boom");
+                        })
+                .bind("name");
+        var binding = BinderReflection.findBinding(binder, field);
+
+        var result = FormFieldValidation.firstError(field, binding);
+
+        Assertions.assertEquals(java.util.Optional.empty(), result,
+                "errorFromBinding catch must return Optional.empty(), not "
+                        + "null; null breaks the caller's .ifPresent() chain");
+    }
+
+    @Test
     void fillForm_boundHasValidatorFieldNotDoubleValidated() {
         // ValidatedField implements HasValidator. The binder wraps the
         // field's default validator into the binding chain by default, so a

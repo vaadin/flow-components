@@ -259,8 +259,19 @@ class BeanPropertySchemaTest {
 
     @Test
     void resolveReturnsNullForNullPropertyPath() {
+        var logger = TestLoggerFactory
+                .getTestLogger(BeanPropertyMetadata.class);
+        logger.clearAll();
+
         Assertions.assertNull(
                 BeanPropertyMetadata.resolve(TypedBean.class, null));
+
+        var warnings = logger.getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.WARN).toList();
+        Assertions.assertTrue(warnings.isEmpty(),
+                "Null property path is normal for lambda-bound bindings "
+                        + "and is called every turn per field; it must not "
+                        + "warn-log, got: " + warnings);
     }
 
     @Test
