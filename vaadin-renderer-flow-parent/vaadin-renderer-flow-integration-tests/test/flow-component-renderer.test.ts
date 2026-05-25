@@ -1,7 +1,8 @@
 import type {} from '@web/test-runner-mocha';
 import '../frontend/generated/jar-resources/flow-component-renderer.js';
 import { render, html, LitElement } from 'lit';
-import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
 
 type Vaadin = {

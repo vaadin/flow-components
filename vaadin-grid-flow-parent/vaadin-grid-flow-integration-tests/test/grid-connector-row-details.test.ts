@@ -1,4 +1,5 @@
-import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { getBodyCellContent, setRootItems } from './shared.js';
 import { init } from './shared.js';
 import type { FlowGrid } from './shared.js';

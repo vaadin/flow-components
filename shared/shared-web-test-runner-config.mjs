@@ -11,6 +11,18 @@ export const sharedConfig = {
       timeout: '10000'
     }
   },
+  testRunnerHtml: (testFramework) => `
+    <html>
+      <body>
+        <script type="module">
+          import { use } from 'chai';
+          import sinonChai from 'sinon-chai';
+          use(sinonChai);
+        </script>
+        <script type="module" src="${testFramework}"></script>
+      </body>
+    </html>
+  `,
   ...(process.env.GITHUB_ACTIONS
     ? {
         reporters: [
