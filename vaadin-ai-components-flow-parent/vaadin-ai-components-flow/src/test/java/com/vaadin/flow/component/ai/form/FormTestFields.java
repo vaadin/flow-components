@@ -35,6 +35,9 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.data.binder.HasItems;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
@@ -199,6 +202,38 @@ final class FormTestFields {
             implements HasLabel, HasHelper {
         LabeledStringField() {
             super("");
+        }
+    }
+
+    /**
+     * String-valued field that implements {@link HasValidator}. The default
+     * validator can be swapped at runtime so individual tests can pin the
+     * validation outcome without rebuilding the field hierarchy. Setting a raw
+     * validator via {@link #setDefaultValidator} also lets tests exercise
+     * pathological returns ({@code null} validator, {@code null} result, blank
+     * error message) for the controller's defensive paths.
+     */
+    @Tag("validated-field")
+    static class ValidatedField extends StubField<ValidatedField, String>
+            implements HasValidator<String> {
+
+        private Validator<String> validator = Validator.alwaysPass();
+
+        ValidatedField() {
+            super("");
+        }
+
+        void rejectAllWith(String message) {
+            this.validator = (value, ctx) -> ValidationResult.error(message);
+        }
+
+        void setDefaultValidator(Validator<String> validator) {
+            this.validator = validator;
+        }
+
+        @Override
+        public Validator<String> getDefaultValidator() {
+            return validator;
         }
     }
 

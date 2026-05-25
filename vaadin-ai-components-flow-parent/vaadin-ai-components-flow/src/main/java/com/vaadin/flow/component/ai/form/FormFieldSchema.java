@@ -55,20 +55,21 @@ final class FormFieldSchema {
      * type metadata, and the current value.
      */
     static ObjectNode build(String id, HasValue<?, ?> field, FormFieldType type,
-            FormFieldHints hints) {
+            FormFieldHints hints, BeanPropertyMetadata bean) {
         var node = JacksonUtils.createObjectNode();
         node.put("id", id);
         var description = mergeDescription(field, hints);
         if (!description.isEmpty()) {
             node.put("description", description);
         }
-        applyType(node, field, type, hints);
+        applyType(node, field, type, hints, bean);
         applyValue(node, field, type, hints);
         return node;
     }
 
     private static void applyType(ObjectNode node, HasValue<?, ?> field,
-            FormFieldType type, FormFieldHints hints) {
+            FormFieldType type, FormFieldHints hints,
+            BeanPropertyMetadata bean) {
         if (type == FormFieldType.MULTI_SELECT) {
             node.put("array", true);
             var items = node.putObject("items");
@@ -85,7 +86,20 @@ final class FormFieldSchema {
             applySelectionOptions(node, field, hints);
             return;
         }
-        switch (type) {
+        // Bean-driven override: when a bound property carries a more specific
+        // Java type than the field's value type ("TextField → BigDecimal" via a
+        // converter, "TextField → Tier" via an enum converter), the bean
+        // wins. The field's value type (often String) is too coarse to drive
+        // the schema on its own when there is a converter sitting in between.
+        var effective = type;
+        if (type == FormFieldType.STRING && bean != null) {
+            var fromBean = FormFieldType
+                    .classifyBeanProperty(bean.propertyType);
+            if (fromBean != null) {
+                effective = fromBean;
+            }
+        }
+        switch (effective) {
         case EMAIL -> {
             node.put(FIELD_TYPE, TYPE_STRING);
             node.put(FIELD_FORMAT, "email");
@@ -109,7 +123,15 @@ final class FormFieldSchema {
             node.put(FIELD_TYPE, TYPE_STRING);
             node.put(FIELD_FORMAT, "time");
         }
-        default -> node.put(FIELD_TYPE, TYPE_STRING);
+        default -> {
+            node.put(FIELD_TYPE, TYPE_STRING);
+            // The bean side may be an enum even though the field is a plain
+            // TextField; surface the constants so the LLM picks a valid name.
+            if (bean != null && !bean.enumConstants.isEmpty()) {
+                var arr = node.putArray("enum");
+                bean.enumConstants.forEach(arr::add);
+            }
+        }
         }
     }
 

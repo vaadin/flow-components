@@ -504,12 +504,12 @@ class FormValueConverterTest {
 
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type) {
-        return new FormFieldDescriptor("test-id", field, type, null);
+        return new FormFieldDescriptor("test-id", field, type, null, null);
     }
 
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type, FormFieldHints hints) {
-        return new FormFieldDescriptor("test-id", field, type, hints);
+        return new FormFieldDescriptor("test-id", field, type, hints, null);
     }
 
     private static FormFieldHints hintsWithToValue(

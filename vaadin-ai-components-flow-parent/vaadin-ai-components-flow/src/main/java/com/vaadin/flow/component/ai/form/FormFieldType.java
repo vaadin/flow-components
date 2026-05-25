@@ -94,6 +94,52 @@ enum FormFieldType {
         return CLASSIFY_CACHE.get(field.getClass());
     }
 
+    /**
+     * Classifies a leaf Java type (a bean property's type, or a field's
+     * resolved {@code HasValue<?, V>} value type) into the taxonomy. Returns
+     * {@code null} when the type does not map to a concrete variant — the
+     * bean-side caller keeps the field's own classification in that case
+     * (notably for {@code Object}, {@code String}, custom value classes, and
+     * {@code enum} types where the constants are surfaced separately); the
+     * field-side caller in {@link #doClassify} falls back to {@link #STRING}.
+     * Primitive {@code Class} literals are accepted for the bean-property path;
+     * field value types are always boxed since generics can't be primitive.
+     *
+     * @param propertyType
+     *            the property or value type, not {@code null}
+     * @return the matching variant, or {@code null} when there is no specific
+     *         mapping
+     */
+    static FormFieldType classifyBeanProperty(Class<?> propertyType) {
+        if (propertyType == Boolean.class || propertyType == boolean.class) {
+            return BOOLEAN;
+        }
+        if (propertyType == Integer.class || propertyType == int.class
+                || propertyType == Long.class || propertyType == long.class
+                || propertyType == Short.class || propertyType == short.class
+                || propertyType == Byte.class || propertyType == byte.class
+                || propertyType == BigInteger.class) {
+            return INTEGER;
+        }
+        if (propertyType == Double.class || propertyType == double.class
+                || propertyType == Float.class || propertyType == float.class) {
+            return NUMBER;
+        }
+        if (propertyType == BigDecimal.class) {
+            return BIG_DECIMAL;
+        }
+        if (propertyType == LocalDate.class) {
+            return DATE;
+        }
+        if (propertyType == LocalDateTime.class) {
+            return DATE_TIME;
+        }
+        if (propertyType == LocalTime.class) {
+            return TIME;
+        }
+        return null;
+    }
+
     private static FormFieldType doClassify(Class<?> fieldClass) {
         if (isAssignableTo(fieldClass, PASSWORD_FIELD_FQN)) {
             return UNSUPPORTED;
@@ -111,30 +157,11 @@ enum FormFieldType {
             return SINGLE_SELECT;
         }
         var valueType = resolveValueType(fieldClass);
-        if (valueType == Boolean.class) {
-            return BOOLEAN;
+        if (valueType == null) {
+            return STRING;
         }
-        if (valueType == Integer.class || valueType == Long.class
-                || valueType == Short.class || valueType == Byte.class
-                || valueType == BigInteger.class) {
-            return INTEGER;
-        }
-        if (valueType == Double.class || valueType == Float.class) {
-            return NUMBER;
-        }
-        if (valueType == BigDecimal.class) {
-            return BIG_DECIMAL;
-        }
-        if (valueType == LocalDate.class) {
-            return DATE;
-        }
-        if (valueType == LocalDateTime.class) {
-            return DATE_TIME;
-        }
-        if (valueType == LocalTime.class) {
-            return TIME;
-        }
-        return STRING;
+        var mapped = classifyBeanProperty(valueType);
+        return mapped != null ? mapped : STRING;
     }
 
     /**
