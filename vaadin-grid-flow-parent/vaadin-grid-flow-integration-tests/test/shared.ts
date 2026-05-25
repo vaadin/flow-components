@@ -3,8 +3,6 @@ import '@vaadin/grid/src/all-imports.js';
 import '../frontend/generated/jar-resources/gridConnector.ts';
 import '../frontend/generated/jar-resources/treeGridConnector.ts';
 import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
-// For some reason vaadin-grid-flow-selection-column doesn't import vaadin-checkbox
-import '@vaadin/checkbox/src/vaadin-checkbox.js';
 import sinon from 'sinon';
 import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
