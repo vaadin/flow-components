@@ -25,9 +25,6 @@ async function computeModules() {
 
 const wtrTestsFolderName = 'test';
 
-// Playwright 1.62 dropped Chromium builds for Debian 11, which the CI agents still run
-const playwrightVersion = '1.61.0';
-
 function runTests() {
   for (const module of modules) {
     const id = module.replace('-parent', '');
@@ -51,18 +48,6 @@ function runTests() {
 
       // Install the IT module dependencies
       execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
-
-      // Pin Playwright. Written after the Flow build, which rewrites
-      // package.json and can drop the overrides section.
-      const json = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
-      json.overrides = { ...json.overrides, playwright: playwrightVersion, 'playwright-core': playwrightVersion };
-      fs.writeFileSync(packageJson, JSON.stringify(json, null, 2));
-
-      // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
