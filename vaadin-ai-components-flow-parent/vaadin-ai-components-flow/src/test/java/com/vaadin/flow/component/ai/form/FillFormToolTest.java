@@ -580,6 +580,30 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_bindingConverterFailureSurfacesReasonInRejected() {
+        // A withConverter chain (e.g. String -> Integer) is the typical way
+        // applications adapt a TextField to a non-String bean property. Bad
+        // input fails inside the binder's chain rather than in the form
+        // controller's own FormValueConverter; the rejection block must
+        // still carry the converter's error message so the LLM can correct
+        // on the next turn.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(IntegerBean.class);
+        binder.forField(field).withConverter(Integer::parseInt,
+                i -> i == null ? "" : i.toString(), "must be a whole number")
+                .bind("count");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"abc\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals("must be a whole number",
+                rejectionReason(result, idOf(field)),
+                "Converter failure must surface its message in rejected, "
+                        + "got: " + result);
+    }
+
+    @Test
     void fillForm_bindingValidatorBlankMessageIsStillSurfacedAsRejection() {
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
@@ -1173,6 +1197,25 @@ class FillFormToolTest {
         @SuppressWarnings("unused")
         public void setName(String name) {
             this.name = name;
+        }
+    }
+
+    /**
+     * Bean with a non-String property — drives the converter-failure rejection
+     * test where the binder's chain (not the controller's own converter) is the
+     * source of the error.
+     */
+    private static class IntegerBean {
+        private Integer count;
+
+        @SuppressWarnings("unused")
+        public Integer getCount() {
+            return count;
+        }
+
+        @SuppressWarnings("unused")
+        public void setCount(Integer count) {
+            this.count = count;
         }
     }
 

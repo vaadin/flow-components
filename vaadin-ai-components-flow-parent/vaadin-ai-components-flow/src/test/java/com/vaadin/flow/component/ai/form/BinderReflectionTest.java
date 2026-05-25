@@ -70,19 +70,6 @@ class BinderReflectionTest {
     }
 
     @Test
-    void getBeanTypeOnNullBinderReturnsNullWithoutWarning() {
-        var result = BinderReflection.getBeanType(null);
-
-        Assertions.assertNull(result);
-        var warnings = TestLoggerFactory.getTestLogger(BinderReflection.class)
-                .getLoggingEvents().stream()
-                .filter(e -> e.getLevel() == Level.WARN).toList();
-        Assertions.assertTrue(warnings.isEmpty(),
-                "Null binder must not WARN on every schema build, got: "
-                        + warnings);
-    }
-
-    @Test
     void setBoundPropertiesAccessible() {
         Assertions.assertDoesNotThrow(() -> {
             var field = Binder.class.getDeclaredField("boundProperties");

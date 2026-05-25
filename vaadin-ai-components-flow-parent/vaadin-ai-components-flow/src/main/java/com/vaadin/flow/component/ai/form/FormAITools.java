@@ -47,13 +47,10 @@ final class FormAITools {
      * one visible (non-ignored) form field. The id is the opaque UUID assigned
      * at discovery time; the {@link FormFieldHints} reference is live so live
      * label, helper text, current value, and any post-construction hint updates
-     * are read fresh on each tool call. {@code beanMetadata} is non-null only
-     * for bound fields whose binding resolves to a named bean property — it
-     * carries the bean-side property type for the schema.
+     * are read fresh on each tool call.
      */
     record FormFieldDescriptor(String id, HasValue<?, ?> field,
-            FormFieldType type, FormFieldHints hints,
-            BeanPropertyMetadata beanMetadata) {
+            FormFieldType type, FormFieldHints hints) {
     }
 
     /**
@@ -152,7 +149,7 @@ final class FormAITools {
                 for (var d : callbacks.visibleFields()) {
                     try {
                         fields.add(FormFieldSchema.build(d.id(), d.field(),
-                                d.type(), d.hints(), d.beanMetadata()));
+                                d.type(), d.hints()));
                     } catch (Exception ex) {
                         LOGGER.warn("get_form_state failed for field {}",
                                 d.id(), ex);

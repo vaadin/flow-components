@@ -434,19 +434,14 @@ public class FormAIController implements AIController {
         @Override
         public List<FormAITools.FormFieldDescriptor> visibleFields() {
             var descriptors = new ArrayList<FormAITools.FormFieldDescriptor>();
-            var propertyNames = BinderReflection.collectPropertyNames(binder);
-            var beanClass = BinderReflection.getBeanType(binder);
             for (var field : collectActiveFields()) {
                 var type = FormFieldType.classify(field);
                 if (type == FormFieldType.UNSUPPORTED) {
                     continue;
                 }
                 var id = getOrCreateId(field);
-                var propertyName = propertyNames.get(field);
-                var beanMetadata = BeanPropertyMetadata.resolve(beanClass,
-                        propertyName);
                 descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
-                        type, hintsById.get(id), beanMetadata));
+                        type, hintsById.get(id)));
             }
             return descriptors;
         }
@@ -591,7 +586,7 @@ public class FormAIController implements AIController {
             for (var d : postWrite) {
                 try {
                     fieldsArr.add(FormFieldSchema.build(d.id(), d.field(),
-                            d.type(), d.hints(), d.beanMetadata()));
+                            d.type(), d.hints()));
                 } catch (Exception ex) {
                     LOGGER.warn("fill_form field-state build failed for {}",
                             d.id(), ex);

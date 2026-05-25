@@ -95,22 +95,16 @@ enum FormFieldType {
     }
 
     /**
-     * Classifies a leaf Java type (a bean property's type, or a field's
-     * resolved {@code HasValue<?, V>} value type) into the taxonomy. Returns
-     * {@code null} when the type does not map to a concrete variant — the
-     * bean-side caller keeps the field's own classification in that case
-     * (notably for {@code Object}, {@code String}, custom value classes, and
-     * {@code enum} types where the constants are surfaced separately); the
-     * field-side caller in {@link #doClassify} falls back to {@link #STRING}.
-     * Primitive {@code Class} literals are accepted for the bean-property path;
-     * field value types are always boxed since generics can't be primitive.
+     * Classifies a field's resolved {@code HasValue<?, V>} value type into the
+     * taxonomy. Returns {@code null} when the type does not map to a concrete
+     * variant; the caller in {@link #doClassify} falls back to {@link #STRING}.
      *
      * @param propertyType
-     *            the property or value type, not {@code null}
+     *            the value type, not {@code null}
      * @return the matching variant, or {@code null} when there is no specific
      *         mapping
      */
-    static FormFieldType classifyBeanProperty(Class<?> propertyType) {
+    private static FormFieldType classifyValueType(Class<?> propertyType) {
         if (propertyType == Boolean.class || propertyType == boolean.class) {
             return BOOLEAN;
         }
@@ -160,7 +154,7 @@ enum FormFieldType {
         if (valueType == null) {
             return STRING;
         }
-        var mapped = classifyBeanProperty(valueType);
+        var mapped = classifyValueType(valueType);
         return mapped != null ? mapped : STRING;
     }
 

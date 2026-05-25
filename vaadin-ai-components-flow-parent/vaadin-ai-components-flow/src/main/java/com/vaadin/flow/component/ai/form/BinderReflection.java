@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 
@@ -51,9 +50,6 @@ final class BinderReflection {
             "boundProperties");
 
     private static final Field BINDINGS_FIELD = getBinderField("bindings");
-
-    private static final Field PROPERTY_SET_FIELD = getBinderField(
-            "propertySet");
 
     private BinderReflection() {
     }
@@ -116,32 +112,6 @@ final class BinderReflection {
             }
         } catch (Exception ex) {
             LOGGER.warn("Could not extract bindings from Binder.", ex);
-        }
-        return null;
-    }
-
-    /**
-     * Returns the bean class the {@link Binder} was constructed with, or
-     * {@code null} when the binder is {@code null}, was built without a class
-     * (the lambda-only {@code new Binder<>()} constructor), or reflection is
-     * unavailable. {@link FormAIController} uses the class to look up
-     * bean-property metadata for the JSON schema sent to the LLM.
-     *
-     * @param binder
-     *            the binder, or {@code null}
-     * @return the bean class, or {@code null}
-     */
-    static Class<?> getBeanType(Binder<?> binder) {
-        if (binder == null || PROPERTY_SET_FIELD == null) {
-            return null;
-        }
-        try {
-            var propertySet = PROPERTY_SET_FIELD.get(binder);
-            if (propertySet instanceof BeanPropertySet<?> bps) {
-                return bps.getBeanType();
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Could not read Binder.propertySet.", ex);
         }
         return null;
     }
