@@ -548,8 +548,6 @@ class FillFormToolTest {
 
     @Test
     void fillForm_bindingValidatorRejectionLeavesValueInField() {
-        // RFC: invalid values stay in the field with their error indicator;
-        // the orchestrator does not roll back on validation failure.
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
         binder.forField(field).withValidator(v -> v != null && v.length() >= 3,

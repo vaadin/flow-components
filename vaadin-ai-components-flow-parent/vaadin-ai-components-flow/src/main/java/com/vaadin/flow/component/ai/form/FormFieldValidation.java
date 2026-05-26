@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValueContext;
 
 /**
@@ -47,6 +46,8 @@ final class FormFieldValidation {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormFieldValidation.class);
+
+    private static final String GENERIC_REJECTION_MESSAGE = "Field rejected the value.";
 
     private FormFieldValidation() {
     }
@@ -105,8 +106,7 @@ final class FormFieldValidation {
             var context = field instanceof Component component
                     ? new ValueContext(component)
                     : new ValueContext();
-            var outcome = (ValidationResult) validator.apply(field.getValue(),
-                    context);
+            var outcome = validator.apply(field.getValue(), context);
             if (outcome == null || !outcome.isError()) {
                 return Optional.empty();
             }
@@ -119,6 +119,4 @@ final class FormFieldValidation {
             return Optional.empty();
         }
     }
-
-    private static final String GENERIC_REJECTION_MESSAGE = "Field rejected the value.";
 }

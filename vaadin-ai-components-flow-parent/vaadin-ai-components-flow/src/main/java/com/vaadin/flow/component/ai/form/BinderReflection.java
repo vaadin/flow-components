@@ -97,7 +97,7 @@ final class BinderReflection {
      *            the field to look up, not {@code null}
      * @return the matching binding, or {@code null}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "java:S1452" })
     static Binding<?, ?> findBinding(Binder<?> binder, HasValue<?, ?> field) {
         if (binder == null || BINDINGS_FIELD == null) {
             return null;
