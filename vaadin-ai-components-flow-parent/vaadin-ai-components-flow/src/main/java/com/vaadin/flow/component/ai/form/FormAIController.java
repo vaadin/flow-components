@@ -17,13 +17,13 @@ package com.vaadin.flow.component.ai.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -113,7 +113,13 @@ public class FormAIController implements AIController {
 
     private final Component form;
     private final Binder<?> binder;
-    private final Map<String, FormFieldHints> hintsById = new HashMap<>();
+    /**
+     * Per-field hint state, keyed by the field itself. {@link WeakHashMap} lets
+     * the entry become collectable once the field is no longer reachable from
+     * the form tree or application code, so a long-lived controller across many
+     * add/remove cycles does not accumulate stale hints.
+     */
+    private final Map<HasValue<?, ?>, FormFieldHints> hintsByField = new WeakHashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
 
     /**
@@ -394,16 +400,13 @@ public class FormAIController implements AIController {
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
-        var id = (String) ComponentUtil.getData((Component) field,
-                FIELD_ID_KEY);
-        var hints = hintsById.get(id);
+        var hints = hintsByField.get(field);
         return hints != null && hints.ignored;
     }
 
     private FormFieldHints hintsFor(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
-        return hintsById.computeIfAbsent(getOrCreateId(field),
-                k -> new FormFieldHints());
+        return hintsByField.computeIfAbsent(field, k -> new FormFieldHints());
     }
 
     /**
@@ -414,6 +417,21 @@ public class FormAIController implements AIController {
     private void attachIds() {
         FormFieldDiscovery.collectFields(form)
                 .forEach(FormAIController::getOrCreateId);
+    }
+
+    /**
+     * Resolves an LLM-supplied field id back to its live, non-ignored field, or
+     * {@code null} if no active field matches. Used by id-keyed tool callbacks
+     * ({@code query_field_options}) to look up the field and its hints from the
+     * field-keyed hint map.
+     */
+    private HasValue<?, ?> findActiveFieldById(String fieldId) {
+        for (var field : collectActiveFields()) {
+            if (Objects.equals(getOrCreateId(field), fieldId)) {
+                return field;
+            }
+        }
+        return null;
     }
 
     private static String getOrCreateId(HasValue<?, ?> field) {
@@ -441,7 +459,7 @@ public class FormAIController implements AIController {
                 }
                 var id = getOrCreateId(field);
                 descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
-                        type, hintsById.get(id)));
+                        type, hintsByField.get(field)));
             }
             return descriptors;
         }
@@ -449,7 +467,8 @@ public class FormAIController implements AIController {
         @Override
         public List<String> queryFieldOptions(String fieldId, String filter,
                 int limit) {
-            var hints = hintsById.get(fieldId);
+            var field = findActiveFieldById(fieldId);
+            var hints = field != null ? hintsByField.get(field) : null;
             if (hints == null || hints.valueOptionsQuery == null) {
                 throw new FormAITools.ToolException(
                         "Unknown field id: " + fieldId);

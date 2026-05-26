@@ -21,7 +21,8 @@ import java.util.function.Function;
 
 /**
  * Mutable per-field hint state held by {@link FormAIController}, keyed by the
- * field's opaque id.
+ * field itself in a {@link java.util.WeakHashMap} so removed fields' hints
+ * become collectable.
  *
  * @author Vaadin Ltd
  */
