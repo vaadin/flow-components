@@ -162,6 +162,21 @@ export class VaadinSpreadsheet extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     spreadsheetResizeObserver.observe(this);
+    if (!this.api) {
+      this._overlays = document.getElementById('spreadsheet-overlays');
+      if (!this._overlays) {
+        this._overlays = document.createElement('div');
+        this._overlays.id = 'spreadsheet-overlays';
+        document.body.appendChild(this._overlays);
+      }
+
+      this.api = new Spreadsheet(this, this.renderRoot);
+      this.api.setHeight('100%');
+      this.api.setWidth('100%');
+      this.createCallbacks();
+
+      this._firstUpdate = true;
+    }
   }
 
   disconnectedCallback() {
@@ -171,23 +186,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
-    let initial = false;
-    let overlays = document.getElementById('spreadsheet-overlays');
-    if (!this.api) {
-      if (!overlays) {
-        overlays = document.createElement('div');
-        overlays.id = 'spreadsheet-overlays';
-        document.body.appendChild(overlays);
-      }
-
-      this.api = new Spreadsheet(this, this.renderRoot);
-      this.api.setHeight('100%');
-      this.api.setWidth('100%');
-      this.createCallbacks();
-
-      initial = true;
-    }
-    overlays.setAttribute('theme', this.getAttribute('theme'));
+    this._overlays.setAttribute('theme', this.getAttribute('theme'));
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
@@ -309,74 +308,107 @@ export class VaadinSpreadsheet extends LitElement {
       }
       propNames.push(name);
     });
-    this.api.notifyStateChanges(propNames, initial);
-    if (initial) {
+    this.api.notifyStateChanges(propNames, this._firstUpdate);
+    if (this._firstUpdate) {
       this.api.relayout();
+      this._firstUpdate = false;
     }
+  }
+
+  // Flow can send RPC calls in the same task as the property writes that
+  // configure the api, before Lit's microtask-scheduled `updated()` runs to
+  // propagate those properties to the api. Calling `performUpdate()` flushes
+  // the pending update synchronously so the api state is ready.
+  _flush() {
+    this.performUpdate();
   }
 
   /* CLIENT SIDE RPC METHODS */
   updateBottomRightCellValues(cellData) {
+    this._flush();
     this.api.updateBottomRightCellValues(cellData);
   }
 
   updateTopLeftCellValues(cellData) {
+    this._flush();
     this.api.updateTopLeftCellValues(cellData);
   }
 
   updateTopRightCellValues(cellData) {
+    this._flush();
     this.api.updateTopRightCellValues(cellData);
   }
 
   updateBottomLeftCellValues(cellData) {
+    this._flush();
     this.api.updateBottomLeftCellValues(cellData);
   }
 
   updateFormulaBar(possibleName, col, row) {
+    this._flush();
     this.api.updateFormulaBar(possibleName, col, row);
   }
 
   invalidCellAddress() {
+    this._flush();
     this.api.invalidCellAddress();
   }
 
   showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) {
+    this._flush();
     this.api.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
   }
 
   showActions(actionDetails) {
+    this._flush();
     this.api.showActions(actionDetails);
   }
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
+    this._flush();
+    // The sheet widget's initial relayout is deferred via GWT's scheduler.
+    // If this RPC runs in the same task as the initial property batch (e.g.
+    // opening a Dialog that contains the Spreadsheet), `$scrollAreaIntoView`
+    // would dereference `definedRowHeights` before it exists. The server
+    // reissues this call once the spreadsheet has fully attached.
+    if (!this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
+      return;
+    }
     this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
   cellsUpdated(updatedCellData) {
-    if (this.api) this.api.cellsUpdated(updatedCellData);
+    this._flush();
+    this.api.cellsUpdated(updatedCellData);
   }
 
   refreshCellStyles() {
-    if (this.api) this.api.refreshCellStyles();
+    this._flush();
+    this.api.refreshCellStyles();
   }
 
   editCellComment(col, row) {
+    this._flush();
     this.api.editCellComment(col, row);
   }
 
   onPopupButtonOpen(row, column, contentId, appId) {
+    this._flush();
     this.api.onPopupButtonOpened(row, column, contentId, appId);
   }
 
   closePopup(row, column) {
+    this._flush();
     this.api.closePopup(row, column);
   }
 
   addPopupButton(rawState) {
+    this._flush();
     this.api.addPopupButton(rawState);
   }
 
   removePopupButton(rawState) {
+    this._flush();
     this.api.removePopupButton(rawState);
   }
 
