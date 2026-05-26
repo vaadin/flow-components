@@ -17,13 +17,13 @@ package com.vaadin.flow.component.ai.form;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
@@ -97,6 +96,17 @@ import tools.jackson.databind.JsonNode;
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
  * </p>
  *
+ * <p>
+ * <b>Field identity:</b> hints are stored in a {@link WeakHashMap} keyed by the
+ * field instance, so a field removed from the form and unreferenced elsewhere
+ * becomes collectable along with its hints — the controller does not leak
+ * per-field state across long-lived add/remove cycles. The map relies on
+ * identity-based {@code equals} / {@code hashCode}, which is the default
+ * behaviour of {@link Component} and is not overridden by Vaadin components.
+ * The map is not thread-safe, matching Vaadin's single-threaded UI access
+ * contract.
+ * </p>
+ *
  * @author Vaadin Ltd
  */
 public class FormAIController implements AIController {
@@ -104,16 +114,9 @@ public class FormAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAIController.class);
 
-    /**
-     * Key under which a field's opaque id is stored on the field component via
-     * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
-     * removing and re-adding the field within a session.
-     */
-    static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
-
     private final Component form;
     private final Binder<?> binder;
-    private final Map<String, FormFieldHints> hintsById = new HashMap<>();
+    private final Map<HasValue<?, ?>, FormFieldHints> hintsByField = new WeakHashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
 
     /**
@@ -318,7 +321,7 @@ public class FormAIController implements AIController {
     public void onRequest() {
         // Refresh the field set so fields added or removed between turns
         // are picked up.
-        attachIds();
+        ensureHintsForDiscoveredFields();
         seedDescriptionsFromBinder();
         lockFields();
     }
@@ -394,39 +397,60 @@ public class FormAIController implements AIController {
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
-        var id = (String) ComponentUtil.getData((Component) field,
-                FIELD_ID_KEY);
-        var hints = hintsById.get(id);
+        var hints = hintsByField.get(field);
         return hints != null && hints.ignored;
     }
 
     private FormFieldHints hintsFor(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
-        return hintsById.computeIfAbsent(getOrCreateId(field),
-                k -> new FormFieldHints());
-    }
-
-    /**
-     * Walks the form tree and ensures every discovered field has an id
-     * attached. Ids already attached are left untouched so they stay stable
-     * across removals, re-additions, and discovery walks.
-     */
-    private void attachIds() {
-        FormFieldDiscovery.collectFields(form)
-                .forEach(FormAIController::getOrCreateId);
-    }
-
-    private static String getOrCreateId(HasValue<?, ?> field) {
-        if (!(field instanceof Component component)) {
+        if (!(field instanceof Component)) {
             throw new IllegalArgumentException(
                     "Field must be a Component: " + field.getClass().getName());
         }
-        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        return hintsByField.computeIfAbsent(field, f -> {
+            var hints = new FormFieldHints();
+            hints.id = UUID.randomUUID().toString();
+            return hints;
+        });
+    }
+
+    /**
+     * Walks the form tree and ensures every discovered field has a hints entry
+     * (and therefore a stable id). Entries created earlier are left untouched
+     * so ids stay stable across removals, re-additions, and discovery walks for
+     * fields still strongly referenced from the form tree.
+     */
+    private void ensureHintsForDiscoveredFields() {
+        FormFieldDiscovery.collectFields(form).forEach(this::hintsFor);
+    }
+
+    /**
+     * Returns the controller-assigned id for the given field, or {@code null}
+     * if the controller has not observed the field yet. Package-private for
+     * test helpers that need to map a field instance back to the id the LLM
+     * sees in tool calls.
+     */
+    String idOf(HasValue<?, ?> field) {
+        var hints = hintsByField.get(field);
+        return hints != null ? hints.id : null;
+    }
+
+    /**
+     * Resolves a tool-call id back to the hints entry by scanning the current
+     * form tree. O(form size) per lookup; the {@code query_field_options} hot
+     * path is per-tool-call, not per-keystroke, and form trees are small.
+     */
+    private FormFieldHints findHintsById(String id) {
         if (id == null) {
-            id = UUID.randomUUID().toString();
-            ComponentUtil.setData(component, FIELD_ID_KEY, id);
+            return null;
         }
-        return id;
+        for (var field : FormFieldDiscovery.collectFields(form)) {
+            var hints = hintsByField.get(field);
+            if (hints != null && id.equals(hints.id)) {
+                return hints;
+            }
+        }
+        return null;
     }
 
     private final class ToolCallbacks implements FormAITools.Callbacks {
@@ -439,9 +463,9 @@ public class FormAIController implements AIController {
                 if (type == FormFieldType.UNSUPPORTED) {
                     continue;
                 }
-                var id = getOrCreateId(field);
-                descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
-                        type, hintsById.get(id)));
+                var hints = hintsFor(field);
+                descriptors.add(new FormAITools.FormFieldDescriptor(hints.id,
+                        field, type, hints));
             }
             return descriptors;
         }
@@ -449,7 +473,7 @@ public class FormAIController implements AIController {
         @Override
         public List<String> queryFieldOptions(String fieldId, String filter,
                 int limit) {
-            var hints = hintsById.get(fieldId);
+            var hints = findHintsById(fieldId);
             if (hints == null || hints.valueOptionsQuery == null) {
                 throw new FormAITools.ToolException(
                         "Unknown field id: " + fieldId);

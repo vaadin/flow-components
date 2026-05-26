@@ -87,7 +87,7 @@ class QueryFieldOptionsToolTest {
                 "Error message should echo the offending id so the LLM can "
                         + "correlate, got: " + resultUnknownId);
 
-        var unregisteredId = idOf(unregistered);
+        var unregisteredId = idOf(controller, unregistered);
         var resultFieldWithoutOptions = executeQueryFieldOptions(controller,
                 unregistered, "", 10);
 
@@ -157,7 +157,7 @@ class QueryFieldOptionsToolTest {
         }, Function.identity());
         controller.onRequest();
 
-        var fieldId = idOf(field);
+        var fieldId = idOf(controller, field);
         executeQueryFieldOptions(controller,
                 json("{\"field\":\"" + fieldId + "\"}"));
 

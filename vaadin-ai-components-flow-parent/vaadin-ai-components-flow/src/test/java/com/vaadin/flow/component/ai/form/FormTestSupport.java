@@ -18,8 +18,6 @@ package com.vaadin.flow.component.ai.form;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -38,7 +36,7 @@ final class FormTestSupport {
 
     static String executeQueryFieldOptions(FormAIController controller,
             HasValue<?, ?> field, String filter, int limit) {
-        var fieldId = idOf(field);
+        var fieldId = idOf(controller, field);
         return executeQueryFieldOptions(controller,
                 json("{\"field\":\"" + fieldId + "\",\"filter\":\"" + filter
                         + "\",\"limit\":" + limit + "}"));
@@ -61,14 +59,14 @@ final class FormTestSupport {
     }
 
     /**
-     * Returns the opaque id that {@link FormAIController} attached to the field
-     * at request start. Tests that need to assert against the id (or inject it
-     * into a tool argument) read it from here so the field fixture itself does
-     * not have to know about the controller's conventions.
+     * Returns the id that {@link FormAIController} assigned to the field, or
+     * {@code null} if the controller has not observed it yet. Tests that need
+     * to assert against the id (or inject it into a tool argument) read it from
+     * here so the field fixture itself does not have to know about the
+     * controller's conventions.
      */
-    static String idOf(HasValue<?, ?> field) {
-        return (String) ComponentUtil.getData((Component) field,
-                FormAIController.FIELD_ID_KEY);
+    static String idOf(FormAIController controller, HasValue<?, ?> field) {
+        return controller.idOf(field);
     }
 
     /**

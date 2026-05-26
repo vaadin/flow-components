@@ -20,13 +20,20 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Mutable per-field hint state held by {@link FormAIController}, keyed by the
- * field's opaque id.
+ * Mutable per-field hint state held by {@link FormAIController}. The hint entry
+ * owns the field's tool-call id so a single object holds every piece of
+ * controller-owned per-field state.
  *
  * @author Vaadin Ltd
  */
 final class FormFieldHints {
 
+    /**
+     * The UUID exposed to the LLM as this field's id in every tool payload.
+     * {@code null} when the hints object is constructed outside the controller
+     * (e.g. in unit tests for {@code FormValueConverter}).
+     */
+    String id;
     String description;
     BiFunction<String, Integer, List<String>> valueOptionsQuery;
     Function<String, ?> valueOptionsToValue;

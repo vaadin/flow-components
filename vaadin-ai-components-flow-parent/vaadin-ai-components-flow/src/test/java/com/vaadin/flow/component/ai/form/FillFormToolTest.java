@@ -70,12 +70,14 @@ class FillFormToolTest {
     void fillForm_writesStringValueToTextField() {
         var field = new LabeledStringField();
         field.setLabel("Name");
-        var result = fillFormResult(controllerFor(field),
-                payload(field, "\"Acme Corp\""));
+        var controller = controllerFor(field);
+        var result = fillFormResult(controller,
+                payload(controller, field, "\"Acme Corp\""));
 
         Assertions.assertEquals("Acme Corp", field.getValue());
         Assertions.assertTrue(success(result), "Result: " + result);
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
         Assertions.assertTrue(rejectedIds(result).isEmpty(),
                 "No rejections expected, got: " + result);
     }
@@ -83,7 +85,8 @@ class FillFormToolTest {
     @Test
     void fillForm_writesNumberToDoubleField() {
         var field = new DoubleField();
-        fillFormPayload(controllerFor(field), payload(field, "58.4"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "58.4"));
 
         Assertions.assertEquals(58.4, field.getValue());
     }
@@ -91,7 +94,8 @@ class FillFormToolTest {
     @Test
     void fillForm_writesIntegerToIntField() {
         var field = new IntField();
-        fillFormPayload(controllerFor(field), payload(field, "3"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "3"));
 
         Assertions.assertEquals(3, field.getValue());
     }
@@ -102,7 +106,8 @@ class FillFormToolTest {
         // recognises whole-number floats and casts them down. Fractional
         // values are rejected (see fillForm_rejectsFractionalValueForInteger).
         var field = new IntField();
-        fillFormPayload(controllerFor(field), payload(field, "3.0"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "3.0"));
 
         Assertions.assertEquals(3, field.getValue());
     }
@@ -111,7 +116,8 @@ class FillFormToolTest {
     void fillForm_rejectsFractionalValueForInteger() {
         var field = new IntField();
         field.setValue(42);
-        fillFormPayload(controllerFor(field), payload(field, "3.5"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "3.5"));
 
         Assertions.assertEquals(42, field.getValue(),
                 "Fractional JSON for an integer field must be rejected; "
@@ -124,7 +130,8 @@ class FillFormToolTest {
         // pattern; the LLM emits the value as a JSON string and the
         // converter parses it.
         var field = new BigDecField();
-        fillFormPayload(controllerFor(field), payload(field, "\"1234.50\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "\"1234.50\""));
 
         Assertions.assertEquals(new BigDecimal("1234.50"), field.getValue());
     }
@@ -132,7 +139,8 @@ class FillFormToolTest {
     @Test
     void fillForm_writesBooleanToBoolField() {
         var field = new BoolField();
-        fillFormPayload(controllerFor(field), payload(field, "true"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "true"));
 
         Assertions.assertTrue(field.getValue());
     }
@@ -140,7 +148,9 @@ class FillFormToolTest {
     @Test
     void fillForm_writesIsoDateToDateField() {
         var field = new DateField();
-        fillFormPayload(controllerFor(field), payload(field, "\"2026-05-19\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller,
+                payload(controller, field, "\"2026-05-19\""));
 
         Assertions.assertEquals(LocalDate.of(2026, 5, 19), field.getValue());
     }
@@ -152,8 +162,9 @@ class FillFormToolTest {
         // parseable by OffsetDateTime, so this case pins the offset branch
         // end-to-end through the tool.
         var field = new DateTimeField();
-        fillFormPayload(controllerFor(field),
-                payload(field, "\"2026-05-19T10:30:00Z\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller,
+                payload(controller, field, "\"2026-05-19T10:30:00Z\""));
 
         Assertions.assertEquals(LocalDateTime.of(2026, 5, 19, 10, 30, 0),
                 field.getValue(),
@@ -168,8 +179,9 @@ class FillFormToolTest {
         // the LocalDateTime fallback branch end-to-end through the tool,
         // complementing the zoned test above.
         var field = new DateTimeField();
-        fillFormPayload(controllerFor(field),
-                payload(field, "\"2026-05-19T10:30:00\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller,
+                payload(controller, field, "\"2026-05-19T10:30:00\""));
 
         Assertions.assertEquals(LocalDateTime.of(2026, 5, 19, 10, 30, 0),
                 field.getValue(),
@@ -180,7 +192,8 @@ class FillFormToolTest {
     @Test
     void fillForm_writesIsoTimeToTimeField() {
         var field = new TimeField();
-        fillFormPayload(controllerFor(field), payload(field, "\"09:15:00\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "\"09:15:00\""));
 
         Assertions.assertEquals(LocalTime.of(9, 15), field.getValue());
     }
@@ -191,7 +204,8 @@ class FillFormToolTest {
         // null — the converter routes through getEmptyValue().
         var field = new TestField();
         field.setValue("previous");
-        fillFormPayload(controllerFor(field), payload(field, "null"));
+        var controller = controllerFor(field);
+        fillFormPayload(controller, payload(controller, field, "null"));
 
         Assertions.assertEquals("", field.getValue());
     }
@@ -204,8 +218,9 @@ class FillFormToolTest {
         // aborting the fill.
         var field = new DoubleField();
         field.setValue(42.0);
-        fillFormPayload(controllerFor(field),
-                payload(field, "\"not a number\""));
+        var controller = controllerFor(field);
+        fillFormPayload(controller,
+                payload(controller, field, "\"not a number\""));
 
         Assertions.assertEquals(42.0, field.getValue(),
                 "Type-mismatched payload must leave the field unchanged");
@@ -252,8 +267,8 @@ class FillFormToolTest {
         var controller = controllerFor(name, amount);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(name), "Acme");
-        args.put(idOf(amount), "not a number");
+        args.put(idOf(controller, name), "Acme");
+        args.put(idOf(controller, amount), "not a number");
         fillFormPayload(controller, args);
 
         Assertions.assertEquals("Acme", name.getValue());
@@ -280,8 +295,8 @@ class FillFormToolTest {
         controller.ignore(secret);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(visible), "set");
-        args.put(idOf(secret), "leaked");
+        args.put(idOf(controller, visible), "set");
+        args.put(idOf(controller, secret), "leaked");
         var raw = fillFormPayload(controller, args);
         var result = parseResult(raw);
 
@@ -289,9 +304,10 @@ class FillFormToolTest {
         Assertions.assertEquals("original", secret.getValue(),
                 "Ignored field must never be written, even when its id "
                         + "appears in the payload");
-        Assertions.assertEquals(List.of(idOf(secret)), rejectedIds(result),
+        Assertions.assertEquals(List.of(idOf(controller, secret)),
+                rejectedIds(result),
                 "Forged id must surface in rejected as if it were unknown");
-        var reason = rejectionReason(result, idOf(secret));
+        var reason = rejectionReason(result, idOf(controller, secret));
         Assertions.assertTrue(reason.contains("Unknown field id"),
                 "Reason must use the generic unknown-id wording, not a "
                         + "special 'ignored field' message that would leak "
@@ -314,17 +330,18 @@ class FillFormToolTest {
         password.setValue("untouched");
         var controller = controllerFor(password);
 
-        // onRequest already stamped an id (attachIds walks every
+        // onRequest already assigned an id (the controller observes every
         // discovered field, UNSUPPORTED included). Forge it into the
         // payload to verify the controller still skips it.
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(password), "leaked");
+        args.put(idOf(controller, password), "leaked");
         var raw = fillFormPayload(controller, args);
         var result = parseResult(raw);
 
         Assertions.assertEquals("untouched", password.getValue());
-        Assertions.assertEquals(List.of(idOf(password)), rejectedIds(result));
-        var reason = rejectionReason(result, idOf(password));
+        Assertions.assertEquals(List.of(idOf(controller, password)),
+                rejectedIds(result));
+        var reason = rejectionReason(result, idOf(controller, password));
         Assertions.assertTrue(reason.contains("Unknown field id"),
                 "Reason must use the generic unknown-id wording, not a "
                         + "special 'unsupported' message; got: " + reason);
@@ -344,14 +361,16 @@ class FillFormToolTest {
         var controller = controllerFor(name, amount);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(name), "Acme");
-        args.put(idOf(amount), 58.4);
+        args.put(idOf(controller, name), "Acme");
+        args.put(idOf(controller, amount), 58.4);
         var result = fillFormResult(controller, args);
 
         Assertions.assertTrue(success(result), "Result: " + result);
-        Assertions.assertTrue(writtenIds(result).contains(idOf(name)),
+        Assertions.assertTrue(
+                writtenIds(result).contains(idOf(controller, name)),
                 "Written must include the name id; got: " + result);
-        Assertions.assertTrue(writtenIds(result).contains(idOf(amount)),
+        Assertions.assertTrue(
+                writtenIds(result).contains(idOf(controller, amount)),
                 "Written must include the amount id; got: " + result);
         Assertions.assertTrue(rejectedIds(result).isEmpty());
     }
@@ -370,13 +389,14 @@ class FillFormToolTest {
         var controller = controllerFor(written, untouched);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(written), "Acme");
+        args.put(idOf(controller, written), "Acme");
         var raw = fillFormPayload(controller, args);
         var result = parseResult(raw);
 
-        Assertions.assertEquals(List.of(idOf(written)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, written)),
+                writtenIds(result));
         Assertions.assertTrue(rejectedIds(result).isEmpty());
-        Assertions.assertFalse(raw.contains(idOf(untouched)),
+        Assertions.assertFalse(raw.contains(idOf(controller, untouched)),
                 "Untouched field's id must not appear in the response, "
                         + "got: " + raw);
         Assertions.assertFalse(raw.contains("Notes"),
@@ -413,11 +433,13 @@ class FillFormToolTest {
         name.setValue("previous");
         var controller = controllerFor(name);
 
-        var result = fillFormResult(controller, payload(name, "null"));
+        var result = fillFormResult(controller,
+                payload(controller, name, "null"));
 
         Assertions.assertEquals("", name.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, name)),
+                writtenIds(result));
     }
 
     @Test
@@ -425,24 +447,25 @@ class FillFormToolTest {
         // A type-mismatch lands the field in 'rejected' with the
         // converter's reason text verbatim — the LLM can use the message
         // to fix its next attempt, and the entry is keyed by the field's
-        // opaque id so the LLM can match it back to its own payload.
+        // id so the LLM can match it back to its own payload.
         var amount = new DoubleField();
         amount.setValue(42.0);
         var controller = controllerFor(amount);
 
         var result = fillFormResult(controller,
-                payload(amount, "\"not a number\""));
+                payload(controller, amount, "\"not a number\""));
 
         Assertions.assertEquals(42.0, amount.getValue(),
                 "Rejected payload must leave the field unchanged");
         Assertions.assertFalse(success(result));
         Assertions.assertTrue(writtenIds(result).isEmpty());
-        Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, amount)),
+                rejectedIds(result));
         Assertions.assertTrue(
-                rejectionReason(result, idOf(amount))
+                rejectionReason(result, idOf(controller, amount))
                         .contains("Expected number"),
                 "Reason must surface the converter's text; got: "
-                        + rejectionReason(result, idOf(amount)));
+                        + rejectionReason(result, idOf(controller, amount)));
     }
 
     @Test
@@ -455,14 +478,16 @@ class FillFormToolTest {
         var controller = controllerFor(name, amount);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(name), "Acme");
-        args.put(idOf(amount), "not a number");
+        args.put(idOf(controller, name), "Acme");
+        args.put(idOf(controller, amount), "not a number");
         var result = fillFormResult(controller, args);
 
         Assertions.assertFalse(success(result), "Result: " + result);
-        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
-        Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
-        Assertions.assertTrue(rejectionReason(result, idOf(amount))
+        Assertions.assertEquals(List.of(idOf(controller, name)),
+                writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, amount)),
+                rejectedIds(result));
+        Assertions.assertTrue(rejectionReason(result, idOf(controller, amount))
                 .contains("Expected number"));
     }
 
@@ -476,11 +501,12 @@ class FillFormToolTest {
         var controller = controllerFor(throwing);
 
         var raw = fillFormPayload(controller,
-                payload(throwing, "\"anything\""));
+                payload(controller, throwing, "\"anything\""));
         var result = parseResult(raw);
 
-        Assertions.assertEquals(List.of(idOf(throwing)), rejectedIds(result));
-        var reason = rejectionReason(result, idOf(throwing));
+        Assertions.assertEquals(List.of(idOf(controller, throwing)),
+                rejectedIds(result));
+        var reason = rejectionReason(result, idOf(controller, throwing));
         Assertions.assertNotNull(reason);
         Assertions.assertFalse(raw.contains("internal-detail-from-setvalue"),
                 "Raw exception message must not leak anywhere in the "
@@ -509,7 +535,7 @@ class FillFormToolTest {
                 "Schema must be byte-identical across calls so providers "
                         + "can cache the tool definition. Before: " + before
                         + " / after: " + after);
-        Assertions.assertFalse(before.contains(idOf(name)),
+        Assertions.assertFalse(before.contains(idOf(controller, name)),
                 "Schema must not enumerate field ids — the LLM discovers "
                         + "them via get_form_state. Got: " + before);
         Assertions.assertFalse(before.contains("Acme"),
@@ -634,13 +660,15 @@ class FillFormToolTest {
                 projects::get);
         controller.onRequest();
 
-        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+        var result = fillFormResult(controller,
+                payload(controller, field, "\"Apollo\""));
 
         Assertions.assertEquals(new Project("P-1", "Apollo"), field.getValue(),
                 "Field must receive the resolved domain object, not the "
                         + "raw label string");
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
     }
 
     @Test
@@ -652,16 +680,19 @@ class FillFormToolTest {
         var field = new SingleSelectField<Project>();
         var controller = controllerFor(field);
 
-        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+        var result = fillFormResult(controller,
+                payload(controller, field, "\"Apollo\""));
 
         Assertions.assertNull(field.getValue());
         Assertions.assertFalse(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                rejectedIds(result));
         Assertions.assertTrue(
-                rejectionReason(result, idOf(field)).contains("valueOptions"),
+                rejectionReason(result, idOf(controller, field))
+                        .contains("valueOptions"),
                 "Reason must point at the missing valueOptions "
                         + "registration; got: "
-                        + rejectionReason(result, idOf(field)));
+                        + rejectionReason(result, idOf(controller, field)));
     }
 
     @Test
@@ -675,15 +706,18 @@ class FillFormToolTest {
                 label -> null);
         controller.onRequest();
 
-        var result = fillFormResult(controller, payload(field, "\"Unknown\""));
+        var result = fillFormResult(controller,
+                payload(controller, field, "\"Unknown\""));
 
         Assertions.assertNull(field.getValue(),
                 "Unknown label must not silently clear the field");
-        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                rejectedIds(result));
         Assertions.assertTrue(
-                rejectionReason(result, idOf(field)).contains("Unknown"),
+                rejectionReason(result, idOf(controller, field))
+                        .contains("Unknown"),
                 "Reason must name the unmatched label; got: "
-                        + rejectionReason(result, idOf(field)));
+                        + rejectionReason(result, idOf(controller, field)));
     }
 
     @Test
@@ -701,12 +735,13 @@ class FillFormToolTest {
         controller.onRequest();
 
         var result = fillFormResult(controller,
-                payload(field, "[\"Apollo\", \"Vega\"]"));
+                payload(controller, field, "[\"Apollo\", \"Vega\"]"));
 
         Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
                 new Project("Vega", "Vega")), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -725,12 +760,13 @@ class FillFormToolTest {
         controller.onRequest();
 
         var result = fillFormResult(controller,
-                payload(field, "[\"Apollo\", \"Vega\"]"));
+                payload(controller, field, "[\"Apollo\", \"Vega\"]"));
 
         Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
                 new Project("Vega", "Vega")), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
     }
 
     @Test
@@ -738,12 +774,14 @@ class FillFormToolTest {
         var field = new MultiSelectField<Project>();
         var controller = controllerFor(field);
 
-        var result = fillFormResult(controller, payload(field, "[\"Apollo\"]"));
+        var result = fillFormResult(controller,
+                payload(controller, field, "[\"Apollo\"]"));
 
         Assertions.assertEquals(Set.of(), field.getValue());
-        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
-        Assertions.assertTrue(
-                rejectionReason(result, idOf(field)).contains("valueOptions"));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                rejectedIds(result));
+        Assertions.assertTrue(rejectionReason(result, idOf(controller, field))
+                .contains("valueOptions"));
     }
 
     @Test
@@ -760,11 +798,13 @@ class FillFormToolTest {
                 label -> Set.of(existing));
         controller.onRequest();
 
-        var result = fillFormResult(controller, payload(field, "[]"));
+        var result = fillFormResult(controller,
+                payload(controller, field, "[]"));
 
         Assertions.assertEquals(Set.of(), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
     }
 
     @Test
@@ -781,11 +821,13 @@ class FillFormToolTest {
                 label -> "low".equals(label) ? 1 : 10);
         controller.onRequest();
 
-        var result = fillFormResult(controller, payload(field, "\"high\""));
+        var result = fillFormResult(controller,
+                payload(controller, field, "\"high\""));
 
         Assertions.assertEquals(10, field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
     }
 
     @Test
@@ -798,13 +840,14 @@ class FillFormToolTest {
         var controller = controllerFor(field);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(field), "Acme");
+        args.put(idOf(controller, field), "Acme");
         args.put("stale-id-from-prior-turn", "garbage");
         var result = fillFormResult(controller, args);
 
         Assertions.assertEquals("Acme", field.getValue());
         Assertions.assertFalse(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
+        Assertions.assertEquals(List.of(idOf(controller, field)),
+                writtenIds(result));
         Assertions.assertEquals(List.of("stale-id-from-prior-turn"),
                 rejectedIds(result));
         Assertions
@@ -841,7 +884,8 @@ class FillFormToolTest {
         var controller = new FormAIController(detachedForm);
         controller.onRequest();
 
-        var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
+        var raw = fillFormPayload(controller,
+                payload(controller, field, "\"Acme\""));
 
         Assertions.assertEquals("Error: fill failed.", raw,
                 "Detached form must surface as the generic fill_form "
@@ -861,8 +905,8 @@ class FillFormToolTest {
         var controller = controllerFor(throwing, ok);
 
         var args = JacksonUtils.createObjectNode();
-        args.put(idOf(throwing), "doesn't matter");
-        args.put(idOf(ok), "landed");
+        args.put(idOf(controller, throwing), "doesn't matter");
+        args.put(idOf(controller, ok), "landed");
         fillFormPayload(controller, args);
 
         Assertions.assertEquals("landed", ok.getValue(),
@@ -901,7 +945,7 @@ class FillFormToolTest {
     private FormAIController controllerFor(Component... fields) {
         var controller = newController(fields);
         // Drive onRequest() so each discovered field has its UUID id
-        // stamped — payload helpers use idOf() to look the id up.
+        // assigned — payload helpers look the id up via the controller.
         controller.onRequest();
         return controller;
     }
@@ -919,9 +963,10 @@ class FillFormToolTest {
         return new FormAIController(form);
     }
 
-    private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
-        return JacksonUtils
-                .readTree("{\"" + idOf(field) + "\":" + jsonValue + "}");
+    private static JsonNode payload(FormAIController controller,
+            HasValue<?, ?> field, String jsonValue) {
+        return JacksonUtils.readTree(
+                "{\"" + idOf(controller, field) + "\":" + jsonValue + "}");
     }
 
     /**

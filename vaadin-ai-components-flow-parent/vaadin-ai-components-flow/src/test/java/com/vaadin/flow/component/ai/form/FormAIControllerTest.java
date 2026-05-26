@@ -663,7 +663,8 @@ class FormAIControllerTest {
             controller.onRequest();
             var entries = formStateFields(controller);
             var unboundEntry = entries.stream()
-                    .filter(e -> e.path("id").asString().equals(idOf(unbound)))
+                    .filter(e -> e.path("id").asString()
+                            .equals(idOf(controller, unbound)))
                     .findFirst().orElseThrow();
 
             Assertions.assertTrue(
@@ -687,12 +688,13 @@ class FormAIControllerTest {
             controller.onRequest();
             var entries = formStateFields(controller);
 
-            var nameEntry = entries.stream().filter(
-                    e -> e.path("id").asString().equals(idOf(holder.name)))
+            var nameEntry = entries.stream()
+                    .filter(e -> e.path("id").asString()
+                            .equals(idOf(controller, holder.name)))
                     .findFirst().orElseThrow();
             var emailEntry = entries.stream()
                     .filter(e -> e.path("id").asString()
-                            .equals(idOf(holder.emailField)))
+                            .equals(idOf(controller, holder.emailField)))
                     .findFirst().orElseThrow();
 
             Assertions.assertEquals("Customer Name | name",

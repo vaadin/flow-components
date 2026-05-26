@@ -82,9 +82,12 @@ class FormStateToolTest {
         var fields = formStateFields(controller);
 
         Assertions.assertEquals(3, fields.size());
-        Assertions.assertEquals(idOf(a), fields.get(0).get("id").asString());
-        Assertions.assertEquals(idOf(b), fields.get(1).get("id").asString());
-        Assertions.assertEquals(idOf(c), fields.get(2).get("id").asString());
+        Assertions.assertEquals(idOf(controller, a),
+                fields.get(0).get("id").asString());
+        Assertions.assertEquals(idOf(controller, b),
+                fields.get(1).get("id").asString());
+        Assertions.assertEquals(idOf(controller, c),
+                fields.get(2).get("id").asString());
     }
 
     @Test
@@ -97,7 +100,7 @@ class FormStateToolTest {
         var fields = formStateFields(controller);
 
         Assertions.assertEquals(1, fields.size());
-        Assertions.assertEquals(idOf(visible),
+        Assertions.assertEquals(idOf(controller, visible),
                 fields.get(0).get("id").asString());
     }
 
@@ -134,7 +137,7 @@ class FormStateToolTest {
         var fields = formStateFields(controller);
 
         Assertions.assertEquals(1, fields.size());
-        Assertions.assertEquals(idOf(visible),
+        Assertions.assertEquals(idOf(controller, visible),
                 fields.get(0).get("id").asString());
     }
 
@@ -153,7 +156,7 @@ class FormStateToolTest {
         Assertions.assertEquals(1, fields.size(),
                 "PasswordField must never appear in the form-state result, "
                         + "got: " + fields);
-        Assertions.assertEquals(idOf(visible),
+        Assertions.assertEquals(idOf(controller, visible),
                 fields.get(0).get("id").asString());
     }
 
@@ -767,7 +770,8 @@ class FormStateToolTest {
         Assertions.assertEquals("trailing",
                 fields.get(2).path("value").asString(),
                 "Fields after a failing field must still be present");
-        Assertions.assertEquals(idOf(bad), fields.get(1).path("id").asString(),
+        Assertions.assertEquals(idOf(controller, bad),
+                fields.get(1).path("id").asString(),
                 "Failed field entry must carry its id so the LLM can "
                         + "correlate, got: " + fields.get(1));
         Assertions.assertFalse(fields.get(1).path("error").isMissingNode(),
@@ -897,9 +901,9 @@ class FormStateToolTest {
         var secondId = formStateFields(controller).get(0).get("id").asString();
 
         Assertions.assertEquals(firstId, secondId);
-        Assertions.assertEquals(firstId, idOf(field),
-                "id in get_form_state must match the id stored on the "
-                        + "component");
+        Assertions.assertEquals(firstId, idOf(controller, field),
+                "id in get_form_state must match the id the controller "
+                        + "assigned to the field");
     }
 
     @Test
@@ -972,12 +976,12 @@ class FormStateToolTest {
                             }
                           ]
                         }"""
-                        .replace("<merchant>", idOf(merchant))
-                        .replace("<amount>", idOf(amount))
-                        .replace("<currency>", idOf(currency))
-                        .replace("<date>", idOf(date))
-                        .replace("<category>", idOf(category))
-                        .replace("<notes>", idOf(notes)));
+                        .replace("<merchant>", idOf(controller, merchant))
+                        .replace("<amount>", idOf(controller, amount))
+                        .replace("<currency>", idOf(controller, currency))
+                        .replace("<date>", idOf(controller, date))
+                        .replace("<category>", idOf(controller, category))
+                        .replace("<notes>", idOf(controller, notes)));
 
         Assertions.assertEquals(expected, actual);
     }
