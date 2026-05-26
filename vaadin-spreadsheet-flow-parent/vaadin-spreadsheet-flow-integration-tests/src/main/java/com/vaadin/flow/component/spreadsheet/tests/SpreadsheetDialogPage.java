@@ -19,7 +19,6 @@ import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
-import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -123,10 +122,7 @@ public class SpreadsheetDialogPage extends VerticalLayout {
         openDialog.setId("open-dialog");
 
         Button toggleModality = new Button("Toggle modality",
-                e -> dialog
-                        .setModality(dialog.getModality() == ModalityMode.STRICT
-                                ? ModalityMode.MODELESS
-                                : ModalityMode.STRICT));
+                e -> dialog.setModal(!dialog.isModal()));
         toggleModality.setId("toggle-modality");
 
         add(openDialog, toggleModality, lastAction);
