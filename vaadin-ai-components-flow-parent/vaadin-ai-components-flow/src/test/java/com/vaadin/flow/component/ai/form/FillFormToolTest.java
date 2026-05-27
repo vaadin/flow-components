@@ -948,6 +948,68 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_singleSelect_eagerItemsResolveLabelWithoutValueOptions() {
+        // A `ComboBox<String>`/`Select<String>` with eager
+        // `setItems(...)` has a non-empty ListDataProvider and the schema
+        // already surfaces its items as `enum`. The converter must resolve
+        // an LLM-supplied label against those items via
+        // FormValueConverter.renderItem so the field is writable without
+        // also requiring FormAIController.valueOptions(...).
+        var field = new SingleSelectField<String>();
+        field.setItems("EUR", "USD", "GBP");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"EUR\""));
+
+        Assertions.assertEquals("EUR", field.getValue(),
+                "Eager-items SINGLE_SELECT must accept a label that "
+                        + "matches one of its items");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_singleSelect_eagerItemsRejectLabelNotInItems() {
+        // Symmetric to the above: when eager items exist, a label that is
+        // not in the rendered set must be rejected with a reason that
+        // names the offending label so the LLM can self-correct.
+        var field = new SingleSelectField<String>();
+        field.setItems("EUR", "USD", "GBP");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"YEN\""));
+
+        Assertions.assertNull(field.getValue(),
+                "Unknown label must not write a value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("YEN"),
+                "Reason must name the unmatched label; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_singleSelect_eagerItemsResolveLabelViaItemLabelGenerator() {
+        // The symmetry between schema (emits `enum`) and converter
+        // (matches by label) rides on FormValueConverter.renderItem.
+        // String items collapse to Object#toString, so an item type with
+        // a custom ItemLabelGenerator is what actually exercises the
+        // generator path on both halves of the protocol.
+        var field = new SingleSelectField<Project>();
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        field.setItems(apollo, vega);
+        field.setItemLabelGenerator(Project::name);
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Eager-items SINGLE_SELECT must match via the custom "
+                        + "ItemLabelGenerator, not via toString()");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
     void fillForm_singleSelect_unknownLabelIsRejected() {
         // toValue returning null is the agreed signal for "label doesn't
         // match any option". The orchestrator must reject rather than
@@ -1025,6 +1087,71 @@ class FillFormToolTest {
         Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
         Assertions.assertTrue(
                 rejectionReason(result, idOf(field)).contains("valueOptions"));
+    }
+
+    @Test
+    void fillForm_multiSelect_eagerItemsResolveLabelsWithoutValueOptions() {
+        // Symmetric to the SINGLE_SELECT regression guard: a
+        // `MultiSelectComboBox<String>`/`CheckboxGroup<String>` with eager
+        // `setItems(...)` has a non-empty ListDataProvider and the schema
+        // surfaces the items as the `items.enum` of the array. The
+        // converter must resolve each label against those items so the
+        // field is writable without also requiring valueOptions(...).
+        var field = new MultiSelectField<String>();
+        field.setItems("AI", "Cloud", "Security");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"AI\", \"Cloud\"]"));
+
+        Assertions.assertEquals(Set.of("AI", "Cloud"), field.getValue(),
+                "Eager-items MULTI_SELECT must accept labels that "
+                        + "match its items");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_multiSelect_eagerItemsRejectAnyLabelNotInItems() {
+        // Unknown labels in the multi-select array must surface in the
+        // rejection so the LLM can drop or re-pick them; the field must
+        // not be partially written either.
+        var field = new MultiSelectField<String>();
+        field.setItems("AI", "Cloud", "Security");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"AI\", \"Quantum\"]"));
+
+        Assertions.assertEquals(Set.of(), field.getValue(),
+                "A label miss must abort the multi-select write, not "
+                        + "leave the field with the partial set");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("Quantum"),
+                "Reason must name the unmatched label; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_multiSelect_eagerItemsResolveLabelsViaItemLabelGenerator() {
+        // Same lock as the SINGLE_SELECT variant: a typed item with a
+        // custom ItemLabelGenerator exercises renderItem on both the
+        // schema-emit side and the converter-resolve side, so the test
+        // catches drift if either side stops honoring the generator.
+        var field = new MultiSelectField<Project>();
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        field.setItems(apollo, vega);
+        field.setItemLabelGenerator(Project::name);
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller,
+                payload(field, "[\"Apollo\", \"Vega\"]"));
+
+        Assertions.assertEquals(Set.of(apollo, vega), field.getValue(),
+                "Eager-items MULTI_SELECT must match via the custom "
+                        + "ItemLabelGenerator, not via toString()");
+        Assertions.assertTrue(success(result));
     }
 
     @Test
