@@ -366,38 +366,47 @@ export class VaadinSpreadsheet extends LitElement {
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
     this._flush();
-    // The sheet widget's initial relayout is deferred via GWT's scheduler,
-    // so `definedRowHeights` may not yet exist when this RPC arrives in the
-    // same task as the initial property batch (e.g. opening a Dialog that
-    // contains the Spreadsheet). Calling `setSelectedCellAndRange` before
-    // it's populated would throw inside `$scrollAreaIntoView`. Re-queue the
-    // call until the layout state is ready; only the latest pending call is
-    // kept so rapid successive calls collapse to the final selection.
-    if (!this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
-      this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
-      if (!this._pendingSelectionScheduled) {
-        this._pendingSelectionScheduled = true;
-        const applyPending = () => {
-          if (!this.isConnected || !this._pendingSelection) {
-            this._pendingSelectionScheduled = false;
-            this._pendingSelection = null;
-            return;
-          }
-          if (this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
-            const args = this._pendingSelection;
-            this._pendingSelection = null;
-            this._pendingSelectionScheduled = false;
-            this.api.setSelectedCellAndRange(...args);
-            return;
-          }
-          setTimeout(applyPending, 10);
-        };
-        setTimeout(applyPending, 10);
-      }
+    // Keep only the latest selection so rapid successive calls collapse to the
+    // final one, then try to apply it.
+    this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
+    this._applyPendingSelection();
+  }
+
+  // Applies the latest pending selection. The sheet widget's initial relayout
+  // is deferred via GWT's scheduler, so a call arriving in the same task as the
+  // initial property batch (e.g. opening a Dialog that contains the
+  // Spreadsheet) reaches the api before the sheet layout exists and throws
+  // inside `$scrollAreaIntoView`. The layout state can't be probed from here
+  // (the relevant widget fields are obfuscated in production builds), so we
+  // attempt the call and, if it throws, re-queue it until the layout is ready.
+  _applyPendingSelection() {
+    if (!this._pendingSelection || !this.api) {
       return;
     }
-    this._pendingSelection = null;
-    this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
+    try {
+      this.api.setSelectedCellAndRange(...this._pendingSelection);
+      this._pendingSelection = null;
+      this._selectionRetries = 0;
+    } catch {
+      // Layout not ready yet; retry shortly (bounded to avoid spinning).
+      if (this._selectionRetryScheduled) {
+        return;
+      }
+      if ((this._selectionRetries = (this._selectionRetries || 0) + 1) > 200) {
+        this._pendingSelection = null;
+        this._selectionRetries = 0;
+        return;
+      }
+      this._selectionRetryScheduled = true;
+      setTimeout(() => {
+        this._selectionRetryScheduled = false;
+        if (!this.isConnected) {
+          this._pendingSelection = null;
+          return;
+        }
+        this._applyPendingSelection();
+      }, 10);
+    }
   }
 
   cellsUpdated(updatedCellData) {
