@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.form;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,7 +46,10 @@ final class BinderReflection {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(BinderReflection.class);
 
-    private static final Field BOUND_PROPERTIES_FIELD = getBoundPropertiesField();
+    private static final Field BOUND_PROPERTIES_FIELD = getBinderField(
+            "boundProperties");
+
+    private static final Field BINDINGS_FIELD = getBinderField("bindings");
 
     private BinderReflection() {
     }
@@ -83,20 +87,43 @@ final class BinderReflection {
     }
 
     /**
-     * Looks up {@link Binder}'s private {@code boundProperties} field and makes
-     * it accessible. Returns {@code null} (with a warning) when the field does
-     * not exist on the {@code Binder} version on the classpath — callers
-     * degrade to the no-binder code path rather than failing.
+     * Returns the {@link Binding} bound to {@code field} in {@code binder}, or
+     * {@code null} when the binder is {@code null}, the field is not bound, or
+     * reflection is unavailable.
+     *
+     * @param binder
+     *            the binder, or {@code null}
+     * @param field
+     *            the field to look up, not {@code null}
+     * @return the matching binding, or {@code null}
      */
-    private static Field getBoundPropertiesField() {
+    @SuppressWarnings({ "unchecked", "java:S1452" })
+    static Binding<?, ?> findBinding(Binder<?> binder, HasValue<?, ?> field) {
+        if (binder == null || BINDINGS_FIELD == null) {
+            return null;
+        }
         try {
-            var field = Binder.class.getDeclaredField("boundProperties");
+            var bindings = (Collection<? extends Binding<?, ?>>) BINDINGS_FIELD
+                    .get(binder);
+            for (var binding : bindings) {
+                if (binding.getField() == field) {
+                    return binding;
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Could not extract bindings from Binder.", ex);
+        }
+        return null;
+    }
+
+    private static Field getBinderField(String name) {
+        try {
+            var field = Binder.class.getDeclaredField(name);
             field.setAccessible(true);
             return field;
         } catch (Exception e) {
-            LOGGER.warn("Could not access Binder.boundProperties; bound "
-                    + "fields will not seed the LLM-facing description from "
-                    + "their bean property name.", e);
+            LOGGER.warn("Could not access Binder.{}; bound-field metadata "
+                    + "will not be available.", name, e);
         }
         return null;
     }

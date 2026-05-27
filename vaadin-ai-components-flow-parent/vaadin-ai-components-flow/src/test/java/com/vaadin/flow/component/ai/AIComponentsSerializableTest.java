@@ -85,6 +85,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldHints.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldSchema.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldType.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldValidation.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormValueConverter.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?"));
     }
