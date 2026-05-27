@@ -666,8 +666,7 @@ class FillFormToolTest {
 
     @Test
     void fillForm_singleSelect_eagerItemsResolveLabelWithoutValueOptions() {
-        // Regression guard for `refactor!: drop binder-converter-derived
-        // schema metadata`: a `ComboBox<String>`/`Select<String>` with eager
+        // A `ComboBox<String>`/`Select<String>` with eager
         // `setItems(...)` has a non-empty ListDataProvider and the schema
         // already surfaces its items as `enum`. The converter must resolve
         // an LLM-supplied label against those items via

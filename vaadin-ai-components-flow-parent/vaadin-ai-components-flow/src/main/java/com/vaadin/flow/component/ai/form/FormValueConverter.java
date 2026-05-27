@@ -191,9 +191,12 @@ final class FormValueConverter {
      * the resulting object matches the field's value type before
      * {@link HasValue#setValue} sees it. Multi-select fields expect a JSON
      * array of labels; single-select and other label-routed fields expect a
-     * single string. Selection fields without a {@code valueOptions}
-     * registration are rejected with a curated reason naming the missing
-     * registration.
+     * single string. A selection field without a {@code valueOptions}
+     * registration falls back to matching the supplied label(s) against the
+     * field's own in-memory items (an eager {@code setItems(...)}), which carry
+     * the same labels {@code get_form_state} advertised; only a field that has
+     * neither a {@code valueOptions} registration nor items is rejected with a
+     * curated reason naming the missing registration.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
