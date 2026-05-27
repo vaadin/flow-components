@@ -18,18 +18,12 @@ package com.vaadin.flow.component.slider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 
 class SliderSignalTest extends AbstractSignalsTest {
-
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
     private DecimalSlider slider;
     private ValueSignal<Double> minSignal;

@@ -1,4 +1,5 @@
-import { expect, fixtureSync } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync } from '@vaadin/testing-helpers';
 import { sendKeys } from '@web/test-runner-commands';
 import { comboBoxConnector, FlowComboBox, init } from './shared.ts';
 import '@vaadin/combo-box';

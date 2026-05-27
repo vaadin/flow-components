@@ -76,11 +76,20 @@ final class FormTestSupport {
      * exploded into a {@link List}, the shape tests assert against.
      */
     static List<JsonNode> formStateFields(FormAIController controller) {
-        var result = findTool(controller.getTools(), "get_form_state")
-                .execute(JacksonUtils.createObjectNode());
-        var root = json(result);
+        var root = formStateRoot(controller);
         var out = new ArrayList<JsonNode>();
         root.path("fields").forEach(out::add);
         return out;
+    }
+
+    /**
+     * Drives {@code get_form_state} and returns the parsed root JSON. Use this
+     * when a test needs to assert against the {@code rejected} block alongside
+     * the {@code fields} array.
+     */
+    static JsonNode formStateRoot(FormAIController controller) {
+        var result = findTool(controller.getTools(), "get_form_state")
+                .execute(JacksonUtils.createObjectNode());
+        return json(result);
     }
 }

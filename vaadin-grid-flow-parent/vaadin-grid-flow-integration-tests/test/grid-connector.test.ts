@@ -1,4 +1,5 @@
-import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import {
   init,
   gridConnector,
