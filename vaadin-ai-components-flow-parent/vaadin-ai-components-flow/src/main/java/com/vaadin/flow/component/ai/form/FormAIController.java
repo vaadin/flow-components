@@ -80,6 +80,16 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
+ * <b>Validation:</b> each value the LLM writes is validated immediately after
+ * it is applied. A bound field is validated through its binding, so the
+ * converter and every registered validator run as one unit; an unbound field
+ * that exposes a default validator is validated through that validator. A value
+ * that fails validation stays in the field and the failure is reported back to
+ * the LLM as a rejection, so it can supply a corrected value within the same
+ * turn.
+ * </p>
+ *
+ * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * that wasn't already read-only is set to read-only so the user cannot type
  * into a field the AI is about to overwrite. Locks are released when the turn
