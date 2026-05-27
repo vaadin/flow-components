@@ -702,6 +702,226 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withExplicitAttachments_includesAttachmentsInRequest() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello",
+                List.of(createAttachment("a.txt"), createAttachment("b.png")));
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(2, attachments.size());
+        Assertions.assertEquals("a.txt", attachments.getFirst().name());
+        Assertions.assertEquals("b.png", attachments.get(1).name());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void prompt_withExplicitAttachments_rendersInUserMessageList() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var attachment = createAttachment("a.txt");
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(attachment));
+
+        var attachmentsCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), attachmentsCaptor.capture());
+        var rendered = (List<AIAttachment>) attachmentsCaptor.getValue();
+        Assertions.assertEquals(1, rendered.size());
+        Assertions.assertEquals("a.txt", rendered.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_firesRequestListenerWithAttachments() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestListener(receivedEvent::set).build();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals("Hello", event.getUserMessage());
+        Assertions.assertNotNull(event.getMessageId());
+        Assertions.assertEquals(1, event.getAttachments().size());
+        Assertions.assertEquals("a.txt",
+                event.getAttachments().getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_doesNotDrainFileReceiver() {
+        // The two-arg overload must leave the configured receiver alone so
+        // any pending UI uploads stay buffered for the next prompt(String).
+        // Pins the "Replace (don't drain)" semantic from the JavaDoc.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockFileReceiver, Mockito.never()).takeAttachments();
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_ignoresPendingReceiverAttachments() {
+        // Even if the receiver has files buffered, the explicit list wins
+        // and the receiver's content does not leak into this turn.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("from-receiver.txt")));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("explicit.txt")));
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(1, attachments.size());
+        Assertions.assertEquals("explicit.txt", attachments.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullListThrowsNullPointerException() {
+        var orchestrator = getSimpleOrchestrator();
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> orchestrator.prompt("Hello", null));
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullElementThrowsNullPointerException() {
+        var listWithNull = new ArrayList<AIAttachment>();
+        listWithNull.add(null);
+        var orchestrator = getSimpleOrchestrator();
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> orchestrator.prompt("Hello", listWithNull));
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_emptyListSendsNoAttachments() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of());
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().attachments().isEmpty());
+        // Empty explicit list is still an explicit list, so we still don't
+        // fall back to draining the receiver.
+        Mockito.verify(mockFileReceiver, Mockito.never()).takeAttachments();
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullUserMessageIsIgnored() {
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt(null, List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_blankUserMessageIsIgnored() {
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("   ", List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_listIsCopiedDefensively() {
+        // Without a defensive copy, the caller mutating their list during
+        // the streamed response would silently desync the LLMRequest, the
+        // user message list, and the history snapshot. Pin that mutations
+        // after prompt() can't affect what the provider sees.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var mutable = new ArrayList<AIAttachment>();
+        mutable.add(createAttachment("a.txt"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", mutable);
+        mutable.add(createAttachment("b.txt"));
+        mutable.clear();
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(1, attachments.size());
+        Assertions.assertEquals("a.txt", attachments.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_addsUserMessageToHistory() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        var history = orchestrator.getHistory();
+        Assertions.assertFalse(history.isEmpty());
+        var user = history.getFirst();
+        Assertions.assertEquals(ChatMessage.Role.USER, user.role());
+        Assertions.assertEquals("Hello", user.content());
+        Assertions.assertNotNull(user.messageId());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_listenerAndHistoryShareMessageId() {
+        // The request listener and the conversation history record the
+        // turn under the same messageId — that's the correlation handle
+        // external storage (e.g. attachment maps keyed by messageId) relies
+        // on, so it can't drift between the two surfaces.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestListener(receivedEvent::set).build();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        Assertions.assertEquals(receivedEvent.get().getMessageId(),
+                orchestrator.getHistory().getFirst().messageId());
+    }
+
+    @Test
     void prompt_withTimeout_setsTimeoutErrorMessage() throws Exception {
         var mockMessage = createMockMessage();
         var latch = new CountDownLatch(1);
