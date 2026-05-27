@@ -80,6 +80,16 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
+ * <b>Validation:</b> each value the LLM writes is validated immediately after
+ * it is applied. A bound field is validated through its binding, so the
+ * converter and every registered validator run as one unit; an unbound field
+ * that exposes a default validator is validated through that validator. A value
+ * that fails validation stays in the field and the failure is reported back to
+ * the LLM as a rejection, so it can supply a corrected value within the same
+ * turn.
+ * </p>
+ *
+ * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * that wasn't already read-only is set to read-only so the user cannot type
  * into a field the AI is about to overwrite. Locks are released when the turn
@@ -583,83 +593,126 @@ public class FormAIController implements AIController {
         }
 
         private String doFill(JsonNode arguments) {
-            // Snapshot the visible-field set once and iterate the payload so
-            // every id the LLM sent ends up either in 'written' or
-            // 'rejected'. Iterating visibleFields() instead would silently
-            // drop unknown ids — the LLM would have no way to learn that an
-            // id from a previous turn is stale and trigger a refresh.
+            // Resolve ids against the pre-write snapshot so every id the LLM
+            // sent gets a verdict — including ones that no longer match a
+            // current field (stale id, structural change). Iterating
+            // visibleFields() alone would silently drop unknown ids and the
+            // LLM would have no way to learn the id list needs refreshing.
             var byId = new LinkedHashMap<String, FormFieldDescriptor>();
             for (var descriptor : visibleFields()) {
                 byId.put(descriptor.id(), descriptor);
             }
-            var written = new ArrayList<String>();
             var rejected = new ArrayList<RejectedEntry>();
             for (var id : arguments.propertyNames()) {
+                var value = arguments.get(id);
                 var field = byId.get(id);
                 if (field == null) {
-                    rejected.add(new RejectedEntry(id, "Unknown field id '" + id
-                            + "'. Call get_form_state to refresh the "
-                            + "id list and retry only entries that are "
-                            + "rejected with the reason unknown field id."));
+                    rejected.add(new RejectedEntry(id, value,
+                            "Unknown field id '" + id
+                                    + "'. Call get_form_state to refresh "
+                                    + "the id list and retry only entries "
+                                    + "that are rejected with the reason "
+                                    + "unknown field id."));
                     continue;
                 }
-                applyValue(field, arguments.get(id), written, rejected);
+                applyValue(field, value, rejected);
             }
-            return formatResult(written, rejected);
+            // Re-snapshot the visible field set after writes so the response
+            // reflects value-change listener cascades, structural changes,
+            // and any normalisation setters applied. Per RFC, the response
+            // mirrors what get_form_state would return after the write.
+            return formatResult(visibleFields(), rejected);
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void applyValue(FormFieldDescriptor field, JsonNode value,
-                List<String> written, List<RejectedEntry> rejected) {
+                List<RejectedEntry> rejected) {
             Object converted;
             try {
                 converted = FormValueConverter.convert(field, value);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());
-                rejected.add(new RejectedEntry(field.id(), ex.getMessage()));
+                rejected.add(
+                        new RejectedEntry(field.id(), value, ex.getMessage()));
+                return;
+            } catch (Exception ex) {
+                // Anything other than RejectedValueException is an uncontrolled
+                // converter failure — surface a curated rejection so a single
+                // bad field doesn't collapse the whole turn into a generic
+                // error and erase the other fields' writes and rejections.
+                LOGGER.warn("Converter threw unexpectedly for field {}",
+                        field.id(), ex);
+                rejected.add(new RejectedEntry(field.id(), value,
+                        "Field rejected the value."));
                 return;
             }
             HasValue raw = field.field();
             try {
                 raw.setValue(converted);
-                written.add(field.id());
             } catch (Exception ex) {
                 LOGGER.debug("setValue rejected for field {}: {}", field.id(),
                         ex.getMessage());
                 // setValue's exception text comes from third-party / Vaadin
                 // code — drop it and surface a curated reason so the LLM
                 // gets nothing the application didn't sanction.
-                rejected.add(new RejectedEntry(field.id(),
+                rejected.add(new RejectedEntry(field.id(), value,
                         "Field rejected the value."));
+                return;
             }
+            // Per RFC: validation runs at fill_form time. Bound fields route
+            // through their Binding; unbound HasValidator fields run their
+            // own default validator. The value stays in the field either way
+            // — the rejected block tells the LLM what to fix on the next
+            // turn while the binder's UI shows the error indicator.
+            var binding = BinderReflection.findBinding(binder, raw);
+            FormFieldValidation.firstError(raw, binding)
+                    .ifPresent(reason -> rejected
+                            .add(new RejectedEntry(field.id(), value, reason)));
         }
 
         /**
-         * Builds the {@code fill_form} tool's JSON response:
-         * {@code {"success": bool, "written": [ids], "rejected": [{"id",
-         * "reason"}]}}. {@code success} is {@code true} iff {@code rejected} is
-         * empty. Ids are the only stable per-field reference (labels can
-         * collide, descriptions get truncated), so the LLM has unambiguous
-         * attribution for a retry of only the rejected entries.
+         * Builds the {@code fill_form} tool's JSON response. Shape mirrors
+         * {@code get_form_state} — a {@code fields} block listing every visible
+         * field's current state — plus a {@code rejected} block with
+         * {@code {"id", "value", "reason"}} entries. Ids are the only stable
+         * per-field reference (labels can collide, descriptions get truncated),
+         * so the LLM has unambiguous attribution for a retry of only the
+         * rejected entries.
          */
-        private String formatResult(List<String> written,
+        private String formatResult(List<FormFieldDescriptor> postWrite,
                 List<RejectedEntry> rejected) {
             var root = JacksonUtils.createObjectNode();
-            root.put("success", rejected.isEmpty());
-            var writtenArr = root.putArray("written");
-            written.forEach(writtenArr::add);
+            var fieldsArr = root.putArray("fields");
+            for (var d : postWrite) {
+                try {
+                    fieldsArr.add(FormFieldSchema.build(d.id(), d.field(),
+                            d.type(), d.hints()));
+                } catch (Exception ex) {
+                    LOGGER.warn("fill_form field-state build failed for {}",
+                            d.id(), ex);
+                    var errorNode = JacksonUtils.createObjectNode();
+                    errorNode.put("id", d.id());
+                    errorNode.put("error", "Failed to build field state.");
+                    fieldsArr.add(errorNode);
+                }
+            }
             var rejectedArr = root.putArray("rejected");
             for (var entry : rejected) {
                 var node = rejectedArr.addObject();
                 node.put("id", entry.id());
+                node.set("value", entry.value());
                 node.put("reason", entry.reason());
             }
             return root.toString();
         }
     }
 
-    /** One rejected entry in the {@code fill_form} JSON response. */
-    private record RejectedEntry(String id, String reason) {
+    /**
+     * One rejected entry in the {@code fill_form} JSON response. {@code value}
+     * carries the LLM's input verbatim so the LLM sees what failed;
+     * {@code reason} is the curated message.
+     */
+    private record RejectedEntry(String id, JsonNode value, String reason) {
     }
 }

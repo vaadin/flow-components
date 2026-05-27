@@ -20,33 +20,53 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
 
-import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.data.binder.Binder;
 
+/**
+ * Tests for {@link BinderReflection}'s public surface. The reflection
+ * fall-through paths (NPE → catch → log + empty result) work for a {@code null}
+ * binder but emit a WARN every call, which would flood logs whenever the
+ * controller is constructed without a binder. Each method must short-circuit
+ * silently on {@code null}.
+ */
 class BinderReflectionTest {
-
-    private final TestLogger logger = TestLoggerFactory
-            .getTestLogger(BinderReflection.class);
 
     @BeforeEach
     void clearLogger() {
-        logger.clear();
+        TestLoggerFactory.getTestLogger(BinderReflection.class).clearAll();
     }
 
     @Test
-    void collectPropertyNames_nullBinder_returnsEmptyMapWithoutLogging() {
-        // Callers (including FormAIController#seedDescriptionsFromBinder)
-        // pass the field unconditionally — a null binder is the no-binder
-        // controller path and must not produce log noise on every prompt.
+    void collectPropertyNamesOnNullBinderReturnsEmptyWithoutWarning() {
+        // FormAIController's single-arg constructor passes a null binder
+        // through to collectPropertyNames on every get_form_state call; an
+        // exception-handled fallback would log a warning on every request.
         var result = BinderReflection.collectPropertyNames(null);
 
         Assertions.assertTrue(result.isEmpty(),
-                "Null binder must yield an empty map, got: " + result);
-        var warnings = logger.getLoggingEvents().stream()
-                .filter(event -> event.getLevel() == Level.WARN).toList();
+                "Null binder must produce an empty map, got: " + result);
+        var warnings = TestLoggerFactory.getTestLogger(BinderReflection.class)
+                .getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.WARN).toList();
         Assertions.assertTrue(warnings.isEmpty(),
-                "Null binder must not log a warning; got: " + warnings);
+                "Null binder is a normal no-binder construction, not a "
+                        + "reflection failure, and must not WARN, got: "
+                        + warnings);
+    }
+
+    @Test
+    void findBindingOnNullBinderReturnsNullWithoutWarning() {
+        var result = BinderReflection.findBinding(null, new TestField());
+
+        Assertions.assertNull(result);
+        var warnings = TestLoggerFactory.getTestLogger(BinderReflection.class)
+                .getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.WARN).toList();
+        Assertions.assertTrue(warnings.isEmpty(),
+                "Null binder must not WARN on every validation call, got: "
+                        + warnings);
     }
 
     @Test

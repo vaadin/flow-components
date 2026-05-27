@@ -44,27 +44,125 @@ import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
+import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
 
 /**
- * Tests for {@link FormAIController}'s {@code fill_form} tool. The tool returns
- * a JSON object the LLM reads back —
- * {@code {"success": <bool>, "written": [field-ids], "rejected": [{"id":
- * <field-id>, "reason": "..."}]}}. Each test drives the tool the way the LLM
- * would and asserts on the parsed response (success flag, per-id attribution)
- * plus the field state. Tests that pin error strings outside the JSON happy
- * path (e.g. malformed {@code arguments}) assert against the raw response
+ * Tests for {@link FormAIController}'s {@code fill_form} tool. Per the RFC the
+ * tool returns the same shape as {@code get_form_state} — a {@code fields}
+ * block listing every visible field's current state — plus a {@code rejected}
+ * block carrying {@code {"id", "value", "reason"}} entries for any value that
+ * failed to parse, resolve, or validate. Each test drives the tool the way the
+ * LLM would and asserts on the parsed response (rejection state, fields block
+ * contents) plus the field state. Tests that pin error strings outside the JSON
+ * happy path (e.g. malformed {@code arguments}) assert against the raw response
  * string directly.
  */
 class FillFormToolTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @Test
+    void fillForm_responseFieldsBlockMirrorsGetFormStateForAllVisibleFields() {
+        // Per RFC: fill_form returns the same shape as get_form_state. The
+        // LLM sees every visible field's current state in the response, not
+        // just the ids it wrote — so structural or cascading changes from
+        // value-change listeners surface without an extra get_form_state
+        // round-trip.
+        var name = new LabeledStringField();
+        name.setLabel("Name");
+        var notes = new LabeledStringField();
+        notes.setLabel("Notes");
+        notes.setValue("untouched");
+        var controller = controllerFor(name, notes);
+
+        var result = fillFormResult(controller, payload(name, "\"Acme\""));
+
+        var ids = new ArrayList<String>();
+        result.path("fields").forEach(f -> ids.add(f.path("id").asString()));
+        Assertions.assertTrue(ids.contains(idOf(name)),
+                "fields block must include the written field; got: " + result);
+        Assertions.assertTrue(ids.contains(idOf(notes)),
+                "fields block must include every visible field, even ones "
+                        + "the LLM didn't write; got: " + result);
+    }
+
+    @Test
+    void fillForm_responseSurfacesPostWriteValueInFieldsBlock() {
+        var field = new LabeledStringField();
+        field.setLabel("Name");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Acme\""));
+
+        var entry = fieldEntry(result, idOf(field));
+        Assertions.assertNotNull(entry,
+                "Field must appear in fields block, got: " + result);
+        Assertions.assertEquals("Acme", entry.path("value").asString(),
+                "fields entry must carry the post-write value; got: " + result);
+    }
+
+    @Test
+    void fillForm_responseSurfacesValueChangeListenerCascadeInFieldsBlock() {
+        // The killer case for full-state responses: a value-change listener
+        // on the written field updates a SECOND field. The LLM sees that
+        // cascade in the same response and can react in the same turn.
+        var name = new LabeledStringField();
+        name.setLabel("Name");
+        var email = new LabeledStringField();
+        email.setLabel("Email");
+        name.addValueChangeListener(
+                e -> email.setValue(e.getValue() + "@example.com"));
+        var controller = controllerFor(name, email);
+
+        var result = fillFormResult(controller, payload(name, "\"acme\""));
+
+        Assertions.assertEquals("acme@example.com",
+                fieldEntry(result, idOf(email)).path("value").asString(),
+                "Cascaded value from listener must surface in fields block, "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_responseOmitsIgnoredFields() {
+        var visible = new LabeledStringField();
+        visible.setLabel("Visible");
+        var secret = new LabeledStringField();
+        secret.setLabel("Secret");
+        secret.setValue("classified");
+        var controller = controllerFor(visible, secret);
+        controller.ignore(secret);
+
+        var raw = fillFormPayload(controller, payload(visible, "\"Acme\""));
+
+        Assertions.assertFalse(raw.contains(idOf(secret)),
+                "Ignored field's id must not appear, got: " + raw);
+        Assertions.assertFalse(raw.contains("Secret"),
+                "Ignored field's label must not appear, got: " + raw);
+        Assertions.assertFalse(raw.contains("classified"),
+                "Ignored field's value must not appear, got: " + raw);
+    }
+
+    @Test
+    void fillForm_rejectedEntryIncludesAttemptedValue() {
+        var amount = new DoubleField();
+        var controller = controllerFor(amount);
+
+        var result = fillFormResult(controller,
+                payload(amount, "\"not a number\""));
+
+        Assertions.assertEquals("\"not a number\"",
+                rejectionValue(result, idOf(amount)),
+                "Rejected entry must echo the LLM's input value, got: "
+                        + result);
+    }
 
     @Test
     void fillForm_writesStringValueToTextField() {
@@ -75,7 +173,6 @@ class FillFormToolTest {
 
         Assertions.assertEquals("Acme Corp", field.getValue());
         Assertions.assertTrue(success(result), "Result: " + result);
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
         Assertions.assertTrue(rejectedIds(result).isEmpty(),
                 "No rejections expected, got: " + result);
     }
@@ -230,7 +327,6 @@ class FillFormToolTest {
                 "Unknown id must not move any field");
         Assertions.assertFalse(success(result),
                 "Unknown id must mark the turn unsuccessful, got: " + result);
-        Assertions.assertTrue(writtenIds(result).isEmpty());
         Assertions.assertEquals(List.of("not-a-real-id"), rejectedIds(result));
         var reason = rejectionReason(result, "not-a-real-id");
         Assertions.assertTrue(reason.contains("not-a-real-id"),
@@ -299,9 +395,9 @@ class FillFormToolTest {
         Assertions.assertFalse(raw.contains("Secret"),
                 "Ignored field's label must not appear in the response, "
                         + "got: " + raw);
-        Assertions.assertFalse(raw.contains("leaked"),
-                "The forged payload value targeting the ignored field "
-                        + "must not be echoed back, got: " + raw);
+        Assertions.assertFalse(raw.contains("original"),
+                "Ignored field's current value must not appear in the "
+                        + "response, got: " + raw);
     }
 
     @Test
@@ -331,9 +427,9 @@ class FillFormToolTest {
         Assertions.assertFalse(raw.contains("Password"),
                 "PasswordField's label must not appear in the response, "
                         + "got: " + raw);
-        Assertions.assertFalse(raw.contains("leaked"),
-                "The forged payload value targeting the PasswordField "
-                        + "must not be echoed back, got: " + raw);
+        Assertions.assertFalse(raw.contains("untouched"),
+                "PasswordField's current value must not appear in the "
+                        + "response, got: " + raw);
     }
 
     @Test
@@ -349,47 +445,14 @@ class FillFormToolTest {
         var result = fillFormResult(controller, args);
 
         Assertions.assertTrue(success(result), "Result: " + result);
-        Assertions.assertTrue(writtenIds(result).contains(idOf(name)),
-                "Written must include the name id; got: " + result);
-        Assertions.assertTrue(writtenIds(result).contains(idOf(amount)),
-                "Written must include the amount id; got: " + result);
         Assertions.assertTrue(rejectedIds(result).isEmpty());
     }
 
     @Test
-    void fillForm_writeResultDoesNotLeakUntouchedFields() {
-        // The response surfaces only ids the LLM attempted to write.
-        // Untouched fields — including ones that hold user-typed values —
-        // must not appear so the response doesn't disclose data the LLM
-        // never asked about.
-        var written = new LabeledStringField();
-        written.setLabel("Name");
-        var untouched = new LabeledStringField();
-        untouched.setLabel("Notes");
-        untouched.setValue("user-typed secret");
-        var controller = controllerFor(written, untouched);
-
-        var args = JacksonUtils.createObjectNode();
-        args.put(idOf(written), "Acme");
-        var raw = fillFormPayload(controller, args);
-        var result = parseResult(raw);
-
-        Assertions.assertEquals(List.of(idOf(written)), writtenIds(result));
-        Assertions.assertTrue(rejectedIds(result).isEmpty());
-        Assertions.assertFalse(raw.contains(idOf(untouched)),
-                "Untouched field's id must not appear in the response, "
-                        + "got: " + raw);
-        Assertions.assertFalse(raw.contains("Notes"),
-                "Untouched field's label must not appear, got: " + raw);
-        Assertions.assertFalse(raw.contains("user-typed secret"),
-                "Untouched field's value must not appear, got: " + raw);
-    }
-
-    @Test
-    void fillForm_emptyPayloadReturnsSuccessWithEmptyArrays() {
-        // No payload means no writes attempted — success is true (no
-        // failures), both arrays are empty. The LLM uses the JSON shape
-        // to confirm it didn't accidentally fire a malformed turn.
+    void fillForm_emptyPayloadReturnsSuccessWithEmptyRejected() {
+        // No payload means no writes attempted — success (no rejected
+        // entries) holds. The LLM uses the JSON shape to confirm it
+        // didn't accidentally fire a malformed turn.
         var name = new LabeledStringField();
         name.setLabel("Name");
         var controller = controllerFor(name);
@@ -399,7 +462,6 @@ class FillFormToolTest {
 
         Assertions.assertTrue(success(result),
                 "Empty payload is a no-op, not a failure; got: " + result);
-        Assertions.assertTrue(writtenIds(result).isEmpty());
         Assertions.assertTrue(rejectedIds(result).isEmpty());
     }
 
@@ -417,7 +479,6 @@ class FillFormToolTest {
 
         Assertions.assertEquals("", name.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
     }
 
     @Test
@@ -436,7 +497,6 @@ class FillFormToolTest {
         Assertions.assertEquals(42.0, amount.getValue(),
                 "Rejected payload must leave the field unchanged");
         Assertions.assertFalse(success(result));
-        Assertions.assertTrue(writtenIds(result).isEmpty());
         Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
         Assertions.assertTrue(
                 rejectionReason(result, idOf(amount))
@@ -460,10 +520,234 @@ class FillFormToolTest {
         var result = fillFormResult(controller, args);
 
         Assertions.assertFalse(success(result), "Result: " + result);
-        Assertions.assertEquals(List.of(idOf(name)), writtenIds(result));
         Assertions.assertEquals(List.of(idOf(amount)), rejectedIds(result));
         Assertions.assertTrue(rejectionReason(result, idOf(amount))
                 .contains("Expected number"));
+    }
+
+    @Test
+    void fillForm_bindingValidatorRejectionSurfacesInRejected() {
+        // RFC: validation runs at fill_form time and rejections come back in
+        // the same response so the LLM can self-correct in the same turn
+        // without an extra get_form_state round-trip.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> v != null && v.length() >= 3,
+                "Name must be at least 3 characters").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertFalse(success(result),
+                "Validator rejection must produce success=false, got: "
+                        + result);
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals("Name must be at least 3 characters",
+                rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_bindingValidatorRejectionLeavesValueInField() {
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> v != null && v.length() >= 3,
+                "Name must be at least 3 characters").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals("X", field.getValue(),
+                "Invalid values must stay in the field; the binder shows "
+                        + "the error and the LLM corrects on the next turn");
+    }
+
+    @Test
+    void fillForm_bindingValidatorPassDoesNotEmitRejected() {
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> v != null && v.length() >= 3,
+                "Name must be at least 3 characters").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"Acme\""));
+
+        Assertions.assertTrue(success(result),
+                "Passing validator must yield success=true, got: " + result);
+        Assertions.assertTrue(rejectedIds(result).isEmpty(),
+                "No rejected expected, got: " + result);
+    }
+
+    @Test
+    void fillForm_bindingConverterFailureSurfacesReasonInRejected() {
+        // A withConverter chain (e.g. String -> Integer) is the typical way
+        // applications adapt a TextField to a non-String bean property. Bad
+        // input fails inside the binder's chain rather than in the form
+        // controller's own FormValueConverter; the rejection block must
+        // still carry the converter's error message so the LLM can correct
+        // on the next turn.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(IntegerBean.class);
+        binder.forField(field).withConverter(Integer::parseInt,
+                i -> i == null ? "" : i.toString(), "must be a whole number")
+                .bind("count");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"abc\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals("must be a whole number",
+                rejectionReason(result, idOf(field)),
+                "Converter failure must surface its message in rejected, "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_bindingValidatorBlankMessageIsStillSurfacedAsRejection() {
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> false, "").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result),
+                "Validator that fails with a blank message must still "
+                        + "produce a rejected entry; otherwise the LLM "
+                        + "thinks the write succeeded while the field is "
+                        + "in an invalid state. Got: " + result);
+    }
+
+    @Test
+    void fillForm_hasValidatorRejectionForUnboundFieldSurfacesInRejected() {
+        // Unbound fields fall back to HasValidator's default validator. The
+        // fill_form path must hit the same FormFieldValidation hook that
+        // get_form_state uses, otherwise unbound rejections only show on
+        // the next get_form_state call.
+        var field = new ValidatedField();
+        field.rejectAllWith("Value not accepted");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertFalse(success(result),
+                "HasValidator rejection must surface in fill_form, got: "
+                        + result);
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertEquals("Value not accepted",
+                rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_hasValidatorWarningLevelResultEmitsNoRejection() {
+        // ValidationResult with ErrorLevel.WARNING isError()=false; the
+        // early return in errorFromHasValidator's non-error branch is what
+        // keeps the message from being surfaced as a rejection. The
+        // outer-catch safety net hides the bug for ValidationResult.ok()
+        // because getErrorMessage() throws there, but a non-error result
+        // with a real message does not throw — the rejection leaks out.
+        var field = new ValidatedField();
+        field.setDefaultValidator((value,
+                ctx) -> com.vaadin.flow.data.binder.ValidationResult.create(
+                        "soft-warning",
+                        com.vaadin.flow.data.binder.ErrorLevel.WARNING));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertTrue(rejectedIds(result).isEmpty(),
+                "Non-error ValidationResult (INFO/WARNING) must not produce "
+                        + "a rejection, got: " + result);
+    }
+
+    @Test
+    void fillForm_hasValidatorReceivesComponentInValueContext() {
+        // Pins that FormFieldValidation builds the ValueContext with the
+        // field as the Component so locale-aware validators (and anything
+        // else reading ctx.getComponent()) sees the source component, not
+        // an empty Optional.
+        var field = new ValidatedField();
+        field.setDefaultValidator((value,
+                ctx) -> com.vaadin.flow.data.binder.ValidationResult.error(
+                        "component-was-" + ctx.getComponent().isPresent()));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals("component-was-true",
+                rejectionReason(result, idOf(field)),
+                "Validator must receive a ValueContext carrying the field "
+                        + "as its Component; got: " + result);
+    }
+
+    @Test
+    void firstError_bindingValidateThrows_returnsEmptyNotNull() {
+        // FormFieldValidation.errorFromBinding's catch must return
+        // Optional.empty(), not null; the caller chains .ifPresent(...) on
+        // the result and null breaks the chain. The fill_form pipeline
+        // intercepts validator throws at setValue (the binder triggers
+        // validation through the value-change listener), so the catch is
+        // only reachable when firstError is called directly with a binding
+        // whose validate(false) still throws — pin the contract here.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field)
+                .withValidator(
+                        (com.vaadin.flow.data.binder.Validator<String>) (value,
+                                ctx) -> {
+                            throw new RuntimeException("validator-boom");
+                        })
+                .bind("name");
+        var binding = BinderReflection.findBinding(binder, field);
+
+        var result = FormFieldValidation.firstError(field, binding);
+
+        Assertions.assertEquals(java.util.Optional.empty(), result,
+                "errorFromBinding catch must return Optional.empty(), not "
+                        + "null; null breaks the caller's .ifPresent() chain");
+    }
+
+    @Test
+    void fillForm_boundHasValidatorFieldNotDoubleValidated() {
+        // ValidatedField implements HasValidator. The binder wraps the
+        // field's default validator into the binding chain by default, so a
+        // failing validator would otherwise be counted both via
+        // Binding.validate(false) and via the direct HasValidator branch in
+        // FormFieldValidation. The early return after the binding path
+        // keeps the rejection from being recorded twice.
+        var field = new ValidatedField();
+        field.rejectAllWith("X");
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"anything\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result),
+                "Bound HasValidator field must record exactly one rejection, "
+                        + "not two; got: " + result);
+    }
+
+    @Test
+    void fillForm_conversionFailureDoesNotRunValidators() {
+        // A converter rejection short-circuits applyValue before setValue
+        // runs — the validator must not run either (running it on the
+        // pre-fill value would produce a misleading reason that doesn't
+        // describe the LLM's failed input).
+        var field = new IntField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field)
+                .withValidator(v -> false, "validator should not have run")
+                .bind(b -> 0, (b, v) -> {
+                });
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"not-int\""));
+
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertNotEquals("validator should not have run",
+                rejectionReason(result, idOf(field)),
+                "Conversion failure must report the converter's reason, "
+                        + "not the validator's; got: " + result);
     }
 
     @Test
@@ -640,7 +924,6 @@ class FillFormToolTest {
                 "Field must receive the resolved domain object, not the "
                         + "raw label string");
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
     }
 
     @Test
@@ -706,7 +989,6 @@ class FillFormToolTest {
         Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
                 new Project("Vega", "Vega")), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -730,7 +1012,6 @@ class FillFormToolTest {
         Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
                 new Project("Vega", "Vega")), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
     }
 
     @Test
@@ -764,7 +1045,6 @@ class FillFormToolTest {
 
         Assertions.assertEquals(Set.of(), field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
     }
 
     @Test
@@ -785,7 +1065,6 @@ class FillFormToolTest {
 
         Assertions.assertEquals(10, field.getValue());
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
     }
 
     @Test
@@ -804,7 +1083,6 @@ class FillFormToolTest {
 
         Assertions.assertEquals("Acme", field.getValue());
         Assertions.assertFalse(success(result));
-        Assertions.assertEquals(List.of(idOf(field)), writtenIds(result));
         Assertions.assertEquals(List.of("stale-id-from-prior-turn"),
                 rejectedIds(result));
         Assertions
@@ -851,6 +1129,37 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
+        // FormValueConverter.convert delegates to field.getEmptyValue() for
+        // JSON null. A field whose getEmptyValue() throws produces an
+        // exception that is NOT a RejectedValueException; the controller's
+        // applyValue only catches RejectedValueException, so the throw
+        // propagates all the way out of doFill. The response must still be
+        // a structured JSON document so the LLM can attribute the failure
+        // to the offending field and retry the rest — collapsing the entire
+        // turn into a generic "Error: fill failed." erases every other
+        // field's write and rejection record.
+        var bad = new EmptyValueThrowingField();
+        var ok = new TestField();
+        var controller = controllerFor(bad, ok);
+
+        var args = JacksonUtils.createObjectNode();
+        args.putNull(idOf(bad));
+        args.put(idOf(ok), "landed");
+        var raw = fillFormPayload(controller, args);
+
+        Assertions.assertFalse(raw.startsWith("Error"),
+                "Unexpected converter throw must not collapse the entire "
+                        + "turn into a raw error string, got: " + raw);
+        var result = parseResult(raw);
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(bad)),
+                "Bad field must surface in rejected, got: " + result);
+        Assertions.assertNotNull(fieldEntry(result, idOf(ok)),
+                "Other fields must still appear in the fields block, got: "
+                        + result);
+    }
+
+    @Test
     void fillForm_setValueThrowingLeavesOtherFieldsIntact() {
         // ThrowingField's setValue throws RuntimeException. The controller
         // catches the throw, logs at DEBUG, and continues with the next
@@ -874,6 +1183,40 @@ class FillFormToolTest {
     private record Project(String code, String name) {
     }
 
+    /** Minimal bean used by the binder-validator tests. */
+    private static class TestBean {
+        private String name;
+
+        @SuppressWarnings("unused")
+        public String getName() {
+            return name;
+        }
+
+        @SuppressWarnings("unused")
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    /**
+     * Bean with a non-String property — drives the converter-failure rejection
+     * test where the binder's chain (not the controller's own converter) is the
+     * source of the error.
+     */
+    private static class IntegerBean {
+        private Integer count;
+
+        @SuppressWarnings("unused")
+        public Integer getCount() {
+            return count;
+        }
+
+        @SuppressWarnings("unused")
+        public void setCount(Integer count) {
+            this.count = count;
+        }
+    }
+
     /**
      * Field whose {@link #setValue} always throws — used to pin the
      * controller's catch(RuntimeException) branch around setValue.
@@ -888,6 +1231,29 @@ class FillFormToolTest {
         @Override
         public void setValue(String value) {
             throw new RuntimeException("internal-detail-from-setvalue");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field whose {@link #getEmptyValue} throws — exercises the path where
+     * {@code FormValueConverter.convert} raises a non-{@code
+     * RejectedValueException} for a JSON {@code null} payload.
+     */
+    @com.vaadin.flow.component.Tag("empty-value-throwing-field")
+    private static class EmptyValueThrowingField extends
+            com.vaadin.flow.component.AbstractField<EmptyValueThrowingField, String> {
+        EmptyValueThrowingField() {
+            super("");
+        }
+
+        @Override
+        public String getEmptyValue() {
+            throw new RuntimeException("internal-detail-from-getemptyvalue");
         }
 
         @Override
@@ -917,6 +1283,15 @@ class FillFormToolTest {
         var form = new Div(fields);
         ui.add(form);
         return new FormAIController(form);
+    }
+
+    private FormAIController controllerForBound(Binder<?> binder,
+            Component... fields) {
+        var form = new Div(fields);
+        ui.add(form);
+        var controller = new FormAIController(form, binder);
+        controller.onRequest();
+        return controller;
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
@@ -957,13 +1332,10 @@ class FillFormToolTest {
     }
 
     private static boolean success(JsonNode result) {
-        return result.path("success").asBoolean();
-    }
-
-    private static List<String> writtenIds(JsonNode result) {
-        var ids = new ArrayList<String>();
-        result.path("written").forEach(node -> ids.add(node.asString()));
-        return ids;
+        // The new response shape doesn't carry a `success` key — the LLM
+        // (and these tests) derive success from the `rejected` block being
+        // empty.
+        return !result.path("rejected").iterator().hasNext();
     }
 
     private static List<String> rejectedIds(JsonNode result) {
@@ -981,6 +1353,33 @@ class FillFormToolTest {
         for (var entry : result.path("rejected")) {
             if (id.equals(entry.path("id").asString())) {
                 return entry.path("reason").asString();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the JSON text of the {@code value} field on the rejected entry
+     * for the given id (the LLM input that was rejected), or {@code null} if
+     * the id is not in {@code rejected}.
+     */
+    private static String rejectionValue(JsonNode result, String id) {
+        for (var entry : result.path("rejected")) {
+            if (id.equals(entry.path("id").asString())) {
+                return entry.path("value").toString();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the entry for the given id in the {@code fields} block, or
+     * {@code null} if the id is not present.
+     */
+    private static JsonNode fieldEntry(JsonNode result, String id) {
+        for (var entry : result.path("fields")) {
+            if (id.equals(entry.path("id").asString())) {
+                return entry;
             }
         }
         return null;
