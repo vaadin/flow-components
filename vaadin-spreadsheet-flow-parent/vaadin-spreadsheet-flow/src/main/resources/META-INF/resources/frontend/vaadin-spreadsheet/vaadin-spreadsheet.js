@@ -21,6 +21,14 @@ const overlayStyles = (() => {
   return $tpl.content;
 })();
 
+// Selection retry budget: GWT defers the initial relayout via its scheduler, so
+// a setSelectedCellAndRange call arriving in the same task as the initial
+// property batch throws. Retry every 10ms for ~2s (the relayout normally
+// completes within a handful of ms; the cap is just an upper bound to stop
+// spinning if something is genuinely broken).
+const SELECTION_RETRY_INTERVAL_MS = 10;
+const SELECTION_MAX_RETRIES = 200;
+
 export class VaadinSpreadsheet extends LitElement {
   static get styles() {
     return spreadsheetStyles;
@@ -182,6 +190,12 @@ export class VaadinSpreadsheet extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     spreadsheetResizeObserver.unobserve(this);
+    if (this._selectionRetryTimer) {
+      clearTimeout(this._selectionRetryTimer);
+      this._selectionRetryTimer = null;
+    }
+    this._pendingSelection = null;
+    this._selectionRetries = 0;
   }
 
   updated(_changedProperties) {
@@ -366,38 +380,41 @@ export class VaadinSpreadsheet extends LitElement {
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
     this._flush();
-    // The sheet widget's initial relayout is deferred via GWT's scheduler,
-    // so `definedRowHeights` may not yet exist when this RPC arrives in the
-    // same task as the initial property batch (e.g. opening a Dialog that
-    // contains the Spreadsheet). Calling `setSelectedCellAndRange` before
-    // it's populated would throw inside `$scrollAreaIntoView`. Re-queue the
-    // call until the layout state is ready; only the latest pending call is
-    // kept so rapid successive calls collapse to the final selection.
-    if (!this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
-      this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
-      if (!this._pendingSelectionScheduled) {
-        this._pendingSelectionScheduled = true;
-        const applyPending = () => {
-          if (!this.isConnected || !this._pendingSelection) {
-            this._pendingSelectionScheduled = false;
-            this._pendingSelection = null;
-            return;
-          }
-          if (this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
-            const args = this._pendingSelection;
-            this._pendingSelection = null;
-            this._pendingSelectionScheduled = false;
-            this.api.setSelectedCellAndRange(...args);
-            return;
-          }
-          setTimeout(applyPending, 10);
-        };
-        setTimeout(applyPending, 10);
-      }
+    // Latest selection wins — rapid successive calls collapse to the final one.
+    this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
+    this._applyPendingSelection();
+  }
+
+  // The api's `setSelectedCellAndRange` reaches into the sheet widget, whose
+  // initial relayout GWT schedules deferred — so a call arriving in the same
+  // task as the initial property batch (e.g. opening a Dialog containing the
+  // Spreadsheet) throws inside `$scrollAreaIntoView`. The layout state can't be
+  // probed from here (the relevant widget fields are obfuscated in production
+  // builds), so attempt the call and, if it throws, re-queue until layout is
+  // ready.
+  _applyPendingSelection() {
+    if (!this._pendingSelection || !this.api) {
       return;
     }
-    this._pendingSelection = null;
-    this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
+    try {
+      this.api.setSelectedCellAndRange(...this._pendingSelection);
+      this._pendingSelection = null;
+      this._selectionRetries = 0;
+    } catch {
+      if (this._selectionRetryTimer) {
+        return;
+      }
+      this._selectionRetries = (this._selectionRetries || 0) + 1;
+      if (this._selectionRetries > SELECTION_MAX_RETRIES) {
+        this._pendingSelection = null;
+        this._selectionRetries = 0;
+        return;
+      }
+      this._selectionRetryTimer = setTimeout(() => {
+        this._selectionRetryTimer = null;
+        this._applyPendingSelection();
+      }, SELECTION_RETRY_INTERVAL_MS);
+    }
   }
 
   cellsUpdated(updatedCellData) {
