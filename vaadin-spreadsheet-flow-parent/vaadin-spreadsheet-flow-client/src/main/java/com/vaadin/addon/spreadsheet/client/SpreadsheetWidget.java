@@ -80,6 +80,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private static final int DELAYED_SERVER_REQUEST_DELAY = 200; // ms
     private static final String DEFAULT_WIDTH = "500.0px";
     private static final String DEFAULT_HEIGHT = "400.0px";
+    private static final int MAX_SELECT_CELL_RANGE_RETRIES = 100;
 
     private final SheetWidget sheetWidget;
     final FormulaBarWidget formulaBarWidget;
@@ -119,6 +120,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
     private boolean loaded;
+    private Object[] pendingSelectCellRangeArgs;
+    private boolean selectCellRangeRetryScheduled;
+    private int selectCellRangeRetries;
     private boolean touchMode;
     private boolean formulaBarEditing;
     private boolean inlineEditing;
@@ -2067,7 +2071,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (!selectCellRangeRetryScheduled) {
                 selectCellRangeRetryScheduled = true;
                 Scheduler.get()
-                        .scheduleDeferred(() -> applyPendingSelectCellRange());
+                        .scheduleDeferred(this::applyPendingSelectCellRange);
             }
             return;
         }
@@ -2075,11 +2079,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 selectedCellRow, firstColumn, lastColumn, firstRow, lastRow,
                 scroll);
     }
-
-    private static final int MAX_SELECT_CELL_RANGE_RETRIES = 100;
-    private Object[] pendingSelectCellRangeArgs;
-    private boolean selectCellRangeRetryScheduled;
-    private int selectCellRangeRetries;
 
     private void applyPendingSelectCellRange() {
         selectCellRangeRetryScheduled = false;
@@ -2093,8 +2092,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 return;
             }
             selectCellRangeRetryScheduled = true;
-            Scheduler.get()
-                    .scheduleDeferred(() -> applyPendingSelectCellRange());
+            Scheduler.get().scheduleDeferred(this::applyPendingSelectCellRange);
             return;
         }
         Object[] a = pendingSelectCellRangeArgs;
