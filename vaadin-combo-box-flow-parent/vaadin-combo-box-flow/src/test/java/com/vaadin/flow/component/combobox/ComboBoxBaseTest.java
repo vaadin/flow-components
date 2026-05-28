@@ -372,7 +372,7 @@ abstract class ComboBoxBaseTest {
         Assertions.assertEquals("aria-labelledby",
                 comboBox.getAriaLabelledBy().get());
 
-        comboBox.setAriaLabelledBy(null);
+        comboBox.setAriaLabelledBy((String) null);
         Assertions.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
     }
 }
