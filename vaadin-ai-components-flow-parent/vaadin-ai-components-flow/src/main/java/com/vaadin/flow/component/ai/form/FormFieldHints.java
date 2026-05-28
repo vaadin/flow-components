@@ -22,6 +22,15 @@ import java.util.function.Function;
 /**
  * Mutable per-field hint state held by {@link FormAIController}, keyed by the
  * field's opaque id.
+ * <p>
+ * Set by {@link FormAIController#valueOptions(ValueOptions)
+ * controller.valueOptions(...)}: {@link #valueOptionsQuery} carries the filter
+ * callback (or a fixed-options snapshot wrapped in one), {@link #fixedOptions}
+ * flags whether the schema should render the options as {@code enum} or
+ * {@code queryable}, and {@link #valueOptionsToValue} resolves one label to one
+ * element. For multi-select fields the controller wraps the resolved elements
+ * into a {@link java.util.LinkedHashSet} before {@code setValue}; the hint
+ * state is the same shape in both cases.
  *
  * @author Vaadin Ltd
  */
@@ -31,11 +40,10 @@ final class FormFieldHints {
     BiFunction<String, Integer, List<String>> valueOptionsQuery;
     Function<String, ?> valueOptionsToValue;
     /**
-     * {@code true} when the field was registered with the fixed-collection
-     * {@code valueOptions} overload; {@code false} when registered with a query
-     * callback (queryable) or with no value-options hint at all. Used by
-     * {@link FormFieldSchema} to choose {@code enum} vs {@code queryable} in
-     * the {@code get_form_state} JSON.
+     * {@code true} when the field was registered with the fixed-options
+     * variant; {@code false} when registered with a query callback or with no
+     * value-options hint at all. Used by {@link FormFieldSchema} to choose
+     * {@code enum} vs {@code queryable} in the {@code get_form_state} JSON.
      */
     boolean fixedOptions;
     boolean ignored;

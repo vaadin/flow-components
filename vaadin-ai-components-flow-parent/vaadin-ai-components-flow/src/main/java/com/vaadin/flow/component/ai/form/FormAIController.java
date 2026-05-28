@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,7 +27,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
@@ -42,6 +43,7 @@ import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
@@ -57,6 +59,21 @@ import tools.jackson.databind.JsonNode;
  * fields by walking the container's component tree and collecting every
  * component that implements {@link HasValue}. The walk recurses into nested
  * {@link HasComponents} children so layouts containing layouts are handled.
+ * </p>
+ *
+ * <p>
+ * <b>Per-field configuration:</b> use the chained
+ * {@link #describe(HasValue, String) describe}, {@link #ignore(HasValue)
+ * ignore}, and {@link #valueOptions(ValueOptions) valueOptions} methods.
+ * {@code valueOptions} takes a {@link ValueOptions} built via
+ * {@link ValueOptions#forField(HasValue) forField} — the compiler picks the
+ * {@link ValueOptions#forField(MultiSelect) MultiSelect overload} automatically
+ * for fields statically typed as {@link MultiSelect}. For fields whose value
+ * type is anything other than {@link String}, the
+ * {@link #valueOptions(ValueOptions, Function) two-argument overload} also
+ * accepts a label-to-value converter, which the controller applies per label;
+ * for multi-select fields the resolved elements are then aggregated into a
+ * {@link LinkedHashSet} before {@link HasValue#setValue}.
  * </p>
  *
  * <p>
@@ -105,6 +122,9 @@ import tools.jackson.databind.JsonNode;
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
+ * Re-register the same {@code describe} / {@code valueOptions} hints; field ids
+ * remain stable across the round-trip because they live on the field Components
+ * themselves.
  * </p>
  *
  * @author Vaadin Ltd
@@ -150,9 +170,7 @@ public class FormAIController implements AIController {
      * default {@link #describe(HasValue, String) description} when the
      * developer has not registered one explicitly; the controller itself still
      * uses an opaque UUID as the field's tool-call id. Lambda-bound bindings
-     * carry no property name and contribute no default. A field that is part of
-     * the layout but not bound to the supplied binder behaves the same as in
-     * the no-binder constructor.
+     * carry no property name and contribute no default.
      *
      * @param form
      *            the container whose fields the LLM may populate, not
@@ -194,115 +212,115 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Declares the set of values the LLM may pick for the field. The query
-     * callback receives a filter string and a limit and returns matching
-     * options as the labels the LLM should see; the {@code toValue} function
-     * converts a chosen label back to the field's value type. Later calls for
-     * the same field overwrite earlier ones.
-     * <p>
-     * <b>Multi-select fields:</b> a multi-select's value type is
-     * {@code Set<Item>}, so the typed signature forces {@code toValue} to
-     * return {@code Set<Item>}. Write {@code toValue} to return a single-item
-     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}).
+     * Registers options for a {@link String}-typed field. The {@code config}
+     * carries the field and either a fixed label list or a query callback; the
+     * label-to-value converter is implicitly {@link Function#identity()
+     * Function.identity()} because the chosen label is the value. For any other
+     * value type, use {@link #valueOptions(ValueOptions, Function) the
+     * two-argument overload} — the type system enforces at compile time that a
+     * non-{@link String} field's registration is paired with an explicit
+     * converter. For {@link MultiSelect MultiSelect} fields the controller
+     * wraps resolved elements into a {@link LinkedHashSet} before
+     * {@link HasValue#setValue}. Later calls for the same field overwrite
+     * earlier ones.
      *
-     * @param field
-     *            the field whose options the LLM may query, not {@code null}
-     * @param query
-     *            the filter callback returning labels for the LLM, not
-     *            {@code null}
-     * @param toValue
-     *            converts a chosen label to the field's value type, not
-     *            {@code null}
-     * @param <T>
-     *            the field's value type
+     * @param config
+     *            the field's options registration, not {@code null}; must have
+     *            {@code options(...)} (fixed or queryable) set
      * @return this controller, for chaining
+     * @throws NullPointerException
+     *             if {@code config} is {@code null}
+     * @throws IllegalArgumentException
+     *             if the registration has no {@code options(...)} set; if the
+     *             developer routed a {@code MultiSelect} field through the
+     *             single-value {@code forField} overload (upcast reference); or
+     *             if the field's value type is a Collection but the field does
+     *             not implement {@link MultiSelect}
      */
-    public <T> FormAIController valueOptions(HasValue<?, T> field,
-            BiFunction<String, Integer, List<String>> query,
-            Function<String, T> toValue) {
-        Objects.requireNonNull(query, "Query function must not be null");
+    public FormAIController valueOptions(ValueOptions<String> config) {
+        Objects.requireNonNull(config, "Value options must not be null");
+        return applyValueOptions(config, Function.identity());
+    }
+
+    /**
+     * Registers options for a field paired with an explicit label-to-value
+     * converter. The converter resolves one LLM-supplied label into one element
+     * of the field's value type (or per-element type for a {@link MultiSelect
+     * MultiSelect}). For {@code MultiSelect} fields the controller wraps
+     * resolved elements into a {@link LinkedHashSet} before
+     * {@link HasValue#setValue}. Later calls for the same field overwrite
+     * earlier ones.
+     *
+     * @param config
+     *            the field's options registration, not {@code null}; must have
+     *            {@code options(...)} (fixed or queryable) set
+     * @param toValue
+     *            converts a chosen label to one element of the field's value
+     *            type, not {@code null}
+     * @param <V>
+     *            the per-label item type (the field's value type for
+     *            single-value fields, the per-element type for multi-select)
+     * @return this controller, for chaining
+     * @throws NullPointerException
+     *             if {@code config} or {@code toValue} is {@code null}
+     * @throws IllegalArgumentException
+     *             if the registration has no {@code options(...)} set; if the
+     *             developer routed a {@code MultiSelect} field through the
+     *             single-value {@code forField} overload (upcast reference); or
+     *             if the field's value type is a Collection but the field does
+     *             not implement {@link MultiSelect}
+     */
+    public <V> FormAIController valueOptions(ValueOptions<V> config,
+            Function<String, V> toValue) {
+        Objects.requireNonNull(config, "Value options must not be null");
         Objects.requireNonNull(toValue, "Value converter must not be null");
-        var hints = hintsFor(field);
-        hints.valueOptionsQuery = query;
+        return applyValueOptions(config, toValue);
+    }
+
+    private FormAIController applyValueOptions(ValueOptions<?> config,
+            Function<String, ?> toValue) {
+        var fixed = config.fixedOptions();
+        var query = config.query();
+        if ((fixed == null) == (query == null)) {
+            throw new IllegalArgumentException(
+                    "ValueOptions requires options(...) "
+                            + "(fixed Collection or query BiFunction)");
+        }
+        // The single-value forField overload accepts MultiSelect fields whose
+        // static reference is upcast to HasValue. Reject so the typed
+        // MultiSelect overload remains the only path for multi-select
+        // registrations and toValue stays per-item rather than Set-returning.
+        var isMultiSelect = config.field() instanceof MultiSelect;
+        if (!config.isMulti() && isMultiSelect) {
+            throw new IllegalArgumentException(
+                    "Field implements MultiSelect — declare the reference as "
+                            + "MultiSelect so the MultiSelect-typed forField "
+                            + "overload picks up, and toValue can return one "
+                            + "item rather than a Set");
+        }
+        // Collection-valued fields must implement MultiSelect — otherwise we
+        // have no defined aggregation for per-label converter results.
+        // field.getEmptyValue() is the runtime signal: non-MultiSelect fields
+        // whose empty value is a Collection are the case we reject.
+        if (!isMultiSelect
+                && config.field().getEmptyValue() instanceof Collection) {
+            throw new IllegalArgumentException(
+                    "Field's value type is a Collection but the field does "
+                            + "not implement MultiSelect. Collection-valued "
+                            + "fields must implement MultiSelect to be "
+                            + "registered via valueOptions(...).");
+        }
+        var hints = hintsFor(config.field());
         hints.valueOptionsToValue = toValue;
-        hints.fixedOptions = false;
+        if (fixed != null) {
+            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(fixed,
+                    filter, limit);
+            hints.fixedOptions = true;
+        } else {
+            hints.valueOptionsQuery = query;
+            hints.fixedOptions = false;
+        }
         return this;
-    }
-
-    /**
-     * Declares the set of values the LLM may pick for a {@link String}-typed
-     * field. The query callback receives a filter string and a limit and
-     * returns matching options; each label is used as the field value as-is.
-     * Later calls for the same field overwrite earlier ones.
-     *
-     * @param field
-     *            the field whose options the LLM may query, not {@code null}
-     * @param query
-     *            the filter callback returning labels for the LLM, not
-     *            {@code null}
-     * @return this controller, for chaining
-     */
-    public FormAIController valueOptions(HasValue<?, String> field,
-            BiFunction<String, Integer, List<String>> query) {
-        return valueOptions(field, query, Function.identity());
-    }
-
-    /**
-     * Declares a fixed set of labels the LLM may pick for the field. The
-     * {@code toValue} function converts a chosen label back to the field's
-     * value type. Later calls for the same field overwrite earlier ones.
-     * <p>
-     * <b>Multi-select fields:</b> a multi-select's value type is
-     * {@code Set<Item>}, so the typed signature forces {@code toValue} to
-     * return {@code Set<Item>}. Write {@code toValue} to return a single-item
-     * set per label (e.g. {@code label -> Set.of(itemByLabel.get(label))}).
-     *
-     * @param field
-     *            the field whose options the LLM may pick from, not
-     *            {@code null}
-     * @param options
-     *            the labels the LLM may pick from, not {@code null}; a
-     *            defensive copy is taken
-     * @param toValue
-     *            converts a chosen label to the field's value type, not
-     *            {@code null}
-     * @param <T>
-     *            the field's value type
-     * @return this controller, for chaining
-     */
-    public <T> FormAIController valueOptions(HasValue<?, T> field,
-            Collection<String> options, Function<String, T> toValue) {
-        Objects.requireNonNull(options, "Options must not be null");
-        var snapshot = List.copyOf(options);
-        valueOptions(field, (filter, limit) -> {
-            var matches = snapshot.stream();
-            if (filter != null && !filter.isEmpty()) {
-                var needle = filter.toLowerCase(Locale.ROOT);
-                matches = matches.filter(
-                        o -> o.toLowerCase(Locale.ROOT).contains(needle));
-            }
-            return matches.limit(limit).toList();
-        }, toValue);
-        hintsFor(field).fixedOptions = true;
-        return this;
-    }
-
-    /**
-     * Declares a fixed set of labels the LLM may pick for a
-     * {@link String}-typed field. Each chosen label is used as the field value
-     * as-is. Later calls for the same field overwrite earlier ones.
-     *
-     * @param field
-     *            the field whose options the LLM may pick from, not
-     *            {@code null}
-     * @param options
-     *            the labels the LLM may pick from, not {@code null}; a
-     *            defensive copy is taken
-     * @return this controller, for chaining
-     */
-    public FormAIController valueOptions(HasValue<?, String> field,
-            Collection<String> options) {
-        return valueOptions(field, options, Function.identity());
     }
 
     /**
@@ -404,9 +422,12 @@ public class FormAIController implements AIController {
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
-        var id = (String) ComponentUtil.getData((Component) field,
-                FIELD_ID_KEY);
-        var hints = hintsById.get(id);
+        var owner = ownerOrNull(field);
+        if (owner == null) {
+            return false;
+        }
+        var id = (String) ComponentUtil.getData(owner, FIELD_ID_KEY);
+        var hints = id == null ? null : hintsById.get(id);
         return hints != null && hints.ignored;
     }
 
@@ -427,31 +448,75 @@ public class FormAIController implements AIController {
     }
 
     private static String getOrCreateId(HasValue<?, ?> field) {
-        if (!(field instanceof Component component)) {
-            throw new IllegalArgumentException(
-                    "Field must be a Component: " + field.getClass().getName());
-        }
-        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
+        var owner = requireOwner(field);
+        var id = (String) ComponentUtil.getData(owner, FIELD_ID_KEY);
         if (id == null) {
             id = UUID.randomUUID().toString();
-            ComponentUtil.setData(component, FIELD_ID_KEY, id);
+            ComponentUtil.setData(owner, FIELD_ID_KEY, id);
         }
         return id;
+    }
+
+    /**
+     * Resolves the {@link Component} that owns a field's value state. The id is
+     * stored on this Component via
+     * {@link ComponentUtil#setData(Component, String, Object)} so it survives
+     * session-scoped serialization and detach + re-attach.
+     */
+    private static Component requireOwner(HasValue<?, ?> field) {
+        if (field instanceof Component c) {
+            return c;
+        }
+        if (field instanceof HasElement he) {
+            return he.getElement().getComponent().orElseThrow(
+                    () -> new IllegalArgumentException(rejectMessage(field)));
+        }
+        throw new IllegalArgumentException(rejectMessage(field));
+    }
+
+    private static Component ownerOrNull(HasValue<?, ?> field) {
+        if (field instanceof Component c) {
+            return c;
+        }
+        if (field instanceof HasElement he) {
+            return he.getElement().getComponent().orElse(null);
+        }
+        return null;
+    }
+
+    private static String rejectMessage(HasValue<?, ?> field) {
+        return "FormAIController requires fields backed by a Component. "
+                + "Got " + field.getClass().getName() + ". "
+                + "Either pass a Component that implements HasValue "
+                + "(e.g. TextField) or a HasValueAndElement wrapper around a "
+                + "Component (e.g. grid.asMultiSelect()).";
+    }
+
+    private static List<String> filterAndLimit(List<String> source,
+            String filter, int limit) {
+        var stream = source.stream();
+        if (filter != null && !filter.isEmpty()) {
+            var needle = filter.toLowerCase(Locale.ROOT);
+            stream = stream
+                    .filter(o -> o.toLowerCase(Locale.ROOT).contains(needle));
+        }
+        return stream.limit(limit).toList();
     }
 
     private final class ToolCallbacks implements FormAITools.Callbacks {
 
         @Override
-        public List<FormAITools.FormFieldDescriptor> visibleFields() {
-            var descriptors = new ArrayList<FormAITools.FormFieldDescriptor>();
+        public List<FormFieldDescriptor> visibleFields() {
+            var descriptors = new ArrayList<FormFieldDescriptor>();
             for (var field : collectActiveFields()) {
+                var id = getOrCreateId(field);
+                var hints = hintsById.get(id);
                 var type = FormFieldType.classify(field);
                 if (type == FormFieldType.UNSUPPORTED) {
                     continue;
                 }
-                var id = getOrCreateId(field);
-                descriptors.add(new FormAITools.FormFieldDescriptor(id, field,
-                        type, hintsById.get(id)));
+                descriptors
+                        .add(new FormFieldDescriptor(id, field, type, hints));
             }
             return descriptors;
         }
@@ -470,18 +535,26 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            // The fill always hops through ui.access so writes land on the
-            // UI thread with CurrentInstance bound, regardless of whether
-            // the LLM provider invoked the tool from a reactor scheduler
-            // thread (the production path) or directly from the UI thread
-            // itself (in which case ui.access runs the lambda synchronously
-            // and future.get() returns immediately, so the hop is a no-op).
+            // The fill must land on the UI thread with the session lock so
+            // setValue calls don't race with the client. In the production
+            // path the LLM provider invokes this from a reactor-scheduler
+            // thread, so we hop through ui.access and wait for the queued
+            // task to complete. If the caller already holds the session
+            // lock (UI thread, e.g. a button-click handler invoking the
+            // tool directly), running through ui.access would deadlock —
+            // the access task is queued but only purged on the ultimate
+            // unlock (hold count 0), which never happens while we're
+            // waiting on future.get(). Detect that case and run inline.
+            //
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
             var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
                     "fill_form invoked on a controller whose form is not "
                             + "attached to a UI"));
+            if (ui.getSession() != null && ui.getSession().hasLock()) {
+                return doFill(arguments);
+            }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {

@@ -87,7 +87,12 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldType.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldValidation.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormValueConverter.*",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?"));
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?",
+                // ValueOptions is a transient registration helper: the
+                // controller copies its state into FormFieldHints during
+                // valueOptions(...) and discards the instance. It is not part
+                // of any serialized session state.
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.ValueOptions(\\$\\d+)?"));
     }
 
     @BeforeEach
