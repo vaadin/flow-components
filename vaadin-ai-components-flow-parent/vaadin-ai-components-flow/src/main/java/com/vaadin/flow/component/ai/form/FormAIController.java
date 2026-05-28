@@ -425,12 +425,9 @@ public class FormAIController implements AIController {
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
-        var owner = ownerOrNull(field);
-        if (owner == null) {
-            return false;
-        }
-        var id = (String) ComponentUtil.getData(owner, FIELD_ID_KEY);
-        var hints = id == null ? null : hintsById.get(id);
+        var id = (String) ComponentUtil.getData((Component) field,
+                FIELD_ID_KEY);
+        var hints = hintsById.get(id);
         return hints != null && hints.ignored;
     }
 
@@ -461,10 +458,6 @@ public class FormAIController implements AIController {
             ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
-    }
-
-    private static Component ownerOrNull(HasValue<?, ?> field) {
-        return field instanceof Component c ? c : null;
     }
 
     private static List<String> filterAndLimit(List<String> source,
@@ -510,26 +503,15 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            // The fill must land on the UI thread with the session lock so
-            // setValue calls don't race with the client. In the production
-            // path the LLM provider invokes this from a reactor-scheduler
-            // thread, so we hop through ui.access and wait for the queued
-            // task to complete. If the caller already holds the session
-            // lock (UI thread, e.g. a button-click handler invoking the
-            // tool directly), running through ui.access would deadlock —
-            // the access task is queued but only purged on the ultimate
-            // unlock (hold count 0), which never happens while we're
-            // waiting on future.get(). Detect that case and run inline.
-            //
-            // A controller whose form isn't attached to a UI is a
-            // configuration error — fail fast rather than write silently
-            // to a detached state tree.
+            // The fill always hops through ui.access so writes land on the
+            // UI thread with CurrentInstance bound, regardless of whether
+            // the LLM provider invoked the tool from a reactor scheduler
+            // thread (the production path) or directly from the UI thread
+            // itself (in which case ui.access runs the lambda synchronously
+            // and future.get() returns immediately, so the hop is a no-op).
             var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
                     "fill_form invoked on a controller whose form is not "
                             + "attached to a UI"));
-            if (ui.getSession() != null && ui.getSession().hasLock()) {
-                return doFill(arguments);
-            }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
