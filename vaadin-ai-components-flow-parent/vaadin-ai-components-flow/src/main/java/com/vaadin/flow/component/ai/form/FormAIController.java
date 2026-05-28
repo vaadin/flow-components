@@ -509,6 +509,9 @@ public class FormAIController implements AIController {
             // thread (the production path) or directly from the UI thread
             // itself (in which case ui.access runs the lambda synchronously
             // and future.get() returns immediately, so the hop is a no-op).
+            // A controller whose form isn't attached to a UI is a
+            // configuration error — fail fast rather than write silently
+            // to a detached state tree.
             var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
                     "fill_form invoked on a controller whose form is not "
                             + "attached to a UI"));
