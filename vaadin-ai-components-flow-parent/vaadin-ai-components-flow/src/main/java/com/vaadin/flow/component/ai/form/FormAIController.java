@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
@@ -372,6 +371,10 @@ public class FormAIController implements AIController {
         var propertyNames = BinderReflection.collectPropertyNames(binder);
         for (var entry : propertyNames.entrySet()) {
             var field = entry.getKey();
+            // A Binder accepts any HasValue, including non-Component
+            // adapters bound for the application's own purposes. Such
+            // fields can't carry the controller's id, so skip them
+            // silently rather than throwing out of the constructor.
             if (!(field instanceof Component)) {
                 continue;
             }
@@ -448,48 +451,20 @@ public class FormAIController implements AIController {
     }
 
     private static String getOrCreateId(HasValue<?, ?> field) {
-        var owner = requireOwner(field);
-        var id = (String) ComponentUtil.getData(owner, FIELD_ID_KEY);
+        if (!(field instanceof Component component)) {
+            throw new IllegalArgumentException(
+                    "Field must be a Component: " + field.getClass().getName());
+        }
+        var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
         if (id == null) {
             id = UUID.randomUUID().toString();
-            ComponentUtil.setData(owner, FIELD_ID_KEY, id);
+            ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
     }
 
-    /**
-     * Resolves the {@link Component} that owns a field's value state. The id is
-     * stored on this Component via
-     * {@link ComponentUtil#setData(Component, String, Object)} so it survives
-     * session-scoped serialization and detach + re-attach.
-     */
-    private static Component requireOwner(HasValue<?, ?> field) {
-        if (field instanceof Component c) {
-            return c;
-        }
-        if (field instanceof HasElement he) {
-            return he.getElement().getComponent().orElseThrow(
-                    () -> new IllegalArgumentException(rejectMessage(field)));
-        }
-        throw new IllegalArgumentException(rejectMessage(field));
-    }
-
     private static Component ownerOrNull(HasValue<?, ?> field) {
-        if (field instanceof Component c) {
-            return c;
-        }
-        if (field instanceof HasElement he) {
-            return he.getElement().getComponent().orElse(null);
-        }
-        return null;
-    }
-
-    private static String rejectMessage(HasValue<?, ?> field) {
-        return "FormAIController requires fields backed by a Component. "
-                + "Got " + field.getClass().getName() + ". "
-                + "Either pass a Component that implements HasValue "
-                + "(e.g. TextField) or a HasValueAndElement wrapper around a "
-                + "Component (e.g. grid.asMultiSelect()).";
+        return field instanceof Component c ? c : null;
     }
 
     private static List<String> filterAndLimit(List<String> source,
