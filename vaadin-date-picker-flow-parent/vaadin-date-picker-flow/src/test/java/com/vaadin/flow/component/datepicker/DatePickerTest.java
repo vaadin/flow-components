@@ -318,7 +318,7 @@ class DatePickerTest {
         Assertions.assertEquals("aria-labelledby",
                 datePicker.getAriaLabelledBy().get());
 
-        datePicker.setAriaLabelledBy(null);
+        datePicker.setAriaLabelledBy((String) null);
         Assertions.assertTrue(datePicker.getAriaLabelledBy().isEmpty());
     }
 

@@ -229,7 +229,7 @@ class PopoverTest {
         Assertions.assertEquals("aria-labelledby",
                 popover.getAriaLabelledBy().get());
 
-        popover.setAriaLabelledBy(null);
+        popover.setAriaLabelledBy((String) null);
         Assertions.assertTrue(popover.getAriaLabelledBy().isEmpty());
     }
 

@@ -143,7 +143,7 @@ class CheckboxUnitTest {
         Assertions.assertEquals("aria-labelledby",
                 checkbox.getAriaLabelledBy().get());
 
-        checkbox.setAriaLabelledBy(null);
+        checkbox.setAriaLabelledBy((String) null);
         Assertions.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
     }
 
