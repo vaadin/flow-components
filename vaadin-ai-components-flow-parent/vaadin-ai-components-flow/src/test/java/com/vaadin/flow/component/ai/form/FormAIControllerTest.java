@@ -99,6 +99,69 @@ class FormAIControllerTest {
     }
 
     @Nested
+    class InstructionsTool {
+
+        @Test
+        void getToolsExposesGetFormInstructionsAsTheFirstTool() {
+            // Most providers feed the tool list to the model in order. The
+            // controller surfaces get_form_instructions first so the
+            // workflow text is the model's first read regardless of
+            // provider-side reordering.
+            var controller = new FormAIController(new Div(new TestField()));
+
+            var tools = controller.getTools();
+
+            Assertions.assertEquals("get_form_instructions",
+                    tools.get(0).getName(),
+                    "First tool must be get_form_instructions; got: "
+                            + tools.stream().map(t -> t.getName()).toList());
+        }
+
+        @Test
+        void instructionsToolDescriptionCarriesTheFullWorkflow() {
+            // The workflow lives in the description so the LLM sees it
+            // just from listing tools — no extra tool call needed. Pin
+            // load-bearing phrases so accidental truncation surfaces as a
+            // failing assertion.
+            var controller = new FormAIController(new Div(new TestField()));
+            var instructions = findTool(controller.getTools(),
+                    "get_form_instructions");
+
+            var description = instructions.getDescription();
+
+            for (var anchor : List.of("get_form_state", "fill_form",
+                    "query_field_options", "queryable", "enum", "rejected",
+                    ".ignore()", "SAME turn", "newly-appeared")) {
+                Assertions.assertTrue(description.contains(anchor),
+                        "Workflow description must mention '" + anchor
+                                + "', got: " + description);
+            }
+        }
+
+        @Test
+        void instructionsToolExecuteReturnsTheSameText() {
+            // The execute() return value is the LLM's fallback if it
+            // forgot the workflow mid-turn. It must match what the
+            // description advertised so the model gets a consistent
+            // story.
+            var controller = new FormAIController(new Div(new TestField()));
+            var instructions = findTool(controller.getTools(),
+                    "get_form_instructions");
+
+            var description = instructions.getDescription();
+            var execResult = instructions
+                    .execute(JacksonUtils.createObjectNode());
+
+            Assertions.assertTrue(description.endsWith(execResult),
+                    "execute() output must be the trailing workflow "
+                            + "block of the description so calling the "
+                            + "tool returns the same text the model "
+                            + "already read; description: " + description
+                            + " execResult: " + execResult);
+        }
+    }
+
+    @Nested
     class Construction {
 
         @Test
