@@ -114,7 +114,7 @@ public class BreadcrumbsItem extends Component
      */
     public BreadcrumbsItem(String text, String path,
             Component prefixComponent) {
-        super(text, path);
+        this(text, path);
         setPrefixComponent(prefixComponent);
     }
 
@@ -131,7 +131,7 @@ public class BreadcrumbsItem extends Component
      */
     public BreadcrumbsItem(String text, Class<? extends Component> view,
             Component prefixComponent) {
-        super(text, view);
+        this(text, view);
         setPrefixComponent(prefixComponent);
     }
 
@@ -150,7 +150,7 @@ public class BreadcrumbsItem extends Component
      */
     public BreadcrumbsItem(String text, Class<? extends Component> view,
             RouteParameters params, Component prefixComponent) {
-        super(text, view, params);
+        this(text, view, params);
         setPrefixComponent(prefixComponent);
     }
 
