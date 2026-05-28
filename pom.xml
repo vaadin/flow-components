@@ -21,6 +21,7 @@
         <module>vaadin-badge-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-aura-theme-flow-parent</module>
+        <module>vaadin-breadcrumbs-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-card-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
@@ -678,8 +679,10 @@
         <profile>
             <id>sonar-cloud</id>
             <properties>
-                <!-- Exclude I18N files from duplication checks (repetitive getter/setter boilerplate) -->
-                <sonar.cpd.exclusions>**/*I18N.java</sonar.cpd.exclusions>
+                <!-- Exclude from duplication checks:
+                     - I18N files (repetitive getter/setter boilerplate)
+                     - AI controllers (share an intentionally parallel instructions-tool shape per component) -->
+                <sonar.cpd.exclusions>**/*I18N.java,**/component/ai/**/*AIController.java</sonar.cpd.exclusions>
                 <!-- SonarQube rule exclusions for: Integration tests -->
                 <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
                 <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->

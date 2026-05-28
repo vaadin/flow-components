@@ -861,7 +861,7 @@ class SelectTest {
         Assertions.assertEquals("aria-labelledby",
                 select.getAriaLabelledBy().get());
 
-        select.setAriaLabelledBy(null);
+        select.setAriaLabelledBy((String) null);
         Assertions.assertTrue(select.getAriaLabelledBy().isEmpty());
     }
 
