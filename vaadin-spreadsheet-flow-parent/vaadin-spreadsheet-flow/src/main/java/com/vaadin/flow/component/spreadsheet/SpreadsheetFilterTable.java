@@ -151,6 +151,16 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButtonToClearButtonMap.get(popupButton).setEnabled(false);
             popupButton.markActive(false);
         }
+        // Refresh option lists after all filters cleared, so each ItemFilter
+        // sees the now-empty filteredRows of its siblings.
+        for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
+                .values()) {
+            for (SpreadsheetFilter filter : filters) {
+                if (filter instanceof ItemFilter) {
+                    ((ItemFilter) filter).updateOptions();
+                }
+            }
+        }
         getSpreadsheet().setRowsHidden(IntStream
                 .range(filteringRegion.getFirstRow(),
                         filteringRegion.getLastRow() + 1)
@@ -260,6 +270,27 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
                         filteringRegion.getLastRow() + 1)
                 .boxed().collect(Collectors.toMap(Function.identity(),
                         filteredRows::contains)));
+    }
+
+    /**
+     * Gets the union of rows hidden by all filters in this table except the
+     * given one.
+     *
+     * @param self
+     *            Filter to exclude from the union
+     * @return Rows hidden by other filters
+     */
+    Set<Integer> getRowsHiddenByOtherFilters(SpreadsheetFilter self) {
+        Set<Integer> hidden = new HashSet<>();
+        for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
+                .values()) {
+            for (SpreadsheetFilter filter : filters) {
+                if (filter != self) {
+                    hidden.addAll(filter.getFilteredRows());
+                }
+            }
+        }
+        return hidden;
     }
 
     /**

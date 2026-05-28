@@ -260,7 +260,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         Set<String> values = new HashSet<>();
         for (int r = filterRange.getFirstRow(); r <= filterRange
                 .getLastRow(); r++) {
-            if (!filteredRows.contains(r) && !spreadsheet.isRowHidden(r)) {
+            if (!filteredRows.contains(r)) {
                 values.add(spreadsheet.getCellValue(
                         spreadsheet.getCell(r, filterRange.getFirstColumn())));
             }
@@ -269,14 +269,21 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     }
 
     /**
-     * Gets all of the unique values for this filter column.
+     * Gets the unique values for this filter column, omitting values whose
+     * rows are all hidden by filters on other columns.
      *
-     * @return All unique values within this column
+     * @return Unique values within this column that have at least one row not
+     *         hidden by other column filters
      */
     protected Set<String> getAllValues() {
+        Set<Integer> otherHidden = filterTable
+                .getRowsHiddenByOtherFilters(this);
         Set<String> values = new HashSet<>();
         for (int r = filterRange.getFirstRow(); r <= filterRange
                 .getLastRow(); r++) {
+            if (otherHidden.contains(r)) {
+                continue;
+            }
             values.add(spreadsheet.getCellValue(
                     spreadsheet.getCell(r, filterRange.getFirstColumn())));
         }
