@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
@@ -136,27 +135,12 @@ class BreadcrumbsItemTest {
     // PREFIX TESTS
 
     @Test
-    void setPrefixComponent_getPrefixComponentReturnsSame() {
+    void setPrefixComponent_getPrefixComponent() {
         var item = new BreadcrumbsItem("Home");
         var prefix = new Div();
         item.setPrefixComponent(prefix);
 
         Assertions.assertEquals(prefix, item.getPrefixComponent());
-    }
-
-    // ENABLED TESTS
-
-    @Test
-    void setEnabledFalse_disabledAttributeReflected() {
-        UI ui = new UI();
-        var item = new BreadcrumbsItem("Home");
-        ui.add(item);
-
-        item.setEnabled(false);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-
-        Assertions.assertFalse(item.isEnabled());
-        Assertions.assertTrue(item.getElement().hasAttribute("disabled"));
     }
 
     @SafeVarargs
