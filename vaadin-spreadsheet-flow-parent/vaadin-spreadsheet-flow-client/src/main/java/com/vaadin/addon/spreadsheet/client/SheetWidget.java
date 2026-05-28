@@ -1841,8 +1841,8 @@ public class SheetWidget extends Panel {
     /**
      * Whether the deferred init scheduled in {@link #resetFromModel} has
      * finished and the sheet's layout state (row heights, scroll metrics) is
-     * populated. Callers that dereference layout state must wait for this to
-     * be {@code true} or risk an NPE in {@link #getRowHeight} et al.
+     * populated. Callers that dereference layout state must wait for this to be
+     * {@code true} or risk an NPE in {@link #getRowHeight} et al.
      */
     boolean isLoaded() {
         return loaded;

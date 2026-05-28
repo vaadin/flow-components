@@ -2062,12 +2062,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             int lastRow, boolean scroll) {
         if (!sheetWidget.isLoaded()) {
             pendingSelectCellRangeArgs = new Object[] { name,
-                    selectedCellColumn, selectedCellRow, firstColumn, lastColumn,
-                    firstRow, lastRow, scroll };
+                    selectedCellColumn, selectedCellRow, firstColumn,
+                    lastColumn, firstRow, lastRow, scroll };
             if (!selectCellRangeRetryScheduled) {
                 selectCellRangeRetryScheduled = true;
-                Scheduler.get().scheduleDeferred(
-                        () -> applyPendingSelectCellRange());
+                Scheduler.get()
+                        .scheduleDeferred(() -> applyPendingSelectCellRange());
             }
             return;
         }
@@ -2093,8 +2093,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 return;
             }
             selectCellRangeRetryScheduled = true;
-            Scheduler.get().scheduleDeferred(
-                    () -> applyPendingSelectCellRange());
+            Scheduler.get()
+                    .scheduleDeferred(() -> applyPendingSelectCellRange());
             return;
         }
         Object[] a = pendingSelectCellRangeArgs;
