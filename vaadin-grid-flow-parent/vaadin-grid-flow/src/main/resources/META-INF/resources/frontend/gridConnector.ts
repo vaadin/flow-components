@@ -187,15 +187,17 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.resolvePendingCallbacks = () => {
     const { rootCache } = dataProviderController;
 
-    Object.values(rootCache.pendingRequests).forEach((callback) => {
-      // Set a flag so the grid re-checks all rendered rows after all callbacks
-      // are resolved, and requests any that are still missing, not just the ones
-      // covered by this resolved callback.
-      grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
+    preventRowUpdates(() => {
+      Object.values(rootCache.pendingRequests).forEach((callback) => {
+        // Set a flag so the grid re-checks all rendered rows after all callbacks
+        // are resolved, and requests any that are still missing, not just the ones
+        // covered by this resolved callback.
+        grid._shouldLoadAllRenderedRowsAfterPageLoad = true;
 
-      // Resolve this pending callback. This may synchronously trigger new ones
-      // to be created or reissued.
-      callback([]);
+        // Resolve this pending callback. This may synchronously trigger new ones
+        // to be created or reissued.
+        callback([]);
+      });
     });
 
     // If no new data provider requests came in while resolving the callbacks
@@ -277,24 +279,22 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  let preventUpdateVisibleRowsActive = 0;
+  let preventRowUpdatesActive = 0;
 
-  function preventUpdateVisibleRows(callback) {
+  function preventRowUpdates(callback) {
     try {
-      preventUpdateVisibleRowsActive++;
+      preventRowUpdatesActive++;
       callback();
     } finally {
-      preventUpdateVisibleRowsActive--;
+      preventRowUpdatesActive--;
     }
   }
 
-  grid.__updateVisibleRows = function (...args) {
-    if (preventUpdateVisibleRowsActive === 0) {
-      Object.getPrototypeOf(this).__updateVisibleRows.call(this, ...args);
-    }
-  };
-
   grid.__updateRow = function (row, ...args) {
+    if (preventRowUpdatesActive !== 0) {
+      return;
+    }
+
     Object.getPrototypeOf(this).__updateRow.call(this, row, ...args);
 
     // since no row can be selected when selection mode is NONE
@@ -312,7 +312,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       rootCache.items[startIndex + i] = item;
     });
 
-    preventUpdateVisibleRows(() => {
+    preventRowUpdates(() => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
       grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
 
@@ -345,7 +345,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
-      preventUpdateVisibleRows(() => {
+      preventRowUpdates(() => {
         if (item.detailsOpened) {
           grid.openItemDetails(item);
         } else {
@@ -369,7 +369,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    preventUpdateVisibleRows(() => {
+    preventRowUpdates(() => {
       grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
       items.forEach((item) => grid.closeItemDetails(item));
     });
