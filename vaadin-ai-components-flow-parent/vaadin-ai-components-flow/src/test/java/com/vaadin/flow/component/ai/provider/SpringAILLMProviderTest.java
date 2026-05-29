@@ -828,11 +828,18 @@ class SpringAILLMProviderTest {
     @Test
     void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
         // Zero-chunk stream: nothing ever flips the terminal gate.
+        // Uses the ChatClient constructor so no MessageChatMemoryAdvisor
+        // sits on the chain. The advisor's stream aggregation requires
+        // at least one emitted chunk to propagate the conversation id,
+        // which would fail an empty-flux test before the warn-on-no-
+        // terminal logic could run.
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.empty());
 
-        provider.stream(request).collectList().block();
+        chatClientProvider.stream(request).collectList().block();
 
         assertAbnormalTerminationWarningLogged();
     }
