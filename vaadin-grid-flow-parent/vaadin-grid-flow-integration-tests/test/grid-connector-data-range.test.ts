@@ -18,25 +18,30 @@ describe('grid connector - data range', () => {
 
     grid.$connector.updateSize(rootSize);
 
+    count = Math.min(count, rootSize - start);
+    if (count === 0) {
+      return;
+    }
+
     if (lastRequestedRange) {
       grid.$connector.clear(lastRequestedRange[0], lastRequestedRange[1]);
     }
 
-    count = Math.min(count, rootSize - start);
     grid.$connector.set(start, items.slice(start, start + count));
     grid.$connector.confirm(-1);
     lastRequestedRange = [start, count];
   }
 
-  function expectRequestedRange(range: [number, number]) {
+  function expectRangeRequest([start, count]: [number, number]) {
     expect(grid.$server.setViewportRange).to.be.calledOnce;
-    expect(grid.$server.setViewportRange.args[0]).to.eql(range);
+    expect(grid.$server.setViewportRange.args[0]).to.eql([start, count]);
   }
 
-  function processRequestedRange() {
-    const range = grid.$server.setViewportRange.args[0];
-    setRootItemsRange(range[0], range[1]);
+  function resolveRangeRequest([start, count]: [number, number]) {
+    setRootItemsRange(start, count);
+    grid.$server.setViewportRange.promise?.resolve(null);
     grid.$server.setViewportRange.resetHistory();
+    return Promise.resolve();
   }
 
   beforeEach(async () => {
@@ -62,20 +67,21 @@ describe('grid connector - data range', () => {
     grid.$connector.updateSize(rootSize);
 
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([0, PAGE_SIZE]);
-    processRequestedRange();
+    expectRangeRequest([0, PAGE_SIZE]);
+
+    await resolveRangeRequest([0, PAGE_SIZE]);
   });
 
   it('should request correct ranges when scrolling (start -> end -> start)', async () => {
     grid.scrollToIndex(rootSize - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
 
-    processRequestedRange();
+    await resolveRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
 
     grid.scrollToIndex(0);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([0, PAGE_SIZE]);
+    expectRangeRequest([0, PAGE_SIZE]);
   });
 
   it('should request correct range when size decreases after scrolling (start -> end)', async () => {
@@ -83,62 +89,77 @@ describe('grid connector - data range', () => {
     rootSize /= 2;
     grid.$connector.updateSize(rootSize);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
   it('should request correct ranges when scrolling (start -> middle -> end)', async () => {
     grid.scrollToIndex(rootSize / 2);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
 
-    processRequestedRange();
+    await resolveRangeRequest([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
 
     grid.scrollToIndex(rootSize - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
   it('should request correct ranges when scrolling (end -> middle -> start)', async () => {
     grid.scrollToIndex(rootSize - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    processRequestedRange();
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+
+    await resolveRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
 
     grid.scrollToIndex(rootSize / 2);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
 
-    processRequestedRange();
+    await resolveRangeRequest([rootSize / 2 - PAGE_SIZE, PAGE_SIZE * 2]);
 
     grid.scrollToIndex(0);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([0, PAGE_SIZE]);
+    expectRangeRequest([0, PAGE_SIZE]);
   });
 
   it('should debounce range requests when scrolling fast', async () => {
     grid.scrollToIndex(rootSize / 2);
     grid.scrollToIndex(rootSize - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
   it('should request correct ranges when scrolling fast (start -> end -> start)', async () => {
     grid.scrollToIndex(rootSize - 1);
     grid.scrollToIndex(0);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
-
-    processRequestedRange();
-
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([0, PAGE_SIZE]);
+    expectRangeRequest([0, PAGE_SIZE]);
   });
 
-  it('should request correct range when size descreases after scrolling fast (start -> end -> start)', async () => {
+  it('should resolve pending requests after scrolling fast (start -> end -> start)', async () => {
     grid.scrollToIndex(rootSize - 1);
     grid.scrollToIndex(0);
-    rootSize /= 2;
-    grid.$connector.updateSize(rootSize);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
+    await resolveRangeRequest([0, 0]);
+    expect(grid.loading).to.be.false;
+  });
+
+  it('should skip duplicate range request while a request is in flight', async () => {
+    // Trigger a request for the end of the grid and leave it in flight
+    // (do not resolve it).
+    grid.scrollToIndex(rootSize - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    grid.$server.setViewportRange.resetHistory();
+
+    // While that request is still in flight, scroll to an uncached page so
+    // the grid requests more data, then scroll back to the end before the
+    // debouncer fires. When it fires, the visible range matches the range of
+    // the in-flight request, so no second server request should be sent.
+    grid.scrollToIndex(rootSize / 2);
+    await nextFrame();
+    grid.scrollToIndex(rootSize - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setViewportRange).to.not.be.called;
   });
 });
