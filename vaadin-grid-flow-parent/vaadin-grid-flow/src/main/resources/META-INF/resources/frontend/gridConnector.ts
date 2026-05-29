@@ -175,16 +175,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     await grid.$server.setViewportRange(range[0], range[1] - range[0]);
 
-    if (isRangeEqual(range, requestedRange)) {
-      // If requestedRange is still set and matches the current range, it means
-      // the server responded with no new data and $connector.confirm wasn't called
-      // because the server assumes all the data is already on the client. This can
-      // happen, for example, when scrolling quickly back and forth so that the grid
-      // returns to a position whose data has already been delivered and is cached.
-      // In this case, just resolve the callbacks so the grid can exit the loading
-      // state correctly.
-      grid.$connector.resolvePendingCallbacks();
-    }
+    // Resolve any pending callbacks in case the server responded with no new
+    // data and $connector.confirm wasn't called because the server assumes all
+    // the data is already on the client. This can happen, for example, when
+    // scrolling quickly back and forth so that the grid returns to a position
+    // whose data has already been delivered and is cached. In that case,
+    // resolving the callbacks lets the grid exit the loading state correctly.
+    grid.$connector.resolvePendingCallbacks();
   };
 
   grid.$connector.resolvePendingCallbacks = () => {

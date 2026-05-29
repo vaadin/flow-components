@@ -143,4 +143,23 @@ describe('grid connector - data range', () => {
     await resolveRangeRequest([0, 0]);
     expect(grid.loading).to.be.false;
   });
+
+  it('should skip duplicate range request while a request is in flight', async () => {
+    // Trigger a request for the end of the grid and leave it in flight
+    // (do not resolve it).
+    grid.scrollToIndex(rootSize - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expectRangeRequest([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
+    grid.$server.setViewportRange.resetHistory();
+
+    // While that request is still in flight, scroll to an uncached page so
+    // the grid requests more data, then scroll back to the end before the
+    // debouncer fires. When it fires, the visible range matches the range of
+    // the in-flight request, so no second server request should be sent.
+    grid.scrollToIndex(rootSize / 2);
+    await nextFrame();
+    grid.scrollToIndex(rootSize - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setViewportRange).to.not.be.called;
+  });
 });
