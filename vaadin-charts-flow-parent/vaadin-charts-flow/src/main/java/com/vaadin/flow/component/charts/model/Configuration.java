@@ -27,6 +27,7 @@ import com.vaadin.flow.component.charts.events.internal.DataUpdatedEvent;
 import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
+import com.vaadin.flow.component.charts.events.internal.SeriesRemovedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 
 /**
@@ -151,10 +152,34 @@ public class Configuration extends AbstractConfigurationObject
      * @param series
      */
     public void setSeries(List<Series> series) {
+        List<Series> previous = this.series;
         this.series = new ArrayList<>(series);
-        for (Series s : series) {
+        for (Series s : this.series) {
             s.setConfiguration(this);
             addSeriesToDrilldownConfiguration(s);
+        }
+        if (reactiveSyncTrigger != null) {
+            reconcileSeries(previous, this.series);
+        }
+    }
+
+    /**
+     * Reconciles a list replacement into id-keyed events (removed / added /
+     * changed) so the reactive sync can apply a minimal set of operations
+     * instead of a full redraw. Only used while the reactive sync is active.
+     */
+    private void reconcileSeries(List<Series> previous, List<Series> current) {
+        for (Series old : previous) {
+            if (!current.contains(old)) {
+                fireSeriesRemoved(old);
+            }
+        }
+        for (Series s : current) {
+            if (previous.contains(s)) {
+                fireSeriesChanged(s);
+            } else {
+                fireSeriesAdded(s);
+            }
         }
     }
 
@@ -926,6 +951,19 @@ public class Configuration extends AbstractConfigurationObject
     }
 
     /**
+     * Notifies listeners that a data series has been removed.
+     *
+     * @param series
+     *            The removed series
+     */
+    void fireSeriesRemoved(Series series) {
+        SeriesRemovedEvent event = new SeriesRemovedEvent(series);
+        for (ConfigurationChangeListener listener : changeListeners) {
+            listener.seriesRemoved(event);
+        }
+    }
+
+    /**
      * Notifies listeners that a data series has been updated.
      *
      * @param series
@@ -1228,6 +1266,31 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void setReactiveSyncTrigger(Runnable trigger) {
         this.reactiveSyncTrigger = trigger;
+    }
+
+    /**
+     * For internal use only. May be renamed or removed in a future release.
+     * <p>
+     * Assigns (once) and returns the internal reactive identity of the given
+     * series, used by the reactive sync to address it on the client
+     * independently of the user-facing {@link Series#getId() public id}.
+     */
+    public String ensureSeriesReactiveId(Series series) {
+        return series instanceof AbstractSeries
+                ? ((AbstractSeries) series).ensureReactiveId()
+                : null;
+    }
+
+    /**
+     * For internal use only. May be renamed or removed in a future release.
+     * <p>
+     * Returns the internal reactive identity of the given series, or
+     * {@code null} if none has been assigned.
+     */
+    public String getSeriesReactiveId(Series series) {
+        return series instanceof AbstractSeries
+                ? ((AbstractSeries) series).getReactiveId()
+                : null;
     }
 
     @Override

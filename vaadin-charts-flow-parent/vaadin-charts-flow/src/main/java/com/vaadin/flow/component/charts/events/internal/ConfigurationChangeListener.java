@@ -66,6 +66,17 @@ public interface ConfigurationChangeListener extends Serializable {
     void seriesAdded(SeriesAddedEvent event);
 
     /**
+     * A series has been removed. Defaults to a no-op so existing listeners keep
+     * today's behavior (series removal via {@code setSeries} does not propagate
+     * without a redraw); the reactive listener overrides it.
+     *
+     * @param event
+     *            The event
+     */
+    default void seriesRemoved(SeriesRemovedEvent event) {
+    }
+
+    /**
      * The series has been changed.
      *
      * @param event

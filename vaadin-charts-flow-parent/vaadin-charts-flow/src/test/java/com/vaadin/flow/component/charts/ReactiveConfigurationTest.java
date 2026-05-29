@@ -114,8 +114,7 @@ class ReactiveConfigurationTest {
 
         assertTrue(delta.has("title"),
                 "Delta must include the changed title branch");
-        assertEquals("updated",
-                delta.get("title").get("text").asString(),
+        assertEquals("updated", delta.get("title").get("text").asString(),
                 "Delta title.text must reflect the post-mutation value");
 
         // Untouched top-level branches must NOT be in the delta.
@@ -138,8 +137,8 @@ class ReactiveConfigurationTest {
 
         chart.synchronizeReactiveConfiguration();
 
-        verify(chart.getElement(), never()).callJsFunction(
-                eq("updateConfiguration"), any(), any());
+        verify(chart.getElement(), never())
+                .callJsFunction(eq("updateConfiguration"), any(), any());
     }
 
     @Test

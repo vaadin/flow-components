@@ -8,8 +8,11 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.vaadin.flow.component.charts.Chart;
 
@@ -22,6 +25,19 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     private String name;
     private String stack;
     private String id;
+
+    /**
+     * Internal, Vaadin-controlled identity used by the experimental reactive
+     * sync to address this series on the client independently of the
+     * user-facing {@link #getId() public id} (which carries no uniqueness
+     * guarantee). Serialized as a top-level {@code vaadinReactiveId} series
+     * option (which Highcharts preserves across updates) so the client
+     * connector can resolve the series by scanning for it. Assigned lazily and
+     * only when reactive sync is active, so serialization is unchanged when the
+     * feature is off.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String vaadinReactiveId;
 
     @JsonUnwrapped
     private AbstractPlotOptions plotOptions;
@@ -69,6 +85,25 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * Assigns (once) and returns the internal reactive identity. For internal
+     * use only.
+     */
+    String ensureReactiveId() {
+        if (vaadinReactiveId == null) {
+            vaadinReactiveId = UUID.randomUUID().toString();
+        }
+        return vaadinReactiveId;
+    }
+
+    /**
+     * @return the internal reactive identity, or {@code null} if none has been
+     *         assigned. For internal use only.
+     */
+    String getReactiveId() {
+        return vaadinReactiveId;
     }
 
     /**

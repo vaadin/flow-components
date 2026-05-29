@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.charts;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -74,6 +75,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -93,14 +95,14 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-chart")
 @NpmPackage(value = "@vaadin/charts", version = "25.2.0-beta1")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
+@JsModule("./vaadin-charts/chartConnector.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Configuration configuration;
 
     private Registration configurationUpdateRegistration;
 
-    private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
-            this);
+    private ConfigurationChangeListener changeListener;
 
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
             ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE,
@@ -116,6 +118,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     private Registration pendingReactiveSync;
 
     private ObjectNode lastSyncedJson;
+
+    private final List<ObjectNode> reactiveSeriesOps = new ArrayList<>();
 
     /**
      * Creates a new chart with default configuration
@@ -152,6 +156,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
             pendingReactiveSync.remove();
             pendingReactiveSync = null;
         }
+        reactiveSeriesOps.clear();
         if (configuration != null) {
             configuration.setReactiveSyncTrigger(null);
         }
@@ -164,15 +169,34 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
         configurationUpdateRegistration = ui.beforeClientResponse(this,
                 context -> {
+                    if (reactiveEnabled && configuration != null) {
+                        // Assign a stable internal id to every series before
+                        // the
+                        // initial serialization so the client connector can
+                        // resolve them for later reactive operations.
+                        configuration.getSeries()
+                                .forEach(configuration::ensureSeriesReactiveId);
+                    }
                     drawChart(resetConfiguration);
                     reportUsage();
 
                     if (configuration != null) {
                         // Start listening to data series events once the chart
-                        // has been drawn.
+                        // has been drawn. When reactive sync is enabled, series
+                        // and data mutations are coalesced into id-keyed ops;
+                        // otherwise the eager forwarder preserves today's
+                        // behavior.
+                        if (changeListener != null) {
+                            configuration.removeChangeListener(changeListener);
+                        }
+                        changeListener = reactiveEnabled
+                                ? new ReactiveConfigurationForwarder(this)
+                                : new ProxyChangeForwarder(this);
                         configuration.addChangeListener(changeListener);
 
                         if (reactiveEnabled) {
+                            getElement().executeJs(
+                                    "window.Vaadin.Flow.chartConnector.init(this)");
                             seedReactiveSnapshot();
                             configuration.setReactiveSyncTrigger(
                                     this::requestReactiveSync);
@@ -208,6 +232,15 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
                 }));
     }
 
+    /**
+     * Buffers an id-keyed series/point operation for the next coalesced sync.
+     * Package-visible for {@link ReactiveConfigurationForwarder}.
+     */
+    void enqueueSeriesOp(ObjectNode op) {
+        reactiveSeriesOps.add(op);
+        requestReactiveSync();
+    }
+
     /** Package-visible for unit tests. */
     void synchronizeReactiveConfiguration() {
         if (configuration == null) {
@@ -220,6 +253,18 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
             getElement().callJsFunction("updateConfiguration", delta, false);
         }
         lastSyncedJson = current;
+
+        // Apply buffered series/point operations by stable internal id. These
+        // own the `series` branch (excluded from the delta above), so a
+        // coalesced
+        // batch mixing add/remove/update reconciles without re-animating the
+        // unaffected series.
+        if (!reactiveSeriesOps.isEmpty()) {
+            ArrayNode ops = JacksonUtils.getMapper().createArrayNode();
+            reactiveSeriesOps.forEach(ops::add);
+            reactiveSeriesOps.clear();
+            getElement().executeJs("this.$connector.syncSeries($0)", ops);
+        }
     }
 
     /**
@@ -245,6 +290,12 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
         current.properties().forEach(entry -> {
             String key = entry.getKey();
+            // The `series` branch is owned by the id-keyed op queue
+            // (see synchronizeReactiveConfiguration); applying it through the
+            // positional merge here would re-animate unaffected series.
+            if ("series".equals(key)) {
+                return;
+            }
             if (previous == null || !previous.has(key)
                     || !previous.get(key).equals(entry.getValue())) {
                 delta.set(key, entry.getValue());
@@ -299,6 +350,18 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
+
+        if (reactiveEnabled) {
+            // The client now holds the full configuration; cancel any pending
+            // reactive sync and discard buffered ops, then reseed the snapshot
+            // so the next reactive diff is computed against what was just sent.
+            if (pendingReactiveSync != null) {
+                pendingReactiveSync.remove();
+                pendingReactiveSync = null;
+            }
+            reactiveSeriesOps.clear();
+            lastSyncedJson = configurationNode;
+        }
     }
 
     /**
@@ -362,10 +425,14 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      */
     public void setConfiguration(Configuration configuration) {
         if (this.configuration != null) {
-            // unbound old configuration
-            this.configuration.removeChangeListener(changeListener);
+            // unbind old configuration
+            if (changeListener != null) {
+                this.configuration.removeChangeListener(changeListener);
+            }
+            this.configuration.setReactiveSyncTrigger(null);
         }
         this.configuration = configuration;
+        reactiveSeriesOps.clear();
         if (getElement().getNode().isAttached()) {
             getUI().ifPresent(ui -> beforeClientResponse(ui, true));
         }

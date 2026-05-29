@@ -25,7 +25,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 
 class ProxyChangeForwarder implements ConfigurationChangeListener {
 
-    private final Chart chart;
+    protected final Chart chart;
 
     ProxyChangeForwarder(Chart chart) {
         this.chart = chart;
