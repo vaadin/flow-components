@@ -20,9 +20,12 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Markdown is a component for rendering Markdown content. It takes Markdown
@@ -35,7 +38,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
-    private String serverContent;
+    private final SignalPropertySupport<String> contentSupport = SignalPropertySupport
+            .create(this, this::handleContentChange);
+
     private String clientContent;
 
     /**
@@ -56,14 +61,24 @@ public class Markdown extends Component implements HasSize {
     }
 
     /**
+     * Creates a Markdown with content bound to a signal.
+     *
+     * @param contentSignal
+     *            the signal providing the markdown content
+     * @see #bindContent(Signal)
+     */
+    public Markdown(Signal<String> contentSignal) {
+        bindContent(contentSignal);
+    }
+
+    /**
      * Sets the markdown content.
      *
      * @param content
      *            the markdown content
      */
     public void setContent(String content) {
-        serverContent = content;
-        scheduleContentUpdate();
+        contentSupport.set(content);
     }
 
     /**
@@ -73,10 +88,8 @@ public class Markdown extends Component implements HasSize {
      *            the markdown content to append
      */
     public void appendContent(String content) {
-        if (serverContent == null) {
-            serverContent = "";
-        }
-        setContent(serverContent + content);
+        var current = contentSupport.get();
+        setContent((current == null ? "" : current) + content);
     }
 
     /**
@@ -85,21 +98,42 @@ public class Markdown extends Component implements HasSize {
      * @return the markdown content
      */
     public String getContent() {
-        return serverContent;
+        return contentSupport.get();
+    }
+
+    /**
+     * Binds the markdown content to the given signal. While the binding is
+     * active, calling {@link #setContent(String)} or
+     * {@link #appendContent(String)} will throw a
+     * {@code BindingActiveException}.
+     *
+     * @param contentSignal
+     *            the signal providing the markdown content
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     */
+    public SignalBinding<String> bindContent(Signal<String> contentSignal) {
+        return contentSupport.bind(contentSignal);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (serverContent != null) {
+        if (contentSupport.get() != null) {
             clientContent = null;
             scheduleContentUpdate();
         }
     }
 
+    private void handleContentChange(String content) {
+        scheduleContentUpdate();
+    }
+
     private void scheduleContentUpdate() {
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    var serverContent = contentSupport.get();
                     if (Objects.equals(clientContent, serverContent)) {
                         return;
                     }
