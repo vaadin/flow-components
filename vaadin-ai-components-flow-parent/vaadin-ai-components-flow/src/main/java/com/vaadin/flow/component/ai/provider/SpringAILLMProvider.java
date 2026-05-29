@@ -261,8 +261,8 @@ public class SpringAILLMProvider implements LLMProvider {
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
-            promptSpec = promptSpec.advisors(a -> a
-                    .param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
+            promptSpec = promptSpec.advisors(
+                    a -> a.param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
         }
         promptSpec = promptSpec.user(userSpec -> {
             userSpec.text(request.userMessage());
