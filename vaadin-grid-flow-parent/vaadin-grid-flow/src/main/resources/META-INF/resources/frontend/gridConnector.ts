@@ -6,7 +6,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
 
 function isRangeEqual(range1, range2) {
-  return new Set(range1).difference(new Set(range2)).size === 0;
+  return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
 }
 
 window.Vaadin.Flow.gridConnector = {};
