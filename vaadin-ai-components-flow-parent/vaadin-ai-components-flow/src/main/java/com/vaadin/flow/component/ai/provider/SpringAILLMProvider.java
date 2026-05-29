@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -105,8 +106,8 @@ public class SpringAILLMProvider implements LLMProvider {
         chatMemory = MessageWindowChatMemory.builder().maxMessages(MAX_MESSAGES)
                 .build();
         chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
-                        .conversationId(CONVERSATION_ID).build())
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
         hasManagedMemory = true;
     }
@@ -259,6 +260,10 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
+        if (hasManagedMemory) {
+            promptSpec = promptSpec.advisors(a -> a
+                    .param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
+        }
         promptSpec = promptSpec.user(userSpec -> {
             userSpec.text(request.userMessage());
             var media = buildMedia(request);
