@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -127,9 +126,10 @@ class FormStateToolTest {
         var visible = new TestField();
         var password = new PasswordField();
         password.setValue("secret");
-        var controller = new FormAIController(new Div(visible, password))
-                .describe(password, "Account password")
-                .valueOptions(password, List.of("hunter2"));
+        var controller = new FormAIController(new Div(visible, password));
+        controller.describe(password, "Account password");
+        controller.valueOptions(
+                ValueOptions.forField(password).options(List.of("hunter2")));
 
         var fields = formStateFields(controller);
 
@@ -393,8 +393,8 @@ class FormStateToolTest {
         // queryable/enum sit inside the items block.
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi, (filter, limit) -> List.of("a", "b"),
-                Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("a", "b")));
 
         var f = formStateFields(controller).get(0);
 
@@ -418,8 +418,8 @@ class FormStateToolTest {
         multi.setItems("a", "b", "c");
         multi.setValue(Set.of("a", "c"));
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi,
-                (filter, limit) -> List.of("a", "b", "c"), Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("a", "b", "c")));
 
         var f = formStateFields(controller).get(0);
 
@@ -444,8 +444,9 @@ class FormStateToolTest {
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
         combo.setValue(new Project("P-2", "Beta"));
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta"),
+        controller.valueOptions(
+                ValueOptions.forField(combo).options(
+                        (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta")),
                 label -> null);
 
         var f = formStateFields(controller).get(0);
@@ -487,9 +488,8 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setItems("apple", "banana", "cherry");
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("apple", "banana"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of("apple", "banana")));
 
         var f = formStateFields(controller).get(0);
 
@@ -571,7 +571,8 @@ class FormStateToolTest {
         // instead).
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo, List.of("EUR", "USD", "GBP"));
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
 
@@ -587,8 +588,8 @@ class FormStateToolTest {
     void getFormStateEncodesQueryableForBiFunctionValueOptions() {
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("Apollo", "Polaris"));
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
 
@@ -603,7 +604,8 @@ class FormStateToolTest {
     void getFormStateExposesEnumForFixedValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("EUR", "USD", "GBP"));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
 
@@ -616,8 +618,8 @@ class FormStateToolTest {
     void getFormStateExposesQueryableForBiFunctionValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("Apollo", "Polaris"));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
 
@@ -785,7 +787,8 @@ class FormStateToolTest {
         var field = new IntField();
         field.setValue(2);
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("1", "2", "3"),
+        controller.valueOptions(
+                ValueOptions.forField(field).options(List.of("1", "2", "3")),
                 Integer::parseInt);
 
         var f = formStateFields(controller).get(0);
@@ -842,8 +845,8 @@ class FormStateToolTest {
     void getFormStateMultiSelectQueryableUsesItemsQueryable() {
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi, (filter, limit) -> List.of("x"),
-                Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("x")));
 
         var f = formStateFields(controller).get(0);
 
@@ -921,11 +924,12 @@ class FormStateToolTest {
         var notes = new TestField();
 
         var form = new Div(merchant, amount, currency, date, category, notes);
-        var controller = new FormAIController(form)
-                .describe(merchant, "The vendor name")
-                .valueOptions(currency, List.of("EUR", "USD", "GBP"))
-                .valueOptions(category, List.of("Travel", "Meals", "Software",
-                        "Office", "Other"));
+        var controller = new FormAIController(form);
+        controller.describe(merchant, "The vendor name");
+        controller.valueOptions(ValueOptions.forField(currency)
+                .options(List.of("EUR", "USD", "GBP")));
+        controller.valueOptions(ValueOptions.forField(category).options(
+                List.of("Travel", "Meals", "Software", "Office", "Other")));
 
         // Execute first so the controller walks the form and assigns ids to
         // fields that had no hints registered.

@@ -193,6 +193,20 @@ final class FormTestFields {
     }
 
     /**
+     * Collection-valued field that does not implement {@link MultiSelect}. Used
+     * to verify the controller rejects this shape — Collection-valued fields
+     * must implement {@code MultiSelect} to be registered via
+     * {@code valueOptions(...)}.
+     */
+    @Tag("collection-without-multiselect-field")
+    static class CollectionWithoutMultiSelectField
+            extends StubField<CollectionWithoutMultiSelectField, List<String>> {
+        CollectionWithoutMultiSelectField() {
+            super(List.of());
+        }
+    }
+
+    /**
      * String-valued field that also implements {@link HasLabel} and
      * {@link HasHelper}, used by the description-merging test.
      */
@@ -628,4 +642,5 @@ final class FormTestFields {
             return provider;
         }
     }
+
 }

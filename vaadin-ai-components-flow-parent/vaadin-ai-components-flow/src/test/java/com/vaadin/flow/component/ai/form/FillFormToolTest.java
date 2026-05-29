@@ -41,6 +41,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -914,8 +915,8 @@ class FillFormToolTest {
         var field = new SingleSelectField<Project>();
         var projects = Map.of("Apollo", new Project("P-1", "Apollo"));
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
-                projects::get);
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo")), projects::get);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
@@ -1016,8 +1017,8 @@ class FillFormToolTest {
         // pass null to setValue (which would silently clear the field).
         var field = new SingleSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
-                label -> null);
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo")), label -> null);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
@@ -1032,40 +1033,16 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithSetWrap() {
-        // The typed valueOptions signature forces toValue to return the
-        // field's value type (Set<Project> for MultiSelectField<Project>).
-        // The application wraps each per-label lookup in Set.of(...); the
-        // orchestrator flat-unions the per-label sets into the final
-        // selection.
+    void fillForm_multiSelect_writesResolvedSetViaValueOptions() {
+        // valueOptions on a MultiSelectField takes a single-item Function;
+        // the converter accumulates per-label items into the Set<Project>
+        // value type via an internal LinkedHashSet.
         var field = new MultiSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("Apollo", "Vega"),
-                label -> Set.of(new Project(label, label)));
-        controller.onRequest();
-
-        var result = fillFormResult(controller,
-                payload(field, "[\"Apollo\", \"Vega\"]"));
-
-        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
-                new Project("Vega", "Vega")), field.getValue());
-        Assertions.assertTrue(success(result));
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithRawCast() {
-        // Alternative caller pattern: drop the Set wrap by raw-casting the
-        // field argument so toValue is Function<String, Item>. The
-        // orchestrator detects the non-Collection return at runtime and
-        // adds each resolved item directly to the aggregate set, so both
-        // caller patterns produce the same final value on the field.
-        var field = new MultiSelectField<Project>();
-        var controller = newController(field);
-        controller.valueOptions((HasValue) field,
-                (filter, limit) -> List.of("Apollo", "Vega"),
-                label -> new Project((String) label, (String) label));
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Apollo", "Vega")),
+                label -> new Project(label, label));
         controller.onRequest();
 
         var result = fillFormResult(controller,
@@ -1156,22 +1133,72 @@ class FillFormToolTest {
 
     @Test
     void fillForm_multiSelect_emptyArrayClearsField() {
-        // Empty array is the LLM clearing the multi-select; the resulting
-        // value matches the field's own empty value (Set.of() for Vaadin
-        // multi-selects), so other code observing the field sees the
-        // shape it expects.
+        // Empty array is the LLM clearing the multi-select; the converter
+        // builds an empty LinkedHashSet so the field's setValue receives
+        // an empty Set.
         var field = new MultiSelectField<Project>();
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of(),
-                label -> Set.of(existing));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of()), label -> existing);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "[]"));
 
         Assertions.assertEquals(Set.of(), field.getValue());
         Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_multiSelect_nonArrayPayloadIsRejected() {
+        // The LLM sends a bare string for a multi-select field. The
+        // converter enforces the array shape so a stray scalar payload
+        // doesn't reach setValue.
+        var field = new MultiSelectField<Project>();
+        var existing = new Project("X", "X");
+        field.setValue(Set.of(existing));
+        var controller = newController(field);
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Apollo")),
+                label -> new Project(label, label));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(Set.of(existing), field.getValue(),
+                "Rejected fill must not mutate the prior selection");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("array"),
+                "Reason must name the missing array shape; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_multiSelect_reregistrationOverwritesPriorOptions() {
+        // valueOptions called twice on the same MultiSelect field — the
+        // second call wins, including switching from fixed to queryable
+        // and replacing the toValue function.
+        var field = new MultiSelectField<Project>();
+        var controller = newController(field);
+        controller.valueOptions(
+                ValueOptions.forField(field).options(List.of("First")),
+                label -> new Project("v1", label));
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Second")),
+                label -> new Project("v2", label));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "[\"Second\"]"));
+
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(Set.of(new Project("v2", "Second")),
+                field.getValue(),
+                "Re-registration must hand the LLM-supplied label to the "
+                        + "second toValue, not the first");
     }
 
     @Test
@@ -1183,8 +1210,9 @@ class FillFormToolTest {
         // typed setValue (e.g. ComboBox<Project>) would reject it.
         var field = new IntField();
         var controller = newController(field);
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("low", "high"),
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("low", "high")),
                 label -> "low".equals(label) ? 1 : 10);
         controller.onRequest();
 
