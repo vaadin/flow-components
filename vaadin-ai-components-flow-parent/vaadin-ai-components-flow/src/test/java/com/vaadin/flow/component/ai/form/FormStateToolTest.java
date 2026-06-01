@@ -122,6 +122,60 @@ class FormStateToolTest {
     }
 
     @Test
+    void getFormStateExcludesFieldInsideInvisibleContainer() {
+        // Hiding a container hides the fields inside it from the user. The
+        // field's own isVisible() is still true, so the controller must judge
+        // EFFECTIVE visibility (ancestors included) to keep such a field off
+        // the surface — otherwise the AI reads/writes a field nobody can see.
+        var field = new TestField();
+        var container = new Div(field);
+        container.setVisible(false);
+        var controller = new FormAIController(new Div(container));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(0, fields.size(),
+                "Field inside an invisible container must be excluded, got: "
+                        + fields);
+    }
+
+    @Test
+    void getFormStateExcludesFieldUnderInvisibleAncestor() {
+        // The hidden ancestor may be several levels up; effective-visibility
+        // must walk the whole chain, not just the immediate parent.
+        var field = new TestField();
+        var hiddenAncestor = new Div(new Div(new Div(field)));
+        hiddenAncestor.setVisible(false);
+        var controller = new FormAIController(new Div(hiddenAncestor));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(0, fields.size(),
+                "Field under an invisible ancestor must be excluded, got: "
+                        + fields);
+    }
+
+    @Test
+    void getFormStateLabelsFieldInsideDisabledContainerAsDisabled() {
+        // Disabling a container disables the fields inside it for the user.
+        // Such a field is read-only context: it must stay listed but carry the
+        // "disabled" flag so the AI does not try to fill it.
+        var field = new TestField();
+        var container = new Div(field);
+        container.setEnabled(false);
+        var controller = new FormAIController(new Div(container));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size(),
+                "Field inside a disabled container must still be listed, got: "
+                        + fields);
+        Assertions.assertTrue(fields.get(0).path("disabled").asBoolean(false),
+                "Field inside a disabled container must be flagged disabled, "
+                        + "got: " + fields.get(0));
+    }
+
+    @Test
     void getFormStateLabelsDisabledFieldsAsContext() {
         // A disabled field cannot be edited by the user, but the AI should
         // still see it (with its description) so it can reason about the form,

@@ -520,30 +520,36 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Whether the field is currently visible. A field the application has
-     * hidden ({@code setVisible(false)}) is dropped from the LLM surface
-     * entirely: the user cannot see it, so its value is not exposed as context
-     * and it cannot be written. A conditional field hidden until a controlling
-     * field is set only enters the surface once it becomes visible and the next
-     * state read is taken.
+     * Whether the field is effectively visible — visible itself and not hidden
+     * by any ancestor. A field the application has hidden
+     * ({@code setVisible(false)}), or that sits inside a hidden container, is
+     * dropped from the LLM surface entirely: the user cannot see it, so its
+     * value is not exposed as context and it cannot be written. A conditional
+     * field hidden until a controlling field is set only enters the surface
+     * once it becomes visible and the next state read is taken.
      *
      * @param field
      *            the discovered field to test, not {@code null}
-     * @return {@code true} when the field is visible (or is not a
-     *         {@link Component} exposing visibility), {@code false} otherwise
+     * @return {@code true} when the field and all its ancestors are visible (or
+     *         it is not a {@link Component} exposing visibility), {@code false}
+     *         otherwise
      */
     private boolean isVisible(HasValue<?, ?> field) {
-        return !(field instanceof Component component) || component.isVisible();
+        return !(field instanceof Component component)
+                || ComponentUtil.isEffectivelyVisible(component);
     }
 
     /**
-     * Whether the field is disabled ({@code setEnabled(false)}). A disabled
-     * field is shown to the LLM as read-only context but cannot be written.
+     * Whether the field is effectively disabled — disabled itself
+     * ({@code setEnabled(false)}) or sitting inside a disabled container.
+     * Unlike visibility, {@link HasEnabled#isEnabled()} already reflects the
+     * ancestor chain, so no explicit walk is needed. A disabled field is shown
+     * to the LLM as read-only context but cannot be written.
      *
      * @param field
      *            the discovered field to test, not {@code null}
      * @return {@code true} when the field exposes an enabled state and is
-     *         currently disabled, {@code false} otherwise
+     *         effectively disabled, {@code false} otherwise
      */
     private boolean isDisabled(HasValue<?, ?> field) {
         return field instanceof HasEnabled hasEnabled
