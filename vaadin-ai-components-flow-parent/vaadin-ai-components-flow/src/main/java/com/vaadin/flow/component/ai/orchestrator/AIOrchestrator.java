@@ -902,12 +902,11 @@ public class AIOrchestrator implements Serializable {
      * conversation history with attachments (from
      * {@link AIOrchestrator#getHistory()}).</li>
      * <li>{@link #withMetadata(SerializableSupplier)} – sets a supplier the
-     * orchestrator invokes on every turn; the returned string is exposed to the
-     * LLM as the description of a built-in {@code get_session_context} tool.
-     * Defaults to a current-date-and-time supplier so the LLM can interpret
-     * relative date/time references; pass {@code null} to disable, or a custom
-     * supplier to include tenant, locale, page state, or anything else worth
-     * keeping out of the system prompt.</li>
+     * orchestrator invokes on every turn to give the LLM free-form session
+     * context. Defaults to a current-date-and-time supplier so the LLM can
+     * interpret relative date/time references; pass {@code null} to disable, or
+     * a custom supplier to include tenant, locale, page state, or anything else
+     * worth keeping out of the system prompt.</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
@@ -1233,39 +1232,33 @@ public class AIOrchestrator implements Serializable {
         /**
          * Sets the supplier of free-form session context the LLM sees on every
          * turn. The supplier is invoked once per turn on the UI thread when the
-         * request is being built; its return value is exposed to the LLM as the
-         * description of a built-in {@code get_session_context} tool. Because
-         * the content lives in the tool's description, a tool call is not
-         * required for the LLM to read it.
+         * request is being built.
          * <p>
          * The supplier may return any string the application wants the LLM to
          * have on hand — current date and time, the active tenant, the user's
          * locale, the page the user is on, feature flags. Compose multiple
          * pieces of context with plain string concatenation.
          * <p>
-         * If the supplier returns {@code null} or an empty/blank string, the
-         * tool is omitted for that turn — useful for "context only when X"
+         * If the supplier returns {@code null} or an empty/blank string, no
+         * context is added for that turn — useful for "context only when X"
          * patterns. If the supplier throws, the turn is aborted via the normal
          * error path: the assistant placeholder is updated to a generic error
          * message, {@link AIController#onResponse(Throwable)} fires with the
          * thrown exception, and the exception propagates to the caller of the
          * prompt entry point.
          * <p>
-         * Passing {@code null} disables the tool entirely, including the
+         * Passing {@code null} disables session context entirely, including the
          * built-in default. By default, the orchestrator installs a supplier
          * that yields the current date and time so the LLM can interpret
          * relative date/time references ("show me sales from the past two
          * months") without having to guess.
          * <p>
          * The supplier runs on the UI thread, so it can read
-         * {@link UI#getCurrent()} and session-scoped state. The resolved string
-         * is captured in the per-turn tool instance, so an LLM-driven
-         * {@code execute()} call returns the same content without re-invoking
-         * the supplier.
+         * {@link UI#getCurrent()} and session-scoped state.
          *
          * @param contextSupplier
          *            supplier of the per-turn context string, or {@code null}
-         *            to disable the tool entirely
+         *            to disable session context entirely
          * @return this builder
          */
         public Builder withMetadata(
