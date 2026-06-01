@@ -122,12 +122,11 @@ class FormStateToolTest {
     }
 
     @Test
-    void getFormStateOmitsDisabledFields() {
-        // A disabled field cannot be edited by the user; the AI must not fill
-        // it either. Disabling is the typical way a field is gated on another
-        // field's value (a "Seat preference" enabled only for non-Economy
-        // cabins), so the disabled field re-enters the surface once the
-        // controlling field is set and the next state read is taken.
+    void getFormStateLabelsDisabledFieldsAsContext() {
+        // A disabled field cannot be edited by the user, but the AI should
+        // still see it (with its description) so it can reason about the form,
+        // e.g. set the controlling field that enables it. The "disabled" flag
+        // tells the AI it is read-only context; fill_form rejects writes to it.
         var enabled = new TestField();
         var disabled = new TestField();
         disabled.setEnabled(false);
@@ -135,11 +134,75 @@ class FormStateToolTest {
 
         var fields = formStateFields(controller);
 
-        Assertions.assertEquals(1, fields.size(),
-                "Disabled (setEnabled(false)) field must be excluded, got: "
+        Assertions.assertEquals(2, fields.size(),
+                "Disabled field must still be listed as context, got: "
                         + fields);
-        Assertions.assertEquals(idOf(enabled),
-                fields.get(0).get("id").asString());
+        var disabledNode = fields.get(1);
+        Assertions.assertEquals(idOf(disabled),
+                disabledNode.get("id").asString());
+        Assertions.assertTrue(disabledNode.path("disabled").asBoolean(false),
+                "Disabled field must carry \"disabled\": true, got: "
+                        + disabledNode);
+        Assertions.assertFalse(fields.get(0).has("disabled"),
+                "Enabled field must not carry a disabled flag, got: "
+                        + fields.get(0));
+    }
+
+    @Test
+    void getFormStateLabelsReadOnlyFieldsAsContext() {
+        // A read-only field is visible to the user but not editable; the AI
+        // sees it as context with a "readOnly" flag and fill_form rejects
+        // writes to it.
+        var editable = new TestField();
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = new FormAIController(new Div(editable, readOnly));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(2, fields.size(),
+                "Read-only field must still be listed as context, got: "
+                        + fields);
+        var readOnlyNode = fields.get(1);
+        Assertions.assertEquals(idOf(readOnly),
+                readOnlyNode.get("id").asString());
+        Assertions.assertTrue(readOnlyNode.path("readOnly").asBoolean(false),
+                "Read-only field must carry \"readOnly\": true, got: "
+                        + readOnlyNode);
+        Assertions.assertFalse(fields.get(0).has("readOnly"),
+                "Editable field must not carry a readOnly flag, got: "
+                        + fields.get(0));
+    }
+
+    @Test
+    void getFormStateDoesNotFlagTurnLockedFieldsAsReadOnly() {
+        // During a turn the controller locks every writable field read-only so
+        // the user can't race the AI. That lock must not surface as a
+        // "readOnly" context flag: only application-set read-only counts. A
+        // field the application itself set read-only keeps its flag.
+        var editable = new TestField();
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = new FormAIController(new Div(editable, readOnly));
+
+        controller.onRequest(); // locks the editable field read-only
+        try {
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(2, fields.size());
+            var editableNode = fields.get(0);
+            Assertions.assertEquals(idOf(editable),
+                    editableNode.get("id").asString());
+            Assertions.assertFalse(editableNode.has("readOnly"),
+                    "Turn-locked editable field must not be flagged readOnly, "
+                            + "got: " + editableNode);
+            Assertions.assertTrue(
+                    fields.get(1).path("readOnly").asBoolean(false),
+                    "Application-read-only field must stay flagged, got: "
+                            + fields.get(1));
+        } finally {
+            controller.onResponse(null);
+        }
     }
 
     @Test
