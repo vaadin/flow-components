@@ -2574,6 +2574,24 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withMetadataSupplierReturningNull_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> null)
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Null supplier output should suppress the tool for that turn");
+    }
+
+    @Test
     void prompt_withMetadataAndController_mergesContextFirst() {
         stubAddMessage();
         Mockito.when(
