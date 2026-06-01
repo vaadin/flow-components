@@ -332,7 +332,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         var tool1 = createToolSpec("originalTool", "Original");
         AIController originalController = createController(tool1);
 
-        // Build without mocks (no message list) so it can serialize
+        // Build without mocks (no message list) so it can serialize.
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withController(originalController).build();
 
@@ -347,9 +347,14 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(newProvider).stream(captor.capture());
-        var explicitTools = captor.getValue().explicitTools();
-        Assertions.assertEquals(1, explicitTools.size());
-        Assertions.assertEquals("newTool", explicitTools.getFirst().getName());
+        var toolNames = captor.getValue().explicitTools().stream()
+                .map(LLMProvider.ToolSpec::getName).toList();
+        Assertions.assertTrue(toolNames.contains("newTool"),
+                "Reconnect should install the new controller's tool; got: "
+                        + toolNames);
+        Assertions.assertFalse(toolNames.contains("originalTool"),
+                "Reconnect should drop the previous controller's tool; got: "
+                        + toolNames);
     }
 
     private static AIController createController(

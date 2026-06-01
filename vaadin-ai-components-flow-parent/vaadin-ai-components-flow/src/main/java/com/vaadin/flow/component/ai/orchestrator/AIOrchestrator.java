@@ -18,10 +18,15 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -53,7 +58,10 @@ import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.streams.UploadHandler;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -162,6 +170,13 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
+    /**
+     * Name of the built-in tool that exposes per-turn session context to the
+     * LLM. Reserved — applications should not register their own tool with this
+     * name.
+     */
+    static final String SESSION_CONTEXT_TOOL_NAME = "get_session_context";
+
     private transient LLMProvider provider;
     private final String systemPrompt;
     private AIMessageList messageList;
@@ -174,6 +189,7 @@ public class AIOrchestrator implements Serializable {
     private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
     private ResponseListener responseListener;
+    private SerializableSupplier<String> contextSupplier;
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
     private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
@@ -528,6 +544,7 @@ public class AIOrchestrator implements Serializable {
         var controllerTools = controller != null
                 && controller.getTools() != null ? controller.getTools()
                         : List.<LLMProvider.ToolSpec> of();
+        final var explicitTools = mergeWithContextTool(controllerTools);
         return new LLMProvider.LLMRequest() {
 
             @Override
@@ -552,9 +569,112 @@ public class AIOrchestrator implements Serializable {
 
             @Override
             public List<LLMProvider.ToolSpec> explicitTools() {
-                return controllerTools;
+                return explicitTools;
             }
         };
+    }
+
+    /**
+     * Resolves the configured {@link Supplier} for session context and, if it
+     * returns non-empty content, prepends a {@value #SESSION_CONTEXT_TOOL_NAME}
+     * tool that carries that content in its description. The resolved string is
+     * captured in the per-turn tool instance so {@code execute()} can return it
+     * without re-invoking the supplier off the UI thread.
+     * <p>
+     * A supplier that throws aborts the turn — the exception propagates through
+     * {@link #buildRequest} and is handled by the existing error path in
+     * {@link #processUserInput}.
+     */
+    private List<LLMProvider.ToolSpec> mergeWithContextTool(
+            List<LLMProvider.ToolSpec> controllerTools) {
+        if (contextSupplier == null) {
+            return controllerTools;
+        }
+        var resolved = contextSupplier.get();
+        if (resolved == null || resolved.isBlank()) {
+            return controllerTools;
+        }
+        var contextTool = buildSessionContextTool(resolved);
+        var merged = new ArrayList<LLMProvider.ToolSpec>(
+                controllerTools.size() + 1);
+        merged.add(contextTool);
+        merged.addAll(controllerTools);
+        return List.copyOf(merged);
+    }
+
+    /**
+     * Builds the per-turn {@value #SESSION_CONTEXT_TOOL_NAME} tool. The
+     * resolved content is baked into the description so the LLM sees it just
+     * from listing the available tools — no separate call is normally needed.
+     * {@link LLMProvider.ToolSpec#execute} returns the same content so a model
+     * that does call the tool gets exactly what the description already
+     * carries.
+     */
+    private static LLMProvider.ToolSpec buildSessionContextTool(
+            String content) {
+        return new SessionContextTool(content);
+    }
+
+    private static final DateTimeFormatter DEFAULT_CONTEXT_DATE_TIME_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mmXXX");
+
+    /**
+     * Default supplier installed when {@link Builder#withMetadata} has not been
+     * called. Renders the server clock as e.g.
+     * {@code "Current server date and time: 2026-05-28T17:42+03:00 (Friday, Europe/Helsinki)"}
+     * so the LLM can interpret relative date references without guessing.
+     */
+    private static SerializableSupplier<String> defaultContextSupplier() {
+        return () -> {
+            var now = ZonedDateTime.now();
+            var dayOfWeek = now.getDayOfWeek().getDisplayName(TextStyle.FULL,
+                    Locale.ENGLISH);
+            return String.format("Current server date and time: %s (%s, %s)",
+                    now.format(DEFAULT_CONTEXT_DATE_TIME_FORMAT), dayOfWeek,
+                    now.getZone().getId());
+        };
+    }
+
+    /**
+     * Per-turn {@link LLMProvider.ToolSpec} that surfaces the resolved session
+     * context. {@link Serializable} so the orchestrator's per-turn explicit
+     * tools list does not break the serialization round-trip test even though
+     * tools themselves are rebuilt on every turn.
+     */
+    private static final class SessionContextTool
+            implements LLMProvider.ToolSpec, Serializable {
+        private final String content;
+        private final String description;
+
+        SessionContextTool(String content) {
+            this.content = content;
+            this.description = """
+                    Read for current session context (e.g. date and time, user \
+                    locale). The content below is captured at the start of \
+                    this turn:
+
+                    """ + content;
+        }
+
+        @Override
+        public String getName() {
+            return SESSION_CONTEXT_TOOL_NAME;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        @Override
+        public String getParametersSchema() {
+            return null;
+        }
+
+        @Override
+        public String execute(JsonNode arguments) {
+            return content;
+        }
     }
 
     private void fireResponseListener(String responseText, Throwable error,
@@ -606,6 +726,11 @@ public class AIOrchestrator implements Serializable {
                                 + "with a maximum length of 64 characters "
                                 + "(pattern: "
                                 + VALID_TOOL_NAME_PATTERN.pattern() + ").");
+            }
+            if (SESSION_CONTEXT_TOOL_NAME.equals(name)) {
+                LOGGER.warn(
+                        "Tool name '{}' is reserved for the built-in session context tool",
+                        name);
             }
             if (!seen.add(name)) {
                 LOGGER.warn(
@@ -781,6 +906,12 @@ public class AIOrchestrator implements Serializable {
      * <li>{@link #withHistory(List, Map)} – restores a previously saved
      * conversation history with attachments (from
      * {@link AIOrchestrator#getHistory()}).</li>
+     * <li>{@link #withMetadata(SerializableSupplier)} – sets a supplier the
+     * orchestrator invokes on every turn to give the LLM free-form session
+     * context. Defaults to a current-date-and-time supplier so the LLM can
+     * interpret relative date/time references; pass {@code null} to disable, or
+     * a custom supplier to include tenant, locale, page state, or anything else
+     * worth keeping out of the system prompt.</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
@@ -804,6 +935,8 @@ public class AIOrchestrator implements Serializable {
         private ResponseListener responseListener;
         private List<ChatMessage> history;
         private Map<String, List<AIAttachment>> historyAttachments;
+        private SerializableSupplier<String> contextSupplier;
+        private boolean contextSupplierSet;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -1102,6 +1235,49 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
+         * Sets the supplier of free-form session context the LLM sees on every
+         * turn. The supplier is invoked once per turn on the UI thread when the
+         * request is being built.
+         * <p>
+         * The supplier may return any string the application wants the LLM to
+         * have on hand — current date and time, the active tenant, the user's
+         * locale, the page the user is on, feature flags. Compose multiple
+         * pieces of context with plain string concatenation.
+         * <p>
+         * If the supplier returns {@code null} or an empty/blank string, no
+         * context is added for that turn — useful for "context only when X"
+         * patterns. If the supplier throws, the turn is aborted via the normal
+         * error path: the assistant placeholder is updated to a generic error
+         * message, {@link AIController#onResponse(Throwable)} fires with the
+         * thrown exception, and the exception propagates to the caller of the
+         * prompt entry point.
+         * <p>
+         * Passing {@code null} disables session context entirely, including the
+         * built-in default. By default, the orchestrator installs a supplier
+         * that yields the current date and time so the LLM can interpret
+         * relative date/time references ("show me sales from the past two
+         * months") without having to guess.
+         * <p>
+         * The supplier runs on the UI thread, so it can read
+         * {@link UI#getCurrent()} and session-scoped state.
+         *
+         * @param contextSupplier
+         *            supplier of the per-turn context string, or {@code null}
+         *            to disable session context entirely
+         * @return this builder
+         */
+        public Builder withMetadata(
+                SerializableSupplier<String> contextSupplier) {
+            if (contextSupplierSet) {
+                LOGGER.warn("Context supplier was already set on the "
+                        + "builder and will be replaced");
+            }
+            this.contextSupplier = contextSupplier;
+            this.contextSupplierSet = true;
+            return this;
+        }
+
+        /**
          * Sets the conversation history and associated attachments to restore
          * when the orchestrator is built. This restores the LLM provider's
          * conversation context (including multimodal content), the message list
@@ -1151,6 +1327,8 @@ public class AIOrchestrator implements Serializable {
             orchestrator.requestListener = requestListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseListener = responseListener;
+            orchestrator.contextSupplier = contextSupplierSet ? contextSupplier
+                    : defaultContextSupplier();
             try {
                 if (input != null) {
                     input.addSubmitListener(
