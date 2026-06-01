@@ -727,6 +727,11 @@ public class AIOrchestrator implements Serializable {
                                 + "(pattern: "
                                 + VALID_TOOL_NAME_PATTERN.pattern() + ").");
             }
+            if (SESSION_CONTEXT_TOOL_NAME.equals(name)) {
+                LOGGER.warn(
+                        "Tool name '{}' is reserved for the built-in session context tool",
+                        name);
+            }
             if (!seen.add(name)) {
                 LOGGER.warn(
                         "Duplicate tool name '{}': previous tool will be replaced",

@@ -2715,6 +2715,22 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void withController_reservedSessionContextToolName_logsWarning() {
+        var reserved = createToolSpec("get_session_context", "Clashing tool");
+        AIController controller = createController(reserved);
+
+        AIOrchestrator.builder(mockProvider, null).withController(controller);
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage().equals(
+                        "Tool name '{}' is reserved for the built-in session context tool"))
+                .findFirst();
+
+        Assertions.assertTrue(warning.isPresent(),
+                "Using the reserved tool name should log a warning");
+    }
+
+    @Test
     void builder_withNullToolName_throwsIllegalArgumentException() {
         var controller = createController(createToolSpec(null, "A tool"));
 
