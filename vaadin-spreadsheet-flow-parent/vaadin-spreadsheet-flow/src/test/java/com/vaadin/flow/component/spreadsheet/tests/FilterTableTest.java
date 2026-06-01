@@ -120,6 +120,27 @@ class FilterTableTest {
     }
 
     @Test
+    void filterTwoColumns_clearOneColumn_otherColumnFilterRetained() {
+        // Column 1 value "3" is in row 2, column 2 value "7" is in row 5
+        getFilterCheckboxGroup(1).deselect("3");
+        getFilterCheckboxGroup(2).deselect("7");
+
+        getClearButton(1).click();
+
+        // Column 1 filter is cleared
+        Assertions.assertEquals(0, getItemFilter(1).getFilteredRows().size());
+        Assertions.assertFalse(spreadsheet.isRowHidden(2));
+        Assertions.assertFalse(getClearButton(1).isEnabled());
+        Assertions.assertFalse(getPopupButton(1).isActive());
+
+        // Column 2 filter is retained
+        Assertions.assertEquals(1, getItemFilter(2).getFilteredRows().size());
+        Assertions.assertTrue(spreadsheet.isRowHidden(5));
+        Assertions.assertTrue(getClearButton(2).isEnabled());
+        Assertions.assertTrue(getPopupButton(2).isActive());
+    }
+
+    @Test
     void filter_clearAndReload_filtersCleared() {
         getFilterCheckboxGroup().deselect("4");
         table.clear();
@@ -158,25 +179,41 @@ class FilterTableTest {
     }
 
     private CheckboxGroup<String> getFilterCheckboxGroup() {
-        return (CheckboxGroup<String>) getItemFilter().getChildren()
+        return getFilterCheckboxGroup(1);
+    }
+
+    private CheckboxGroup<String> getFilterCheckboxGroup(int column) {
+        return (CheckboxGroup<String>) getItemFilter(column).getChildren()
                 .filter(component -> component instanceof CheckboxGroup)
                 .findFirst().get();
     }
 
     private ItemFilter getItemFilter() {
-        return (ItemFilter) getPopupButtonChildren().get(0);
+        return getItemFilter(1);
+    }
+
+    private ItemFilter getItemFilter(int column) {
+        return (ItemFilter) getPopupButtonChildren(column).get(0);
     }
 
     private Button getClearButton() {
-        return (Button) getPopupButtonChildren().get(1);
+        return getClearButton(1);
     }
 
-    private List<Component> getPopupButtonChildren() {
-        return getPopupButton().getContent().getChildren()
+    private Button getClearButton(int column) {
+        return (Button) getPopupButtonChildren(column).get(1);
+    }
+
+    private List<Component> getPopupButtonChildren(int column) {
+        return getPopupButton(column).getContent().getChildren()
                 .collect(Collectors.toList());
     }
 
     private PopupButton getPopupButton() {
-        return table.getPopupButton(1);
+        return getPopupButton(1);
+    }
+
+    private PopupButton getPopupButton(int column) {
+        return table.getPopupButton(column);
     }
 }

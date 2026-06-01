@@ -159,11 +159,32 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
     }
 
     /**
+     * Clears the filters of the column the given pop-up button belongs to.
+     * Other columns' filters are left intact.
+     *
+     * @param popupButton
+     *            The pop-up button whose column filters should be cleared
+     */
+    public void clearFilters(PopupButton popupButton) {
+        HashSet<SpreadsheetFilter> filters = popupButtonToFiltersMap
+                .get(popupButton);
+        if (filters != null) {
+            for (SpreadsheetFilter filter : filters) {
+                filter.clearFilter();
+            }
+        }
+        // Recomputes hidden rows from the remaining filters and updates the
+        // pop-up button / clear button states.
+        onFiltersUpdated();
+    }
+
+    /**
      * Creates the "Clear filters" buttons for the pop-ups.
      */
     protected void initClearAllButtons() {
         for (PopupButton popupButton : getPopupButtons()) {
             Button clearButton = createClearButton();
+            clearButton.addClickListener(event -> clearFilters(popupButton));
             addComponentToPopup(popupButton, clearButton);
             popupButtonToClearButtonMap.put(popupButton, clearButton);
         }
@@ -206,7 +227,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
 
     /**
      * Creates a "Clear filters" button. It has the
-     * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name.
+     * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name. The click listener
+     * that clears the column's filters is attached in
+     * {@link #initClearAllButtons()}.
      *
      * @return Button for clearing the filters
      */
@@ -217,7 +240,6 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
                 ButtonVariant.SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
-        button.addClickListener(event -> clearAllFilters());
         return button;
     }
 
