@@ -30,6 +30,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -49,7 +51,10 @@ import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -600,6 +605,109 @@ class FillFormToolTest {
                 rejectionReason(result, idOf(field)),
                 "Converter failure must surface its message in rejected, "
                         + "got: " + result);
+    }
+
+    @Test
+    void fillForm_binderLevelCrossFieldValidatorSurfacesAsRejection() {
+        // A bean-level cross-field validator registered via
+        // Binder.withValidator((bean, ctx) -> ...) must surface its rejection
+        // in the fill_form response when the LLM writes a combination of
+        // values that violates the rule. Per-binding validators alone aren't
+        // enough — some rules only make sense across multiple fields (e.g.
+        // "if format=Lightning, length<=10"). The rejection is keyed on a
+        // sentinel id since the rule isn't bound to one specific field.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertFalse(success(result),
+                "Cross-field validation failure must surface in rejected; "
+                        + "got: " + result);
+        var crossReason = rejectionReason(result, "__form__");
+        Assertions.assertNotNull(crossReason,
+                "Cross-field rejection must be keyed on the '__form__' "
+                        + "sentinel id (not on either field id, since the "
+                        + "rule isn't tied to one field); got rejected ids: "
+                        + rejectedIds(result));
+        Assertions.assertTrue(crossReason.contains("Lightning"),
+                "Reason must surface the validator's message so the LLM "
+                        + "can self-correct; got: " + crossReason);
+    }
+
+    @Test
+    void fillForm_binderLevelCrossFieldValidatorPassDoesNotEmitRejection() {
+        // Symmetric guard: when the cross-field validator passes, no sentinel
+        // rejection appears in the response.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree("{\"" + idOf(formatField)
+                        + "\":\"Standard\",\"" + idOf(lengthField) + "\":45}"));
+
+        Assertions.assertTrue(success(result),
+                "Passing cross-field validator must produce success=true; "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_binderLevelCrossFieldValidatorSkippedWithoutBean() {
+        // Binder.validate()'s bean-level validators only run when a bean is set
+        // on the binder. When the application uses readBean/writeBean instead
+        // of setBean the bean-level rule has no target — the controller must
+        // not emit a sentinel rejection in that case, since there is nothing
+        // to validate against.
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> ValidationResult
+                .error("never-fires-without-bean"));
+        // intentionally no setBean
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertTrue(success(result),
+                "Without setBean the bean-level validator has no target and "
+                        + "must not produce a sentinel rejection; got: "
+                        + result);
     }
 
     @Test
@@ -1354,6 +1462,36 @@ class FillFormToolTest {
     }
 
     /**
+     * Two-property bean driving the binder-level cross-field-validator tests.
+     * Public visibility is required because {@code Binder.setBean(...)}
+     * reflects through the property getters via {@code BeanPropertySet}.
+     */
+    public static class TwoFieldBean {
+        private String format;
+        private Integer length;
+
+        @SuppressWarnings("unused")
+        public String getFormat() {
+            return format;
+        }
+
+        @SuppressWarnings("unused")
+        public void setFormat(String format) {
+            this.format = format;
+        }
+
+        @SuppressWarnings("unused")
+        public Integer getLength() {
+            return length;
+        }
+
+        @SuppressWarnings("unused")
+        public void setLength(Integer length) {
+            this.length = length;
+        }
+    }
+
+    /**
      * Bean with a non-String property — drives the converter-failure rejection
      * test where the binder's chain (not the controller's own converter) is the
      * source of the error.
@@ -1447,6 +1585,27 @@ class FillFormToolTest {
         var controller = new FormAIController(form, binder);
         controller.onRequest();
         return controller;
+    }
+
+    /**
+     * Stubs {@code service.getContext()} and the
+     * {@link ApplicationConfiguration} attribute on the
+     * {@link MockUIExtension}'s mocked {@code VaadinService} so
+     * {@code Binder.setBean(...)} can resolve its I18N / production-mode
+     * lookups without tripping over Mockito's default {@code null} return. Only
+     * the cross-field-validator tests that call {@code setBean} need this.
+     */
+    private void stubVaadinContext() {
+        var context = Mockito.mock(VaadinContext.class);
+        var appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+        // ApplicationConfiguration.get(context) uses the (Class, Supplier)
+        // getAttribute overload internally — match that exact shape, otherwise
+        // the mock returns null and DefaultBindingExceptionHandler NPEs.
+        Mockito.when(context.getAttribute(
+                ArgumentMatchers.eq(ApplicationConfiguration.class),
+                ArgumentMatchers.any())).thenReturn(appConfig);
+        Mockito.when(ui.getService().getContext()).thenReturn(context);
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
