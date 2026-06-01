@@ -443,7 +443,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withContext(null).build();
+                .withMetadata(null).build();
         orchestrator.prompt("do it");
 
         Mockito.verify(fakeTool).execute(Mockito.any());
@@ -1957,7 +1957,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withContext(null).build();
+                .withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2517,7 +2517,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
-                .withContext(() -> "Tenant: acme").build();
+                .withMetadata(() -> "Tenant: acme").build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2546,24 +2546,24 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withContext(null).build();
+                .withMessageList(mockMessageList).withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
         Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
-                "withContext(null) should suppress the built-in tool");
+                "withMetadata(null) should suppress the built-in tool");
     }
 
     @Test
-    void prompt_withContextSupplierReturningBlank_omitsSessionContextTool() {
+    void prompt_withMetadataSupplierReturningBlank_omitsSessionContextTool() {
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withContext(() -> "   ")
+                .withMessageList(mockMessageList).withMetadata(() -> "   ")
                 .build();
         orchestrator.prompt("Hello");
 
@@ -2574,7 +2574,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withContextAndController_mergesContextFirst() {
+    void prompt_withMetadataAndController_mergesContextFirst() {
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -2584,7 +2584,7 @@ class AIOrchestratorTest {
         var controller = createController(tool1);
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withContext(() -> "Tenant: acme").build();
+                .withMetadata(() -> "Tenant: acme").build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2596,7 +2596,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withContextSupplier_invokedOncePerTurn() {
+    void prompt_withMetadataSupplier_invokedOncePerTurn() {
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -2604,7 +2604,7 @@ class AIOrchestratorTest {
 
         var callCount = new AtomicInteger();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withContext(() -> {
+                .withMessageList(mockMessageList).withMetadata(() -> {
                     callCount.incrementAndGet();
                     return "tick " + callCount.get();
                 }).build();
@@ -2617,11 +2617,11 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withContextSupplierThrowing_abortsTurn() {
+    void prompt_withMetadataSupplierThrowing_abortsTurn() {
         stubAddMessage();
         var thrown = new RuntimeException("context supplier failed");
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withContext(() -> {
+                .withMessageList(mockMessageList).withMetadata(() -> {
                     throw thrown;
                 }).build();
 
@@ -2636,16 +2636,16 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withContextCalledTwice_logsWarning() {
-        AIOrchestrator.builder(mockProvider, null).withContext(() -> "first")
-                .withContext(() -> "second");
+    void builder_withMetadataCalledTwice_logsWarning() {
+        AIOrchestrator.builder(mockProvider, null).withMetadata(() -> "first")
+                .withMetadata(() -> "second");
 
         var warning = logger.getLoggingEvents().stream()
                 .filter(e -> e.getMessage()
                         .contains("Context supplier was already set"))
                 .findFirst();
         Assertions.assertTrue(warning.isPresent(),
-                "Second withContext call should log a replacement warning");
+                "Second withMetadata call should log a replacement warning");
     }
 
     @Test
@@ -2659,7 +2659,7 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withContext(null).build();
+                .withMessageList(mockMessageList).withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2875,7 +2875,7 @@ class AIOrchestratorTest {
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
                 "withAssistantName", "withRequestListener",
                 "withAttachmentClickListener", "withResponseListener",
-                "withHistory", "withContext");
+                "withHistory", "withMetadata");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);

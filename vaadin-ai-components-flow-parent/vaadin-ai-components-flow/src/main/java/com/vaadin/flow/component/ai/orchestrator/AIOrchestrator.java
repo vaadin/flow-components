@@ -619,7 +619,7 @@ public class AIOrchestrator implements Serializable {
             .ofPattern("yyyy-MM-dd'T'HH:mmXXX");
 
     /**
-     * Default supplier installed when {@link Builder#withContext} has not been
+     * Default supplier installed when {@link Builder#withMetadata} has not been
      * called. Renders the server clock as e.g.
      * {@code "Current server date and time: 2026-05-28T17:42+03:00 (Friday, Europe/Helsinki)"}
      * so the LLM can interpret relative date references without guessing.
@@ -901,7 +901,7 @@ public class AIOrchestrator implements Serializable {
      * <li>{@link #withHistory(List, Map)} – restores a previously saved
      * conversation history with attachments (from
      * {@link AIOrchestrator#getHistory()}).</li>
-     * <li>{@link #withContext(SerializableSupplier)} – sets a supplier the
+     * <li>{@link #withMetadata(SerializableSupplier)} – sets a supplier the
      * orchestrator invokes on every turn; the returned string is exposed to the
      * LLM as the description of a built-in {@code get_session_context} tool.
      * Defaults to a current-date-and-time supplier so the LLM can interpret
@@ -1268,7 +1268,7 @@ public class AIOrchestrator implements Serializable {
          *            to disable the tool entirely
          * @return this builder
          */
-        public Builder withContext(
+        public Builder withMetadata(
                 SerializableSupplier<String> contextSupplier) {
             if (contextSupplierSet) {
                 LOGGER.warn("Context supplier was already set on the "
