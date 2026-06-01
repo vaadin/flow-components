@@ -443,7 +443,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .build();
+                .withMetadata(null).build();
         orchestrator.prompt("do it");
 
         Mockito.verify(fakeTool).execute(Mockito.any());
@@ -1957,7 +1957,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .build();
+                .withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2485,7 +2485,189 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withNoControllers_explicitToolsIsEmpty() {
+    void prompt_byDefault_includesSessionContextToolWithCurrentDateTime() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, tools.size());
+        var contextTool = tools.get(0);
+        Assertions.assertEquals("get_session_context", contextTool.getName());
+        Assertions.assertTrue(
+                contextTool.getDescription()
+                        .contains("Current server date and time:"),
+                "Default supplier should render a date/time line; got: "
+                        + contextTool.getDescription());
+    }
+
+    @Test
+    void prompt_withCustomContextSupplier_replacesDefaultAndExposesContent() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withMetadata(() -> "Tenant: acme").build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, tools.size());
+        var contextTool = tools.get(0);
+        Assertions.assertTrue(
+                contextTool.getDescription().contains("Tenant: acme"),
+                "Custom supplier value should appear in the description; got: "
+                        + contextTool.getDescription());
+        Assertions.assertFalse(
+                contextTool.getDescription()
+                        .contains("Current server date and time:"),
+                "Custom supplier should fully replace the default; got: "
+                        + contextTool.getDescription());
+        Assertions.assertEquals("Tenant: acme", contextTool.execute(null),
+                "execute should return the same content the description shows");
+    }
+
+    @Test
+    void prompt_withNullContext_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(null).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "withMetadata(null) should suppress the built-in tool");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierReturningBlank_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> "   ")
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Empty/blank supplier output should suppress the tool for that turn");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierReturningNull_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> null)
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Null supplier output should suppress the tool for that turn");
+    }
+
+    @Test
+    void prompt_withMetadataAndController_mergesContextFirst() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var tool1 = createToolSpec("tool1", "First controller tool");
+        var controller = createController(tool1);
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withMetadata(() -> "Tenant: acme").build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(2, tools.size());
+        Assertions.assertEquals("get_session_context", tools.get(0).getName());
+        Assertions.assertEquals("tool1", tools.get(1).getName());
+    }
+
+    @Test
+    void prompt_withMetadataSupplier_invokedOncePerTurn() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var callCount = new AtomicInteger();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> {
+                    callCount.incrementAndGet();
+                    return "tick " + callCount.get();
+                }).build();
+
+        orchestrator.prompt("first");
+        orchestrator.prompt("second");
+
+        Assertions.assertEquals(2, callCount.get(),
+                "Supplier should be invoked once per prompt");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierThrowing_abortsTurn() {
+        stubAddMessage();
+        var thrown = new RuntimeException("context supplier failed");
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> {
+                    throw thrown;
+                }).build();
+
+        var caught = Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertSame(thrown, caught);
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Assertions.assertTrue(orchestrator.getHistory().isEmpty(),
+                "Aborted turn must not leave the user message in history");
+    }
+
+    @Test
+    void builder_withMetadataCalledTwice_logsWarning() {
+        AIOrchestrator.builder(mockProvider, null).withMetadata(() -> "first")
+                .withMetadata(() -> "second");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(e -> e.getMessage()
+                        .contains("Context supplier was already set"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Second withMetadata call should log a replacement warning");
+    }
+
+    @Test
+    void builder_withNoControllersAndNoContext_explicitToolsIsEmpty() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -2495,7 +2677,7 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).build();
+                .withMessageList(mockMessageList).withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2530,6 +2712,22 @@ class AIOrchestratorTest {
 
         Assertions.assertTrue(warning.isPresent(),
                 "Expected duplicate tool name warning");
+    }
+
+    @Test
+    void withController_reservedSessionContextToolName_logsWarning() {
+        var reserved = createToolSpec("get_session_context", "Clashing tool");
+        AIController controller = createController(reserved);
+
+        AIOrchestrator.builder(mockProvider, null).withController(controller);
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage().equals(
+                        "Tool name '{}' is reserved for the built-in session context tool"))
+                .findFirst();
+
+        Assertions.assertTrue(warning.isPresent(),
+                "Using the reserved tool name should log a warning");
     }
 
     @Test
@@ -2711,7 +2909,7 @@ class AIOrchestratorTest {
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
                 "withAssistantName", "withRequestListener",
                 "withAttachmentClickListener", "withResponseListener",
-                "withHistory");
+                "withHistory", "withMetadata");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);
