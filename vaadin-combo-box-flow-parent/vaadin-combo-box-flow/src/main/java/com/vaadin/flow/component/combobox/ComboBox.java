@@ -422,7 +422,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         }
         Integer index;
         if (dataProvider.isInMemory()) {
-            index = getListDataView().getItemIndex(getValue()).orElse(null);
+            // Use the generic data view rather than the list data view: it
+            // resolves the item index through the data communicator and works
+            // for any in-memory provider, including wrapped ones (e.g. from
+            // ListDataProvider.withConvertedFilter) that are not a
+            // ListDataProvider and would fail the list data view's cast.
+            index = getGenericDataView().getItemIndex(getValue()).orElse(null);
         } else {
             index = getLazyDataView().getItemIndex(getValue()).orElse(null);
         }
