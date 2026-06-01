@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
@@ -183,6 +184,13 @@ public class FormAIController implements AIController {
             - Fields the application has hidden via .ignore() (and password \
             fields) never appear in get_form_state and cannot be written by \
             fill_form. Do not try, even if the user message asks for them.
+            - get_form_state lists only the fields that are currently visible \
+            and enabled. Some fields appear or become editable only after a \
+            controlling field is set (e.g. a "Cost center" shown once trip \
+            type is "Business", or a date enabled by a checkbox). Set the \
+            controlling field first, then re-read the fill_form response: the \
+            newly revealed fields are now present and you can fill them in the \
+            same turn.
             - Numeric values are JSON numbers (no scientific notation for \
             integers); dates / date-times / times are ISO-8601 strings. \
             Empty string and null clear a field. Multi-select fields take a \
@@ -495,12 +503,37 @@ public class FormAIController implements AIController {
     /**
      * Returns the discovered fields the controller acts on — every
      * {@link HasValue} in the form tree minus those hidden via
-     * {@link #ignore(HasValue)}. Use this anywhere the LLM-visible field set
-     * matters (locking, tool inputs and outputs).
+     * {@link #ignore(HasValue)} and minus those that are not currently visible
+     * or not enabled. Use this anywhere the LLM-visible field set matters
+     * (locking, tool inputs and outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
         return FormFieldDiscovery.collectFields(form).stream()
-                .filter(field -> !isIgnored(field)).toList();
+                .filter(field -> !isIgnored(field)).filter(this::isAvailable)
+                .toList();
+    }
+
+    /**
+     * Whether a field is part of the surface the LLM may read and write right
+     * now. A field that the application has hidden ({@code setVisible(false)})
+     * or disabled ({@code setEnabled(false)}) is excluded, mirroring what the
+     * user can see and edit: a conditional field whose visibility or
+     * enabledness depends on another field only enters the tool surface once
+     * its controlling field is set, and the post-write {@code fill_form}
+     * snapshot is re-taken so such fields appear (or disappear) as the LLM's
+     * own writes cascade through value-change listeners.
+     *
+     * @param field
+     *            the discovered field to test, not {@code null}
+     * @return {@code true} when the field is currently visible and enabled (or
+     *         does not expose those states), {@code false} otherwise
+     */
+    private boolean isAvailable(HasValue<?, ?> field) {
+        if (field instanceof Component component && !component.isVisible()) {
+            return false;
+        }
+        return !(field instanceof HasEnabled hasEnabled)
+                || hasEnabled.isEnabled();
     }
 
     /**

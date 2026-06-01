@@ -101,6 +101,65 @@ class FormStateToolTest {
     }
 
     @Test
+    void getFormStateOmitsHiddenFields() {
+        // A field the application has hidden with setVisible(false) is not
+        // something the user can see or edit, so it must not enter the LLM's
+        // tool surface either. This is how a conditionally-shown field (e.g.
+        // a "Cost center" revealed only for business trips) stays out of
+        // get_form_state until its controlling field reveals it.
+        var visible = new TestField();
+        var hidden = new TestField();
+        hidden.setVisible(false);
+        var controller = new FormAIController(new Div(visible, hidden));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size(),
+                "Hidden (setVisible(false)) field must be excluded, got: "
+                        + fields);
+        Assertions.assertEquals(idOf(visible),
+                fields.get(0).get("id").asString());
+    }
+
+    @Test
+    void getFormStateOmitsDisabledFields() {
+        // A disabled field cannot be edited by the user; the AI must not fill
+        // it either. Disabling is the typical way a field is gated on another
+        // field's value (a "Seat preference" enabled only for non-Economy
+        // cabins), so the disabled field re-enters the surface once the
+        // controlling field is set and the next state read is taken.
+        var enabled = new TestField();
+        var disabled = new TestField();
+        disabled.setEnabled(false);
+        var controller = new FormAIController(new Div(enabled, disabled));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size(),
+                "Disabled (setEnabled(false)) field must be excluded, got: "
+                        + fields);
+        Assertions.assertEquals(idOf(enabled),
+                fields.get(0).get("id").asString());
+    }
+
+    @Test
+    void getFormStateIncludesFieldOnceItBecomesVisible() {
+        // Fields are re-discovered on every state read, so a field hidden at
+        // one turn appears at the next once the controlling field reveals it.
+        var field = new TestField();
+        field.setVisible(false);
+        var controller = new FormAIController(new Div(field));
+
+        Assertions.assertEquals(0, formStateFields(controller).size(),
+                "Hidden field must be absent while invisible");
+
+        field.setVisible(true);
+
+        Assertions.assertEquals(1, formStateFields(controller).size(),
+                "Field must reappear once it is made visible again");
+    }
+
+    @Test
     void getFormStateReturnsEmptyFieldsArrayForEmptyForm() {
         var controller = new FormAIController(new Div());
 
