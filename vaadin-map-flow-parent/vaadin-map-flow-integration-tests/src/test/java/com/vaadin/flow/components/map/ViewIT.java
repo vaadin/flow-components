@@ -53,7 +53,7 @@ public class ViewIT extends AbstractComponentIT {
     }
 
     @Test
-    public void zoomLimits_appliedToOpenLayersView() {
+    public void setZoomLimits() {
         MapElement map = $(MapElement.class).first();
         MapElement.ViewReference view = map.getMapReference().getView();
 
