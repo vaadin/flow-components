@@ -17,11 +17,11 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetFilterTable;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-@Route("spreadsheet-filter-cross-column")
-@PageTitle("Filter cross-column repro (#9329)")
-public class SpreadsheetFilterCrossColumnPage extends VerticalLayout {
+@Route("spreadsheet-filter")
+@PageTitle("Spreadsheet filter")
+public class SpreadsheetFilterPage extends VerticalLayout {
 
-    public SpreadsheetFilterCrossColumnPage() {
+    public SpreadsheetFilterPage() {
         Spreadsheet spreadsheet = new Spreadsheet();
         spreadsheet.setTheme(SpreadsheetTheme.LUMO);
         spreadsheet.setHeight("400px");
