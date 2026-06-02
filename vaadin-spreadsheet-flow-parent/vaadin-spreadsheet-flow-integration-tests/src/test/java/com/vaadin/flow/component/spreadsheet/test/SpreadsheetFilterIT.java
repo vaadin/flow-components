@@ -33,28 +33,28 @@ public class SpreadsheetFilterIT extends AbstractSpreadsheetIT {
     @Test
     public void filterColumn_otherColumnOmitsValuesOfHiddenRows() {
         // Before filtering, Column C offers all of its values
-        openFilterPopup(3);
+        openFilterPopup("C1");
         Assert.assertEquals(List.of("Alice", "Bob", "Carol"),
                 getFilterOptions("Column C"));
         closeFilterPopup("Column C");
 
         // Filter Column A so that the "Alpha" row gets hidden
-        openFilterPopup(1);
+        openFilterPopup("A1");
         uncheckFilterOption("Column A", "Alpha");
         closeFilterPopup("Column A");
 
         // Column C no longer offers "Alice", as its row is hidden by Column A
-        openFilterPopup(3);
+        openFilterPopup("C1");
         Assert.assertEquals(List.of("Bob", "Carol"),
                 getFilterOptions("Column C"));
     }
 
     /**
-     * Opens the filter pop-up of the given one-based column (Column A == 1).
+     * Opens the filter pop-up of the column whose header cell is at the given
+     * address (e.g. "A1").
      */
-    private void openFilterPopup(int column) {
-        findElementInShadowRoot(
-                By.cssSelector(".col" + column + ".row1 .popupbutton")).click();
+    private void openFilterPopup(String headerCell) {
+        getSpreadsheet().getCellAt(headerCell).popupButtonClick();
     }
 
     /**
