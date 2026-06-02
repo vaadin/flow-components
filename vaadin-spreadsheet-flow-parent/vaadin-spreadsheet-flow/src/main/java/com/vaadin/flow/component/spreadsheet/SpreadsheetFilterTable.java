@@ -151,16 +151,17 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButtonToClearButtonMap.get(popupButton).setEnabled(false);
             popupButton.markActive(false);
         }
+
         // Refresh option lists after all filters cleared, so each ItemFilter
         // sees the now-empty filteredRows of its siblings.
-        for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
-                .values()) {
-            for (SpreadsheetFilter filter : filters) {
-                if (filter instanceof ItemFilter) {
-                    ((ItemFilter) filter).updateOptions();
+        for (var filters : popupButtonToFiltersMap.values()) {
+            for (var filter : filters) {
+                if (filter instanceof ItemFilter itemFilter) {
+                    itemFilter.updateOptions();
                 }
             }
         }
+
         getSpreadsheet().setRowsHidden(IntStream
                 .range(filteringRegion.getFirstRow(),
                         filteringRegion.getLastRow() + 1)
@@ -285,7 +286,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
                 .values()) {
             for (SpreadsheetFilter filter : filters) {
-                if (filter != self) {
+                if (!filter.equals(self)) {
                     hidden.addAll(filter.getFilteredRows());
                 }
             }
