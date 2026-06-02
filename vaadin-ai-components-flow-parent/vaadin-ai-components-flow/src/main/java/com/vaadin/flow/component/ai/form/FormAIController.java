@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
@@ -107,13 +108,16 @@ import tools.jackson.databind.JsonNode;
  *
  * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
- * that wasn't already read-only is set to read-only so the user cannot type
- * into a field the AI is about to overwrite. Locks are released when the turn
- * ends, successfully or otherwise. Application code that changes a field's
- * read-only state mid-turn (e.g. from a value-change listener reacting to the
- * LLM's writes) will be overridden when the controller releases its own locks
- * at turn end — applications should avoid toggling read-only state during a
- * fill turn, or reapply it after the turn completes.
+ * the user can currently edit (visible, enabled, and not already read-only) is
+ * set to read-only so the user cannot type into a field the AI is about to
+ * overwrite. Locks are released when the turn ends, successfully or otherwise.
+ * Application code that turns a locked field read-only mid-turn (e.g. from a
+ * value-change listener reacting to the LLM's writes) is not honoured: the
+ * field already reports read-only because of the lock, so the controller cannot
+ * tell the application's toggle apart from its own lock. {@code fill_form}
+ * still writes the field, and the lock is released at turn end regardless.
+ * Applications should avoid toggling read-only state during a fill turn, or
+ * reapply it after the turn completes.
  * </p>
  *
  * <p>
@@ -183,6 +187,15 @@ public class FormAIController implements AIController {
             - Fields the application has hidden via .ignore() (and password \
             fields) never appear in get_form_state and cannot be written by \
             fill_form. Do not try, even if the user message asks for them.
+            - get_form_state lists every visible field. A field tagged \
+            "disabled": true or "readOnly": true is context only — read its \
+            value, but fill_form will reject any write to it. Such a field \
+            usually becomes writable after a controlling field is set (e.g. a \
+            "Cost center" enabled once trip type is "Business", or a date \
+            enabled by a checkbox). Set the controlling field first, then \
+            re-read the fill_form response: the field is now writable and you \
+            can fill it in the same turn. Hidden fields are not listed at all; \
+            setting their controlling field reveals them on the next state read.
             - Numeric values are JSON numbers (no scientific notation for \
             integers); dates / date-times / times are ISO-8601 strings. \
             Empty string and null clear a field. Multi-select fields take a \
@@ -482,14 +495,15 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Puts every discovered, non-ignored, currently editable field into
+     * Puts every discovered, non-ignored, currently writable field into
      * read-only state so the user cannot type into a field the AI is about to
-     * overwrite. Fields that were already read-only when the turn started are
-     * left untouched and will not be unlocked at turn end.
+     * overwrite. Fields that are disabled or were already read-only when the
+     * turn started are not writable, so they are left untouched and will not be
+     * unlocked at turn end.
      */
     private void lockFields() {
         for (var field : collectActiveFields()) {
-            if (field.isReadOnly()) {
+            if (isDisabled(field) || isApplicationReadOnly(field)) {
                 continue;
             }
             field.setReadOnly(true);
@@ -500,12 +514,70 @@ public class FormAIController implements AIController {
     /**
      * Returns the discovered fields the controller acts on — every
      * {@link HasValue} in the form tree minus those hidden via
-     * {@link #ignore(HasValue)}. Use this anywhere the LLM-visible field set
-     * matters (locking, tool inputs and outputs).
+     * {@link #ignore(HasValue)} and minus those that are not currently visible.
+     * Disabled and read-only fields are kept: the LLM reads them as context but
+     * cannot write them (see {@link #isDisabled} /
+     * {@link #isApplicationReadOnly}). Use this anywhere the LLM-visible field
+     * set matters (locking, tool inputs and outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
         return FormFieldDiscovery.collectFields(form).stream()
-                .filter(field -> !isIgnored(field)).toList();
+                .filter(field -> !isIgnored(field)).filter(this::isVisible)
+                .toList();
+    }
+
+    /**
+     * Whether the field is effectively visible — visible itself and not hidden
+     * by any ancestor. A field the application has hidden
+     * ({@code setVisible(false)}), or that sits inside a hidden container, is
+     * dropped from the LLM surface entirely: the user cannot see it, so its
+     * value is not exposed as context and it cannot be written. A conditional
+     * field hidden until a controlling field is set only enters the surface
+     * once it becomes visible and the next state read is taken.
+     *
+     * @param field
+     *            the discovered field to test, not {@code null}
+     * @return {@code true} when the field and all its ancestors are visible (or
+     *         it is not a {@link Component} exposing visibility), {@code false}
+     *         otherwise
+     */
+    private boolean isVisible(HasValue<?, ?> field) {
+        return !(field instanceof Component component)
+                || ComponentUtil.isEffectivelyVisible(component);
+    }
+
+    /**
+     * Whether the field is effectively disabled — disabled itself
+     * ({@code setEnabled(false)}) or sitting inside a disabled container.
+     * Unlike visibility, {@link HasEnabled#isEnabled()} already reflects the
+     * ancestor chain, so no explicit walk is needed. A disabled field is shown
+     * to the LLM as read-only context but cannot be written.
+     *
+     * @param field
+     *            the discovered field to test, not {@code null}
+     * @return {@code true} when the field exposes an enabled state and is
+     *         effectively disabled, {@code false} otherwise
+     */
+    private boolean isDisabled(HasValue<?, ?> field) {
+        return field instanceof HasEnabled hasEnabled
+                && !hasEnabled.isEnabled();
+    }
+
+    /**
+     * Whether the application set the field read-only, as opposed to the
+     * controller's own turn lock. Between {@link #lockFields()} and
+     * {@link #unlockFields()} every writable field reports read-only, so a
+     * field counts as application-read-only only when it reports read-only yet
+     * is not one this controller locked (the {@code lockedFields} set). Such a
+     * field is shown to the LLM as read-only context but cannot be written.
+     *
+     * @param field
+     *            the discovered field to test, not {@code null}
+     * @return {@code true} when the field is read-only independently of the
+     *         controller's turn lock, {@code false} otherwise
+     */
+    private boolean isApplicationReadOnly(HasValue<?, ?> field) {
+        return field.isReadOnly() && !lockedFields.contains(field);
     }
 
     /**
@@ -567,6 +639,24 @@ public class FormAIController implements AIController {
         return stream.limit(limit).toList();
     }
 
+    /**
+     * Builds the {@code fill_form} rejection reason for a write the LLM aimed
+     * at a field it can read but not edit.
+     *
+     * @param disabled
+     *            {@code true} when the field is disabled, {@code false} when it
+     *            is read-only
+     * @return an LLM-facing reason explaining why the write was rejected
+     */
+    private static String notWritableReason(boolean disabled) {
+        if (disabled) {
+            return "Field is disabled and cannot be filled. Set its "
+                    + "controlling field to enable it, then re-read fill_form's "
+                    + "response and fill it.";
+        }
+        return "Field is read-only and cannot be filled.";
+    }
+
     private final class ToolCallbacks implements FormAITools.Callbacks {
 
         @Override
@@ -579,8 +669,8 @@ public class FormAIController implements AIController {
                 if (type == FormFieldType.UNSUPPORTED) {
                     continue;
                 }
-                descriptors
-                        .add(new FormFieldDescriptor(id, field, type, hints));
+                descriptors.add(new FormFieldDescriptor(id, field, type, hints,
+                        isDisabled(field), isApplicationReadOnly(field)));
             }
             return descriptors;
         }
@@ -659,6 +749,20 @@ public class FormAIController implements AIController {
                                     + "unknown field id."));
                     continue;
                 }
+                // Re-evaluate the field's live writability rather than the
+                // verdict captured before this turn's writes: an earlier
+                // write in the same payload (e.g. via a value-change listener)
+                // can disable or enable a field that appears later. Using the
+                // pre-write snapshot would let a write land on a field the
+                // user can no longer edit, or reject one that just became
+                // writable.
+                var raw = field.field();
+                var disabled = isDisabled(raw);
+                if (disabled || isApplicationReadOnly(raw)) {
+                    rejected.add(new RejectedEntry(id, value,
+                            notWritableReason(disabled)));
+                    continue;
+                }
                 if (applyValue(field, value, rejected)) {
                     writtenValues.put(id, value);
                 }
@@ -668,13 +772,12 @@ public class FormAIController implements AIController {
             // is order-independent. Only fields this turn actually wrote get a
             // per-field verdict; an untouched field that happens to be invalid
             // is not this turn's rejection. Both reads run with
-            // fireEvent=false,
-            // so an untouched field is never marked invalid as a side effect of
-            // validation.
+            // fireEvent=false, so an untouched field is never marked invalid as
+            // a side effect of validation.
             for (var entry : writtenValues.entrySet()) {
-                var raw = byId.get(entry.getKey()).field();
-                var binding = BinderReflection.findBinding(binder, raw);
-                FormFieldValidation.firstError(raw, binding).ifPresent(
+                var written = byId.get(entry.getKey()).field();
+                var binding = BinderReflection.findBinding(binder, written);
+                FormFieldValidation.firstError(written, binding).ifPresent(
                         reason -> rejected.add(new RejectedEntry(entry.getKey(),
                                 entry.getValue(), reason)));
             }
@@ -760,8 +863,7 @@ public class FormAIController implements AIController {
             var fieldsArr = root.putArray("fields");
             for (var d : postWrite) {
                 try {
-                    fieldsArr.add(FormFieldSchema.build(d.id(), d.field(),
-                            d.type(), d.hints()));
+                    fieldsArr.add(FormFieldSchema.build(d));
                 } catch (Exception ex) {
                     LOGGER.warn("fill_form field-state build failed for {}",
                             d.id(), ex);

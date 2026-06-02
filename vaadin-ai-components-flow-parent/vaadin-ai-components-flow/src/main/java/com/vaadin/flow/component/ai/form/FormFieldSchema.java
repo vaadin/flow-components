@@ -22,6 +22,7 @@ import java.util.Collection;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -52,15 +53,29 @@ final class FormFieldSchema {
 
     /**
      * Builds a JSON node describing one form field: id, merged description,
-     * type metadata, and the current value.
+     * read-only/disabled status, type metadata, and the current value.
+     *
+     * @param descriptor
+     *            the field to describe, not {@code null}
+     * @return the field's metadata node
      */
-    static ObjectNode build(String id, HasValue<?, ?> field, FormFieldType type,
-            FormFieldHints hints) {
+    static ObjectNode build(FormFieldDescriptor descriptor) {
+        var field = descriptor.field();
+        var type = descriptor.type();
+        var hints = descriptor.hints();
         var node = JacksonUtils.createObjectNode();
-        node.put("id", id);
+        node.put("id", descriptor.id());
         var description = mergeDescription(field, hints);
         if (!description.isEmpty()) {
             node.put("description", description);
+        }
+        // A disabled or read-only field is shown for context only; the flags
+        // tell the LLM not to fill it (fill_form rejects writes to it).
+        if (descriptor.disabled()) {
+            node.put("disabled", true);
+        }
+        if (descriptor.readOnly()) {
+            node.put("readOnly", true);
         }
         applyType(node, field, type, hints);
         applyValue(node, field, type, hints);
