@@ -111,11 +111,13 @@ import tools.jackson.databind.JsonNode;
  * the user can currently edit (visible, enabled, and not already read-only) is
  * set to read-only so the user cannot type into a field the AI is about to
  * overwrite. Locks are released when the turn ends, successfully or otherwise.
- * Application code that changes a field's read-only state mid-turn (e.g. from a
- * value-change listener reacting to the LLM's writes) will be overridden when
- * the controller releases its own locks at turn end — applications should avoid
- * toggling read-only state during a fill turn, or reapply it after the turn
- * completes.
+ * Application code that turns a locked field read-only mid-turn (e.g. from a
+ * value-change listener reacting to the LLM's writes) is not honoured: the
+ * field already reports read-only because of the lock, so the controller cannot
+ * tell the application's toggle apart from its own lock. {@code fill_form}
+ * still writes the field, and the lock is released at turn end regardless.
+ * Applications should avoid toggling read-only state during a fill turn, or
+ * reapply it after the turn completes.
  * </p>
  *
  * <p>
