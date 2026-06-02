@@ -379,6 +379,51 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_rejectsWriteToNowHiddenFieldAsUnknownId() {
+        // The LLM may hold an id from an earlier get_form_state for a field
+        // that has since been hidden. A hidden field is off the surface, so
+        // the write is rejected as an unknown id (which tells the LLM to
+        // refresh via get_form_state), and the field keeps its value.
+        var field = new TestField();
+        field.setValue("orig");
+        var controller = controllerFor(field); // id stamped while visible
+        field.setVisible(false); // hidden after the LLM saw it
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Hidden field must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A hidden field is off the surface, so the write must be "
+                        + "rejected as an unknown id; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToFieldUnderNowHiddenContainerAsUnknownId() {
+        // Same as above, but the field is hidden because an ancestor container
+        // is hidden rather than the field itself. Effective visibility keeps it
+        // off the surface, so the write is rejected as an unknown id.
+        var field = new TestField();
+        field.setValue("orig");
+        var container = new Div(field);
+        var controller = controllerFor(container); // id stamped while visible
+        container.setVisible(false); // ancestor hidden afterwards
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Field under a hidden container must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A field hidden by an ancestor is off the surface, so the "
+                        + "write must be rejected as an unknown id; got: "
+                        + reason);
+    }
+
+    @Test
     void fillForm_postWriteSnapshotDoesNotFlagTurnLockedFieldAsReadOnly() {
         // The fill_form response re-snapshots the form AFTER the writes, while
         // the controller's turn lock is still on. A locked-but-writable field
