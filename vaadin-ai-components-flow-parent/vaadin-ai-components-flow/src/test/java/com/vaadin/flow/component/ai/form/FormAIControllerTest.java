@@ -21,11 +21,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -460,22 +456,24 @@ class FormAIControllerTest {
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describe(null, "x"));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(null, (f, l) -> List.of(),
-                            Function.identity()));
-            Assertions.assertThrows(NullPointerException.class, () -> controller
-                    .valueOptions(null, List.of(), Function.identity()));
-            Assertions.assertThrows(NullPointerException.class,
                     () -> controller.ignore(null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> controller.valueOptions(null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> ValueOptions.forField((HasValue<?, String>) null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> ValueOptions.forField(
+                            (com.vaadin.flow.data.selection.MultiSelect<?, String>) null));
         }
 
         @Test
         void fixedOptionsFilterRestrictsResultsByLabelSubstring() {
-            // The Collection overload of valueOptions builds a case-
-            // insensitive 'contains' filter on the supplied labels.
+            // The fixed-options variant builds a case-insensitive 'contains'
+            // filter on the supplied labels.
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(field, List.of("apple", "banana", "cherry"),
-                    Function.identity());
+            controller.valueOptions(ValueOptions.forField(field)
+                    .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
             Assertions.assertEquals("banana\n",
@@ -494,20 +492,33 @@ class FormAIControllerTest {
         void hintMethodsRejectNullPayload() {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
+            var config = ValueOptions.forField(field);
 
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describe(field, null));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(field,
-                            (BiFunction<String, Integer, List<String>>) null,
-                            Function.identity()));
-            Assertions.assertThrows(NullPointerException.class, () -> controller
-                    .valueOptions(field, (f, l) -> List.of(), null));
+                    () -> config.options(
+                            (java.util.function.BiFunction<String, Integer, List<String>>) null));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(field,
-                            (Collection<String>) null, Function.identity()));
+                    () -> config.options((java.util.Collection<String>) null));
+            // A null converter passed to the controller's two-argument
+            // overload throws NPE.
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(field, List.of(), null));
+                    () -> controller.valueOptions(ValueOptions
+                            .forField(new IntField()).options(List.of("a")),
+                            null));
+            // An empty fixed-options list leaves the field un-fillable;
+            // rejected at the options() call site.
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> config.options(List.<String> of()));
+            // A ValueOptions with no options(...) set is rejected by the
+            // controller at registration. The missing-converter case is
+            // compile-time enforced (no overload accepts a non-String
+            // ValueOptions without a Function argument), so it has no
+            // corresponding runtime test.
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> controller
+                            .valueOptions(ValueOptions.forField(field)));
         }
 
         @Test
@@ -518,8 +529,8 @@ class FormAIControllerTest {
             // the query tool unchanged.
             var field = new IntField();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(field, List.of("1", "2", "3"),
-                    Integer::parseInt);
+            controller.valueOptions(ValueOptions.forField(field)
+                    .options(List.of("1", "2", "3")), Integer::parseInt);
             controller.onRequest();
 
             Assertions.assertEquals("1\n2\n3\n",
@@ -527,19 +538,18 @@ class FormAIControllerTest {
         }
 
         @Test
-        void stringOverloadsUseLabelsAsValuesDirectly() {
-            // The two-arg valueOptions overloads omit toValue: for String
-            // fields the chosen label is the value as-is. Smoke-test both
-            // shapes (query callback and fixed collection) to pin the
-            // delegation to the three-arg methods.
+        void identityToValueLetsStringFieldsUseLabelsDirectly() {
+            // Passing Function.identity() for toValue is the canonical
+            // String-field shortcut: the chosen label is the value as-is.
+            // Smoke-test both shapes (query callback and fixed collection).
             var queriedField = new TestField();
             var fixedField = new TestField();
             var controller = new FormAIController(
                     new Div(queriedField, fixedField));
-            controller.valueOptions(queriedField,
-                    (filter, limit) -> List.of("alpha", "beta"));
-            controller.valueOptions(fixedField,
-                    List.of("apple", "banana", "cherry"));
+            controller.valueOptions(ValueOptions.forField(queriedField)
+                    .options((filter, limit) -> List.of("alpha", "beta")));
+            controller.valueOptions(ValueOptions.forField(fixedField)
+                    .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
             Assertions.assertEquals("alpha\nbeta\n",
@@ -551,16 +561,16 @@ class FormAIControllerTest {
         @Test
         void reregisteringWithBiFunctionClearsPriorFixedOptionsFlag() {
             // Each valueOptions call replaces the previous registration for
-            // the same field. The fixed-collection overload sets a flag
-            // that makes the schema render options as 'enum'; re-
-            // registering with a BiFunction must reset that flag so the
-            // schema rendering matches the new registration (queryable, not
-            // enum).
+            // the same field. The fixed-options variant sets a flag that
+            // makes the schema render options as 'enum'; re-registering with
+            // a query callback must reset that flag so the schema rendering
+            // matches the new registration (queryable, not enum).
             var combo = new SingleSelectField<String>();
             var controller = new FormAIController(new Div(combo));
-            controller.valueOptions(combo, List.of("EUR", "USD"));
-            controller.valueOptions(combo,
-                    (filter, limit) -> List.of("EUR", "USD"));
+            controller.valueOptions(ValueOptions.forField(combo)
+                    .options(List.of("EUR", "USD")));
+            controller.valueOptions(ValueOptions.forField(combo)
+                    .options((filter, limit) -> List.of("EUR", "USD")));
 
             var schema = json(findTool(controller.getTools(), "get_form_state")
                     .execute(JacksonUtils.createObjectNode()));
@@ -575,16 +585,106 @@ class FormAIControllerTest {
         }
 
         @Test
-        void valueOptionsOnMultiSelectFixedCollectionRendersAsItemsEnum() {
-            // valueOptions on a MultiSelectField registers a Set-returning
-            // toValue (the typed signature requires it because T =
-            // Set<String> for a multi-select). In get_form_state the
-            // labels surface inside items.enum (multi-select schema)
-            // rather than at the node level — pin that the same nesting
-            // path applies whether or not the field is multi-select.
+        void valueOptionsForFieldOnUpcastMultiSelectReferenceThrowsIllegalArgument() {
+            // A MultiSelect statically typed as such picks the MultiSelect-
+            // typed forField overload at compile time. This runtime check
+            // is for the upcast case: the developer holds a HasValue
+            // reference to a MultiSelect instance, so the compiler picks
+            // the single-value overload and the controller would otherwise
+            // accept a Set-returning converter. The check redirects to the
+            // typed MultiSelect overload.
+            var multiSelect = new FormTestFields.MultiSelectField<String>();
+            HasValue<?, java.util.Set<String>> upcast = multiSelect;
+            var controller = new FormAIController(new Div(multiSelect));
+            var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> controller.valueOptions(
+                            ValueOptions.forField(upcast).options(List.of("a")),
+                            label -> java.util.Set.of(label)));
+            Assertions.assertTrue(ex.getMessage().contains("MultiSelect"),
+                    "Rejection must name MultiSelect so the developer can "
+                            + "tighten the reference type; got: "
+                            + ex.getMessage());
+        }
+
+        @Test
+        void valueOptionsRejectsCollectionValuedFieldNotImplementingMultiSelect() {
+            // Collection-valued fields must implement MultiSelect; otherwise
+            // there is no defined aggregation for per-label converter results
+            // and the controller refuses to register them.
+            var field = new FormTestFields.CollectionWithoutMultiSelectField();
+            var controller = new FormAIController(new Div(field));
+            var ex = Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> controller.valueOptions(
+                            ValueOptions.forField(field).options(List.of("a")),
+                            label -> List.of(label)));
+            Assertions.assertTrue(
+                    ex.getMessage().contains("Collection")
+                            && ex.getMessage().contains("MultiSelect"),
+                    "Rejection must name both 'Collection' and "
+                            + "'MultiSelect' so the developer can resolve "
+                            + "the mismatch; got: " + ex.getMessage());
+        }
+
+        @Test
+        void valueOptionsAcceptsTypedMultiSelectFieldWithNonStringConverter() {
+            // Counterpart to the Collection-value rejection: a MultiSelect-
+            // typed field with a non-String per-element type and an explicit
+            // converter must remain accepted, even though its empty value is
+            // itself a Collection.
+            var field = new FormTestFields.MultiSelectField<Integer>();
+            var controller = new FormAIController(new Div(field));
+            Assertions.assertDoesNotThrow(() -> controller.valueOptions(
+                    ValueOptions.forField(field).options(List.of("1", "2")),
+                    Integer::parseInt));
+        }
+
+        @Test
+        void valueOptionsConfigFixedAndQueryClearEachOther() {
+            // The two options(...) overloads (fixed Collection, queryable
+            // BiFunction) clear each other so a half-finished config can't
+            // resurrect stale state. fixed-then-queryable lands as
+            // queryable; queryable-then-fixed lands as enum.
+            var queryWins = new TestField();
+            var fixedWins = new TestField();
+            var controller = new FormAIController(
+                    new Div(queryWins, fixedWins));
+            controller.valueOptions(
+                    ValueOptions.forField(queryWins).options(List.of("a", "b"))
+                            .options((filter, limit) -> List.of("x", "y")));
+            controller.valueOptions(ValueOptions.forField(fixedWins)
+                    .options((filter, limit) -> List.of("x", "y"))
+                    .options(List.of("a", "b")));
+
+            var schema = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode()));
+            var queryEntry = schema.path("fields").get(0);
+            var fixedEntry = schema.path("fields").get(1);
+
+            Assertions.assertTrue(queryEntry.path("queryable").asBoolean(),
+                    "fixed options(...) then queryable options(...) must "
+                            + "land as queryable, got: " + queryEntry);
+            Assertions.assertTrue(queryEntry.path("enum").isMissingNode(),
+                    "Stale enum must not survive queryable options(...) "
+                            + "overwriting fixed options(...), got: "
+                            + queryEntry);
+            var fixedLabels = new java.util.ArrayList<String>();
+            fixedEntry.path("enum")
+                    .forEach(node -> fixedLabels.add(node.asString()));
+            Assertions.assertEquals(List.of("a", "b"), fixedLabels,
+                    "queryable options(...) then fixed options(...) must "
+                            + "land as fixed enum, got: " + fixedEntry);
+        }
+
+        @Test
+        void multiSelectFixedOptionsRenderAsItemsEnum() {
+            // valueOptions on a MultiSelectField surfaces labels inside
+            // items.enum (multi-select schema) rather than at the node
+            // level — pin that the same nesting path applies whether or
+            // not the field is multi-select.
             var field = new FormTestFields.MultiSelectField<String>();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(field, List.of("alpha", "beta"), Set::of);
+            controller.valueOptions(ValueOptions.forField(field)
+                    .options(List.of("alpha", "beta")));
 
             var schema = json(findTool(controller.getTools(), "get_form_state")
                     .execute(JacksonUtils.createObjectNode()));
@@ -599,6 +699,7 @@ class FormAIControllerTest {
                     "Fixed-collection registration must surface as enum, "
                             + "not queryable; got items: " + items);
         }
+
     }
 
     @Nested

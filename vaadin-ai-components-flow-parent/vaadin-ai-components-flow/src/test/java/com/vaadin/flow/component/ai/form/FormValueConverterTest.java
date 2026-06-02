@@ -34,6 +34,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DateTimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -364,10 +365,10 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_multiSelectWithItemReturningToValueAddsEachItemDirectly() {
-        // toValue returns one item per label (the unsafe-cast caller
-        // pattern — Function<String, Project>). The converter adds each
-        // resolved item directly to the aggregate set.
+    void convert_multiSelectBuildsSetFromLabels() {
+        // toValue maps one label to one Project; the converter aggregates
+        // them into a LinkedHashSet that matches the field's Set<Project>
+        // value type via MultiSelect-erasure.
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
                 hintsWithToValue(label -> new Project(label, label)));
@@ -380,42 +381,21 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_multiSelectWithSetReturningToValueFlattensTheResults() {
-        // toValue returns Set<Project> per label (the typed
-        // valueOptions(HasValue<?, Set<Project>>, ..., Function<String,
-        // Set<Project>>) caller pattern). The converter flat-unions per-
-        // label sets into the aggregate so both caller patterns produce
-        // the same Set<Project> on the field.
+    void convert_multiSelectDeduplicatesRepeatedLabels() {
+        // The converter aggregates into a LinkedHashSet so duplicate labels
+        // collapse to one item — matches the MultiSelect contract.
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> Set.of(new Project(label, label))));
+                hintsWithToValue(label -> new Project(label, label)));
 
         var result = FormValueConverter.convert(field,
-                json("[\"Apollo\", \"Vega\"]"));
+                json("[\"Apollo\", \"Apollo\", \"Vega\"]"));
 
-        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
-                new Project("Vega", "Vega")), result);
-    }
-
-    @Test
-    void convert_multiSelectFlattenDedupesAcrossLabels() {
-        // Each per-label Set can contribute more than one item, and the
-        // aggregate is a Set — so a duplicate item across labels collapses.
-        // Pin the dedup so a regression that uses a List doesn't surface
-        // duplicate items to setValue.
-        var apollo = new Project("Apollo", "Apollo");
-        var vega = new Project("Vega", "Vega");
-        var field = wrap(new MultiSelectField<Project>(),
-                FormFieldType.MULTI_SELECT,
-                hintsWithToValue(
-                        label -> "team-a".equals(label) ? Set.of(apollo, vega)
-                                : Set.of(vega)));
-
-        var result = FormValueConverter.convert(field,
-                json("[\"team-a\", \"team-b\"]"));
-
-        Assertions.assertEquals(Set.of(apollo, vega), result,
-                "Duplicate items across labels must dedup; got: " + result);
+        Assertions.assertEquals(
+                Set.of(new Project("Apollo", "Apollo"),
+                        new Project("Vega", "Vega")),
+                result,
+                "Repeated labels must collapse into a single set entry");
     }
 
     @Test
@@ -444,18 +424,17 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_multiSelectEmptyArrayReturnsFieldEmptyValue() {
-        // Empty array is the LLM clearing the multi-select; convert must
-        // route through the field's own getEmptyValue() so setValue sees
-        // the expected type (Vaadin multi-selects return Set.of()), not
-        // an ad-hoc LinkedHashSet that might be unwelcome.
+    void convert_multiSelectEmptyArrayBuildsEmptySet() {
+        // Empty array is the LLM clearing the multi-select; the converter
+        // produces an empty LinkedHashSet which the field accepts as the
+        // cleared selection.
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
                 hintsWithToValue(label -> new Project("c", label)));
 
         var result = FormValueConverter.convert(field, json("[]"));
 
-        Assertions.assertEquals(field.field().getEmptyValue(), result);
+        Assertions.assertEquals(Set.of(), result);
     }
 
     @Test
@@ -481,6 +460,30 @@ class FormValueConverterTest {
                 "Rejection reason must name the first unmatched label so "
                         + "the LLM knows which entry to fix; got: "
                         + ex.getMessage());
+    }
+
+    @Test
+    void convert_multiSelectToValueThrowsRejectedWithCuratedReason() {
+        // The application's toValue can throw arbitrary text on any label
+        // inside the array. The rejection reason must not echo that text
+        // back to the LLM, but it should still name the offending label
+        // so the LLM can correlate.
+        var field = wrap(new MultiSelectField<Project>(),
+                FormFieldType.MULTI_SELECT, hintsWithToValue(label -> {
+                    throw new IllegalStateException(
+                            "internal-detail-from-toValue");
+                }));
+
+        var json = json("[\"Apollo\"]");
+        var ex = Assertions.assertThrows(RejectedValueException.class,
+                () -> FormValueConverter.convert(field, json));
+        Assertions.assertFalse(
+                ex.getMessage().contains("internal-detail-from-toValue"),
+                "Curated rejection must not echo the third-party "
+                        + "exception text; got: " + ex.getMessage());
+        Assertions.assertTrue(ex.getMessage().contains("Apollo"),
+                "Curated rejection should still name the offending label; "
+                        + "got: " + ex.getMessage());
     }
 
     @Test
@@ -557,10 +560,6 @@ class FormValueConverterTest {
         var hints = new FormFieldHints();
         hints.valueOptionsToValue = toValue;
         return hints;
-    }
-
-    /** Domain-typed item used by the SELECT tests. */
-    private record Project(String code, String name) {
     }
 
     private static JsonNode json(String text) {

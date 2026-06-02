@@ -37,18 +37,20 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * Classifies a {@link HasValue} field into the {@link FormAIController}'s
  * internal type taxonomy.
  * <p>
- * Detection is primarily contract-based: the value type is resolved by walking
- * the field's class hierarchy and reading the type argument of
+ * Detection is contract-based: the value type is resolved by walking the
+ * field's class hierarchy and reading the type argument of
  * {@code HasValue<?, V>}, and the selection variants are picked up via the
  * framework-level marker interfaces {@link MultiSelect},
  * {@link HasListDataView}, {@link HasLazyDataView}, {@link HasDataView}, and
- * {@link HasItems}. Two component-specific cases are recognised by class name
- * because their behaviour cannot be inferred from {@code HasValue}'s contract:
- * {@code PasswordField} is auto-ignored to keep secret values out of LLM tool
- * payloads, and {@code EmailField} is marked with {@code format=email} for the
- * schema. The lookups are class-hierarchy walks against fully-qualified names,
- * not {@code instanceof} on imported classes, so this module does not pull in
- * the text-field component module at compile time.
+ * {@link HasItems}. Multi-select is gated strictly by {@link MultiSelect};
+ * custom collection-typed fields that don't implement it are classified by
+ * their {@code V} type, not as multi-value. Two component-specific cases are
+ * recognised by class name because their behaviour cannot be inferred from
+ * {@code HasValue}'s contract: {@code PasswordField} is auto-ignored to keep
+ * secret values out of LLM tool payloads, and {@code EmailField} is marked with
+ * {@code format=email} for the schema. The lookups are class-hierarchy walks
+ * against fully-qualified names, not {@code instanceof} on imported classes, so
+ * this module does not pull in the text-field component module at compile time.
  * <p>
  * For any other custom {@code HasValue}, classification works without
  * registration: the value type is resolved through the hierarchy and mapped to

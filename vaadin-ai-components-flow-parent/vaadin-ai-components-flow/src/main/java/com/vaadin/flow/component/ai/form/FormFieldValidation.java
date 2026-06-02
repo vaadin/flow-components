@@ -103,9 +103,9 @@ final class FormFieldValidation {
             if (validator == null) {
                 return Optional.empty();
             }
-            var context = field instanceof Component component
-                    ? new ValueContext(component)
-                    : new ValueContext();
+            // The controller rejects non-Component fields at registration,
+            // so every field that reaches this code is a Component.
+            var context = new ValueContext((Component) field);
             var outcome = validator.apply(field.getValue(), context);
             if (outcome == null || !outcome.isError()) {
                 return Optional.empty();
