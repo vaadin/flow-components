@@ -379,6 +379,38 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_rejectsWriteToFieldDisabledByEarlierWriteInSamePayload() {
+        // A field's availability can change mid-fill: writing a controlling
+        // field earlier in the same payload can disable a field that appears
+        // later. The not-writable check must re-evaluate each field's LIVE
+        // state at write time, not a snapshot taken before any writes —
+        // otherwise the write lands on a field the user can no longer edit.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setValue("orig");
+        // Writing the trigger disables the dependent field.
+        trigger.addValueChangeListener(e -> dependent.setEnabled(false));
+        var controller = controllerFor(trigger, dependent);
+
+        // Order matters: the trigger is written first so the dependent is
+        // already disabled by the time its entry is processed.
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(trigger), "go");
+        args.put(idOf(dependent), "new");
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("orig", dependent.getValue(),
+                "A field disabled by an earlier write in the same payload "
+                        + "must not be written");
+        Assertions.assertEquals(List.of(idOf(dependent)), rejectedIds(result),
+                "The write to the now-disabled field must be rejected; got: "
+                        + result);
+        var reason = rejectionReason(result, idOf(dependent));
+        Assertions.assertTrue(reason.contains("disabled"),
+                "Reason must say the field is disabled; got: " + reason);
+    }
+
+    @Test
     void fillForm_rejectsWriteToNowHiddenFieldAsUnknownId() {
         // The LLM may hold an id from an earlier get_form_state for a field
         // that has since been hidden. A hidden field is off the surface, so

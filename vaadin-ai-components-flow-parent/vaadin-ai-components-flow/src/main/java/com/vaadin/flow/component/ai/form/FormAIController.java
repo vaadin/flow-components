@@ -636,12 +636,13 @@ public class FormAIController implements AIController {
      * Builds the {@code fill_form} rejection reason for a write the LLM aimed
      * at a field it can read but not edit.
      *
-     * @param field
-     *            the disabled or read-only field that was targeted
+     * @param disabled
+     *            {@code true} when the field is disabled, {@code false} when it
+     *            is read-only
      * @return an LLM-facing reason explaining why the write was rejected
      */
-    private static String notWritableReason(FormFieldDescriptor field) {
-        if (field.disabled()) {
+    private static String notWritableReason(boolean disabled) {
+        if (disabled) {
             return "Field is disabled and cannot be filled. Set its "
                     + "controlling field to enable it, then re-read fill_form's "
                     + "response and fill it.";
@@ -735,9 +736,18 @@ public class FormAIController implements AIController {
                                     + "unknown field id."));
                     continue;
                 }
-                if (field.disabled() || field.readOnly()) {
+                // Re-evaluate the field's live writability rather than the
+                // verdict captured before this turn's writes: an earlier
+                // write in the same payload (e.g. via a value-change listener)
+                // can disable or enable a field that appears later. Using the
+                // pre-write snapshot would let a write land on a field the
+                // user can no longer edit, or reject one that just became
+                // writable.
+                var raw = field.field();
+                var disabled = isDisabled(raw);
+                if (disabled || isApplicationReadOnly(raw)) {
                     rejected.add(new RejectedEntry(id, value,
-                            notWritableReason(field)));
+                            notWritableReason(disabled)));
                     continue;
                 }
                 applyValue(field, value, rejected);
