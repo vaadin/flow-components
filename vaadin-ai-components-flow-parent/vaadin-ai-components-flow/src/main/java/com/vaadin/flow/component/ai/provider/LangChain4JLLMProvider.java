@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,13 @@ import tools.jackson.databind.JsonNode;
  * history across components, reuse the same provider instance.
  * </p>
  * <p>
+ * <b>Custom streaming:</b> For full control over how requests are sent, use
+ * {@link #LangChain4JLLMProvider(Function)} to supply a function that receives
+ * a {@link LangChain4JLLMRequest} (with inputs already converted to LangChain4j
+ * types) and returns the response stream. The model-based constructors are
+ * implemented on top of this same function.
+ * </p>
+ * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
  * uses session persistence, you will need to create a new provider instance
  * after session restore.
@@ -103,6 +111,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
     private final transient ChatMemory chatMemory;
+    private final transient Function<LangChain4JLLMRequest, Flux<String>> streamFunction;
 
     /**
      * Constructor with a streaming chat model.
@@ -130,11 +139,42 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 null);
     }
 
+    /**
+     * Constructor with a custom streaming function. The function receives a
+     * {@link LangChain4JLLMRequest} with all inputs already converted to
+     * LangChain4j types (attachments as
+     * {@link dev.langchain4j.data.message.Content}, tools as
+     * {@link ToolSpecification} and {@link ToolExecutor}) and returns the
+     * response token stream. This gives full control over how the request is
+     * sent, for example to use a custom model, request parameters, or tool
+     * execution strategy.
+     * <p>
+     * Conversation memory must be managed by the function. History seeded with
+     * {@link #setHistory(List, Map)} is included in the request's
+     * {@link LangChain4JLLMRequest#messages()}, but responses produced by the
+     * function are not retained by the provider.
+     *
+     * @param streamFunction
+     *            the function that turns a request into a response stream, not
+     *            {@code null}
+     * @throws NullPointerException
+     *             if streamFunction is {@code null}
+     */
+    public LangChain4JLLMProvider(
+            Function<LangChain4JLLMRequest, Flux<String>> streamFunction) {
+        this.streamingChatModel = null;
+        this.nonStreamingChatModel = null;
+        this.chatMemory = MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES);
+        this.streamFunction = Objects.requireNonNull(streamFunction,
+                "Stream function must not be null");
+    }
+
     private LangChain4JLLMProvider(ChatModel chatModel,
             StreamingChatModel streamingChatModel) {
         this.streamingChatModel = streamingChatModel;
         this.nonStreamingChatModel = chatModel;
         this.chatMemory = MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES);
+        this.streamFunction = this::defaultStream;
     }
 
     @Override
@@ -142,15 +182,24 @@ public class LangChain4JLLMProvider implements LLMProvider {
         Objects.requireNonNull(request, "Request must not be null");
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
+        return streamFunction.apply(buildVendorRequest(request));
+    }
+
+    private LangChain4JLLMRequest buildVendorRequest(LLMRequest request) {
+        var userMessage = buildUserMessage(request);
+        var messages = buildMessages(request.systemPrompt());
+        messages.add(userMessage);
+        return new DefaultLangChain4JLLMRequest(request.systemPrompt(),
+                userMessage, List.copyOf(messages),
+                prepareToolSpecifications(request),
+                prepareToolExecutors(request));
+    }
+
+    private Flux<String> defaultStream(LangChain4JLLMRequest request) {
         return Flux.create(sink -> {
             try {
-                var userMessage = buildUserMessage(request);
-                chatMemory.add(userMessage);
-                var toolContext = new ToolContext(prepareToolExecutors(request),
-                        prepareToolSpecifications(request));
-                var context = new ChatExecutionContext(request, sink,
-                        chatMemory, toolContext);
-                executeChat(context);
+                chatMemory.add(request.userMessage());
+                executeChat(new ChatExecutionContext(request, sink));
             } catch (Exception e) {
                 sink.error(e);
             }
@@ -284,26 +333,37 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private void executeChat(ChatExecutionContext context) {
-        var messages = buildMessages(context.getRequest(),
-                context.getChatMemory());
+        var chatRequest = buildChatRequest(context.getRequest());
         if (streamingChatModel != null) {
             checkPushConfiguration();
-            executeStreamingChat(messages, context);
+            executeStreamingChat(chatRequest, context);
         } else {
-            executeNonStreamingChat(messages, context);
+            executeNonStreamingChat(chatRequest, context);
         }
     }
 
-    private void executeStreamingChat(
-            List<dev.langchain4j.data.message.ChatMessage> messages,
-            ChatExecutionContext context) {
-        var chatRequestBuilder = ChatRequest.builder().messages(messages);
-        var specifications = context.getToolContext().specifications();
+    private ChatRequest buildChatRequest(LangChain4JLLMRequest request) {
+        var builder = ChatRequest.builder()
+                .messages(buildMessages(request.systemPrompt()));
+        var specifications = request.toolSpecifications();
         if (!specifications.isEmpty()) {
-            chatRequestBuilder = chatRequestBuilder
-                    .toolSpecifications(specifications);
+            builder.toolSpecifications(specifications);
         }
-        var chatRequest = chatRequestBuilder.build();
+        return builder.build();
+    }
+
+    private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
+            String systemPrompt) {
+        var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
+        if (systemPrompt != null && !systemPrompt.trim().isEmpty()) {
+            messages.add(SystemMessage.from(systemPrompt.trim()));
+        }
+        messages.addAll(chatMemory.messages());
+        return messages;
+    }
+
+    private void executeStreamingChat(ChatRequest chatRequest,
+            ChatExecutionContext context) {
         streamingChatModel.chat(chatRequest,
                 new StreamingChatResponseHandler() {
                     @Override
@@ -327,23 +387,17 @@ public class LangChain4JLLMProvider implements LLMProvider {
             ChatExecutionContext context) {
         var toolExecutionRequests = aiMessage.toolExecutionRequests();
         for (var toolExecRequest : toolExecutionRequests) {
-            var toolExecutor = context.getToolContext().executors()
+            var toolExecutor = context.getRequest().toolExecutors()
                     .get(toolExecRequest.name());
             var result = executeToolRequest(toolExecutor, toolExecRequest);
-            context.getChatMemory().add(result);
+            chatMemory.add(result);
         }
     }
 
-    private void executeNonStreamingChat(
-            List<dev.langchain4j.data.message.ChatMessage> messages,
+    private void executeNonStreamingChat(ChatRequest chatRequest,
             ChatExecutionContext context) {
         try {
-            var requestBuilder = ChatRequest.builder().messages(messages);
-            var specifications = context.getToolContext().specifications();
-            if (!specifications.isEmpty()) {
-                requestBuilder.toolSpecifications(specifications);
-            }
-            var response = nonStreamingChatModel.chat(requestBuilder.build());
+            var response = nonStreamingChatModel.chat(chatRequest);
             handleResponse(context, response);
         } catch (Exception e) {
             context.getSink().error(e);
@@ -357,7 +411,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             context.getSink().complete();
             return;
         }
-        context.getChatMemory().add(aiMessage);
+        chatMemory.add(aiMessage);
         if (!isStreaming()) {
             var text = aiMessage.text();
             if (text != null && !text.isEmpty()) {
@@ -385,19 +439,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
         }
         return ToolExecutionResultMessage.from(toolExecRequest, result);
-    }
-
-    private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
-            LLMRequest request, ChatMemory chatMemory) {
-        var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
-        if (request.systemPrompt() != null) {
-            var systemPrompt = request.systemPrompt().trim();
-            if (!systemPrompt.isEmpty()) {
-                messages.add(SystemMessage.from(systemPrompt));
-            }
-        }
-        messages.addAll(chatMemory.messages());
-        return messages;
     }
 
     private UserMessage buildUserMessage(LLMRequest request) {
@@ -474,43 +515,36 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Encapsulates tool-related data for chat execution.
+     * Default {@link LangChain4JLLMRequest} implementation.
      */
-    private record ToolContext(Map<String, ToolExecutor> executors,
-            List<ToolSpecification> specifications) {
+    private record DefaultLangChain4JLLMRequest(String systemPrompt,
+            UserMessage userMessage,
+            List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<ToolSpecification> toolSpecifications,
+            Map<String, ToolExecutor> toolExecutors)
+            implements
+                LangChain4JLLMRequest {
     }
 
     /**
      * Encapsulates execution state for a chat stream.
      */
     private static class ChatExecutionContext {
-        private final LLMRequest request;
+        private final LangChain4JLLMRequest request;
         private final FluxSink<String> sink;
-        private final ChatMemory chatMemory;
-        private final ToolContext toolContext;
 
-        ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
-                ChatMemory chatMemory, ToolContext toolContext) {
+        ChatExecutionContext(LangChain4JLLMRequest request,
+                FluxSink<String> sink) {
             this.request = request;
             this.sink = sink;
-            this.chatMemory = chatMemory;
-            this.toolContext = toolContext;
         }
 
-        LLMRequest getRequest() {
+        LangChain4JLLMRequest getRequest() {
             return request;
         }
 
         FluxSink<String> getSink() {
             return sink;
-        }
-
-        ChatMemory getChatMemory() {
-            return chatMemory;
-        }
-
-        ToolContext getToolContext() {
-            return toolContext;
         }
     }
 }

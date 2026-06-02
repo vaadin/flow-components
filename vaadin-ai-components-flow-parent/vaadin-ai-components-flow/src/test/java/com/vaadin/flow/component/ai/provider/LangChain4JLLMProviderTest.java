@@ -53,6 +53,7 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
 class LangChain4JLLMProviderTest {
@@ -981,6 +982,80 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(names.contains("explicitTool"));
         Assertions.assertTrue(names.contains("getTemperature"));
         Assertions.assertTrue(names.contains("getHumidity"));
+    }
+
+    // --- Custom streaming function tests ---
+
+    @Test
+    void constructor_withNullStreamFunction_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new LangChain4JLLMProvider(
+                        (java.util.function.Function<LangChain4JLLMRequest, Flux<String>>) null));
+    }
+
+    @Test
+    void streamFunction_receivesConvertedRequest_andReturnsStream() {
+        var captured = new java.util.concurrent.atomic.AtomicReference<LangChain4JLLMRequest>();
+        var customProvider = new LangChain4JLLMProvider(req -> {
+            captured.set(req);
+            return Flux.just("custom ", "response");
+        });
+
+        var attachment = new AIAttachment("test.png", "image/png",
+                "fake-image-data".getBytes());
+        var toolObject = new SampleToolsClass();
+        var request = new TestLLMRequest("Describe this image",
+                "You are helpful", List.of(attachment),
+                new Object[] { toolObject });
+
+        var results = customProvider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("custom ", "response"), results);
+        var vendorRequest = captured.get();
+        Assertions.assertNotNull(vendorRequest);
+        // Attachments are exposed as LangChain4j Content
+        Assertions.assertTrue(vendorRequest.userMessage().contents().stream()
+                .anyMatch(ImageContent.class::isInstance));
+        // messages() includes the system prompt and the user message
+        var messages = vendorRequest.messages();
+        Assertions.assertTrue(
+                messages.stream().anyMatch(SystemMessage.class::isInstance));
+        Assertions.assertTrue(
+                messages.stream().anyMatch(UserMessage.class::isInstance));
+        // Tools are converted to specifications and executors
+        var specNames = vendorRequest.toolSpecifications().stream()
+                .map(dev.langchain4j.agent.tool.ToolSpecification::name)
+                .toList();
+        Assertions.assertTrue(specNames.contains("getTemperature"));
+        Assertions.assertTrue(specNames.contains("getHumidity"));
+        Assertions.assertEquals(specNames.size(),
+                vendorRequest.toolExecutors().size());
+    }
+
+    @Test
+    void streamFunction_setHistory_populatesMemorySeenByFunction() {
+        var captured = new java.util.concurrent.atomic.AtomicReference<LangChain4JLLMRequest>();
+        var customProvider = new LangChain4JLLMProvider(req -> {
+            captured.set(req);
+            return Flux.empty();
+        });
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Previous question",
+                        null, null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Previous answer",
+                        null, null));
+        customProvider.setHistory(history, Collections.emptyMap());
+
+        customProvider.stream(createSimpleRequest("Follow-up")).collectList()
+                .block();
+
+        var messages = captured.get().messages();
+        Assertions.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof UserMessage um
+                        && um.singleText().equals("Previous question")));
+        Assertions.assertTrue(
+                messages.stream().anyMatch(msg -> msg instanceof AiMessage ai
+                        && ai.text().equals("Previous answer")));
     }
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,

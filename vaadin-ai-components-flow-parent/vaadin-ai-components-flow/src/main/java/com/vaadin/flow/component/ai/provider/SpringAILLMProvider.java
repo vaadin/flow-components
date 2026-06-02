@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,13 @@ import tools.jackson.databind.JsonNode;
  * to the internal chat memory.
  * </p>
  * <p>
+ * <b>Custom streaming:</b> For full control over how requests are sent, use
+ * {@link #SpringAILLMProvider(Function)} to supply a function that receives a
+ * {@link SpringAILLMRequest} (with inputs already converted to Spring AI types)
+ * and returns the response stream. The model- and client-based constructors are
+ * implemented on top of this same function.
+ * </p>
+ * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
  * uses session persistence, you will need to create a new provider instance
  * after session restore.
@@ -90,6 +98,7 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private final transient ChatClient chatClient;
     private final transient MessageWindowChatMemory chatMemory;
+    private final transient Function<SpringAILLMRequest, Flux<String>> streamFunction;
     private final boolean hasManagedMemory;
     private boolean isStreaming = true;
 
@@ -110,6 +119,7 @@ public class SpringAILLMProvider implements LLMProvider {
                         MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
         hasManagedMemory = true;
+        streamFunction = this::defaultStream;
     }
 
     /**
@@ -127,6 +137,39 @@ public class SpringAILLMProvider implements LLMProvider {
         this.chatClient = chatClient;
         chatMemory = null;
         hasManagedMemory = false;
+        streamFunction = this::defaultStream;
+    }
+
+    /**
+     * Constructor with a custom streaming function. The function receives a
+     * {@link SpringAILLMRequest} with all inputs already converted to Spring AI
+     * types (attachments as {@link Media}, framework-agnostic tools as
+     * {@link ToolCallback}) and returns the response token stream. This gives
+     * full control over how the request is sent, for example to use a custom
+     * {@link ChatClient}, request options, or model.
+     * <p>
+     * Conversation memory must be managed by the function, so
+     * {@link #setHistory(List, Map)} is not supported with this constructor.
+     * <p>
+     * Because Spring AI's {@link ChatModel} is itself a functional interface, a
+     * bare lambda is ambiguous between this constructor and
+     * {@link #SpringAILLMProvider(ChatModel)}. Pass a method reference or an
+     * explicitly typed lambda ({@code (SpringAILLMRequest request) -> ...}) to
+     * select this constructor.
+     *
+     * @param streamFunction
+     *            the function that turns a request into a response stream, not
+     *            {@code null}
+     * @throws NullPointerException
+     *             if streamFunction is {@code null}
+     */
+    public SpringAILLMProvider(
+            Function<SpringAILLMRequest, Flux<String>> streamFunction) {
+        this.streamFunction = Objects.requireNonNull(streamFunction,
+                "Stream function must not be null");
+        chatClient = null;
+        chatMemory = null;
+        hasManagedMemory = false;
     }
 
     @Override
@@ -134,6 +177,16 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(request, "Request must not be null");
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
+        return streamFunction.apply(buildVendorRequest(request));
+    }
+
+    private SpringAILLMRequest buildVendorRequest(LLMRequest request) {
+        return new DefaultSpringAILLMRequest(request.userMessage(),
+                request.systemPrompt(), buildMedia(request), request.tools(),
+                buildToolCallbacks(request));
+    }
+
+    private Flux<String> defaultStream(SpringAILLMRequest request) {
         if (isStreaming) {
             checkPushConfiguration();
             return executeStreamingChat(request);
@@ -189,7 +242,7 @@ public class SpringAILLMProvider implements LLMProvider {
                 .build();
     }
 
-    private Flux<String> executeStreamingChat(LLMRequest request) {
+    private Flux<String> executeStreamingChat(SpringAILLMRequest request) {
         try {
             var chatResponses = getPromptSpec(request).stream().chatResponse();
             return warnOnMissingFinishReason(chatResponses)
@@ -258,7 +311,8 @@ public class SpringAILLMProvider implements LLMProvider {
         return text != null ? text : "";
     }
 
-    private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
+    private ChatClient.ChatClientRequestSpec getPromptSpec(
+            SpringAILLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
             promptSpec = promptSpec.advisors(
@@ -266,9 +320,9 @@ public class SpringAILLMProvider implements LLMProvider {
         }
         promptSpec = promptSpec.user(userSpec -> {
             userSpec.text(request.userMessage());
-            var media = buildMedia(request);
-            if (media.length != 0) {
-                userSpec.media(media);
+            var media = request.media();
+            if (!media.isEmpty()) {
+                userSpec.media(media.toArray(Media[]::new));
             }
         });
         if (request.systemPrompt() != null
@@ -279,17 +333,15 @@ public class SpringAILLMProvider implements LLMProvider {
         if (tools != null && tools.length > 0) {
             promptSpec = promptSpec.tools(tools);
         }
-        var explicitTools = request.explicitTools();
-        if (explicitTools != null && !explicitTools.isEmpty()) {
-            var callbacks = explicitTools.stream()
-                    .map(SpringAILLMProvider::toToolCallback)
-                    .toArray(ToolCallback[]::new);
-            promptSpec = promptSpec.toolCallbacks(callbacks);
+        var toolCallbacks = request.toolCallbacks();
+        if (!toolCallbacks.isEmpty()) {
+            promptSpec = promptSpec
+                    .toolCallbacks(toolCallbacks.toArray(ToolCallback[]::new));
         }
         return promptSpec;
     }
 
-    private Flux<String> executeNonStreamingChat(LLMRequest request) {
+    private Flux<String> executeNonStreamingChat(SpringAILLMRequest request) {
         return Flux.create(sink -> {
             try {
                 var promptSpec = getPromptSpec(request);
@@ -304,14 +356,22 @@ public class SpringAILLMProvider implements LLMProvider {
         });
     }
 
-    private Media[] buildMedia(LLMRequest request) {
+    private List<Media> buildMedia(LLMRequest request) {
         var attachments = request.attachments();
         if (attachments == null) {
-            return new Media[0];
+            return List.of();
         }
         return attachments.stream().map(SpringAILLMProvider::getAttachmentMedia)
-                .filter(Optional::isPresent).map(Optional::get)
-                .toArray(Media[]::new);
+                .flatMap(Optional::stream).toList();
+    }
+
+    private static List<ToolCallback> buildToolCallbacks(LLMRequest request) {
+        var explicitTools = request.explicitTools();
+        if (explicitTools == null || explicitTools.isEmpty()) {
+            return List.of();
+        }
+        return explicitTools.stream().map(SpringAILLMProvider::toToolCallback)
+                .toList();
     }
 
     private static Optional<Media> getAttachmentMedia(AIAttachment attachment) {
@@ -378,5 +438,13 @@ public class SpringAILLMProvider implements LLMProvider {
                     + "require @Push annotation or programmatic push "
                     + "configuration to update the UI in real-time.");
         }
+    }
+
+    /**
+     * Default {@link SpringAILLMRequest} implementation.
+     */
+    private record DefaultSpringAILLMRequest(String userMessage,
+            String systemPrompt, List<Media> media, Object[] tools,
+            List<ToolCallback> toolCallbacks) implements SpringAILLMRequest {
     }
 }

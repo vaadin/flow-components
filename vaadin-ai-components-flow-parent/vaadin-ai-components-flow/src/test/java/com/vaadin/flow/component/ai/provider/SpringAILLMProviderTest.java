@@ -1240,6 +1240,58 @@ class SpringAILLMProviderTest {
         Assertions.assertNotNull(toolDef.inputSchema());
     }
 
+    // --- Custom streaming function tests ---
+
+    @Test
+    void constructor_withNullStreamFunction_throwsNullPointerException() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new SpringAILLMProvider(
+                        (java.util.function.Function<SpringAILLMRequest, Flux<String>>) null));
+    }
+
+    @Test
+    void streamFunction_receivesConvertedRequest_andReturnsStream() {
+        var captured = new java.util.concurrent.atomic.AtomicReference<SpringAILLMRequest>();
+        var customProvider = new SpringAILLMProvider(
+                (SpringAILLMRequest req) -> {
+                    captured.set(req);
+                    return Flux.just("custom ", "response");
+                });
+
+        var attachment = new AIAttachment("photo.png", "image/png",
+                "fake-image".getBytes());
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "ok");
+        var request = new TestLLMRequestWithExplicitTools("Describe",
+                "Be brief", List.of(attachment), new Object[0],
+                List.of(explicitTool));
+
+        var results = customProvider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("custom ", "response"), results);
+        var vendorRequest = captured.get();
+        Assertions.assertNotNull(vendorRequest);
+        Assertions.assertEquals("Describe", vendorRequest.userMessage());
+        Assertions.assertEquals("Be brief", vendorRequest.systemPrompt());
+        // Attachments are exposed as Spring AI Media
+        Assertions.assertEquals(1, vendorRequest.media().size());
+        // Explicit tools are exposed as ToolCallback instances
+        Assertions.assertEquals(1, vendorRequest.toolCallbacks().size());
+        Assertions.assertEquals("myTool", vendorRequest.toolCallbacks()
+                .getFirst().getToolDefinition().name());
+    }
+
+    @Test
+    void streamFunction_setHistory_throwsUnsupportedOperationException() {
+        var customProvider = new SpringAILLMProvider(
+                (SpringAILLMRequest req) -> Flux.empty());
+        var history = List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null));
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> customProvider.setHistory(history,
+                        Collections.emptyMap()));
+    }
+
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<JsonNode, String> executor) {
