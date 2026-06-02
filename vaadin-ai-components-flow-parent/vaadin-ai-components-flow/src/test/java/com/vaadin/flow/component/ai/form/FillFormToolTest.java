@@ -826,6 +826,28 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_blankValidatorMessageReplacedWithGenericReason() {
+        // A validator that fails with a blank (whitespace-only) message must
+        // not surface that blank text as the rejection reason — an empty
+        // reason gives the LLM nothing to act on. The reason must fall back to
+        // the generic message instead. Pins the blank-handling in
+        // FormFieldValidation.message(); a non-blank message passes through
+        // unchanged (covered by fillForm_hasValidatorRejection...).
+        var field = new ValidatedField();
+        field.setDefaultValidator(
+                (value, ctx) -> ValidationResult.error("   "));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals("Field rejected the value.",
+                rejectionReason(result, idOf(field)),
+                "A blank validator message must be replaced with the generic "
+                        + "reason so the LLM gets actionable text, got: "
+                        + result);
+    }
+
+    @Test
     void fillForm_hasValidatorReceivesComponentInValueContext() {
         // Pins that FormFieldValidation builds the ValueContext with the
         // field as the Component so locale-aware validators (and anything

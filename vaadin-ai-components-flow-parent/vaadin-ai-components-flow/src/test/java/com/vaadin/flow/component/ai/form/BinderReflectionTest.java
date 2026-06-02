@@ -57,6 +57,24 @@ class BinderReflectionTest {
     }
 
     @Test
+    void beanValidationErrorsOnNullBinderReturnsEmptyWithoutWarning() {
+        // FormAIController's single-arg constructor passes a null binder
+        // through to beanValidationErrors on every fill_form call; an
+        // exception-handled fallback would log a warning on every request.
+        var result = BinderReflection.beanValidationErrors(null);
+
+        Assertions.assertTrue(result.isEmpty(),
+                "Null binder must produce an empty list, got: " + result);
+        var warnings = TestLoggerFactory.getTestLogger(BinderReflection.class)
+                .getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.WARN).toList();
+        Assertions.assertTrue(warnings.isEmpty(),
+                "Null binder is a normal no-binder construction, not a "
+                        + "reflection failure, and must not WARN, got: "
+                        + warnings);
+    }
+
+    @Test
     void findBindingOnNullBinderReturnsNullWithoutWarning() {
         var result = BinderReflection.findBinding(null, new TestField());
 
