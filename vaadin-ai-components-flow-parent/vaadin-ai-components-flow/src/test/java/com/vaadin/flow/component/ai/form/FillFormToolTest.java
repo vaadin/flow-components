@@ -338,6 +338,148 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_rejectsWriteToDisabledFieldWithoutChangingIt() {
+        // A disabled field is shown to the LLM as context (with a "disabled"
+        // flag) but is not writable. A write to it must be rejected with a
+        // reason that points at enabling it, and the field must keep its value.
+        var disabled = new TestField();
+        disabled.setValue("orig");
+        disabled.setEnabled(false);
+        var controller = controllerFor(new TestField(), disabled);
+
+        var result = fillFormResult(controller, payload(disabled, "\"new\""));
+
+        Assertions.assertEquals("orig", disabled.getValue(),
+                "Disabled field must keep its value");
+        Assertions.assertEquals(List.of(idOf(disabled)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(disabled));
+        Assertions.assertTrue(reason.contains("disabled"),
+                "Reason must say the field is disabled; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToReadOnlyFieldWithoutChangingIt() {
+        // An application-read-only field is context only. A write to it must be
+        // rejected without changing it. The controller's own turn lock does not
+        // count as read-only here — that path is exercised by every happy-path
+        // fill test, which writes through the lock after onRequest().
+        var readOnly = new TestField();
+        readOnly.setValue("orig");
+        readOnly.setReadOnly(true);
+        var controller = controllerFor(new TestField(), readOnly);
+
+        var result = fillFormResult(controller, payload(readOnly, "\"new\""));
+
+        Assertions.assertEquals("orig", readOnly.getValue(),
+                "Read-only field must keep its value");
+        Assertions.assertEquals(List.of(idOf(readOnly)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(readOnly));
+        Assertions.assertTrue(reason.contains("read-only"),
+                "Reason must say the field is read-only; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToFieldDisabledByEarlierWriteInSamePayload() {
+        // A field's availability can change mid-fill: writing a controlling
+        // field earlier in the same payload can disable a field that appears
+        // later. The not-writable check must re-evaluate each field's LIVE
+        // state at write time, not a snapshot taken before any writes —
+        // otherwise the write lands on a field the user can no longer edit.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setValue("orig");
+        // Writing the trigger disables the dependent field.
+        trigger.addValueChangeListener(e -> dependent.setEnabled(false));
+        var controller = controllerFor(trigger, dependent);
+
+        // Order matters: the trigger is written first so the dependent is
+        // already disabled by the time its entry is processed.
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(trigger), "go");
+        args.put(idOf(dependent), "new");
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("orig", dependent.getValue(),
+                "A field disabled by an earlier write in the same payload "
+                        + "must not be written");
+        Assertions.assertEquals(List.of(idOf(dependent)), rejectedIds(result),
+                "The write to the now-disabled field must be rejected; got: "
+                        + result);
+        var reason = rejectionReason(result, idOf(dependent));
+        Assertions.assertTrue(reason.contains("disabled"),
+                "Reason must say the field is disabled; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToNowHiddenFieldAsUnknownId() {
+        // The LLM may hold an id from an earlier get_form_state for a field
+        // that has since been hidden. A hidden field is off the surface, so
+        // the write is rejected as an unknown id (which tells the LLM to
+        // refresh via get_form_state), and the field keeps its value.
+        var field = new TestField();
+        field.setValue("orig");
+        var controller = controllerFor(field); // id stamped while visible
+        field.setVisible(false); // hidden after the LLM saw it
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Hidden field must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A hidden field is off the surface, so the write must be "
+                        + "rejected as an unknown id; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToFieldUnderNowHiddenContainerAsUnknownId() {
+        // Same as above, but the field is hidden because an ancestor container
+        // is hidden rather than the field itself. Effective visibility keeps it
+        // off the surface, so the write is rejected as an unknown id.
+        var field = new TestField();
+        field.setValue("orig");
+        var container = new Div(field);
+        var controller = controllerFor(container); // id stamped while visible
+        container.setVisible(false); // ancestor hidden afterwards
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Field under a hidden container must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A field hidden by an ancestor is off the surface, so the "
+                        + "write must be rejected as an unknown id; got: "
+                        + reason);
+    }
+
+    @Test
+    void fillForm_postWriteSnapshotDoesNotFlagTurnLockedFieldAsReadOnly() {
+        // The fill_form response re-snapshots the form AFTER the writes, while
+        // the controller's turn lock is still on. A locked-but-writable field
+        // must appear in that snapshot WITHOUT a readOnly flag — the lock is
+        // the controller's, not the application's — and must carry the value
+        // just written. Guards the formatResult() path the way
+        // get_form_state's own carve-out test guards the read path.
+        var field = new TestField();
+        var controller = controllerFor(field); // onRequest() locks the field
+
+        var result = fillFormResult(controller, payload(field, "\"filled\""));
+
+        var entry = fieldEntry(result, idOf(field));
+        Assertions.assertNotNull(entry,
+                "Locked field must appear in the post-write fields block; got: "
+                        + result);
+        Assertions.assertFalse(entry.has("readOnly"),
+                "Turn-locked field must not be flagged readOnly in the "
+                        + "fill_form post-write snapshot; got: " + entry);
+        Assertions.assertEquals("filled", field.getValue(),
+                "Write to a turn-locked (but app-writable) field must land");
+    }
+
+    @Test
     void fillForm_partialSuccessLeavesBadFieldOnPriorValue() {
         // Mixed payload: name converts cleanly, amount fails. The valid
         // field must land; the failed field must stay on its prior value.
