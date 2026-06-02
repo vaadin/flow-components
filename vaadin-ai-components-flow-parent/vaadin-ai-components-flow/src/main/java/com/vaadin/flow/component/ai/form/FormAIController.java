@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -118,6 +119,14 @@ import tools.jackson.databind.JsonNode;
  * still writes the field, and the lock is released at turn end regardless.
  * Applications should avoid toggling read-only state during a fill turn, or
  * reapply it after the turn completes.
+ * </p>
+ *
+ * <p>
+ * <b>Change tracking and highlight:</b> a handler registered through
+ * {@link #withFieldValuesChanged(Consumer)} fires once per successful turn with
+ * the fields whose value changed during the turn — the common driver for
+ * {@link #showHighlight(HasValue)} / {@link #hideHighlight} to flash the AI's
+ * edits in the UI.
  * </p>
  *
  * <p>
@@ -213,6 +222,9 @@ public class FormAIController implements AIController {
     private final Binder<?> binder;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
+    private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
+    private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
+    private Consumer<Map<HasValue<?, ?>, FieldValueChange>> fieldValuesChangedHandler;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -405,6 +417,100 @@ public class FormAIController implements AIController {
         return this;
     }
 
+    /**
+     * Registers a handler that is invoked once per successful turn with the
+     * fields whose value differs from what was read at the start of the turn.
+     * Comparison is by {@link Objects#equals(Object, Object)} so multi-select
+     * sets, dates, and other value-objects work naturally.
+     * <p>
+     * Only fields visible to the LLM (non-ignored discovered fields) are
+     * tracked, and only changed fields appear in the map. The handler is not
+     * called when the turn ended in error or when no field changed. The map
+     * iterates in document order; modifying it has no effect on the controller.
+     * <p>
+     * The handler runs on the UI thread with the session lock held, so it can
+     * update components and call {@link #showHighlight} /
+     * {@link #hideHighlight} directly without {@code ui.access(...)}. A typical
+     * use is to flash the AI's edits by calling {@code showHighlight} on every
+     * changed field.
+     *
+     * @param handler
+     *            handler invoked with the per-field {@link FieldValueChange}
+     *            entries, or {@code null} to remove a previously registered
+     *            handler
+     * @return this controller, for chaining
+     */
+    public FormAIController withFieldValuesChanged(
+            Consumer<Map<HasValue<?, ?>, FieldValueChange>> handler) {
+        this.fieldValuesChangedHandler = handler;
+        return this;
+    }
+
+    /**
+     * Paints a highlight on the field via the {@code vaadin-field-highlighter}
+     * web component. Repeated calls keep exactly one highlight on the field.
+     * Call {@link #hideHighlight} to clear it. The field can be any
+     * {@link HasValue} {@link Component}, in or out of this controller's form,
+     * and each field's highlight state is independent of the others.
+     * <p>
+     * The AI user added to the field carries a UUID id unique to this
+     * controller, so the highlight coexists with any other
+     * {@code vaadin-field-highlighter} users the application keeps on the field
+     * (e.g. from a collaboration session) as long as those consumers also use
+     * {@code addUser} / {@code removeUser} rather than {@code setUsers}.
+     * <p>
+     * The highlight is not retained across detach/re-attach: a detached field's
+     * client-side state is discarded, and re-attaching produces a fresh element
+     * with no highlight. Call {@code showHighlight} again if the field leaves
+     * and returns to the DOM.
+     *
+     * @param field
+     *            the field to highlight, not {@code null}; must be a
+     *            {@link Component}
+     * @return this controller, for chaining
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code field} is not a {@link Component}
+     */
+    public FormAIController showHighlight(HasValue<?, ?> field) {
+        FormFieldHighlighter.show(requireFieldComponent(field).getElement(),
+                aiUserId);
+        return this;
+    }
+
+    /**
+     * Clears any highlight previously applied to the field via
+     * {@link #showHighlight}. A no-op when no highlight is currently shown.
+     * Only this controller's AI user is removed; other users on the field stay
+     * highlighted. The field can be any {@link HasValue} {@link Component}, in
+     * or out of this controller's form, and clearing one field's highlight has
+     * no effect on others.
+     *
+     * @param field
+     *            the field to clear the highlight from, not {@code null}; must
+     *            be a {@link Component}
+     * @return this controller, for chaining
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code field} is not a {@link Component}
+     */
+    public FormAIController hideHighlight(HasValue<?, ?> field) {
+        FormFieldHighlighter.hide(requireFieldComponent(field).getElement(),
+                aiUserId);
+        return this;
+    }
+
+    private static Component requireFieldComponent(HasValue<?, ?> field) {
+        Objects.requireNonNull(field, "Field must not be null");
+        if (!(field instanceof Component component)) {
+            throw new IllegalArgumentException(
+                    "Field must be a Component: " + field.getClass().getName());
+        }
+        return component;
+    }
+
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LLMProvider.ToolSpec>();
@@ -457,14 +563,68 @@ public class FormAIController implements AIController {
         attachIds();
         seedDescriptionsFromBinder();
         lockFields();
+        snapshotPreTurnValues();
     }
 
     @Override
     public void onResponse(Throwable error) {
-        // Unlock regardless of success or failure: locks set in onRequest
-        // must be released so the user can edit again. The failure path
-        // doesn't have any committed state to discard.
-        unlockFields();
+        try {
+            fireFieldValuesChanged(error);
+        } finally {
+            // Unlock regardless of success or failure: locks set in onRequest
+            // must be released so the user can edit again. The failure path
+            // doesn't have any committed state to discard.
+            unlockFields();
+        }
+    }
+
+    /**
+     * Captures the current value of every active field before the LLM runs. The
+     * snapshot is consulted in {@link #onResponse} to compute the before /
+     * after diff for {@link #withFieldValuesChanged}. Skipped when no handler
+     * is registered to avoid copying values that no one will read.
+     */
+    private void snapshotPreTurnValues() {
+        preTurnValues.clear();
+        if (fieldValuesChangedHandler == null) {
+            return;
+        }
+        for (var field : collectActiveFields()) {
+            preTurnValues.put(field, field.getValue());
+        }
+    }
+
+    /**
+     * Builds the change map from the pre-turn snapshot and the current field
+     * values, then invokes the registered handler if anything changed. On error
+     * the snapshot is discarded and the handler does not fire — the application
+     * learns about errors through the orchestrator's response listener instead.
+     * A throwing handler is logged and otherwise ignored so the rest of the
+     * response lifecycle (notably {@link #unlockFields}) still runs.
+     */
+    private void fireFieldValuesChanged(Throwable error) {
+        if (preTurnValues.isEmpty() || error != null) {
+            preTurnValues.clear();
+            return;
+        }
+        var changes = new LinkedHashMap<HasValue<?, ?>, FieldValueChange>();
+        for (var entry : preTurnValues.entrySet()) {
+            var field = entry.getKey();
+            var oldValue = entry.getValue();
+            var newValue = field.getValue();
+            if (!Objects.equals(oldValue, newValue)) {
+                changes.put(field, new FieldValueChange(oldValue, newValue));
+            }
+        }
+        preTurnValues.clear();
+        if (changes.isEmpty()) {
+            return;
+        }
+        try {
+            fieldValuesChangedHandler.accept(changes);
+        } catch (Exception ex) {
+            LOGGER.warn("Field-values-changed handler threw an exception", ex);
+        }
     }
 
     /**
