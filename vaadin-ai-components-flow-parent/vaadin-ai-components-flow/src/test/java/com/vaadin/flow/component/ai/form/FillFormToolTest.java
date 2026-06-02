@@ -789,14 +789,11 @@ class FillFormToolTest {
     }
 
     @Test
-    void firstError_bindingValidateThrows_returnsEmptyNotNull() {
-        // FormFieldValidation.errorFromBinding's catch must return
-        // Optional.empty(), not null; the caller chains .ifPresent(...) on
-        // the result and null breaks the chain. The fill_form pipeline
-        // intercepts validator throws at setValue (the binder triggers
-        // validation through the value-change listener), so the catch is
-        // only reachable when firstError is called directly with a binding
-        // whose validate(false) still throws — pin the contract here.
+    void validate_bindingValidatorThrows_returnsEmptyNotNull() {
+        // A validator that throws (rather than returning an error result) must
+        // not crash the single post-write validation pass: validate must catch
+        // the throw and return an empty, non-null result so doFill can still
+        // format a response for the rest of the turn.
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
         binder.forField(field)
@@ -806,13 +803,14 @@ class FillFormToolTest {
                             throw new RuntimeException("validator-boom");
                         })
                 .bind("name");
-        var binding = BinderReflection.findBinding(binder, field);
 
-        var result = FormFieldValidation.firstError(field, binding);
+        var result = FormFieldValidation.validate(binder);
 
-        Assertions.assertEquals(java.util.Optional.empty(), result,
-                "errorFromBinding catch must return Optional.empty(), not "
-                        + "null; null breaks the caller's .ifPresent() chain");
+        Assertions.assertTrue(
+                result.fieldErrors().isEmpty() && result.beanErrors().isEmpty(),
+                "validate must swallow a throwing validator and return empty "
+                        + "field and bean errors, not propagate or return "
+                        + "null");
     }
 
     @Test

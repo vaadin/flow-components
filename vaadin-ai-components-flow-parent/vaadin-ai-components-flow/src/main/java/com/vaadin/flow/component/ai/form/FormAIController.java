@@ -641,6 +641,12 @@ public class FormAIController implements AIController {
                 byId.put(descriptor.id(), descriptor);
             }
             var rejected = new ArrayList<RejectedEntry>();
+            // Phase 1: write the LLM's values. Convert and setValue only,
+            // collecting write-level rejections (bad conversion, field-refused
+            // value). Validation is deferred to the single pass below so every
+            // field is judged against the fully-written form rather than a
+            // partial snapshot whose verdict would depend on argument order.
+            var writtenValues = new LinkedHashMap<String, JsonNode>();
             for (var id : arguments.propertyNames()) {
                 var value = arguments.get(id);
                 var field = byId.get(id);
@@ -653,15 +659,31 @@ public class FormAIController implements AIController {
                                     + "unknown field id."));
                     continue;
                 }
-                applyValue(field, value, rejected);
+                if (applyValue(field, value, rejected)) {
+                    writtenValues.put(id, value);
+                }
             }
-            // After the per-field writes, run the binder's bean-level
-            // validators (the binder.withValidator((bean, ctx) -> ...) family)
-            // and surface each failure as a synthetic rejection keyed on the
-            // FORM_LEVEL_REJECTION_ID sentinel, since a cross-field rule is not
-            // tied to a single field id. Per-binding validators already ran in
-            // applyValue.
-            for (var message : FormFieldValidation.beanLevelErrors(binder)) {
+            // Phase 2: one validation pass over the post-write state.
+            // binder.validate() covers every binding plus the bean-level
+            // cross-field rules in a single, order-independent round. Only
+            // fields this turn actually wrote get a per-field verdict; an
+            // untouched field that happens to be invalid is not this turn's
+            // rejection. Cross-field failures are surfaced under the
+            // FORM_LEVEL_REJECTION_ID sentinel since they are not tied to a
+            // single field id.
+            var errors = FormFieldValidation.validate(binder);
+            for (var entry : writtenValues.entrySet()) {
+                var raw = byId.get(entry.getKey()).field();
+                var binding = BinderReflection.findBinding(binder, raw);
+                var reason = binding != null ? errors.fieldErrors().get(raw)
+                        : FormFieldValidation.unboundFieldError(raw)
+                                .orElse(null);
+                if (reason != null) {
+                    rejected.add(new RejectedEntry(entry.getKey(),
+                            entry.getValue(), reason));
+                }
+            }
+            for (var message : errors.beanErrors()) {
                 rejected.add(new RejectedEntry(
                         FormFieldValidation.FORM_LEVEL_REJECTION_ID, null,
                         message));
@@ -673,8 +695,18 @@ public class FormAIController implements AIController {
             return formatResult(visibleFields(), rejected);
         }
 
+        /**
+         * Converts {@code value} and writes it to {@code field}. Validation is
+         * not run here — it happens in a single pass after every value is
+         * written (see {@code doFill}). Only write failures (a rejected
+         * conversion or a field that refuses the value) are recorded.
+         *
+         * @return {@code true} when the value was written and is eligible for
+         *         the post-write validation pass, {@code false} when a write
+         *         failure was recorded
+         */
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        private void applyValue(FormFieldDescriptor field, JsonNode value,
+        private boolean applyValue(FormFieldDescriptor field, JsonNode value,
                 List<RejectedEntry> rejected) {
             Object converted;
             try {
@@ -684,7 +716,7 @@ public class FormAIController implements AIController {
                         ex.getMessage());
                 rejected.add(
                         new RejectedEntry(field.id(), value, ex.getMessage()));
-                return;
+                return false;
             } catch (Exception ex) {
                 // Anything other than RejectedValueException is an uncontrolled
                 // converter failure — surface a curated rejection so a single
@@ -694,7 +726,7 @@ public class FormAIController implements AIController {
                         field.id(), ex);
                 rejected.add(new RejectedEntry(field.id(), value,
                         "Field rejected the value."));
-                return;
+                return false;
             }
             HasValue raw = field.field();
             try {
@@ -707,17 +739,9 @@ public class FormAIController implements AIController {
                 // gets nothing the application didn't sanction.
                 rejected.add(new RejectedEntry(field.id(), value,
                         "Field rejected the value."));
-                return;
+                return false;
             }
-            // Per RFC: validation runs at fill_form time. Bound fields route
-            // through their Binding; unbound HasValidator fields run their
-            // own default validator. The value stays in the field either way
-            // — the rejected block tells the LLM what to fix on the next
-            // turn while the binder's UI shows the error indicator.
-            var binding = BinderReflection.findBinding(binder, raw);
-            FormFieldValidation.firstError(raw, binding)
-                    .ifPresent(reason -> rejected
-                            .add(new RejectedEntry(field.id(), value, reason)));
+            return true;
         }
 
         /**
