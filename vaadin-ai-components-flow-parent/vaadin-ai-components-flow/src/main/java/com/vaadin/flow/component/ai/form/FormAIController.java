@@ -663,27 +663,28 @@ public class FormAIController implements AIController {
                     writtenValues.put(id, value);
                 }
             }
-            // Phase 2: one validation pass over the post-write state.
-            // binder.validate() covers every binding plus the bean-level
-            // cross-field rules in a single, order-independent round. Only
-            // fields this turn actually wrote get a per-field verdict; an
-            // untouched field that happens to be invalid is not this turn's
-            // rejection. Cross-field failures are surfaced under the
-            // FORM_LEVEL_REJECTION_ID sentinel since they are not tied to a
-            // single field id.
-            var errors = FormFieldValidation.validate(binder);
+            // Phase 2: validate the post-write state. Each written field is
+            // judged against the fully-written form, so the per-field verdict
+            // is order-independent. Only fields this turn actually wrote get a
+            // per-field verdict; an untouched field that happens to be invalid
+            // is not this turn's rejection. Both reads run with
+            // fireEvent=false,
+            // so an untouched field is never marked invalid as a side effect of
+            // validation.
             for (var entry : writtenValues.entrySet()) {
                 var raw = byId.get(entry.getKey()).field();
                 var binding = BinderReflection.findBinding(binder, raw);
-                var reason = binding != null ? errors.fieldErrors().get(raw)
-                        : FormFieldValidation.unboundFieldError(raw)
-                                .orElse(null);
-                if (reason != null) {
-                    rejected.add(new RejectedEntry(entry.getKey(),
-                            entry.getValue(), reason));
-                }
+                FormFieldValidation.firstError(raw, binding).ifPresent(
+                        reason -> rejected.add(new RejectedEntry(entry.getKey(),
+                                entry.getValue(), reason)));
             }
-            for (var message : errors.beanErrors()) {
+            // Bean-level cross-field rules are not tied to a single field, so
+            // they are surfaced under the FORM_LEVEL_REJECTION_ID sentinel.
+            // They reflect the current form state rather than just this turn's
+            // writes — a cross-field rule is either satisfied or not, and the
+            // LLM is told to adjust the offending fields regardless of which
+            // turn wrote them.
+            for (var message : FormFieldValidation.beanErrors(binder)) {
                 rejected.add(new RejectedEntry(
                         FormFieldValidation.FORM_LEVEL_REJECTION_ID, null,
                         message));

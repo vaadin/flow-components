@@ -653,6 +653,63 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_crossFieldValidationDoesNotMarkUntouchedFieldInvalid() {
+        // Regression guard for the core fix: reading the post-write verdict —
+        // including the bean-level cross-field rule — must not fire a
+        // validation status event for a field this turn did not write.
+        // Binder.validate() (fireEvent=true) re-validates every binding and
+        // lights up each field's invalid indicator, so an untouched-but-invalid
+        // field would wrongly show an error after an unrelated fill. The
+        // controller must instead read the verdict without firing UI events
+        // (binding.validate(false) per written field, plus a side-effect-free
+        // bean-level read). A field's binding-level validation status handler
+        // is exactly what the binder calls to light up that field, so a
+        // handler that never fires proves the field was not marked.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var untouchedField = new LabeledStringField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        var untouchedStatusEvents = new int[] { 0 };
+        binder.forField(untouchedField)
+                // Always-invalid: Binder.validate() would mark it, so a clean
+                // counter can only mean the field was never validated.
+                .withValidator(value -> false, "untouched is always invalid")
+                .withValidationStatusHandler(
+                        status -> untouchedStatusEvents[0]++)
+                .bind("notes");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField,
+                untouchedField);
+        // Ignore any status events fired while wiring up the binder/bean; only
+        // the fill itself is under test.
+        untouchedStatusEvents[0] = 0;
+
+        // Write only the cross-field pair (which fails the rule); never touch
+        // untouchedField.
+        fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertEquals(0, untouchedStatusEvents[0],
+                "Validating the post-write state must not fire a validation "
+                        + "status event for a field this turn did not write; "
+                        + "the untouched field's indicator must stay clean. "
+                        + "Got events: " + untouchedStatusEvents[0]);
+    }
+
+    @Test
     void fillForm_binderLevelCrossFieldValidatorPassDoesNotEmitRejection() {
         // Symmetric guard: when the cross-field validator passes, no sentinel
         // rejection appears in the response.
@@ -789,11 +846,16 @@ class FillFormToolTest {
     }
 
     @Test
-    void validate_bindingValidatorThrows_returnsEmptyNotNull() {
-        // A validator that throws (rather than returning an error result) must
-        // not crash the single post-write validation pass: validate must catch
-        // the throw and return an empty, non-null result so doFill can still
-        // format a response for the rest of the turn.
+    void firstError_bindingValidateThrows_returnsEmptyNotNull() {
+        // A per-field validator that throws (rather than returning an error
+        // result) must not crash the post-write validation pass: firstError
+        // must catch the throw and return Optional.empty(), not null — the
+        // caller chains .ifPresent(...) on the result and null breaks the
+        // chain. The fill_form pipeline intercepts validator throws at
+        // setValue (the binder triggers validation through the value-change
+        // listener), so the catch is only reachable when firstError is called
+        // directly with a binding whose validate(false) still throws — pin the
+        // contract here.
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
         binder.forField(field)
@@ -803,14 +865,35 @@ class FillFormToolTest {
                             throw new RuntimeException("validator-boom");
                         })
                 .bind("name");
+        var binding = BinderReflection.findBinding(binder, field);
 
-        var result = FormFieldValidation.validate(binder);
+        var result = FormFieldValidation.firstError(field, binding);
 
-        Assertions.assertTrue(
-                result.fieldErrors().isEmpty() && result.beanErrors().isEmpty(),
-                "validate must swallow a throwing validator and return empty "
-                        + "field and bean errors, not propagate or return "
-                        + "null");
+        Assertions.assertEquals(java.util.Optional.empty(), result,
+                "errorFromBinding catch must return Optional.empty(), not "
+                        + "null; null breaks the caller's .ifPresent() chain");
+    }
+
+    @Test
+    void beanErrors_beanValidatorThrows_returnsEmptyNotNull() {
+        // A bean-level cross-field validator that throws must not crash the
+        // post-write pass: beanErrors must swallow the throw and return an
+        // empty (never null) list so doFill can still format a response for
+        // the rest of the turn.
+        stubVaadinContext();
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(field).bind("format");
+        binder.withValidator((bean, ctx) -> {
+            throw new RuntimeException("bean-validator-boom");
+        });
+        binder.setBean(new TwoFieldBean());
+
+        var result = FormFieldValidation.beanErrors(binder);
+
+        Assertions.assertTrue(result.isEmpty(),
+                "beanErrors must swallow a throwing bean-level validator and "
+                        + "return an empty, non-null list; got: " + result);
     }
 
     @Test
@@ -1460,13 +1543,17 @@ class FillFormToolTest {
     }
 
     /**
-     * Two-property bean driving the binder-level cross-field-validator tests.
-     * Public visibility is required because {@code Binder.setBean(...)}
-     * reflects through the property getters via {@code BeanPropertySet}.
+     * Bean driving the binder-level cross-field-validator tests. {@code format}
+     * and {@code length} feed the cross-field rule; {@code notes} is an
+     * unrelated property for binding a field the cross-field tests leave
+     * untouched. Public visibility is required because
+     * {@code Binder.setBean(...)} reflects through the property getters via
+     * {@code BeanPropertySet}.
      */
     public static class TwoFieldBean {
         private String format;
         private Integer length;
+        private String notes;
 
         @SuppressWarnings("unused")
         public String getFormat() {
@@ -1486,6 +1573,16 @@ class FillFormToolTest {
         @SuppressWarnings("unused")
         public void setLength(Integer length) {
             this.length = length;
+        }
+
+        @SuppressWarnings("unused")
+        public String getNotes() {
+            return notes;
+        }
+
+        @SuppressWarnings("unused")
+        public void setNotes(String notes) {
+            this.notes = notes;
         }
     }
 
