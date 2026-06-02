@@ -9,107 +9,55 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
+import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("spreadsheet-filter")
-public class SpreadsheetFilterIT extends AbstractSpreadsheetIT {
+public class SpreadsheetFilterIT extends AbstractComponentIT {
 
-    private static final String SELECT_ALL = "(Select All)";
+    private SpreadsheetElement spreadsheet;
 
     @Before
     public void init() {
         open();
-        getSpreadsheet();
+        spreadsheet = $(SpreadsheetElement.class).single();
     }
 
     @Test
     public void filterColumn_otherColumnOmitsValuesOfHiddenRows() {
         // Before filtering, Column C offers all of its values
-        openFilterPopup("C1");
+        spreadsheet.getCellAt("C1").popupButtonClick();
         Assert.assertEquals(List.of("Alice", "Bob", "Carol"),
-                getFilterOptions("Column C"));
-        closeFilterPopup("Column C");
+                getFilterPopup().getOptions());
+        closeFilterPopup();
 
         // Filter Column A so that the "Alpha" row gets hidden
-        openFilterPopup("A1");
-        uncheckFilterOption("Column A", "Alpha");
-        closeFilterPopup("Column A");
+        spreadsheet.getCellAt("A1").popupButtonClick();
+        getFilterPopup().deselectByText("Alpha");
+        closeFilterPopup();
 
         // Column C no longer offers "Alice", as its row is hidden by Column A
-        openFilterPopup("C1");
+        spreadsheet.getCellAt("C1").popupButtonClick();
         Assert.assertEquals(List.of("Bob", "Carol"),
-                getFilterOptions("Column C"));
+                getFilterPopup().getOptions());
     }
 
-    /**
-     * Opens the filter pop-up of the column whose header cell is at the given
-     * address (e.g. "A1").
-     */
-    private void openFilterPopup(String headerCell) {
-        getSpreadsheet().getCellAt(headerCell).popupButtonClick();
+    private CheckboxGroupElement getFilterPopup() {
+        return $(CheckboxGroupElement.class).single();
     }
 
-    /**
-     * Returns the filter pop-up overlay whose header matches the given caption.
-     */
-    private WebElement getFilterOverlay(String caption) {
-        return waitUntil(driver -> driver
-                .findElements(
-                        By.cssSelector(".v-spreadsheet-popupbutton-overlay"))
-                .stream()
-                .filter(overlay -> caption.equals(
-                        overlay.findElement(By.cssSelector(".header-caption"))
-                                .getText()))
-                .findFirst().orElse(null));
-    }
-
-    /**
-     * Returns the value options listed in the given column's filter pop-up,
-     * excluding the "(Select All)" entry.
-     */
-    private List<String> getFilterOptions(String caption) {
-        return getFilterOverlay(caption)
-                .findElements(By.tagName("vaadin-checkbox")).stream()
-                .map(checkbox -> checkbox.getText().trim())
-                .filter(text -> !text.isEmpty() && !SELECT_ALL.equals(text))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Unchecks the given value option in the given column's filter pop-up,
-     * which hides the matching rows.
-     */
-    private void uncheckFilterOption(String caption, String option) {
-        WebElement checkbox = getFilterOverlay(caption)
-                .findElements(By.tagName("vaadin-checkbox")).stream()
-                .filter(c -> option.equals(c.getText().trim())).findFirst()
-                .orElseThrow();
-        checkbox.click();
-        getCommandExecutor().waitForVaadin();
-    }
-
-    /**
-     * Closes the given column's filter pop-up and waits until it is gone.
-     */
-    private void closeFilterPopup(String caption) {
-        getFilterOverlay(caption)
-                .findElement(By.cssSelector(".v-window-closebox")).click();
-        waitUntil(driver -> driver
-                .findElements(
-                        By.cssSelector(".v-spreadsheet-popupbutton-overlay"))
-                .stream().noneMatch(overlay -> {
-                    var headers = overlay
-                            .findElements(By.cssSelector(".header-caption"));
-                    return !headers.isEmpty()
-                            && caption.equals(headers.get(0).getText());
-                }));
+    private void closeFilterPopup() {
+        findElement(By.className("v-window-closebox")).click();
+        // The overlay fades out, so wait until it is actually gone before
+        // opening the next one, otherwise single() would match two overlays.
+        waitUntil(driver -> $(CheckboxGroupElement.class).all().isEmpty());
     }
 }
