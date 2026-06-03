@@ -881,7 +881,8 @@ public class FormulaBarWidget extends Composite {
      * Parses single
      *
      * @param cellRef
-     * @return
+     *            the cell reference
+     * @return the parsed cell coordinate
      */
     private static CellCoord parseSingleCell(String cellRef) {
         String c = "", r = "";

@@ -447,8 +447,11 @@ public class SpreadsheetUtil implements Serializable {
      * and find the bounding rectangle for the referenced cells.
      *
      * @param formula
+     *            the formula
      * @param spreadsheet
+     *            the spreadsheet
      * @param includeHiddenCells
+     *            whether hidden cells are included
      * @return CellRangeAddress bounding the evaluated result
      */
     public static CellRangeAddress getRangeForReference(String formula,

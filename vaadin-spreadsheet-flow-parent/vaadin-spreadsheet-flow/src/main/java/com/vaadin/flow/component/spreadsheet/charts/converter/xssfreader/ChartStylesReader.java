@@ -216,6 +216,7 @@ class ChartStylesReader {
      * properties like these can come from a common interface
      *
      * @param xAx
+     *            the x-axis
      * @return axis properties
      */
     protected AxisProperties getAxisProperties(CTCatAx xAx) {

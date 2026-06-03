@@ -381,7 +381,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param serverUnavailable
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setServerUnavailable(String serverUnavailable) {
                 this.serverUnavailable = serverUnavailable;
@@ -398,7 +398,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param unexpectedServerError
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setUnexpectedServerError(
                     String unexpectedServerError) {
@@ -416,7 +416,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param forbidden
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setForbidden(String forbidden) {
                 this.forbidden = forbidden;
@@ -491,7 +491,7 @@ public class UploadI18N implements Serializable {
         /**
          * get units size list
          *
-         * @return
+         * @return the size
          */
         public List<String> getSize() {
             return size;
@@ -502,7 +502,8 @@ public class UploadI18N implements Serializable {
          * "YB"]
          *
          * @param size
-         * @return
+         *            the size
+         * @return this instance
          */
         public Units setSize(List<String> size) {
             this.size = size;

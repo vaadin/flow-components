@@ -1020,6 +1020,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * dialog is closed.
          *
          * @param rendererCreated
+         *            {@code true} if the renderer function has been created,
+         *            {@code false} otherwise
          */
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;
