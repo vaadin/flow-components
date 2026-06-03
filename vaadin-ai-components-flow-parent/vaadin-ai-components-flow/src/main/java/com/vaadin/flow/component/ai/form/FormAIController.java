@@ -467,16 +467,14 @@ public class FormAIController implements AIController {
      * @param field
      *            the field to highlight, not {@code null}; must be a
      *            {@link Component}
-     * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code field} is {@code null}
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public FormAIController showHighlight(HasValue<?, ?> field) {
+    public void showHighlight(HasValue<?, ?> field) {
         FormFieldHighlighter.show(requireFieldComponent(field).getElement(),
                 aiUserId);
-        return this;
     }
 
     /**
@@ -490,16 +488,14 @@ public class FormAIController implements AIController {
      * @param field
      *            the field to clear the highlight from, not {@code null}; must
      *            be a {@link Component}
-     * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code field} is {@code null}
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public FormAIController hideHighlight(HasValue<?, ?> field) {
+    public void hideHighlight(HasValue<?, ?> field) {
         FormFieldHighlighter.hide(requireFieldComponent(field).getElement(),
                 aiUserId);
-        return this;
     }
 
     private static Component requireFieldComponent(HasValue<?, ?> field) {

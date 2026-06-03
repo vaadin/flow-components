@@ -1308,7 +1308,8 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field).showHighlight(field);
+            controller.showHighlight(field);
+            controller.showHighlight(field);
             var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(2, scripts.size(),
@@ -1331,8 +1332,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field).hideHighlight(field)
-                    .showHighlight(field);
+            controller.showHighlight(field);
+            controller.hideHighlight(field);
+            controller.showHighlight(field);
             var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(3, scripts.size(),
@@ -1375,17 +1377,6 @@ class FormAIControllerTest {
                     () -> controller.showHighlight(nonComponent));
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> controller.hideHighlight(nonComponent));
-        }
-
-        @Test
-        void showAndHideHighlightReturnTheControllerForChaining() {
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            Assertions.assertSame(controller, controller.showHighlight(field));
-            Assertions.assertSame(controller, controller.hideHighlight(field));
         }
 
         @Test
