@@ -1354,14 +1354,12 @@ class FormAIControllerTest {
 
             Assertions.assertEquals(3, scripts.size(),
                     "Each call enqueues its own script; got: " + scripts);
-            Assertions.assertTrue(scripts.get(0).contains("addUser"),
-                    "First script must be the show (addUser); got: "
-                            + scripts.get(0));
-            Assertions.assertTrue(scripts.get(1).contains("removeUser"),
-                    "Middle script must be the hide (removeUser); got: "
-                            + scripts.get(1));
-            Assertions.assertTrue(scripts.get(2).contains("addUser"),
-                    "Third script must be the show again (addUser); got: "
+            Assertions.assertTrue(isShowScript(scripts.get(0)),
+                    "First script must be the show; got: " + scripts.get(0));
+            Assertions.assertTrue(isHideScript(scripts.get(1)),
+                    "Middle script must be the hide; got: " + scripts.get(1));
+            Assertions.assertTrue(isShowScript(scripts.get(2)),
+                    "Third script must be the show again; got: "
                             + scripts.get(2));
         }
 
@@ -1414,8 +1412,7 @@ class FormAIControllerTest {
                     "showHighlight must queue a script even when the field "
                             + "is outside the controller's form; got: "
                             + scripts);
-            Assertions.assertTrue(scripts.getFirst().contains("addUser")
-                    && scripts.getFirst().contains("'AI'"));
+            Assertions.assertTrue(isShowScript(scripts.getFirst()));
         }
 
         @Test
@@ -1478,19 +1475,129 @@ class FormAIControllerTest {
             Assertions.assertEquals(1, keepScripts.size(),
                     "keep field should keep only its show script when "
                             + "another field is hidden; got: " + keepScripts);
-            Assertions.assertTrue(keepScripts.getFirst().contains("addUser"),
-                    "keep field's queued script should be the show "
-                            + "(addUser with AI user); got: "
+            Assertions.assertTrue(isShowScript(keepScripts.getFirst()),
+                    "keep field's queued script should be the show; got: "
                             + keepScripts.getFirst());
             Assertions.assertEquals(2, clearScripts.size(),
                     "cleared field receives show then hide; got: "
                             + clearScripts);
-            Assertions.assertTrue(clearScripts.get(0).contains("addUser"),
-                    "First script on cleared field is the show (addUser); "
-                            + "got: " + clearScripts.get(0));
-            Assertions.assertTrue(clearScripts.get(1).contains("removeUser"),
-                    "Last script on cleared field is the removeUser; got: "
+            Assertions.assertTrue(isShowScript(clearScripts.get(0)),
+                    "First script on cleared field is the show; got: "
+                            + clearScripts.get(0));
+            Assertions.assertTrue(isHideScript(clearScripts.get(1)),
+                    "Last script on cleared field is the hide; got: "
                             + clearScripts.get(1));
+        }
+
+        @Test
+        void showHighlightReappliesOnReattach() {
+            // Detach drops the client-side highlight; the controller's
+            // attach listener must re-issue addUser on the next attach so
+            // the user does not lose the visual cue.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showHighlight(field);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var addUserScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(1, addUserScripts.size(),
+                    "Re-attach must re-issue exactly one addUser script; "
+                            + "got: " + addUserScripts);
+        }
+
+        @Test
+        void hideHighlightCancelsReapplyOnReattach() {
+            // hide removes the attach listener as well as queueing
+            // removeUser; a subsequent detach/re-attach must not bring the
+            // highlight back.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showHighlight(field);
+            controller.hideHighlight(field);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var addUserScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(0, addUserScripts.size(),
+                    "After hide, re-attach must not re-issue addUser; got: "
+                            + addUserScripts);
+        }
+
+        @Test
+        void repeatedShowDoesNotStackReapplyListeners() {
+            // Two showHighlight calls must register exactly one attach
+            // listener. Otherwise re-attach would queue duplicate addUser
+            // scripts and leak listeners across the field's lifetime.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showHighlight(field);
+            controller.showHighlight(field);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var addUserScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(1, addUserScripts.size(),
+                    "Repeated show calls must collapse to one attach "
+                            + "listener; re-attach must re-issue addUser "
+                            + "exactly once; got: " + addUserScripts);
+        }
+
+        @Test
+        void showHighlightAfterHideReinstallsReapply() {
+            // show → hide → show on the same field must end with a working
+            // attach listener again, because hide removed the previous one
+            // and the second show installs a fresh registration.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showHighlight(field);
+            controller.hideHighlight(field);
+            controller.showHighlight(field);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var addUserScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(1, addUserScripts.size(),
+                    "Show after hide must reinstall the re-apply listener; "
+                            + "re-attach must re-issue addUser exactly once; "
+                            + "got: " + addUserScripts);
+        }
+
+        // Tie the JS-shape check to the conceptual operation so call
+        // sites read as "is this a show / hide?" instead of grepping the
+        // raw JS string. The canonical add/remove-user test (above) pins
+        // the exact JS contract; these helpers are for follow-on tests
+        // that only need to distinguish show from hide.
+        private static boolean isShowScript(String script) {
+            return script.contains("addUser");
+        }
+
+        private static boolean isHideScript(String script) {
+            return script.contains("removeUser");
         }
 
         private List<String> pendingJsOn(HasElement target) {

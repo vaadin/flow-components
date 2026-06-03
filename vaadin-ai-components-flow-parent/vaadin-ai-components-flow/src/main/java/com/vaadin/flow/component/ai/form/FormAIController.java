@@ -46,6 +46,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.JsonNode;
 
@@ -224,6 +225,12 @@ public class FormAIController implements AIController {
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
+    /**
+     * Per-field attach-listener registrations that re-apply the AI highlight
+     * after detach/re-attach. Populated on the first {@link #showHighlight}
+     * call for a field; entries are removed by {@link #hideHighlight}.
+     */
+    private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
     private Consumer<List<FieldValueChange>> fieldValuesChangedHandler;
 
     /**
@@ -459,10 +466,10 @@ public class FormAIController implements AIController {
      * (e.g. from a collaboration session) as long as those consumers also use
      * {@code addUser} / {@code removeUser} rather than {@code setUsers}.
      * <p>
-     * The highlight is not retained across detach/re-attach: a detached field's
-     * client-side state is discarded, and re-attaching produces a fresh element
-     * with no highlight. Call {@code showHighlight} again if the field leaves
-     * and returns to the DOM.
+     * The first {@code showHighlight} call on a field also registers an attach
+     * listener that re-applies the AI user every time the field re-enters the
+     * DOM, so the highlight survives detach/re-attach. The listener is removed
+     * by {@link #hideHighlight}.
      *
      * @param field
      *            the field to highlight, not {@code null}; must be a
@@ -473,8 +480,12 @@ public class FormAIController implements AIController {
      *             if {@code field} is not a {@link Component}
      */
     public void showHighlight(HasValue<?, ?> field) {
-        FormFieldHighlighter.show(requireFieldComponent(field).getElement(),
-                aiUserId);
+        var component = requireFieldComponent(field);
+        var element = component.getElement();
+        highlightedFields.computeIfAbsent(field,
+                ignored -> component.addAttachListener(
+                        event -> FormFieldHighlighter.show(element, aiUserId)));
+        FormFieldHighlighter.show(element, aiUserId);
     }
 
     /**
@@ -483,7 +494,9 @@ public class FormAIController implements AIController {
      * Only this controller's AI user is removed; other users on the field stay
      * highlighted. The field can be any {@link HasValue} {@link Component}, in
      * or out of this controller's form, and clearing one field's highlight has
-     * no effect on others.
+     * no effect on others. The re-attach listener registered by
+     * {@link #showHighlight} is also removed, so the highlight does not come
+     * back if the field leaves and returns to the DOM after this call.
      *
      * @param field
      *            the field to clear the highlight from, not {@code null}; must
@@ -494,8 +507,12 @@ public class FormAIController implements AIController {
      *             if {@code field} is not a {@link Component}
      */
     public void hideHighlight(HasValue<?, ?> field) {
-        FormFieldHighlighter.hide(requireFieldComponent(field).getElement(),
-                aiUserId);
+        var element = requireFieldComponent(field).getElement();
+        var registration = highlightedFields.remove(field);
+        if (registration != null) {
+            registration.remove();
+        }
+        FormFieldHighlighter.hide(element, aiUserId);
     }
 
     private static Component requireFieldComponent(HasValue<?, ?> field) {
