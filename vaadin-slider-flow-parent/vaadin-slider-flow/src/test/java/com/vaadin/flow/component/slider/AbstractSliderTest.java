@@ -58,7 +58,7 @@ abstract class AbstractSliderTest<TComponent extends NumberSlider<TComponent, TV
         Assertions.assertEquals("aria-labelledby",
                 slider.getAriaLabelledBy().get());
 
-        slider.setAriaLabelledBy(null);
+        slider.setAriaLabelledBy((String) null);
         Assertions.assertTrue(slider.getAriaLabelledBy().isEmpty());
     }
 
