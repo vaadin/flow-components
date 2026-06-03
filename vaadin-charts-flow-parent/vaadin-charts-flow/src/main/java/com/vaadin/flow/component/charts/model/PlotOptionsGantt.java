@@ -905,6 +905,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
      * form of data export.
      *
      * @param includeInDataExport
+     *            the include in data export
      */
     public void setIncludeInDataExport(Boolean includeInDataExport) {
         this.includeInDataExport = includeInDataExport;
@@ -930,6 +931,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
      * @see Chart#addPointDragListener(ComponentEventListener)
      * @see Chart#addPointDropListener(ComponentEventListener)
      * @param dragDrop
+     *            the drag drop
      */
     public void setDragDrop(DragDrop dragDrop) {
         this.dragDrop = dragDrop;

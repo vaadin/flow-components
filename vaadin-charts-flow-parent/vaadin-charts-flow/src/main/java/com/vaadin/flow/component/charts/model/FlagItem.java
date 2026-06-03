@@ -23,7 +23,9 @@ public class FlagItem extends DataSeriesItem {
      * Constructs an item with X and Title values
      *
      * @param x
+     *            the X value
      * @param title
+     *            the title
      */
     public FlagItem(Number x, String title) {
         setX(x);
@@ -34,7 +36,9 @@ public class FlagItem extends DataSeriesItem {
      * Constructs an item with X and Title values
      *
      * @param instant
+     *            the instant
      * @param title
+     *            the title
      */
     public FlagItem(Instant instant, String title) {
         setX(instant);
@@ -45,7 +49,9 @@ public class FlagItem extends DataSeriesItem {
      * Constructs an item with X, Title and Text values
      *
      * @param x
+     *            the X value
      * @param title
+     *            the title
      */
     public FlagItem(Number x, String title, String text) {
         setX(x);
@@ -57,8 +63,11 @@ public class FlagItem extends DataSeriesItem {
      * Constructs an item with X, Title and Text values
      *
      * @param instant
+     *            the instant
      * @param title
+     *            the title
      * @param text
+     *            the text
      */
     public FlagItem(Instant instant, String title, String text) {
         setX(instant);
@@ -70,6 +79,7 @@ public class FlagItem extends DataSeriesItem {
      * Sets the title of the flag
      *
      * @param title
+     *            the title
      */
     public void setTitle(String title) {
         this.title = title;

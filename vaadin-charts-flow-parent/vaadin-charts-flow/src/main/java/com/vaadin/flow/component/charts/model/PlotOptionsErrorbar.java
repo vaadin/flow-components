@@ -131,7 +131,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
-     * @return
+     * @return the clip
      */
     public Boolean getClip() {
         return clip;

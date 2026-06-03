@@ -83,6 +83,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
      * converted to percentages in the default data label formatter.
      *
      * @param amount
+     *            the amount
      */
     public void setAmount(Number amount) {
         this.amount = amount;

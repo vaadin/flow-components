@@ -612,6 +612,7 @@ public class DataLabels extends AbstractDataLabels {
      * possible, it defaults to right. Defaults to "center".
      *
      * @param position
+     *            the position
      */
     public void setPosition(HorizontalAlign position) {
         this.position = position;

@@ -174,6 +174,7 @@ public class SolidColor extends AbstractConfigurationObject implements Color {
      * Constructs a new color from a hex value like "#ff0000" for red.
      *
      * @param color
+     *            the color
      */
     public SolidColor(String color) {
 

@@ -107,6 +107,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * relative size.
      *
      * @param borderRadius
+     *            the border radius
      */
     public void setBorderRadius(String borderRadius) {
         this.borderRadius = borderRadius;

@@ -38,6 +38,7 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
      * Enable zooming with mouse wheel.
      *
      * @param enabled
+     *            whether mouse-wheel zooming is enabled
      */
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
@@ -59,6 +60,7 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
      * while with 2, one mouse wheel delta will zoom in 50%.
      *
      * @param sensitivity
+     *            the sensitivity
      */
     public void setSensitivity(Number sensitivity) {
         this.sensitivity = sensitivity;
@@ -86,6 +88,7 @@ public class ZoomingMouseWheel extends AbstractConfigurationObject {
      * and {@link YAxis#setEndOnTick(Boolean)} to false.
      *
      * @param type
+     *            the chart type
      */
     public void setType(Dimension type) {
         this.type = type;

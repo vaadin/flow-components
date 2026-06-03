@@ -32,6 +32,7 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
      * Construct a ChartDrilldownEvent
      *
      * @param source
+     *            the event source
      */
     public DrilldownEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.point.drilldown") String drilldown,
@@ -55,7 +56,7 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
     /**
      * Gets the name of the drilldown
      *
-     * @return
+     * @return the drilldown
      */
     public String getDrilldown() {
         return drilldown;

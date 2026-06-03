@@ -203,6 +203,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * groupPixelWidth option.
      *
      * @param dataGrouping
+     *            the data grouping
      */
     public abstract void setDataGrouping(DataGrouping dataGrouping);
 

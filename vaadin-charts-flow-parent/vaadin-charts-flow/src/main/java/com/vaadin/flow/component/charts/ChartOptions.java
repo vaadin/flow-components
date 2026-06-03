@@ -55,6 +55,7 @@ public class ChartOptions extends AbstractConfigurationObject {
      * Changes the language of all charts.
      *
      * @param lang
+     *            the language options
      */
     public void setLang(Lang lang) {
         this.lang = lang;
@@ -88,6 +89,7 @@ public class ChartOptions extends AbstractConfigurationObject {
      * be redrawn.
      *
      * @param theme
+     *            the chart theme
      */
     public void setTheme(Theme theme) {
         this.theme = theme;

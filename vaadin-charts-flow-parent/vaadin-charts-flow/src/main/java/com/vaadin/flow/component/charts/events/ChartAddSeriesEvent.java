@@ -29,9 +29,13 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
      * Constructs a ChartAddSeriesEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      * @param name
+     *            the name
      * @param data
+     *            the data
      */
     public ChartAddSeriesEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.options.name") String name,
@@ -47,7 +51,7 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
     /**
      * Gets the series name
      *
-     * @return
+     * @return the name
      */
     public String getName() {
         return name;
@@ -56,7 +60,7 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
     /**
      * Gets the series data
      *
-     * @return
+     * @return the data
      */
     public Number[] getData() {
         return data;

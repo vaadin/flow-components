@@ -27,8 +27,11 @@ public class DataSeriesItemSankey extends DataSeriesItem {
      * Constructs an item with from, to and weight values
      *
      * @param from
+     *            the from
      * @param to
+     *            the to
      * @param weight
+     *            the weight
      */
     public DataSeriesItemSankey(String from, String to, Number weight) {
         this();

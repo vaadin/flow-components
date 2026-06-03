@@ -34,12 +34,15 @@ public class BoxPlotItem extends DataSeriesItem {
      * Constructs an item for box plot with given values.
      *
      * @param low
+     *            the low
      * @param q1
      *            lower quartile
      * @param median
+     *            the median
      * @param q3
      *            upper quartile
      * @param high
+     *            the high
      */
     public BoxPlotItem(Number low, Number q1, Number median, Number q3,
             Number high) {
@@ -53,7 +56,7 @@ public class BoxPlotItem extends DataSeriesItem {
 
     /**
      * @see #setLowerQuartile(Number)
-     * @return
+     * @return the lower quartile
      */
     public Number getLowerQuartile() {
         return q1;
@@ -97,6 +100,7 @@ public class BoxPlotItem extends DataSeriesItem {
      * Sets the median of the item. Often referred as q2 value.
      *
      * @param median
+     *            the median
      */
     public void setMedian(Number median) {
         this.median = median;

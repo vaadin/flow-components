@@ -51,6 +51,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Defaults to null.
      *
      * @param minorTickInterval
+     *            the minor tick interval
      */
     public void setMinorTickInterval(TickIntervalStyle minorTickInterval) {
         this.minorTickInterval = minorTickInterval;
@@ -68,6 +69,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * "#C0D0E0".
      *
      * @param lineColor
+     *            the line color
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -84,6 +86,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Sets the width of the line marking the axis itself. Defaults to 1.
      *
      * @param lineWidth
+     *            the line width
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -100,6 +103,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Sets the pixel width of the major tick marks. Defaults to 1.
      *
      * @param tickWidth
+     *            the tick width
      */
     public void setTickWidth(Number tickWidth) {
         this.tickWidth = tickWidth;
@@ -116,6 +120,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Sets the color for the main tick marks. Defaults to #C0D0E0.
      *
      * @param tickColor
+     *            the tick color
      */
     public void setTickColor(Color tickColor) {
         this.tickColor = tickColor;
@@ -132,6 +137,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Sets the title style
      *
      * @param style
+     *            the style
      */
     public void setTitle(Style style) {
         title.setStyle(style);
@@ -185,6 +191,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * area. Defaults to 0.
      *
      * @param gridLineWidth
+     *            the grid line width
      */
     public void setGridLineWidth(Number gridLineWidth) {
         this.gridLineWidth = gridLineWidth;
@@ -205,6 +212,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * to null.
      *
      * @param alternateGridColor
+     *            the alternate grid color
      */
     public void setAlternateGridColor(Color alternateGridColor) {
         this.alternateGridColor = alternateGridColor;

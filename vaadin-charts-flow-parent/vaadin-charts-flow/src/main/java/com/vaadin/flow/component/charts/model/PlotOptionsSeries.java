@@ -231,6 +231,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
      * Defaults to <code>y</code>.
      *
      * @param colorKey
+     *            the color key
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;

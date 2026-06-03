@@ -23,14 +23,14 @@ public interface HasSeries extends Serializable {
     /**
      * Returns the index of the series
      *
-     * @return
+     * @return the index of the series
      */
     int getSeriesItemIndex();
 
     /**
      * Returns the series
      *
-     * @return
+     * @return the series
      */
     default Series getSeries() {
         return getSource().getConfiguration().getSeries()

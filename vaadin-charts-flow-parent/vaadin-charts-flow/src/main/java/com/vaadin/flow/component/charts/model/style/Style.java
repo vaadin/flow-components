@@ -36,6 +36,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>color</code> CSS attribute.
      *
      * @param color
+     *            the color
      */
     public void setColor(Color color) {
         this.color = color;
@@ -52,6 +53,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>font-weight</code> CSS attribute.
      *
      * @param fontWeight
+     *            the font weight
      */
     public void setFontWeight(FontWeight fontWeight) {
         this.fontWeight = fontWeight;
@@ -68,6 +70,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>font-family</code> CSS attribute.
      *
      * @param fontFamily
+     *            the font family
      */
     public void setFontFamily(String fontFamily) {
         this.fontFamily = fontFamily;
@@ -84,6 +87,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>font-size</code> CSS attribute.
      *
      * @param fontSize
+     *            the font size
      */
     public void setFontSize(String fontSize) {
         this.fontSize = fontSize;
@@ -100,6 +104,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>left</code> CSS attribute
      *
      * @param left
+     *            the left
      */
     public void setLeft(String left) {
         this.left = left;
@@ -116,6 +121,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>top</code> CSS attribute
      *
      * @param top
+     *            the top
      */
     public void setTop(String top) {
         this.top = top;
@@ -125,6 +131,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>position</code> CSS attribute
      *
      * @param position
+     *            the position
      */
     public void setPosition(StylePosition position) {
         this.position = position;
@@ -162,6 +169,7 @@ public class Style extends AbstractConfigurationObject {
      * Sets the <code>textShadow</code> CSS attribute
      *
      * @param textShadow
+     *            the text shadow
      */
     public void setTextShadow(String textShadow) {
         this.textShadow = textShadow;

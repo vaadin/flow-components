@@ -32,6 +32,7 @@ public class ListSeries extends AbstractSeries {
      * Constructs a ListSeries with the given series name.
      *
      * @param name
+     *            the name
      */
     public ListSeries(String name) {
         super(name);
@@ -41,6 +42,7 @@ public class ListSeries extends AbstractSeries {
      * Constructs a ListSeries with the given array of values.
      *
      * @param values
+     *            the values
      */
     public ListSeries(Number... values) {
         Collections.addAll(data, values);
@@ -60,7 +62,9 @@ public class ListSeries extends AbstractSeries {
      * Constructs a ListSeries with the given series name and array of values.
      *
      * @param name
+     *            the name
      * @param values
+     *            the values
      */
     public ListSeries(String name, Number... values) {
         this(name);
@@ -92,6 +96,7 @@ public class ListSeries extends AbstractSeries {
      * Sets the values in the list series to the ones provided.
      *
      * @param values
+     *            the values
      */
     public void setData(Number... values) {
         data.clear();
@@ -102,6 +107,7 @@ public class ListSeries extends AbstractSeries {
      * Sets the given list of numeric values as the values in this list series.
      *
      * @param data
+     *            the data
      */
     public void setData(List<Number> data) {
         this.data = data;

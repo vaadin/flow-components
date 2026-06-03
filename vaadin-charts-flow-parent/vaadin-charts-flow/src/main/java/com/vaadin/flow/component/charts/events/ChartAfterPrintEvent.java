@@ -22,7 +22,9 @@ public class ChartAfterPrintEvent extends ComponentEvent<Chart> {
      * Constructs a ChartAfterPrintEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      */
     public ChartAfterPrintEvent(Chart source, boolean fromClient) {
         super(source, fromClient);

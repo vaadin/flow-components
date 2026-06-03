@@ -51,6 +51,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * rounded down.
      *
      * @param min
+     *            the minimum value
      */
     public void setMin(Number min) {
         this.min = min;
@@ -60,6 +61,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The minimum value of the axis as Instant.
      *
      * @param min
+     *            the minimum value
      * @see #setMin(Number)
      */
     public void setMin(Instant min) {
@@ -81,6 +83,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * chart.alignTicks.
      *
      * @param max
+     *            the maximum value
      */
     public void setMax(Number max) {
         this.max = max;
@@ -90,6 +93,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The maximum value of the axis as Instant.
      *
      * @param max
+     *            the maximum value
      * @see #setMax(Number)
      */
     public void setMax(Instant max) {

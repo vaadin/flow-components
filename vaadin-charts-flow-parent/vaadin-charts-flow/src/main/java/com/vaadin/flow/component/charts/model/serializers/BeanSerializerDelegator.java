@@ -26,6 +26,7 @@ import tools.jackson.databind.util.NameTransformer;
  * implementing {@link BeanSerializerBase}.
  *
  * @param <T>
+ *            the serialized value type
  */
 public class BeanSerializerDelegator<T> extends BeanSerializerBase {
 

@@ -44,6 +44,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * @see #setPlotBackgroundColor(Color)
      *
      * @param backgroundColor
+     *            the background color
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -66,6 +67,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * @see #setBackgroundColor(Color)
      *
      * @param plotBackgroundColor
+     *            the plot background color
      */
     public void setPlotBackgroundColor(Color plotBackgroundColor) {
         this.plotBackgroundColor = plotBackgroundColor;
@@ -105,6 +107,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * plotBackgroundColor be set.
      *
      * @param plotShadow
+     *            the plot shadow
      */
     public void setPlotShadow(Boolean plotShadow) {
         this.plotShadow = plotShadow;
@@ -141,6 +144,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * allowing unique CSS styling for each chart. Defaults to "".
      *
      * @param className
+     *            the class name
      */
     public void setClassName(String className) {
         this.className = className;
@@ -199,6 +203,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * "#4572A7".
      *
      * @param plotBorderColor
+     *            the plot border color
      */
     public void setPlotBorderColor(Color plotBorderColor) {
         this.plotBorderColor = plotBorderColor;
@@ -228,6 +233,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * </p>
      *
      * @param style
+     *            the style
      */
     public void setStyle(Style style) {
         this.style = style;
@@ -245,6 +251,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * Sets the color of the outer chart border. Defaults to #4572A7.
      *
      * @param borderColor
+     *            the border color
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;

@@ -899,6 +899,7 @@ public class ChartModel extends AbstractConfigurationObject {
      * support.
      *
      * @param zooming
+     *            the zooming
      */
     public void setZooming(Zooming zooming) {
         this.zooming = zooming;

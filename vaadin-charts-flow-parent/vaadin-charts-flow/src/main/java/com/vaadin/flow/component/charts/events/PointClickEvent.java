@@ -31,18 +31,31 @@ public class PointClickEvent extends ComponentEvent<Chart>
      * Constructs a PointClickEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      * @param pageX
+     *            the absolute X coordinate
      * @param pageY
+     *            the absolute Y coordinate
      * @param altKey
+     *            whether the Alt key was pressed
      * @param ctrlKey
+     *            whether the Ctrl key was pressed
      * @param metaKey
+     *            whether the Meta key was pressed
      * @param shiftKey
+     *            whether the Shift key was pressed
      * @param button
+     *            the mouse button
      * @param seriesIndex
+     *            the series index
      * @param category
+     *            the category
      * @param pointIndex
+     *            the point index
      * @param pointId
+     *            the point id
      */
     public PointClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.pageX") int pageX,

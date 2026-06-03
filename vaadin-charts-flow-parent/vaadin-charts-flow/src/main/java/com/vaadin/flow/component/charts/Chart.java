@@ -120,6 +120,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Creates a new chart with the given type
      *
      * @param type
+     *            the chart type
      * @see #Chart()
      */
     public Chart(ChartType type) {
@@ -243,6 +244,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * behavior.
      *
      * @param disabled
+     *            whether visibility toggling should be disabled
      */
     public void setVisibilityTogglingDisabled(boolean disabled) {
         getElement().setProperty("_visibilityTogglingDisabled", disabled);
@@ -296,6 +298,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * series is added to the chart
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartAddSeriesListener(
             ComponentEventListener<ChartAddSeriesEvent> listener) {
@@ -307,6 +310,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * is printed using the print menu
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartAfterPrintListener(
             ComponentEventListener<ChartAfterPrintEvent> listener) {
@@ -318,6 +322,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * chart is printed using the print menu
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartBeforePrintListener(
             ComponentEventListener<ChartBeforePrintEvent> listener) {
@@ -329,6 +334,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * area
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartClickListener(
             ComponentEventListener<ChartClickEvent> listener) {
@@ -340,6 +346,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * 'Back to previous series' button.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartDrillupListener(
             ComponentEventListener<ChartDrillupEvent> listener) {
@@ -351,6 +358,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * series have been drilled up in a chart with multiple drilldown series.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartDrillupAllListener(
             ComponentEventListener<ChartDrillupAllEvent> listener) {
@@ -362,6 +370,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * loaded
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartLoadListener(
             ComponentEventListener<ChartLoadEvent> listener) {
@@ -373,6 +382,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * redrawn
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartRedrawListener(
             ComponentEventListener<ChartRedrawEvent> listener) {
@@ -384,6 +394,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * clicked a checkbox in the legend
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addCheckBoxClickListener(
             ComponentEventListener<SeriesCheckboxClickEvent> listener) {
@@ -395,6 +406,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * drilldown series for each drilldown callback when doing async drilldown
      *
      * @param listener
+     *            the listener to add
      * @see DataSeries#addItemWithDrilldown(DataSeriesItem) addItemWithDrilldown
      *      to find out how to enable async drilldown
      */
@@ -413,6 +425,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * listener implementation.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addChartSelectionListener(
             ComponentEventListener<ChartSelectionEvent> listener) {
@@ -428,6 +441,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * setVisibilityTogglingDisabled(<code>true</code>)
      *
      * @param listener
+     *            the listener to add
      * @see #setVisibilityTogglingDisabled(boolean)
      */
     public Registration addSeriesLegendItemClickListener(
@@ -444,6 +458,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * setVisibilityTogglingDisabled(<code>true</code>)
      *
      * @param listener
+     *            the listener to add
      * @see #setVisibilityTogglingDisabled(boolean)
      */
     public Registration addPointLegendItemClickListener(
@@ -456,6 +471,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * series is animated
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesAfterAnimateListener(
             ComponentEventListener<SeriesAfterAnimateEvent> listener) {
@@ -467,6 +483,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * series in the chart
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesClickListener(
             ComponentEventListener<SeriesClickEvent> listener) {
@@ -478,6 +495,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * hidden
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesHideListener(
             ComponentEventListener<SeriesHideEvent> listener) {
@@ -489,6 +507,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * exits the neighborhood of a series
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesMouseOutListener(
             ComponentEventListener<SeriesMouseOutEvent> listener) {
@@ -500,6 +519,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * enters the neighborhood of a series
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesMouseOverListener(
             ComponentEventListener<SeriesMouseOverEvent> listener) {
@@ -511,6 +531,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * shown
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addSeriesShowListener(
             ComponentEventListener<SeriesShowEvent> listener) {
@@ -522,6 +543,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * points, bars or columns in the chart
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointClickListener(
             ComponentEventListener<PointClickEvent> listener) {
@@ -533,6 +555,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * exits the neighborhood of a data point
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointMouseOutListener(
             ComponentEventListener<PointMouseOutEvent> listener) {
@@ -544,6 +567,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * enters the neighborhood of a data point
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointMouseOverListener(
             ComponentEventListener<PointMouseOverEvent> listener) {
@@ -555,6 +579,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * removed.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointRemoveListener(
             ComponentEventListener<PointRemoveEvent> listener) {
@@ -566,6 +591,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * selected.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointSelectListener(
             ComponentEventListener<PointSelectEvent> listener) {
@@ -577,6 +603,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * is unselected.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointUnselectListener(
             ComponentEventListener<PointUnselectEvent> listener) {
@@ -588,6 +615,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * updated.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointUpdateListener(
             ComponentEventListener<PointUpdateEvent> listener) {
@@ -599,6 +627,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * drag a point.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointDragStartListener(
             ComponentEventListener<PointDragStartEvent> listener) {
@@ -609,6 +638,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Adds a point drop listener, which will be notified point is dropped.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointDropListener(
             ComponentEventListener<PointDropEvent> listener) {
@@ -620,6 +650,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * dragged.
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addPointDragListener(
             ComponentEventListener<PointDragEvent> listener) {
@@ -631,6 +662,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * axis extremes are set
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addXAxesExtremesSetListener(
             ComponentEventListener<XAxesExtremesSetEvent> listener) {
@@ -642,6 +674,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * axis extremes are set
      *
      * @param listener
+     *            the listener to add
      */
     public Registration addYAxesExtremesSetListener(
             ComponentEventListener<YAxesExtremesSetEvent> listener) {

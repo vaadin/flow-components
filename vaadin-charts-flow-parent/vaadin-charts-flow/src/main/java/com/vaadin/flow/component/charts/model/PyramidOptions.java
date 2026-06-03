@@ -157,6 +157,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * Specific data labels configuration for a series type
      *
      * @param dataLabels
+     *            the data labels
      */
     public abstract void setDataLabels(DataLabelsFunnel dataLabels);
 

@@ -31,7 +31,9 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
      * Constructs a SeriesLegendItemClickEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      */
     public PointLegendItemClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.browserEvent.pageX") int pageX,

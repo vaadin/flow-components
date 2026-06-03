@@ -36,8 +36,11 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2 and Y
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      */
     public DataSeriesItemXrange(Number x, Number x2, Number y) {
         super(x, y);
@@ -48,8 +51,11 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2 and Y
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      */
     public DataSeriesItemXrange(Instant x, Instant x2, Number y) {
         super(x, y);
@@ -60,9 +66,13 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2, Y and partialFillAmount.
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      * @param partialFillAmount
+     *            the partial fill amount
      */
     public DataSeriesItemXrange(Number x, Number x2, Number y,
             Number partialFillAmount) {
@@ -74,9 +84,13 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2, Y and partialFillAmount.
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      * @param partialFillAmount
+     *            the partial fill amount
      */
     public DataSeriesItemXrange(Instant x, Instant x2, Number y,
             Number partialFillAmount) {
@@ -88,10 +102,15 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2, Y, partialFillAmount and partialFillColor.
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      * @param partialFillAmount
+     *            the partial fill amount
      * @param partialFillColor
+     *            the partial fill color
      */
     public DataSeriesItemXrange(Number x, Number x2, Number y,
             Number partialFillAmount, Color partialFillColor) {
@@ -104,10 +123,15 @@ public class DataSeriesItemXrange extends DataSeriesItem {
      * Constructs an item with X, X2, Y, partialFillAmount and partialFillColor.
      *
      * @param x
+     *            the X value
      * @param x2
+     *            the x2
      * @param y
+     *            the Y value
      * @param partialFillAmount
+     *            the partial fill amount
      * @param partialFillColor
+     *            the partial fill color
      */
     public DataSeriesItemXrange(Instant x, Instant x2, Number y,
             Number partialFillAmount, Color partialFillColor) {

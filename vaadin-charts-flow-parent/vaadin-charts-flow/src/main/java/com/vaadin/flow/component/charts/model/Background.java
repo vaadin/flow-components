@@ -39,6 +39,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the background color
      *
      * @param backgroundColor
+     *            the background color
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -55,6 +56,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the border color
      *
      * @param borderColor
+     *            the border color
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -76,6 +78,7 @@ public class Background extends AbstractConfigurationObject {
      * string.
      *
      * @param borderRadius
+     *            the border radius
      */
     public void setBorderRadius(String borderRadius) {
         this.borderRadius = borderRadius;
@@ -92,6 +95,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the width of the border
      *
      * @param borderWidth
+     *            the border width
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -126,6 +130,7 @@ public class Background extends AbstractConfigurationObject {
      * charts.</em>
      *
      * @param outerRadius
+     *            the outer radius
      */
     public void setOuterRadius(String outerRadius) {
         this.outerRadius = outerRadius;
@@ -147,6 +152,7 @@ public class Background extends AbstractConfigurationObject {
      * charts.</em>
      *
      * @param innerRadius
+     *            the inner radius
      */
     public void setInnerRadius(String innerRadius) {
         this.innerRadius = innerRadius;

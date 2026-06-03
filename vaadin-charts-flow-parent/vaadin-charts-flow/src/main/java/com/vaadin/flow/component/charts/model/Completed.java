@@ -43,6 +43,7 @@ public class Completed extends AbstractConfigurationObject {
      * (finished). Defaults to 0.
      *
      * @param amount
+     *            the amount
      */
     public void setAmount(Number amount) {
         this.amount = amount;
@@ -60,6 +61,7 @@ public class Completed extends AbstractConfigurationObject {
      * main color. The value will be ignored if the chart is in Styled mode.
      *
      * @param fill
+     *            the fill
      */
     public void setFill(Color fill) {
         this.fill = fill;

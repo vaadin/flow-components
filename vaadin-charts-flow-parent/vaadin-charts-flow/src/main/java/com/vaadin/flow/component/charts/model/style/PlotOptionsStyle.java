@@ -90,6 +90,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#BAR} charts
      *
      * @param bar
+     *            the bar
      */
     public void setBar(PlotOptionsBar bar) {
         this.bar = bar;
@@ -106,6 +107,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#AREA} charts
      *
      * @param area
+     *            the area
      */
     public void setArea(PlotOptionsArea area) {
         this.area = area;
@@ -122,6 +124,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#PIE} charts
      *
      * @param pie
+     *            the pie
      */
     public void setPie(PlotOptionsPie pie) {
         this.pie = pie;
@@ -138,6 +141,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#LINE} charts
      *
      * @param line
+     *            the line
      */
     public void setLine(PlotOptionsLine line) {
         this.line = line;
@@ -154,6 +158,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#COLUMN} charts
      *
      * @param column
+     *            the column
      */
     public void setColumn(PlotOptionsColumn column) {
         this.column = column;
@@ -170,6 +175,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#SPLINE} charts
      *
      * @param spline
+     *            the spline
      */
     public void setSpline(PlotOptionsSpline spline) {
         this.spline = spline;
@@ -186,6 +192,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for all type of charts
      *
      * @param series
+     *            the series
      */
     public void setSeries(PlotOptionsSeries series) {
         this.series = series;
@@ -202,6 +209,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#AREARANGE} charts
      *
      * @param arearange
+     *            the arearange
      */
     public void setArearange(PlotOptionsArearange arearange) {
         this.arearange = arearange;
@@ -218,6 +226,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#AREASPLINERANGE} charts
      *
      * @param areasplinerange
+     *            the areasplinerange
      */
     public void setAreasplinerange(PlotOptionsAreasplinerange areasplinerange) {
         this.areasplinerange = areasplinerange;
@@ -234,6 +243,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#AREASPLINE} charts
      *
      * @param areaspline
+     *            the areaspline
      */
     public void setAreaspline(PlotOptionsAreaspline areaspline) {
         this.areaspline = areaspline;
@@ -250,6 +260,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#PYRAMID} charts
      *
      * @param pyramid
+     *            the pyramid
      */
     public void setPyramid(PlotOptionsPyramid pyramid) {
         this.pyramid = pyramid;
@@ -266,6 +277,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#WATERFALL} charts
      *
      * @param waterfall
+     *            the waterfall
      */
     public void setWaterfall(PlotOptionsWaterfall waterfall) {
         this.waterfall = waterfall;
@@ -279,6 +291,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#TREEMAP} charts
      *
      * @param treemap
+     *            the treemap
      */
     public void setTreemap(PlotOptionsTreemap treemap) {
         this.treemap = treemap;
@@ -295,6 +308,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#POLYGON} charts
      *
      * @param polygon
+     *            the polygon
      */
     public void setPolygon(PlotOptionsPolygon polygon) {
         this.polygon = polygon;
@@ -311,6 +325,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#BOXPLOT} charts
      *
      * @param boxplot
+     *            the boxplot
      */
     public void setBoxplot(PlotOptionsBoxplot boxplot) {
         this.boxplot = boxplot;
@@ -327,6 +342,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#BUBBLE} charts
      *
      * @param bubble
+     *            the bubble
      */
     public void setBubble(PlotOptionsBubble bubble) {
         this.bubble = bubble;
@@ -340,6 +356,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#COLUMNRANGE} charts
      *
      * @param columnrange
+     *            the columnrange
      */
     public void setColumnrange(PlotOptionsColumnrange columnrange) {
         this.columnrange = columnrange;
@@ -353,6 +370,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#ERRORBAR} charts
      *
      * @param errorbar
+     *            the errorbar
      */
     public void setErrorbar(PlotOptionsErrorbar errorbar) {
         this.errorbar = errorbar;
@@ -369,6 +387,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#FUNNEL} charts
      *
      * @param funnel
+     *            the funnel
      */
     public void setFunnel(PlotOptionsFunnel funnel) {
         this.funnel = funnel;
@@ -385,6 +404,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#GAUGE} charts
      *
      * @param gauge
+     *            the gauge
      */
     public void setGauge(PlotOptionsGauge gauge) {
         this.gauge = gauge;
@@ -398,6 +418,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#HEATMAP} charts
      *
      * @param heatmap
+     *            the heatmap
      */
     public void setHeatmap(PlotOptionsHeatmap heatmap) {
         this.heatmap = heatmap;
@@ -411,6 +432,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#SCATTER} charts
      *
      * @param scatter
+     *            the scatter
      */
     public void setScatter(PlotOptionsScatter scatter) {
         this.scatter = scatter;
@@ -424,6 +446,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#SOLIDGAUGE} charts
      *
      * @param solidgauge
+     *            the solidgauge
      */
     public void setSolidgauge(PlotOptionsSolidgauge solidgauge) {
         this.solidgauge = solidgauge;
@@ -444,6 +467,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#CANDLESTICK} charts
      *
      * @param candlestick
+     *            the candlestick
      */
     public void setCandlestick(PlotOptionsCandlestick candlestick) {
         this.candlestick = candlestick;
@@ -460,6 +484,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#FLAGS} charts
      *
      * @param flags
+     *            the flags
      */
     public void setFlags(PlotOptionsFlags flags) {
         this.flags = flags;
@@ -476,6 +501,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#OHLC} charts
      *
      * @param ohlc
+     *            the ohlc
      */
     public void setOhlc(PlotOptionsOhlc ohlc) {
         this.ohlc = ohlc;
@@ -492,6 +518,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#BULLET} charts
      *
      * @param bullet
+     *            the bullet
      */
     public void setBullet(PlotOptionsBullet bullet) {
         this.bullet = bullet;
@@ -508,6 +535,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#ORGANIZATION} charts
      *
      * @param organization
+     *            the organization
      */
     public void setOrganization(PlotOptionsOrganization organization) {
         this.organization = organization;
@@ -524,6 +552,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#TIMELINE} charts
      *
      * @param timeline
+     *            the timeline
      */
     public void setTimeline(PlotOptionsTimeline timeline) {
         this.timeline = timeline;
@@ -540,6 +569,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#XRANGE} charts
      *
      * @param xrange
+     *            the xrange
      */
     public void setXrange(PlotOptionsXrange xrange) {
         this.xrange = xrange;
@@ -556,6 +586,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#GANTT} charts
      *
      * @param gantt
+     *            the gantt
      */
     public void setGantt(PlotOptionsGantt gantt) {
         this.gantt = gantt;

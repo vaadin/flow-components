@@ -37,6 +37,7 @@ public class Zooming extends AbstractConfigurationObject {
      * {@link ChartModel#getPanKey()}.
      *
      * @param key
+     *            the key
      */
     public void setKey(PanKey key) {
         this.key = key;
@@ -56,6 +57,7 @@ public class Zooming extends AbstractConfigurationObject {
      * Configuration for mouse wheel zoom.
      *
      * @param mouseWheel
+     *            the mouse wheel
      */
     public void setMouseWheel(ZoomingMouseWheel mouseWheel) {
         this.mouseWheel = mouseWheel;
@@ -73,6 +75,7 @@ public class Zooming extends AbstractConfigurationObject {
      * the same as the {@link #getType()} setting.
      *
      * @param pinchType
+     *            the pinch type
      */
     public void setPinchType(Dimension pinchType) {
         this.pinchType = pinchType;
@@ -93,6 +96,7 @@ public class Zooming extends AbstractConfigurationObject {
      * reset zoom.
      *
      * @param resetButton
+     *            the reset button
      */
     public void setResetButton(ZoomingResetButton resetButton) {
         this.resetButton = resetButton;
@@ -114,6 +118,7 @@ public class Zooming extends AbstractConfigurationObject {
      * the page.
      *
      * @param singleTouch
+     *            the single touch
      */
     public void setSingleTouch(Boolean singleTouch) {
         this.singleTouch = singleTouch;
@@ -134,6 +139,7 @@ public class Zooming extends AbstractConfigurationObject {
      * due to the radial nature of the coordinate system.
      *
      * @param type
+     *            the chart type
      */
     public void setType(Dimension type) {
         this.type = type;

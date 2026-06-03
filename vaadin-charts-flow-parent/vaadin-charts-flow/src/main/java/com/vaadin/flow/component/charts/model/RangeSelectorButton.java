@@ -44,6 +44,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
      * Defines the timespan for the button
      *
      * @param type
+     *            the chart type
      */
     public void setType(RangeSelectorTimespan type) {
         this.type = type;
@@ -60,6 +61,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
      * Defines how many units of the defined type to use.
      *
      * @param count
+     *            the count
      */
     public void setCount(Number count) {
         this.count = count;
@@ -76,6 +78,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
      * Defines the text for the button
      *
      * @param text
+     *            the text
      */
     public void setText(String text) {
         this.text = text;
@@ -92,6 +95,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
      * Defines a custom data grouping definition for the button
      *
      * @param dataGrouping
+     *            the data grouping
      */
     public void setDataGrouping(DataGrouping dataGrouping) {
         this.dataGrouping = dataGrouping;

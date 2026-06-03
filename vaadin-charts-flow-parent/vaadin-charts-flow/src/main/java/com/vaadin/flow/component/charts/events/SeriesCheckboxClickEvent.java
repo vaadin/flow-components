@@ -27,9 +27,13 @@ public class SeriesCheckboxClickEvent extends ComponentEvent<Chart>
      * Constructs a SeriesCheckboxClickEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      * @param isChecked
+     *            whether the checkbox is checked
      * @param seriesIndex
+     *            the series index
      */
     public SeriesCheckboxClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.checked") boolean isChecked,
@@ -42,7 +46,7 @@ public class SeriesCheckboxClickEvent extends ComponentEvent<Chart>
     /**
      * Checks if the checkbox is checked
      *
-     * @return
+     * @return whether the checkbox is checked
      */
     public boolean isChecked() {
         return checked;

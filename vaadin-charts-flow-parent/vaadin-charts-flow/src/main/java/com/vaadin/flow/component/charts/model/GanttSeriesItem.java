@@ -85,6 +85,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * Used in axes of type treegrid. Defaults to false.
      *
      * @param collapsed
+     *            the collapsed
      */
     public void setCollapsed(Boolean collapsed) {
         this.collapsed = collapsed;
@@ -120,6 +121,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * Progress indicator of how much of the task is completed.
      *
      * @param completed
+     *            the completed
      */
     public void setCompleted(Completed completed) {
         this.completed = completed;
@@ -129,6 +131,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * Progress indicator of how much of the task is completed.
      *
      * @param completed
+     *            the completed
      */
     public void setCompleted(Number completed) {
         if (this.completed == null) {
@@ -191,6 +194,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * The end time of a task.
      *
      * @param end
+     *            the end
      */
     public void setEnd(Instant end) {
         this.end = Util.toHighchartsTS(end);
@@ -208,6 +212,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * handled, while end is ignored. Defaults to false.
      *
      * @param milestone
+     *            the milestone
      */
     public void setMilestone(Boolean milestone) {
         this.milestone = milestone;
@@ -225,6 +230,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * to null
      *
      * @param parent
+     *            the parent
      */
     public void setParent(String parent) {
         this.parent = parent;
@@ -241,6 +247,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * The start time of a task.
      *
      * @param start
+     *            the start
      */
     public void setStart(Instant start) {
         this.start = Util.toHighchartsTS(start);
@@ -257,6 +264,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * The Y value of a task.
      *
      * @param y
+     *            the Y value
      */
     public void setY(Number y) {
         this.y = y;
@@ -340,6 +348,7 @@ public class GanttSeriesItem extends AbstractConfigurationObject {
      * callbacks and formatter callbacks.
      *
      * @param custom
+     *            the custom
      */
     public void setCustom(AbstractConfigurationObject custom) {
         this.custom = custom;

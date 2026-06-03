@@ -72,8 +72,11 @@ public abstract class AbstractChartExample extends Div {
      * Runs given task repeatedly until the reference component is attached
      *
      * @param component
+     *            the component
      * @param task
+     *            the task
      * @param interval
+     *            the interval
      * @param initialPause
      *            a timeout after tas is started
      */

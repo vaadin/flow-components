@@ -1725,6 +1725,7 @@ public class YAxis extends Axis {
      * Defaults to true.
      *
      * @param alignTicks
+     *            the align ticks
      */
     public void setAlignTicks(Boolean alignTicks) {
         this.alignTicks = alignTicks;
@@ -1743,6 +1744,7 @@ public class YAxis extends Axis {
      * axes.
      *
      * @param margin
+     *            the margin
      */
     public void setMargin(Number margin) {
         this.margin = margin;
@@ -1760,6 +1762,7 @@ public class YAxis extends Axis {
      * {@link #setMinRange(Number)}
      *
      * @param maxRange
+     *            the max range
      */
     public void setMaxRange(Number maxRange) {
         this.maxRange = maxRange;
@@ -1781,6 +1784,7 @@ public class YAxis extends Axis {
      * Defaults to false.
      *
      * @param minorTicks
+     *            the minor ticks
      */
     public void setMinorTicks(Boolean minorTicks) {
         this.minorTicks = minorTicks;
@@ -1801,6 +1805,7 @@ public class YAxis extends Axis {
      * Adding or removing items will make the chart resize. Defaults to 50.
      *
      * @param staticScale
+     *            the static scale
      */
     public void setStaticScale(Number staticScale) {
         this.staticScale = staticScale;

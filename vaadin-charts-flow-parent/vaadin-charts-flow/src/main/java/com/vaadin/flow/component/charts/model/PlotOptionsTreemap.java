@@ -118,7 +118,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
     }
 
     /**
-     * {@see #setAllowTraversingTree(Boolean)}
+     * @see #setAllowTraversingTree(Boolean)
      */
     public Boolean getAllowTraversingTree() {
 
@@ -231,7 +231,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
     }
 
     /**
-     * {@see #setBreadcrumbs(Breadcrumbs)}
+     * @see #setBreadcrumbs(Breadcrumbs)
      */
     public Breadcrumbs getBreadcrumbs() {
         if (breadcrumbs == null) {
@@ -245,6 +245,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * through the traversed levels.
      *
      * @param breadcrumbs
+     *            the breadcrumbs
      */
     public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
         this.breadcrumbs = breadcrumbs;

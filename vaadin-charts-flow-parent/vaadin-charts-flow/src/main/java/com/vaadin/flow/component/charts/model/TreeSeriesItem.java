@@ -38,7 +38,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
 
     /**
      * @see #setParent(String)
-     * @return
+     * @return the parent
      */
     public String getParent() {
         return parent;
@@ -50,6 +50,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
      * the root. Defaults to null.
      *
      * @param parent
+     *            the parent
      */
     public void setParent(String parent) {
         this.parent = parent;
@@ -59,6 +60,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
      * Set the parent of this node.
      *
      * @param parent
+     *            the parent
      */
     public void setParent(TreeSeriesItem parent) {
         String parentString = (parent != null ? parent.getId() : null);
@@ -67,7 +69,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
 
     /**
      * @see #setValue(Number)
-     * @return
+     * @return the value
      */
     public Number getValue() {
         return value;
@@ -77,6 +79,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
      * Set the numeric value of this node
      *
      * @param value
+     *            the value
      */
     public void setValue(Number value) {
         this.value = value;
@@ -84,7 +87,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
 
     /**
      * @see #setColorValue(Number)
-     * @return
+     * @return the color value
      */
     public Number getColorValue() {
         return colorValue;
@@ -95,6 +98,7 @@ public class TreeSeriesItem extends AbstractSeriesItem {
      * colorAxis.
      *
      * @param colorValue
+     *            the color value
      */
     public void setColorValue(Number colorValue) {
         this.colorValue = colorValue;

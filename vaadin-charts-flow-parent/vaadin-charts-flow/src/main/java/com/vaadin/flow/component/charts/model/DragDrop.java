@@ -41,6 +41,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * individually. Defaults to true.
      *
      * @param draggableEnd
+     *            the draggable end
      */
     public void setDraggableEnd(Boolean draggableEnd) {
         this.draggableEnd = draggableEnd;
@@ -58,6 +59,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * individually. Defaults to true.
      *
      * @param draggableStart
+     *            the draggable start
      */
     public void setDraggableStart(Boolean draggableStart) {
         this.draggableStart = draggableStart;
@@ -74,6 +76,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Enable dragging in the X dimension.
      *
      * @param draggableX
+     *            the draggable x
      */
     public void setDraggableX(Boolean draggableX) {
         this.draggableX = draggableX;
@@ -90,6 +93,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Allow X1 value to be dragged individually. Defaults to true.
      *
      * @param draggableX1
+     *            the draggable x1
      */
     public void setDraggableX1(Boolean draggableX1) {
         this.draggableX1 = draggableX1;
@@ -106,6 +110,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Allow X2 value to be dragged individually. Defaults to true.
      *
      * @param draggableX2
+     *            the draggable x2
      */
     public void setDraggableX2(Boolean draggableX2) {
         this.draggableX2 = draggableX2;
@@ -123,6 +128,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * TreeGrid axes (the default axis type in Gantt charts).
      *
      * @param draggableY
+     *            the draggable y
      */
     public void setDraggableY(Boolean draggableY) {
         this.draggableY = draggableY;
@@ -142,6 +148,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Options for the drag handles.
      *
      * @param dragHandle
+     *            the drag handle
      */
     public void setDragHandle(DragHandle dragHandle) {
         this.dragHandle = dragHandle;
@@ -158,6 +165,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Set the maximum X value the points can be moved to.
      *
      * @param dragMaxX
+     *            the drag max x
      */
     public void setDragMaxX(Number dragMaxX) {
         this.dragMaxX = dragMaxX;
@@ -174,6 +182,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Set the maximum Y value the points can be moved to.
      *
      * @param dragMaxY
+     *            the drag max y
      */
     public void setDragMaxY(Number dragMaxY) {
         this.dragMaxY = dragMaxY;
@@ -190,6 +199,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Set the minimum X value the points can be moved to.
      *
      * @param dragMinX
+     *            the drag min x
      */
     public void setDragMinX(Number dragMinX) {
         this.dragMinX = dragMinX;
@@ -206,6 +216,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * Set the minimum Y value the points can be moved to.
      *
      * @param dragMinY
+     *            the drag min y
      */
     public void setDragMinY(Number dragMinY) {
         this.dragMinY = dragMinY;
@@ -224,6 +235,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * 1. Defaults to 0.
      *
      * @param dragPrecisionX
+     *            the drag precision x
      */
     public void setDragPrecisionX(Number dragPrecisionX) {
         this.dragPrecisionX = dragPrecisionX;
@@ -242,6 +254,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * 1. Defaults to 0.
      *
      * @param dragPrecisionY
+     *            the drag precision y
      */
     public void setDragPrecisionY(Number dragPrecisionY) {
         this.dragPrecisionY = dragPrecisionY;
@@ -260,6 +273,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * selecting points. Defaults to 2.
      *
      * @param dragSensitivity
+     *            the drag sensitivity
      */
     public void setDragSensitivity(Number dragSensitivity) {
         this.dragSensitivity = dragSensitivity;
@@ -277,6 +291,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * be grouped together when moving. Defaults to undefined.
      *
      * @param groupBy
+     *            the group by
      */
     public void setGroupBy(String groupBy) {
         this.groupBy = groupBy;
@@ -299,6 +314,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * @see #setLiveRedraw(Boolean)
      *
      * @param guideBox
+     *            the guide box
      */
     public void setGuideBox(GuideBox guideBox) {
         this.guideBox = guideBox;
@@ -316,6 +332,7 @@ public class DragDrop extends AbstractConfigurationObject {
      * illustrate the new point size. Defaults to true.
      *
      * @param liveRedraw
+     *            whether live redraw is enabled
      */
     public void setLiveRedraw(Boolean liveRedraw) {
         this.liveRedraw = liveRedraw;

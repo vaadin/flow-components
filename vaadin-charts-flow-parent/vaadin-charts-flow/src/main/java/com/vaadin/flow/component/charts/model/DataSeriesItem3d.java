@@ -23,8 +23,11 @@ public class DataSeriesItem3d extends DataSeriesItem {
      * Constructs an item with X, Y and Z values
      *
      * @param x
+     *            the X value
      * @param y
+     *            the Y value
      * @param z
+     *            the z
      */
     public DataSeriesItem3d(Number x, Number y, Number z) {
         super(x, y);
@@ -35,6 +38,7 @@ public class DataSeriesItem3d extends DataSeriesItem {
      * Sets the z value of the point.
      *
      * @param z
+     *            the z
      */
     public void setZ(Number z) {
         this.z = z;

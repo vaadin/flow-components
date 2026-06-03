@@ -20,6 +20,7 @@ public class RangeSeries extends DataSeries {
      * Constructs a RangeSeries with the given name
      *
      * @param name
+     *            the name
      */
     public RangeSeries(String name) {
         setName(name);

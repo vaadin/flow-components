@@ -37,6 +37,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * series' point by its {@link Series#getId()}
      *
      * @param series
+     *            the series
      */
     void addSeries(Series series) {
         this.series.add(series);
@@ -46,6 +47,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * Sets the configuration linked to the drilldown series.
      *
      * @param configuration
+     *            the chart configuration
      */
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
@@ -62,7 +64,7 @@ public class Drilldown extends AbstractConfigurationObject {
 
     /**
      * @see #setActiveAxisLabelStyle(Style)
-     * @return
+     * @return the active axis label style
      */
     public Style getActiveAxisLabelStyle() {
         return activeAxisLabelStyle;
@@ -73,6 +75,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * drilldown data.
      *
      * @param activeAxisLabelStyle
+     *            the active axis label style
      */
     public void setActiveAxisLabelStyle(Style activeAxisLabelStyle) {
         this.activeAxisLabelStyle = activeAxisLabelStyle;
@@ -80,7 +83,7 @@ public class Drilldown extends AbstractConfigurationObject {
 
     /**
      * @see #setActiveDataLabelStyle(Style)
-     * @return
+     * @return the active data label style
      */
     public Style getActiveDataLabelStyle() {
         return activeDataLabelStyle;
@@ -91,6 +94,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * drilldown data.
      *
      * @param activeDataLabelStyle
+     *            the active data label style
      */
     public void setActiveDataLabelStyle(Style activeDataLabelStyle) {
         this.activeDataLabelStyle = activeDataLabelStyle;
@@ -110,6 +114,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * and points of different types, but animation will not occur.
      *
      * @param animation
+     *            whether to animate the operation
      */
     public void setAnimation(Boolean animation) {
         this.animation = animation;

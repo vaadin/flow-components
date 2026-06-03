@@ -22,7 +22,9 @@ public class ChartLoadEvent extends ComponentEvent<Chart> {
      * Constructs a ChartLoadEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      */
     public ChartLoadEvent(Chart source, boolean fromClient) {
         super(source, fromClient);

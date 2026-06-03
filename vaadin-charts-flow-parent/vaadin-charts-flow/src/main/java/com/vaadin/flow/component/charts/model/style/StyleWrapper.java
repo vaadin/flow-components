@@ -19,7 +19,7 @@ public class StyleWrapper extends AbstractConfigurationObject {
     /**
      * Return the style object
      *
-     * @return
+     * @return the style object
      */
     public Style getStyle() {
         return style;
@@ -29,6 +29,7 @@ public class StyleWrapper extends AbstractConfigurationObject {
      * Set the style object
      *
      * @param style
+     *            the style
      */
     public void setStyle(Style style) {
         this.style = style;

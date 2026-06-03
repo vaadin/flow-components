@@ -27,14 +27,23 @@ public class ChartClickEvent extends ComponentEvent<Chart>
      * Constructs a ChartClickEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      * @param pageX
+     *            the absolute X coordinate
      * @param pageY
+     *            the absolute Y coordinate
      * @param altKey
+     *            whether the Alt key was pressed
      * @param ctrlKey
+     *            whether the Ctrl key was pressed
      * @param metaKey
+     *            whether the Meta key was pressed
      * @param shiftKey
+     *            whether the Shift key was pressed
      * @param button
+     *            the mouse button
      */
     public ChartClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.xValue") Double x,

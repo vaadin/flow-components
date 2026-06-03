@@ -35,10 +35,15 @@ public class OhlcItem extends DataSeriesItem {
      * Constructs an ohlc data item for give open, high, low and close values
      *
      * @param x
+     *            the X value
      * @param open
+     *            the open
      * @param high
+     *            the high
      * @param low
+     *            the low
      * @param close
+     *            the close
      */
     public OhlcItem(Number x, Number open, Number high, Number low,
             Number close) {
@@ -54,10 +59,15 @@ public class OhlcItem extends DataSeriesItem {
      * Constructs an ohlc data item for give open, high, low and close values
      *
      * @param instant
+     *            the instant
      * @param open
+     *            the open
      * @param high
+     *            the high
      * @param low
+     *            the low
      * @param close
+     *            the close
      */
     public OhlcItem(Instant instant, Number open, Number high, Number low,
             Number close) {
@@ -80,6 +90,7 @@ public class OhlcItem extends DataSeriesItem {
      * Sets the open value of the OHLC item
      *
      * @param open
+     *            the open
      */
     public void setOpen(Number open) {
         this.open = open;
@@ -96,6 +107,7 @@ public class OhlcItem extends DataSeriesItem {
      * Sets the close value of the OHLC item
      *
      * @param close
+     *            the close
      */
     public void setClose(Number close) {
         this.close = close;

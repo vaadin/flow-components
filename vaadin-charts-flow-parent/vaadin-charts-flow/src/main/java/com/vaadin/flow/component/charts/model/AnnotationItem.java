@@ -33,6 +33,7 @@ public class AnnotationItem extends AbstractConfigurationObject {
      * Sets labels that can be positioned anywhere in the chart area.
      *
      * @param labels
+     *            the labels
      */
     public void setLabels(AnnotationItemLabel... labels) {
         clearLabels();
@@ -44,6 +45,7 @@ public class AnnotationItem extends AbstractConfigurationObject {
      *
      * @see #setLabels(AnnotationItemLabel...)
      * @param labels
+     *            the labels
      */
     public void addLabels(AnnotationItemLabel... labels) {
         for (AnnotationItemLabel label : labels) {
@@ -56,6 +58,7 @@ public class AnnotationItem extends AbstractConfigurationObject {
      *
      * @see #setLabels(AnnotationItemLabel...)
      * @param label
+     *            the label
      */
     public void addLabel(AnnotationItemLabel label) {
         getLabels().add(label);

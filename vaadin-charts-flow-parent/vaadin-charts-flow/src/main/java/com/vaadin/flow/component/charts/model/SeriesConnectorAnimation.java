@@ -27,6 +27,7 @@ public class SeriesConnectorAnimation extends AbstractConfigurationObject {
      * Defaults to true.
      *
      * @param reversed
+     *            whether the animation direction is reversed
      */
     public void setReversed(Boolean reversed) {
         this.reversed = reversed;

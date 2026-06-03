@@ -52,7 +52,7 @@ public class TreeSeries extends AbstractSeries {
     /**
      * Return an unmodifiable copy of the items in this series.
      *
-     * @return
+     * @return an unmodifiable copy of the items in this series
      * @see #setData(Collection)
      */
     public Collection<TreeSeriesItem> getData() {
@@ -64,6 +64,7 @@ public class TreeSeries extends AbstractSeries {
      * whole tree, and the list is not ordered.
      *
      * @param data
+     *            the data
      */
     public void setData(Collection<TreeSeriesItem> data) {
         this.data = new LinkedList<>(data);
@@ -80,6 +81,7 @@ public class TreeSeries extends AbstractSeries {
      * Add given item to the series
      *
      * @param item
+     *            the item
      */
     public void add(TreeSeriesItem item) {
         data.add(item);
@@ -89,6 +91,7 @@ public class TreeSeries extends AbstractSeries {
      * Add all the given items to the series
      *
      * @param items
+     *            the items
      */
     public void addAll(TreeSeriesItem... items) {
         data.addAll(Arrays.asList(items));

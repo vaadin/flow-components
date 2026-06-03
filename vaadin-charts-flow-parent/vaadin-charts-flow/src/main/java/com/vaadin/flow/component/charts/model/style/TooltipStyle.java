@@ -33,6 +33,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
      * Sets the background color of tooltips
      *
      * @param backgroundColor
+     *            the background color
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -49,6 +50,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
      * Sets the width of the border of tooltips
      *
      * @param borderWidth
+     *            the border width
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -116,6 +118,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
      * color of the corresponding series or point. Defaults to null.
      *
      * @param borderColor
+     *            the border color
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;

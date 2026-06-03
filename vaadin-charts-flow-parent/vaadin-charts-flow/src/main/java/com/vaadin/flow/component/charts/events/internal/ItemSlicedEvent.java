@@ -26,9 +26,13 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
      * Constructs the event.
      *
      * @param index
+     *            the item index
      * @param sliced
+     *            whether the item is sliced
      * @param redraw
+     *            whether to redraw the chart
      * @param animation
+     *            whether to animate the operation
      */
     public ItemSlicedEvent(Series series, int index, boolean sliced,
             boolean redraw, boolean animation) {
@@ -43,8 +47,11 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
      * Constructs the event with animated transition
      *
      * @param index
+     *            the item index
      * @param sliced
+     *            whether the item is sliced
      * @param redraw
+     *            whether to redraw the chart
      */
     public ItemSlicedEvent(Series series, int index, boolean sliced,
             boolean redraw) {
@@ -55,7 +62,9 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
      * Constructs the event with animated transition, redraws the chart
      *
      * @param index
+     *            the item index
      * @param sliced
+     *            whether the item is sliced
      */
     public ItemSlicedEvent(Series series, int index, boolean sliced) {
         this(series, index, sliced, true, true);
@@ -64,7 +73,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
     /**
      * Returns the index of the point to be sliced
      *
-     * @return
+     * @return the index of the point to be sliced
      */
     public int getIndex() {
         return index;
@@ -74,7 +83,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
      * When true, the point is sliced out. When false, the point is set in. When
      * null or undefined, the sliced state is toggled.
      *
-     * @return
+     * @return whether the item is sliced
      */
     public boolean isSliced() {
         return sliced;

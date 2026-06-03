@@ -45,6 +45,7 @@ public class Time extends AbstractConfigurationObject {
      * {@link #setUseUTC(Boolean) useUTC} to true.
      *
      * @param timezone
+     *            the timezone
      */
     public void setTimezone(String timezone) {
         this.timezone = timezone;

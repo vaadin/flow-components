@@ -33,6 +33,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * Defaults to highcharts-drag-handle.
      *
      * @param className
+     *            the class name
      */
     public void setClassName(String className) {
         this.className = className;
@@ -49,6 +50,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * The fill color of the drag handles. Defaults to #fff.
      *
      * @param color
+     *            the color
      */
     public void setColor(Color color) {
         this.color = color;
@@ -67,6 +69,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * direction the point is being dragged.
      *
      * @param cursor
+     *            the cursor
      */
     public void setCursor(String cursor) {
         this.cursor = cursor;
@@ -83,6 +86,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * The line color of the drag handles. Defaults to rgba(0, 0, 0, 0.6).
      *
      * @param lineColor
+     *            the line color
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -99,6 +103,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * The line width for the drag handles. Defaults to 1.
      *
      * @param lineWidth
+     *            the line width
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -115,6 +120,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * The z index for the drag handles. Defaults to 901.
      *
      * @param zIndex
+     *            the z index
      */
     public void setzIndex(Number zIndex) {
         this.zIndex = zIndex;
@@ -133,6 +139,7 @@ public class DragHandle extends AbstractConfigurationObject {
      * path is automatically positioned on the point.
      *
      * @param _fn_pathFormatter
+     *            the path formatter
      */
     public void setPathFormatter(String _fn_pathFormatter) {
         this._fn_pathFormatter = _fn_pathFormatter;

@@ -53,7 +53,7 @@ public class GanttSeries extends AbstractSeries {
     /**
      * Return an unmodifiable copy of the items in this series.
      *
-     * @return
+     * @return an unmodifiable copy of the items in this series
      * @see #setData(Collection)
      */
     public Collection<GanttSeriesItem> getData() {
@@ -64,6 +64,7 @@ public class GanttSeries extends AbstractSeries {
      * Set the list of {@link GanttSeriesItem} in this series.
      *
      * @param data
+     *            the data
      */
     public void setData(Collection<GanttSeriesItem> data) {
         this.data = new LinkedList<>(data);
@@ -80,6 +81,7 @@ public class GanttSeries extends AbstractSeries {
      * Add given item to the series
      *
      * @param item
+     *            the item
      */
     public void add(GanttSeriesItem item) {
         data.add(item);
@@ -89,6 +91,7 @@ public class GanttSeries extends AbstractSeries {
      * Add all the given items to the series
      *
      * @param items
+     *            the items
      */
     public void addAll(GanttSeriesItem... items) {
         data.addAll(Arrays.asList(items));
@@ -98,6 +101,7 @@ public class GanttSeries extends AbstractSeries {
      * Returns {@link GanttSeriesItem} at given index
      *
      * @param index
+     *            the item index
      * @return the Item
      * @throws IndexOutOfBoundsException
      *             if data series don't have item at given index

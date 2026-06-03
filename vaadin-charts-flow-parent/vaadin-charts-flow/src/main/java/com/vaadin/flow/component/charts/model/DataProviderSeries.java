@@ -221,7 +221,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * Returns a list mappings between chart attributes(keys) and values. For
      * example: x->1, x->2, y->2, y->3 for linear chart
      *
-     * @return
+     * @return a list mappings between chart attributes(keys) and values
      */
 
     public List<Map<String, Optional<Object>>> getValues() {
@@ -238,7 +238,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Returns a set of chart attributes(keys).
      *
-     * @return
+     * @return a set of chart attributes(keys)
      */
     public Set<String> getChartAttributes() {
         return chartAttributeToCallback.keySet();
@@ -248,7 +248,8 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * Returns true if the chart is updated automatically when a DataChangeEvent
      * is emitted by the data provider. Default is true.
      *
-     * @return
+     * @return true if the chart is updated automatically when a DataChangeEvent
+     *         is emitted by the data provider
      */
     public boolean isAutomaticChartUpdateEnabled() {
         return automaticChartUpdateEnabled;

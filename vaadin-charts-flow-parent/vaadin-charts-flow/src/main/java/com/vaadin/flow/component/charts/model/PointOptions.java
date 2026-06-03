@@ -205,6 +205,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * Specific data labels configuration for a series type
      *
      * @param dataLabels
+     *            the data labels
      */
     public abstract void setDataLabels(DataLabels dataLabels);
 

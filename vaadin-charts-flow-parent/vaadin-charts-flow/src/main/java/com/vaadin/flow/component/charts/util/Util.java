@@ -13,11 +13,12 @@ import java.time.Instant;
 public class Util {
 
     /**
-     * Gets the number of miliseconds from the Java epoch of
+     * Gets the number of milliseconds from the Java epoch of
      * 1970-01-01T00:00:00Z.
      *
      * @param date
-     * @return
+     *            the date
+     * @return the number of milliseconds from the Java epoch
      */
     public static long toHighchartsTS(Instant date) {
         return date.getEpochSecond() * 1000;

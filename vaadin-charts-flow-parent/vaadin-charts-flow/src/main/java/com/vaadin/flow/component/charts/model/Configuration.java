@@ -80,6 +80,7 @@ public class Configuration extends AbstractConfigurationObject
      * Sets options for configuring accessibility for the chart.
      *
      * @param accessibility
+     *            the accessibility
      */
     public void setAccessibility(Accessibility accessibility) {
         this.accessibility = accessibility;
@@ -118,6 +119,7 @@ public class Configuration extends AbstractConfigurationObject
      * Adds a single series to the list of series in this configuration.
      *
      * @param series
+     *            the series
      */
     public void addSeries(Series series) {
         this.series.add(series);
@@ -149,6 +151,7 @@ public class Configuration extends AbstractConfigurationObject
      * the client.
      *
      * @param series
+     *            the series
      */
     public void setSeries(List<Series> series) {
         this.series = new ArrayList<>(series);
@@ -161,6 +164,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * @see #setSeries(List)
      * @param series
+     *            the series
      */
     public void setSeries(Series... series) {
         setSeries(Arrays.asList(series));
@@ -172,6 +176,7 @@ public class Configuration extends AbstractConfigurationObject
      * at this point
      *
      * @param series
+     *            the series
      */
     private void addSeriesToDrilldownConfiguration(Series series) {
         if (series instanceof DataSeries) {
@@ -215,6 +220,7 @@ public class Configuration extends AbstractConfigurationObject
      * The main title of the chart.
      *
      * @param title
+     *            the title
      */
     public void setTitle(Title title) {
         this.title = title;
@@ -254,6 +260,7 @@ public class Configuration extends AbstractConfigurationObject
      * Sets the chart's subtitle
      *
      * @param subTitle
+     *            the subtitle
      */
     public void setSubTitle(Subtitle subTitle) {
         subtitle = subTitle;
@@ -505,6 +512,7 @@ public class Configuration extends AbstractConfigurationObject
      * series or point.
      *
      * @param tooltip
+     *            the tooltip
      */
     public void setTooltip(Tooltip tooltip) {
         this.tooltip = tooltip;
@@ -525,6 +533,7 @@ public class Configuration extends AbstractConfigurationObject
      * the chart.
      *
      * @param credits
+     *            the credits
      */
     public void setCredits(Credits credits) {
         this.credits = credits;
@@ -555,6 +564,7 @@ public class Configuration extends AbstractConfigurationObject
      * each series item or point item in the chart.
      *
      * @param legend
+     *            the legend
      */
     public void setLegend(Legend legend) {
         this.legend = legend;
@@ -579,6 +589,7 @@ public class Configuration extends AbstractConfigurationObject
      * @see #setPlotOptions(AbstractPlotOptions...)
      *
      * @param type
+     *            the chart type
      */
     public AbstractPlotOptions getPlotOptions(ChartType type) {
         return plotOptions.get(type.toString());
@@ -598,6 +609,7 @@ public class Configuration extends AbstractConfigurationObject
      * @see AbstractPlotOptions
      *
      * @param plotOptions
+     *            the plot options
      */
     public void setPlotOptions(AbstractPlotOptions... plotOptions) {
         this.plotOptions.clear();
@@ -612,6 +624,7 @@ public class Configuration extends AbstractConfigurationObject
      * @see #setPlotOptions(AbstractPlotOptions...)
      *
      * @param plotOptions
+     *            the plot options
      */
     public void addPlotOptions(AbstractPlotOptions plotOptions) {
         if (plotOptions instanceof PlotOptionsSeries) {
@@ -626,6 +639,7 @@ public class Configuration extends AbstractConfigurationObject
      * Sets whether to enable exporting
      *
      * @param exporting
+     *            the exporting
      * @see Exporting
      * @see #setExporting(Exporting)
      */
@@ -637,6 +651,7 @@ public class Configuration extends AbstractConfigurationObject
      * Sets the exporting module settings.
      *
      * @param exporting
+     *            the exporting
      * @see Exporting
      */
     public void setExporting(Exporting exporting) {
@@ -677,6 +692,7 @@ public class Configuration extends AbstractConfigurationObject
      * set. Each XAxis or YAxis can reference the pane by index.
      *
      * @param pane
+     *            the pane
      */
     public void addPane(Pane pane) {
         if (this.pane == null) {
@@ -691,6 +707,7 @@ public class Configuration extends AbstractConfigurationObject
      * This is only valid if the chart is configured to use timeline mode. See
      *
      * @param rangeSelector
+     *            the range selector
      * @see RangeSelector
      */
     public void setRangeSelector(RangeSelector rangeSelector) {
@@ -723,6 +740,7 @@ public class Configuration extends AbstractConfigurationObject
      * Allows panning over the X axis of the chart
      *
      * @param scrollbar
+     *            the scrollbar
      */
     public void setScrollbar(Scrollbar scrollbar) {
         this.scrollbar = scrollbar;
@@ -744,6 +762,7 @@ public class Configuration extends AbstractConfigurationObject
      * The actual text to display is set in the {@link Lang#setNoData(String)}
      *
      * @param noData
+     *            the no-data options
      */
     public void setNoData(NoData noData) {
         this.noData = noData;
@@ -763,6 +782,7 @@ public class Configuration extends AbstractConfigurationObject
      * Set options for buttons and menus appearing in the exporting module.
      *
      * @param navigation
+     *            the navigation
      */
     public void setNavigation(Navigation navigation) {
         this.navigation = navigation;
@@ -783,6 +803,7 @@ public class Configuration extends AbstractConfigurationObject
      * covers the plot area on chart operations.
      *
      * @param loading
+     *            the loading
      */
     public void setLoading(Loading loading) {
         this.loading = loading;
@@ -802,6 +823,7 @@ public class Configuration extends AbstractConfigurationObject
      * Set configuration for the navigator
      *
      * @param navigator
+     *            the navigator
      */
     public void setNavigator(Navigator navigator) {
         this.navigator = navigator;
@@ -821,6 +843,7 @@ public class Configuration extends AbstractConfigurationObject
      * Set configuration for time options
      *
      * @param time
+     *            the time
      */
     public void setTime(Time time) {
         this.time = time;
@@ -858,7 +881,9 @@ public class Configuration extends AbstractConfigurationObject
      * Notifies listeners that a data point has been added
      *
      * @param series
+     *            the series
      * @param value
+     *            the value
      */
     void fireDataAdded(Series series, Number value) {
         DataAddedEvent dataAddedEvent = new DataAddedEvent(series, value);
@@ -871,6 +896,7 @@ public class Configuration extends AbstractConfigurationObject
      * Notifies listeners that a data point has been added
      *
      * @param shift
+     *            the shift
      */
     void fireDataAdded(Series series, DataSeriesItem item, boolean shift) {
         DataAddedEvent dataAddedEvent = new DataAddedEvent(series, item, shift);
@@ -1039,10 +1065,15 @@ public class Configuration extends AbstractConfigurationObject
      * Fires point sliced event
      *
      * @param series
+     *            the series
      * @param index
+     *            the item index
      * @param sliced
+     *            whether the item is sliced
      * @param redraw
+     *            whether to redraw the chart
      * @param animation
+     *            whether to animate the operation
      */
     void fireItemSliced(Series series, int index, boolean sliced,
             boolean redraw, boolean animation) {
@@ -1203,6 +1234,7 @@ public class Configuration extends AbstractConfigurationObject
      * dependency (see {@link GanttSeriesItemDependency}).
      *
      * @param connectors
+     *            the connectors
      */
     public void setConnectors(ChartConnectors connectors) {
         this.connectors = connectors;

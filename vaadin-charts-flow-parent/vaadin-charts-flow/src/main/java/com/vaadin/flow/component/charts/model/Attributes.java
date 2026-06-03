@@ -23,7 +23,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * @see #setFill(Color)
-     * @return
+     * @return the fill
      */
     public Color getFill() {
         return fill;
@@ -33,6 +33,7 @@ public class Attributes extends AbstractConfigurationObject {
      * SVG fill attribute
      *
      * @param fill
+     *            the fill
      */
     public void setFill(Color fill) {
         this.fill = fill;
@@ -40,7 +41,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * @see #setStroke(Color)
-     * @return
+     * @return the stroke
      */
     public Color getStroke() {
         return stroke;
@@ -50,6 +51,7 @@ public class Attributes extends AbstractConfigurationObject {
      * SVG stroke attribute
      *
      * @param stroke
+     *            the stroke
      */
     public void setStroke(Color stroke) {
         this.stroke = stroke;
@@ -57,7 +59,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * @see #setStrokeWidth(Number)
-     * @return
+     * @return the stroke width
      */
     public Number getStrokeWidth() {
         return strokeWidth;
@@ -67,6 +69,7 @@ public class Attributes extends AbstractConfigurationObject {
      * SVG stroke-width attribute
      *
      * @param strokeWidth
+     *            the stroke width
      */
     public void setStrokeWidth(Number strokeWidth) {
         this.strokeWidth = strokeWidth;

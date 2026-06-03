@@ -31,10 +31,15 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
      * Construct a ChartSelectionEvent
      *
      * @param source
+     *            the event source
      * @param selectionStart
+     *            the selection start
      * @param selectionEnd
+     *            the selection end
      * @param valueStart
+     *            the value start
      * @param valueEnd
+     *            the value end
      */
     public ChartSelectionEvent(Chart source, boolean fromClient,
             @EventData("event.detail.xAxisMin") Double selectionStart,

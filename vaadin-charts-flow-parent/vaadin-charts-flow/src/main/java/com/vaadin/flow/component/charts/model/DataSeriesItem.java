@@ -314,6 +314,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * {@link DrilldownCallback} will be triggered when user clicks in a point.
      *
      * @param drilldown
+     *            the drilldown
      */
     void setDrilldown(String drilldown) {
         this.drilldown = drilldown;
@@ -324,6 +325,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * triggered when user clicks in a point.
      *
      * @param drilldown
+     *            the drilldown
      */
     void setDrilldown(Boolean drilldown) {
         this.drilldown = drilldown;
@@ -341,6 +343,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * Set the label configuration for this item
      *
      * @param dataLabels
+     *            the data labels
      */
     public void setDataLabels(DataLabels dataLabels) {
         this.dataLabels = dataLabels;
@@ -368,6 +371,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * Note that not all browsers have support for all values.
      *
      * @param cursor
+     *            the cursor
      */
     public void setCursor(String cursor) {
         this.cursor = cursor;

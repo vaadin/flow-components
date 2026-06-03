@@ -26,6 +26,7 @@ public interface Series extends Serializable {
      * to "".
      *
      * @param name
+     *            the name
      */
     void setName(String name);
 
@@ -33,6 +34,7 @@ public interface Series extends Serializable {
      * Sets the configuration to which this series is linked.
      *
      * @param configuration
+     *            the chart configuration
      */
     void setConfiguration(Configuration configuration);
 
@@ -40,7 +42,7 @@ public interface Series extends Serializable {
      * Gets the plot options related to this specific series. This is needed
      * e.g. in combined charts.
      *
-     * @return
+     * @return the plot options
      */
     AbstractPlotOptions getPlotOptions();
 
@@ -54,6 +56,7 @@ public interface Series extends Serializable {
      * chart and theme levels.
      *
      * @param plotOptions
+     *            the plot options
      */
     void setPlotOptions(AbstractPlotOptions plotOptions);
 

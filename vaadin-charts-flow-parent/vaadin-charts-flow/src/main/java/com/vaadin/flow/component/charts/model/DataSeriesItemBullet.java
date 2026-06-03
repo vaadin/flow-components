@@ -30,7 +30,9 @@ public class DataSeriesItemBullet extends DataSeriesItem {
      * Constructs an item with Y and Target
      *
      * @param y
+     *            the Y value
      * @param target
+     *            the target
      */
     public DataSeriesItemBullet(Number y, Number target) {
         super();
@@ -42,8 +44,11 @@ public class DataSeriesItemBullet extends DataSeriesItem {
      * Constructs an item with X, Y and Target
      *
      * @param x
+     *            the X value
      * @param y
+     *            the Y value
      * @param target
+     *            the target
      */
     public DataSeriesItemBullet(Number x, Number y, Number target) {
         super(x, y);
@@ -54,8 +59,11 @@ public class DataSeriesItemBullet extends DataSeriesItem {
      * Constructs an item with X, Y and Target
      *
      * @param x
+     *            the X value
      * @param y
+     *            the Y value
      * @param target
+     *            the target
      */
     public DataSeriesItemBullet(Instant x, Number y, Number target) {
         super(x, y);

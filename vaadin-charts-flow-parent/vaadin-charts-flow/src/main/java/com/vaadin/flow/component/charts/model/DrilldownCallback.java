@@ -29,6 +29,7 @@ public interface DrilldownCallback extends Serializable {
      * return the Series to be used as drilldown for the point.
      *
      * @param event
+     *            the configuration change event
      * @return a {@link Series} instance to be used as drilldown for the point
      *         or <code>null</code> if nothing should be done
      */
@@ -59,7 +60,7 @@ public interface DrilldownCallback extends Serializable {
         /**
          * Returns the {@link #getItem()} series.
          *
-         * @return
+         * @return the {@link #getItem()} series
          */
         public Series getSeries() {
             return series;
@@ -68,7 +69,7 @@ public interface DrilldownCallback extends Serializable {
         /**
          * Returns the item that was clicked
          *
-         * @return
+         * @return the item that was clicked
          */
         public DataSeriesItem getItem() {
             return item;
@@ -77,7 +78,7 @@ public interface DrilldownCallback extends Serializable {
         /**
          * Returns the index of {@link #getItem()} in {@link #getSeries()}.
          *
-         * @return
+         * @return the index of {@link #getItem()} in {@link #getSeries()}
          */
         public int getItemIndex() {
             return itemIndex;

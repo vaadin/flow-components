@@ -31,6 +31,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * highcharts-drag-box-default. Defaults to highcharts-drag-box-default.
      *
      * @param className
+     *            the class name
      */
     public void setClassName(String className) {
         this.className = className;
@@ -47,6 +48,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * Guide box fill color. Defaults to rgba(0, 0, 0, 0.1).
      *
      * @param color
+     *            the color
      */
     public void setColor(Color color) {
         this.color = color;
@@ -63,6 +65,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * Guide box cursor. Defaults to "move".
      *
      * @param cursor
+     *            the cursor
      */
     public void setCursor(String cursor) {
         this.cursor = cursor;
@@ -79,6 +82,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * Color of the border around the guide box. Defaults to #888.
      *
      * @param lineColor
+     *            the line color
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -95,6 +99,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * Width of the line around the guide box. Defaults to 1.
      *
      * @param lineWidth
+     *            the line width
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -111,6 +116,7 @@ public class GuideBoxDefaultState extends AbstractConfigurationObject {
      * Guide box zIndex. Defaults to 900.
      *
      * @param zIndex
+     *            the z index
      */
     public void setzIndex(Number zIndex) {
         this.zIndex = zIndex;

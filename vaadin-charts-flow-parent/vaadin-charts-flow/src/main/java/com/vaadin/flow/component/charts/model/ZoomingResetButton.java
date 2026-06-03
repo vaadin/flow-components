@@ -39,6 +39,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
      * automatically if zooming is enabled and hidden if zooming is disabled.
      *
      * @param enabled
+     *            whether the reset button is visible
      */
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
@@ -63,6 +64,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
      * </p>
      *
      * @param position
+     *            the position
      */
     public void setPosition(Position position) {
         this.position = position;
@@ -79,6 +81,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
      * What frame the button placement should be related to.
      *
      * @param relativeTo
+     *            the relative to
      */
     public void setRelativeTo(ButtonRelativeTo relativeTo) {
         this.relativeTo = relativeTo;
@@ -98,6 +101,7 @@ public class ZoomingResetButton extends AbstractConfigurationObject {
      * A collection of attributes for the button theme.
      *
      * @param theme
+     *            the chart theme
      */
     public void setTheme(ButtonTheme theme) {
         this.theme = theme;

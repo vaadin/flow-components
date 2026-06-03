@@ -45,7 +45,9 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * and year
      *
      * @param month
+     *            the month
      * @param year
+     *            the year
      */
     public DateTimeLabelFormats(String month, String year) {
         this.month = month;
@@ -64,6 +66,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for second resolution.
      *
      * @param second
+     *            the second
      */
     public void setSecond(String second) {
         this.second = second;
@@ -81,6 +84,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for minute resolution.
      *
      * @param minute
+     *            the minute
      */
     public void setMinute(String minute) {
         this.minute = minute;
@@ -98,6 +102,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for hour resolution
      *
      * @param hour
+     *            the hour
      */
     public void setHour(String hour) {
         this.hour = hour;
@@ -115,6 +120,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for day resolution.
      *
      * @param day
+     *            the day
      */
     public void setDay(String day) {
         this.day = day;
@@ -132,6 +138,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for week resolution.
      *
      * @param week
+     *            the week
      */
     public void setWeek(String week) {
         this.week = week;
@@ -149,6 +156,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for month resolution.
      *
      * @param month
+     *            the month
      */
     public void setMonth(String month) {
         this.month = month;
@@ -166,6 +174,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
      * Sets the format String for year resolution.
      *
      * @param year
+     *            the year
      */
     public void setYear(String year) {
         this.year = year;

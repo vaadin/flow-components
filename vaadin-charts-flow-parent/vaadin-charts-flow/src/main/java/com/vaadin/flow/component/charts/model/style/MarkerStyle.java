@@ -28,6 +28,7 @@ public class MarkerStyle extends AbstractConfigurationObject {
      * point's color is used. Defaults to "#FFFFFF".
      *
      * @param lineColor
+     *            the line color
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;

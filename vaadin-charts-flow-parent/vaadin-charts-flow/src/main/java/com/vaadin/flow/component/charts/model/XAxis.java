@@ -1537,6 +1537,7 @@ public class XAxis extends Axis {
      * current date and time.
      *
      * @param currentDateIndicator
+     *            the current date indicator
      */
     public void setCurrentDateIndicator(Boolean currentDateIndicator) {
         if (currentDateIndicator) {
@@ -1551,6 +1552,7 @@ public class XAxis extends Axis {
      * current date and time.
      *
      * @param currentDateIndicator
+     *            the current date indicator
      */
     public void setCurrentDateIndicator(PlotLine currentDateIndicator) {
         this.currentDateIndicator = currentDateIndicator;
@@ -1588,6 +1590,7 @@ public class XAxis extends Axis {
      * Defaults to true.
      *
      * @param alignTicks
+     *            the align ticks
      */
     public void setAlignTicks(Boolean alignTicks) {
         this.alignTicks = alignTicks;
@@ -1606,6 +1609,7 @@ public class XAxis extends Axis {
      * axes.
      *
      * @param margin
+     *            the margin
      */
     public void setMargin(Number margin) {
         this.margin = margin;
@@ -1623,6 +1627,7 @@ public class XAxis extends Axis {
      * {@link #setMinRange(Number)}
      *
      * @param maxRange
+     *            the max range
      */
     public void setMaxRange(Number maxRange) {
         this.maxRange = maxRange;
@@ -1640,6 +1645,7 @@ public class XAxis extends Axis {
      * disable panning on an individual axis. Defaults to true.
      *
      * @param panningEnabled
+     *            the panning enabled
      */
     public void setPanningEnabled(Boolean panningEnabled) {
         this.panningEnabled = panningEnabled;
@@ -1661,6 +1667,7 @@ public class XAxis extends Axis {
      * Defaults to false.
      *
      * @param minorTicks
+     *            the minor ticks
      */
     public void setMinorTicks(Boolean minorTicks) {
         this.minorTicks = minorTicks;

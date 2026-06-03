@@ -62,6 +62,7 @@ public interface ConfigurationChangeListener extends Serializable {
      * A new series has been added
      *
      * @param event
+     *            the configuration change event
      */
     void seriesAdded(SeriesAddedEvent event);
 
@@ -85,7 +86,9 @@ public interface ConfigurationChangeListener extends Serializable {
      * Reset zoom level by setting axis extremes to null
      *
      * @param redraw
+     *            whether to redraw the chart
      * @param animate
+     *            whether to animate the redraw
      */
     void resetZoom(boolean redraw, boolean animate);
 }

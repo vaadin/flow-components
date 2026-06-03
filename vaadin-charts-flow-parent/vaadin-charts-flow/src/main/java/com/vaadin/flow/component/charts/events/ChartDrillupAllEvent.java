@@ -23,7 +23,9 @@ public class ChartDrillupAllEvent extends ComponentEvent<Chart> {
      * Constructs a ChartDrillupAllEvent
      *
      * @param source
+     *            the event source
      * @param fromClient
+     *            whether the event originated from the client
      */
     public ChartDrillupAllEvent(Chart source, boolean fromClient) {
         super(source, fromClient);

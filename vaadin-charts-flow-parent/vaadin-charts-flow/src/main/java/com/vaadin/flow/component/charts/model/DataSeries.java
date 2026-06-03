@@ -47,7 +47,9 @@ public class DataSeries extends AbstractSeries {
      * value pairs.
      *
      * @param categories
+     *            the categories
      * @param ys
+     *            the ys
      */
     public DataSeries(String[] categories, Number[] ys) {
         for (int i = 0; i < categories.length; i++) {
@@ -153,6 +155,7 @@ public class DataSeries extends AbstractSeries {
      * value for names (value.toString) and Y-values.
      *
      * @param values
+     *            the values
      */
     public void setData(Number... values) {
         data.clear();
@@ -165,6 +168,7 @@ public class DataSeries extends AbstractSeries {
      * Sets the data to the provided list of data items.
      *
      * @param data
+     *            the data
      */
     public void setData(List<DataSeriesItem> data) {
         this.data = data;
@@ -206,7 +210,9 @@ public class DataSeries extends AbstractSeries {
      * {@link Configuration#getDrilldown()}
      *
      * @param item
+     *            the item
      * @param series
+     *            the series
      */
     public void addItemWithDrilldown(DataSeriesItem item, Series series) {
         add(item);
@@ -227,6 +233,7 @@ public class DataSeries extends AbstractSeries {
      * {@link Configuration#getDrilldown()}
      *
      * @param item
+     *            the item
      */
     public void addItemWithDrilldown(DataSeriesItem item) {
         add(item);
@@ -317,6 +324,7 @@ public class DataSeries extends AbstractSeries {
      * Returns {@link DataSeriesItem} at given index
      *
      * @param index
+     *            the item index
      * @return the Item
      * @throws IndexOutOfBoundsException
      *             if data series don't have item at given index

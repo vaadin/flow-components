@@ -87,6 +87,7 @@ public class ChartSerialization implements Serializable {
      * for it, adding custom serializers might be needed.
      *
      * @param newObjectWriter
+     *            the new object writer
      * @see #createObjectMapper()
      */
     public static void setObjectMapperInstance(ObjectWriter newObjectWriter) {

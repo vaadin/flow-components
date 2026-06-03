@@ -26,8 +26,11 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * Constructs an item with Name, Label and Description values
      *
      * @param name
+     *            the name
      * @param label
+     *            the label
      * @param description
+     *            the description
      */
     public DataSeriesItemTimeline(String name, String label,
             String description) {
@@ -41,9 +44,13 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * Constructs an item with X, Name, Label and Description values
      *
      * @param x
+     *            the X value
      * @param name
+     *            the name
      * @param label
+     *            the label
      * @param description
+     *            the description
      */
     public DataSeriesItemTimeline(Number x, String name, String label,
             String description) {
@@ -55,9 +62,13 @@ public class DataSeriesItemTimeline extends DataSeriesItem {
      * Constructs an item with X, Name, Label and Description values
      *
      * @param x
+     *            the X value
      * @param name
+     *            the name
      * @param label
+     *            the label
      * @param description
+     *            the description
      */
     public DataSeriesItemTimeline(Instant x, String name, String label,
             String description) {

@@ -34,6 +34,7 @@ public class GuideBox extends AbstractConfigurationObject {
      * Style options for the guide box default state.
      *
      * @param defaultState
+     *            the default state
      */
     public void setDefaultState(GuideBoxDefaultState defaultState) {
         this.defaultState = defaultState;

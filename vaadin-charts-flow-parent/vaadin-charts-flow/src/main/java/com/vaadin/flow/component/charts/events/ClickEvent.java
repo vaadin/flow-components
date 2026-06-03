@@ -17,7 +17,7 @@ public interface ClickEvent extends Serializable {
     /**
      * Gets the mouse click details
      *
-     * @return
+     * @return the mouse details
      */
     MouseEventDetails getMouseDetails();
 

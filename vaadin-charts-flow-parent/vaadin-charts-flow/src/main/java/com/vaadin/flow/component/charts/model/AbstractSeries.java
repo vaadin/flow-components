@@ -84,6 +84,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * series' stack options match each other. Defaults to null.
      *
      * @param stack
+     *            the stack
      */
     public void setStack(String stack) {
         this.stack = stack;
@@ -243,6 +244,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * @see #setyAxis(Integer)
      *
      * @param secondaryAxis
+     *            whether to use the secondary axis
      */
     public void setyAxis(YAxis secondaryAxis) {
         if (configuration == null) {

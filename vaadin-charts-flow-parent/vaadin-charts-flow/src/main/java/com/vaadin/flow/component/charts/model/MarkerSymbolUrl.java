@@ -21,6 +21,7 @@ public class MarkerSymbolUrl extends AbstractConfigurationObject
      * Constructs a MarkerSymbol with the given URL
      *
      * @param url
+     *            the URL
      */
     public MarkerSymbolUrl(String url) {
         this.setUrl(url);
@@ -30,6 +31,7 @@ public class MarkerSymbolUrl extends AbstractConfigurationObject
      * Sets the URL of the marker symbol
      *
      * @param url
+     *            the URL
      */
     public void setUrl(String url) {
         this.url = "url(" + url + ")";
