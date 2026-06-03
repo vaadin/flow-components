@@ -1757,7 +1757,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * client by using {@link String#valueOf(Object)}.
      * <p>
      * <em>NOTE:</em> For displaying components, see
-     * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
+     * {@link #addComponentColumn(ValueProvider)}. For using built-in renderers,
      * see {@link #addColumn(Renderer)}.
      * </p>
      * <p>
@@ -1790,7 +1790,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * the client by using {@link String#valueOf(Object)}.
      * <p>
      * <em>NOTE:</em> For displaying components, see
-     * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
+     * {@link #addComponentColumn(ValueProvider)}. For using built-in renderers,
      * see {@link #addColumn(Renderer)}.
      * </p>
      * <p>
@@ -2432,7 +2432,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * If there are no existing footer rows, this will create the first row.
      *
-     * @return the created header row
+     * @return the created footer row
      */
     public FooterRow appendFooterRow() {
         if (getFooterRows().size() == 0) {
@@ -3925,7 +3925,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * in-memory and backend sorting accordingly.
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
-     * updated originated from user.
+     * update originated from user.
      *
      * @param order
      *            sort order to be set to Grid.
@@ -4014,11 +4014,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Updates an in-memory and backend sortings in Grid's data communicator
+     * Updates in-memory and backend sorting in Grid's data communicator
      * taking into account Grid's sort orders and in-memory comparator.
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
-     * updated originated from user.
+     * update originated from user.
      *
      * @param userOriginated
      *            <code>true</code> if the sorting changes as a result of user

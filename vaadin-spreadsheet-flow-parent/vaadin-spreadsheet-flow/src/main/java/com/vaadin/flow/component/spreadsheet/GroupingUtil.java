@@ -383,7 +383,7 @@ class GroupingUtil implements Serializable {
                 sheet, idx);
 
         // expand:
-        // colapsed bit must be unset
+        // collapsed bit must be unset
         // hidden bit gets unset _if_ surrounding groups are expanded you can
         // determine
         // this by looking at the hidden bit of the enclosing group. You will

@@ -730,7 +730,7 @@ public class SpreadsheetFactory implements Serializable {
          *
          * Each row that is part of a group has a set outline level. Unlike
          * cols, the 'collapse' property is actually used for rows, in
-         * conjuction with the 'hidden' prop. If a group is collapsed, each row
+         * conjunction with the 'hidden' prop. If a group is collapsed, each row
          * in the group has its 'hidden' prop set to true. Also, the column
          * after the group (or before, if inverted) has its 'collapsed' property
          * set to true.
@@ -874,10 +874,10 @@ public class SpreadsheetFactory implements Serializable {
                     } else {
                         LOGGER.debug("IMAGE WITHOUT ANCHOR: " + overlayWrapper);
 
-                        // FIXME seems like there is a POI bug, images that have
-                        // in Excel (XLSX) been se as a certain type (type==3)
-                        // will get a null anchor.
-                        // Achor types:
+            // FIXME seems like there is a POI bug, images that have
+            // in Excel (XLSX) been set as a certain type (type==3)
+            // will get a null anchor.
+            // Anchor types:
                         // 0 = Move and size with Cells,
                         // 2 = Move but don't size with cells,
                         // 3 = Don't move or size with cells.

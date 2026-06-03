@@ -534,7 +534,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Controls visiblity of toolbar
+     * Controls the visibility of the toolbar.
      *
      * @param value
      */
@@ -548,10 +548,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Gets visiblity state of toolbar
+     * Gets the visibility state of the toolbar.
      *
      * @param
-     * @return true if toolbar is visible false otherwise
+     * @return true if toolbar is visible, false otherwise
      */
     public boolean getToolbarVisible() {
         return toolbarVisible;
