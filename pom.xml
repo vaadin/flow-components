@@ -318,14 +318,9 @@
 
                           dash: -
                           packageNameWithoutDash: ${replacestring;${packageNameWithDash};${dash};}
+                          packageName: ${replacestring;${packageNameWithoutDash};icons;icon}
 
-                          packageNameTmp: ${replacestring;${packageNameWithoutDash};icons;icon}
-
-                          isDemoPattern: .*-flow-demo
-                          isDemo: ${matches;${project.artifactId};${isDemoPattern}}
-                          packageName: ${packageNameTmp}${if;${isDemo};.demo}
-
-                          exportPackageDefault: ${project.groupId}.flow.component.*${packageName}.*
+                          exportPackageDefault: ${project.groupId}.flow.component.${packageName}.*
                           isExportPackageDefault: ${is;${osgi.export.package};default}
                           exportPackage: ${if;${isExportPackageDefault};${exportPackageDefault};${osgi.export.package}}
                           symbolicNameDefault: ${project.groupId}.flow.component.${packageName}
@@ -335,16 +330,13 @@
                           Bundle-SymbolicName: ${symbolicName}
 
                           Import-Package: *
-                          Export-Package: ${exportPackage};-noimport:=true
+                          Export-Package: ${join;${exportPackage};${osgi.export.package.additional}}
                           Bundle-License: ${osgi.bundle.license}
 
                           CvdlName: ${cvdlName}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                   includeresource.resources: -src/main/resources
-
-                          //if profile war is used in demos
-                  fixupmessages: "Classes found in the wrong directory";is:=warning
 
                           ]]></bnd>
                     </configuration>
