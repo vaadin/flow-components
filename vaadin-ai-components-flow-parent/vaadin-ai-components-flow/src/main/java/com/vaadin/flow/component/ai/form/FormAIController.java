@@ -123,10 +123,10 @@ import tools.jackson.databind.JsonNode;
  *
  * <p>
  * <b>Change tracking and highlight:</b> a handler registered through
- * {@link #withFieldValuesChanged(Consumer)} fires once per successful turn with
- * the fields whose value changed during the turn — the common driver for
- * {@link #showHighlight(HasValue)} / {@link #hideHighlight} to flash the AI's
- * edits in the UI.
+ * {@link #addFieldValueChangedListener(Consumer)} fires once per successful
+ * turn with the fields whose value changed during the turn — the common driver
+ * for {@link #showHighlight(HasValue)} / {@link #hideHighlight} to flash the
+ * AI's edits in the UI.
  * </p>
  *
  * <p>
@@ -224,7 +224,7 @@ public class FormAIController implements AIController {
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
-    private Consumer<Map<HasValue<?, ?>, FieldValueChange>> fieldValuesChangedHandler;
+    private Consumer<List<FieldValueChange>> fieldValuesChangedHandler;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -424,8 +424,8 @@ public class FormAIController implements AIController {
      * sets, dates, and other value-objects work naturally.
      * <p>
      * Only fields visible to the LLM (non-ignored discovered fields) are
-     * tracked, and only changed fields appear in the map. The handler is not
-     * called when the turn ended in error or when no field changed. The map
+     * tracked, and only changed fields appear in the list. The handler is not
+     * called when the turn ended in error or when no field changed. The list
      * iterates in document order; modifying it has no effect on the controller.
      * <p>
      * The handler runs on the UI thread with the session lock held, so it can
@@ -440,8 +440,8 @@ public class FormAIController implements AIController {
      *            handler
      * @return this controller, for chaining
      */
-    public FormAIController withFieldValuesChanged(
-            Consumer<Map<HasValue<?, ?>, FieldValueChange>> handler) {
+    public FormAIController addFieldValueChangedListener(
+            Consumer<List<FieldValueChange>> handler) {
         this.fieldValuesChangedHandler = handler;
         return this;
     }
@@ -577,8 +577,8 @@ public class FormAIController implements AIController {
     /**
      * Captures the current value of every active field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
-     * after diff for {@link #withFieldValuesChanged}. Skipped when no handler
-     * is registered to avoid copying values that no one will read.
+     * after diff for {@link #addFieldValueChangedListener}. Skipped when no
+     * handler is registered to avoid copying values that no one will read.
      */
     private void snapshotPreTurnValues() {
         preTurnValues.clear();
@@ -603,13 +603,13 @@ public class FormAIController implements AIController {
             preTurnValues.clear();
             return;
         }
-        var changes = new LinkedHashMap<HasValue<?, ?>, FieldValueChange>();
+        var changes = new ArrayList<FieldValueChange>();
         for (var entry : preTurnValues.entrySet()) {
             var field = entry.getKey();
             var oldValue = entry.getValue();
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
-                changes.put(field, new FieldValueChange(oldValue, newValue));
+                changes.add(new FieldValueChange(field, oldValue, newValue));
             }
         }
         preTurnValues.clear();

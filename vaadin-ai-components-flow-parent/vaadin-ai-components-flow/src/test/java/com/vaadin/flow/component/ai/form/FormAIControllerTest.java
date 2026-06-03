@@ -23,7 +23,6 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -939,8 +938,8 @@ class FormAIControllerTest {
         void handlerFiresWithChangedFieldsAfterSuccessfulTurn() {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             field.setValue("John");
@@ -950,7 +949,7 @@ class FormAIControllerTest {
             Assertions.assertNotNull(changes, "Handler must fire when a "
                     + "field's value changed during the turn");
             Assertions.assertEquals(1, changes.size());
-            var change = changes.get(field);
+            var change = changeFor(changes, field);
             Assertions.assertEquals("", change.oldValue());
             Assertions.assertEquals("John", change.newValue());
         }
@@ -960,8 +959,8 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var invocations = new AtomicInteger();
-            controller
-                    .withFieldValuesChanged(c -> invocations.incrementAndGet());
+            controller.addFieldValueChangedListener(
+                    c -> invocations.incrementAndGet());
 
             controller.onRequest();
             // No setValue between request and response.
@@ -976,8 +975,8 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var invocations = new AtomicInteger();
-            controller
-                    .withFieldValuesChanged(c -> invocations.incrementAndGet());
+            controller.addFieldValueChangedListener(
+                    c -> invocations.incrementAndGet());
 
             controller.onRequest();
             field.setValue("partial");
@@ -989,12 +988,12 @@ class FormAIControllerTest {
         }
 
         @Test
-        void mapContainsOnlyChangedFields() {
+        void listContainsOnlyChangedFields() {
             var changed = new TestField();
             var untouched = new TestField();
             var controller = new FormAIController(new Div(changed, untouched));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             changed.setValue("X");
@@ -1003,8 +1002,8 @@ class FormAIControllerTest {
             var changes = captured.get();
             Assertions.assertEquals(1, changes.size(),
                     "Only the changed field should appear; got: " + changes);
-            Assertions.assertTrue(changes.containsKey(changed));
-            Assertions.assertFalse(changes.containsKey(untouched));
+            Assertions.assertTrue(containsChangeFor(changes, changed));
+            Assertions.assertFalse(containsChangeFor(changes, untouched));
         }
 
         @Test
@@ -1017,17 +1016,17 @@ class FormAIControllerTest {
             visible.addValueChangeListener(e -> hidden.setValue("cascade"));
             var controller = new FormAIController(new Div(visible, hidden));
             controller.ignore(hidden);
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             visible.setValue("primary");
             controller.onResponse(null);
 
             var changes = captured.get();
-            Assertions.assertTrue(changes.containsKey(visible));
-            Assertions.assertFalse(changes.containsKey(hidden),
-                    "Ignored fields must not appear in the change map; got: "
+            Assertions.assertTrue(containsChangeFor(changes, visible));
+            Assertions.assertFalse(containsChangeFor(changes, hidden),
+                    "Ignored fields must not appear in the change list; got: "
                             + changes);
         }
 
@@ -1049,7 +1048,7 @@ class FormAIControllerTest {
             // a stuck-locked field strands the user.
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            controller.withFieldValuesChanged(c -> {
+            controller.addFieldValueChangedListener(c -> {
                 throw new RuntimeException("handler boom");
             });
 
@@ -1065,13 +1064,13 @@ class FormAIControllerTest {
         void cascadingChangesAppearInTheSameTurn() {
             // A field's value-change listener writes to a sibling. Both
             // fields' values differ from the pre-turn snapshot, so both
-            // appear in the change map.
+            // appear in the change list.
             var primary = new TestField();
             var cascaded = new TestField();
             primary.addValueChangeListener(e -> cascaded.setValue("derived"));
             var controller = new FormAIController(new Div(primary, cascaded));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             primary.setValue("driver");
@@ -1082,7 +1081,7 @@ class FormAIControllerTest {
                     "Both the driver and cascaded fields should be reported; "
                             + "got: " + changes);
             Assertions.assertEquals("derived",
-                    changes.get(cascaded).newValue());
+                    changeFor(changes, cascaded).newValue());
         }
 
         @Test
@@ -1090,8 +1089,8 @@ class FormAIControllerTest {
             var field = new FormTestFields.MultiSelectField<String>();
             field.setValue(Set.of("a", "b"));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             // Same content, different Set instance — Objects.equals true.
@@ -1108,27 +1107,27 @@ class FormAIControllerTest {
             var field = new FormTestFields.MultiSelectField<String>();
             field.setValue(Set.of("a", "b"));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             field.setValue(Set.of("a", "c"));
             controller.onResponse(null);
 
-            var change = captured.get().get(field);
+            var change = changeFor(captured.get(), field);
             Assertions.assertEquals(Set.of("a", "b"), change.oldValue());
             Assertions.assertEquals(Set.of("a", "c"), change.newValue());
         }
 
         @Test
-        void changeMapIteratesInDocumentOrder() {
+        void changeListIteratesInDocumentOrder() {
             var first = new TestField();
             var second = new TestField();
             var third = new TestField();
             var controller = new FormAIController(
                     new Div(first, second, third));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             third.setValue("c");
@@ -1137,8 +1136,9 @@ class FormAIControllerTest {
             controller.onResponse(null);
 
             Assertions.assertEquals(List.of(first, second, third),
-                    new java.util.ArrayList<>(captured.get().keySet()),
-                    "Map iteration must follow document order regardless of "
+                    captured.get().stream().map(FieldValueChange::field)
+                            .toList(),
+                    "List iteration must follow document order regardless of "
                             + "the order writes happened in");
         }
 
@@ -1146,14 +1146,14 @@ class FormAIControllerTest {
         void nullPreTurnValueIsReportedFaithfully() {
             var field = new FormTestFields.DateField();
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             field.setValue(LocalDate.of(2026, 1, 1));
             controller.onResponse(null);
 
-            var change = captured.get().get(field);
+            var change = changeFor(captured.get(), field);
             Assertions.assertNull(change.oldValue(),
                     "Pre-turn null must round-trip as null");
             Assertions.assertEquals(LocalDate.of(2026, 1, 1),
@@ -1169,14 +1169,14 @@ class FormAIControllerTest {
             var field = new FormTestFields.DateField();
             field.setValue(LocalDate.of(2026, 1, 1));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<Map<HasValue<?, ?>, FieldValueChange>>();
-            controller.withFieldValuesChanged(captured::set);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
 
             controller.onRequest();
             field.setValue(null);
             controller.onResponse(null);
 
-            var change = captured.get().get(field);
+            var change = changeFor(captured.get(), field);
             Assertions.assertEquals(LocalDate.of(2026, 1, 1),
                     change.oldValue());
             Assertions.assertNull(change.newValue(),
@@ -1189,9 +1189,9 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(field));
             var firstHandlerCalls = new AtomicInteger();
             var secondHandlerCalls = new AtomicInteger();
-            controller.withFieldValuesChanged(
+            controller.addFieldValueChangedListener(
                     c -> firstHandlerCalls.incrementAndGet());
-            controller.withFieldValuesChanged(
+            controller.addFieldValueChangedListener(
                     c -> secondHandlerCalls.incrementAndGet());
 
             controller.onRequest();
@@ -1209,8 +1209,9 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var calls = new AtomicInteger();
-            controller.withFieldValuesChanged(c -> calls.incrementAndGet());
-            controller.withFieldValuesChanged(null);
+            controller
+                    .addFieldValueChangedListener(c -> calls.incrementAndGet());
+            controller.addFieldValueChangedListener(null);
 
             controller.onRequest();
             field.setValue("X");
@@ -1218,7 +1219,21 @@ class FormAIControllerTest {
 
             Assertions.assertEquals(0, calls.get(),
                     "A previously registered handler must not fire after "
-                            + "being cleared with withFieldValuesChanged(null)");
+                            + "being cleared with "
+                            + "addFieldValueChangedListener(null)");
+        }
+
+        private static FieldValueChange changeFor(
+                List<FieldValueChange> changes, HasValue<?, ?> field) {
+            return changes.stream().filter(c -> c.field() == field).findFirst()
+                    .orElseThrow(() -> new AssertionError(
+                            "No FieldValueChange entry for field " + field
+                                    + " in " + changes));
+        }
+
+        private static boolean containsChangeFor(List<FieldValueChange> changes,
+                HasValue<?, ?> field) {
+            return changes.stream().anyMatch(c -> c.field() == field);
         }
     }
 

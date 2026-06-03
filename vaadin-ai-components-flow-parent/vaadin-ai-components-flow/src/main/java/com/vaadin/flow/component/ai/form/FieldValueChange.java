@@ -17,12 +17,16 @@ package com.vaadin.flow.component.ai.form;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.HasValue;
+
 /**
  * Captures the before / after values of a single field across one
  * {@link FormAIController} turn. Reported through
- * {@link FormAIController#withFieldValuesChanged} for every field whose value
- * changed during the turn — either written by the LLM or by a cascade.
+ * {@link FormAIController#addFieldValueChangedListener} for every field whose
+ * value changed during the turn — either written by the LLM or by a cascade.
  *
+ * @param field
+ *            the field whose value changed
  * @param oldValue
  *            the field's value at the start of the turn, possibly {@code null}
  * @param newValue
@@ -30,6 +34,6 @@ import java.io.Serializable;
  *
  * @author Vaadin Ltd
  */
-public record FieldValueChange(Object oldValue,
+public record FieldValueChange(HasValue<?, ?> field, Object oldValue,
         Object newValue) implements Serializable {
 }
