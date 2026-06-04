@@ -7,7 +7,7 @@
 - **Issue:** https://github.com/vaadin/flow-components/issues/1453
 - **Verdict:** reproduced
 - **Hypothesis tested:** The bug is that `GridDropEvent`'s constructor cannot be created, triggered by dropping a row on a header filter field (the client sends a `grid-drop` event with an empty `dropLocation`), observable as a server-side `IllegalArgumentException` caused by `NoSuchElementException` at `GridDropEvent.<init>`.
-- **Branch:** `repro/1453` — pushed to `vaadin/flow-components`
+- **Branch:** [`repro/1453`](https://github.com/vaadin/flow-components/tree/repro/1453) — pushed to `vaadin/flow-components`
 - **Reproduced on:** flow-components @ `24.10` (flow 24.10-SNAPSHOT, `@vaadin/grid` 24.10.2 and earlier)
 - **Present on main?:** no — fixed by the web component in [vaadin/web-components#10351](https://github.com/vaadin/web-components/pull/10351) (released in 25.0.0, backported to 24.8.x / 24.9.x / 24.10.3). The server-side fragility in `GridDropEvent` is still present on `main`, but the client no longer emits the empty event that triggers it.
 - **Theme / Browser:** Lumo / Chromium (matches the reporters: Chrome-only)
