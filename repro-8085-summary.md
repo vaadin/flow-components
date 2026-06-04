@@ -8,8 +8,8 @@
 - **Verdict:** reproduced.
 - **Hypothesis tested:** invoking the click-shortcut on a checkable `MenuItem` fires the click listener but leaves `isChecked()` unchanged (no toggle), whereas a real mouse click toggles **then** fires.
 - **Branch:** `repro/8085` — pushed to `vaadin/flow-components`
-- **Reproduced on:** flow-components @ `24.10` (`24.10-SNAPSHOT`); the report names 24.8.
-- **Present on main?:** very likely. The root-cause wiring in `MenuItemBase` (toggle bound to a DOM `click` listener) is **unchanged** between `24.10` and `main`, and `addClickShortcut` does not dispatch that DOM click. Not run directly on `main` (its nightly `@vaadin/*` deps trip pnpm's `minimum-release-age` build guard).
+- **Reproduced on:** flow-components @ `24.10` (`24.10-SNAPSHOT`) and `main` (`25.3-SNAPSHOT`); the report names 24.8.
+- **Present on main?:** yes — confirmed on `main` (`25.3-SNAPSHOT`): a mouse click on the item toggles (`checked = true`), while the shortcut fires the listener without toggling (`checked` stays the same). The root-cause wiring in `MenuItemBase` (toggle bound to a DOM `click` listener that `addClickShortcut` does not dispatch) is unchanged between `24.10` and `main`.
 - **Theme / Browser:** Lumo / Chromium (playwright-cli)
 - **Demo video (on this branch):** `repro-8085-shortcut-no-toggle.webm`. Drag into the comment for inline playback.
 
