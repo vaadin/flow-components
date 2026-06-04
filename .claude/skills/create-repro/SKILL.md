@@ -25,6 +25,8 @@ Read the issue description in $0, extract the steps to reproduce it, and create 
 
 4. Create a minimal snippet containing one or more Flow views and add it to `repro-app`. Replace the content of `ReproView` (route `""`) with the reproduction, or add more views with their own `@Route` in the same package.
 
+   Do not add a class-level Javadoc describing the issue or listing the scenarios. Only add short inline comments next to the relevant code explaining how to trigger the issue. The full steps belong in the chat response (step 5), not in the code.
+
 5. Provide the steps to reproduce the issue, including the command to start the app:
 
    ```sh
@@ -32,8 +34,6 @@ Read the issue description in $0, extract the steps to reproduce it, and create 
    ```
 
    Then open http://localhost:8080.
-
-6. Ask the user whether to start the app. If yes, run the command above as a background task and poll its output until "Frontend compiled successfully" appears, then tell the user the app is running at http://localhost:8080. To stop it later, run `mvn jetty:stop -pl repro-app` — do not kill the background task, as that leaves the forked Jetty JVM holding port 8080.
 
 ## Notes
 
