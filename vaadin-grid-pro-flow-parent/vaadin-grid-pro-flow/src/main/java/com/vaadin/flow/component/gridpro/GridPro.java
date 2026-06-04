@@ -437,10 +437,10 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Sets the value of the webcomponent's property enterNextRow. Default
-     * value is false. When true, pressing Enter while in cell edit mode will
-     * move focus to the editable cell in the next row (Shift + Enter - same,
-     * but for previous row).
+     * Sets the value of the webcomponent's property enterNextRow. Default value
+     * is false. When true, pressing Enter while in cell edit mode will move
+     * focus to the editable cell in the next row (Shift + Enter - same, but for
+     * previous row).
      *
      * @param enterNextRow
      *            when <code>true</code>, pressing Enter while in cell edit mode
@@ -452,10 +452,10 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
-     * Gets the value of the webcomponent's property enterNextRow. Default
-     * value is false. When true, pressing Enter while in cell edit mode will
-     * move focus to the editable cell in the next row (Shift + Enter - same,
-     * but for previous row).
+     * Gets the value of the webcomponent's property enterNextRow. Default value
+     * is false. When true, pressing Enter while in cell edit mode will move
+     * focus to the editable cell in the next row (Shift + Enter - same, but for
+     * previous row).
      *
      * @return enterNextRow value
      */
@@ -465,8 +465,8 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Sets the value of the webcomponent's property singleCellEdit. Default
-     * value is false. When true, after moving to next or previous editable
-     * cell using Tab / Shift+Tab, it will be focused without edit mode.
+     * value is false. When true, after moving to next or previous editable cell
+     * using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @param singleCellEdit
      *            when <code>true</code>, after moving to next or previous
@@ -479,8 +479,8 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Gets the value of the webcomponent's property singleCellEdit. Default
-     * value is false. When true, after moving to next or previous editable
-     * cell using Tab / Shift+Tab, it will be focused without edit mode.
+     * value is false. When true, after moving to next or previous editable cell
+     * using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @return singleCellEdit value
      */

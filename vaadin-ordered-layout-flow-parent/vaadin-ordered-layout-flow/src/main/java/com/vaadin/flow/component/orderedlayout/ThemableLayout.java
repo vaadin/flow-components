@@ -34,7 +34,8 @@ import com.vaadin.flow.dom.ThemeList;
 public interface ThemableLayout extends HasElement {
     /**
      * Toggles {@code margin} theme setting for the element. If a theme supports
-     * this attribute, it will apply margin to or remove margin from the element.
+     * this attribute, it will apply margin to or remove margin from the
+     * element.
      *
      * @param margin
      *            adds {@code margin} theme setting if {@code true} or removes

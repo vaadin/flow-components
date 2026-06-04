@@ -889,8 +889,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            function that returns a stream of items from the backend based
      *            on the offset, limit and an object filter
      * @param countCallback
-     *            function that returns the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
      *            the user into the object filter used by the callbacks
@@ -978,8 +978,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            function that returns a stream of items from the back end for
      *            a query
      * @param countCallback
-     *            function that returns the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @return ComboBoxLazyDataView instance for further configuration
      */
     @Override

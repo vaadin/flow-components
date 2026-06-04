@@ -4014,8 +4014,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Updates in-memory and backend sorting in Grid's data communicator
-     * taking into account Grid's sort orders and in-memory comparator.
+     * Updates in-memory and backend sorting in Grid's data communicator taking
+     * into account Grid's sort orders and in-memory comparator.
      * <p>
      * Notifies sort listeners with updated sort orders and whether the sorting
      * update originated from user.
