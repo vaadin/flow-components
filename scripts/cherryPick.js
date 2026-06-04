@@ -14,6 +14,7 @@
 
 const https = require("https");
 const { spawn } = require('child_process');
+const readline = require('readline');
 const exec = require('util').promisify(require('child_process').exec);
 const { exe } = require('child_process');
 
@@ -198,16 +199,28 @@ async function resolveWithClaude(prNumber, sha, branch, title) {
       [
         '-p',
         prompt,
+        '--allowedTools',
+        'Read,Edit,Bash(git:*),Bash(mvn:*)',
         '--permission-mode',
-        'acceptEdits'
-        // In CI (no TTY) you likely need full autonomy instead:
-        // '--dangerously-skip-permissions',
-        // Optionally pin tools/model:
-        // '--allowedTools', 'Bash,Edit,Read,Write,Grep,Glob',
-        // '--model', 'claude-opus-4-8',
+        'acceptEdits',
+        '--output-format',
+        'stream-json',
+        '--verbose' // required by stream-json in -p mode
+        // '--include-partial-messages', // add for token-level streaming of text
+        // '--dangerously-skip-permissions', // CI (no TTY)
       ],
-      { stdio: 'inherit' }
-    ); // spawn streams output; exec() caps at 1MB maxBuffer
+      { stdio: ['inherit', 'pipe', 'inherit'] }
+    ); // pipe stdout so we can parse it
+
+    const rl = readline.createInterface({ input: child.stdout });
+    rl.on('line', (line) => {
+      if (!line.trim()) return;
+      try {
+        logClaudeEvent(JSON.parse(line));
+      } catch {
+        console.log(line); // not JSON (shouldn't happen) — pass through
+      }
+    });
 
     child.on('error', (err) => {
       console.error(`Failed to launch Claude: ${err}`);
@@ -215,11 +228,11 @@ async function resolveWithClaude(prNumber, sha, branch, title) {
     });
 
     child.on('exit', async (code) => {
+      rl.close();
       if (code !== 0) {
         console.error(`Claude exited with code ${code}`);
         return resolve(false);
       }
-      // Don't trust exit 0 alone — verify the cherry-pick actually completed.
       try {
         const inProgress = require('fs').existsSync('.git/CHERRY_PICK_HEAD');
         const { stdout } = await exec('git status --porcelain');
