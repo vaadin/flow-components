@@ -464,7 +464,7 @@ public class BasicIT extends AbstractComponentIT {
         Assert.assertFalse(cell.innerHTMLContains(editorTag));
 
         // Entering edit mode with double click
-        // Workaround(yuriy-fix): double-click is not working on IE11
+        // Workaround(yuriy-fix): doubleClick is not working on IE11
         executeScript(
                 "arguments[0].dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));",
                 cell);
