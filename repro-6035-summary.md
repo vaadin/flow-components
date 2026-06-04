@@ -8,8 +8,8 @@
 - **Verdict:** reproduced (bug #2 — the loading loop). Bug #1 (fast tab-out race) not reproduced — see Notes.
 - **Hypothesis tested:** With a lazy (server-backed) ComboBox and `autoOpen=false`, typing a filter then clearing it *before* opening, then opening, leaves the overlay stuck loading — observable as `comboBox.loading === true` permanently with the spinner shown over an empty dropdown.
 - **Branch:** `repro/6035` — pushed to `vaadin/flow-components`
-- **Reproduced on:** flow-components @ `24.10` (`24.10-SNAPSHOT`) — matches the reporter's "V24"
-- **Present on main?:** unverified. The frontend build for `main` (25.3-SNAPSHOT) could not be produced in this environment (its nightly `@vaadin/*` npm packages trip pnpm's `minimum-release-age` supply-chain guard). The connector was heavily refactored between 24.10 and main (`comboBoxConnector.js`: +145/−102), so it **may be fixed on main** — needs a working main build to confirm.
+- **Reproduced on:** flow-components @ `24.10` (`24.10-SNAPSHOT`, matches the reporter's "V24") **and `25.1`** (`25.1-SNAPSHOT`) — identical behavior on both: `loading` stuck `true` (8s+), control (direct open) clears it.
+- **Present on main?:** very likely, but not directly verified. The connector was heavily refactored between 24.10 and main (`comboBoxConnector.js`: +145/−102), yet the bug still reproduces on `25.1` (close to main), so the refactor did **not** fix it. A direct `main` (25.3-SNAPSHOT) run could not be produced here (its nightly `@vaadin/*` npm packages trip pnpm's `minimum-release-age` supply-chain guard); confirm on `main` when a build is available.
 - **Theme / Browser:** base / Chromium (playwright-cli)
 
 ## Observed behavior
