@@ -25,8 +25,6 @@ Read the issue description in $0, extract the steps to reproduce it, and create 
 
 4. Create a minimal snippet containing one or more Flow views and add it to `repro-app`. Replace the content of `ReproView` (route `""`) with the reproduction, or add more views with their own `@Route` in the same package.
 
-   Do not add a class-level Javadoc describing the issue or listing the scenarios. Only add short inline comments next to the relevant code explaining how to trigger the issue. The full steps belong in the chat response (step 5), not in the code.
-
 5. Provide the steps to reproduce the issue, including the command to start the app:
 
    ```sh
@@ -37,5 +35,6 @@ Read the issue description in $0, extract the steps to reproduce it, and create 
 
 ## Notes
 
+- Minimal means fewest moving parts, not simplest setup. Identify the conditions that trigger the bug (data loading mechanism, latency, item count, locale, viewport, ...) and recreate them faithfully — don't substitute a simpler mechanism that looks equivalent. If the trigger is timing, build the delay into the repro (e.g. simulated latency) so it can be hit reliably by hand.
 - The `repro-app` module only joins the Maven reactor when the `-Drepro-app` property is set.
 - Changes made for a reproduction are not meant to be committed.
