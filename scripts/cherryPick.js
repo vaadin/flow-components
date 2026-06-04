@@ -187,7 +187,11 @@ async function resolveWithClaude(prNumber, sha, branch, title) {
     ``,
     `1. Resolve the merge conflicts. If needed, read the conflicting files on both the ` +
       `source branch and the ${branch} branch to understand the differences before resolving.`,
-    `2. Commit the resolved cherry-pick:`,
+    `2. Verify the changes:`,
+    `   - Run the unit tests for the affected component module(s).`,
+    `   - If tests fail, investigate and fix the issue before continuing.`,
+    `   - Run the formatter: mvn spotless:apply`,
+    `3. Commit the resolved cherry-pick:`,
     `   - Stage only the files that were part of the original cherry-pick or that you had ` +
       `to fix after running tests. Do not stage untracked files.`,
     `   - Complete the cherry-pick commit using this exact subject line: "${title}"`
@@ -206,8 +210,6 @@ async function resolveWithClaude(prNumber, sha, branch, title) {
         '--output-format',
         'stream-json',
         '--verbose' // required by stream-json in -p mode
-        // '--include-partial-messages', // add for token-level streaming of text
-        // '--dangerously-skip-permissions', // CI (no TTY)
       ],
       { stdio: ['inherit', 'pipe', 'inherit'] }
     ); // pipe stdout so we can parse it
@@ -242,6 +244,35 @@ async function resolveWithClaude(prNumber, sha, branch, title) {
       }
     });
   });
+}
+
+function logClaudeEvent(event) {
+  switch (event.type) {
+    case 'system':
+      if (event.subtype === 'init') {
+        console.log(`[claude] session started (model: ${event.model})`);
+      }
+      break;
+    case 'assistant':
+      for (const block of event.message?.content ?? []) {
+        if (block.type === 'text' && block.text.trim()) {
+          console.log(`[claude] ${block.text.trim()}`);
+        } else if (block.type === 'tool_use') {
+          const detail = block.input?.command ?? block.input?.file_path ?? '';
+          console.log(`[claude] → ${block.name}${detail ? ' ' + detail : ''}`);
+        }
+      }
+      break;
+    case 'user': // tool results coming back — keep it terse
+      console.log(`[claude] ← tool result`);
+      break;
+    case 'result':
+      console.log(
+        `[claude] done: ${event.subtype} ` +
+          `(${event.num_turns} turns, ${event.duration_ms}ms, $${event.total_cost_usd ?? '?'})`
+      );
+      break;
+  }
 }
 
 async function labelCommit(url, label){
