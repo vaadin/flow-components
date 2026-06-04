@@ -10,6 +10,7 @@
 - **Reproduced on:** flow-components @ `24.10` (`24.10-SNAPSHOT`, matches the reporter's "V24") **and `25.1`** (`25.1-SNAPSHOT`) — identical behavior on both.
 - **Present on main?:** very likely, not directly verified. The connector was heavily refactored between 24.10 and main (`comboBoxConnector.js` +145/−102), yet the bug still reproduces on `25.1` (one step below main), so the refactor did **not** fix it. A direct `main` (25.3-SNAPSHOT) run could not be built here (nightly `@vaadin/*` deps trip pnpm's `minimum-release-age` guard); confirm on `main` when buildable.
 - **Theme / Browser:** base / Chromium (playwright-cli)
+- **Demo videos (on this branch):** `repro-6035-bug1-tab-commit.webm` (scenario 1) · `repro-6035-bug2-loading-loop.webm` (scenario 2). Drag a file into a GitHub comment for inline playback.
 
 ## Observed behavior
 
