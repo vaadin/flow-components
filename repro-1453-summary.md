@@ -5,7 +5,7 @@
 > The steps, verdict, and root-cause pointer below were generated automatically and must be confirmed by a human before being treated as authoritative.
 
 - **Issue:** https://github.com/vaadin/flow-components/issues/1453
-- **Verdict:** reproduced
+- **Verdict:** reproduced — **duplicate of [#7689](https://github.com/vaadin/flow-components/issues/7689) (closed, already fixed)**
 - **Hypothesis tested:** The bug is that `GridDropEvent`'s constructor cannot be created, triggered by dropping a row on a header filter field (the client sends a `grid-drop` event with an empty `dropLocation`), observable as a server-side `IllegalArgumentException` caused by `NoSuchElementException` at `GridDropEvent.<init>`.
 - **Branch:** [`repro/1453`](https://github.com/vaadin/flow-components/tree/repro/1453) — pushed to `vaadin/flow-components`
 - **Reproduced on:** flow-components @ `24.10` (flow 24.10-SNAPSHOT, `@vaadin/grid` 24.10.2 and earlier)
@@ -104,6 +104,10 @@ this.dropLocation = Arrays.asList(GridDropLocation.values()).stream()
 When the client sends an empty/unknown `dropLocation`, no enum value matches and the bare `.get()` on an empty `Optional` throws. The server has no defensive handling for a missing/unrecognized drop location.
 
 The client-side cause was fixed in [vaadin/web-components#10351](https://github.com/vaadin/web-components/pull/10351): `_onDrop` now only dispatches `grid-drop` when `_dropLocation` is set (`if (this.dropMode && this._dropLocation)`), so dropping on a header/input no longer emits an empty event. The server-side `.get()` remains unguarded, so the defect could resurface from any future client that sends an empty location.
+
+## Duplicate
+
+This is the same bug as **[#7689](https://github.com/vaadin/flow-components/issues/7689) — "GridDropEvent throws Exception when dropping Row on Header"** (closed): identical stack trace (`NoSuchElementException` at `GridDropEvent.<init>(GridDropEvent.java:86)`), identical root cause, and the same trigger (dropping a row on a header field containing a native input). #7689's minimal example matches this one. #7689 was fixed by web-components [#10351](https://github.com/vaadin/web-components/pull/10351), which is also what fixes #1453. #1453 (older, still open) can be closed as a duplicate of / fixed alongside #7689.
 
 ## Notes
 
