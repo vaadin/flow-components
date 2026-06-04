@@ -1777,7 +1777,7 @@ public class YAxis extends Axis {
      * interval is calculated as a fifth of the tickInterval. On a logarithmic
      * axis, minor ticks are laid out based on a best guess, attempting to enter
      * approximately 5 minor ticks between each major tick. Prior to v6.0.0,
-     * ticks were unabled in auto layout by setting minorTickInterval to "auto".
+     * ticks were enabled in auto layout by setting minorTickInterval to "auto".
      * Defaults to false.
      *
      * @param minorTicks

@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * backgroundColor (which can be solid or gradient), innerWidth, outerWidth,
  * borderWidth, borderColor.
  * <p>
- * <b>These configuration options apply only to polar and angular gauges trough
+ * <b>These configuration options apply only to polar and angular gauges through
  * the Pane-configuration object.</b>
  */
 public class Background extends AbstractConfigurationObject {

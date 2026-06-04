@@ -748,7 +748,7 @@ public class AvatarGroup extends Component
     }
 
     /**
-     * Sets the the maximum number of avatars to display.
+     * Sets the maximum number of avatars to display.
      * <p>
      * By default, all the avatars are displayed. When max is set, the
      * overflowing avatars are grouped into one avatar.

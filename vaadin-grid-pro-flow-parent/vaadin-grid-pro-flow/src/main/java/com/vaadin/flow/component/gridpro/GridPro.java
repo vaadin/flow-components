@@ -420,7 +420,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param propertyName
      *            the property name of the new column, not <code>null</code>
-     * @return and edit column configurer for configuring the column editor
+     * @return an edit column configurer for configuring the column editor
      *
      * @see Grid#addColumn(String)
      * @see EditColumnConfigurator#text(ItemUpdater)
@@ -438,7 +438,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Sets the value of the webcomponent's property enterNextRow. Default
-     * values is false. When true, pressing Enter while in cell edit mode will
+     * value is false. When true, pressing Enter while in cell edit mode will
      * move focus to the editable cell in the next row (Shift + Enter - same,
      * but for previous row).
      *
@@ -453,7 +453,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Gets the value of the webcomponent's property enterNextRow. Default
-     * values is false. When true, pressing Enter while in cell edit mode will
+     * value is false. When true, pressing Enter while in cell edit mode will
      * move focus to the editable cell in the next row (Shift + Enter - same,
      * but for previous row).
      *
@@ -465,7 +465,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Sets the value of the webcomponent's property singleCellEdit. Default
-     * values is false. When true, after moving to next or previous editable
+     * value is false. When true, after moving to next or previous editable
      * cell using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @param singleCellEdit
@@ -479,7 +479,7 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Gets the value of the webcomponent's property singleCellEdit. Default
-     * values is false. When true, after moving to next or previous editable
+     * value is false. When true, after moving to next or previous editable
      * cell using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @return singleCellEdit value

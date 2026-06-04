@@ -1030,7 +1030,7 @@ public class ApplicationConnection implements HasHandlers {
         if (connector == null) {
             /*
              * No connector will exist in cases where Vaadin widgets have been
-             * re-used without implementing server<->client communication.
+             * reused without implementing server<->client communication.
              */
             return false;
         }
@@ -1056,7 +1056,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Sets the delegate that is called whenever a communication error occurrs.
+     * Sets the delegate that is called whenever a communication error occurs.
      *
      * @param delegate
      *            the delegate.
@@ -1146,7 +1146,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Returns the hearbeat instance.
+     * Returns the heartbeat instance.
      */
     public Heartbeat getHeartbeat() {
         return null;
