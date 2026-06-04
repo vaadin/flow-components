@@ -669,6 +669,20 @@
             </build>
         </profile>
         <profile>
+            <!-- Reproduction app for testing combinations of components when
+                 reproducing issues. Activated on demand, never part of CI or
+                 release builds, never published to Maven. -->
+            <id>repro-app</id>
+            <activation>
+                <property>
+                    <name>repro-app</name>
+                </property>
+            </activation>
+            <modules>
+                <module>repro-app</module>
+            </modules>
+        </profile>
+        <profile>
             <id>sonar-cloud</id>
             <properties>
                 <!-- Exclude from duplication checks:
