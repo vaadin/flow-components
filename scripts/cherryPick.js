@@ -12,8 +12,8 @@
  *
  */
 
-const axios = require('axios');
 const https = require("https");
+const { spawn } = require('child_process');
 const exec = require('util').promisify(require('child_process').exec);
 const { exe } = require('child_process');
 
@@ -45,8 +45,11 @@ async function getAllCommits(){
       }
     };
     
-    res = await axios.get(url, options);
-    data = res.data;
+    res = await fetch(url, options);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+    data = await res.json();
     data = data.filter(da => da.labels.length > 0 && da.merged_at !== null);
     
     if (data.length === 0) {
@@ -71,8 +74,11 @@ async function getCommit(commitURL){
       }
     };
     
-    res = await axios.get(commitURL, options);
-    data = res.data;
+    res = await fetch(commitURL, options);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+    data = await res.json();
 
     return data;
   } catch (error) {
@@ -131,32 +137,39 @@ ${quotedBody}
 async function cherryPickCommits(){
   for(let i=arrPR.length-1; i>=0; i--){
     let branchName = `cherry-pick-${arrPR[i]}-to-${arrBranch[i]}-${Date.now()}`;
-    
     await exec('git checkout main');
     await exec('git pull');
     await exec(`git checkout ${arrBranch[i]}`);
     await exec(`git reset --hard origin/${arrBranch[i]}`);
-    
-    try{
+
+    try {
       await exec(`git checkout -b ${branchName}`);
     } catch (err) {
       console.error(`Cannot Create Branch, error : ${err}`);
       process.exit(1);
     }
-    
-    try{
-      let {stdout, stderr} = await exec(`git cherry-pick ${arrSHA[i]}`);
+
+    let conflicted = false;
+    try {
+      await exec(`git cherry-pick ${arrSHA[i]}`);
     } catch (err) {
-      console.error(`Cannot Pick the Commit:${arrSHA[i]} to ${arrBranch[i]}, error :${err}`);
-      await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
-      await postComment(arrURL[i], arrUser[i], arrMergedBy[i], arrBranch[i], err);
-      await exec(`git cherry-pick --abort`);
-      await exec(`git checkout main`);
-      await exec(`git branch -D ${branchName}`);
-      continue;
+      console.error(`Automatic cherry-pick of ${arrSHA[i]} to ${arrBranch[i]} failed: ${err}`);
+      conflicted = true; // leave the conflicted tree in place for Claude
     }
+
+    if (conflicted) {
+      const resolved = await resolveWithClaude(arrPR[i], arrSHA[i], arrBranch[i], arrTitle[i]);
+      if (!resolved) {
+        // Fallback: keep the original "manual" label, no PR comment.
+        await labelCommit(arrURL[i], `need to pick manually ${arrBranch[i]}`);
+        await exec(`git cherry-pick --abort`).catch(() => {});
+        await exec(`git checkout main`);
+        await exec(`git branch -D ${branchName}`);
+        continue;
+      }
+    }
+
     await exec(`git push origin HEAD:${branchName}`);
-    
     await createPR(arrTitle[i], branchName, arrBranch[i], buildCherryPickBody(arrPR[i], arrBody[i], arrBranch[i]));
     await exec(`git checkout main`);
     await exec(`git branch -D ${branchName}`);
@@ -164,28 +177,96 @@ async function cherryPickCommits(){
   }
 }
 
+async function resolveWithClaude(prNumber, sha, branch, title) {
+  const prompt = [
+    `A "git cherry-pick" for PR #${prNumber} (commit ${sha}) onto branch ${branch} ` +
+      `is already in progress in the current working tree and has merge conflicts.`,
+    `Resolve it by following these steps, and do nothing else — do NOT push, do NOT ` +
+      `open a pull request, and do NOT change any PR labels (the surrounding script handles those):`,
+    ``,
+    `1. Resolve the merge conflicts. If needed, read the conflicting files on both the ` +
+      `source branch and the ${branch} branch to understand the differences before resolving.`,
+    `2. Commit the resolved cherry-pick:`,
+    `   - Stage only the files that were part of the original cherry-pick or that you had ` +
+      `to fix after running tests. Do not stage untracked files.`,
+    `   - Complete the cherry-pick commit using this exact subject line: "${title}"`
+  ].join('\n');
+
+  return new Promise((resolve) => {
+    const child = spawn(
+      'claude',
+      [
+        '-p',
+        prompt,
+        '--permission-mode',
+        'acceptEdits'
+        // In CI (no TTY) you likely need full autonomy instead:
+        // '--dangerously-skip-permissions',
+        // Optionally pin tools/model:
+        // '--allowedTools', 'Bash,Edit,Read,Write,Grep,Glob',
+        // '--model', 'claude-opus-4-8',
+      ],
+      { stdio: 'inherit' }
+    ); // spawn streams output; exec() caps at 1MB maxBuffer
+
+    child.on('error', (err) => {
+      console.error(`Failed to launch Claude: ${err}`);
+      resolve(false);
+    });
+
+    child.on('exit', async (code) => {
+      if (code !== 0) {
+        console.error(`Claude exited with code ${code}`);
+        return resolve(false);
+      }
+      // Don't trust exit 0 alone — verify the cherry-pick actually completed.
+      try {
+        const inProgress = require('fs').existsSync('.git/CHERRY_PICK_HEAD');
+        const { stdout } = await exec('git status --porcelain');
+        resolve(!inProgress && stdout.trim() === '');
+      } catch {
+        resolve(false);
+      }
+    });
+  });
+}
+
 async function labelCommit(url, label){
   let issueURL = url.replace("pulls", "issues") + "/labels";
   const options = {
-    headers:{
+    method: 'POST',
+    headers: {
       'User-Agent': 'Vaadin Cherry Pick',
-      'Authorization': `token ${token}`,
-    }
+      Authorization: `token ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ labels: [label] })
   };
-  
-  await axios.post(issueURL, {"labels":[label]}, options);
+
+  const res = await fetch(issueURL, options);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  }
 }
 
 async function postComment(url, userName, mergedBy, branch, message){
   let issueURL = url.replace("pulls", "issues") + "/comments";
   const options = {
-    headers:{
+    method: 'POST',
+    headers: {
       'User-Agent': 'Vaadin Cherry Pick',
-      'Authorization': `token ${token}`,
-    }
+      Authorization: `token ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      body: `Hi ${userName} and ${mergedBy}, when i performed cherry-pick to this commit to ${branch}, i have encountered the following issue. Can you take a look and pick it manually?\n Error Message:\n ${message}`
+    })
   };
 
-  await axios.post(issueURL, {"body":`Hi ${userName} and ${mergedBy}, when i performed cherry-pick to this commit to ${branch}, i have encountered the following issue. Can you take a look and pick it manually?\n Error Message:\n ${message}`}, options);
+  const res = await fetch(issueURL, options);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  }
 }
 
 async function createPR(title, head, base, body){
