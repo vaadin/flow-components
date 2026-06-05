@@ -24,6 +24,8 @@ Three date pickers set to the same value `2015-07-06`:
 
 The German/Swiss locales render the day and month **without leading zeros**, while Turkish renders them **zero-padded** — the inconsistency from the report.
 
+![date-picker German locale without leading zeros](https://raw.githubusercontent.com/vaadin/flow-components/6d6ec7a5f7b4bc3c515f1670b3bbf07d8ea9f03f/repro-1509.png)
+
 ## Expected behavior
 
 Consistent zero-padded day/month for locales whose convention is `dd.MM.yyyy` — e.g. `de_DE`/`de_CH` should display `06.07.2015`.
