@@ -127,7 +127,10 @@ class FormAIControllerTest {
 
             for (var anchor : List.of("get_form_state", "fill_form",
                     "query_field_options", "queryable", "enum", "rejected",
-                    ".ignore()", "SAME turn", "newly-appeared")) {
+                    ".ignore()", "SAME turn", "newly-appeared",
+                    // bean-level cross-field rejections key on the "__form__"
+                    // sentinel id, not a real field id.
+                    "__form__", "cross-field")) {
                 Assertions.assertTrue(description.contains(anchor),
                         "Workflow description must mention '" + anchor
                                 + "', got: " + description);
