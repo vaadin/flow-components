@@ -76,7 +76,7 @@ class MarkdownSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindContent_constructorBinds() {
+    void signalConstructor_bindsContent() {
         markdown = new Markdown(contentSignal);
         ui.add(markdown);
 
@@ -87,7 +87,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindContent_setContent_throwsBindingActiveException() {
-        markdown = new Markdown(contentSignal);
+        markdown = new Markdown();
+        markdown.bindContent(contentSignal);
         ui.add(markdown);
 
         Assertions.assertThrows(BindingActiveException.class,
@@ -96,7 +97,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindContent_appendContent_throwsBindingActiveException() {
-        markdown = new Markdown(contentSignal);
+        markdown = new Markdown();
+        markdown.bindContent(contentSignal);
         ui.add(markdown);
 
         Assertions.assertThrows(BindingActiveException.class,
@@ -113,7 +115,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindContent_detachAndAttach_reactivates() {
-        markdown = new Markdown(contentSignal);
+        markdown = new Markdown();
+        markdown.bindContent(contentSignal);
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**foo**", false);
 
@@ -130,7 +133,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindContent_nullSignalValue_clearsContent() {
-        markdown = new Markdown(contentSignal);
+        markdown = new Markdown();
+        markdown.bindContent(contentSignal);
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**foo**", false);
 
@@ -141,7 +145,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindContent_computedSignal_drivesContent() {
-        markdown = new Markdown(computedSignal);
+        markdown = new Markdown();
+        markdown.bindContent(computedSignal);
         ui.add(markdown);
 
         Assertions.assertEquals("**foo** bar", markdown.getContent());
