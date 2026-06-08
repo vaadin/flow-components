@@ -11,6 +11,7 @@
     <name>Vaadin Grid</name>
     <description>Vaadin Grid</description>
     <properties>
+        <osgi.export.package.additional>com.vaadin.flow.component.treegrid.*</osgi.export.package.additional>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>
