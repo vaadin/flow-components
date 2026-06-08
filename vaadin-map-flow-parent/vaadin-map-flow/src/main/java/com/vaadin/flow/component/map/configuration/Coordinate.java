@@ -36,7 +36,9 @@ public class Coordinate implements Serializable {
      * in that projection instead.
      *
      * @param x
+     *            the x coordinate
      * @param y
+     *            the y coordinate
      */
     public Coordinate(double x, double y) {
         this.x = x;

@@ -514,7 +514,9 @@ public class SpreadsheetFactory implements Serializable {
      * indexes.
      *
      * @param spreadsheet
+     *            the spreadsheet
      * @param sheet
+     *            the sheet
      */
     static void calculateSheetSizes(final Spreadsheet spreadsheet,
             final Sheet sheet) {

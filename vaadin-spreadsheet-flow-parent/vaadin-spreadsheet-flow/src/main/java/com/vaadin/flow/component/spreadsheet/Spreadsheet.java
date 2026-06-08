@@ -1217,6 +1217,7 @@ public class Spreadsheet extends Component
      * the default / previously set spreadsheet handler.
      *
      * @param spreadsheetHandler
+     *            the spreadsheet handler
      */
     public void setSpreadsheetHandler(
             SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1497,7 +1498,7 @@ public class Spreadsheet extends Component
      * Returns true if embedded charts are displayed
      *
      * @see #setChartsEnabled(boolean)
-     * @return
+     * @return {@code true} if charts are enabled, {@code false} otherwise
      */
     public boolean isChartsEnabled() {
         return chartsEnabled;
@@ -1508,6 +1509,7 @@ public class Spreadsheet extends Component
      * the spreadsheet or not.
      *
      * @param chartsEnabled
+     *            whether charts are enabled
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;

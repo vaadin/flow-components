@@ -62,7 +62,7 @@ public interface SheetHandler extends GroupingHandler {
     /**
      * default row height in points (?)
      *
-     * @return
+     * @return the default row height
      */
     float getDefaultRowHeight();
 
@@ -105,14 +105,14 @@ public interface SheetHandler extends GroupingHandler {
     /**
      * The maximum amount of columns that are visible
      *
-     * @return
+     * @return the maximum column count
      */
     int getMaxColumns();
 
     /**
      * The maximum amount of rows that are visible
      *
-     * @return
+     * @return the maximum row count
      */
     int getMaxRows();
 
@@ -146,6 +146,7 @@ public interface SheetHandler extends GroupingHandler {
      * Called on right mouse button click on top of some cell.
      *
      * @param nativeEvent
+     *            the native event
      * @param column
      *            1-based
      * @param row
@@ -157,6 +158,7 @@ public interface SheetHandler extends GroupingHandler {
      * Called on right mouse button click on top of a row header
      *
      * @param nativeEvent
+     *            the native event
      * @param rowIndex
      *            1-based
      */
@@ -166,6 +168,7 @@ public interface SheetHandler extends GroupingHandler {
      * Called on right mouse button click on top of a column header
      *
      * @param nativeEvent
+     *            the native event
      * @param columnIndex
      *            1-based
      */
@@ -200,8 +203,10 @@ public interface SheetHandler extends GroupingHandler {
      * Returns the merged region that this cell belongs to.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return the merged region element
      */
     MergedRegion getMergedRegion(int col, int row);
 
@@ -212,7 +217,7 @@ public interface SheetHandler extends GroupingHandler {
      *            starting column of merged cell
      * @param row
      *            starting row of merged cell
-     * @return
+     * @return the merged region element
      */
     MergedRegion getMergedRegionStartingFrom(int col, int row);
 

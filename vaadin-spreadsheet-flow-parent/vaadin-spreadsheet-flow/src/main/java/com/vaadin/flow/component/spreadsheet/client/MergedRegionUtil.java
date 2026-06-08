@@ -46,11 +46,16 @@ public class MergedRegionUtil {
      * Parameters 1-based.
      *
      * @param container
+     *            the container
      * @param topRow
+     *            the top row index
      * @param bottomRow
+     *            the bottom row index
      * @param leftColumn
+     *            the left column index
      * @param rightColumn
-     * @return
+     *            the right column index
+     * @return the merged region
      */
     public static MergedRegion findIncreasingSelection(
             MergedRegionContainer container, int topRow, int bottomRow,

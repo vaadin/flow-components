@@ -80,6 +80,7 @@ public class Utils {
      * @param version
      *            for inferring ranges for column-only references
      * @param formula
+     *            the formula
      * @return all cells in the referenced areas
      */
     public static List<CellReference> getAllReferencedCells(

@@ -367,7 +367,7 @@ public class ApplicationConfiguration implements EntryPoint {
      * Gets the initial UIDL from the DOM, if it was provided during the init
      * process.
      *
-     * @return
+     * @return the UIDL
      */
     public String getUIDL() {
         return getJsoConfiguration(id).getUIDL();
