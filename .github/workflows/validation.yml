@@ -71,9 +71,7 @@ jobs:
       - name: Compute build cache key
         id: build-key
         if: steps.skip-ci.outputs.skip != 'true'
-        env:
-          KEY: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/*.js') }}
-        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+        run: echo "key=${{ runner.os }}-build-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
       - name: Restore build cache
         id: build-cache
@@ -313,6 +311,16 @@ jobs:
       - name: Restore build cache
         if: steps.war-cache.outputs.cache-hit != 'true'
         id: build-cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-cache-miss: true
+
+      - name: Restore build cache (unit tests)
+        if: matrix.type == 'unit'
         uses: actions/cache@v5
         with:
           path: |
