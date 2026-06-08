@@ -319,16 +319,6 @@ jobs:
           key: ${{ needs.build.outputs.build-cache-key }}
           fail-on-cache-miss: true
 
-      - name: Restore build cache (unit tests)
-        if: matrix.type == 'unit'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository/com/vaadin
-            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ needs.build.outputs.build-cache-key }}
-          fail-on-cache-miss: true
-
       - name: Run unit tests
         if: matrix.type == 'unit'
         run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
