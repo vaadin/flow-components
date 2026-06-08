@@ -68,7 +68,7 @@ class SpringAILLMProviderTest {
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
-        Mockito.when(mockChatModel.getDefaultOptions())
+        Mockito.when(mockChatModel.getOptions())
                 .thenReturn(ToolCallingChatOptions.builder().build());
         provider = new SpringAILLMProvider(mockChatModel);
         logger.clearAll();
@@ -401,9 +401,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
@@ -417,9 +417,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
