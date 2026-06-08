@@ -188,7 +188,7 @@ class BigDecimalFieldTest extends TextFieldTest {
         Assertions.assertEquals("aria-labelledby",
                 field.getAriaLabelledBy().get());
 
-        field.setAriaLabelledBy(null);
+        field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 

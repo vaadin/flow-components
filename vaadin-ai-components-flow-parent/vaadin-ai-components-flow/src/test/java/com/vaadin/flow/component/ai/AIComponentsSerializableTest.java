@@ -87,6 +87,10 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldType.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldValidation.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormValueConverter.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldHighlighter(\\$\\d+)?",
+                // vaadin-field-highlighter-flow dependency: a one-shot
+                // init utility, not Serializable by design.
+                "com\\.vaadin\\.flow\\.component\\.fieldhighlighter\\.FieldHighlighterInitializer(\\$\\d+)?",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?",
                 // ValueOptions is a transient registration helper: the
                 // controller copies its state into FormFieldHints during
