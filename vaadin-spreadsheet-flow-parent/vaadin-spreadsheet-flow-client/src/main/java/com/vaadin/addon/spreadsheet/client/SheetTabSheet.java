@@ -553,7 +553,7 @@ public class SheetTabSheet extends Widget {
      * @param tab
      *            the tab
      * @param name
-     *            to use
+     *            the tab name
      */
     private void setTabName(Element tab, String name) {
         if (tab == null)

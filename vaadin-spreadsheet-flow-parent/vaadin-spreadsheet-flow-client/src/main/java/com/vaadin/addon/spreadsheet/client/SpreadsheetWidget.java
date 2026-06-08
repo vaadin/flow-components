@@ -1627,7 +1627,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * @param value
      *            the value
      * @param focusSheet
-     *            the focus sheet
+     *            whether to focus the sheet
      */
     private void doDeferredCellValueCommit(final String value,
             final boolean focusSheet) {

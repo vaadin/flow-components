@@ -55,7 +55,7 @@ public class MergedRegionUtil {
      *            the left column index
      * @param rightColumn
      *            the right column index
-     * @return the merged region element
+     * @return the merged region
      */
     public static MergedRegion findIncreasingSelection(
             MergedRegionContainer container, int topRow, int bottomRow,
