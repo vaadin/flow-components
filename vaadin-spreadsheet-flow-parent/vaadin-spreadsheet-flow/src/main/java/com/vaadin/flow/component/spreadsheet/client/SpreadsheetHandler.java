@@ -125,8 +125,10 @@ public interface SpreadsheetHandler extends GroupingHandler {
      *
      * @param sheetIndex
      *            0-based
-     * @param scrollTop
      * @param scrollLeft
+     *            the horizontal scroll position
+     * @param scrollTop
+     *            the vertical scroll position
      */
     public void sheetSelected(int sheetIndex, int scrollLeft, int scrollTop);
 
@@ -135,14 +137,17 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * @param sheetIndex
      *            0-based
      * @param newName
+     *            the new name
      */
     public void sheetRenamed(int sheetIndex, String newName);
 
     /**
      * Sheet is created as the last sheet
      *
-     * @param scrollTop
      * @param scrollLeft
+     *            the horizontal scroll position
+     * @param scrollTop
+     *            the vertical scroll position
      */
     public void sheetCreated(int scrollLeft, int scrollTop);
 
@@ -150,11 +155,17 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * Cell range selected by painting
      *
      * @param selectedCellRow
+     *            the selected cell row
      * @param selectedCellColumn
+     *            the selected cell column
      * @param row1
+     *            the first row index
      * @param col1
+     *            the first column index
      * @param row2
+     *            the second row index
      * @param col2
+     *            the second column index
      */
     // @Delayed(lastOnly = true)
     public void cellRangePainted(int selectedCellRow, int selectedCellColumn,
@@ -182,9 +193,13 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * @param newRowSizes
      *            row index and new size (converted pt)
      * @param row1
+     *            the first row index
      * @param col1
+     *            the first column index
      * @param row2
+     *            the second row index
      * @param col2
+     *            the second column index
      */
     public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
             int row2, int col2);
@@ -193,9 +208,13 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * Columns resized with drag and drop. Indexes 1-based.
      *
      * @param row1
+     *            the first row index
      * @param col1
+     *            the first column index
      * @param row2
+     *            the second row index
      * @param col2
+     *            the second column index
      * @param newColumnSizes
      *            column index and new size (px)
      */
@@ -240,6 +259,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * Client pasted text at current selection.
      *
      * @param text
+     *            the text
      */
     public void onPaste(String text);
 

@@ -80,6 +80,7 @@ public class FooterRow extends AbstractRow<FooterCell> {
      * Creates a new footer row from the layer of column elements.
      *
      * @param layer
+     *            the column layer
      */
     FooterRow(ColumnLayer layer) {
         super(layer, FooterCell::new);

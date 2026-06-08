@@ -820,7 +820,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Sets whether dialog can be resized by user or not.
      *
      * @param resizable
-     *            {@code true} to enabled resizing of the dialog, {@code false}
+     *            {@code true} to enable resizing of the dialog, {@code false}
      *            otherwise.
      */
     public void setResizable(boolean resizable) {
@@ -830,7 +830,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Gets whether dialog is enabled to be resized or not.
      *
-     * @return {@code true} if resizing is enabled, {@code falsoe} otherwiser
+     * @return {@code true} if resizing is enabled, {@code false} otherwise
      *         (default).
      */
     public boolean isResizable() {
@@ -876,7 +876,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * dialog footer area. The footer is displayed only if there's at least one
      * component added with {@link DialogHeaderFooter#add(Component...)}.
      *
-     * @return the header object
+     * @return the footer object
      */
     public DialogFooter getFooter() {
         if (this.dialogFooter == null) {
@@ -1020,6 +1020,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * dialog is closed.
          *
          * @param rendererCreated
+         *            {@code true} if the renderer function has been created,
+         *            {@code false} otherwise
          */
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;

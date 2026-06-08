@@ -34,7 +34,9 @@ public class MapElement extends TestBenchElement {
      * at the calculated pixel offset.
      *
      * @param x
+     *            the x coordinate
      * @param y
+     *            the y coordinate
      */
     public void clickAtCoordinates(double x, double y) {
         PixelCoordinate pixelCoordinates = getPixelCoordinates(x, y, true);
