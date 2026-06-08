@@ -139,6 +139,19 @@ class SideNavItemTest {
     }
 
     @Test
+    void setPathWithUnsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sideNavItem.setPath("javascript:alert(1)"));
+    }
+
+    @Test
+    void setUnsafePathWithUnsafeScheme_pathSet() {
+        sideNavItem.setUnsafePath("javascript:alert(1)");
+
+        assertPath("javascript:alert(1)");
+    }
+
+    @Test
     void setPathWithoutAliasesAsComponent_onlyPathUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRoute.class);
