@@ -683,7 +683,7 @@ public class FormulaBarWidget extends Composite {
         }
 
         // Find next not-matching char before and after caret, and try to match
-        // section inbetween.
+        // section in between.
 
         int start = -1, end = -1;
 

@@ -847,12 +847,12 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param fetchCallback
      *            function that returns a stream of items from the backend based
-     *            on the offset, limit and a object filter
+     *            on the offset, limit and an object filter
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
-     *            the user into a callback's object filter
+     *            the user into the callback's object filter
      * @param <C>
-     *            filter type used by a callback
+     *            filter type used by the callback
      * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
@@ -887,15 +887,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param fetchCallback
      *            function that returns a stream of items from the backend based
-     *            on the offset, limit and a object filter
+     *            on the offset, limit and an object filter
      * @param countCallback
-     *            function that return the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
-     *            the user into a callback's object filter
+     *            the user into the object filter used by the callbacks
      * @param <C>
-     *            filter type used by a callbacks
+     *            filter type used by the callbacks
      * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
@@ -978,8 +978,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            function that returns a stream of items from the back end for
      *            a query
      * @param countCallback
-     *            function that return the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @return ComboBoxLazyDataView instance for further configuration
      */
     @Override
