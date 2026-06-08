@@ -4221,6 +4221,8 @@ public class SheetWidget extends Panel {
      *
      * @param event
      *            the event
+     * @param target
+     *            the target element
      */
     private void updateCellCommentDisplay(Event event, Element target) {
         int eventTypeInt = event.getTypeInt();

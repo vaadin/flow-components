@@ -125,10 +125,10 @@ public interface SpreadsheetHandler extends GroupingHandler {
      *
      * @param sheetIndex
      *            0-based
-     * @param scrollTop
-     *            the vertical scroll position
      * @param scrollLeft
      *            the horizontal scroll position
+     * @param scrollTop
+     *            the vertical scroll position
      */
     public void sheetSelected(int sheetIndex, int scrollLeft, int scrollTop);
 
@@ -144,10 +144,10 @@ public interface SpreadsheetHandler extends GroupingHandler {
     /**
      * Sheet is created as the last sheet
      *
-     * @param scrollTop
-     *            the vertical scroll position
      * @param scrollLeft
      *            the horizontal scroll position
+     * @param scrollTop
+     *            the vertical scroll position
      */
     public void sheetCreated(int scrollLeft, int scrollTop);
 

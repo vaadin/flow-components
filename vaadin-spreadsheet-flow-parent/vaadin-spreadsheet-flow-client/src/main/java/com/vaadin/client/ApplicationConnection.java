@@ -746,7 +746,7 @@ public class ApplicationConnection implements HasHandlers {
      * Returns false
      *
      * @param paintable
-     *            the paintable widget
+     *            the paintable connector
      * @return false, always
      * @deprecated As of 7.0, serves no purpose
      */

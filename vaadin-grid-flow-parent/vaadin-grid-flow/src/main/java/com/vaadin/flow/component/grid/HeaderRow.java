@@ -44,7 +44,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
          * Creates a new HeaderCell which wraps the given column element.
          *
          * @param column
-         *            the column index
+         *            the column element
          */
         HeaderCell(AbstractColumn<?> column) {
             super(column);

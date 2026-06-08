@@ -1599,11 +1599,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * update the sheet display after editing has finished
      *
+     * @param value
+     *            the cell value
      * @param focusSheet
-     *            the focus sheet
-     *
-     * @param focusSheet
-     *            the focus sheet
+     *            whether to focus the sheet after editing
      */
     private void cellEditingDone(String value, boolean focusSheet) {
         inlineEditing = false;

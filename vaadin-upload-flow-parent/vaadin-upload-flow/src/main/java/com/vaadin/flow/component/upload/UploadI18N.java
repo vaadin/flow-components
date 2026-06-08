@@ -491,7 +491,7 @@ public class UploadI18N implements Serializable {
         /**
          * get units size list
          *
-         * @return the size
+         * @return the list of size unit labels
          */
         public List<String> getSize() {
             return size;
@@ -502,7 +502,7 @@ public class UploadI18N implements Serializable {
          * "YB"]
          *
          * @param size
-         *            the size
+         *            the list of size unit labels
          * @return this instance
          */
         public Units setSize(List<String> size) {
