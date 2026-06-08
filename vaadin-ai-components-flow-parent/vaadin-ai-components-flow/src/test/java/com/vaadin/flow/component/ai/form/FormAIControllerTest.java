@@ -1375,6 +1375,58 @@ class FormAIControllerTest {
                             + "must not be reported as a change");
         }
 
+        @Test
+        void fieldRevealedAndFilledInSameTurnIsReported() {
+            var controlling = new TestField();
+            var conditional = new TestField();
+            conditional.setVisible(false);
+            controlling
+                    .addValueChangeListener(e -> conditional.setVisible(true));
+            var controller = new FormAIController(
+                    new Div(controlling, conditional));
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
+
+            controller.onRequest();
+            controlling.setValue("business"); // reveals the conditional field
+            conditional.setValue("cost-center-42"); // AI fills the revealed one
+            controller.onResponse(null);
+
+            var changes = captured.get();
+            Assertions.assertTrue(containsChangeFor(changes, conditional),
+                    "A field revealed and filled within the same turn must be "
+                            + "reported as changed; got: " + changes);
+        }
+
+        @Test
+        void fieldAddedAndFilledInSameTurnIsReported() {
+            // Stronger variant: the conditional field does not exist in
+            // the form when onRequest snapshots. A controlling field's
+            // listener ADDS it to the form mid-turn (e.g. a checkbox
+            // revealing a new panel), and the same turn fills it. It must
+            // still be reported as changed.
+            var controlling = new TestField();
+            var added = new TestField();
+            var form = new Div(controlling);
+            // Adding the conditional field is application-driven, triggered
+            // by the controlling field's value change.
+            controlling.addValueChangeListener(e -> form.add(added));
+            var controller = new FormAIController(form);
+            var captured = new AtomicReference<List<FieldValueChange>>();
+            controller.addFieldValueChangedListener(captured::set);
+
+            controller.onRequest();
+            controlling.setValue("business"); // adds the new field to the form
+            added.setValue("cost-center-42"); // AI fills the newly-added field
+            controller.onResponse(null);
+
+            var changes = captured.get();
+            Assertions.assertTrue(containsChangeFor(changes, added),
+                    "A field added to the form and filled within the same "
+                            + "turn must be reported as changed; got: "
+                            + changes);
+        }
+
         private static FieldValueChange changeFor(
                 List<FieldValueChange> changes, HasValue<?, ?> field) {
             return changes.stream().filter(c -> c.field() == field).findFirst()
