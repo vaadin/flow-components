@@ -106,7 +106,7 @@ public class Options3d extends AbstractConfigurationObject {
     }
 
     /**
-     * Wether to render the chart using the 3D functionality.
+     * Whether to render the chart using the 3D functionality.
      * <p>
      * Defaults to: false
      */

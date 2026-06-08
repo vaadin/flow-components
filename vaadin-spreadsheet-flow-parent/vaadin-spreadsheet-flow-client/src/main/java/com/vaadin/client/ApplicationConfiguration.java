@@ -48,7 +48,7 @@ import com.vaadin.shared.ui.ui.UIConstants;
 public class ApplicationConfiguration implements EntryPoint {
 
     /**
-     * Helper class for reading configuration options from the bootstap
+     * Helper class for reading configuration options from the bootstrap
      * javascript
      *
      * @since 7.0

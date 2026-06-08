@@ -203,7 +203,7 @@ public class SheetWidget extends Panel {
      * Stylesheet element for holding the edited cell style (for convenience
      * reasons, not actually visible). The selector is updated to the edited
      * cell. Also holds the style for the last freeze panel column, if any. This
-     * is for preventing text oveflow over freeze panel.
+     * is for preventing text overflow over freeze panel.
      */
     private StyleElement editedCellFreezeColumnStyle = Document.get()
             .createStyleElement();
@@ -6236,7 +6236,7 @@ public class SheetWidget extends Panel {
                 int distanceFromWindowLeft = left - windowLeft;
 
                 // If there is not enough space for the overflow of the popup's
-                // width to the right of hte text box, and there IS enough space
+                // width to the right of the text box, and there IS enough space
                 // for the
                 // overflow to the left of the text box, then right-align the
                 // popup.
