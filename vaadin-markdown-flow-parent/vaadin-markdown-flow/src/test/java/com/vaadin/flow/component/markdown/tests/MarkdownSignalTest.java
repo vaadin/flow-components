@@ -15,15 +15,12 @@
  */
 package com.vaadin.flow.component.markdown.tests;
 
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -110,7 +107,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
         markdown = new Markdown();
         markdown.bindContent(contentSignal);
 
-        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals(0,
+                ui.dumpPendingJavaScriptInvocations().size());
     }
 
     @Test
@@ -124,7 +122,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
         // Signal changes while detached must not produce JS invocations
         contentSignal.set("**while-detached**");
-        Assertions.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assertions.assertEquals(0,
+                ui.dumpPendingJavaScriptInvocations().size());
 
         ui.add(markdown);
         Assertions.assertEquals("**while-detached**", markdown.getContent());
@@ -157,7 +156,8 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     private void assertUpdateMarkdownCall(Component component, String content,
             boolean isAppend) {
-        var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
+        var pendingJavaScriptInvocations = ui
+                .dumpPendingJavaScriptInvocations();
 
         Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
 
@@ -179,9 +179,5 @@ class MarkdownSignalTest extends AbstractSignalsTest {
         }
         Assertions.assertEquals(content, parameters.get(0));
         Assertions.assertEquals(element, parameters.get(1));
-    }
-
-    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
-        return ui.dumpPendingJavaScriptInvocations();
     }
 }
