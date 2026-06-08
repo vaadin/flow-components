@@ -150,8 +150,8 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Returns the POI index of the first visible sheet (not hidden or very
-     * hidden). If no sheets are visible, returns 0. This is not be possible at
-     * least in Excel, but unfortunately POI allows it.
+     * hidden). If no sheets are visible, returns 0. This should not be possible
+     * at least in Excel, but unfortunately POI allows it.
      *
      * @param workbook
      *            Workbook to get the sheets from
