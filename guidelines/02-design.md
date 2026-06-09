@@ -179,9 +179,8 @@ re-implements it. Its only accessibility job is exposing the web component's
 i18n and labelling APIs to Java.
 
 - **Localisable text.** Any text the component renders itself (internal button
-  labels, error messages, tooltip defaults) is customisable from Java. Where the
-  web component exposes an `i18n` property, the wrapper maps it to a
-  `{Component}I18n` class; defaults are English fallbacks, never hard-coded.
+  labels, error messages, tooltip defaults) is customisable from Java, never
+  hard-coded — see [I18n & Accessibility](10-i18n-and-a11y.md).
 - **Property order independence.** Setting properties before vs after attach
   produces the same result. Don't introduce ordering dependencies (e.g. by
   deferring writes to `onAttach` in a way that discards earlier values).

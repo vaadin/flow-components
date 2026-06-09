@@ -6,16 +6,15 @@
 - **JUnit 6 (Jupiter)** for unit tests; **JUnit 4 + TestBench + Selenium** for
   integration tests; **Mockito** for mocking; **Jetty** for the IT server.
 - **Jackson 3** for JSON — databind from `tools.jackson.*`, annotations from
-  `com.fasterxml.jackson.annotation.*` (annotations stayed in the legacy
-  package). Always go through `JacksonUtils`; never build JSON by string
-  concatenation.
+  `com.fasterxml.jackson.annotation.*` (they stayed in the legacy package).
 
 ## Ground rules
 
-- Every public API class, data class, and event object implements
-  `Serializable` — Vaadin sessions may be persisted to disk.
-- Connectors and `executeJs` calls run in the `attach` handler, never the
-  constructor (see [Composition](07-composition.md)).
+- Components and the data objects they expose are `Serializable`, and JSON is
+  built with Jackson (`JacksonUtils`) — see
+  [Design → Universal behavioural requirements](02-design.md#universal-behavioural-requirements).
+- Connectors and `executeJs` calls run in `attach`, not the constructor — see
+  [Composition](07-composition.md).
 - Read `.claude/skills/signal-rules/SKILL.md` before writing `bind*` methods.
 
 ## Module structure

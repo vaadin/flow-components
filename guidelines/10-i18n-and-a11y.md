@@ -26,12 +26,11 @@ public class ExampleI18n implements Serializable {
 - `implements Serializable` (including nested classes).
 - `@JsonInclude(NON_NULL)` so unset strings aren't sent and don't overwrite
   web-component defaults.
-- Jackson annotations from `com.fasterxml.jackson.annotation.*`; databind types
-  (`JsonNode`, `ObjectNode`) from `tools.jackson.databind.*`. Mixing packages
-  silently fails.
+- Jackson annotations and databind types come from different packages (see
+  [Repository](01-repository.md#technology-stack)) — mixing them silently fails.
 - Setters may return `this` — the one sanctioned fluent style in the Flow API.
 
-Push it to the element as JSON via `JacksonUtils`, never string concatenation:
+Push it to the element via `JacksonUtils`:
 
 ```java
 public void setI18n(ExampleI18n i18n) {
