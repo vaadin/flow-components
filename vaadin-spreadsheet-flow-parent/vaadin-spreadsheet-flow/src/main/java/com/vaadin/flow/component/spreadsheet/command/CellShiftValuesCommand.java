@@ -32,6 +32,7 @@ public class CellShiftValuesCommand extends CellValueCommand {
      * @param spreadsheet
      *            Target spreadsheet
      * @param decrease
+     *            whether the selection decreases
      */
     public CellShiftValuesCommand(Spreadsheet spreadsheet, boolean decrease) {
         super(spreadsheet);

@@ -1,4 +1,5 @@
-import { expect, fixtureSync } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync } from '@vaadin/testing-helpers';
 import dateFnsFormat from 'date-fns/format';
 import { DatePickerDate } from '@vaadin/date-picker';
 import { init, extractDateParts, datepickerConnector, type FlowDatePicker } from './shared.js';

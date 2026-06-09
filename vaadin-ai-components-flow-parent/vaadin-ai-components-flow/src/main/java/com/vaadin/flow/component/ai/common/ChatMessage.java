@@ -41,7 +41,7 @@ import java.util.Objects;
  * @param messageId
  *            an optional identifier assigned to user messages by the
  *            orchestrator, used to correlate with attachment data stored via
- *            {@code AttachmentSubmitListener}; may be {@code null}
+ *            {@code RequestListener}; may be {@code null}
  * @param time
  *            the timestamp when the message was created; may be {@code null}
  * @author Vaadin Ltd

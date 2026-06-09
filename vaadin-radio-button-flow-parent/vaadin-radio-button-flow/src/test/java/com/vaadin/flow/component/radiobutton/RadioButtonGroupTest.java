@@ -493,7 +493,7 @@ class RadioButtonGroupTest {
         Assertions.assertEquals("aria-labelledby",
                 group.getAriaLabelledBy().get());
 
-        group.setAriaLabelledBy(null);
+        group.setAriaLabelledBy((String) null);
         Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
     }
 

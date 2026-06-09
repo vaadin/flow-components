@@ -41,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
  * it contains.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.2.0-alpha12")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.2.0-beta1")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout>,
@@ -452,10 +452,10 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     }
 
     /**
-     * Adds the components to the <em>middle</em> slot of this layout.
+     * Adds the components to the <em>end</em> slot of this layout.
      *
      * @param components
-     *            Components to add to the middle slot.
+     *            Components to add to the end slot.
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
@@ -470,7 +470,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * Adds the components to the <em>end</em> slot of this layout.
      *
      * @param components
-     *            Components to add to the middle slot.
+     *            Components to add to the end slot.
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.

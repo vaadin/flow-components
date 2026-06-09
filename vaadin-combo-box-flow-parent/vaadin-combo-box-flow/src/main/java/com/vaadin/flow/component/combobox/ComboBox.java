@@ -88,7 +88,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.2.0-alpha12")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.2.0-beta1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -97,6 +97,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+
+    private boolean focusSelectedItem;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -162,6 +164,13 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         addValueChangeListener(event -> {
             if (event.isFromClient()) {
                 refreshValue();
+            }
+        });
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            var isOpened = (boolean) event.getValue();
+            if (isOpened && focusSelectedItem) {
+                scrollToSelectedItem();
             }
         });
     }
@@ -366,6 +375,66 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
+    }
+
+    /**
+     * Sets whether the dropdown should scroll to and focus the currently
+     * selected item when it opens. Off by default.
+     * <p>
+     * Works out of the box for in-memory data. For a lazy data provider, the
+     * lazy data view must have an
+     * {@link com.vaadin.flow.data.provider.ItemIndexProvider ItemIndexProvider}
+     * configured via
+     * {@link com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView#setItemIndexProvider(com.vaadin.flow.data.provider.ItemIndexProvider)
+     * getLazyDataView().setItemIndexProvider(...)} so that the selected item's
+     * index can be resolved against the current sorting. Opening the dropdown
+     * throws {@link UnsupportedOperationException} otherwise.
+     * <p>
+     *
+     * @param focusSelectedItem
+     *            {@code true} to scroll to and focus the selected item when the
+     *            dropdown opens, {@code false} to keep the default behavior of
+     *            opening at the top
+     */
+    public void setFocusSelectedItem(boolean focusSelectedItem) {
+        this.focusSelectedItem = focusSelectedItem;
+    }
+
+    /**
+     * Gets whether the dropdown scrolls to and focuses the currently selected
+     * item when it opens.
+     *
+     * @return {@code true} if the dropdown auto-focuses the selected item,
+     *         {@code false} otherwise
+     * @see #setFocusSelectedItem(boolean)
+     */
+    public boolean isFocusSelectedItem() {
+        return focusSelectedItem;
+    }
+
+    private void scrollToSelectedItem() {
+        if (getValue() == null) {
+            return;
+        }
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider == null) {
+            return;
+        }
+        Integer index;
+        if (dataProvider.isInMemory()) {
+            // Use the generic data view rather than the list data view: it
+            // resolves the item index through the data communicator and works
+            // for any in-memory provider, including wrapped ones (e.g. from
+            // ListDataProvider.withConvertedFilter) that are not a
+            // ListDataProvider and would fail the list data view's cast.
+            index = getGenericDataView().getItemIndex(getValue()).orElse(null);
+        } else {
+            index = getLazyDataView().getItemIndex(getValue()).orElse(null);
+        }
+        if (index == null || index < 0) {
+            return;
+        }
+        getElement().callJsFunction("scrollToIndex", index);
     }
 
     /**

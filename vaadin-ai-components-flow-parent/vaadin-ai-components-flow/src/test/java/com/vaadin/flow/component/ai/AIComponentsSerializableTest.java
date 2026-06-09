@@ -77,10 +77,26 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.ChartAIController(\\$\\d+)?",
                 // Build-time generator — not a runtime component
                 "com\\.vaadin\\.flow\\.component\\.ai\\.chart\\.PlotOptionsSchemaGenerator",
-                // FormAIController — intentionally not serializable;
-                // restored via reconnect()
-                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormAIController(\\$\\d+)?",
-                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldDiscovery(\\$\\d+)?"));
+                // FormAIController and its helpers — intentionally not
+                // serializable; restored via reconnect()
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormAIController.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormAITools.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldDiscovery.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldHints.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldSchema.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldType.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldValidation.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormValueConverter.*",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldHighlighter(\\$\\d+)?",
+                // vaadin-field-highlighter-flow dependency: a one-shot
+                // init utility, not Serializable by design.
+                "com\\.vaadin\\.flow\\.component\\.fieldhighlighter\\.FieldHighlighterInitializer(\\$\\d+)?",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?",
+                // ValueOptions is a transient registration helper: the
+                // controller copies its state into FormFieldHints during
+                // valueOptions(...) and discards the instance. It is not part
+                // of any serialized session state.
+                "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.ValueOptions(\\$\\d+)?"));
     }
 
     @BeforeEach
@@ -320,7 +336,7 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         var tool1 = createToolSpec("originalTool", "Original");
         AIController originalController = createController(tool1);
 
-        // Build without mocks (no message list) so it can serialize
+        // Build without mocks (no message list) so it can serialize.
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withController(originalController).build();
 
@@ -335,9 +351,14 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(newProvider).stream(captor.capture());
-        var explicitTools = captor.getValue().explicitTools();
-        Assertions.assertEquals(1, explicitTools.size());
-        Assertions.assertEquals("newTool", explicitTools.getFirst().getName());
+        var toolNames = captor.getValue().explicitTools().stream()
+                .map(LLMProvider.ToolSpec::getName).toList();
+        Assertions.assertTrue(toolNames.contains("newTool"),
+                "Reconnect should install the new controller's tool; got: "
+                        + toolNames);
+        Assertions.assertFalse(toolNames.contains("originalTool"),
+                "Reconnect should drop the previous controller's tool; got: "
+                        + toolNames);
     }
 
     private static AIController createController(
@@ -346,11 +367,6 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
             @Override
             public List<LLMProvider.ToolSpec> getTools() {
                 return List.of(tools);
-            }
-
-            @Override
-            public void onResponseComplete() {
-                // Test controller doesn't need to handle request completion
             }
         };
     }

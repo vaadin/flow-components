@@ -21,22 +21,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 class MasterDetailLayoutTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
     private final MasterDetailLayout layout = new MasterDetailLayout();
 

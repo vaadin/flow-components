@@ -31,6 +31,7 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
      *            the temp file extension without leading dot
      * @return The generated temp file handle
      * @throws IOException
+     *             if the temp file cannot be created or written
      */
     File createTempFile(String extension) throws IOException {
         return createTempFile("TestFileUpload", extension);
@@ -46,6 +47,7 @@ public abstract class AbstractUploadIT extends AbstractComponentIT {
      *            the temp file extension without leading dot
      * @return The generated temp file handle
      * @throws IOException
+     *             if the temp file cannot be created or written
      */
     File createTempFile(String fileName, String extension) throws IOException {
         File tempFile = File.createTempFile(fileName, "." + extension);

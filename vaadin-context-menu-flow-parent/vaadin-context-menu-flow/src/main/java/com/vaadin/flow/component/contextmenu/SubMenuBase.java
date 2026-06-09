@@ -159,7 +159,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     /**
      * Gets a (sub) menu manager.
      *
-     * @return
+     * @return the menu manager
      */
     protected MenuManager<C, I, S> getMenuManager() {
         if (menuManager == null) {

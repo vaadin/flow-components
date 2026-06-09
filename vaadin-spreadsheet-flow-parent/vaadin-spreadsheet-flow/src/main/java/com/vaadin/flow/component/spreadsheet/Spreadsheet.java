@@ -1217,6 +1217,7 @@ public class Spreadsheet extends Component
      * the default / previously set spreadsheet handler.
      *
      * @param spreadsheetHandler
+     *            the spreadsheet handler
      */
     public void setSpreadsheetHandler(
             SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1497,7 +1498,7 @@ public class Spreadsheet extends Component
      * Returns true if embedded charts are displayed
      *
      * @see #setChartsEnabled(boolean)
-     * @return
+     * @return {@code true} if charts are enabled, {@code false} otherwise
      */
     public boolean isChartsEnabled() {
         return chartsEnabled;
@@ -1508,6 +1509,7 @@ public class Spreadsheet extends Component
      * the spreadsheet or not.
      *
      * @param chartsEnabled
+     *            whether charts are enabled
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
@@ -3459,7 +3461,7 @@ public class Spreadsheet extends Component
      *
      * @param fileName
      *            The full name of the file. If the name doesn't end with '.xls'
-     *            or '.xlsx', the approriate one will be appended.
+     *            or '.xlsx', the appropriate one will be appended.
      * @return A File with the content of the current {@link Workbook}, In the
      *         file format of the original {@link Workbook}.
      * @throws FileNotFoundException
@@ -6110,17 +6112,17 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Get the minimum row heigth in points for the rows that contain custom
+     * Get the minimum row height in points for the rows that contain custom
      * components
      *
-     * @return the minimum row heigths in points
+     * @return the minimum row heights in points
      */
     public int getMinimumRowHeightForComponents() {
         return minimumRowHeightForComponents;
     }
 
     /***
-     * Set the minimum row heigth in points for the rows that contain custom
+     * Set the minimum row height in points for the rows that contain custom
      * components. If set to a small value, it might cause some components like
      * checkboxes to be cut off
      *

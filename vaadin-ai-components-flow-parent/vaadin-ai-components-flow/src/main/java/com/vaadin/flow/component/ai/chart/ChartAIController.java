@@ -57,14 +57,14 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponseComplete()}, avoiding partial state and multiple redraws
- * during a multi-tool LLM turn. The chart state is stored directly on the
- * {@link Chart} component, so it survives serialization.
+ * {@link #onResponse(Throwable)} on the success path, avoiding partial state
+ * and multiple redraws during a multi-tool LLM turn. The chart state is stored
+ * directly on the {@link Chart} component, so it survives serialization.
  * </p>
  * <p>
- * If the LLM turn fails, the orchestrator fires
- * {@link #onResponseFailed(Throwable)} instead — pending changes are discarded
- * and the chart keeps its last successfully-rendered state.
+ * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
+ * pending changes are discarded and the chart keeps its last
+ * successfully-rendered state.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -305,8 +305,14 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public void onResponseComplete() {
+    public void onResponse(Throwable error) {
         ChartEntry entry = ChartEntry.get(chart);
+        if (error != null) {
+            if (entry != null) {
+                entry.clearPendingState();
+            }
+            return;
+        }
         if (entry == null || !entry.hasPendingState()) {
             return;
         }
@@ -331,14 +337,6 @@ public class ChartAIController implements AIController {
         // is not required: Configuration is server-side state and any JS
         // calls are queued by Flow until the chart attaches.
         render(entry, queriesToRender, configJson, true);
-    }
-
-    @Override
-    public void onResponseFailed(Throwable error) {
-        var entry = ChartEntry.get(chart);
-        if (entry != null) {
-            entry.clearPendingState();
-        }
     }
 
     private void render(ChartEntry entry, List<String> queries,
