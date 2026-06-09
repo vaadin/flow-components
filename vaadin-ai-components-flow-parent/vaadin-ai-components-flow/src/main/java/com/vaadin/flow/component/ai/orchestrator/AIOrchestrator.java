@@ -18,10 +18,15 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -53,7 +58,10 @@ import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.streams.UploadHandler;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -88,7 +96,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
- *         .withResponseCompleteListener(e -&gt; save(e.getResponse())) // optional
+ *         .withResponseListener(e -&gt; save(e.getResponse())) // optional
  *         .withHistory(savedHistory, savedAttachments) // optional, for restore
  *         .build();
  * </pre>
@@ -98,7 +106,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * to obtain a snapshot and {@link Builder#withHistory(List, Map)} to restore
  * conversation state (including attachments) across sessions. To persist
  * history automatically after each exchange, use
- * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)}.
+ * {@link Builder#withResponseListener(ResponseListener)}.
  * </p>
  * <p>
  * <b>Serialization:</b> The LLM provider and tool objects are not serialized
@@ -162,6 +170,13 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
+    /**
+     * Name of the built-in tool that exposes per-turn session context to the
+     * LLM. Reserved — applications should not register their own tool with this
+     * name.
+     */
+    static final String SESSION_CONTEXT_TOOL_NAME = "get_session_context";
+
     private transient LLMProvider provider;
     private final String systemPrompt;
     private AIMessageList messageList;
@@ -171,9 +186,10 @@ public class AIOrchestrator implements Serializable {
     private transient AIController controller;
     private String userName;
     private String assistantName;
-    private AttachmentSubmitListener attachmentSubmitListener;
+    private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
-    private ResponseCompleteListener responseCompleteListener;
+    private ResponseListener responseListener;
+    private SerializableSupplier<String> contextSupplier;
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
     private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
@@ -220,8 +236,13 @@ public class AIOrchestrator implements Serializable {
      * component.
      * </p>
      * <p>
-     * If a request is already being processed, this method will log a warning
-     * and return without processing the new prompt.
+     * Attachments are taken from a configured {@link AIFileReceiver} (if any).
+     * To send a prompt with caller-supplied attachments, use
+     * {@link #prompt(String, List)}.
+     * </p>
+     * <p>
+     * If a request is already being processed, this method logs a warning and
+     * returns without processing the new prompt.
      * </p>
      *
      * @param userMessage
@@ -232,7 +253,50 @@ public class AIOrchestrator implements Serializable {
      *             {@link #reconnect(LLMProvider)})
      */
     public void prompt(String userMessage) {
-        doPrompt(userMessage);
+        doPrompt(userMessage, null);
+    }
+
+    /**
+     * Sends a prompt with caller-supplied attachments. Useful for programmatic
+     * flows where attachments are produced server-side — generated files,
+     * fetched data, content from non-Upload sources — rather than uploaded
+     * through a UI component.
+     * <p>
+     * Behaves like {@link #prompt(String)} otherwise: the message and
+     * attachments appear in the message list, the request listener fires with
+     * the {@code messageId} also recorded in the conversation history, and the
+     * attachments are forwarded to the {@link LLMProvider.LLMRequest}.
+     * </p>
+     * <p>
+     * <b>Interaction with a configured {@link AIFileReceiver}:</b> this
+     * overload uses only the supplied list and does <b>not</b> drain the
+     * receiver. Attachments pending in the receiver stay there for the next
+     * call to {@link #prompt(String)} (or the user's next submit through a
+     * connected input). To merge UI-driven and programmatic attachments, the
+     * caller must drain the receiver explicitly and pass the combined list.
+     * </p>
+     * <p>
+     * If a request is already being processed, this method logs a warning and
+     * returns without processing the new prompt.
+     * </p>
+     *
+     * @param userMessage
+     *            the prompt to send to the AI
+     * @param attachments
+     *            the attachments to send with the prompt; pass an empty list
+     *            for none. Copied defensively — subsequent mutations of the
+     *            caller's list have no effect.
+     * @throws NullPointerException
+     *             if {@code attachments} is {@code null} or contains
+     *             {@code null} elements
+     * @throws IllegalStateException
+     *             if no UI context is available, or if the orchestrator needs
+     *             to be reconnected after deserialization (see
+     *             {@link #reconnect(LLMProvider)})
+     */
+    public void prompt(String userMessage, List<AIAttachment> attachments) {
+        Objects.requireNonNull(attachments, "attachments cannot be null");
+        doPrompt(userMessage, List.copyOf(attachments));
     }
 
     /**
@@ -282,17 +346,15 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * The returned list contains all user and assistant messages exchanged
      * through this orchestrator. User messages include a
-     * {@link ChatMessage#messageId()} matching the ID provided to the
-     * {@link AttachmentSubmitListener}, which can be used to correlate with
-     * externally stored attachment data.
+     * {@link ChatMessage#messageId()} matching the id provided to the
+     * {@link RequestListener}, which can be used to correlate with externally
+     * stored attachment data.
      * <p>
      * <b>Note:</b> This method returns a point-in-time snapshot. If a streaming
      * response is in progress, the snapshot may contain the user message
      * without its corresponding assistant response. For automatic persistence,
-     * use
-     * {@link Builder#withResponseCompleteListener(ResponseCompleteListener)} to
-     * be notified at the right time, then call {@code getHistory()} from that
-     * callback.
+     * use {@link Builder#withResponseListener(ResponseListener)} to be notified
+     * at the right time, then call {@code getHistory()} from that callback.
      *
      * @return an unmodifiable copy of the conversation history, never
      *         {@code null}
@@ -365,6 +427,7 @@ public class AIOrchestrator implements Serializable {
             if (assistantMessage != null && messageList != null) {
                 ui.access(() -> assistantMessage.setText(userMessage));
             }
+            fireResponseListener("", error, ui);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -372,12 +435,13 @@ public class AIOrchestrator implements Serializable {
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
             }
-            fireResponseCompleteListener(responseText, ui);
+            fireResponseListener(responseText, null, ui);
             LOGGER.debug("LLM streaming completed successfully");
         });
     }
 
-    private void doPrompt(String userMessage) {
+    private void doPrompt(String userMessage,
+            List<AIAttachment> explicitAttachments) {
         if (userMessage == null || userMessage.isBlank()) {
             return;
         }
@@ -392,51 +456,96 @@ public class AIOrchestrator implements Serializable {
             return;
         }
         try {
-            processUserInput(userMessage);
-        } catch (Exception e) {
-            // streamResponseToMessage's doFinally only fires after
-            // subscription. If processUserInput throws before that (e.g. an
-            // AttachmentSubmitListener failure), the flag would
-            // stay stuck and the orchestrator would refuse every later
-            // prompt.
+            processUserInput(userMessage, explicitAttachments);
+        } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
+            // Reset the flag before firing the hook so a controller can
+            // retry from onResponse, matching the async paths where
+            // doFinally clears the flag before the hook runs. Catching
+            // Throwable rather than Exception covers Error subtypes (OOM,
+            // AssertionError) — otherwise the flag would stay stuck and
+            // every later prompt would be dropped. Firing the hook for
+            // any Throwable mirrors the async onError consumer.
             isProcessing.set(false);
-            throw e;
+            // null only if UI.getCurrentOrThrow inside processUserInput
+            // failed first — in which case nothing past it executed.
+            var currentUi = UI.getCurrent();
+            if (currentUi != null) {
+                fireResponseListener("", t, currentUi);
+            }
+            throw t;
         }
     }
 
-    private void processUserInput(String userMessage) {
+    private void processUserInput(String userMessage,
+            List<AIAttachment> explicitAttachments) {
         var ui = UI.getCurrentOrThrow();
         checkFeatureFlag(ui);
 
-        var attachments = fileReceiver != null ? fileReceiver.takeAttachments()
-                : List.<AIAttachment> of();
+        var attachments = getAttachmentsToProcess(explicitAttachments);
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
-
-        var messageId = UUID.randomUUID().toString();
-        conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
-                userMessage, messageId, Instant.now()));
-        if (userAIMessage != null) {
-            itemToMessageId.put(userAIMessage, messageId);
-        }
-
-        if (!attachments.isEmpty() && attachmentSubmitListener != null) {
-            var attachmentsCopy = List.copyOf(attachments);
-            attachmentSubmitListener.onAttachmentSubmit(
-                    new AttachmentSubmitListener.AttachmentSubmitEvent(
-                            messageId, attachmentsCopy));
-        }
-
         var assistantMessage = createAssistantMessagePlaceholder();
-        String effectiveSystemPrompt = null;
-        if (systemPrompt != null && !systemPrompt.isBlank()) {
-            effectiveSystemPrompt = systemPrompt.trim();
+
+        try {
+            if (controller != null) {
+                controller.onRequest();
+            }
+
+            var request = buildRequest(userMessage, attachments);
+            LOGGER.debug("Processing prompt with {} attachments",
+                    attachments.size());
+
+            var messageId = UUID.randomUUID().toString();
+            if (requestListener != null) {
+                // Fires on every prompt with the user message, assigned
+                // messageId, and attachments (empty list when none) — the
+                // generic "request being submitted" hook for listener users,
+                // counterpart to AIController.onRequest().
+                requestListener.onRequest(new RequestListener.RequestEvent(
+                        userMessage, messageId, List.copyOf(attachments)));
+            }
+            conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
+                    userMessage, messageId, Instant.now()));
+            if (userAIMessage != null) {
+                itemToMessageId.put(userAIMessage, messageId);
+            }
+
+            streamResponseToMessage(request, assistantMessage, ui);
+        } catch (Throwable t) { // NOSONAR — Throwable to surface UI on any
+                                // throw
+            // Single update — stream errors are async and never reach this
+            // catch; onResponse throws are handled inside
+            // fireResponseListener (which appends rather than rewrites).
+            if (assistantMessage != null) {
+                assistantMessage
+                        .setText("An error occurred. Please try again.");
+            }
+            throw t;
         }
-        final var finalSystemPrompt = effectiveSystemPrompt;
+    }
+
+    private List<AIAttachment> getAttachmentsToProcess(
+            List<AIAttachment> explicitAttachments) {
+        // Explicit list wins; the receiver buffer stays untouched in that
+        // case (see prompt(String, List) JavaDoc).
+        if (explicitAttachments != null) {
+            return explicitAttachments;
+        }
+        if (fileReceiver != null) {
+            return fileReceiver.takeAttachments();
+        }
+        return List.of();
+    }
+
+    private LLMProvider.LLMRequest buildRequest(String userMessage,
+            List<AIAttachment> attachments) {
+        final var effectiveSystemPrompt = systemPrompt != null
+                && !systemPrompt.isBlank() ? systemPrompt.trim() : null;
         var controllerTools = controller != null
                 && controller.getTools() != null ? controller.getTools()
                         : List.<LLMProvider.ToolSpec> of();
-        var request = new LLMProvider.LLMRequest() {
+        final var explicitTools = mergeWithContextTool(controllerTools);
+        return new LLMProvider.LLMRequest() {
 
             @Override
             public String userMessage() {
@@ -450,7 +559,7 @@ public class AIOrchestrator implements Serializable {
 
             @Override
             public String systemPrompt() {
-                return finalSystemPrompt;
+                return effectiveSystemPrompt;
             }
 
             @Override
@@ -460,36 +569,138 @@ public class AIOrchestrator implements Serializable {
 
             @Override
             public List<LLMProvider.ToolSpec> explicitTools() {
-                return controllerTools;
+                return explicitTools;
             }
         };
-        LOGGER.debug("Processing prompt with {} attachments",
-                attachments.size());
-        streamResponseToMessage(request, assistantMessage, ui);
     }
 
-    private void fireResponseCompleteListener(String responseText, UI ui) {
-        if (responseCompleteListener != null) {
+    /**
+     * Resolves the configured {@link Supplier} for session context and, if it
+     * returns non-empty content, prepends a {@value #SESSION_CONTEXT_TOOL_NAME}
+     * tool that carries that content in its description. The resolved string is
+     * captured in the per-turn tool instance so {@code execute()} can return it
+     * without re-invoking the supplier off the UI thread.
+     * <p>
+     * A supplier that throws aborts the turn — the exception propagates through
+     * {@link #buildRequest} and is handled by the existing error path in
+     * {@link #processUserInput}.
+     */
+    private List<LLMProvider.ToolSpec> mergeWithContextTool(
+            List<LLMProvider.ToolSpec> controllerTools) {
+        if (contextSupplier == null) {
+            return controllerTools;
+        }
+        var resolved = contextSupplier.get();
+        if (resolved == null || resolved.isBlank()) {
+            return controllerTools;
+        }
+        var contextTool = buildSessionContextTool(resolved);
+        var merged = new ArrayList<LLMProvider.ToolSpec>(
+                controllerTools.size() + 1);
+        merged.add(contextTool);
+        merged.addAll(controllerTools);
+        return List.copyOf(merged);
+    }
+
+    /**
+     * Builds the per-turn {@value #SESSION_CONTEXT_TOOL_NAME} tool. The
+     * resolved content is baked into the description so the LLM sees it just
+     * from listing the available tools — no separate call is normally needed.
+     * {@link LLMProvider.ToolSpec#execute} returns the same content so a model
+     * that does call the tool gets exactly what the description already
+     * carries.
+     */
+    private static LLMProvider.ToolSpec buildSessionContextTool(
+            String content) {
+        return new SessionContextTool(content);
+    }
+
+    private static final DateTimeFormatter DEFAULT_CONTEXT_DATE_TIME_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mmXXX");
+
+    /**
+     * Default supplier installed when {@link Builder#withMetadata} has not been
+     * called. Renders the server clock as e.g.
+     * {@code "Current server date and time: 2026-05-28T17:42+03:00 (Friday, Europe/Helsinki)"}
+     * so the LLM can interpret relative date references without guessing.
+     */
+    private static SerializableSupplier<String> defaultContextSupplier() {
+        return () -> {
+            var now = ZonedDateTime.now();
+            var dayOfWeek = now.getDayOfWeek().getDisplayName(TextStyle.FULL,
+                    Locale.ENGLISH);
+            return String.format("Current server date and time: %s (%s, %s)",
+                    now.format(DEFAULT_CONTEXT_DATE_TIME_FORMAT), dayOfWeek,
+                    now.getZone().getId());
+        };
+    }
+
+    /**
+     * Per-turn {@link LLMProvider.ToolSpec} that surfaces the resolved session
+     * context. {@link Serializable} so the orchestrator's per-turn explicit
+     * tools list does not break the serialization round-trip test even though
+     * tools themselves are rebuilt on every turn.
+     */
+    private static final class SessionContextTool
+            implements LLMProvider.ToolSpec, Serializable {
+        private final String content;
+        private final String description;
+
+        SessionContextTool(String content) {
+            this.content = content;
+            this.description = """
+                    Read for current session context (e.g. date and time, user \
+                    locale). The content below is captured at the start of \
+                    this turn:
+
+                    """ + content;
+        }
+
+        @Override
+        public String getName() {
+            return SESSION_CONTEXT_TOOL_NAME;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        @Override
+        public String getParametersSchema() {
+            return null;
+        }
+
+        @Override
+        public String execute(JsonNode arguments) {
+            return content;
+        }
+    }
+
+    private void fireResponseListener(String responseText, Throwable error,
+            UI ui) {
+        if (responseListener != null) {
             try {
-                responseCompleteListener.onResponseComplete(
-                        new ResponseCompleteListener.ResponseCompleteEvent(
-                                responseText));
+                responseListener.onResponse(new ResponseListener.ResponseEvent(
+                        responseText, error));
             } catch (Exception e) {
-                LOGGER.error("Error in response complete listener", e);
+                LOGGER.error("Error in response listener", e);
             }
         }
         if (controller != null) {
             ui.access(() -> {
                 try {
-                    controller.onResponseComplete();
+                    controller.onResponse(error);
                 } catch (Exception e) {
-                    LOGGER.error("Error in controller onResponseComplete", e);
+                    LOGGER.error("Error in controller onResponse", e);
                     // Append a separate assistant message instead of
                     // rewriting the LLM's response. By the time this
                     // runs, the response is already in the provider's
                     // chat memory and in our history; rewriting either
                     // would misrepresent what the LLM actually said.
-                    if (messageList != null) {
+                    // Only on the success path — the failure path already
+                    // rewrote the placeholder to a generic error message.
+                    if (error == null && messageList != null) {
                         messageList.addMessage(
                                 "An error occurred. Please try again.",
                                 assistantName, Collections.emptyList());
@@ -515,6 +726,11 @@ public class AIOrchestrator implements Serializable {
                                 + "with a maximum length of 64 characters "
                                 + "(pattern: "
                                 + VALID_TOOL_NAME_PATTERN.pattern() + ").");
+            }
+            if (SESSION_CONTEXT_TOOL_NAME.equals(name)) {
+                LOGGER.warn(
+                        "Tool name '{}' is reserved for the built-in session context tool",
+                        name);
             }
             if (!seen.add(name)) {
                 LOGGER.warn(
@@ -607,8 +823,8 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * Attachments are not stored in the orchestrator's conversation
          * history. If the application persisted attachment data via
-         * {@link AttachmentSubmitListener} before serialization, pass it here
-         * so the new provider can reconstruct multimodal context. Pass
+         * {@link RequestListener} before serialization, pass it here so the new
+         * provider can reconstruct multimodal context. Pass
          * {@link Collections#emptyMap()} (the default) if there are no
          * attachments to restore.
          * <p>
@@ -679,13 +895,23 @@ public class AIOrchestrator implements Serializable {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
-     * <li>{@link #withResponseCompleteListener(ResponseCompleteListener)} –
-     * registers a callback that fires after each successful exchange with the
-     * assistant's response text, enabling persistence via
-     * {@link AIOrchestrator#getHistory()} or follow-up actions.</li>
+     * <li>{@link #withRequestListener(RequestListener)} – registers a callback
+     * that fires on every prompt with the user message, the assigned message
+     * id, and any attachments.</li>
+     * <li>{@link #withResponseListener(ResponseListener)} – registers a
+     * callback that fires after each exchange with the assistant's response
+     * text and an optional error (success and failure use the same listener),
+     * enabling persistence via {@link AIOrchestrator#getHistory()} or follow-up
+     * actions.</li>
      * <li>{@link #withHistory(List, Map)} – restores a previously saved
      * conversation history with attachments (from
      * {@link AIOrchestrator#getHistory()}).</li>
+     * <li>{@link #withMetadata(SerializableSupplier)} – sets a supplier the
+     * orchestrator invokes on every turn to give the LLM free-form session
+     * context. Defaults to a current-date-and-time supplier so the LLM can
+     * interpret relative date/time references; pass {@code null} to disable, or
+     * a custom supplier to include tenant, locale, page state, or anything else
+     * worth keeping out of the system prompt.</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
@@ -704,11 +930,13 @@ public class AIOrchestrator implements Serializable {
         private AIController controller;
         private String userName;
         private String assistantName;
-        private AttachmentSubmitListener attachmentSubmitListener;
+        private RequestListener requestListener;
         private AttachmentClickListener attachmentClickListener;
-        private ResponseCompleteListener responseCompleteListener;
+        private ResponseListener responseListener;
         private List<ChatMessage> history;
         private Map<String, List<AIAttachment>> historyAttachments;
+        private SerializableSupplier<String> contextSupplier;
+        private boolean contextSupplierSet;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -923,22 +1151,26 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Sets a listener that is called when a message with attachments is
-         * submitted to the LLM provider. This allows you to store attachment
-         * data in your own storage. The listener receives a unique message ID
-         * that can later be used to identify the attachments when they are
-         * clicked or when restoring conversation history via
+         * Sets a listener that is called on every prompt, just before the LLM
+         * stream opens. The listener receives the user message, the assigned
+         * {@code messageId}, and the attachments included with the message
+         * (empty list when none). Same lifecycle moment as
+         * {@link AIController#onRequest()}.
+         * <p>
+         * Typical use: persist attachment data in your own storage keyed by
+         * {@code messageId}, so the same id can be used later to look the
+         * attachment up via
+         * {@link AttachmentClickListener.AttachmentClickEvent#getMessageId()}
+         * or when restoring conversation history via
          * {@link #withHistory(List, Map)}.
          *
          * @param listener
-         *            the listener to call on attachment submit
+         *            the listener to call on each prompt
          * @return this builder
          */
-        public Builder withAttachmentSubmitListener(
-                AttachmentSubmitListener listener) {
-            warnIfAlreadySet(this.attachmentSubmitListener,
-                    "Attachment submit listener");
-            this.attachmentSubmitListener = listener;
+        public Builder withRequestListener(RequestListener listener) {
+            warnIfAlreadySet(this.requestListener, "Request listener");
+            this.requestListener = listener;
             return this;
         }
 
@@ -947,7 +1179,7 @@ public class AIOrchestrator implements Serializable {
          * is clicked. The listener receives the message ID and attachment
          * index, allowing you to retrieve attachment data from your own storage
          * using the same message ID provided in
-         * {@link AttachmentSubmitListener.AttachmentSubmitEvent#getMessageId()}.
+         * {@link RequestListener.RequestEvent#getMessageId()}.
          * <p>
          * Note: This listener requires a message list to be configured via
          * {@link #withMessageList(MessageList)}. If no message list is set, the
@@ -966,36 +1198,82 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
-         * Sets a listener that is called after each successful exchange — when
-         * the assistant's stream has completed without error. This is the
+         * Sets a listener that is called once per turn when the assistant's
+         * stream has completed — successfully or with an error. This is the
          * recommended hook for persisting conversation state (via
          * {@link AIOrchestrator#getHistory()}), triggering follow-up actions,
-         * or updating UI elements.
+         * or surfacing errors to the user. Same lifecycle moment as
+         * {@link AIController#onResponse(Throwable)}.
          * <p>
-         * The response text passed to the listener may be empty if the model
-         * emitted only tool calls or otherwise stopped without producing
-         * visible content. Such turns are still successful exchanges; check
+         * On success the response text may be empty if the model emitted only
+         * tool calls or otherwise stopped without producing visible content.
+         * Such turns are still successful exchanges; check
          * {@code event.getResponse().isEmpty()} if your listener should only
          * react to text-bearing responses. Empty responses are <i>not</i>
          * appended to the conversation history.
+         * <p>
+         * On failure {@code event.getError()} carries the cause and the
+         * response text is empty or a partial stream that was received before
+         * the failure.
          * <p>
          * The listener is called from a background thread (Reactor scheduler).
          * It is safe to perform blocking I/O (e.g. database writes) directly.
          * To update Vaadin UI components from this listener, use
          * {@code ui.access()}.
          * <p>
-         * The listener is not called when the LLM response fails or times out,
-         * nor when history is restored via {@link #withHistory(List, Map)}.
+         * The listener is not called when history is restored via
+         * {@link #withHistory(List, Map)}.
          *
          * @param listener
-         *            the listener to call after each successful exchange
+         *            the listener to call after each exchange
          * @return this builder
          */
-        public Builder withResponseCompleteListener(
-                ResponseCompleteListener listener) {
-            warnIfAlreadySet(this.responseCompleteListener,
-                    "Response complete listener");
-            this.responseCompleteListener = listener;
+        public Builder withResponseListener(ResponseListener listener) {
+            warnIfAlreadySet(this.responseListener, "Response listener");
+            this.responseListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets the supplier of free-form session context the LLM sees on every
+         * turn. The supplier is invoked once per turn on the UI thread when the
+         * request is being built.
+         * <p>
+         * The supplier may return any string the application wants the LLM to
+         * have on hand — current date and time, the active tenant, the user's
+         * locale, the page the user is on, feature flags. Compose multiple
+         * pieces of context with plain string concatenation.
+         * <p>
+         * If the supplier returns {@code null} or an empty/blank string, no
+         * context is added for that turn — useful for "context only when X"
+         * patterns. If the supplier throws, the turn is aborted via the normal
+         * error path: the assistant placeholder is updated to a generic error
+         * message, {@link AIController#onResponse(Throwable)} fires with the
+         * thrown exception, and the exception propagates to the caller of the
+         * prompt entry point.
+         * <p>
+         * Passing {@code null} disables session context entirely, including the
+         * built-in default. By default, the orchestrator installs a supplier
+         * that yields the current date and time so the LLM can interpret
+         * relative date/time references ("show me sales from the past two
+         * months") without having to guess.
+         * <p>
+         * The supplier runs on the UI thread, so it can read
+         * {@link UI#getCurrent()} and session-scoped state.
+         *
+         * @param contextSupplier
+         *            supplier of the per-turn context string, or {@code null}
+         *            to disable session context entirely
+         * @return this builder
+         */
+        public Builder withMetadata(
+                SerializableSupplier<String> contextSupplier) {
+            if (contextSupplierSet) {
+                LOGGER.warn("Context supplier was already set on the "
+                        + "builder and will be replaced");
+            }
+            this.contextSupplier = contextSupplier;
+            this.contextSupplierSet = true;
             return this;
         }
 
@@ -1046,12 +1324,15 @@ public class AIOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
-            orchestrator.attachmentSubmitListener = attachmentSubmitListener;
+            orchestrator.requestListener = requestListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
-            orchestrator.responseCompleteListener = responseCompleteListener;
+            orchestrator.responseListener = responseListener;
+            orchestrator.contextSupplier = contextSupplierSet ? contextSupplier
+                    : defaultContextSupplier();
             try {
                 if (input != null) {
-                    input.addSubmitListener(orchestrator::doPrompt);
+                    input.addSubmitListener(
+                            msg -> orchestrator.doPrompt(msg, null));
                 }
 
                 if (attachmentClickListener != null && messageList != null) {

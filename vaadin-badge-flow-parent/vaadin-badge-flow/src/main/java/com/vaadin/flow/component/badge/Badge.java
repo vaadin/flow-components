@@ -17,15 +17,12 @@ package com.vaadin.flow.component.badge;
 
 import java.util.Optional;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -68,29 +65,12 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-badge")
-@NpmPackage(value = "@vaadin/badge", version = "25.2.0-alpha10")
+@NpmPackage(value = "@vaadin/badge", version = "25.2.0-beta1")
 @JsModule("@vaadin/badge/src/vaadin-badge.js")
 public class Badge extends Component
         implements HasSize, HasText, HasThemeVariant<BadgeVariant> {
 
     private static final String ICON_SLOT = "icon";
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
-    }
-
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        boolean enabled = featureFlags
-                .isEnabled(BadgeFeatureFlagProvider.BADGE_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
 
     private final Text textNode = new Text("");
 

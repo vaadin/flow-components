@@ -1,0 +1,225 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.breadcrumbs;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouteParameters;
+
+/**
+ * An item of the {@link Breadcrumbs} component, representing a single entry in
+ * the navigation trail.
+ * <p>
+ * An item carries the text shown in the trail and, optionally, a {@code path}
+ * it links to. An item without a path is the current page and is rendered as a
+ * non-link. The link target can be set as a plain URL string via
+ * {@link #setPath(String)} or resolved from a Flow route class via
+ * {@link #setPath(Class)} / {@link #setPath(Class, RouteParameters)}. An
+ * optional prefix component (typically an icon) can be shown before the text.
+ *
+ * @author Vaadin Ltd
+ */
+@Tag("vaadin-breadcrumbs-item")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta1")
+@JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
+public class BreadcrumbsItem extends Component
+        implements HasText, HasEnabled, HasPrefix {
+
+    /**
+     * Creates a breadcrumbs item with the given text and no path. An item
+     * without a path represents the current page and is rendered as a non-link.
+     *
+     * @param text
+     *            the text of the item
+     */
+    public BreadcrumbsItem(String text) {
+        setText(text);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text that links to the given
+     * path.
+     *
+     * @param text
+     *            the text of the item
+     * @param path
+     *            the path to link to
+     */
+    public BreadcrumbsItem(String text, String path) {
+        setPath(path);
+        setText(text);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text that links to the given
+     * view.
+     *
+     * @param text
+     *            the text of the item
+     * @param view
+     *            the view to link to
+     */
+    public BreadcrumbsItem(String text, Class<? extends Component> view) {
+        setPath(view);
+        setText(text);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text that links to the given
+     * view using the given route parameters.
+     *
+     * @param text
+     *            the text of the item
+     * @param view
+     *            the view to link to
+     * @param params
+     *            the route parameters
+     */
+    public BreadcrumbsItem(String text, Class<? extends Component> view,
+            RouteParameters params) {
+        setPath(view, params);
+        setText(text);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text and prefix component (like
+     * an icon) that links to the given path.
+     *
+     * @param text
+     *            the text of the item
+     * @param path
+     *            the path to link to
+     * @param prefixComponent
+     *            the prefix component for the item (usually an icon)
+     */
+    public BreadcrumbsItem(String text, String path,
+            Component prefixComponent) {
+        this(text, path);
+        setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text and prefix component (like
+     * an icon) that links to the given view.
+     *
+     * @param text
+     *            the text of the item
+     * @param view
+     *            the view to link to
+     * @param prefixComponent
+     *            the prefix component for the item (usually an icon)
+     */
+    public BreadcrumbsItem(String text, Class<? extends Component> view,
+            Component prefixComponent) {
+        this(text, view);
+        setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Creates a breadcrumbs item with the given text and prefix component (like
+     * an icon) that links to the given view using the given route parameters.
+     *
+     * @param text
+     *            the text of the item
+     * @param view
+     *            the view to link to
+     * @param params
+     *            the route parameters
+     * @param prefixComponent
+     *            the prefix component for the item (usually an icon)
+     */
+    public BreadcrumbsItem(String text, Class<? extends Component> view,
+            RouteParameters params, Component prefixComponent) {
+        this(text, view, params);
+        setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Gets the path this item links to.
+     *
+     * @return the path this item links to, or {@code null} if the item has no
+     *         path
+     */
+    public String getPath() {
+        return getElement().getAttribute("path");
+    }
+
+    /**
+     * Sets the path, as a URL string, this item links to.
+     * <p>
+     * Note that there is also an alternative way of setting the link path via
+     * {@link #setPath(Class)}.
+     *
+     * @param path
+     *            the path to link to, or {@code null} to remove the path and
+     *            render the item as the current page (a non-link)
+     *
+     * @see #setPath(Class)
+     */
+    public void setPath(String path) {
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path", path);
+        }
+    }
+
+    /**
+     * Resolves the URL of the given view via the Vaadin router and sets it as
+     * the path this item links to.
+     *
+     * @param view
+     *            the view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation. Set to
+     *            {@code null} to remove the path.
+     *
+     * @see #setPath(String)
+     */
+    public void setPath(Class<? extends Component> view) {
+        setPath(view, RouteParameters.empty());
+    }
+
+    /**
+     * Resolves the URL of the given view via the Vaadin router using the given
+     * route parameters and sets it as the path this item links to.
+     *
+     * @param view
+     *            the view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation. Set to
+     *            {@code null} to remove the path.
+     * @param parameters
+     *            the route parameters
+     *
+     * @see #setPath(String)
+     */
+    public void setPath(Class<? extends Component> view,
+            RouteParameters parameters) {
+        if (view == null) {
+            setPath((String) null);
+        } else {
+            RouteConfiguration routeConfiguration = RouteConfiguration
+                    .forRegistry(ComponentUtil.getRouter(this).getRegistry());
+            setPath(routeConfiguration.getUrl(view, parameters));
+        }
+    }
+}

@@ -57,9 +57,14 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponseComplete()}, avoiding partial state and multiple redraws
- * during a multi-tool LLM turn. The chart state is stored directly on the
- * {@link Chart} component, so it survives serialization.
+ * {@link #onResponse(Throwable)} on the success path, avoiding partial state
+ * and multiple redraws during a multi-tool LLM turn. The chart state is stored
+ * directly on the {@link Chart} component, so it survives serialization.
+ * </p>
+ * <p>
+ * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
+ * pending changes are discarded and the chart keeps its last
+ * successfully-rendered state.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -199,9 +204,8 @@ public class ChartAIController implements AIController {
                 for (String q : queries) {
                     databaseProvider.executeQuery(q);
                 }
-                ChartEntry entry = ChartEntry.getOrCreate(chart, chartId);
-                entry.setQueries(queries);
-                entry.setPendingDataUpdate(true);
+                ChartEntry.getOrCreate(chart, chartId)
+                        .setPendingQueries(queries);
             }
 
             @Override
@@ -301,18 +305,29 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public void onResponseComplete() {
+    public void onResponse(Throwable error) {
         ChartEntry entry = ChartEntry.get(chart);
+        if (error != null) {
+            if (entry != null) {
+                entry.clearPendingState();
+            }
+            return;
+        }
         if (entry == null || !entry.hasPendingState()) {
             return;
         }
 
-        List<String> queries = entry.getQueries();
-        if (queries.isEmpty()) {
-            // Config-only: no queries to render yet. Clear only the
-            // data flag but keep pendingConfigurationJson so it's used
-            // when data arrives in a later request.
-            entry.setPendingDataUpdate(false);
+        // Pending queries staged this turn replace the current set; if the
+        // turn only updated config, re-render with the current queries.
+        var queriesToRender = entry.getPendingQueries() != null
+                ? entry.getPendingQueries()
+                : entry.getQueries();
+
+        if (queriesToRender.isEmpty()) {
+            // Nothing to render. Consume any empty pending queries (rare:
+            // LLM staged an empty list) but keep pendingConfigurationJson
+            // so it applies when data arrives in a later request.
+            entry.setPendingQueries(null);
             return;
         }
 
@@ -321,7 +336,7 @@ public class ChartAIController implements AIController {
         // which runs this on the UI thread under session lock. Attachment
         // is not required: Configuration is server-side state and any JS
         // calls are queued by Flow until the chart attaches.
-        render(entry, queries, configJson, true);
+        render(entry, queriesToRender, configJson, true);
     }
 
     private void render(ChartEntry entry, List<String> queries,
@@ -329,6 +344,7 @@ public class ChartAIController implements AIController {
         try {
             ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
                     queries, configJson);
+            entry.setQueries(queries);
             if (fireListeners) {
                 fireStateChangeListeners();
             }

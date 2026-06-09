@@ -45,6 +45,7 @@ public abstract class SheetOverlayWrapper implements Serializable {
      * this method can inform the spreadsheet.
      *
      * @param listener
+     *            the listener
      */
     public void setOverlayChangeListener(OverlayChangeListener listener) {
         // NOP

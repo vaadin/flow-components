@@ -61,6 +61,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
          * Right click (event) on top of row header at the index
          *
          * @param nativeEvent
+         *            the native event
          * @param rowIndex
          *            1-based
          */
@@ -70,6 +71,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
          * Right click (event) on top of column header at the index
          *
          * @param nativeEvent
+         *            the native event
          * @param columnIndex
          *            1-based
          */
@@ -1597,9 +1599,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * update the sheet display after editing has finished
      *
+     * @param value
+     *            the cell value
      * @param focusSheet
-     *
-     * @param focusSheet
+     *            whether to focus the sheet after editing
      */
     private void cellEditingDone(String value, boolean focusSheet) {
         inlineEditing = false;
@@ -1622,7 +1625,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      *
      * @param value
+     *            the value
      * @param focusSheet
+     *            whether to focus the sheet
      */
     private void doDeferredCellValueCommit(final String value,
             final boolean focusSheet) {
@@ -2006,6 +2011,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * the client side cache, but the cell is not actually visible.
      *
      * @param updatedCellData
+     *            the updated cell data
      */
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
         sheetWidget.cellValuesUpdated(updatedCellData);

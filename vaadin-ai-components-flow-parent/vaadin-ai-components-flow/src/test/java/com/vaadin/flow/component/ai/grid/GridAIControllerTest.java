@@ -184,7 +184,7 @@ class GridAIControllerTest {
 
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponseComplete());
+                () -> controller.onResponse(null));
 
         Assertions.assertNull(controller.getState());
     }
@@ -202,26 +202,63 @@ class GridAIControllerTest {
     }
 
     @Test
-    void onResponseComplete_noPending_doesNotChangeGrid() {
+    void onResponse_noPending_doesNotChangeGrid() {
         // No pending query — should be a no-op
         var columnsBefore = grid.getColumns().size();
-        controller.onResponseComplete();
+        controller.onResponse(null);
         Assertions.assertEquals(columnsBefore, grid.getColumns().size());
         Assertions.assertNull(controller.getState());
     }
 
     @Test
-    void onResponseComplete_clearsPending_secondCallIsNoOp() {
+    void onResponse_clearsPending_secondCallIsNoOp() {
         dbProvider.queryResults = List.of(row("a", 1));
         simulateUpdate("SELECT a FROM t");
 
         // Second call — no pending query
-        controller.onResponseComplete();
+        controller.onResponse(null);
 
         // State should still reflect the first update
         var stateTool = findTool("get_grid_state");
         Assertions.assertTrue(
                 stateTool.execute(json("{}")).contains("SELECT a FROM t"));
+    }
+
+    @Nested
+    class OnResponseFailure {
+
+        @Test
+        void failedTurnDoesNotLeakPendingQueryIntoNextOnResponse() {
+            // Establish a baseline successful turn.
+            dbProvider.queryResults = List.of(row("a", 1));
+            simulateUpdate("SELECT a FROM good");
+
+            // A second turn stages a query, then fails before completion.
+            findTool("update_grid_data")
+                    .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
+            controller.onResponse(new RuntimeException("stream error"));
+
+            // A third turn fires onResponseComplete without staging anything
+            // (LLM responded conversationally). The bad query must not be
+            // rendered.
+            controller.onResponse(null);
+
+            Assertions.assertEquals("SELECT a FROM good",
+                    controller.getState().query());
+        }
+
+        @Test
+        void failedFirstTurnDoesNotEstablishState() {
+            // No prior successful turn — the failed turn is the first one.
+            dbProvider.queryResults = List.of(row("a", 1));
+            findTool("update_grid_data")
+                    .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
+            controller.onResponse(new RuntimeException("stream error"));
+
+            controller.onResponse(null);
+
+            Assertions.assertNull(controller.getState());
+        }
     }
 
     // --- GridState serialization ---
@@ -323,7 +360,7 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponseComplete());
+                () -> controller.onResponse(null));
 
         // Previous successful query should be retained
         Assertions.assertEquals("SELECT a FROM good",
@@ -342,7 +379,7 @@ class GridAIControllerTest {
     // --- State change listeners ---
 
     @Test
-    void stateChangeListener_firesAfterOnResponseComplete() {
+    void stateChangeListener_firesAfterOnResponseSuccess() {
         var captured = new AtomicReference<GridState>();
         controller.addStateChangeListener(captured::set);
 
@@ -364,7 +401,7 @@ class GridAIControllerTest {
 
         dbProvider.throwOnExecute = true;
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponseComplete());
+                () -> controller.onResponse(null));
 
         Assertions.assertNull(captured.get());
     }
@@ -400,7 +437,7 @@ class GridAIControllerTest {
         var states = new ArrayList<GridState>();
         controller.addStateChangeListener(states::add);
 
-        controller.onResponseComplete();
+        controller.onResponse(null);
 
         Assertions.assertTrue(states.isEmpty(),
                 "Second onResponseComplete should not fire listeners");
@@ -940,7 +977,7 @@ class GridAIControllerTest {
     private void simulateUpdate(String query) {
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"" + query + "\"}"));
-        controller.onResponseComplete();
+        controller.onResponse(null);
     }
 
     private static Map<String, Object> row(Object... keysAndValues) {

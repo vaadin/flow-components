@@ -76,6 +76,7 @@ public interface ColorConverter extends Serializable {
      * Returns true if the given cell style has a background color.
      *
      * @param cs
+     *            the cell style
      * @return Whether the given cell style has a defined background color or
      *         not.
      */

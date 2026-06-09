@@ -48,7 +48,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "25.2.0-alpha10")
+@NpmPackage(value = "@vaadin/crud", version = "25.2.0-beta1")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -534,9 +534,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Controls visiblity of toolbar
+     * Controls the visibility of the toolbar.
      *
      * @param value
+     *            {@code true} to show the toolbar, {@code false} to hide it
      */
     public void setToolbarVisible(boolean value) {
         toolbarVisible = value;
@@ -548,10 +549,9 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Gets visiblity state of toolbar
+     * Gets the visibility state of the toolbar.
      *
-     * @param
-     * @return true if toolbar is visible false otherwise
+     * @return true if toolbar is visible, false otherwise
      */
     public boolean getToolbarVisible() {
         return toolbarVisible;
@@ -570,6 +570,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Sets the Crud new item button
      *
      * @param button
+     *            the new item button
      */
     public void setNewButton(Component button) {
         newButton = button;

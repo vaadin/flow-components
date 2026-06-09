@@ -40,8 +40,8 @@ class ChartEntry implements Serializable {
 
     private final String id;
     private List<String> queries = new ArrayList<>();
+    private List<String> pendingQueries;
     private String pendingConfigurationJson;
-    private boolean pendingDataUpdate;
 
     /**
      * Gets the {@link ChartEntry} for the given chart, or {@code null} if none
@@ -137,32 +137,34 @@ class ChartEntry implements Serializable {
     }
 
     /**
-     * Returns whether a data update is pending.
+     * Returns the staged SQL queries waiting to be committed by the next
+     * successful {@code onResponseComplete}, or {@code null} if none.
      *
-     * @return {@code true} if queries were changed and the chart needs
-     *         re-rendering
+     * @return the pending SQL queries, or {@code null}
      */
-    public boolean isPendingDataUpdate() {
-        return pendingDataUpdate;
+    public List<String> getPendingQueries() {
+        return pendingQueries == null ? null
+                : Collections.unmodifiableList(pendingQueries);
     }
 
     /**
-     * Marks or clears the pending data update flag.
+     * Stages SQL queries to be applied on the next successful
+     * {@code onResponseComplete}. Pass {@code null} to clear.
      *
-     * @param pendingDataUpdate
-     *            {@code true} if the chart data needs re-rendering
+     * @param queries
+     *            the SQL queries to stage, or {@code null}
      */
-    public void setPendingDataUpdate(boolean pendingDataUpdate) {
-        this.pendingDataUpdate = pendingDataUpdate;
+    public void setPendingQueries(List<String> queries) {
+        this.pendingQueries = queries == null ? null : new ArrayList<>(queries);
     }
 
     /**
      * Returns whether this entry has pending state waiting to be applied.
      *
-     * @return {@code true} if there is pending configuration or data update
+     * @return {@code true} if there is pending configuration or pending queries
      */
     public boolean hasPendingState() {
-        return pendingConfigurationJson != null || pendingDataUpdate;
+        return pendingConfigurationJson != null || pendingQueries != null;
     }
 
     /**
@@ -170,7 +172,7 @@ class ChartEntry implements Serializable {
      */
     public void clearPendingState() {
         pendingConfigurationJson = null;
-        pendingDataUpdate = false;
+        pendingQueries = null;
     }
 
     /**

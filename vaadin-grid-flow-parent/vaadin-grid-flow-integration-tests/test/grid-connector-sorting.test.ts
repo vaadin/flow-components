@@ -1,4 +1,5 @@
-import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { getHeaderCellContent, init, setRootItems } from './shared.js';
 import type { FlowGrid, FlowGridSorter, Item } from './shared.js';
 import { GridColumn } from '@vaadin/grid';

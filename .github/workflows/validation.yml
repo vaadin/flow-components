@@ -1,6 +1,8 @@
 name: Validation
 
 on:
+  schedule:
+    - cron: '30 23 * * *'
   pull_request:
     branches: ['main', '25.*']
   merge_group:
@@ -14,6 +16,11 @@ on:
         description: 'Number of parallel IT shards'
         required: false
         default: '5'
+      local-wc-validation:
+        description: 'Run validation against local web-components checkout'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
@@ -32,6 +39,7 @@ jobs:
     outputs:
       skip: ${{ steps.skip-ci.outputs.skip }}
       components: ${{ steps.components.outputs.elements }}
+      build-cache-key: ${{ steps.build-key.outputs.key }}
     steps:
       - name: Set Maven args
         run: |
@@ -60,13 +68,20 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Compute build cache key
+        id: build-key
+        if: steps.skip-ci.outputs.skip != 'true'
+        run: echo "key=${{ runner.os }}-build-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+
       - name: Restore build cache
         id: build-cache
         if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ steps.build-key.outputs.key }}
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -146,6 +161,8 @@ jobs:
       matrix:        ${{ steps.shards.outputs.matrix }}
       has-tests:     ${{ steps.shards.outputs.has-tests }}
       war-cache-key: ${{ steps.war-key.outputs.key }}
+      unit-failed:   ${{ steps.type-failed.outputs.unit }}
+      wtr-failed:    ${{ steps.type-failed.outputs.wtr }}
     strategy:
       fail-fast: true
       matrix:
@@ -174,9 +191,83 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Checkout web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        uses: actions/checkout@v6
+        with:
+          repository: vaadin/web-components
+          ref: main
+          path: web-components
+
+      - name: Install web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        run: yarn install --ignore-engines --ignore-scripts
+        working-directory: web-components
+
+      - name: Configure local web-components
+        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
+
       - name: npm install
         if: matrix.type != 'unit'
         run: npm ci --ignore-scripts
+
+      - name: Detect @NpmPackage version changes
+        id: npm-changes
+        if: matrix.type != 'unit'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          changed=false
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Use the PR files API so we diff against the merge base, not against
+            # main's current tip — otherwise unrelated @NpmPackage commits already
+            # merged into main since the PR branched would trigger a false positive.
+            if gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
+                 --jq '.[] | select(.filename | endswith(".java")) | .patch // ""' \
+               | grep -qE '^\+.*@NpmPackage'; then
+              changed=true
+            fi
+          else
+            base="${{ github.base_ref || 'main' }}"
+            if git fetch --depth=1 origin "$base" 2>/dev/null && \
+               git diff FETCH_HEAD -- '*.java' | grep -q '@NpmPackage'; then
+              changed=true
+            fi
+          fi
+          if [ "$changed" = "true" ]; then
+            echo "MAVEN_OPTS=${MAVEN_OPTS} -Dvaadin.npm.minimumFrontendPackageAgeDays=0" >> "$GITHUB_ENV"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Request changes on PR for @NpmPackage version bump
+        if: >-
+          matrix.type == 'war'
+          && steps.npm-changes.outputs.changed == 'true'
+          && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          MARKER="<!-- vaadin-flow-components:npm-package-bump-review -->"
+          existing=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            --jq "[.[] | select(.state == \"CHANGES_REQUESTED\") | select(.body | contains(\"$MARKER\"))] | length")
+          if [ "$existing" -gt 0 ]; then
+            echo "Existing CHANGES_REQUESTED review found, skipping."
+            exit 0
+          fi
+          BODY=$(sed 's/^          //' <<'EOF'
+          <!-- vaadin-flow-components:npm-package-bump-review -->
+          This PR is updating the @NpmPackage version. Due to the default value of `vaadin.npm.minimumFrontendPackageAgeDays` is 1, I'm blocking this PR for now.
+          In order to not producing a failed snapshot for other projects, please come back one day after to unblock and merge it.
+          EOF
+          )
+          gh api -X POST "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            -f event=REQUEST_CHANGES \
+            -f body="$BODY"
 
       - name: Merge ITs
         if: matrix.type == 'war'
@@ -222,21 +313,15 @@ jobs:
         id: build-cache
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
-
-      - name: Install artifacts (cache miss)
-        if: steps.build-cache.outputs.cache-hit != 'true' && steps.war-cache.outputs.cache-hit != 'true'
-        run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
-            echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
-            sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
-          }
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-cache-miss: true
 
       - name: Run unit tests
         if: matrix.type == 'unit'
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 $MAVEN_ARGS
+        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
 
       - name: Upload unit test reports
         if: always() && matrix.type == 'unit'
@@ -315,9 +400,14 @@ jobs:
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "has-tests=true" >> "$GITHUB_OUTPUT"
 
+      - name: Record job type on failure
+        id: type-failed
+        if: always() && failure()
+        run: echo "${{ matrix.type }}=true" >> "$GITHUB_OUTPUT"
+
   its:
     name: ITs (${{ matrix.shard }})
-    needs: [fast-tests]
+    needs: [build, fast-tests]
     if: needs.fast-tests.outputs.has-tests == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -358,8 +448,11 @@ jobs:
       - name: Restore build cache
         uses: actions/cache@v5
         with:
-          path: ~/.m2/repository/com/vaadin
-          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**') }}
+          path: |
+            ~/.m2/repository/com/vaadin
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-cache-miss: true
 
       - name: Restore WAR cache
         uses: actions/cache@v5
@@ -438,6 +531,30 @@ jobs:
           name: wtr-reports
           path: wtr-reports
 
+      - name: Remove passing test reports
+        run: |
+          # Detect real failures via testsuite attributes (flaky retries leave
+          # <flakyError> tags but keep failures="0" errors="0" on the suite).
+          has_failures=false
+          for dir in surefire-reports failsafe-reports wtr-reports; do
+            [ -d "$dir" ] || continue
+            if find "$dir" -name '*.xml' | xargs grep -lE 'failures="[1-9]|errors="[1-9]' 2>/dev/null | grep -q .; then
+              has_failures=true
+              break
+            fi
+          done
+          echo "has_failures=$has_failures" >> $GITHUB_ENV
+          # Red build: keep only failing reports so dorny focuses on failures.
+          # Green build: keep all reports so every suite shows as passed.
+          if [ "$has_failures" = "true" ]; then
+            for dir in surefire-reports failsafe-reports wtr-reports; do
+              [ -d "$dir" ] || continue
+              find "$dir" -name '*.xml' | while read -r f; do
+                grep -qE 'failures="[1-9]|errors="[1-9]' "$f" || rm -f "$f"
+              done
+            done
+          fi
+
       - name: Check for unit test reports
         id: unit-check
         run: |
@@ -445,25 +562,25 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Unit Tests header
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         run: echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish unit test results
         id: unit-dorny
-        if: steps.unit-check.outputs.count != '0'
+        if: steps.unit-check.outputs.count != '0' && (needs.fast-tests.outputs.unit-failed != 'true' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Unit Tests
           path: surefire-reports/**/TEST-*.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: Unit test compilation error
-        if: steps.unit-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
+        if: needs.fast-tests.outputs.unit-failed == 'true' && env.has_failures != 'true'
         run: |
-          echo ":x: Compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
+          echo ":x: Unit tests compilation failed. Check the **Unit tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for IT reports
         id: it-check
@@ -472,25 +589,21 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Integration Tests header
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         run: echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish integration test results
         id: it-dorny
-        if: steps.it-check.outputs.count != '0'
+        if: steps.it-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || env.has_failures == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: Integration Tests
           path: failsafe-reports/TEST-*.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
-      - name: IT compilation error
-        if: steps.it-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
-        run: |
-          echo ":x: Compilation failed. Check the **Package WAR** job for details." >> $GITHUB_STEP_SUMMARY
 
       - name: Check for WTR reports
         id: wtr-check
@@ -499,25 +612,25 @@ jobs:
           echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: WTR Tests header
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         run: echo "## WTR Tests" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish WTR results
         id: wtr-dorny
-        if: steps.wtr-check.outputs.count != '0'
+        if: steps.wtr-check.outputs.count != '0' && (needs.fast-tests.result == 'success' || needs.fast-tests.outputs.wtr-failed == 'true')
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         with:
           name: WTR Tests
           path: wtr-reports/**/wtr-results.xml
           reporter: java-junit
-          list-tests: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
-          list-suites: ${{ (needs.unit-tests.result == 'failure' || needs.wtr-tests.result == 'failure' || needs.its.result == 'failure') && 'failed' || 'all' }}
+          list-tests: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
+          list-suites: ${{ env.has_failures == 'true' && 'failed' || 'all' }}
           fail-on-error: 'false'
 
       - name: WTR setup error
-        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.result == 'failure'
+        if: steps.wtr-check.outputs.count == '0' && needs.fast-tests.outputs.wtr-failed == 'true'
         run: |
-          echo ":x: WTR setup or compilation failed. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
+          echo ":x: WTR tests did not produce results. Check the **WTR tests** job for details." >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/download-artifact@v8
         if: needs.its.result != 'success'

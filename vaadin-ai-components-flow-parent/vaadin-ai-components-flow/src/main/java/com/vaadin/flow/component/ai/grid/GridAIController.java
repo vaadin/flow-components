@@ -66,9 +66,14 @@ import tools.jackson.databind.JsonNode;
  * </ul>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponseComplete()}, avoiding partial state and multiple redraws
- * during a multi-tool LLM turn. The grid state is stored directly on the
- * {@link Grid} component, so it survives serialization.
+ * {@link #onResponse(Throwable)} on the success path, avoiding partial state
+ * and multiple redraws during a multi-tool LLM turn. The grid state is stored
+ * directly on the {@link Grid} component, so it survives serialization.
+ * </p>
+ * <p>
+ * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
+ * pending changes are discarded and the grid keeps its last
+ * successfully-rendered state.
  * </p>
  * <p>
  * <b>Serialization:</b> This controller is not serialized with the
@@ -206,14 +211,20 @@ public class GridAIController implements AIController {
     }
 
     @Override
-    public void onResponseComplete() {
+    public void onResponse(Throwable error) {
         var entry = GridEntry.get(grid);
+        if (error != null) {
+            if (entry != null) {
+                entry.clearPendingState();
+            }
+            return;
+        }
         if (entry == null || !entry.hasPendingState()) {
-            LOGGER.debug("onResponseComplete: no pending query");
+            LOGGER.debug("onResponse: no pending query");
             return;
         }
         var query = entry.getPendingQuery();
-        LOGGER.info("onResponseComplete: applying query: {}", query);
+        LOGGER.info("onResponse: applying query: {}", query);
         // Render synchronously so exceptions propagate to the orchestrator,
         // which runs this on the UI thread under session lock. Attachment
         // is not required: grid state (columns, data provider) is

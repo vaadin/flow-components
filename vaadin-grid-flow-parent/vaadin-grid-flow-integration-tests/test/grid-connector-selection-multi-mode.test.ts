@@ -1,6 +1,6 @@
-import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
 import { sendKeys, sendMouse } from '@web/test-runner-commands';
-import { middleOfNode } from '@vaadin/testing-helpers';
+import { fixtureSync, middleOfNode, nextFrame } from '@vaadin/testing-helpers';
 import { init, setRootItems, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
 import type { FlowGrid } from './shared.js';
 

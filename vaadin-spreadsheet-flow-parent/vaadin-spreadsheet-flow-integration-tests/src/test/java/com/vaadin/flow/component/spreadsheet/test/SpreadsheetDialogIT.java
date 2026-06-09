@@ -17,6 +17,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("spreadsheet-dialog")
 public class SpreadsheetDialogIT extends AbstractSpreadsheetIT {
@@ -24,6 +25,18 @@ public class SpreadsheetDialogIT extends AbstractSpreadsheetIT {
     @Before
     public void init() {
         open();
+    }
+
+    @Test
+    public void openDialog_noConsoleErrors_initialSelectionApplied() {
+        $(TestBenchElement.class).id("open-dialog").click();
+
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class)
+                .waitForFirst();
+        Assert.assertEquals("H3",
+                spreadsheet.getAddressField().getPropertyString("value"));
+
+        checkLogsForErrors();
     }
 
     @Test

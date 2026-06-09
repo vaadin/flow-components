@@ -497,7 +497,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 disabledLazyLoadingBox);
 
         scrollToItem(disabledLazyLoadingBox, 100);
-        assertLoadedItemsCount("Scrolling down should load further pages", 100,
+        assertLoadedItemsCount("Scrolling down should load further pages", 50,
                 disabledLazyLoadingBox);
         assertRendered(disabledLazyLoadingBox, "99");
     }

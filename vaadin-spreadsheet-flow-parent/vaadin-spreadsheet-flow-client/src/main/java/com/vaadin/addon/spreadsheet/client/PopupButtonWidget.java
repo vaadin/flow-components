@@ -139,7 +139,9 @@ public class PopupButtonWidget extends FocusWidget
      * 1-based
      *
      * @param row
+     *            the row index
      * @param col
+     *            the column index
      */
     public void setRowCol(int row, int col) {
         Widget owner = popup.getOwner();
@@ -237,7 +239,7 @@ public class PopupButtonWidget extends FocusWidget
     /**
      * Returns the position callback method used for the button's popup.
      *
-     * @return
+     * @return the position callback
      */
     public PositionCallback getPositionCallback() {
         return callback;

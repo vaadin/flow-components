@@ -50,6 +50,7 @@ public class CellSelectionManager implements Serializable {
      * Creates a new CellSelectionManager and ties it to the given Spreadsheet
      *
      * @param spreadsheet
+     *            the spreadsheet
      */
     public CellSelectionManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
