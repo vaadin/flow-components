@@ -50,6 +50,27 @@ public class SpreadsheetFilterIT extends AbstractComponentIT {
                 getFilterPopup().getOptions());
     }
 
+    @Test
+    public void filterTwoColumns_eachColumnRetainsOwnFilteredValues() {
+        // Filter Column A so that the "Alpha" row gets hidden
+        spreadsheet.getCellAt("A1").popupButtonClick();
+        getFilterPopup().deselectByText("Alpha");
+        closeFilterPopup();
+
+        // Filter Column B so that the "Bar" row gets hidden
+        spreadsheet.getCellAt("B1").popupButtonClick();
+        getFilterPopup().deselectByText("Bar");
+        closeFilterPopup();
+
+        // Column A still offers "Alpha" as an unchecked option, so its hidden
+        // row can be brought back independently of Column B's filter
+        spreadsheet.getCellAt("A1").popupButtonClick();
+        Assert.assertEquals(List.of("Alpha", "Gamma"),
+                getFilterPopup().getOptions());
+        Assert.assertEquals(List.of("Gamma"),
+                getFilterPopup().getSelectedTexts());
+    }
+
     private CheckboxGroupElement getFilterPopup() {
         return $(CheckboxGroupElement.class).single();
     }
