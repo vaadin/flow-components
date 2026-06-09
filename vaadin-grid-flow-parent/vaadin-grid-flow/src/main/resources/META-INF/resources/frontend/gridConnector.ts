@@ -213,7 +213,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid._updateScrollerItem = function (row, index) {
     Object.getPrototypeOf(this)._updateScrollerItem.call(this, row, index);
 
-    if (grid._columnTree) {
+    const isScrolling = grid.style.overscrollBehavior === 'auto';
+    if (isScrolling) {
       const fetchRange = grid.$connector.getFetchRange();
       dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
       dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
