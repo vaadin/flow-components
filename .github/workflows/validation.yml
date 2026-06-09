@@ -150,7 +150,7 @@ jobs:
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
   fast-tests:
-    name: ${{ matrix.name }}
+    name: Fast tests (${{ matrix.name }})
     needs: build
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
