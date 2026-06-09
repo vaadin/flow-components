@@ -295,9 +295,15 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      *            the values that are NOT filtered
      */
     protected void updateFilteredItems(Collection<String> visibleValues) {
+        Set<Integer> otherHidden = filterTable
+                .getRowsHiddenByOtherFilters(this);
+
         filteredRows.clear();
         for (int r = filterRange.getFirstRow(); r <= filterRange
                 .getLastRow(); r++) {
+            if (otherHidden.contains(r)) {
+                continue;
+            }
             String cellValue = spreadsheet.getCellValue(
                     spreadsheet.getCell(r, filterRange.getFirstColumn()));
             if (!visibleValues.contains(cellValue)) {
