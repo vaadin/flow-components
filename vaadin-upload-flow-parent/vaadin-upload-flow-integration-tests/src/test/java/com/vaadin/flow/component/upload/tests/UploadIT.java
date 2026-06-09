@@ -180,6 +180,58 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
+    public void multipleFiles_oneStillUploading_allFinishedNotFiredYet()
+            throws Exception {
+        UploadElement upload = getUpload();
+
+        // Disable auto upload so the files can be uploaded one at a time.
+        upload.setProperty("noAuto", true);
+
+        // Add two files. Mark them as uploading in order to be able to test
+        // that all-finished event is not fired until both files have succeeded
+        // uploading.
+        upload.upload(createTempFile("txt"), 0);
+        upload.upload(createTempFile("txt"), 0);
+        executeScript(
+                "arguments[0].files.forEach(file => { file.uploading = true });",
+                upload);
+
+        // Upload the first file by pressing its manual upload start button.
+        startUploadOfFile(upload, 0);
+
+        // Wait for the first file to finish uploading.
+        waitUntil(driver -> eventsOutput.getText().contains("-succeeded"));
+
+        // The second file is still uploading, so the all-finished event must
+        // not have fired yet.
+        Assert.assertEquals(
+                "All-finished event must not fire while another file is "
+                        + "still uploading",
+                "-succeeded", eventsOutput.getText());
+
+        // Upload the second file by pressing its manual upload start button.
+        startUploadOfFile(upload, 1);
+
+        // All files have finished now, so the all-finished event must fire.
+        waitUntil(driver -> "-succeeded-succeeded-finished"
+                .equals(eventsOutput.getText()));
+    }
+
+    private void startUploadOfFile(UploadElement upload, int index) {
+        // Clear the uploading flag on the file and re-render the file list so
+        // the start button becomes available
+        executeScript("""
+                const upload = arguments[0];
+                const fileIndex = arguments[1];
+                upload.files[fileIndex].uploading = false;
+                upload.files = [...upload.files];
+                """, upload, index);
+        WebElement startButton = upload.$("vaadin-upload-file").get(index)
+                .$("*").withAttribute("part", "start-button").single();
+        startButton.click();
+    }
+
+    @Test
     public void slowUpload_waitForUpload_pollsUntilUploadFinishes()
             throws Exception {
         Assume.assumeTrue("Current driver does not support Dev Tools",

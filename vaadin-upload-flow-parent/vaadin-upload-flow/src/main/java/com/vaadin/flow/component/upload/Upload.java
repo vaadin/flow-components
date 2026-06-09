@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -49,9 +48,6 @@ import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Upload is a component for uploading one or more files. It shows the upload
@@ -130,17 +126,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
         setUploadHandler(new FailFastUploadHandler());
 
-        final String elementFiles = "element.files";
+        final String filesUploading = "element.files.some(file => file.uploading)";
         DomEventListener allFinishedListener = e -> {
-            ArrayNode files = (ArrayNode) e.getEventData().get(elementFiles);
-
-            boolean isUploading = IntStream.range(0, files.size())
-                    .anyMatch(index -> {
-                        final String KEY = "uploading";
-                        JsonNode object = files.get(index);
-                        return object.has(KEY)
-                                && object.get(KEY).booleanValue();
-                    });
+            boolean isUploading = e.getEventData().get(filesUploading)
+                    .booleanValue();
 
             if (this.uploading && !isUploading) {
                 this.fireAllFinish();
@@ -152,11 +141,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
                 e -> this.uploading = true);
 
         getElement().addEventListener("upload-success", allFinishedListener)
-                .addEventData(elementFiles);
+                .addEventData(filesUploading);
         getElement().addEventListener("upload-error", allFinishedListener)
-                .addEventData(elementFiles);
+                .addEventData(filesUploading);
         getElement().addEventListener("upload-abort", allFinishedListener)
-                .addEventData(elementFiles);
+                .addEventData(filesUploading);
 
         defaultUploadButton = new Button();
         // Ensure the flag is set before the element is added to the slot
