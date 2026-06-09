@@ -82,7 +82,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private static final int DELAYED_SERVER_REQUEST_DELAY = 200; // ms
     private static final String DEFAULT_WIDTH = "500.0px";
     private static final String DEFAULT_HEIGHT = "400.0px";
-    private static final int MAX_SELECT_CELL_RANGE_RETRIES = 100;
 
     private final SheetWidget sheetWidget;
     final FormulaBarWidget formulaBarWidget;
@@ -122,9 +121,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
     private boolean loaded;
-    private Object[] pendingSelectCellRangeArgs;
-    private boolean selectCellRangeRetryScheduled;
-    private int selectCellRangeRetries;
     private boolean touchMode;
     private boolean formulaBarEditing;
     private boolean inlineEditing;
@@ -2062,50 +2058,23 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * Spreadsheet inside a Dialog opens and Flow flushes property writes and
      * RPCs in the same task. In that window, {@code scrollAreaIntoView} would
      * dereference an uninitialized {@code definedRowHeights}. Defer the call
-     * via the same scheduler until the sheet is loaded; only the latest set of
-     * args is kept so rapid successive calls collapse to the final selection.
-     * Bounded to avoid spinning if {@code loaded} never flips. Only this RPC
-     * needs deferring; other RPCs don't touch row/column metrics.
+     * via the same scheduler so it runs after the layout init command. Only
+     * this RPC touches row/column metrics, so only it needs deferring.
      */
     public void selectCellRange(String name, int selectedCellColumn,
             int selectedCellRow, int firstColumn, int lastColumn, int firstRow,
             int lastRow, boolean scroll) {
         if (!sheetWidget.isLoaded()) {
-            pendingSelectCellRangeArgs = new Object[] { name,
-                    selectedCellColumn, selectedCellRow, firstColumn,
-                    lastColumn, firstRow, lastRow, scroll };
-            if (!selectCellRangeRetryScheduled) {
-                selectCellRangeRetryScheduled = true;
-                Scheduler.get()
-                        .scheduleDeferred(this::applyPendingSelectCellRange);
-            }
+            Scheduler.get()
+                    .scheduleDeferred(() -> selectionHandler.selectCellRange(
+                            name, selectedCellColumn, selectedCellRow,
+                            firstColumn, lastColumn, firstRow, lastRow,
+                            scroll));
             return;
         }
         selectionHandler.selectCellRange(name, selectedCellColumn,
                 selectedCellRow, firstColumn, lastColumn, firstRow, lastRow,
                 scroll);
-    }
-
-    private void applyPendingSelectCellRange() {
-        selectCellRangeRetryScheduled = false;
-        if (pendingSelectCellRangeArgs == null) {
-            return;
-        }
-        if (!sheetWidget.isLoaded()) {
-            if (++selectCellRangeRetries > MAX_SELECT_CELL_RANGE_RETRIES) {
-                pendingSelectCellRangeArgs = null;
-                selectCellRangeRetries = 0;
-                return;
-            }
-            selectCellRangeRetryScheduled = true;
-            Scheduler.get().scheduleDeferred(this::applyPendingSelectCellRange);
-            return;
-        }
-        Object[] a = pendingSelectCellRangeArgs;
-        pendingSelectCellRangeArgs = null;
-        selectCellRangeRetries = 0;
-        selectionHandler.selectCellRange((String) a[0], (int) a[1], (int) a[2],
-                (int) a[3], (int) a[4], (int) a[5], (int) a[6], (boolean) a[7]);
     }
 
     public void refreshCellStyles() {
