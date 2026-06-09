@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -211,7 +213,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      * Updates the filtering options based on the values within the column.
      */
     public void updateOptions() {
-        Set<String> newValues = getAllValues();
+        Set<String> newValues = getFilterableValues();
         boolean needsSort = false;
 
         // remove changed, or update value
@@ -258,12 +260,11 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      * @return the cell values
      */
     protected Set<String> getVisibleValues() {
-        Set<String> values = getAllValues();
-        for (int r : filteredRows) {
-            values.remove(spreadsheet.getCellValue(
-                    spreadsheet.getCell(r, filterRange.getFirstColumn())));
-        }
-        return values;
+        Set<String> filteredValues = filteredRows.stream()
+                .map(this::getRowValue).collect(Collectors.toSet());
+        return getFilterableValues().stream()
+                .filter(v -> !filteredValues.contains(v))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -272,20 +273,9 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      *
      * @return the cell values
      */
-    protected Set<String> getAllValues() {
-        Set<Integer> otherHidden = filterTable
-                .getRowsHiddenByOtherFilters(this);
-
-        Set<String> values = new HashSet<>();
-        for (int r = filterRange.getFirstRow(); r <= filterRange
-                .getLastRow(); r++) {
-            if (otherHidden.contains(r)) {
-                continue;
-            }
-            values.add(spreadsheet.getCellValue(
-                    spreadsheet.getCell(r, filterRange.getFirstColumn())));
-        }
-        return values;
+    protected Set<String> getFilterableValues() {
+        return getFilterableRows().mapToObj(this::getRowValue)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -295,24 +285,39 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      *            the values that are NOT filtered
      */
     protected void updateFilteredItems(Collection<String> visibleValues) {
-        Set<Integer> otherHidden = filterTable
-                .getRowsHiddenByOtherFilters(this);
-
         filteredRows.clear();
-        for (int r = filterRange.getFirstRow(); r <= filterRange
-                .getLastRow(); r++) {
-            if (otherHidden.contains(r)) {
-                continue;
-            }
-            String cellValue = spreadsheet.getCellValue(
-                    spreadsheet.getCell(r, filterRange.getFirstColumn()));
-            if (!visibleValues.contains(cellValue)) {
-                filteredRows.add(r);
-            }
-        }
+        getFilterableRows().filter(r -> !visibleValues.contains(getRowValue(r)))
+                .forEach(filteredRows::add);
         latestFilteredValues = new ArrayList<>(visibleValues);
 
         filterTable.onFiltersUpdated();
+    }
+
+    /**
+     * Gets the rows in this column's range that are not already hidden by other
+     * columns' filters, so this column only operates on the rows it owns.
+     *
+     * @return the row indices
+     */
+    private IntStream getFilterableRows() {
+        Set<Integer> otherHidden = filterTable
+                .getRowsHiddenByOtherFilters(this);
+        return IntStream
+                .rangeClosed(filterRange.getFirstRow(),
+                        filterRange.getLastRow())
+                .filter(r -> !otherHidden.contains(r));
+    }
+
+    /**
+     * Gets the cell value of this column at the given row.
+     *
+     * @param row
+     *            the row index
+     * @return the cell value
+     */
+    private String getRowValue(int row) {
+        return spreadsheet.getCellValue(
+                spreadsheet.getCell(row, filterRange.getFirstColumn()));
     }
 
     @Override
