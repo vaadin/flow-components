@@ -108,6 +108,16 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * <p>
      * For merged regions, this method is only called for the first cell of the
      * merged region.
+     * <p>
+     * The Spreadsheet keeps the editor instance shown for a cell and reuses it
+     * across re-renders such as scrolling or refreshing. This method is called
+     * to create the editor when a cell first needs one; while that editor is
+     * kept, the method is not called again for the cell. A new editor is
+     * created when the active sheet changes or a new component factory is set.
+     * Do not rely on this method to update an editor for the current cell; do
+     * per-cell updates in
+     * {@link #onCustomEditorDisplayed(Cell, int, int, Spreadsheet, Sheet, Component)}
+     * instead.
      *
      * @param cell
      *            Cell that should display the custom editor or
@@ -128,13 +138,26 @@ public interface SpreadsheetComponentFactory extends Serializable {
             Spreadsheet spreadsheet, Sheet sheet);
 
     /**
-     * This method is called when a cell with a custom editor is displayed (the
-     * cell is selected). The purpose of this method is to make it possible to
-     * share the same editor component instance between multiple cells; you can
-     * update the component with the appropriate value depending on the cell.
+     * This method is called when the selection changes to a cell with a custom
+     * editor. The purpose of this method is to make it possible to share the
+     * same editor component instance between multiple cells; you can update the
+     * component with the appropriate value depending on the cell. It is called
+     * once per selection change to such a cell, not on scrolling or refreshing
+     * the same selection.
+     * <p>
+     * When {@link Spreadsheet#setShowCustomEditorOnFocus(boolean)} is disabled
+     * (the default), an editor is shown for every applicable cell, but this
+     * method is still called only for the currently selected cell, not for
+     * every displayed editor. To give an editor a value before its cell is
+     * first selected, set it on the instance returned from
+     * {@link #getCustomEditorForCell(Cell, int, int, Spreadsheet, Sheet)}.
      * <p>
      * Note that the Spreadsheet component doesn't automatically update the Cell
-     * value if it has a custom editor.
+     * value if it has a custom editor. The editor's value is transient UI
+     * state: it is preserved while the editor stays displayed, but it is not
+     * written to the cell. To keep a value across a workbook reload or when the
+     * editor is recreated (sheet change, factory change), persist it to the
+     * cell (for example from a value-change listener) and restore it here.
      *
      * @param cell
      *            The cell that has the editor, might be <code>null</code> if
