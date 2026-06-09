@@ -44,8 +44,8 @@ public class Example extends Component
 ## Constructors — progressive disclosure
 
 Cover the common combinations with overloads (empty / text / icon / value /
-signal / listener and their combinations). Button has 11. Add a `Signal<…>`
-variant beside each value parameter:
+signal / listener and their combinations). Add a `Signal<…>` variant beside each
+value parameter:
 
 ```java
 public Button() {}

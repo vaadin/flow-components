@@ -15,7 +15,6 @@
   [Design → Universal behavioural requirements](02-design.md#universal-behavioural-requirements).
 - Connectors and `executeJs` calls run in `attach`, not the constructor — see
   [Composition](07-composition.md).
-- Read `.claude/skills/signal-rules/SKILL.md` before writing `bind*` methods.
 
 ## Module structure
 
