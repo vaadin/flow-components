@@ -291,21 +291,7 @@ final class FormValueConverter {
                 throw new RejectedValueException(
                         "Expected string label, got " + node);
             }
-            var resolved = resolveLabel(node.asString(), toValue);
-            // valueOptions' typed signature forces toValue to return the
-            // field's value type, which for a multi-select is Set<Item>.
-            // Flatten the per-label Set into the aggregate so callers can
-            // naturally write `label -> Set.of(items.get(label))`. A non-
-            // Collection result (developer dropped the Set wrap by casting
-            // the field argument to a raw HasValue) is added directly. The
-            // runtime branch absorbs the API-typing friction so multi-
-            // select works through the existing valueOptions API without
-            // forcing a new method on the controller.
-            if (resolved instanceof Collection<?> c) {
-                result.addAll(c);
-            } else {
-                result.add(resolved);
-            }
+            result.add(resolveLabel(node.asString(), toValue));
         }
         return result;
     }

@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,8 +47,8 @@ class QueryFieldOptionsToolTest {
         // ToolCallbacks to the query function.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("apple", "banana", "cherry"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(field)
+                .options(List.of("apple", "banana", "cherry")));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "an", 10);
@@ -73,8 +72,8 @@ class QueryFieldOptionsToolTest {
         var unregistered = new TestField();
         var controller = new FormAIController(
                 new Div(registered, unregistered));
-        controller.valueOptions(registered, List.of("apple"),
-                Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(registered).options(List.of("apple")));
         controller.onRequest();
 
         var resultUnknownId = executeQueryFieldOptions(controller,
@@ -110,10 +109,11 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> {
-            capturedLimit.set(limit);
-            return List.of();
-        }, Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(field).options((filter, limit) -> {
+                    capturedLimit.set(limit);
+                    return List.of();
+                }));
         controller.onRequest();
 
         executeQueryFieldOptions(controller, field, "", 0);
@@ -150,11 +150,12 @@ class QueryFieldOptionsToolTest {
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> {
-            capturedFilter.set(filter);
-            capturedLimit.set(limit);
-            return List.of();
-        }, Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(field).options((filter, limit) -> {
+                    capturedFilter.set(filter);
+                    capturedLimit.set(limit);
+                    return List.of();
+                }));
         controller.onRequest();
 
         var fieldId = idOf(field);
@@ -171,11 +172,12 @@ class QueryFieldOptionsToolTest {
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> {
-            capturedFilter.set(filter);
-            capturedLimit.set(limit);
-            return List.of();
-        }, Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(field).options((filter, limit) -> {
+                    capturedFilter.set(filter);
+                    capturedLimit.set(limit);
+                    return List.of();
+                }));
         controller.onRequest();
 
         executeQueryFieldOptions(controller, field, "acme", 7);
@@ -188,8 +190,8 @@ class QueryFieldOptionsToolTest {
     void queryFieldOptionsEmitsOneLinePerLabel() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("Apollo #P-1", "Polaris #P-2"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(field)
+                .options(List.of("Apollo #P-1", "Polaris #P-2")));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "", 50);
@@ -202,15 +204,16 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> {
-            capturedLimit.set(limit);
-            // Return more items than the cap so truncation kicks in.
-            var items = new ArrayList<String>(201);
-            for (var i = 0; i < 201; i++) {
-                items.add("item-" + i);
-            }
-            return items;
-        }, Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(field).options((filter, limit) -> {
+                    capturedLimit.set(limit);
+                    // Return more items than the cap so truncation kicks in.
+                    var items = new ArrayList<String>(201);
+                    for (var i = 0; i < 201; i++) {
+                        items.add("item-" + i);
+                    }
+                    return items;
+                }));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "", 9999);
@@ -235,8 +238,8 @@ class QueryFieldOptionsToolTest {
         // message should only appear when items were dropped.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> List.of("only-one"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("only-one")));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "", 9999);
@@ -253,8 +256,8 @@ class QueryFieldOptionsToolTest {
         // explicit signal rather than just "".
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> List.of(),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of()));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "zzz", 10);
@@ -273,9 +276,8 @@ class QueryFieldOptionsToolTest {
         // original label.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("first\nsecond", "third"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("first\nsecond", "third")));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "", 10);
@@ -298,9 +300,10 @@ class QueryFieldOptionsToolTest {
                 + "TOKEN=abc123";
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, (filter, limit) -> {
-            throw new IllegalStateException(sentinel);
-        }, Function.identity());
+        controller.valueOptions(
+                ValueOptions.forField(field).options((filter, limit) -> {
+                    throw new IllegalStateException(sentinel);
+                }));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, field, "", 10);

@@ -30,6 +30,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -41,6 +43,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -48,7 +51,10 @@ import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -337,6 +343,148 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_rejectsWriteToDisabledFieldWithoutChangingIt() {
+        // A disabled field is shown to the LLM as context (with a "disabled"
+        // flag) but is not writable. A write to it must be rejected with a
+        // reason that points at enabling it, and the field must keep its value.
+        var disabled = new TestField();
+        disabled.setValue("orig");
+        disabled.setEnabled(false);
+        var controller = controllerFor(new TestField(), disabled);
+
+        var result = fillFormResult(controller, payload(disabled, "\"new\""));
+
+        Assertions.assertEquals("orig", disabled.getValue(),
+                "Disabled field must keep its value");
+        Assertions.assertEquals(List.of(idOf(disabled)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(disabled));
+        Assertions.assertTrue(reason.contains("disabled"),
+                "Reason must say the field is disabled; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToReadOnlyFieldWithoutChangingIt() {
+        // An application-read-only field is context only. A write to it must be
+        // rejected without changing it. The controller's own turn lock does not
+        // count as read-only here — that path is exercised by every happy-path
+        // fill test, which writes through the lock after onRequest().
+        var readOnly = new TestField();
+        readOnly.setValue("orig");
+        readOnly.setReadOnly(true);
+        var controller = controllerFor(new TestField(), readOnly);
+
+        var result = fillFormResult(controller, payload(readOnly, "\"new\""));
+
+        Assertions.assertEquals("orig", readOnly.getValue(),
+                "Read-only field must keep its value");
+        Assertions.assertEquals(List.of(idOf(readOnly)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(readOnly));
+        Assertions.assertTrue(reason.contains("read-only"),
+                "Reason must say the field is read-only; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToFieldDisabledByEarlierWriteInSamePayload() {
+        // A field's availability can change mid-fill: writing a controlling
+        // field earlier in the same payload can disable a field that appears
+        // later. The not-writable check must re-evaluate each field's LIVE
+        // state at write time, not a snapshot taken before any writes —
+        // otherwise the write lands on a field the user can no longer edit.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setValue("orig");
+        // Writing the trigger disables the dependent field.
+        trigger.addValueChangeListener(e -> dependent.setEnabled(false));
+        var controller = controllerFor(trigger, dependent);
+
+        // Order matters: the trigger is written first so the dependent is
+        // already disabled by the time its entry is processed.
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(trigger), "go");
+        args.put(idOf(dependent), "new");
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("orig", dependent.getValue(),
+                "A field disabled by an earlier write in the same payload "
+                        + "must not be written");
+        Assertions.assertEquals(List.of(idOf(dependent)), rejectedIds(result),
+                "The write to the now-disabled field must be rejected; got: "
+                        + result);
+        var reason = rejectionReason(result, idOf(dependent));
+        Assertions.assertTrue(reason.contains("disabled"),
+                "Reason must say the field is disabled; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToNowHiddenFieldAsUnknownId() {
+        // The LLM may hold an id from an earlier get_form_state for a field
+        // that has since been hidden. A hidden field is off the surface, so
+        // the write is rejected as an unknown id (which tells the LLM to
+        // refresh via get_form_state), and the field keeps its value.
+        var field = new TestField();
+        field.setValue("orig");
+        var controller = controllerFor(field); // id stamped while visible
+        field.setVisible(false); // hidden after the LLM saw it
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Hidden field must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A hidden field is off the surface, so the write must be "
+                        + "rejected as an unknown id; got: " + reason);
+    }
+
+    @Test
+    void fillForm_rejectsWriteToFieldUnderNowHiddenContainerAsUnknownId() {
+        // Same as above, but the field is hidden because an ancestor container
+        // is hidden rather than the field itself. Effective visibility keeps it
+        // off the surface, so the write is rejected as an unknown id.
+        var field = new TestField();
+        field.setValue("orig");
+        var container = new Div(field);
+        var controller = controllerFor(container); // id stamped while visible
+        container.setVisible(false); // ancestor hidden afterwards
+
+        var result = fillFormResult(controller, payload(field, "\"new\""));
+
+        Assertions.assertEquals("orig", field.getValue(),
+                "Field under a hidden container must keep its value");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("Unknown field id"),
+                "A field hidden by an ancestor is off the surface, so the "
+                        + "write must be rejected as an unknown id; got: "
+                        + reason);
+    }
+
+    @Test
+    void fillForm_postWriteSnapshotDoesNotFlagTurnLockedFieldAsReadOnly() {
+        // The fill_form response re-snapshots the form AFTER the writes, while
+        // the controller's turn lock is still on. A locked-but-writable field
+        // must appear in that snapshot WITHOUT a readOnly flag — the lock is
+        // the controller's, not the application's — and must carry the value
+        // just written. Guards the formatResult() path the way
+        // get_form_state's own carve-out test guards the read path.
+        var field = new TestField();
+        var controller = controllerFor(field); // onRequest() locks the field
+
+        var result = fillFormResult(controller, payload(field, "\"filled\""));
+
+        var entry = fieldEntry(result, idOf(field));
+        Assertions.assertNotNull(entry,
+                "Locked field must appear in the post-write fields block; got: "
+                        + result);
+        Assertions.assertFalse(entry.has("readOnly"),
+                "Turn-locked field must not be flagged readOnly in the "
+                        + "fill_form post-write snapshot; got: " + entry);
+        Assertions.assertEquals("filled", field.getValue(),
+                "Write to a turn-locked (but app-writable) field must land");
+    }
+
+    @Test
     void fillForm_partialSuccessLeavesBadFieldOnPriorValue() {
         // Mixed payload: name converts cleanly, amount fails. The valid
         // field must land; the failed field must stay on its prior value.
@@ -602,6 +750,166 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_binderLevelCrossFieldValidatorSurfacesAsRejection() {
+        // A bean-level cross-field validator registered via
+        // Binder.withValidator((bean, ctx) -> ...) must surface its rejection
+        // in the fill_form response when the LLM writes a combination of
+        // values that violates the rule. Per-binding validators alone aren't
+        // enough — some rules only make sense across multiple fields (e.g.
+        // "if format=Lightning, length<=10"). The rejection is keyed on a
+        // sentinel id since the rule isn't bound to one specific field.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertFalse(success(result),
+                "Cross-field validation failure must surface in rejected; "
+                        + "got: " + result);
+        var crossReason = rejectionReason(result, "__form__");
+        Assertions.assertNotNull(crossReason,
+                "Cross-field rejection must be keyed on the '__form__' "
+                        + "sentinel id (not on either field id, since the "
+                        + "rule isn't tied to one field); got rejected ids: "
+                        + rejectedIds(result));
+        Assertions.assertTrue(crossReason.contains("Lightning"),
+                "Reason must surface the validator's message so the LLM "
+                        + "can self-correct; got: " + crossReason);
+    }
+
+    @Test
+    void fillForm_crossFieldValidationDoesNotMarkUntouchedFieldInvalid() {
+        // Regression guard for the core fix: reading the post-write verdict —
+        // including the bean-level cross-field rule — must not fire a
+        // validation status event for a field this turn did not write.
+        // Binder.validate() (fireEvent=true) re-validates every binding and
+        // lights up each field's invalid indicator, so an untouched-but-invalid
+        // field would wrongly show an error after an unrelated fill. The
+        // controller must instead read the verdict without firing UI events
+        // (binding.validate(false) per written field, plus a side-effect-free
+        // bean-level read). A field's binding-level validation status handler
+        // is exactly what the binder calls to light up that field, so a
+        // handler that never fires proves the field was not marked.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var untouchedField = new LabeledStringField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        var untouchedStatusEvents = new int[] { 0 };
+        binder.forField(untouchedField)
+                // Always-invalid: Binder.validate() would mark it, so a clean
+                // counter can only mean the field was never validated.
+                .withValidator(value -> false, "untouched is always invalid")
+                .withValidationStatusHandler(
+                        status -> untouchedStatusEvents[0]++)
+                .bind("notes");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField,
+                untouchedField);
+        // Ignore any status events fired while wiring up the binder/bean; only
+        // the fill itself is under test.
+        untouchedStatusEvents[0] = 0;
+
+        // Write only the cross-field pair (which fails the rule); never touch
+        // untouchedField.
+        fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertEquals(0, untouchedStatusEvents[0],
+                "Validating the post-write state must not fire a validation "
+                        + "status event for a field this turn did not write; "
+                        + "the untouched field's indicator must stay clean. "
+                        + "Got events: " + untouchedStatusEvents[0]);
+    }
+
+    @Test
+    void fillForm_binderLevelCrossFieldValidatorPassDoesNotEmitRejection() {
+        // Symmetric guard: when the cross-field validator passes, no sentinel
+        // rejection appears in the response.
+        stubVaadinContext();
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> {
+            if ("Lightning".equals(bean.getFormat()) && bean.getLength() != null
+                    && bean.getLength() > 10) {
+                return ValidationResult
+                        .error("Lightning talks must be 10 minutes or less");
+            }
+            return ValidationResult.ok();
+        });
+        binder.setBean(new TwoFieldBean());
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree("{\"" + idOf(formatField)
+                        + "\":\"Standard\",\"" + idOf(lengthField) + "\":45}"));
+
+        Assertions.assertTrue(success(result),
+                "Passing cross-field validator must produce success=true; "
+                        + "got: " + result);
+    }
+
+    @Test
+    void fillForm_binderLevelCrossFieldValidatorSkippedWithoutBean() {
+        // Binder.validate()'s bean-level validators only run when a bean is set
+        // on the binder. When the application uses readBean/writeBean instead
+        // of setBean the bean-level rule has no target — the controller must
+        // not emit a sentinel rejection in that case, since there is nothing
+        // to validate against.
+        var formatField = new LabeledStringField();
+        var lengthField = new IntField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(formatField).bind("format");
+        binder.forField(lengthField).bind("length");
+        binder.withValidator((bean, ctx) -> ValidationResult
+                .error("never-fires-without-bean"));
+        // intentionally no setBean
+        var controller = controllerForBound(binder, formatField, lengthField);
+
+        var result = fillFormResult(controller,
+                JacksonUtils.readTree(
+                        "{\"" + idOf(formatField) + "\":\"Lightning\",\""
+                                + idOf(lengthField) + "\":25}"));
+
+        Assertions.assertTrue(success(result),
+                "Without setBean the bean-level validator has no target and "
+                        + "must not produce a sentinel rejection; got: "
+                        + result);
+    }
+
+    @Test
     void fillForm_bindingValidatorBlankMessageIsStillSurfacedAsRejection() {
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
@@ -660,6 +968,28 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_blankValidatorMessageReplacedWithGenericReason() {
+        // A validator that fails with a blank (whitespace-only) message must
+        // not surface that blank text as the rejection reason — an empty
+        // reason gives the LLM nothing to act on. The reason must fall back to
+        // the generic message instead. Pins the blank-handling in
+        // FormFieldValidation.message(); a non-blank message passes through
+        // unchanged (covered by fillForm_hasValidatorRejection...).
+        var field = new ValidatedField();
+        field.setDefaultValidator(
+                (value, ctx) -> ValidationResult.error("   "));
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"X\""));
+
+        Assertions.assertEquals("Field rejected the value.",
+                rejectionReason(result, idOf(field)),
+                "A blank validator message must be replaced with the generic "
+                        + "reason so the LLM gets actionable text, got: "
+                        + result);
+    }
+
+    @Test
     void fillForm_hasValidatorReceivesComponentInValueContext() {
         // Pins that FormFieldValidation builds the ValueContext with the
         // field as the Component so locale-aware validators (and anything
@@ -681,13 +1011,15 @@ class FillFormToolTest {
 
     @Test
     void firstError_bindingValidateThrows_returnsEmptyNotNull() {
-        // FormFieldValidation.errorFromBinding's catch must return
-        // Optional.empty(), not null; the caller chains .ifPresent(...) on
-        // the result and null breaks the chain. The fill_form pipeline
-        // intercepts validator throws at setValue (the binder triggers
-        // validation through the value-change listener), so the catch is
-        // only reachable when firstError is called directly with a binding
-        // whose validate(false) still throws — pin the contract here.
+        // A per-field validator that throws (rather than returning an error
+        // result) must not crash the post-write validation pass: firstError
+        // must catch the throw and return Optional.empty(), not null — the
+        // caller chains .ifPresent(...) on the result and null breaks the
+        // chain. The fill_form pipeline intercepts validator throws at
+        // setValue (the binder triggers validation through the value-change
+        // listener), so the catch is only reachable when firstError is called
+        // directly with a binding whose validate(false) still throws — pin the
+        // contract here.
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
         binder.forField(field)
@@ -704,6 +1036,28 @@ class FillFormToolTest {
         Assertions.assertEquals(java.util.Optional.empty(), result,
                 "errorFromBinding catch must return Optional.empty(), not "
                         + "null; null breaks the caller's .ifPresent() chain");
+    }
+
+    @Test
+    void beanErrors_beanValidatorThrows_returnsEmptyNotNull() {
+        // A bean-level cross-field validator that throws must not crash the
+        // post-write pass: beanErrors must swallow the throw and return an
+        // empty (never null) list so doFill can still format a response for
+        // the rest of the turn.
+        stubVaadinContext();
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TwoFieldBean.class);
+        binder.forField(field).bind("format");
+        binder.withValidator((bean, ctx) -> {
+            throw new RuntimeException("bean-validator-boom");
+        });
+        binder.setBean(new TwoFieldBean());
+
+        var result = FormFieldValidation.beanErrors(binder);
+
+        Assertions.assertTrue(result.isEmpty(),
+                "beanErrors must swallow a throwing bean-level validator and "
+                        + "return an empty, non-null list; got: " + result);
     }
 
     @Test
@@ -914,8 +1268,8 @@ class FillFormToolTest {
         var field = new SingleSelectField<Project>();
         var projects = Map.of("Apollo", new Project("P-1", "Apollo"));
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
-                projects::get);
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo")), projects::get);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
@@ -1016,8 +1370,8 @@ class FillFormToolTest {
         // pass null to setValue (which would silently clear the field).
         var field = new SingleSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of("Apollo"),
-                label -> null);
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo")), label -> null);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
@@ -1032,40 +1386,16 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithSetWrap() {
-        // The typed valueOptions signature forces toValue to return the
-        // field's value type (Set<Project> for MultiSelectField<Project>).
-        // The application wraps each per-label lookup in Set.of(...); the
-        // orchestrator flat-unions the per-label sets into the final
-        // selection.
+    void fillForm_multiSelect_writesResolvedSetViaValueOptions() {
+        // valueOptions on a MultiSelectField takes a single-item Function;
+        // the converter accumulates per-label items into the Set<Project>
+        // value type via an internal LinkedHashSet.
         var field = new MultiSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("Apollo", "Vega"),
-                label -> Set.of(new Project(label, label)));
-        controller.onRequest();
-
-        var result = fillFormResult(controller,
-                payload(field, "[\"Apollo\", \"Vega\"]"));
-
-        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
-                new Project("Vega", "Vega")), field.getValue());
-        Assertions.assertTrue(success(result));
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test
-    void fillForm_multiSelect_writesResolvedSetViaValueOptionsWithRawCast() {
-        // Alternative caller pattern: drop the Set wrap by raw-casting the
-        // field argument so toValue is Function<String, Item>. The
-        // orchestrator detects the non-Collection return at runtime and
-        // adds each resolved item directly to the aggregate set, so both
-        // caller patterns produce the same final value on the field.
-        var field = new MultiSelectField<Project>();
-        var controller = newController(field);
-        controller.valueOptions((HasValue) field,
-                (filter, limit) -> List.of("Apollo", "Vega"),
-                label -> new Project((String) label, (String) label));
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Apollo", "Vega")),
+                label -> new Project(label, label));
         controller.onRequest();
 
         var result = fillFormResult(controller,
@@ -1156,22 +1486,72 @@ class FillFormToolTest {
 
     @Test
     void fillForm_multiSelect_emptyArrayClearsField() {
-        // Empty array is the LLM clearing the multi-select; the resulting
-        // value matches the field's own empty value (Set.of() for Vaadin
-        // multi-selects), so other code observing the field sees the
-        // shape it expects.
+        // Empty array is the LLM clearing the multi-select; the converter
+        // builds an empty LinkedHashSet so the field's setValue receives
+        // an empty Set.
         var field = new MultiSelectField<Project>();
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
-        controller.valueOptions(field, (filter, limit) -> List.of(),
-                label -> Set.of(existing));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of()), label -> existing);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "[]"));
 
         Assertions.assertEquals(Set.of(), field.getValue());
         Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_multiSelect_nonArrayPayloadIsRejected() {
+        // The LLM sends a bare string for a multi-select field. The
+        // converter enforces the array shape so a stray scalar payload
+        // doesn't reach setValue.
+        var field = new MultiSelectField<Project>();
+        var existing = new Project("X", "X");
+        field.setValue(Set.of(existing));
+        var controller = newController(field);
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Apollo")),
+                label -> new Project(label, label));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(Set.of(existing), field.getValue(),
+                "Rejected fill must not mutate the prior selection");
+        Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("array"),
+                "Reason must name the missing array shape; got: "
+                        + rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_multiSelect_reregistrationOverwritesPriorOptions() {
+        // valueOptions called twice on the same MultiSelect field — the
+        // second call wins, including switching from fixed to queryable
+        // and replacing the toValue function.
+        var field = new MultiSelectField<Project>();
+        var controller = newController(field);
+        controller.valueOptions(
+                ValueOptions.forField(field).options(List.of("First")),
+                label -> new Project("v1", label));
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("Second")),
+                label -> new Project("v2", label));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "[\"Second\"]"));
+
+        Assertions.assertTrue(success(result));
+        Assertions.assertEquals(Set.of(new Project("v2", "Second")),
+                field.getValue(),
+                "Re-registration must hand the LLM-supplied label to the "
+                        + "second toValue, not the first");
     }
 
     @Test
@@ -1183,8 +1563,9 @@ class FillFormToolTest {
         // typed setValue (e.g. ComboBox<Project>) would reject it.
         var field = new IntField();
         var controller = newController(field);
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("low", "high"),
+        controller.valueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List.of("low", "high")),
                 label -> "low".equals(label) ? 1 : 10);
         controller.onRequest();
 
@@ -1326,6 +1707,50 @@ class FillFormToolTest {
     }
 
     /**
+     * Bean driving the binder-level cross-field-validator tests. {@code format}
+     * and {@code length} feed the cross-field rule; {@code notes} is an
+     * unrelated property for binding a field the cross-field tests leave
+     * untouched. Public visibility is required because
+     * {@code Binder.setBean(...)} reflects through the property getters via
+     * {@code BeanPropertySet}.
+     */
+    public static class TwoFieldBean {
+        private String format;
+        private Integer length;
+        private String notes;
+
+        @SuppressWarnings("unused")
+        public String getFormat() {
+            return format;
+        }
+
+        @SuppressWarnings("unused")
+        public void setFormat(String format) {
+            this.format = format;
+        }
+
+        @SuppressWarnings("unused")
+        public Integer getLength() {
+            return length;
+        }
+
+        @SuppressWarnings("unused")
+        public void setLength(Integer length) {
+            this.length = length;
+        }
+
+        @SuppressWarnings("unused")
+        public String getNotes() {
+            return notes;
+        }
+
+        @SuppressWarnings("unused")
+        public void setNotes(String notes) {
+            this.notes = notes;
+        }
+    }
+
+    /**
      * Bean with a non-String property — drives the converter-failure rejection
      * test where the binder's chain (not the controller's own converter) is the
      * source of the error.
@@ -1419,6 +1844,27 @@ class FillFormToolTest {
         var controller = new FormAIController(form, binder);
         controller.onRequest();
         return controller;
+    }
+
+    /**
+     * Stubs {@code service.getContext()} and the
+     * {@link ApplicationConfiguration} attribute on the
+     * {@link MockUIExtension}'s mocked {@code VaadinService} so
+     * {@code Binder.setBean(...)} can resolve its I18N / production-mode
+     * lookups without tripping over Mockito's default {@code null} return. Only
+     * the cross-field-validator tests that call {@code setBean} need this.
+     */
+    private void stubVaadinContext() {
+        var context = Mockito.mock(VaadinContext.class);
+        var appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+        // ApplicationConfiguration.get(context) uses the (Class, Supplier)
+        // getAttribute overload internally — match that exact shape, otherwise
+        // the mock returns null and DefaultBindingExceptionHandler NPEs.
+        Mockito.when(context.getAttribute(
+                ArgumentMatchers.eq(ApplicationConfiguration.class),
+                ArgumentMatchers.any())).thenReturn(appConfig);
+        Mockito.when(ui.getService().getContext()).thenReturn(context);
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {

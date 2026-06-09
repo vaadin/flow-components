@@ -452,10 +452,10 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     }
 
     /**
-     * Adds the components to the <em>middle</em> slot of this layout.
+     * Adds the components to the <em>end</em> slot of this layout.
      *
      * @param components
-     *            Components to add to the middle slot.
+     *            Components to add to the end slot.
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
@@ -470,7 +470,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * Adds the components to the <em>end</em> slot of this layout.
      *
      * @param components
-     *            Components to add to the middle slot.
+     *            Components to add to the end slot.
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.

@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -102,6 +101,182 @@ class FormStateToolTest {
     }
 
     @Test
+    void getFormStateOmitsHiddenFields() {
+        // A field the application has hidden with setVisible(false) is not
+        // something the user can see or edit, so it must not enter the LLM's
+        // tool surface either. This is how a conditionally-shown field (e.g.
+        // a "Cost center" revealed only for business trips) stays out of
+        // get_form_state until its controlling field reveals it.
+        var visible = new TestField();
+        var hidden = new TestField();
+        hidden.setVisible(false);
+        var controller = new FormAIController(new Div(visible, hidden));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size(),
+                "Hidden (setVisible(false)) field must be excluded, got: "
+                        + fields);
+        Assertions.assertEquals(idOf(visible),
+                fields.get(0).get("id").asString());
+    }
+
+    @Test
+    void getFormStateExcludesFieldInsideInvisibleContainer() {
+        // Hiding a container hides the fields inside it from the user. The
+        // field's own isVisible() is still true, so the controller must judge
+        // EFFECTIVE visibility (ancestors included) to keep such a field off
+        // the surface — otherwise the AI reads/writes a field nobody can see.
+        var field = new TestField();
+        var container = new Div(field);
+        container.setVisible(false);
+        var controller = new FormAIController(new Div(container));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(0, fields.size(),
+                "Field inside an invisible container must be excluded, got: "
+                        + fields);
+    }
+
+    @Test
+    void getFormStateExcludesFieldUnderInvisibleAncestor() {
+        // The hidden ancestor may be several levels up; effective-visibility
+        // must walk the whole chain, not just the immediate parent.
+        var field = new TestField();
+        var hiddenAncestor = new Div(new Div(new Div(field)));
+        hiddenAncestor.setVisible(false);
+        var controller = new FormAIController(new Div(hiddenAncestor));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(0, fields.size(),
+                "Field under an invisible ancestor must be excluded, got: "
+                        + fields);
+    }
+
+    @Test
+    void getFormStateLabelsFieldInsideDisabledContainerAsDisabled() {
+        // Disabling a container disables the fields inside it for the user.
+        // Such a field is read-only context: it must stay listed but carry the
+        // "disabled" flag so the AI does not try to fill it.
+        var field = new TestField();
+        var container = new Div(field);
+        container.setEnabled(false);
+        var controller = new FormAIController(new Div(container));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size(),
+                "Field inside a disabled container must still be listed, got: "
+                        + fields);
+        Assertions.assertTrue(fields.get(0).path("disabled").asBoolean(false),
+                "Field inside a disabled container must be flagged disabled, "
+                        + "got: " + fields.get(0));
+    }
+
+    @Test
+    void getFormStateLabelsDisabledFieldsAsContext() {
+        // A disabled field cannot be edited by the user, but the AI should
+        // still see it (with its description) so it can reason about the form,
+        // e.g. set the controlling field that enables it. The "disabled" flag
+        // tells the AI it is read-only context; fill_form rejects writes to it.
+        var enabled = new TestField();
+        var disabled = new TestField();
+        disabled.setEnabled(false);
+        var controller = new FormAIController(new Div(enabled, disabled));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(2, fields.size(),
+                "Disabled field must still be listed as context, got: "
+                        + fields);
+        var disabledNode = fields.get(1);
+        Assertions.assertEquals(idOf(disabled),
+                disabledNode.get("id").asString());
+        Assertions.assertTrue(disabledNode.path("disabled").asBoolean(false),
+                "Disabled field must carry \"disabled\": true, got: "
+                        + disabledNode);
+        Assertions.assertFalse(fields.get(0).has("disabled"),
+                "Enabled field must not carry a disabled flag, got: "
+                        + fields.get(0));
+    }
+
+    @Test
+    void getFormStateLabelsReadOnlyFieldsAsContext() {
+        // A read-only field is visible to the user but not editable; the AI
+        // sees it as context with a "readOnly" flag and fill_form rejects
+        // writes to it.
+        var editable = new TestField();
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = new FormAIController(new Div(editable, readOnly));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(2, fields.size(),
+                "Read-only field must still be listed as context, got: "
+                        + fields);
+        var readOnlyNode = fields.get(1);
+        Assertions.assertEquals(idOf(readOnly),
+                readOnlyNode.get("id").asString());
+        Assertions.assertTrue(readOnlyNode.path("readOnly").asBoolean(false),
+                "Read-only field must carry \"readOnly\": true, got: "
+                        + readOnlyNode);
+        Assertions.assertFalse(fields.get(0).has("readOnly"),
+                "Editable field must not carry a readOnly flag, got: "
+                        + fields.get(0));
+    }
+
+    @Test
+    void getFormStateDoesNotFlagTurnLockedFieldsAsReadOnly() {
+        // During a turn the controller locks every writable field read-only so
+        // the user can't race the AI. That lock must not surface as a
+        // "readOnly" context flag: only application-set read-only counts. A
+        // field the application itself set read-only keeps its flag.
+        var editable = new TestField();
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = new FormAIController(new Div(editable, readOnly));
+
+        controller.onRequest(); // locks the editable field read-only
+        try {
+            var fields = formStateFields(controller);
+
+            Assertions.assertEquals(2, fields.size());
+            var editableNode = fields.get(0);
+            Assertions.assertEquals(idOf(editable),
+                    editableNode.get("id").asString());
+            Assertions.assertFalse(editableNode.has("readOnly"),
+                    "Turn-locked editable field must not be flagged readOnly, "
+                            + "got: " + editableNode);
+            Assertions.assertTrue(
+                    fields.get(1).path("readOnly").asBoolean(false),
+                    "Application-read-only field must stay flagged, got: "
+                            + fields.get(1));
+        } finally {
+            controller.onResponse(null);
+        }
+    }
+
+    @Test
+    void getFormStateIncludesFieldOnceItBecomesVisible() {
+        // Fields are re-discovered on every state read, so a field hidden at
+        // one turn appears at the next once the controlling field reveals it.
+        var field = new TestField();
+        field.setVisible(false);
+        var controller = new FormAIController(new Div(field));
+
+        Assertions.assertEquals(0, formStateFields(controller).size(),
+                "Hidden field must be absent while invisible");
+
+        field.setVisible(true);
+
+        Assertions.assertEquals(1, formStateFields(controller).size(),
+                "Field must reappear once it is made visible again");
+    }
+
+    @Test
     void getFormStateReturnsEmptyFieldsArrayForEmptyForm() {
         var controller = new FormAIController(new Div());
 
@@ -127,9 +302,10 @@ class FormStateToolTest {
         var visible = new TestField();
         var password = new PasswordField();
         password.setValue("secret");
-        var controller = new FormAIController(new Div(visible, password))
-                .describe(password, "Account password")
-                .valueOptions(password, List.of("hunter2"));
+        var controller = new FormAIController(new Div(visible, password));
+        controller.describe(password, "Account password");
+        controller.valueOptions(
+                ValueOptions.forField(password).options(List.of("hunter2")));
 
         var fields = formStateFields(controller);
 
@@ -393,8 +569,8 @@ class FormStateToolTest {
         // queryable/enum sit inside the items block.
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi, (filter, limit) -> List.of("a", "b"),
-                Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("a", "b")));
 
         var f = formStateFields(controller).get(0);
 
@@ -418,8 +594,8 @@ class FormStateToolTest {
         multi.setItems("a", "b", "c");
         multi.setValue(Set.of("a", "c"));
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi,
-                (filter, limit) -> List.of("a", "b", "c"), Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("a", "b", "c")));
 
         var f = formStateFields(controller).get(0);
 
@@ -444,8 +620,9 @@ class FormStateToolTest {
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
         combo.setValue(new Project("P-2", "Beta"));
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta"),
+        controller.valueOptions(
+                ValueOptions.forField(combo).options(
+                        (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta")),
                 label -> null);
 
         var f = formStateFields(controller).get(0);
@@ -487,9 +664,8 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setItems("apple", "banana", "cherry");
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("apple", "banana"),
-                Function.identity());
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of("apple", "banana")));
 
         var f = formStateFields(controller).get(0);
 
@@ -571,7 +747,8 @@ class FormStateToolTest {
         // instead).
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo, List.of("EUR", "USD", "GBP"));
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
 
@@ -587,8 +764,8 @@ class FormStateToolTest {
     void getFormStateEncodesQueryableForBiFunctionValueOptions() {
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(combo,
-                (filter, limit) -> List.of("Apollo", "Polaris"));
+        controller.valueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
 
@@ -603,7 +780,8 @@ class FormStateToolTest {
     void getFormStateExposesEnumForFixedValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("EUR", "USD", "GBP"));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
 
@@ -616,8 +794,8 @@ class FormStateToolTest {
     void getFormStateExposesQueryableForBiFunctionValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field,
-                (filter, limit) -> List.of("Apollo", "Polaris"));
+        controller.valueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
 
@@ -785,7 +963,8 @@ class FormStateToolTest {
         var field = new IntField();
         field.setValue(2);
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(field, List.of("1", "2", "3"),
+        controller.valueOptions(
+                ValueOptions.forField(field).options(List.of("1", "2", "3")),
                 Integer::parseInt);
 
         var f = formStateFields(controller).get(0);
@@ -842,8 +1021,8 @@ class FormStateToolTest {
     void getFormStateMultiSelectQueryableUsesItemsQueryable() {
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(multi, (filter, limit) -> List.of("x"),
-                Set::of);
+        controller.valueOptions(ValueOptions.forField(multi)
+                .options((filter, limit) -> List.of("x")));
 
         var f = formStateFields(controller).get(0);
 
@@ -921,11 +1100,12 @@ class FormStateToolTest {
         var notes = new TestField();
 
         var form = new Div(merchant, amount, currency, date, category, notes);
-        var controller = new FormAIController(form)
-                .describe(merchant, "The vendor name")
-                .valueOptions(currency, List.of("EUR", "USD", "GBP"))
-                .valueOptions(category, List.of("Travel", "Meals", "Software",
-                        "Office", "Other"));
+        var controller = new FormAIController(form);
+        controller.describe(merchant, "The vendor name");
+        controller.valueOptions(ValueOptions.forField(currency)
+                .options(List.of("EUR", "USD", "GBP")));
+        controller.valueOptions(ValueOptions.forField(category).options(
+                List.of("Travel", "Meals", "Software", "Office", "Other")));
 
         // Execute first so the controller walks the form and assigns ids to
         // fields that had no hints registered.

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -22,25 +23,37 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValueContext;
 
 /**
- * Surfaces a single rejection reason for a field after the controller has just
- * written an LLM-supplied value. The output drives one entry in the
- * {@code fill_form} tool's {@code rejected} block — the LLM only needs the
- * first complaint per field to pick a corrected value on the next turn.
+ * Surfaces rejection reasons for the fields the controller has just written
+ * with LLM-supplied values. The output drives the {@code fill_form} tool's
+ * {@code rejected} block — the LLM only needs the first complaint per field to
+ * pick a corrected value on the next turn.
  *
  * <p>
- * The lookup follows a strict precedence: a bound field defers entirely to its
- * {@link Binding}, which means the binder's own chain (converter, default
- * {@link HasValidator} validator, every {@code withValidator} registration)
- * runs as one unit and the binder-level message is reported. An unbound field
- * that implements {@link HasValidator} runs that validator directly. Anything
- * else has no validator the controller can reach, so the write is accepted
- * as-is.
+ * Validation runs after every value has been written, so each field is judged
+ * against the fully-written form rather than a partial snapshot. Two
+ * complementary entry points read the verdict without changing the UI:
  * </p>
+ * <ul>
+ * <li>{@link #firstError(HasValue, Binding)} reads the per-field message. A
+ * bound field defers to its {@link Binding}, which means the binder's own chain
+ * (converter, default {@link HasValidator} validator, every
+ * {@code withValidator} registration) runs as one unit. An unbound field that
+ * implements {@link HasValidator} runs that validator directly; anything else
+ * has no reachable validator, so the write is accepted as-is. The read uses
+ * {@code fireEvent=false}, so it does not re-fire status events or touch a
+ * field's invalid indicator.</li>
+ * <li>{@link #beanErrors(Binder)} reads the bean-level cross-field rules
+ * registered with {@code binder.withValidator((bean, ctx) -> ...)}. These are
+ * not tied to any single field, so the controller surfaces them under a
+ * sentinel id. The read runs without modifying the UI, so a field this turn did
+ * not write is never marked invalid as a side effect.</li>
+ * </ul>
  */
 final class FormFieldValidation {
 
@@ -49,11 +62,21 @@ final class FormFieldValidation {
 
     private static final String GENERIC_REJECTION_MESSAGE = "Field rejected the value.";
 
+    /**
+     * Synthetic rejection id for a bean-level cross-field error. Such an error
+     * is not attributable to a single field, so it cannot reuse a field id; the
+     * LLM is told to adjust the offending fields rather than write to this id.
+     */
+    static final String FORM_LEVEL_REJECTION_ID = "__form__";
+
     private FormFieldValidation() {
     }
 
     /**
-     * Returns the first rejection message for {@code field}, if any.
+     * Returns the first rejection message for {@code field}, if any. A bound
+     * field defers entirely to its {@code binding}; an unbound field that
+     * implements {@link HasValidator} runs that validator directly; anything
+     * else has no reachable validator and is accepted as-is.
      *
      * @param field
      *            the field whose post-write value should be checked, not
@@ -75,6 +98,26 @@ final class FormFieldValidation {
         return Optional.empty();
     }
 
+    /**
+     * Returns the bean-level (cross-field) rejection messages for the
+     * post-write state of {@code binder}. These come from
+     * {@code binder.withValidator((bean, ctx) -> ...)} rules, which only run
+     * when a bean is set ({@code setBean}) and every binding is individually
+     * valid; with no bean, a {@code null} binder, or a per-field error pending,
+     * the list is empty. The underlying validation does not modify the UI, so
+     * fields this turn did not write are not marked invalid.
+     *
+     * @param binder
+     *            the binder to validate, or {@code null} when the form has no
+     *            binder
+     * @return the cross-field messages, never {@code null}; empty when there
+     *         are none
+     */
+    static List<String> beanErrors(Binder<?> binder) {
+        return BinderReflection.beanValidationErrors(binder).stream()
+                .map(result -> message(result.getErrorMessage())).toList();
+    }
+
     private static Optional<String> errorFromBinding(Binding<?, ?> binding) {
         try {
             // fireEvent=false: setValue already triggered the binder's
@@ -86,8 +129,7 @@ final class FormFieldValidation {
             if (!status.isError()) {
                 return Optional.empty();
             }
-            return Optional.of(status.getMessage().filter(m -> !m.isBlank())
-                    .orElse(GENERIC_REJECTION_MESSAGE));
+            return Optional.of(message(status.getMessage().orElse(null)));
         } catch (Exception ex) {
             LOGGER.warn("Binding validation threw for {}",
                     binding.getField().getClass(), ex);
@@ -103,20 +145,21 @@ final class FormFieldValidation {
             if (validator == null) {
                 return Optional.empty();
             }
-            var context = field instanceof Component component
-                    ? new ValueContext(component)
-                    : new ValueContext();
+            // The controller rejects non-Component fields at registration,
+            // so every field that reaches this code is a Component.
+            var context = new ValueContext((Component) field);
             var outcome = validator.apply(field.getValue(), context);
             if (outcome == null || !outcome.isError()) {
                 return Optional.empty();
             }
-            var message = outcome.getErrorMessage();
-            return Optional.of(message == null || message.isBlank()
-                    ? GENERIC_REJECTION_MESSAGE
-                    : message);
+            return Optional.of(message(outcome.getErrorMessage()));
         } catch (Exception ex) {
             LOGGER.warn("Default validator threw for {}", field.getClass(), ex);
             return Optional.empty();
         }
+    }
+
+    private static String message(String raw) {
+        return raw == null || raw.isBlank() ? GENERIC_REJECTION_MESSAGE : raw;
     }
 }

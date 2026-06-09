@@ -203,7 +203,7 @@ public class SheetWidget extends Panel {
      * Stylesheet element for holding the edited cell style (for convenience
      * reasons, not actually visible). The selector is updated to the edited
      * cell. Also holds the style for the last freeze panel column, if any. This
-     * is for preventing text oveflow over freeze panel.
+     * is for preventing text overflow over freeze panel.
      */
     private StyleElement editedCellFreezeColumnStyle = Document.get()
             .createStyleElement();
@@ -1040,6 +1040,7 @@ public class SheetWidget extends Panel {
      * stuff when it is unnecessary.
      *
      * @param event
+     *            the event
      */
     protected void onSheetMouseOverOrOut(Event event) {
         mouseOverOrOutEvent = event;
@@ -3409,7 +3410,10 @@ public class SheetWidget extends Panel {
      * Calculates viewed cells after a scroll to right. Runs the escalator for
      * column headers.
      *
-     * @param scrollLeft
+     * @param leftBound
+     *            the left scroll boundary
+     * @param rightBound
+     *            the right scroll boundary
      */
     private void handleHorizontalScrollRight(int leftBound, int rightBound) {
         final int maximumCols = actionHandler.getMaxColumns();
@@ -4226,6 +4230,9 @@ public class SheetWidget extends Panel {
      * the triangle) that has a cell comment.
      *
      * @param event
+     *            the event
+     * @param target
+     *            the target element
      */
     private void updateCellCommentDisplay(Event event, Element target) {
         int eventTypeInt = event.getTypeInt();
@@ -4583,7 +4590,7 @@ public class SheetWidget extends Panel {
      *            1 based
      * @param row
      *            1 based
-     * @return
+     * @return the cell key
      */
     public final static String toKey(int col, int row) {
         return "col" + col + " row" + row;
@@ -4893,7 +4900,9 @@ public class SheetWidget extends Panel {
      * headers).
      *
      * @param column
+     *            the column index
      * @param row
+     *            the row index
      */
     public void swapCellSelection(int column, int row) {
         // highlight previously selected cell (background white->selected)
@@ -4991,7 +5000,9 @@ public class SheetWidget extends Panel {
      * selection. No need to modify highlighted headers.
      *
      * @param col
+     *            the column index
      * @param row
+     *            the row index
      */
     public void swapSelectedCellInsideSelection(int col, int row) {
         Cell newSelectionCell = getCell(col, row);
@@ -5040,9 +5051,13 @@ public class SheetWidget extends Panel {
      * old selected cells. Ignores the currently selected cell.
      *
      * @param col1
+     *            the first column index
      * @param col2
+     *            the second column index
      * @param row1
+     *            the first row index
      * @param row2
+     *            the second row index
      */
     public void replaceAsSelectedCells(int col1, int col2, int row1, int row2) {
         clearCellRangeStylesFromCells();
@@ -5076,9 +5091,13 @@ public class SheetWidget extends Panel {
      * given intervals.
      *
      * @param row1
+     *            the first row index
      * @param row2
+     *            the second row index
      * @param col1
+     *            the first column index
      * @param col2
+     *            the second column index
      */
     public void replaceHeadersAsSelected(int row1, int row2, int col1,
             int col2) {
@@ -5384,8 +5403,10 @@ public class SheetWidget extends Panel {
      * Returns the cell. Checks for it from a freeze pane.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return the cell
      */
     Cell getCell(int col, int row) {
         if (isCellRenderedInFrozenPane(col, row)) {
@@ -5651,8 +5672,10 @@ public class SheetWidget extends Panel {
      * Is the cell currently rendered in any of the frozen panes.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if frozen cell rendered, {@code false} otherwise
      */
     public boolean isFrozenCellRendered(int col, int row) {
         return isCellRenderedInTopLeftPane(col, row)
@@ -5664,8 +5687,11 @@ public class SheetWidget extends Panel {
      * Is the cell currently rendered in top left pane.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if cell rendered in top left pane, {@code false}
+     *         otherwise
      */
     public boolean isCellRenderedInTopLeftPane(int col, int row) {
         return col <= horizontalSplitPosition && row <= verticalSplitPosition;
@@ -5675,8 +5701,11 @@ public class SheetWidget extends Panel {
      * Is the cell currently rendered in top right pane.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if cell rendered in top right pane, {@code false}
+     *         otherwise
      */
     public boolean isCellRenderedInTopRightPane(int col, int row) {
         return col > horizontalSplitPosition && col <= lastColumnIndex
@@ -5687,8 +5716,11 @@ public class SheetWidget extends Panel {
      * Is the cell currently rendered in bottom left pane.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if cell rendered in bottom left pane, {@code false}
+     *         otherwise
      */
     public boolean isCellRenderedInBottomLeftPane(int col, int row) {
         return row > verticalSplitPosition && row <= lastRowIndex
@@ -5699,8 +5731,10 @@ public class SheetWidget extends Panel {
      * Is the given cell currently rendered. Checks freeze panes too.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if cell rendered, {@code false} otherwise
      */
     public boolean isCellRendered(int col, int row) {
         return isCellRenderedInScrollPane(col, row)
@@ -5711,8 +5745,10 @@ public class SheetWidget extends Panel {
      * Is the given cell currently visible completely. Checks freeze panes too.
      *
      * @param col
+     *            the column index
      * @param row
-     * @return
+     *            the row index
+     * @return {@code true} if cell completely visible, {@code false} otherwise
      */
     public boolean isCellCompletelyVisible(int col, int row) {
         return (col <= horizontalSplitPosition
@@ -6246,7 +6282,7 @@ public class SheetWidget extends Panel {
                 int distanceFromWindowLeft = left - windowLeft;
 
                 // If there is not enough space for the overflow of the popup's
-                // width to the right of hte text box, and there IS enough space
+                // width to the right of the text box, and there IS enough space
                 // for the
                 // overflow to the left of the text box, then right-align the
                 // popup.
@@ -6692,7 +6728,7 @@ public class SheetWidget extends Panel {
      *
      * @param index
      *            1 based column index
-     * @return
+     * @return the column width
      */
     private int getColumnWidth(int index) {
         return actionHandler.getColWidthActual(index);

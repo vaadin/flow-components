@@ -23,13 +23,12 @@ public class GridTRElement extends TestBenchElement {
      * @return the cell for the given column
      */
     public GridTHTDElement getCell(GridProColumnElement column) {
-        TestBenchElement e = (TestBenchElement) executeScript(
-                "const grid = arguments[0];" //
-                        + "const columnId = arguments[1];" //
-                        + "return Array.from(grid.children)."
-                        + "filter(function(cell) { return cell._column && cell._column.__generatedTbId == columnId;})[0]",
-                this, column.get__generatedId());
-        return e == null ? null : e.wrap(GridTHTDElement.class);
+        TestBenchElement cell = (TestBenchElement) executeScript("""
+                const [row, column] = arguments;
+                return Array.from(row.children)
+                    .find((cell) => cell._column === column) ?? null;
+                """, this, column);
+        return cell == null ? null : cell.wrap(GridTHTDElement.class);
     }
 
 }

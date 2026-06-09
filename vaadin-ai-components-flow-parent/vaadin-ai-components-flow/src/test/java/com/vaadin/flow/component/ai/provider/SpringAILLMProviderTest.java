@@ -68,7 +68,7 @@ class SpringAILLMProviderTest {
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
-        Mockito.when(mockChatModel.getDefaultOptions())
+        Mockito.when(mockChatModel.getOptions())
                 .thenReturn(ToolCallingChatOptions.builder().build());
         provider = new SpringAILLMProvider(mockChatModel);
         logger.clearAll();
@@ -401,9 +401,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
@@ -417,9 +417,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
@@ -828,11 +828,18 @@ class SpringAILLMProviderTest {
     @Test
     void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
         // Zero-chunk stream: nothing ever flips the terminal gate.
+        // Uses the ChatClient constructor so no MessageChatMemoryAdvisor
+        // sits on the chain. The advisor's stream aggregation requires
+        // at least one emitted chunk to propagate the conversation id,
+        // which would fail an empty-flux test before the warn-on-no-
+        // terminal logic could run.
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.empty());
 
-        provider.stream(request).collectList().block();
+        chatClientProvider.stream(request).collectList().block();
 
         assertAbnormalTerminationWarningLogged();
     }

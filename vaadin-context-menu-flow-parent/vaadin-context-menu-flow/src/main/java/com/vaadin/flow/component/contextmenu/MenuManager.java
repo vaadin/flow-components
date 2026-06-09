@@ -240,7 +240,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     }
 
     /**
-     * Removes components to the (sub)menu.
+     * Removes components from the (sub)menu.
      *
      * @param components
      *            components to remove
