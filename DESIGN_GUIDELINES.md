@@ -4,7 +4,7 @@ This document captures high-level design principles for Vaadin Flow components �
 
 For implementation details, see [FLOW_COMPONENT_GUIDELINES.md](FLOW_COMPONENT_GUIDELINES.md).
 
-For the design principles of the underlying web components, see `DESIGN_GUIDELINES.md` in the web-components repository; the Flow component's API must stay consistent with that design.
+For the design principles of the underlying web components, see the `guidelines/` folder in the web-components repository; the Flow component's API must stay consistent with that design.
 
 ---
 
@@ -16,7 +16,7 @@ Every Flow component is a Java wrapper around an existing Vaadin web component. 
 
 - The web component is the source of truth for behaviour, DOM structure, theme variants, slots, shadow parts, and CSS custom properties. The Flow component must match the web component's semantics, not contradict them.
 - If the web component exposes a property `disabled`, the Flow component's `setDisabled(boolean)` (usually via `HasEnabled`) must map to that property — not to something the Flow layer invents.
-- If the web component exposes an event `opened-changed`, the Flow event listener must listen for that DOM event via `@DomEvent("opened-changed")` — not synthesise a separate Flow-only event.
+- If the web component fires a DOM event such as `custom-value-set`, the Flow event listener must subscribe to it via `@DomEvent("custom-value-set")` — not synthesise a separate Flow-only event.
 - Theme variant enums (`ButtonVariant`, `SideNavVariant`, etc.) MUST use the same variant names as the web component's `theme` attribute accepts, so that both sides stay in lockstep.
 - The `@NpmPackage` version in the Flow component class MUST match the web component version it is validated against; changing one without the other produces silently broken runtime behaviour.
 
@@ -57,7 +57,7 @@ new Button(textSignal, icon, e -> save());         // reactive text + icon + lis
 
 - The single-line-to-common-case principle keeps Flow application code readable: most buttons in a real application are created as `new Button("Save", e -> save())`, and that must not require boilerplate.
 - Overloaded constructors make the component's intended uses discoverable through IDE autocompletion.
-- Refusing fluent chains keeps Flow consistent with the rest of Vaadin Flow and Jakarta: everything is setter-based so that framework tooling (validation, binding, state restoration) sees the same shape.
+- Refusing fluent chains keeps components setter-based, so framework tooling — `Binder`, dependency injection, state restoration — sees the same predictable shape across the whole library.
 
 ---
 
@@ -231,7 +231,7 @@ A new Flow component enters the library behind a Vaadin feature flag and graduat
 
 **What this means in practice:**
 
-- The web component declares `static experimental = true`; the Flow wrapper MUST be gated by the corresponding Vaadin feature flag (see `com.vaadin.experimental.FeatureFlags`).
+- The Flow wrapper MUST be gated by the corresponding Vaadin feature flag (see `com.vaadin.experimental.FeatureFlags`), matching the experimental status of the underlying web component.
 - The flag is checked at runtime in the component's attach handler (or constructor) so that applications that have not opted in cannot accidentally use an unstable API.
 - Integration tests for an experimental component enable the flag via `src/main/resources/vaadin-featureflags.properties` in the integration-tests module, or via the `EnableFeatureFlagExtension` JUnit extension in unit tests.
 - Javadoc on the public class states that the component is experimental and that its API may change before it becomes stable.
@@ -263,20 +263,17 @@ Flow components wrap web components, which means state flows between the Java VM
 
 ---
 
-## Declarative (XML/Lumo) compatibility remains
+## Sensible defaults, zero-config rendering
 
-Flow components are sometimes consumed through Lit templates, Hilla, or server-side templating. The component's default state (zero-argument constructor + defaults) MUST produce something meaningful that renders correctly with no further calls.
+A component created with its zero-argument constructor and no further calls MUST render correctly on its own.
 
 **Rules:**
 
-- A new component without any configuration renders without errors or blank space — it either shows a placeholder, or is visually empty but semantically correct.
-- Required dependencies (web component npm package, connector JS, etc.) are declared with `@NpmPackage` and `@JsModule` on the class so that `new Component()` in any context triggers the right client-side bundle.
-- Components must not require an application startup step beyond adding them to the UI (e.g. no "register this component with a factory at startup" or "call `Component.init()` before use").
+- A new, unconfigured component renders without errors or blank space — a placeholder, or visually empty but semantically correct.
+- Client dependencies are declared with `@NpmPackage` / `@JsModule` on the class, so `new Component()` triggers the right client-side bundle with no extra setup.
+- No application startup step beyond adding the component to the UI — no factory registration, no `Component.init()`.
 
-**Why:**
-
-- Real applications compose many components. If one of them requires a non-trivial setup step, every application must remember to call it — and eventually some application forgets.
-- Frameworks (Spring, CDI) often construct components lazily or in contexts without a live UI. Components that need only their constructor + the standard Flow lifecycle work in all of these.
+**Why:** frameworks like Spring and CDI often construct components lazily or in contexts without a live UI. A component that needs only its constructor plus the standard Flow lifecycle works in all of them.
 
 ---
 
@@ -292,21 +289,11 @@ A Flow component's documentation may mention a universal concern only when the c
 - A component-specific extension or override.
 - A specific interaction pattern not pinned down by the universal rule.
 
-### Every interactive element has an accessible name
-
-Every focusable element, button, link, control, and landmark region the component contributes has an accessible name. When the name comes from visible text it is automatic; when it does not (icon-only buttons, landmarks, dismiss controls, overflow controls), the Flow component MUST expose a way for the application to supply one — typically by implementing `HasAriaLabel` or by exposing a dedicated `set{Label}(String)` method.
+Accessibility behaviours — accessible names, focus order, keyboard support, RTL layout — are owned by the underlying web component and its design guidelines; the Flow wrapper does not restate or re-implement them. Its only job is to expose the web component's i18n and labelling APIs to Java (see below).
 
 ### Localisable labels and error messages
 
-Any text the component renders itself — landmark labels, placeholder strings, internal button labels ("More", "Clear selection", "Open menu"), error messages, tooltip defaults — MUST be customisable from Java. This is typically done through the component's `I18n` class (`ComboBoxI18n`, `UploadI18n`, etc.). Defaults are sensible English fallbacks, never hard-coded strings the application cannot change.
-
-### Focus order follows visual order
-
-Flow components inherit their DOM structure from the underlying web component. If the web component has focus-order issues, fix them there — do NOT compensate on the Flow side (e.g. by manipulating `tabindex` from Java). The focus order rule is owned by the web component.
-
-### Right-to-left layout support
-
-The web component is responsible for RTL layout. The Flow wrapper MUST NOT introduce per-direction branches, CSS, or behaviour of its own. If the Flow component sends icons or directional text to the web component, it relies on the component to render them correctly under RTL.
+Any text the component renders itself — internal button labels ("More", "Clear selection"), error messages, tooltip defaults — MUST be customisable from Java. Where the web component exposes an `i18n` property, the Flow wrapper maps it to an `{Component}I18n` Java class (`ComboBoxI18n`, `UploadI18n`, etc.); defaults are sensible English fallbacks, never hard-coded strings the application cannot change.
 
 ### Property order independence
 

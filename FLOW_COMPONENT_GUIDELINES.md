@@ -4,7 +4,7 @@ This document provides step-by-step guidelines for **implementing** Vaadin Flow 
 
 For high-level design principles, see [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md).
 
-For the underlying web component implementation, see the `WEB_COMPONENT_GUIDELINES.md` in the web-components repository — the Flow wrapper relies on and must stay consistent with that component.
+For the underlying web component implementation, see the `guidelines/` folder in the web-components repository — the Flow wrapper relies on and must stay consistent with that component.
 
 ---
 
