@@ -47,7 +47,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/popover", version = "25.2.0-beta1")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
@@ -341,6 +341,42 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      */
     public boolean isAutofocus() {
         return getElement().getProperty("autofocus", false);
+    }
+
+    /**
+     * Gets whether the popover's content can be reached via Tab navigation from
+     * the target or sibling elements.
+     * <p>
+     * By default, tab focus into the popover is enabled.
+     * <p>
+     * NOTE: this setting has no effect on modal popovers, which use their own
+     * focus trap.
+     *
+     * @return {@code true} if tab focus into the popover is enabled,
+     *         {@code false} otherwise
+     */
+    public boolean isTabFocusEnabled() {
+        return !getElement().getProperty("noTabFocus", false);
+    }
+
+    /**
+     * Sets whether the popover's content can be reached via Tab navigation from
+     * the target or sibling elements. When set to {@code false}, pressing Tab
+     * on the target skips past the popover, and Shift+Tab does not move focus
+     * into the popover's last focusable element. Focus still moves out of the
+     * popover on Tab / Shift+Tab if it was placed inside programmatically.
+     * <p>
+     * By default, tab focus into the popover is enabled.
+     * <p>
+     * NOTE: this setting has no effect on modal popovers, which use their own
+     * focus trap.
+     *
+     * @param tabFocusEnabled
+     *            {@code true} to allow tab focus into the popover,
+     *            {@code false} to skip the popover in tab order
+     */
+    public void setTabFocusEnabled(boolean tabFocusEnabled) {
+        getElement().setProperty("noTabFocus", !tabFocusEnabled);
     }
 
     /**

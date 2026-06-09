@@ -117,7 +117,8 @@ class MenuManagerTest {
     void addItem_textNullListener_createItemUsingFactory_setText_addToItemAndNoListenerAdded() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
-        manager.addItem("foo", null);
+        manager.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Mockito.verify(item).setText("foo");
         Mockito.verifyNoMoreInteractions(item);
@@ -147,7 +148,8 @@ class MenuManagerTest {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         Component component = Mockito.mock(Component.class);
-        manager.addItem(component, null);
+        manager.addItem(component,
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Mockito.verify(item).add(component);
         Mockito.verifyNoMoreInteractions(item);

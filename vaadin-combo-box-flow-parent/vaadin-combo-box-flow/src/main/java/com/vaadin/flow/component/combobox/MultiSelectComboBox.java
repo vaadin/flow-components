@@ -97,7 +97,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.2.0-beta1")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -511,8 +511,8 @@ public class MultiSelectComboBox<TItem>
      * Expansion only works with undefined size in the desired direction (i.e.
      * setting `max-width` limits the component's width).
      *
-     * @param {AutoExpandMode}
-     *            autoExpandMode
+     * @param autoExpandMode
+     *            the auto-expand mode
      * @since 24.3
      */
     public void setAutoExpand(AutoExpandMode autoExpandMode) {
@@ -546,6 +546,30 @@ public class MultiSelectComboBox<TItem>
      */
     public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
         getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
+     * Gets whether all selected item chips collapse into the overflow chip when
+     * they don't all fit.
+     *
+     * @since 25.2
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isCollapseChips() {
+        return getElement().getProperty("collapseChips", false);
+    }
+
+    /**
+     * Enables or disables collapsing of all selected item chips into the
+     * overflow chip when they don't all fit. By default, as many chips as
+     * possible are shown and only the remaining ones are collapsed.
+     *
+     * @since 25.2
+     * @param collapseChips
+     *            {@code true} to collapse all chips into the overflow chip
+     */
+    public void setCollapseChips(boolean collapseChips) {
+        getElement().setProperty("collapseChips", collapseChips);
     }
 
     /**

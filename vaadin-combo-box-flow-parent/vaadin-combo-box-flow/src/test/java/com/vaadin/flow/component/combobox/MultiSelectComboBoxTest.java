@@ -328,6 +328,21 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
+    void setCollapseChips() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assertions.assertFalse(comboBox.isCollapseChips());
+        Assertions.assertFalse(
+                comboBox.getElement().getProperty("collapseChips", false));
+
+        comboBox.setCollapseChips(true);
+
+        Assertions.assertTrue(comboBox.isCollapseChips());
+        Assertions.assertTrue(
+                comboBox.getElement().getProperty("collapseChips", true));
+    }
+
+    @Test
     void setKeepFilter() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 

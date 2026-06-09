@@ -61,7 +61,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0-beta1")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -346,6 +346,29 @@ public class Dashboard extends Component
      */
     public void setMinimumRowHeight(String minRowHeight) {
         getStyle().set("--vaadin-dashboard-row-min-height", minRowHeight);
+    }
+
+    /**
+     * Returns the fixed row height of the dashboard.
+     *
+     * @return the fixed row height of the dashboard
+     */
+    public String getRowHeight() {
+        return getStyle().get("--vaadin-dashboard-row-height");
+    }
+
+    /**
+     * Sets a fixed row height for the dashboard. When set, this value overrides
+     * the {@link #setMinimumRowHeight(String) minimum row height} and prevents
+     * rows from growing to fit their content, allowing widgets to use
+     * {@code 100%} height for their inner content.
+     *
+     * @param rowHeight
+     *            the new fixed row height. Pass in {@code null} to set the row
+     *            height back to the default value.
+     */
+    public void setRowHeight(String rowHeight) {
+        getStyle().set("--vaadin-dashboard-row-height", rowHeight);
     }
 
     /**

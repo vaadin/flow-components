@@ -73,7 +73,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.2.0-beta1")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -748,7 +748,7 @@ public class AvatarGroup extends Component
     }
 
     /**
-     * Sets the the maximum number of avatars to display.
+     * Sets the maximum number of avatars to display.
      * <p>
      * By default, all the avatars are displayed. When max is set, the
      * overflowing avatars are grouped into one avatar.

@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -96,7 +98,8 @@ class ContextMenuTest {
     @Test
     void addItem_getChildren_returnsMenuItem() {
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.addItem("foo", null);
+        contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
         Assertions.assertEquals(1, children.size());
@@ -106,7 +109,8 @@ class ContextMenuTest {
     @Test
     void addItem_getItems_returnsMenuItem() {
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.addItem("foo", null);
+        contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
         List<MenuItem> children = contextMenu.getItems();
         Assertions.assertEquals(1, children.size());
         assertComponentIsMenuItem(children.get(0), "foo");
@@ -115,7 +119,8 @@ class ContextMenuTest {
     @Test
     void addItem_remove_noChildrenNorItems() {
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem item = contextMenu.addItem("foo", null);
+        MenuItem item = contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
         contextMenu.remove(item);
         Assertions.assertEquals(0, contextMenu.getChildren().count());
         Assertions.assertEquals(0, contextMenu.getItems().size());
@@ -125,12 +130,14 @@ class ContextMenuTest {
     void addItemsAndComponents_getChildrenReturnsAllInOrder() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem item1 = contextMenu.addItem("foo", null);
+        MenuItem item1 = contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Span span1 = new Span("foo");
         contextMenu.addComponent(span1);
 
-        MenuItem item2 = contextMenu.addItem("bar", null);
+        MenuItem item2 = contextMenu.addItem("bar",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Span span2 = new Span("bar");
         contextMenu.addComponent(span2);
@@ -148,9 +155,11 @@ class ContextMenuTest {
     @Test
     void addItemsAndSeparator_separatorOnlyIncludedInChildren() {
         var contextMenu = new ContextMenu();
-        var item1 = contextMenu.addItem("foo", null);
+        var item1 = contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
         contextMenu.addSeparator();
-        var item2 = contextMenu.addItem("bar", null);
+        var item2 = contextMenu.addItem("bar",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         var children = contextMenu.getChildren().toList();
         var items = contextMenu.getItems();
@@ -166,12 +175,14 @@ class ContextMenuTest {
     void addItemsAndComponents_getItemsReturnsItemsOnly() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem item1 = contextMenu.addItem("foo", null);
+        MenuItem item1 = contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Span span1 = new Span("foo");
         contextMenu.addComponent(span1);
 
-        MenuItem item2 = contextMenu.addItem("bar", null);
+        MenuItem item2 = contextMenu.addItem("bar",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Span span2 = new Span("bar");
         contextMenu.addComponent(span2);
@@ -198,11 +209,15 @@ class ContextMenuTest {
     void addItemsWithNullClickListeners_doesNotThrow() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem foo = contextMenu.addItem("foo", null);
-        contextMenu.addItem(new Div(), null);
+        MenuItem foo = contextMenu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
+        contextMenu.addItem(new Div(),
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
-        foo.getSubMenu().addItem("bar", null);
-        foo.getSubMenu().addItem(new Div(), null);
+        foo.getSubMenu().addItem("bar",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
+        foo.getSubMenu().addItem(new Div(),
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
     }
 
     @Test

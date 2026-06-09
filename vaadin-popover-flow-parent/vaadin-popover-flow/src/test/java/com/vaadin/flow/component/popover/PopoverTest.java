@@ -229,7 +229,7 @@ class PopoverTest {
         Assertions.assertEquals("aria-labelledby",
                 popover.getAriaLabelledBy().get());
 
-        popover.setAriaLabelledBy(null);
+        popover.setAriaLabelledBy((String) null);
         Assertions.assertTrue(popover.getAriaLabelledBy().isEmpty());
     }
 
@@ -319,6 +319,23 @@ class PopoverTest {
         Assertions.assertTrue(popover.isAutofocus());
         Assertions.assertTrue(
                 popover.getElement().getProperty("autofocus", false));
+    }
+
+    @Test
+    void setTabFocusEnabled_isTabFocusEnabled() {
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(false);
+        Assertions.assertFalse(popover.isTabFocusEnabled());
+        Assertions.assertTrue(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(true);
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
     }
 
     @Test

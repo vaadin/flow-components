@@ -551,8 +551,9 @@ public class SheetTabSheet extends Widget {
      * Set the tab inner text and title to the given name value
      *
      * @param tab
+     *            the tab
      * @param name
-     *            to use
+     *            the tab name
      */
     private void setTabName(Element tab, String name) {
         if (tab == null)

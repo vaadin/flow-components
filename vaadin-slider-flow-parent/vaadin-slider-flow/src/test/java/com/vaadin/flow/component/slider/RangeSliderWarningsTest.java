@@ -24,15 +24,11 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 class RangeSliderWarningsTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            SliderFeatureFlagProvider.SLIDER_COMPONENT);
 
     private Logger mockedLogger;
     private MockedStatic<LoggerFactory> mockLoggerFactoryStatic;

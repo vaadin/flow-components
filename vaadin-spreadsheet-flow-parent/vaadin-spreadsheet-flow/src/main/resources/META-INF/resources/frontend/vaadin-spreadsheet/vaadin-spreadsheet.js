@@ -11,6 +11,10 @@ import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
@@ -162,22 +166,12 @@ export class VaadinSpreadsheet extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     spreadsheetResizeObserver.observe(this);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    spreadsheetResizeObserver.unobserve(this);
-  }
-
-  updated(_changedProperties) {
-    super.updated(_changedProperties);
-    let initial = false;
-    let overlays = document.getElementById('spreadsheet-overlays');
     if (!this.api) {
-      if (!overlays) {
-        overlays = document.createElement('div');
-        overlays.id = 'spreadsheet-overlays';
-        document.body.appendChild(overlays);
+      this._overlays = document.getElementById('spreadsheet-overlays');
+      if (!this._overlays) {
+        this._overlays = document.createElement('div');
+        this._overlays.id = 'spreadsheet-overlays';
+        document.body.appendChild(this._overlays);
       }
 
       this.api = new Spreadsheet(this, this.renderRoot);
@@ -185,198 +179,163 @@ export class VaadinSpreadsheet extends LitElement {
       this.api.setWidth('100%');
       this.createCallbacks();
 
-      initial = true;
+      this._firstUpdate = true;
     }
-    overlays.setAttribute('theme', this.getAttribute('theme'));
-    let propNames = [];
-    let dirty = false;
-    _changedProperties.forEach((oldValue, name) => {
-      let newVal = this[name];
-      if ('dirty' == name) {
-        dirty = true;
-      } else if ('rowBufferSize' == name) {
-        this.api.setRowBufferSize(newVal);
-      } else if ('columnBufferSize' == name) {
-        this.api.setColumnBufferSize(newVal);
-      } else if ('rows' == name) {
-        this.api.setRows(newVal);
-      } else if ('cols' == name) {
-        this.api.setCols(newVal);
-      } else if ('colGroupingData' == name) {
-        this.api.setColGroupingData(newVal);
-      } else if ('rowGroupingData' == name) {
-        this.api.setRowGroupingData(newVal);
-      } else if ('colGroupingMax' == name) {
-        this.api.setColGroupingMax(newVal);
-      } else if ('rowGroupingMax' == name) {
-        this.api.setRowGroupingMax(newVal);
-      } else if ('colGroupingInversed' == name) {
-        this.api.setColGroupingInversed(newVal);
-      } else if ('rowGroupingInversed' == name) {
-        this.api.setRowGroupingInversed(newVal);
-      } else if ('defRowH' == name) {
-        this.api.setDefRowH(newVal);
-      } else if ('defColW' == name) {
-        this.api.setDefColW(newVal);
-      } else if ('rowH' == name) {
-        this.api.setRowH(newVal);
-      } else if ('colW' == name) {
-        this.api.setColW(newVal);
-      } else if ('reload' == name) {
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    spreadsheetResizeObserver.unobserve(this);
+  }
+
+  updated(changedProperties) {
+    super.updated(changedProperties);
+
+    this._overlays.setAttribute('theme', this.getAttribute('theme'));
+
+    changedProperties.forEach((oldValue, name) => {
+      const newVal = this[name];
+      // Most server properties map to a `set<Name>` method on the api. A few
+      // need special handling, and dirty/api/theme are not forwarded at all
+      // (still reported via notifyStateChanges below).
+      if (name === 'dirty' || name === 'api' || name === 'theme') {
+        // No-op.
+      } else if (name === 'reload') {
         this.api.setReload(true);
-      } else if ('sheetIndex' == name) {
-        this.api.setSheetIndex(newVal);
-      } else if ('sheetNames' == name) {
-        this.api.setSheetNames(newVal);
-      } else if ('cellStyleToCSSStyle' == name) {
-        this.api.setCellStyleToCSSStyle(newVal);
-      } else if ('rowIndexToStyleIndex' == name) {
-        this.api.setRowIndexToStyleIndex(newVal);
-      } else if ('columnIndexToStyleIndex' == name) {
-        this.api.setColumnIndexToStyleIndex(newVal);
-      } else if ('lockedColumnIndexes' == name) {
-        this.api.setLockedColumnIndexes(newVal);
-      } else if ('lockedRowIndexes' == name) {
-        this.api.setLockedRowIndexes(newVal);
-      } else if ('shiftedCellBorderStyles' == name) {
-        this.api.setShiftedCellBorderStyles(newVal);
-      } else if ('conditionalFormattingStyles' == name) {
-        this.api.setConditionalFormattingStyles(newVal);
-      } else if ('hiddenColumnIndexes' == name) {
-        this.api.setHiddenColumnIndexes(newVal);
-      } else if ('hiddenRowIndexes' == name) {
-        this.api.setHiddenRowIndexes(newVal);
-      } else if ('verticalScrollPositions' == name) {
-        this.api.setVerticalScrollPositions(newVal);
-      } else if ('horizontalScrollPositions' == name) {
-        this.api.setHorizontalScrollPositions(newVal);
-      } else if ('sheetProtected' == name) {
-        this.api.setSheetProtected(newVal);
-      } else if ('workbookProtected' == name) {
-        this.api.setWorkbookProtected(newVal);
-      } else if ('cellKeysToEditorIdMap' == name) {
-        this.api.setCellKeysToEditorIdMap(newVal);
-      } else if ('componentIDtoCellKeysMap' == name) {
-        this.api.setComponentIDtoCellKeysMap(newVal);
-      } else if ('hyperlinksTooltips' == name) {
-        this.api.setHyperlinksTooltips(newVal);
-      } else if ('cellComments' == name) {
-        this.api.setCellComments(newVal);
-      } else if ('cellCommentAuthors' == name) {
-        this.api.setCellCommentAuthors(newVal);
-      } else if ('visibleCellComments' == name) {
-        this.api.setVisibleCellComments(newVal);
-      } else if ('invalidFormulaCells' == name) {
-        this.api.setInvalidFormulaCells(newVal);
-      } else if ('hasActions' == name) {
-        this.api.setHasActions(newVal);
-      } else if ('overlays' == name) {
-        this.api.setOverlays(newVal);
-      } else if ('mergedRegions' == name) {
-        this.api.setMergedRegions(newVal);
-      } else if ('displayGridlines' == name) {
-        this.api.setDisplayGridlines(newVal);
-      } else if ('displayRowColHeadings' == name) {
-        this.api.setDisplayRowColHeadings(newVal);
-      } else if ('verticalSplitPosition' == name) {
-        this.api.setVerticalSplitPosition(newVal);
-      } else if ('horizontalSplitPosition' == name) {
-        this.api.setHorizontalSplitPosition(newVal);
-      } else if ('infoLabelValue' == name) {
-        this.api.setInfoLabelValue(newVal);
-      } else if ('workbookChangeToggle' == name) {
-        this.api.setWorkbookChangeToggle(newVal);
-      } else if ('invalidFormulaErrorMessage' == name) {
-        this.api.setInvalidFormulaErrorMessage(newVal);
-      } else if ('lockFormatColumns' == name) {
-        this.api.setLockFormatColumns(newVal);
-      } else if ('lockFormatRows' == name) {
-        this.api.setLockFormatRows(newVal);
-      } else if ('namedRanges' == name) {
-        this.api.setNamedRanges(newVal);
-      } else if ('id' == name) {
-        this.api.setId(newVal);
-      } else if ('class' == name) {
-        this.api.setClass(newVal);
-      } else if ('resources' == name) {
+      } else if (name === 'resources') {
         this.api.setResources(this, newVal);
-      } else if ('api' == name) {
-      } else if ('theme' == name) {
-      } else if ('showCustomEditorOnFocus' == name) {
-        this.api.setShowCustomEditorOnFocus(newVal);
       } else {
-        console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
+        const setter = `set${capitalize(name)}`;
+        if (typeof this.api[setter] === 'function') {
+          this.api[setter](newVal);
+        } else {
+          console.error(`<vaadin-spreadsheet> unsupported property received from server: property=${name}`);
+        }
       }
-      propNames.push(name);
     });
-    this.api.notifyStateChanges(propNames, initial);
-    if (initial) {
+
+    this.api.notifyStateChanges([...changedProperties.keys()], this._firstUpdate);
+
+    if (this._firstUpdate) {
       this.api.relayout();
+      this._firstUpdate = false;
     }
   }
 
   /* CLIENT SIDE RPC METHODS */
+  // Flow can send RPC calls in the same task as the property writes that
+  // configure the api, before Lit's microtask-scheduled `updated()` runs to
+  // propagate those properties to the api. Each method below calls
+  // `performUpdate()` first to flush the pending update synchronously so the
+  // api state is ready.
   updateBottomRightCellValues(cellData) {
+    this.performUpdate();
     this.api.updateBottomRightCellValues(cellData);
   }
 
   updateTopLeftCellValues(cellData) {
+    this.performUpdate();
     this.api.updateTopLeftCellValues(cellData);
   }
 
   updateTopRightCellValues(cellData) {
+    this.performUpdate();
     this.api.updateTopRightCellValues(cellData);
   }
 
   updateBottomLeftCellValues(cellData) {
+    this.performUpdate();
     this.api.updateBottomLeftCellValues(cellData);
   }
 
   updateFormulaBar(possibleName, col, row) {
+    this.performUpdate();
     this.api.updateFormulaBar(possibleName, col, row);
   }
 
   invalidCellAddress() {
+    this.performUpdate();
     this.api.invalidCellAddress();
   }
 
   showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) {
+    this.performUpdate();
     this.api.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
   }
 
   showActions(actionDetails) {
+    this.performUpdate();
     this.api.showActions(actionDetails);
   }
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
+    this.performUpdate();
+    // The sheet widget's initial relayout is deferred via GWT's scheduler,
+    // so `definedRowHeights` may not yet exist when this RPC arrives in the
+    // same task as the initial property batch (e.g. opening a Dialog that
+    // contains the Spreadsheet). Calling `setSelectedCellAndRange` before
+    // it's populated would throw inside `$scrollAreaIntoView`. Re-queue the
+    // call until the layout state is ready; only the latest pending call is
+    // kept so rapid successive calls collapse to the final selection.
+    if (!this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
+      this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
+      if (!this._pendingSelectionScheduled) {
+        this._pendingSelectionScheduled = true;
+        const applyPending = () => {
+          if (!this.isConnected || !this._pendingSelection) {
+            this._pendingSelectionScheduled = false;
+            this._pendingSelection = null;
+            return;
+          }
+          if (this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
+            const args = this._pendingSelection;
+            this._pendingSelection = null;
+            this._pendingSelectionScheduled = false;
+            this.api.setSelectedCellAndRange(...args);
+            return;
+          }
+          setTimeout(applyPending, 10);
+        };
+        setTimeout(applyPending, 10);
+      }
+      return;
+    }
+    this._pendingSelection = null;
     this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
   cellsUpdated(updatedCellData) {
-    if (this.api) this.api.cellsUpdated(updatedCellData);
+    this.performUpdate();
+    this.api.cellsUpdated(updatedCellData);
   }
 
   refreshCellStyles() {
-    if (this.api) this.api.refreshCellStyles();
+    this.performUpdate();
+    this.api.refreshCellStyles();
   }
 
   editCellComment(col, row) {
+    this.performUpdate();
     this.api.editCellComment(col, row);
   }
 
   onPopupButtonOpen(row, column, contentId, appId) {
+    this.performUpdate();
     this.api.onPopupButtonOpened(row, column, contentId, appId);
   }
 
   closePopup(row, column) {
+    this.performUpdate();
     this.api.closePopup(row, column);
   }
 
   addPopupButton(rawState) {
+    this.performUpdate();
     this.api.addPopupButton(rawState);
   }
 
   removePopupButton(rawState) {
+    this.performUpdate();
     this.api.removePopupButton(rawState);
   }
 

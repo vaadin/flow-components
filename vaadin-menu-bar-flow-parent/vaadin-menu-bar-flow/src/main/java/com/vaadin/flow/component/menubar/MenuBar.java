@@ -53,8 +53,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.2.0-alpha8")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-alpha8")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-beta1")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
@@ -200,9 +200,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(String text, String tooltipText) {
-        var item = addItem(text);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText);
     }
 
     /**
@@ -225,9 +223,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(Component component, String tooltipText) {
-        var item = addItem(component);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText);
     }
 
     /**
@@ -254,9 +250,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(text, clickListener);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(text, tooltipText, clickListener);
     }
 
     /**
@@ -283,9 +277,22 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
-        var item = addItem(component, clickListener);
-        setTooltipText(item, tooltipText);
-        return item;
+        return menuManager.addItem(component, tooltipText, clickListener);
+    }
+
+    /**
+     * Sets the tooltip text for the given {@link MenuItem}.
+     *
+     * @param item
+     *            the menu item to set the tooltip for
+     * @param tooltipText
+     *            the tooltip text to set for the item
+     * @deprecated Use {@link MenuItem#setTooltipText(String)} instead. This
+     *             method is scheduled for removal in Vaadin 26.
+     */
+    @Deprecated
+    public void setTooltipText(MenuItem item, String tooltipText) {
+        item.setTooltipText(tooltipText);
     }
 
     /**
@@ -490,35 +497,15 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     /**
-     * Sets the tooltip text for the given {@link MenuItem}.
-     *
-     * @param item
-     *            the menu item to set the tooltip for
-     * @param tooltipText
-     *            the tooltip text to set for the item
-     */
-    public void setTooltipText(MenuItem item, String tooltipText) {
-        if (!getElement().getChildren().anyMatch(
-                child -> "tooltip".equals(child.getAttribute("slot")))) {
-            // No <vaadin-tooltip> yet added, add one
-            Element tooltipElement = new Element("vaadin-tooltip");
-
-            tooltipElement.addAttachListener(e -> {
-                // Assigns a generator that reads the tooltip property of the
-                // item component
-                tooltipElement.executeJs(
-                        "this.generator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
-            });
-            SlotUtils.addToSlot(this, "tooltip", tooltipElement);
-        }
-
-        item.getElement().setProperty("tooltip", tooltipText);
-    }
-
-    /**
      * Closes the current submenu.
      */
     public void close() {
         getElement().callJsFunction("close");
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }

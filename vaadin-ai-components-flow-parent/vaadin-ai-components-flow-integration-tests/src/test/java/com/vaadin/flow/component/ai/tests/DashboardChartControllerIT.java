@@ -41,7 +41,7 @@ public class DashboardChartControllerIT extends AbstractComponentIT {
      * Verifies that axis categories are applied when a new Chart widget is
      * added to a Dashboard and populated via an async LLM provider. This
      * reproduces the real AI dashboard flow where the orchestrator's
-     * onRequestCompleted() runs via ui.access() from a background thread,
+     * onResponseComplete() runs via ui.access() from a background thread,
      * causing the widget addition and chart rendering to span separate Push
      * updates.
      * <p>

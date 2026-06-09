@@ -40,6 +40,9 @@ import tools.jackson.databind.JsonNode;
  * dashboard). Callers provide a {@link Callbacks} implementation for state
  * retrieval and mutation.
  * </p>
+ * <p>
+ * Intended only for internal use and can be removed in the future.
+ * </p>
  *
  * @author Vaadin Ltd
  */
@@ -233,7 +236,7 @@ public final class ChartAITools {
                 updateChartDataSource(callbacks), getPlotOptionsSchema());
     }
 
-    public static LLMProvider.ToolSpec getChartState(Callbacks callbacks) {
+    static LLMProvider.ToolSpec getChartState(Callbacks callbacks) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -279,8 +282,7 @@ public final class ChartAITools {
         };
     }
 
-    public static LLMProvider.ToolSpec updateChartConfiguration(
-            Callbacks callbacks) {
+    static LLMProvider.ToolSpec updateChartConfiguration(Callbacks callbacks) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -543,8 +545,7 @@ public final class ChartAITools {
         };
     }
 
-    public static LLMProvider.ToolSpec updateChartDataSource(
-            Callbacks callbacks) {
+    static LLMProvider.ToolSpec updateChartDataSource(Callbacks callbacks) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -698,7 +699,7 @@ public final class ChartAITools {
      * Tool that returns the JSON schema for a specific chart type's plot
      * options. Stateless — no callbacks needed.
      */
-    public static LLMProvider.ToolSpec getPlotOptionsSchema() {
+    static LLMProvider.ToolSpec getPlotOptionsSchema() {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {

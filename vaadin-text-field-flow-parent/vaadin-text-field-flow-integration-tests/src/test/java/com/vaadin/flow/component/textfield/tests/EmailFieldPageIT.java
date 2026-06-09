@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.EmailField;
@@ -100,8 +101,7 @@ public class EmailFieldPageIT extends AbstractComponentIT {
                 .id("clear-email-field");
 
         WebElement input = field.$("input").first();
-        input.sendKeys("foo");
-        blur();
+        input.sendKeys("foo", Keys.ENTER);
 
         field.clickClearButton();
 

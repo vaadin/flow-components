@@ -80,6 +80,7 @@ public class Utils {
      * @param version
      *            for inferring ranges for column-only references
      * @param formula
+     *            the formula
      * @return all cells in the referenced areas
      */
     public static List<CellReference> getAllReferencedCells(
@@ -98,7 +99,7 @@ public class Utils {
      * @param version
      *            to infer max # of rows for column-only formula references
      * @param formula
-     *            containing possibly non-contiguous area refrences
+     *            containing possibly non-contiguous area references
      * @return array of references
      */
     public static AreaReference[] getAreaReferences(SpreadsheetVersion version,

@@ -20,15 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.annotation.Tool;
@@ -103,8 +106,8 @@ public class SpringAILLMProvider implements LLMProvider {
         chatMemory = MessageWindowChatMemory.builder().maxMessages(MAX_MESSAGES)
                 .build();
         chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory)
-                        .conversationId(CONVERSATION_ID).build())
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
         hasManagedMemory = true;
     }
@@ -188,14 +191,79 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            return getPromptSpec(request).stream().content();
+            var chatResponses = getPromptSpec(request).stream().chatResponse();
+            return warnOnMissingFinishReason(chatResponses)
+                    .map(SpringAILLMProvider::getAssistantText)
+                    .filter(text -> !text.isEmpty());
         } catch (Exception e) {
             return Flux.error(e);
         }
     }
 
+    /**
+     * Passes the stream through unchanged, logging a warning on completion if
+     * no chunk in the stream ever represented a terminal model state.
+     * <p>
+     * A streaming chunk is terminal when it carries a {@code finish_reason} and
+     * the response has no pending tool calls. Pending tool calls mean a
+     * follow-up round-trip is expected, and its chunks would be concatenated to
+     * this same Flux, so a chunk with tool calls is intermediate even when it
+     * carries a {@code finish_reason}. The check is sticky - once any terminal
+     * chunk is observed the gate stays open - so that trailing metadata-only
+     * chunks emitted by some providers after the terminal chunk cannot flip it
+     * back. A stream that completes without ever seeing a terminal chunk -
+     * whether because no chunk carried a {@code finish_reason} at all, or
+     * because the only terminal-looking chunks still had tool calls pending -
+     * may indicate abnormal termination.
+     */
+    private static Flux<ChatResponse> warnOnMissingFinishReason(
+            Flux<ChatResponse> source) {
+        var terminalSeen = new AtomicBoolean(false);
+        return source.doOnNext(response -> {
+            if (isTerminalChunk(response)) {
+                terminalSeen.set(true);
+            }
+        }).concatWith(Flux.defer(() -> {
+            if (!terminalSeen.get()) {
+                LOGGER.warn("LLM stream ended without observing a terminal "
+                        + "chunk (one carrying finish_reason and "
+                        + "no pending tool calls). This may "
+                        + "indicate a silent abnormal termination "
+                        + "such as an upstream error or transport "
+                        + "closure; if responses appear truncated "
+                        + "this warning is the signal.");
+            }
+            return Flux.empty();
+        }));
+    }
+
+    private static boolean isTerminalChunk(ChatResponse response) {
+        var result = response.getResult();
+        if (result == null) {
+            return false;
+        }
+        var reason = result.getMetadata().getFinishReason();
+        if (reason == null || reason.isEmpty()) {
+            return false;
+        }
+        return !response.hasToolCalls();
+    }
+
+    private static String getAssistantText(ChatResponse response) {
+        var result = response.getResult();
+        if (result == null) {
+            return "";
+        }
+        var text = result.getOutput().getText();
+        return text != null ? text : "";
+    }
+
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
+        if (hasManagedMemory) {
+            promptSpec = promptSpec.advisors(
+                    a -> a.param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
+        }
         promptSpec = promptSpec.user(userSpec -> {
             userSpec.text(request.userMessage());
             var media = buildMedia(request);
