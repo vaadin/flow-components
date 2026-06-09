@@ -14,38 +14,17 @@ import com.vaadin.testbench.TestBenchElement;
 
 /**
  * A TestBench element representing a
- * <code>&lt;vaadin-pro-grid-edit-column&gt;</code> element. This is not a
- * TestBenchElement as polyfilled browsers are not capable of finding it or
- * handling it as a web element.
+ * <code>&lt;vaadin-pro-grid-edit-column&gt;</code> element.
  */
-public class GridProColumnElement {
-
-    private GridProElement grid;
-    private Long __generatedId;
-
-    public GridProColumnElement(Long __generatedId, GridProElement grid) {
-        this.grid = grid;
-        this.__generatedId = __generatedId;
-    }
-
-    /**
-     * For internal use only.
-     *
-     * @return the generated id for the column
-     */
-    protected Long get__generatedId() {
-        return __generatedId;
-    }
-
+public class GridProColumnElement extends TestBenchElement {
     /**
      * Gets the options List for this column.
      *
      * @return the options list
      */
+    @SuppressWarnings("unchecked")
     public ArrayList<String> getOptionsList() {
-        ArrayList<String> editorOptions = (ArrayList<String>) execJs(
-                "return column.editorOptions");
-        return editorOptions;
+        return (ArrayList<String>) getProperty("editorOptions");
     }
 
     /**
@@ -56,26 +35,6 @@ public class GridProColumnElement {
      * @return the header cell for the column
      */
     public GridTHTDElement getHeaderCell() {
-        return ((TestBenchElement) execJs("return column._headerCell"))
-                .wrap(GridTHTDElement.class);
+        return getPropertyElement("_headerCell").wrap(GridTHTDElement.class);
     }
-
-    private Object execJs(String js) {
-        return grid.getCommandExecutor()
-                .executeScript("var grid = arguments[0];" //
-                        + "var generatedId = arguments[1];"
-                        + "var column = grid._getColumns().filter(function(column) {return column.__generatedTbId == generatedId;})[0];"
-                        + js, grid, __generatedId);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof GridProColumnElement)) {
-            return false;
-        }
-
-        return get__generatedId()
-                .equals(((GridProColumnElement) obj).get__generatedId());
-    }
-
 }
