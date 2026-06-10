@@ -88,7 +88,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.2.0-beta2")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -170,7 +170,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getElement().addPropertyChangeListener("opened", event -> {
             var isOpened = (boolean) event.getValue();
             if (isOpened && focusSelectedItem) {
-                scrollToSelectedItem();
+                focusOnSelectedItem();
             }
         });
     }
@@ -412,7 +412,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return focusSelectedItem;
     }
 
-    private void scrollToSelectedItem() {
+    private void focusOnSelectedItem() {
         if (getValue() == null) {
             return;
         }
@@ -434,7 +434,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (index == null || index < 0) {
             return;
         }
-        getElement().callJsFunction("scrollToIndex", index);
+        getElement().callJsFunction("__focusIndex", index);
     }
 
     /**

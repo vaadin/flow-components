@@ -2265,7 +2265,14 @@ public class SheetWidget extends Panel {
     }
 
     private String getColumnDisplayString(int columnIndex) {
-        return actionHandler.isColumnHidden(columnIndex) ? "display:none;" : "";
+        // !important is required: a hidden cell also matches its row rule
+        // (display:flex) of equal specificity, which for frozen panes is
+        // emitted last (see resetRowAndColumnStyles) and would otherwise win,
+        // leaving the last column's content leaking past the grid edge. See
+        // #9294.
+        return actionHandler.isColumnHidden(columnIndex)
+                ? "display:none !important;"
+                : "";
     }
 
     private void resetRowAndColumnStyles() {

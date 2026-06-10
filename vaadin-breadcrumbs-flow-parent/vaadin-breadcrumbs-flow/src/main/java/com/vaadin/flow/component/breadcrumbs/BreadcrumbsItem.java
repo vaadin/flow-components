@@ -40,7 +40,7 @@ import com.vaadin.flow.router.RouteParameters;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-breadcrumbs-item")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta2")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
 public class BreadcrumbsItem extends Component
         implements HasText, HasEnabled, HasPrefix {

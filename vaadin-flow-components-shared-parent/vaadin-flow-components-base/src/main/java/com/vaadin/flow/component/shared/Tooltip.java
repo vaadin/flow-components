@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0-beta2")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -85,6 +85,51 @@ public class Tooltip implements Serializable {
             return Arrays.stream(TooltipPosition.values())
                     .filter(p -> p.getPosition().equals(position)).findFirst()
                     .orElse(BOTTOM);
+        }
+    }
+
+    /**
+     * Controls which ARIA attribute links the target element(s) with the
+     * tooltip content.
+     */
+    public enum AriaLinkMode {
+        /**
+         * Links the tooltip as a description of the target using
+         * {@code aria-describedby}. This is the default.
+         */
+        ARIA_DESCRIBED_BY("aria-describedby"),
+        /**
+         * Links the tooltip as the accessible name of the target using
+         * {@code aria-labelledby}.
+         */
+        ARIA_LABELLED_BY("aria-labelledby"),
+        /**
+         * Does not add any ARIA linking attribute to the target.
+         */
+        NONE("none");
+
+        private final String value;
+
+        AriaLinkMode(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the {@link AriaLinkMode} for the given value string. Returns
+         * {@link AriaLinkMode#ARIA_DESCRIBED_BY} if no match is found.
+         *
+         * @param value
+         *            the value string
+         * @return the {@link AriaLinkMode}
+         */
+        public static AriaLinkMode fromValue(String value) {
+            return Arrays.stream(AriaLinkMode.values())
+                    .filter(m -> m.getValue().equals(value)).findFirst()
+                    .orElse(ARIA_DESCRIBED_BY);
         }
     }
 
@@ -405,5 +450,45 @@ public class Tooltip implements Serializable {
      */
     public boolean isOpened() {
         return tooltipElement.getProperty("opened", false);
+    }
+
+    /**
+     * Controls which ARIA attribute links the target element(s) with the
+     * tooltip content.
+     *
+     * @param ariaLinkMode
+     *            the ARIA link mode to set, or {@code null} to reset to the
+     *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
+     */
+    public void setAriaLinkMode(AriaLinkMode ariaLinkMode) {
+        if (ariaLinkMode == null) {
+            ariaLinkMode = AriaLinkMode.ARIA_DESCRIBED_BY;
+        }
+        tooltipElement.setProperty("ariaLinkMode", ariaLinkMode.getValue());
+    }
+
+    /**
+     * Controls which ARIA attribute links the target element(s) with the
+     * tooltip content. Defaults to {@link AriaLinkMode#ARIA_DESCRIBED_BY}.
+     *
+     * @return the ARIA link mode
+     */
+    public AriaLinkMode getAriaLinkMode() {
+        return AriaLinkMode
+                .fromValue(tooltipElement.getProperty("ariaLinkMode"));
+    }
+
+    /**
+     * Controls which ARIA attribute links the target element(s) with the
+     * tooltip content.
+     *
+     * @param ariaLinkMode
+     *            the ARIA link mode to set, or {@code null} to reset to the
+     *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
+     * @return the tooltip handle for chaining
+     */
+    public Tooltip withAriaLinkMode(AriaLinkMode ariaLinkMode) {
+        setAriaLinkMode(ariaLinkMode);
+        return this;
     }
 }

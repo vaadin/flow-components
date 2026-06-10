@@ -13,21 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.theme.aura;
+package com.vaadin.flow.component.breadcrumbs;
 
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Aura theme base class.
+ * Set of theme variants applicable for {@code vaadin-breadcrumbs} component.
  */
-@NpmPackage(value = "@vaadin/aura", version = "25.2.0-beta2")
-public class Aura {
+public enum BreadcrumbsVariant implements ThemeVariant {
+    SLASH("slash");
+
+    private final String variant;
+
+    BreadcrumbsVariant(String variant) {
+        this.variant = variant;
+    }
+
     /**
-     * The path to the Aura stylesheet. Can be used as argument to a
-     * {@link StyleSheet} on an {@link AppShellConfigurator} class to apply the
-     * Aura theme to an application.
+     * Gets the variant name.
+     *
+     * @return variant name
      */
-    public static final String STYLESHEET = "aura/aura.css";
+    @Override
+    public String getVariantName() {
+        return variant;
+    }
 }
