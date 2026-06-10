@@ -275,7 +275,7 @@ class ComboBoxTest extends ComboBoxBaseTest {
         var invocations = ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
-                        .contains("scrollToIndex"))
+                        .contains("__focusIndex"))
                 .toList();
         Assertions.assertEquals(1, invocations.size());
         // Parameter 0 is the target element, parameter 1 is the item index

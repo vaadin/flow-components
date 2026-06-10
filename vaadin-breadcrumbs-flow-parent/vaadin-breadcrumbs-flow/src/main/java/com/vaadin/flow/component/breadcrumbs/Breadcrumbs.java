@@ -43,7 +43,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-breadcrumbs")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta2")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs.js")
 public class Breadcrumbs extends Component implements HasSize, HasStyle,
         HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
