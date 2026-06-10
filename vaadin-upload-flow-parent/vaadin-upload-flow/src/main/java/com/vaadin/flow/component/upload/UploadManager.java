@@ -24,8 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -526,12 +524,6 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * The feature flag ID for modular upload components (UploadManager and
-     * related components).
-     */
-    public static final String FEATURE_FLAG_ID = ModularUploadFeatureFlagProvider.FEATURE_FLAG_ID;
-
-    /**
      * Internal connector component that loads the JS module and handles
      * client-server communication. Added as a virtual child of the owner
      * component so it doesn't appear in the DOM.
@@ -540,25 +532,6 @@ public class UploadManager implements Serializable {
     @JsModule("./vaadin-upload-manager-connector.ts")
     @NpmPackage(value = "@vaadin/upload", version = "25.2.0-beta2")
     static class Connector extends Component {
-        @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            super.onAttach(attachEvent);
-            checkFeatureFlag(attachEvent.getUI());
-        }
-
-        private void checkFeatureFlag(com.vaadin.flow.component.UI ui) {
-            FeatureFlags featureFlags = FeatureFlags
-                    .get(ui.getSession().getService().getContext());
-
-            // Check if either the specific modularUpload flag or the umbrella
-            // aiComponents flag is enabled
-            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
-                    || featureFlags.isEnabled("aiComponents");
-
-            if (!enabled) {
-                throw new ModularUploadExperimentalFeatureException();
-            }
-        }
     }
 
     /**
