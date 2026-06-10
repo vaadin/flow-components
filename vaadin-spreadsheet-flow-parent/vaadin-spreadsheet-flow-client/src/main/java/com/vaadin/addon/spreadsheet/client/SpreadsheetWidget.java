@@ -2051,10 +2051,30 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 initialSelection);
     }
 
+    /**
+     * Selects the given cell range, optionally scrolling it into view.
+     * <p>
+     * The call may be deferred until the sheet layout is ready. Sheet layout
+     * state is populated by a {@code scheduleDeferred} command in
+     * {@link SheetWidget#resetFromModel}, so this method can be called before
+     * {@link SheetWidget#isLoaded()} flips {@code true} — for instance when
+     * property writes and RPCs are flushed within the same task. In that
+     * window, {@code scrollAreaIntoView} would dereference an uninitialized
+     * {@code definedRowHeights}, so when the widget has not loaded yet the call
+     * is deferred via the same scheduler to run after the layout init command.
+     * Only this RPC touches row/column metrics, so only it needs deferring.
+     */
     public void selectCellRange(String name, int selectedCellColumn,
             int selectedCellRow, int firstColumn, int lastColumn, int firstRow,
             int lastRow, boolean scroll) {
-
+        if (!sheetWidget.isLoaded()) {
+            Scheduler.get()
+                    .scheduleDeferred(() -> selectionHandler.selectCellRange(
+                            name, selectedCellColumn, selectedCellRow,
+                            firstColumn, lastColumn, firstRow, lastRow,
+                            scroll));
+            return;
+        }
         selectionHandler.selectCellRange(name, selectedCellColumn,
                 selectedCellRow, firstColumn, lastColumn, firstRow, lastRow,
                 scroll);
