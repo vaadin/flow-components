@@ -36,4 +36,12 @@ class ViewTest {
 
         Assertions.assertEquals("EPSG:4326", view.getProjection());
     }
+
+    @Test
+    void zoomLimitDefaults() {
+        View view = new View();
+
+        Assertions.assertEquals(0, view.getMinZoom());
+        Assertions.assertEquals(28, view.getMaxZoom());
+    }
 }

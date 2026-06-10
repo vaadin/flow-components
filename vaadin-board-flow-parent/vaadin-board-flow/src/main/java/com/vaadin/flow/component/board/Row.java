@@ -50,7 +50,7 @@ public class Row extends Component
     }
 
     /**
-     * Creates an new row with the given components.
+     * Creates a new row with the given components.
      *
      * @param components
      *            initial content of the row

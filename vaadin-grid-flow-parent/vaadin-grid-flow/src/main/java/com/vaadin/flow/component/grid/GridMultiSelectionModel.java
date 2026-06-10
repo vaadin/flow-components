@@ -121,7 +121,7 @@ public interface GridMultiSelectionModel<T>
      * visible.
      *
      * @param selectAllCheckBoxVisibility
-     *            the visiblity mode to use
+     *            the visibility mode to use
      * @see SelectAllCheckboxVisibility
      */
     void setSelectAllCheckboxVisibility(
@@ -164,7 +164,7 @@ public interface GridMultiSelectionModel<T>
     void setSelectionColumnFrozen(boolean frozen);
 
     /**
-     * Gets the the selection column's frozen state.
+     * Gets the selection column's frozen state.
      *
      * @return whether the selection column is frozen
      */

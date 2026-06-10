@@ -511,8 +511,8 @@ public class MultiSelectComboBox<TItem>
      * Expansion only works with undefined size in the desired direction (i.e.
      * setting `max-width` limits the component's width).
      *
-     * @param {AutoExpandMode}
-     *            autoExpandMode
+     * @param autoExpandMode
+     *            the auto-expand mode
      * @since 24.3
      */
     public void setAutoExpand(AutoExpandMode autoExpandMode) {

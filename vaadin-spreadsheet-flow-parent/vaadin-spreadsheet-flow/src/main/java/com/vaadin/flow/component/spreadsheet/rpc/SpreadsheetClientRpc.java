@@ -40,6 +40,7 @@ public interface SpreadsheetClientRpc {
      * The String arrays contain the caption and the icon resource key.
      *
      * @param actionDetails
+     *            the action details
      */
     void showActions(ArrayList<SpreadsheetActionDetails> actionDetails);
 

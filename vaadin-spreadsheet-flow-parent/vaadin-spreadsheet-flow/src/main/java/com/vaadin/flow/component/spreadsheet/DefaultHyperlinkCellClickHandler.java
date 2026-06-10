@@ -42,6 +42,7 @@ public class DefaultHyperlinkCellClickHandler
 
     /**
      * @param spreadsheet
+     *            the spreadsheet
      */
     public DefaultHyperlinkCellClickHandler(Spreadsheet spreadsheet) {
         this(spreadsheet, HyperlinkOpenStyle.NewTab);
@@ -49,6 +50,7 @@ public class DefaultHyperlinkCellClickHandler
 
     /**
      * @param spreadsheet
+     *            the spreadsheet
      * @param openStyle
      *            defaults to {@link HyperlinkOpenStyle#NewTab} if null
      */
@@ -88,6 +90,7 @@ public class DefaultHyperlinkCellClickHandler
      * Called when a hyperlink cell has been clicked.
      *
      * @param cell
+     *            the cell
      * @param hyperlink
      *            may be null, only for Excel link relations, not formula
      */
@@ -283,6 +286,7 @@ public class DefaultHyperlinkCellClickHandler
          * open external link
          *
          * @param address
+         *            the address
          */
         public abstract void openExternalLink(String address);
     }

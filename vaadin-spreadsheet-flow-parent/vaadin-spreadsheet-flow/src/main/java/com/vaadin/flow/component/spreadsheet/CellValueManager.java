@@ -446,6 +446,7 @@ public class CellValueManager implements Serializable {
      * Calculate cell width, accounting for merged cells (see #655)
      *
      * @param cell
+     *            the cell
      * @return cell width, including widths of any merged columns
      */
     protected int getCellWidth(Cell cell) {
@@ -913,7 +914,9 @@ public class CellValueManager implements Serializable {
      * Checks whether the given cell belongs to any given range.
      *
      * @param cell
+     *            the cell
      * @param cellRangeAddresses
+     *            the cell range addresses
      * @return {@code true} if in range, {@code false} otherwise
      */
     private boolean selectedIsInRange(CellReference cell,
@@ -932,6 +935,7 @@ public class CellValueManager implements Serializable {
      * everything.
      *
      * @param selectedCellReference
+     *            the selected cell reference
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */
@@ -963,6 +967,7 @@ public class CellValueManager implements Serializable {
      * care of everything.
      *
      * @param individualSelectedCells
+     *            the individually selected cells
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */
@@ -985,6 +990,7 @@ public class CellValueManager implements Serializable {
      * cell range or whether a custom deletion handler takes care of everything.
      *
      * @param cellRangeAddresses
+     *            the cell range addresses
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */

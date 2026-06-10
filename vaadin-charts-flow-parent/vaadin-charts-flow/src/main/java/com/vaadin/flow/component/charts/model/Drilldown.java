@@ -97,7 +97,7 @@ public class Drilldown extends AbstractConfigurationObject {
     }
 
     /**
-     * @return true if animation is enabled false otherwse.
+     * @return true if animation is enabled, false otherwise.
      */
     public Boolean getAnimation() {
         return animation;

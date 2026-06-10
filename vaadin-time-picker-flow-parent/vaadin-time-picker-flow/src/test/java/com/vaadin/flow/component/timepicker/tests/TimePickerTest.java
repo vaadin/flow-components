@@ -323,7 +323,7 @@ class TimePickerTest {
         Assertions.assertEquals("aria-labelledby",
                 timePicker.getAriaLabelledBy().get());
 
-        timePicker.setAriaLabelledBy(null);
+        timePicker.setAriaLabelledBy((String) null);
         Assertions.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
     }
 
