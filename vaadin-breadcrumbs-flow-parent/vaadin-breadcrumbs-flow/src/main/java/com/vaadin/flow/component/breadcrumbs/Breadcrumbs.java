@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.breadcrumbs;
 
+import java.io.Serializable;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -27,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Breadcrumbs is a component for displaying a navigation trail that shows the
@@ -44,6 +49,8 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
         HasThemeVariant<BreadcrumbsVariant> {
 
+    private BreadcrumbsI18n i18n;
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -56,6 +63,62 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         if (!featureFlags.isEnabled(
                 BreadcrumbsFeatureFlagProvider.BREADCRUMBS_COMPONENT)) {
             throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(BreadcrumbsI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public BreadcrumbsI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(BreadcrumbsI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * The internationalization properties for {@link Breadcrumbs}.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class BreadcrumbsI18n implements Serializable {
+        private String moreItems;
+
+        /**
+         * Gets the accessible label announced by screen readers for the
+         * overflow button that reveals the hidden breadcrumb items.
+         *
+         * @return the translated label for the overflow button
+         */
+        public String getMoreItems() {
+            return moreItems;
+        }
+
+        /**
+         * Sets the accessible label announced by screen readers for the
+         * overflow button that reveals the hidden breadcrumb items.
+         *
+         * @param moreItems
+         *            the translated label for the overflow button
+         * @return this instance for method chaining
+         */
+        public BreadcrumbsI18n setMoreItems(String moreItems) {
+            this.moreItems = moreItems;
+            return this;
         }
     }
 }
