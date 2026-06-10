@@ -210,11 +210,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  grid._updateScrollerItem = function (row, index) {
-    Object.getPrototypeOf(this)._updateScrollerItem.call(this, row, index);
+  grid.__updateVirtualizerElement = function (...args) {
+    Object.getPrototypeOf(this).__updateVirtualizerElement.call(this, ...args);
 
-    const isScrolling = grid.style.overscrollBehavior === 'auto';
-    if (isScrolling) {
+    if (grid.$.scroller.hasAttribute('scrolling')) {
       const fetchRange = grid.$connector.getFetchRange();
       dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
       dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
