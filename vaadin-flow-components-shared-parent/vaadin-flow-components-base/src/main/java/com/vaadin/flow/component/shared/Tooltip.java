@@ -457,9 +457,13 @@ public class Tooltip implements Serializable {
      * tooltip content.
      *
      * @param ariaLinkMode
-     *            the ARIA link mode to set, not {@code null}
+     *            the ARIA link mode to set, or {@code null} to reset to the
+     *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
      */
     public void setAriaLinkMode(AriaLinkMode ariaLinkMode) {
+        if (ariaLinkMode == null) {
+            ariaLinkMode = AriaLinkMode.ARIA_DESCRIBED_BY;
+        }
         tooltipElement.setProperty("ariaLinkMode", ariaLinkMode.getValue());
     }
 
@@ -479,7 +483,9 @@ public class Tooltip implements Serializable {
      * tooltip content.
      *
      * @param ariaLinkMode
-     *            the ARIA link mode to set, not {@code null}
+     *            the ARIA link mode to set, or {@code null} to reset to the
+     *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
+     * @return the tooltip handle for chaining
      */
     public Tooltip withAriaLinkMode(AriaLinkMode ariaLinkMode) {
         setAriaLinkMode(ariaLinkMode);

@@ -210,6 +210,18 @@ class TooltipTest {
     }
 
     @Test
+    void createTooltip_setAriaLinkModeNull_resetsToDefault() {
+        var tooltip = Tooltip.forComponent(component);
+        tooltip.setAriaLinkMode(AriaLinkMode.ARIA_LABELLED_BY);
+        tooltip.setAriaLinkMode(null);
+        ui.add(component);
+        Assertions.assertEquals("aria-describedby",
+                getTooltipElement().get().getProperty("ariaLinkMode"));
+        Assertions.assertEquals(AriaLinkMode.ARIA_DESCRIBED_BY,
+                tooltip.getAriaLinkMode());
+    }
+
+    @Test
     void tooltipForCompopnentTwice_sameReference() {
         var tooltip = Tooltip.forComponent(component);
         var tooltip2 = Tooltip.forComponent(component);
