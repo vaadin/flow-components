@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 /**
  * Breadcrumbs is a component for displaying a navigation trail that shows the
@@ -40,7 +41,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-rc2")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs.js")
 public class Breadcrumbs extends Component implements HasSize, HasStyle,
-        HasAriaLabel, HasComponentsOfType<BreadcrumbsItem> {
+        HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
+        HasThemeVariant<BreadcrumbsVariant> {
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
