@@ -498,9 +498,9 @@ jobs:
           if-no-files-found: ignore
 
   results:
-    name: Collect tests
+    name: Validation result
     needs: [build, fast-tests, its]
-    if: always() && needs.build.result == 'success'
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -668,10 +668,16 @@ jobs:
               gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
             done
 
-      - name: Fail if any test failed
+      - name: Fail if any job or test failed
         if: always()
         run: |
           failed=false
+          # Job-level failures (build/setup/compile/packaging/infra).
+          # Skipped is OK: skip-ci skips fast-tests/its, empty builds skip its.
+          for r in "${{ needs.build.result }}" "${{ needs.fast-tests.result }}" "${{ needs.its.result }}"; do
+            [[ "$r" == "failure" || "$r" == "cancelled" ]] && failed=true
+          done
+          # Actual test failures captured in the published reports.
           [[ "${{ steps.unit-dorny.outputs.conclusion }}" == "failure" ]] && failed=true
           [[ "${{ steps.wtr-dorny.outputs.conclusion }}"  == "failure" ]] && failed=true
           [[ "${{ steps.it-dorny.outputs.conclusion }}"   == "failure" ]] && failed=true
