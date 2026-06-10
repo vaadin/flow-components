@@ -87,6 +87,11 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the label for the item
      * @param path
      *            the path to link to
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public SideNavItem(String label, String path) {
         setPath(path);
@@ -154,6 +159,11 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the path to link to
      * @param prefixComponent
      *            the prefix component for the item (usually an icon)
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public SideNavItem(String label, String path, Component prefixComponent) {
         setPath(path);

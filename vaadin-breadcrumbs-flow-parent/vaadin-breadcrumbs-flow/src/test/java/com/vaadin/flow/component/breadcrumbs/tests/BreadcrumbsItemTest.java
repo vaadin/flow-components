@@ -110,6 +110,19 @@ class BreadcrumbsItemTest {
     }
 
     @Test
+    void constructor_textPath_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)"));
+    }
+
+    @Test
+    void constructor_textPathPrefixComponent_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)",
+                        new Div()));
+    }
+
+    @Test
     void setNullStringPath_pathAttributeRemoved() {
         var item = new BreadcrumbsItem("Docs", "/docs");
         item.setPath((String) null);

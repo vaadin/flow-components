@@ -66,6 +66,11 @@ public class BreadcrumbsItem extends Component
      *            the text of the item
      * @param path
      *            the path to link to
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public BreadcrumbsItem(String text, String path) {
         setPath(path);
@@ -113,6 +118,11 @@ public class BreadcrumbsItem extends Component
      *            the path to link to
      * @param prefixComponent
      *            the prefix component for the item (usually an icon)
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public BreadcrumbsItem(String text, String path,
             Component prefixComponent) {

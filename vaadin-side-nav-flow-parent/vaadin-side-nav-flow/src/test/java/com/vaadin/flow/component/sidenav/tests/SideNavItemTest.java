@@ -152,6 +152,19 @@ class SideNavItemTest {
     }
 
     @Test
+    void constructor_labelPath_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new SideNavItem("Docs", "javascript:alert(1)"));
+    }
+
+    @Test
+    void constructor_labelPathPrefixComponent_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new SideNavItem("Docs", "javascript:alert(1)",
+                        new Div()));
+    }
+
+    @Test
     void setPathWithoutAliasesAsComponent_onlyPathUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRoute.class);
