@@ -426,7 +426,6 @@
                     <configuration>
                         <forkCount>${failsafe.forkCount}</forkCount>
                         <argLine>-Xmx2048m</argLine>
-                        <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
