@@ -186,4 +186,19 @@ class LoginFormTest {
         Assertions.assertFalse(form.isError(),
                 "Expected error status being reset by default listener");
     }
+
+    @Test
+    void setActionWithUnsafeScheme_throws() {
+        final LoginForm form = new LoginForm();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> form.setAction("javascript:alert(1)"));
+    }
+
+    @Test
+    void setUnsafeActionWithUnsafeScheme_actionSet() {
+        final LoginForm form = new LoginForm();
+        form.setUnsafeAction("javascript:alert(1)");
+
+        Assertions.assertEquals("javascript:alert(1)", form.getAction());
+    }
 }
