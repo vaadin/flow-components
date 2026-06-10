@@ -134,7 +134,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
@@ -155,7 +155,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
@@ -189,7 +189,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onResponseComplete_renderFails_propagates() {
+        void onResponse_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -201,7 +201,7 @@ class ChartAIControllerTest {
                     "Render failure");
 
             var ex = Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponseComplete());
+                    () -> controller.onResponse(null));
             Assertions.assertEquals("Render failure", ex.getMessage());
         }
 
@@ -225,7 +225,7 @@ class ChartAIControllerTest {
                             + ChartSerialization.toJSON(configuration) + "}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             // Verify plot options were applied to the chart
             var applied = (PlotOptionsColumn) chart.getConfiguration()
@@ -248,7 +248,7 @@ class ChartAIControllerTest {
 
             // Queries are committed only after onResponseComplete; before
             // that, get_chart_state returns the previously-committed view.
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
@@ -282,7 +282,7 @@ class ChartAIControllerTest {
                     .findFirst().get()
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(1, series.size());
@@ -312,7 +312,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             ChartState state = controller.getState();
             Assertions.assertNotNull(state);
@@ -335,7 +335,7 @@ class ChartAIControllerTest {
 
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponseComplete());
+                    () -> controller.onResponse(null));
 
             // Render threw before setQueries could commit, so the chart
             // stays in its previous (uninitialized) state.
@@ -352,7 +352,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}, \"title\": {\"text\": \"Original\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             ChartState savedState = controller.getState();
 
@@ -499,7 +499,7 @@ class ChartAIControllerTest {
     class StateChangeListeners {
 
         @Test
-        void firesAfterOnResponseComplete() {
+        void firesAfterOnResponseSuccess() {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
@@ -511,7 +511,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertNotNull(captured.get());
             Assertions.assertEquals(List.of("SELECT 1"),
@@ -539,7 +539,7 @@ class ChartAIControllerTest {
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponseComplete());
+                    () -> controller.onResponse(null));
 
             Assertions.assertNull(captured.get());
         }
@@ -558,7 +558,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertNull(captured.get());
         }
@@ -573,12 +573,12 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             List<ChartState> states = new ArrayList<>();
             controller.addStateChangeListener(states::add);
 
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertTrue(states.isEmpty(),
                     "Second onResponseComplete should not fire listeners "
@@ -602,7 +602,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertNotNull(secondListenerState.get(),
                     "Second listener should still fire even if the "
@@ -617,14 +617,14 @@ class ChartAIControllerTest {
             var tools = controller.getTools();
             findTool(tools, "update_chart_configuration").execute(json(
                     "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertNull(captured.get());
         }
     }
 
     @Nested
-    class OnResponseFailed {
+    class OnResponseFailure {
 
         @Test
         void failedFirstTurnDoesNotEstablishState() {
@@ -636,11 +636,11 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseFailed(new RuntimeException("stream error"));
+            controller.onResponse(new RuntimeException("stream error"));
 
             // Subsequent successful turn with no tool calls must not pick
             // up the failed turn's staged configuration or queries.
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertNull(controller.getState());
         }
@@ -654,39 +654,39 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             var baselineType = chart.getConfiguration().getChart().getType();
 
             findTool(tools, "update_chart_configuration").execute(json(
                     "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            controller.onResponseFailed(new RuntimeException("stream error"));
+            controller.onResponse(new RuntimeException("stream error"));
 
             // Subsequent successful turn with no tool calls — the failed
             // turn's pending chart type must not be applied.
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             Assertions.assertEquals(baselineType,
                     chart.getConfiguration().getChart().getType());
         }
 
         @Test
-        void failedTurnDoesNotLeakPendingQueriesIntoNextOnResponseComplete() {
+        void failedTurnDoesNotLeakPendingQueriesIntoNextOnResponse() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
             var tools = controller.getTools();
 
             findTool(tools, "update_chart_data_source").execute(
                     json("{\"queries\": [\"SELECT good FROM baseline\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             findTool(tools, "update_chart_data_source").execute(
                     json("{\"queries\": [\"SELECT bad FROM half_baked\"]}"));
-            controller.onResponseFailed(new RuntimeException("stream error"));
+            controller.onResponse(new RuntimeException("stream error"));
 
             // Subsequent successful turn with no tool calls — the failed
             // turn's staged queries must not bleed through.
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             var state = controller.getState();
             Assertions.assertNotNull(state);
@@ -704,7 +704,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onResponseComplete_appliesStateAndFiresListenerImmediately() {
+        void onResponse_appliesStateAndFiresListenerImmediately() {
             AtomicReference<ChartState> captured = new AtomicReference<>();
             controller.addStateChangeListener(captured::set);
 
@@ -716,7 +716,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponseComplete();
+            controller.onResponse(null);
 
             // Attachment does not gate the controller: configuration
             // lives on the server side and Flow queues any JS calls
@@ -728,7 +728,7 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void onResponseComplete_renderFails_propagates() {
+        void onResponse_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
 
@@ -741,7 +741,7 @@ class ChartAIControllerTest {
             // Errors propagate regardless of attach state so the
             // orchestrator can still surface them in the chat UI.
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponseComplete());
+                    () -> controller.onResponse(null));
         }
 
         @Test

@@ -29,6 +29,7 @@ public class URLReference implements Serializable {
      * Sets the URL that this object refers to.
      *
      * @param url
+     *            the URL
      */
     public void setURL(String url) {
         this.url = url;

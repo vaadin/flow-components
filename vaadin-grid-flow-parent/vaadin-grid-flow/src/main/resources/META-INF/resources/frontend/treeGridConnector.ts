@@ -34,11 +34,6 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
 
   window.Vaadin.Flow.gridConnector.initLazy(grid);
 
-  function getViewportRange() {
-    const renderedRows = grid._getRenderedRows();
-    return [renderedRows[0]?.index ?? 0, renderedRows[renderedRows.length - 1]?.index ?? 0];
-  }
-
   grid._dataProviderController._shouldLoadCachePage = function (cache, page) {
     // `$server.setViewportRangeByIndexPath` sends a preloaded viewport range based on
     // the provided index path and `padding` parameter. Applying the new range clears
@@ -56,7 +51,7 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
       return;
     }
 
-    const [start, end] = grid.$connector.getViewportRange();
+    const [start, end] = grid.$connector.getRenderedRange();
     const padding = Math.floor((end - start) * 1.5);
     const flatIndex = await grid.$server.setViewportRangeByIndexPath(indexes, padding);
     grid._scrollToFlatIndex(flatIndex);

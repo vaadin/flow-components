@@ -33,6 +33,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -52,6 +53,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.MockUIExtension;
 
+import io.micrometer.observation.ObservationRegistry;
 import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
@@ -68,7 +70,7 @@ class SpringAILLMProviderTest {
     @BeforeEach
     void setup() {
         mockChatModel = Mockito.mock(ChatModel.class);
-        Mockito.when(mockChatModel.getDefaultOptions())
+        Mockito.when(mockChatModel.getOptions())
                 .thenReturn(ToolCallingChatOptions.builder().build());
         provider = new SpringAILLMProvider(mockChatModel);
         logger.clearAll();
@@ -401,9 +403,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
@@ -417,9 +419,9 @@ class SpringAILLMProviderTest {
         provider.stream(request).blockFirst();
 
         var chatOptions = capturePrompt().getOptions();
-        var noToolCallbacks = chatOptions == null
-                || ((ToolCallingChatOptions) chatOptions).getToolCallbacks()
-                        .isEmpty();
+        var toolCallbacks = chatOptions == null ? null
+                : ((ToolCallingChatOptions) chatOptions).getToolCallbacks();
+        var noToolCallbacks = toolCallbacks == null || toolCallbacks.isEmpty();
         Assertions.assertTrue(noToolCallbacks);
     }
 
@@ -828,11 +830,18 @@ class SpringAILLMProviderTest {
     @Test
     void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
         // Zero-chunk stream: nothing ever flips the terminal gate.
+        // Uses the ChatClient constructor so no MessageChatMemoryAdvisor
+        // sits on the chain. The advisor's stream aggregation requires
+        // at least one emitted chunk to propagate the conversation id,
+        // which would fail an empty-flux test before the warn-on-no-
+        // terminal logic could run.
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.empty());
 
-        provider.stream(request).collectList().block();
+        chatClientProvider.stream(request).collectList().block();
 
         assertAbnormalTerminationWarningLogged();
     }
@@ -866,38 +875,53 @@ class SpringAILLMProviderTest {
     void stream_streamingEndsWithPendingToolCalls_logsWarning() {
         // A tool-call chunk is intermediate, not terminal, so a stream
         // that ends right after one has never seen a real terminal chunk.
+        // The default ChatClient executes tool calls itself and never
+        // passes tool-call chunks downstream, so this scenario only
+        // occurs with a custom ChatClient whose internal tool execution
+        // is disabled.
+        var toolAdvisorBuilder = ToolCallingAdvisor.builder()
+                .toolExecutionEligibilityChecker(response -> false);
+        var chatClient = ChatClient.builder(mockChatModel,
+                ObservationRegistry.NOOP, null, null, toolAdvisorBuilder)
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("invoke tool");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
 
-        provider.stream(request).collectList().block();
+        chatClientProvider.stream(request).collectList().block();
 
         assertAbnormalTerminationWarningLogged();
     }
 
     @Test
     void stream_streamingMultiRoundTripCompletesSuccessfully_emitsTerminalText() {
-        var request = createSimpleRequest("invoke tool");
+        // The ChatClient executes tool calls itself: it consumes the
+        // tool-call chunk, calls the tool, and requests a follow-up round
+        // from the model. Only the follow-up round's chunks reach the
+        // consumer.
+        var request = createToolRequest();
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
-                        mockChatResponse("done", "STOP")));
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()))
+                .thenReturn(Flux.just(mockChatResponse("done", "STOP")));
 
         var results = provider.stream(request).collectList().block();
+
         Assertions.assertEquals(List.of("done"), results);
+        assertAbnormalTerminationWarningNotLogged();
     }
 
     @Test
     void stream_streamingToolCallFollowedByNonTerminalChunks_logsWarning() {
-        // Multi-roundtrip silent abort: a tool-call chunk is observed
-        // (which is intermediate, not terminal), then the follow-up round
-        // produces text but never reaches a real finish_reason - e.g. the
-        // provider truncates the stream after an upstream error. The
-        // sticky check must still surface this because no terminal chunk
-        // was ever seen.
-        var request = createSimpleRequest("invoke tool");
+        // Multi-roundtrip silent abort: the tool-call round-trip succeeds,
+        // then the follow-up round produces text but never reaches a real
+        // finish_reason - e.g. the provider truncates the stream after an
+        // upstream error. The sticky check must still report this because
+        // no terminal chunk was ever seen.
+        var request = createToolRequest();
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall(),
-                        mockChatResponse("partial", null)));
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()))
+                .thenReturn(Flux.just(mockChatResponse("partial", null)));
 
         provider.stream(request).collectList().block();
 
@@ -1101,6 +1125,16 @@ class SpringAILLMProviderTest {
     private static LLMRequest createSimpleRequest(String message) {
         return new TestLLMRequest(message, null, Collections.emptyList(),
                 new Object[0]);
+    }
+
+    private static LLMRequest createToolRequest() {
+        // Registers a tool matching the call emitted by
+        // mockChatResponseWithPendingToolCall so the ChatClient can
+        // execute it.
+        var tool = createExplicitTool("doSomething", "A test tool", null,
+                args -> "tool result");
+        return new TestLLMRequestWithExplicitTools("invoke tool", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
     }
 
     // --- Explicit tools tests ---

@@ -453,7 +453,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
     }
 
     /**
-     * Wether to draw rounded edges on the gauge.
+     * Whether to draw rounded edges on the gauge.
      * <p>
      * Defaults to: false
      */

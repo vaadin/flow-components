@@ -399,7 +399,7 @@ class AIOrchestratorTest {
                 .thenReturn(List.of(attachment));
 
         var attempts = new AtomicInteger();
-        AttachmentSubmitListener listener = event -> {
+        RequestListener listener = event -> {
             if (attempts.incrementAndGet() == 1) {
                 throw new RuntimeException("storage transiently unavailable");
             }
@@ -408,7 +408,7 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(listener).build();
+                .withRequestListener(listener).build();
 
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("First"));
@@ -443,11 +443,11 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .build();
+                .withMetadata(null).build();
         orchestrator.prompt("do it");
 
         Mockito.verify(fakeTool).execute(Mockito.any());
-        Mockito.verify(controller).onResponseComplete();
+        Mockito.verify(controller).onResponse(null);
     }
 
     @Test
@@ -460,19 +460,19 @@ class AIOrchestratorTest {
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        var listener = Mockito.mock(ResponseCompleteListener.class);
+        var listener = Mockito.mock(ResponseListener.class);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.empty());
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList)
-                .withResponseCompleteListener(listener).build();
+                .withMessageList(mockMessageList).withResponseListener(listener)
+                .build();
         orchestrator.prompt("hi");
 
         var captor = ArgumentCaptor
-                .forClass(ResponseCompleteListener.ResponseCompleteEvent.class);
-        Mockito.verify(listener).onResponseComplete(captor.capture());
+                .forClass(ResponseListener.ResponseEvent.class);
+        Mockito.verify(listener).onResponse(captor.capture());
         Assertions.assertEquals("", captor.getValue().getResponse());
         Assertions.assertTrue(orchestrator.getHistory().stream()
                 .noneMatch(msg -> msg.role() == ChatMessage.Role.ASSISTANT));
@@ -699,6 +699,226 @@ class AIOrchestratorTest {
                 aiAttachments.getFirst().mimeType());
         Assertions.assertArrayEquals("test".getBytes(),
                 aiAttachments.getFirst().data());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_includesAttachmentsInRequest() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello",
+                List.of(createAttachment("a.txt"), createAttachment("b.png")));
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(2, attachments.size());
+        Assertions.assertEquals("a.txt", attachments.getFirst().name());
+        Assertions.assertEquals("b.png", attachments.get(1).name());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void prompt_withExplicitAttachments_rendersInUserMessageList() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var attachment = createAttachment("a.txt");
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(attachment));
+
+        var attachmentsCaptor = ArgumentCaptor.forClass(List.class);
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), attachmentsCaptor.capture());
+        var rendered = (List<AIAttachment>) attachmentsCaptor.getValue();
+        Assertions.assertEquals(1, rendered.size());
+        Assertions.assertEquals("a.txt", rendered.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_firesRequestListenerWithAttachments() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestListener(receivedEvent::set).build();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals("Hello", event.getUserMessage());
+        Assertions.assertNotNull(event.getMessageId());
+        Assertions.assertEquals(1, event.getAttachments().size());
+        Assertions.assertEquals("a.txt",
+                event.getAttachments().getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_doesNotDrainFileReceiver() {
+        // The two-arg overload must leave the configured receiver alone so
+        // any pending UI uploads stay buffered for the next prompt(String).
+        // Pins the "Replace (don't drain)" semantic from the JavaDoc.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockFileReceiver, Mockito.never()).takeAttachments();
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_ignoresPendingReceiverAttachments() {
+        // Even if the receiver has files buffered, the explicit list wins
+        // and the receiver's content does not leak into this turn.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("from-receiver.txt")));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("explicit.txt")));
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(1, attachments.size());
+        Assertions.assertEquals("explicit.txt", attachments.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullListThrowsNullPointerException() {
+        var orchestrator = getSimpleOrchestrator();
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> orchestrator.prompt("Hello", null));
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullElementThrowsNullPointerException() {
+        var listWithNull = new ArrayList<AIAttachment>();
+        listWithNull.add(null);
+        var orchestrator = getSimpleOrchestrator();
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> orchestrator.prompt("Hello", listWithNull));
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_emptyListSendsNoAttachments() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of());
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().attachments().isEmpty());
+        // Empty explicit list is still an explicit list, so we still don't
+        // fall back to draining the receiver.
+        Mockito.verify(mockFileReceiver, Mockito.never()).takeAttachments();
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_nullUserMessageIsIgnored() {
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt(null, List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_blankUserMessageIsIgnored() {
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("   ", List.of(createAttachment("a.txt")));
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_listIsCopiedDefensively() {
+        // Without a defensive copy, the caller mutating their list during
+        // the streamed response would silently desync the LLMRequest, the
+        // user message list, and the history snapshot. Pin that mutations
+        // after prompt() can't affect what the provider sees.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var mutable = new ArrayList<AIAttachment>();
+        mutable.add(createAttachment("a.txt"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", mutable);
+        mutable.add(createAttachment("b.txt"));
+        mutable.clear();
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var attachments = captor.getValue().attachments();
+        Assertions.assertEquals(1, attachments.size());
+        Assertions.assertEquals("a.txt", attachments.getFirst().name());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_addsUserMessageToHistory() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = getSimpleOrchestrator();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        var history = orchestrator.getHistory();
+        Assertions.assertFalse(history.isEmpty());
+        var user = history.getFirst();
+        Assertions.assertEquals(ChatMessage.Role.USER, user.role());
+        Assertions.assertEquals("Hello", user.content());
+        Assertions.assertNotNull(user.messageId());
+    }
+
+    @Test
+    void prompt_withExplicitAttachments_listenerAndHistoryShareMessageId() {
+        // The request listener and the conversation history record the
+        // turn under the same messageId — that's the correlation handle
+        // external storage (e.g. attachment maps keyed by messageId) relies
+        // on, so it can't drift between the two surfaces.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var receivedEvent = new AtomicReference<RequestListener.RequestEvent>();
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestListener(receivedEvent::set).build();
+        orchestrator.prompt("Hello", List.of(createAttachment("a.txt")));
+
+        Assertions.assertEquals(receivedEvent.get().getMessageId(),
+                orchestrator.getHistory().getFirst().messageId());
     }
 
     @Test
@@ -1543,7 +1763,7 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
+                .withResponseListener(
                         event -> captured.add(event.getResponse()))
                 .build();
         orchestrator.prompt("Hello");
@@ -1553,26 +1773,33 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void responseCompleteListener_afterStreamError_doesNotFire() {
+    void responseListener_afterStreamError_firesWithErrorAndEmptyResponse() {
+        // ResponseListener fires once per turn — on success and on failure.
+        // On failure event.getError() carries the cause and event.getResponse()
+        // is the partial (possibly empty) stream collected before the error.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
+        var streamError = new RuntimeException("API Error");
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.error(new RuntimeException("API Error")));
+                .thenReturn(Flux.error(streamError));
 
-        var captured = new ArrayList<String>();
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
-                        event -> captured.add(event.getResponse()))
-                .build();
+                .withResponseListener(capturedEvent::set).build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertTrue(captured.isEmpty(),
-                "Listener should not fire on error");
+        Assertions.assertNotNull(capturedEvent.get(),
+                "Listener must fire on error");
+        Assertions.assertEquals("", capturedEvent.get().getResponse(),
+                "No partial stream was emitted before the error");
+        Assertions.assertSame(streamError,
+                capturedEvent.get().getError().orElse(null),
+                "Listener must receive the stream error verbatim");
     }
 
     @Test
@@ -1589,13 +1816,38 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
+                .withResponseListener(
                         event -> captured.add(event.getResponse()))
                 .build();
         orchestrator.prompt("Hi");
 
         Assertions.assertEquals(1, captured.size());
         Assertions.assertEquals("Hello World", captured.getFirst());
+    }
+
+    @Test
+    void responseListener_onSuccess_carriesEmptyErrorOptional() {
+        // The error optional must be empty on the success path; the listener
+        // distinguishes success from failure via getError().isPresent().
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("ok"));
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertNotNull(capturedEvent.get());
+        Assertions.assertEquals("ok", capturedEvent.get().getResponse());
+        Assertions.assertTrue(capturedEvent.get().getError().isEmpty(),
+                "Success path must carry an empty error optional, got: "
+                        + capturedEvent.get().getError());
     }
 
     @Test
@@ -1613,7 +1865,7 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(
+                .withResponseListener(
                         event -> captured.add(event.getResponse()))
                 .build();
         orchestrator.prompt("First");
@@ -1633,7 +1885,7 @@ class AIOrchestratorTest {
 
         var captured = new ArrayList<String>();
         AIOrchestrator.builder(mockProvider, null)
-                .withResponseCompleteListener(
+                .withResponseListener(
                         event -> captured.add(event.getResponse()))
                 .withHistory(history, Collections.emptyMap()).build();
 
@@ -1654,16 +1906,31 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withInput(mockInput)
-                .withResponseCompleteListener(event -> {
+                .withResponseListener(event -> {
                     throw new RuntimeException("Listener error");
                 }).build();
 
-        // Should not throw
         orchestrator.prompt("Hello");
 
-        // History should still be recorded
-        var history = orchestrator.getHistory();
-        Assertions.assertEquals(2, history.size());
+        Assertions.assertEquals(2, orchestrator.getHistory().size());
+    }
+
+    @Test
+    void onFailurePath_responseListenerThrow_stillFiresControllerOnResponse() {
+        stubAddMessage();
+        var streamError = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+
+        var controller = mockController();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(event -> {
+                    throw new RuntimeException("listener died");
+                }).build().prompt("Hello");
+
+        Mockito.verify(controller).onResponse(streamError);
     }
 
     // --- AIController tests ---
@@ -1690,7 +1957,7 @@ class AIOrchestratorTest {
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .build();
+                .withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -1719,7 +1986,10 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponseComplete() {
+            public void onResponse(Throwable error) {
+                if (error != null) {
+                    return;
+                }
                 callCount.incrementAndGet();
             }
         };
@@ -1756,7 +2026,10 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponseComplete() {
+            public void onResponse(Throwable error) {
+                if (error != null) {
+                    return;
+                }
                 throw new RuntimeException("Controller error");
             }
         };
@@ -1787,7 +2060,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withController_onResponseCompleteNotCalledOnError() {
+    void builder_withController_onResponseFiresWithErrorOnError() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -1804,7 +2077,10 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponseComplete() {
+            public void onResponse(Throwable error) {
+                if (error != null) {
+                    return;
+                }
                 callCount.incrementAndGet();
             }
         };
@@ -1837,14 +2113,17 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponseComplete() {
+            public void onResponse(Throwable error) {
+                if (error != null) {
+                    return;
+                }
                 controllerCallCount.incrementAndGet();
             }
         };
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
-                .withResponseCompleteListener(
+                .withResponseListener(
                         event -> listenerCapture.add(event.getResponse()))
                 .build();
         orchestrator.prompt("Hello");
@@ -1865,7 +2144,7 @@ class AIOrchestratorTest {
         orchestratorWith(controller).prompt("Hello");
 
         var inOrder = Mockito.inOrder(controller, mockProvider);
-        inOrder.verify(controller).onRequestStart();
+        inOrder.verify(controller).onRequest();
         inOrder.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
@@ -1890,13 +2169,13 @@ class AIOrchestratorTest {
         captor.getValue().accept("Hi from input");
 
         var inOrder = Mockito.inOrder(controller, mockProvider);
-        inOrder.verify(controller).onRequestStart();
+        inOrder.verify(controller).onRequest();
         inOrder.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
-    void builder_withController_callsOnResponseFailedOnGenericStreamError() {
+    void builder_withController_firesOnResponseWithErrorOnGenericStreamError() {
         stubAddMessage();
         var thrown = new RuntimeException("API died");
         Mockito.when(
@@ -1906,12 +2185,12 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponseFailed(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponse(null);
     }
 
     @Test
-    void builder_withController_callsOnResponseFailedOnTimeoutException() {
+    void builder_withController_firesOnResponseWithErrorOnTimeoutException() {
         stubAddMessage();
         var timeout = new TimeoutException("simulated");
         Mockito.when(
@@ -1921,16 +2200,16 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponseFailed(timeout);
-        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+        Mockito.verify(controller).onResponse(timeout);
+        Mockito.verify(controller, Mockito.never()).onResponse(null);
     }
 
     @Test
-    void builder_withController_onRequestStartThrows_firesOnResponseFailedAndSkipsStream() {
+    void builder_withController_onRequestThrows_firesOnResponseAndSkipsStream() {
         stubAddMessage();
         var thrown = new RuntimeException("controller refused");
         var controller = mockController();
-        Mockito.doThrow(thrown).when(controller).onRequestStart();
+        Mockito.doThrow(thrown).when(controller).onRequest();
 
         var orchestrator = orchestratorWith(controller);
         var caught = Assertions.assertThrows(RuntimeException.class,
@@ -1939,8 +2218,8 @@ class AIOrchestratorTest {
 
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
-        Mockito.verify(controller).onResponseFailed(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponse(null);
     }
 
     @Test
@@ -1969,14 +2248,14 @@ class AIOrchestratorTest {
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("a.txt")));
 
-        AttachmentSubmitListener listener = event -> {
+        RequestListener listener = event -> {
             throw new RuntimeException("listener failed");
         };
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver)
-                .withAttachmentSubmitListener(listener).build();
+                .withRequestListener(listener).build();
 
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("Hello"));
@@ -1991,7 +2270,7 @@ class AIOrchestratorTest {
         // must skip the setText update without an NPE.
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller refused"))
-                .when(controller).onRequestStart();
+                .when(controller).onRequest();
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withController(controller).build();
@@ -2002,21 +2281,21 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void onRequestStartThrows_doesNotCommitToHistoryOrNotifyAttachmentListener() {
+    void onRequestThrows_doesNotCommitToHistoryOrNotifyRequestListener() {
         // No orphan state from a turn that never reached the LLM.
         stubAddMessage();
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(List.of(createAttachment("a.txt")));
 
-        var attachmentListener = Mockito.mock(AttachmentSubmitListener.class);
+        var attachmentListener = Mockito.mock(RequestListener.class);
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller refused"))
-                .when(controller).onRequestStart();
+                .when(controller).onRequest();
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
                 .withFileReceiver(mockFileReceiver).withController(controller)
-                .withAttachmentSubmitListener(attachmentListener).build();
+                .withRequestListener(attachmentListener).build();
 
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("Hello"));
@@ -2024,7 +2303,7 @@ class AIOrchestratorTest {
         Assertions.assertTrue(orchestrator.getHistory().isEmpty(),
                 "Pre-stream throw must not commit user message to history");
         Mockito.verify(attachmentListener, Mockito.never())
-                .onAttachmentSubmit(Mockito.any());
+                .onRequest(Mockito.any());
     }
 
     @Test
@@ -2039,7 +2318,7 @@ class AIOrchestratorTest {
 
         var thrown = new RuntimeException("simulated onRequestStart failure");
         var controller = mockController();
-        Mockito.doThrow(thrown).when(controller).onRequestStart();
+        Mockito.doThrow(thrown).when(controller).onRequest();
 
         var orchestrator = orchestratorWith(controller);
         Assertions.assertThrows(RuntimeException.class,
@@ -2050,7 +2329,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withController_onResponseFailedThrows_isCaughtAndLogged() {
+    void builder_withController_onResponseThrows_isCaughtAndLogged() {
         // A misbehaving hook must not propagate; it gets logged so the
         // failure is operator-visible instead.
         stubAddMessage();
@@ -2061,21 +2340,38 @@ class AIOrchestratorTest {
 
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller blew up"))
-                .when(controller).onResponseFailed(Mockito.any());
+                .when(controller).onResponse(Mockito.any());
 
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponseFailed(streamError);
-        var logged = logger.getLoggingEvents().stream()
-                .filter(event -> event.getMessage()
-                        .equals("Error in controller onResponseFailed"))
+        Mockito.verify(controller).onResponse(streamError);
+        var logged = logger.getLoggingEvents().stream().filter(event -> event
+                .getMessage().equals("Error in controller onResponse"))
                 .findFirst();
         Assertions.assertTrue(logged.isPresent(),
-                "Expected an error log entry for the onResponseFailed throw");
+                "Expected an error log entry for the onResponse throw");
     }
 
     @Test
-    void builder_withController_preStreamThrow_firesOnResponseFailed() {
+    void onResponseThrows_onFailurePath_doesNotAddSeparateErrorMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API died")));
+
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponse(Mockito.any());
+
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
+                Mockito.eq("An error occurred. Please try again."),
+                Mockito.anyString(), Mockito.anyList());
+    }
+
+    @Test
+    void builder_withController_preStreamThrow_firesOnResponseWithError() {
         stubAddMessage();
         var thrown = new IllegalStateException(
                 "provider exploded before returning a stream");
@@ -2089,15 +2385,15 @@ class AIOrchestratorTest {
                 () -> orchestrator.prompt("Hello"));
         Assertions.assertSame(thrown, caught);
 
-        Mockito.verify(controller).onResponseFailed(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponse(null);
     }
 
     @Test
-    void preStreamThrow_controllerCanRetryFromOnResponseFailed() {
+    void preStreamThrow_controllerCanRetryFromOnResponse() {
         // Order invariant: isProcessing must be released BEFORE
-        // onResponseFailed fires, otherwise a controller's recovery
-        // prompt is silently dropped at the CAS-false branch.
+        // onResponse fires, otherwise a controller's recovery prompt is
+        // silently dropped at the CAS-false branch.
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -2106,10 +2402,14 @@ class AIOrchestratorTest {
 
         var orchestratorRef = new AtomicReference<AIOrchestrator>();
         var controller = mockController();
+        // Retry only on the failure-side fire; the success fire on the
+        // retry turn must not re-recurse.
         Mockito.doAnswer(invocation -> {
-            orchestratorRef.get().prompt("retry");
+            if (invocation.getArgument(0) != null) {
+                orchestratorRef.get().prompt("retry");
+            }
             return null;
-        }).when(controller).onResponseFailed(Mockito.any());
+        }).when(controller).onResponse(Mockito.any());
 
         var orchestrator = orchestratorWith(controller);
         orchestratorRef.set(orchestrator);
@@ -2119,12 +2419,13 @@ class AIOrchestratorTest {
 
         Mockito.verify(mockProvider, Mockito.times(2))
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
-        Mockito.verify(controller).onResponseFailed(Mockito.any());
-        Mockito.verify(controller).onResponseComplete();
+        Mockito.verify(controller)
+                .onResponse(Mockito.any(IllegalStateException.class));
+        Mockito.verify(controller).onResponse(null);
     }
 
     @Test
-    void preStreamThrow_firesOnResponseFailedForErrorSubtypes() {
+    void preStreamThrow_firesOnResponseForErrorSubtypes() {
         // onResponseFailed must fire for any Throwable, not just
         // Exception — controllers need to release per-turn state
         // (snapshots, pending writes, locks) regardless of which
@@ -2141,8 +2442,8 @@ class AIOrchestratorTest {
                 () -> orchestrator.prompt("Hello"));
         Assertions.assertSame(thrown, caught);
 
-        Mockito.verify(controller).onResponseFailed(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponseComplete();
+        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller, Mockito.never()).onResponse(null);
     }
 
     @Test
@@ -2167,7 +2468,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withController_successfulTurnDoesNotFireOnResponseFailed() {
+    void builder_withController_successfulTurnFiresOnResponseWithNullError() {
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
@@ -2176,13 +2477,197 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponseComplete();
+        Mockito.verify(controller).onResponse(null);
+        // No failure-side fire — error arg never carries a Throwable on a
+        // successful turn.
         Mockito.verify(controller, Mockito.never())
-                .onResponseFailed(Mockito.any());
+                .onResponse(Mockito.any(Throwable.class));
     }
 
     @Test
-    void builder_withNoControllers_explicitToolsIsEmpty() {
+    void prompt_byDefault_includesSessionContextToolWithCurrentDateTime() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, tools.size());
+        var contextTool = tools.get(0);
+        Assertions.assertEquals("get_session_context", contextTool.getName());
+        Assertions.assertTrue(
+                contextTool.getDescription()
+                        .contains("Current server date and time:"),
+                "Default supplier should render a date/time line; got: "
+                        + contextTool.getDescription());
+    }
+
+    @Test
+    void prompt_withCustomContextSupplier_replacesDefaultAndExposesContent() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withMetadata(() -> "Tenant: acme").build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(1, tools.size());
+        var contextTool = tools.get(0);
+        Assertions.assertTrue(
+                contextTool.getDescription().contains("Tenant: acme"),
+                "Custom supplier value should appear in the description; got: "
+                        + contextTool.getDescription());
+        Assertions.assertFalse(
+                contextTool.getDescription()
+                        .contains("Current server date and time:"),
+                "Custom supplier should fully replace the default; got: "
+                        + contextTool.getDescription());
+        Assertions.assertEquals("Tenant: acme", contextTool.execute(null),
+                "execute should return the same content the description shows");
+    }
+
+    @Test
+    void prompt_withNullContext_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(null).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "withMetadata(null) should suppress the built-in tool");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierReturningBlank_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> "   ")
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Empty/blank supplier output should suppress the tool for that turn");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierReturningNull_omitsSessionContextTool() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> null)
+                .build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Null supplier output should suppress the tool for that turn");
+    }
+
+    @Test
+    void prompt_withMetadataAndController_mergesContextFirst() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var tool1 = createToolSpec("tool1", "First controller tool");
+        var controller = createController(tool1);
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withMetadata(() -> "Tenant: acme").build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var tools = captor.getValue().explicitTools();
+        Assertions.assertEquals(2, tools.size());
+        Assertions.assertEquals("get_session_context", tools.get(0).getName());
+        Assertions.assertEquals("tool1", tools.get(1).getName());
+    }
+
+    @Test
+    void prompt_withMetadataSupplier_invokedOncePerTurn() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var callCount = new AtomicInteger();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> {
+                    callCount.incrementAndGet();
+                    return "tick " + callCount.get();
+                }).build();
+
+        orchestrator.prompt("first");
+        orchestrator.prompt("second");
+
+        Assertions.assertEquals(2, callCount.get(),
+                "Supplier should be invoked once per prompt");
+    }
+
+    @Test
+    void prompt_withMetadataSupplierThrowing_abortsTurn() {
+        stubAddMessage();
+        var thrown = new RuntimeException("context supplier failed");
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withMetadata(() -> {
+                    throw thrown;
+                }).build();
+
+        var caught = Assertions.assertThrows(RuntimeException.class,
+                () -> orchestrator.prompt("Hello"));
+        Assertions.assertSame(thrown, caught);
+
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Assertions.assertTrue(orchestrator.getHistory().isEmpty(),
+                "Aborted turn must not leave the user message in history");
+    }
+
+    @Test
+    void builder_withMetadataCalledTwice_logsWarning() {
+        AIOrchestrator.builder(mockProvider, null).withMetadata(() -> "first")
+                .withMetadata(() -> "second");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(e -> e.getMessage()
+                        .contains("Context supplier was already set"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Second withMetadata call should log a replacement warning");
+    }
+
+    @Test
+    void builder_withNoControllersAndNoContext_explicitToolsIsEmpty() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -2192,7 +2677,7 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.just("Response"));
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).build();
+                .withMessageList(mockMessageList).withMetadata(null).build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
@@ -2227,6 +2712,22 @@ class AIOrchestratorTest {
 
         Assertions.assertTrue(warning.isPresent(),
                 "Expected duplicate tool name warning");
+    }
+
+    @Test
+    void withController_reservedSessionContextToolName_logsWarning() {
+        var reserved = createToolSpec("get_session_context", "Clashing tool");
+        AIController controller = createController(reserved);
+
+        AIOrchestrator.builder(mockProvider, null).withController(controller);
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage().equals(
+                        "Tool name '{}' is reserved for the built-in session context tool"))
+                .findFirst();
+
+        Assertions.assertTrue(warning.isPresent(),
+                "Using the reserved tool name should log a warning");
     }
 
     @Test
@@ -2388,14 +2889,14 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void builder_withResponseCompleteListenerCalledTwice_logsWarning() {
+    void builder_withResponseListenerCalledTwice_logsWarning() {
         var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
-                .withResponseCompleteListener(event -> {
+                .withResponseListener(event -> {
                 });
         assertNoBuilderWarning();
-        orchestratorBuilder.withResponseCompleteListener(event -> {
+        orchestratorBuilder.withResponseListener(event -> {
         }).build();
-        assertBuilderWarning("responseCompleteListener");
+        assertBuilderWarning("responseListener");
     }
 
     @Test
@@ -2406,9 +2907,9 @@ class AIOrchestratorTest {
         // must claim. If you add a new resource with-method (component,
         // controller, ...), do not add it here — ensure build() claims it.
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
-                "withAssistantName", "withAttachmentSubmitListener",
-                "withAttachmentClickListener", "withResponseCompleteListener",
-                "withHistory");
+                "withAssistantName", "withRequestListener",
+                "withAttachmentClickListener", "withResponseListener",
+                "withHistory", "withMetadata");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);
@@ -2556,11 +3057,6 @@ class AIOrchestratorTest {
             @Override
             public List<LLMProvider.ToolSpec> getTools() {
                 return List.of(tools);
-            }
-
-            @Override
-            public void onResponseComplete() {
-                // no-op
             }
         };
     }

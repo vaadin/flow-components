@@ -45,51 +45,43 @@ public interface AIController {
      * Called synchronously on the UI thread just before the LLM stream opens.
      * By the time this method fires, the user message and an empty assistant
      * placeholder are already in the message list; the turn is committed to the
-     * conversation history and the attachment-submit listener only after this
+     * conversation history and the {@link RequestListener} only after this
      * method returns successfully. Implementations can prepare for the turn —
      * locking UI surfaces, snapshotting state the tool definitions depend on,
      * and so on.
      * <p>
      * The default does nothing. Throwing from this method aborts the turn
      * before the commit step: the conversation history is unchanged, the
-     * attachment-submit listener is not notified, the LLM stream is not opened,
-     * the assistant placeholder is updated to a generic error message,
-     * {@link #onResponseFailed(Throwable)} fires with the thrown exception so
+     * request listener is not notified, the LLM stream is not opened, the
+     * assistant placeholder is updated to a generic error message,
+     * {@link #onResponse(Throwable)} fires with the thrown exception so
      * per-turn state captured before the throw can still be released, and the
      * exception propagates back to the caller of the prompt entry point.
      * </p>
      */
-    default void onRequestStart() {
+    default void onRequest() {
     }
 
     /**
-     * Called on the UI thread under the session lock when the LLM stream
-     * completes successfully — after all tool calls for the turn have run and
-     * the LLM has produced its final response. Use it for deferred UI updates
-     * or to commit staged state.
+     * Called on the UI thread under the session lock when the LLM stream has
+     * completed — either successfully or with an error. Every turn fires this
+     * exactly once.
      * <p>
-     * Mutually exclusive with {@link #onResponseFailed(Throwable)}: every turn
-     * fires exactly one of the two. Exceptions thrown from the hook are caught
-     * and the user sees a generic error message; Errors propagate.
+     * On success {@code error} is {@code null}; use the call to commit staged
+     * state or run deferred UI updates. On failure {@code error} carries the
+     * cause (stream error, timeout, or any throw between {@link #onRequest()}
+     * and the start of the stream); release per-turn state captured in
+     * {@code onRequest} (locks, pending writes, snapshots) and discard the
+     * staged work.
      * </p>
-     */
-    void onResponseComplete();
-
-    /**
-     * Called on the UI thread under the session lock when an LLM turn fails —
-     * stream error, timeout, or any throw between {@link #onRequestStart()} and
-     * the start of the stream. Implementations should release per-turn state
-     * captured in {@code onRequestStart} (locks, pending writes, snapshots).
      * <p>
-     * Mutually exclusive with {@link #onResponseComplete()}: every turn fires
-     * exactly one of the two. The default does nothing. Exceptions thrown from
-     * the hook are caught and logged; Errors propagate.
+     * The default does nothing. Exceptions thrown from the hook are caught and
+     * logged; Errors propagate.
      * </p>
      *
      * @param error
-     *            the cause of the failure (Exception or Error), never
-     *            {@code null}
+     *            the cause of failure, or {@code null} on success
      */
-    default void onResponseFailed(Throwable error) {
+    default void onResponse(Throwable error) {
     }
 }
