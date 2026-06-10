@@ -170,7 +170,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getElement().addPropertyChangeListener("opened", event -> {
             var isOpened = (boolean) event.getValue();
             if (isOpened && focusSelectedItem) {
-                scrollToSelectedItem();
+                focusSelectedItem();
             }
         });
     }
@@ -412,7 +412,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return focusSelectedItem;
     }
 
-    private void scrollToSelectedItem() {
+    private void focusSelectedItem() {
         if (getValue() == null) {
             return;
         }
@@ -429,7 +429,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (index == null || index < 0) {
             return;
         }
-        getElement().callJsFunction("scrollToIndex", index);
+        getElement().callJsFunction("__focusIndex", index);
     }
 
     /**
