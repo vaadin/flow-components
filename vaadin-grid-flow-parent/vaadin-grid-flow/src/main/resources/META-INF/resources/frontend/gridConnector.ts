@@ -150,12 +150,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Get the range of currently rendered rows
     let range = grid.$connector.getRenderedRange();
 
-    // Expand the range in both directions to add a buffer
+    // Expand the range in both directions to add a buffer, e.g. a rendered
+    // range of [100, 120] becomes [80, 140]
     const buffer = range[1] - range[0];
     range[0] = Math.max(range[0] - buffer, 0);
     range[1] = Math.min(range[1] + buffer, grid.size - 1);
 
-    // Align the range to page boundaries (inclusive)
+    // Align the range to page boundaries (inclusive), e.g. with pageSize 50,
+    // a range of [60, 110] becomes [50, 149]
     range[0] = Math.floor(range[0] / grid.pageSize) * grid.pageSize;
     range[1] = (Math.floor(range[1] / grid.pageSize) + 1) * grid.pageSize - 1;
 
@@ -172,6 +174,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     requestedRange = range;
 
+    // The range is inclusive while the server expects a length, hence + 1,
+    // e.g. a range of [50, 149] results in a length of 100
     await grid.$server.setViewportRange(range[0], range[1] - range[0] + 1);
 
     // Resolve any pending callbacks in case the server responded with no new
@@ -209,6 +213,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
+  // The grid requests a page only when a row from that page gets rendered,
+  // which is too late to keep up while scrolling and leads to blank rows.
+  // To load data ahead of rendering, request the fetch range (rendered
+  // rows + buffer) on every virtualizer update while scrolling.
   grid.__updateVirtualizerElement = function (...args) {
     Object.getPrototypeOf(this).__updateVirtualizerElement.call(this, ...args);
 
