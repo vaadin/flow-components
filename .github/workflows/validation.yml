@@ -83,6 +83,17 @@ jobs:
             vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
           key: ${{ steps.build-key.outputs.key }}
 
+      # The build cache key never hits across runs, so without this cache the
+      # charts SVG generator (npm install + webpack + mocha) rebuilds on every
+      # run (~40s) even though its sources rarely change.
+      - name: Restore charts SVG generator cache
+        id: svg-cache
+        if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ runner.os }}-charts-svg-generator-${{ hashFiles('vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/**') }}
+
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v5
@@ -109,11 +120,15 @@ jobs:
 
       - name: Install artifacts
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        env:
+          # On an SVG generator cache hit, skip its npm install/build/test and
+          # use the restored output instead.
+          SKIP_SVG_BUILD: ${{ steps.svg-cache.outputs.cache-hit == 'true' }}
         run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -DskipSvgChartsBuild=$SKIP_SVG_BUILD -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -DskipSvgChartsBuild=$SKIP_SVG_BUILD -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Detect modified components
