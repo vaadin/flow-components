@@ -153,7 +153,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Expand the range in both directions to add a buffer
     const buffer = range[1] - range[0];
     range[0] = Math.max(range[0] - buffer, 0);
-    range[1] = Math.min(range[1] + buffer, grid.size);
+    range[1] = Math.min(range[1] + buffer, grid.size - 1);
 
     // Align the range to page boundaries. range[1] is inclusive of the last
     // rendered row, so round it up to the end of that row's page.
