@@ -366,47 +366,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
     this._flush();
-    // Keep only the latest selection so rapid successive calls collapse to the
-    // final one, then try to apply it.
-    this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
-    this._applyPendingSelection();
-  }
-
-  // Applies the latest pending selection. The sheet widget's initial relayout
-  // is deferred via GWT's scheduler, so a call arriving in the same task as the
-  // initial property batch (e.g. opening a Dialog that contains the
-  // Spreadsheet) reaches the api before the sheet layout exists and throws
-  // inside `$scrollAreaIntoView`. The layout state can't be probed from here
-  // (the relevant widget fields are obfuscated in production builds), so we
-  // attempt the call and, if it throws, re-queue it until the layout is ready.
-  _applyPendingSelection() {
-    if (!this._pendingSelection || !this.api) {
-      return;
-    }
-    try {
-      this.api.setSelectedCellAndRange(...this._pendingSelection);
-      this._pendingSelection = null;
-      this._selectionRetries = 0;
-    } catch {
-      // Layout not ready yet; retry shortly (bounded to avoid spinning).
-      if (this._selectionRetryScheduled) {
-        return;
-      }
-      if ((this._selectionRetries = (this._selectionRetries || 0) + 1) > 200) {
-        this._pendingSelection = null;
-        this._selectionRetries = 0;
-        return;
-      }
-      this._selectionRetryScheduled = true;
-      setTimeout(() => {
-        this._selectionRetryScheduled = false;
-        if (!this.isConnected) {
-          this._pendingSelection = null;
-          return;
-        }
-        this._applyPendingSelection();
-      }, 10);
-    }
+    this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
   cellsUpdated(updatedCellData) {
