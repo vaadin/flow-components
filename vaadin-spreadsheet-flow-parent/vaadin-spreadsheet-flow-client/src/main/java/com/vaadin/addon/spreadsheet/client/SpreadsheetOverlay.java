@@ -47,10 +47,6 @@ public class SpreadsheetOverlay extends VOverlay {
             return asUserElement(overlayContainer);
         }
 
-        public void setOverlayContainer(Element overlayContainer) {
-            this.overlayContainer = overlayContainer;
-        }
-
         @Override
         public void show() {
             super.show();

@@ -1457,6 +1457,7 @@ export const spreadsheetOverlayStyles = css`
   }
 
   #spreadsheet-overlays .v-tooltip {
+    border: unset;
     background-color: rgba(50, 50, 50, 0.9);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     color: white;
