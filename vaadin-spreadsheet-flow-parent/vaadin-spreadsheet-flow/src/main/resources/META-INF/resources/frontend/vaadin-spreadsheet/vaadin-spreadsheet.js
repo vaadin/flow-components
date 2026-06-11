@@ -160,21 +160,19 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   render() {
-    return html``;
+    return html`<slot name="overlays"></slot>`;
   }
 
   connectedCallback() {
     super.connectedCallback();
     spreadsheetResizeObserver.observe(this);
     if (!this.api) {
-      this._overlays = document.getElementById('spreadsheet-overlays');
-      if (!this._overlays) {
-        this._overlays = document.createElement('div');
-        this._overlays.id = 'spreadsheet-overlays';
-        document.body.appendChild(this._overlays);
-      }
+      this._overlays = document.createElement('div');
+      this._overlays.id = 'spreadsheet-overlays';
+      this._overlays.slot = 'overlays';
+      this.appendChild(this._overlays);
 
-      this.api = new Spreadsheet(this, this.renderRoot);
+      this.api = new Spreadsheet(this, this.renderRoot, this._overlays);
       this.api.setHeight('100%');
       this.api.setWidth('100%');
       this.createCallbacks();
