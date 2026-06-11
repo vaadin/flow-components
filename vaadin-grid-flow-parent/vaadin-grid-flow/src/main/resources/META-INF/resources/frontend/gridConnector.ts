@@ -150,13 +150,12 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Get the range of currently rendered rows
     let range = grid.$connector.getRenderedRange();
 
-    // Add a buffer to the range in both directions
+    // Expand the range in both directions to add a buffer
     const buffer = range[1] - range[0];
     range[0] = Math.max(range[0] - buffer, 0);
     range[1] = Math.min(range[1] + buffer, grid.size - 1);
 
-    // Align the range to page boundaries. range[1] is inclusive of the last
-    // rendered row, so round it up to the last row of that row's page.
+    // Align the range to page boundaries (inclusive)
     range[0] = Math.floor(range[0] / grid.pageSize) * grid.pageSize;
     range[1] = (Math.floor(range[1] / grid.pageSize) + 1) * grid.pageSize - 1;
 
