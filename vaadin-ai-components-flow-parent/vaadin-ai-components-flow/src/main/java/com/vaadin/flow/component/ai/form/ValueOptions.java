@@ -32,8 +32,8 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * controller.valueOptions(...)}. Tells the controller which labels the LLM may
  * pick from for a single-value or multi-select field. The label set is either
  * fixed ({@link #options(Collection)}) or supplied on demand by a callback
- * ({@link #options(BiFunction)}); exactly one of the two must be set, with
- * the last call winning.
+ * ({@link #options(BiFunction)}); exactly one of the two must be set, with the
+ * last call winning.
  * <p>
  * For non-{@link String} value types, the label-to-value converter is supplied
  * separately to the controller — see
@@ -82,9 +82,9 @@ public final class ValueOptions<I> {
     /**
      * Starts an options registration for a multi-select field. Picked by the
      * compiler over {@link #forField(HasValue)} whenever the reference is
-     * statically typed as {@link MultiSelect}. The per-element type
-     * {@code T} flows through; for any {@code T} other than {@link String},
-     * the controller's two-argument
+     * statically typed as {@link MultiSelect}. The per-element type {@code T}
+     * flows through; for any {@code T} other than {@link String}, the
+     * controller's two-argument
      * {@link FormAIController#valueOptions(ValueOptions, Function)} overload
      * must be used. The controller aggregates resolved per-label items into a
      * {@link LinkedHashSet} before {@link HasValue#setValue}.
@@ -132,22 +132,22 @@ public final class ValueOptions<I> {
     }
 
     /**
-     * Sets a callback the controller invokes whenever the LLM needs to see
-     * the field's options. Use this when the option set is too large or too
-     * dynamic for a fixed list via {@link #options(Collection)} — for example
-     * options that come from a database query or a remote service. The LLM
-     * picks from the labels the callback returns when writing the field.
-     * Mutually exclusive with {@link #options(Collection)} — calling either
-     * clears the other.
+     * Sets a callback the controller invokes whenever the LLM needs to see the
+     * field's options. Use this when the option set is too large or too dynamic
+     * for a fixed list via {@link #options(Collection)} — for example options
+     * that come from a database query or a remote service. The LLM picks from
+     * the labels the callback returns when writing the field. Mutually
+     * exclusive with {@link #options(Collection)} — calling either clears the
+     * other.
      * <p>
      * The callback runs on the UI thread once per LLM tool call.
      *
      * @param query
-     *            invoked with two arguments: a filter string the LLM picked
-     *            (a user-typed search prefix, or empty for a top-N sample),
-     *            and a positive limit on how many labels to return. Returns
-     *            the matching labels in display order, not {@code null}
-     *            (an empty list signals "no matches" to the LLM)
+     *            invoked with two arguments: a filter string the LLM picked (a
+     *            user-typed search prefix, or empty for a top-N sample), and a
+     *            positive limit on how many labels to return. Returns the
+     *            matching labels in display order, not {@code null} (an empty
+     *            list signals "no matches" to the LLM)
      * @return this registration, for chaining
      */
     public ValueOptions<I> options(

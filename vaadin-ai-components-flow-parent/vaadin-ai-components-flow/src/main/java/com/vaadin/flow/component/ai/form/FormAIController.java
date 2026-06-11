@@ -300,8 +300,8 @@ public class FormAIController implements AIController {
 
     /**
      * Registers options for a {@link String}-typed field. No label-to-value
-     * converter is needed because the chosen label is itself the field's
-     * value. For non-{@link String} value types, use
+     * converter is needed because the chosen label is itself the field's value.
+     * For non-{@link String} value types, use
      * {@link #valueOptions(ValueOptions, Function) the two-argument overload};
      * the type system enforces at compile time that a non-{@link String} field
      * is paired with an explicit converter. For {@link MultiSelect MultiSelect}
@@ -330,9 +330,9 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers options for a field paired with a label-to-value converter.
-     * The converter runs once per LLM-chosen label and returns one element of
-     * the field's value type (or per-element type for a {@link MultiSelect
+     * Registers options for a field paired with a label-to-value converter. The
+     * converter runs once per LLM-chosen label and returns one element of the
+     * field's value type (or per-element type for a {@link MultiSelect
      * MultiSelect} field) — typically a service lookup that maps the picked
      * label to the corresponding domain object. For {@code MultiSelect} fields
      * the controller wraps converted elements into a {@link LinkedHashSet}
