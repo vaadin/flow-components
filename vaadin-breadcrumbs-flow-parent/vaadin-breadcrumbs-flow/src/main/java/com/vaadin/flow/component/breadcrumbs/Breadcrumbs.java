@@ -49,7 +49,73 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
         HasThemeVariant<BreadcrumbsVariant> {
 
+    /**
+     * The mode that determines how the breadcrumb trail is populated.
+     */
+    public enum Mode {
+        /**
+         * The trail is populated automatically from the active route hierarchy.
+         */
+        ROUTER,
+        /**
+         * The trail is populated manually by the application through
+         * {@code add} / {@code remove} methods.
+         */
+        MANUAL
+    }
+
+    private Mode mode;
+
     private BreadcrumbsI18n i18n;
+
+    /**
+     * Creates a new breadcrumbs component in {@link Mode#ROUTER} mode.
+     */
+    public Breadcrumbs() {
+        this(Mode.ROUTER);
+    }
+
+    /**
+     * Creates a new breadcrumbs component in the given mode.
+     *
+     * @param mode
+     *            the mode that determines how the trail is populated, not
+     *            {@code null}
+     */
+    public Breadcrumbs(Mode mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Gets the mode that determines how the breadcrumb trail is populated.
+     *
+     * @return the current mode
+     */
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the mode that determines how the breadcrumb trail is populated.
+     * <p>
+     * Switching to a different mode discards the existing children: both the
+     * {@code ROUTER -> MANUAL} and {@code MANUAL -> ROUTER} transitions clear
+     * the current trail so the new mode can start fresh. Setting the mode to
+     * its current value is a no-op and leaves the children untouched.
+     *
+     * @param newMode
+     *            the mode that determines how the trail is populated, not
+     *            {@code null}
+     */
+    public void setMode(Mode newMode) {
+        if (newMode == mode) {
+            return;
+        }
+        this.mode = newMode;
+        // Listener register/unregister and the initial router rebuild are
+        // deferred to a later task; for now just clear the existing children.
+        removeAll();
+    }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
