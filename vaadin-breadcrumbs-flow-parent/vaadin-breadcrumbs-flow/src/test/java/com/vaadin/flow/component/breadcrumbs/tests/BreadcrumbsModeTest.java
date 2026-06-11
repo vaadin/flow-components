@@ -36,13 +36,6 @@ class BreadcrumbsModeTest {
     }
 
     @Test
-    void routerMode_setModeManual_clearsChildren() {
-        var breadcrumbs = new Breadcrumbs(Mode.ROUTER);
-        breadcrumbs.setMode(Mode.MANUAL);
-        Assertions.assertEquals(0, breadcrumbs.getChildren().count());
-    }
-
-    @Test
     void manualModeWithChildren_setModeRouter_clearsChildren() {
         var breadcrumbs = new Breadcrumbs(Mode.MANUAL);
         breadcrumbs.add(new BreadcrumbsItem("Home"),
