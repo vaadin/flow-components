@@ -74,7 +74,6 @@ import com.vaadin.client.MeasuredSize;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
-import com.vaadin.client.ui.VOverlay;
 
 public class SheetWidget extends Panel {
 
@@ -117,9 +116,9 @@ public class SheetWidget extends Panel {
 
     private final SelectionWidget selectionWidget;
 
-    private final VOverlay hyperlinkTooltip;
+    private final SpreadsheetOverlay hyperlinkTooltip;
 
-    private final VOverlay resizeTooltip;
+    private final SpreadsheetOverlay resizeTooltip;
 
     private final CellComment cellCommentOverlay;
 
@@ -385,6 +384,7 @@ public class SheetWidget extends Panel {
 
     private Element host;
     private Node renderRoot;
+    private Element overlayContainer;
 
     static class CellCoord {
         private int col;
@@ -4113,6 +4113,7 @@ public class SheetWidget extends Panel {
 
             final CellComment cellComment = new CellComment(this,
                     cell.getElement().getParentElement());
+            cellComment.setOverlayContainer(overlayContainer);
             cellComment.setAuthor(cellCommentAuthorsMap.get(key));
             cellComment.setCommentText(cellCommentsMap.get(key));
             String errorMessage = invalidFormulaCells.contains(key)
@@ -6884,8 +6885,19 @@ public class SheetWidget extends Panel {
         updateAllVisibleComments();
     }
 
-    public void setHost(Element host, Node renderRoot) {
+    public void setHost(Element host, Node renderRoot,
+            Element overlayContainer) {
         this.host = host;
         this.renderRoot = renderRoot;
+        this.overlayContainer = overlayContainer;
+        // Wire the container into overlays that were eagerly created in the
+        // constructor (before the container was known).
+        hyperlinkTooltip.setOverlayContainer(overlayContainer);
+        resizeTooltip.setOverlayContainer(overlayContainer);
+        cellCommentOverlay.setOverlayContainer(overlayContainer);
+    }
+
+    public Element getOverlayContainer() {
+        return overlayContainer;
     }
 }
