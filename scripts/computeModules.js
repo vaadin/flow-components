@@ -20,6 +20,7 @@
  */
 
 const fs = require('fs');
+const { parseArgs } = require('util');
 
 // Changes touching this many components or more trigger a full validation
 const MAX_COMPONENTS = 5;
@@ -86,8 +87,14 @@ function addDependentComponents(components) {
 }
 
 function main() {
+  const { values, positionals } = parseArgs({
+    options: {
+      'changed-files': { type: 'boolean', default: false }
+    },
+    allowPositionals: true
+  });
   let components;
-  if (process.argv[2] === '--changed-files') {
+  if (values['changed-files']) {
     const changedFiles = fs
       .readFileSync(0, 'utf8')
       .split('\n')
@@ -100,8 +107,8 @@ function main() {
     if (!components) {
       return;
     }
-  } else if (process.argv.length > 2) {
-    components = process.argv.slice(2);
+  } else if (positionals.length > 0) {
+    components = positionals;
   } else {
     return;
   }
