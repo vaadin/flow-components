@@ -140,7 +140,7 @@ public final class ValueOptions<I> {
      * exclusive with {@link #options(Collection)} — calling either clears the
      * other.
      * <p>
-     * The callback runs on the UI thread once per LLM tool call.
+     * The callback runs on the LLM provider's tool-dispatch thread.
      *
      * @param query
      *            invoked with two arguments: a filter string the LLM picked (a
