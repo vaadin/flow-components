@@ -15,15 +15,12 @@
  *
  * Prints the resulting component names (e.g. "grid crud grid-pro") to
  * stdout. Prints nothing when everything should be validated: when the
- * change touches files outside component modules, when it touches too many
- * components, or when there is no input.
+ * change touches files outside component modules, or when there is no
+ * input.
  */
 
 const fs = require('fs');
 const { parseArgs } = require('util');
-
-// Changes touching this many components or more trigger a full validation
-const MAX_COMPONENTS = 5;
 
 // Read component parent modules from the root pom.xml
 function readParentModules() {
@@ -43,8 +40,7 @@ function dependsOn(pomXml, artifactId) {
 }
 
 // Map changed file paths to component names. Returns null (= full
-// validation) if any file is outside a component parent module or if too
-// many components are affected.
+// validation) if any file is outside a component parent module.
 function componentsFromChangedFiles(changedFiles) {
   const components = new Set();
   for (const file of changedFiles) {
@@ -53,9 +49,6 @@ function componentsFromChangedFiles(changedFiles) {
       return null;
     }
     components.add(match[1]);
-  }
-  if (components.size === 0 || components.size >= MAX_COMPONENTS) {
-    return null;
   }
   return [...components];
 }
