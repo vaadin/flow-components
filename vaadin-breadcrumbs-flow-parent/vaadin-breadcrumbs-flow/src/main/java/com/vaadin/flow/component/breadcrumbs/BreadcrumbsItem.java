@@ -26,8 +26,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -73,6 +75,11 @@ public class BreadcrumbsItem extends Component
      *            the text of the item
      * @param path
      *            the path to link to
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public BreadcrumbsItem(String text, String path) {
         setPath(path);
@@ -120,6 +127,11 @@ public class BreadcrumbsItem extends Component
      *            the path to link to
      * @param prefixComponent
      *            the prefix component for the item (usually an icon)
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public BreadcrumbsItem(String text, String path,
             Component prefixComponent) {
@@ -225,6 +237,33 @@ public class BreadcrumbsItem extends Component
      * @see #setPath(Class)
      */
     public void setPath(String path) {
+        if (path != null && !UrlUtil.isSafeUrl(path)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "path", path, "setUnsafePath(String)"));
+        }
+        doSetPath(path);
+    }
+
+    /**
+     * Sets the path this item links to without validating its scheme.
+     * <p>
+     * Unlike {@link #setPath(String)}, this method does not reject paths based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for paths that are fully under your control and known to be safe,
+     * such as a hard-coded {@code javascript:} URL. Passing untrusted input
+     * here can expose the application to cross-site scripting (XSS) attacks.
+     *
+     * @see #setPath(String)
+     *
+     * @param path
+     *            the path to link to, or {@code null} to remove the path and
+     *            render the item as the current page (a non-link)
+     */
+    public void setUnsafePath(String path) {
+        doSetPath(path);
+    }
+
+    private void doSetPath(String path) {
         if (path == null) {
             getElement().removeAttribute("path");
         } else {
