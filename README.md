@@ -51,6 +51,10 @@ NOTE: By default it merges all modules, but it's also possible to merge certain 
 
 - `./scripts/mergeITs.js button text-field crud`
 
+To also include components that depend on the given ones, expand the list first with `./scripts/computeModules.js`:
+
+- `./scripts/mergeITs.js $(./scripts/computeModules.js button)`
+
 ## Running ITs of all components in the merged module
 
 It should take around 15-20 minutes depending on the computer capabilities.
