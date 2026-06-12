@@ -139,6 +139,32 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void setPathWithUnsafeScheme_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> sideNavItem.setPath("javascript:alert(1)"));
+    }
+
+    @Test
+    public void setUnsafePathWithUnsafeScheme_pathSet() {
+        sideNavItem.setUnsafePath("javascript:alert(1)");
+
+        assertPath("javascript:alert(1)");
+    }
+
+    @Test
+    public void constructor_labelPath_unsafeScheme_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> new SideNavItem("Docs", "javascript:alert(1)"));
+    }
+
+    @Test
+    public void constructor_labelPathPrefixComponent_unsafeScheme_throws() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> new SideNavItem("Docs", "javascript:alert(1)",
+                        new Div()));
+    }
+
+    @Test
     public void setPathWithoutAliasesAsComponent_onlyPathUpdated() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRoute.class);

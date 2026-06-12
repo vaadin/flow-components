@@ -30,6 +30,8 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -111,10 +113,44 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * listeners added with {@link #addLoginListener(ComponentEventListener)}.
      * See class Javadoc for more information.
      *
+     * @throws IllegalArgumentException
+     *             if {@code action} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafeAction(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     *
      * @see #getAction()
+     * @see #setUnsafeAction(String)
      * @see #addLoginListener(ComponentEventListener)
      */
     public void setAction(String action) {
+        if (action != null && !UrlUtil.isSafeUrl(action)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "action", action, "setUnsafeAction(String)"));
+        }
+        doSetAction(action);
+    }
+
+    /**
+     * Sets the action URL without validating its scheme.
+     * <p>
+     * Unlike {@link #setAction(String)}, this method does not reject URLs based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for URLs that are fully under your control and known to be safe,
+     * such as a hard-coded {@code javascript:} URL. Passing untrusted input
+     * here can expose the application to cross-site scripting (XSS) attacks.
+     *
+     * @see #setAction(String)
+     *
+     * @param action
+     *            the action URL, or {@code null} to remove the action and
+     *            restore the default login listener handling
+     */
+    public void setUnsafeAction(String action) {
+        doSetAction(action);
+    }
+
+    private void doSetAction(String action) {
         if (action == null) {
             getElement().removeProperty(PROP_ACTION);
             if (registration == null) {

@@ -118,7 +118,7 @@ public class LoginFormTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginForm.class))
                     .thenReturn(mockedLogger);
 
@@ -147,7 +147,7 @@ public class LoginFormTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginForm.class))
                     .thenReturn(mockedLogger);
 
@@ -188,5 +188,20 @@ public class LoginFormTest {
         Assert.assertFalse(
                 "Expected error status being reset by default listener",
                 form.isError());
+    }
+
+    @Test
+    void setActionWithUnsafeScheme_throws() {
+        final LoginForm form = new LoginForm();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> form.setAction("javascript:alert(1)"));
+    }
+
+    @Test
+    void setUnsafeActionWithUnsafeScheme_actionSet() {
+        final LoginForm form = new LoginForm();
+        form.setUnsafeAction("javascript:alert(1)");
+
+        Assertions.assertEquals("javascript:alert(1)", form.getAction());
     }
 }
