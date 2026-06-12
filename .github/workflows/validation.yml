@@ -150,7 +150,8 @@ jobs:
             elif [ "${{ github.event_name }}" = "merge_group" ]; then
               changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
             fi
-            elements=$(echo "$changed_files" | node scripts/computeModules.js --changed-files)
+            mapfile -t files <<< "$changed_files"
+            elements=$(node scripts/computeModules.js --changed-files -- "${files[@]}")
           fi
           if [ -n "$elements" ]; then
             echo "Running partial validation for: $elements"

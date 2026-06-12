@@ -9,9 +9,9 @@
  *     Expands an explicit list of components with components that depend
  *     on them.
  *
- *   echo "$changed_files" | node scripts/computeModules.js --changed-files
- *     Reads changed file paths from stdin, maps them to components, and
- *     expands the result with dependent components.
+ *   node scripts/computeModules.js --changed-files -- [file...]
+ *     Maps changed file paths to components and expands the result with
+ *     dependent components.
  *
  * Prints the resulting component names (e.g. "grid crud grid-pro") to
  * stdout. Prints nothing when everything should be validated: when the
@@ -95,11 +95,7 @@ function main() {
   });
   let components;
   if (values['changed-files']) {
-    const changedFiles = fs
-      .readFileSync(0, 'utf8')
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const changedFiles = positionals.filter(Boolean);
     if (changedFiles.length === 0) {
       return;
     }
