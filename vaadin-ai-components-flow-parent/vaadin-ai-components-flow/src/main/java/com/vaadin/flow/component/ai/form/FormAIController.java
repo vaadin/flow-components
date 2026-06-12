@@ -316,30 +316,30 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers options for a {@link String}-typed field. The {@code config}
-     * carries the field and either a fixed label list or a query callback; the
-     * label-to-value converter is implicitly {@link Function#identity()
-     * Function.identity()} because the chosen label is the value. For any other
-     * value type, use {@link #valueOptions(ValueOptions, Function) the
-     * two-argument overload} — the type system enforces at compile time that a
-     * non-{@link String} field's registration is paired with an explicit
-     * converter. For {@link MultiSelect MultiSelect} fields the controller
-     * wraps resolved elements into a {@link LinkedHashSet} before
-     * {@link HasValue#setValue}. Later calls for the same field overwrite
-     * earlier ones.
+     * Registers options for a {@link String}-typed field. No label-to-value
+     * converter is needed because the chosen label is itself the field's value.
+     * For non-{@link String} value types, use
+     * {@link #valueOptions(ValueOptions, Function) the two-argument overload};
+     * the type system enforces at compile time that a non-{@link String} field
+     * is paired with an explicit converter. For {@link MultiSelect MultiSelect}
+     * fields the controller wraps the chosen labels into a
+     * {@link LinkedHashSet} before {@link HasValue#setValue}. Later calls for
+     * the same field overwrite earlier ones.
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            {@code options(...)} (fixed or queryable) set
+     *            its label source set via either
+     *            {@link ValueOptions#options(Collection)} or
+     *            {@link ValueOptions#options(BiFunction)}
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no {@code options(...)} set; if the
-     *             developer routed a {@code MultiSelect} field through the
-     *             single-value {@code forField} overload (upcast reference); or
-     *             if the field's value type is a Collection but the field does
-     *             not implement {@link MultiSelect}
+     *             if the registration has no label source set; if the developer
+     *             routed a {@code MultiSelect} field through the single-value
+     *             {@code forField} overload (upcast reference); or if the
+     *             field's value type is a Collection but the field does not
+     *             implement {@link MultiSelect}
      */
     public FormAIController valueOptions(ValueOptions<String> config) {
         Objects.requireNonNull(config, "Value options must not be null");
@@ -347,32 +347,38 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers options for a field paired with an explicit label-to-value
-     * converter. The converter resolves one LLM-supplied label into one element
-     * of the field's value type (or per-element type for a {@link MultiSelect
-     * MultiSelect}). For {@code MultiSelect} fields the controller wraps
-     * resolved elements into a {@link LinkedHashSet} before
-     * {@link HasValue#setValue}. Later calls for the same field overwrite
-     * earlier ones.
+     * Registers options for a field paired with a label-to-value converter. The
+     * converter runs once per LLM-chosen label and returns one element of the
+     * field's value type (or per-element type for a {@link MultiSelect
+     * MultiSelect} field) — typically a service lookup that maps the picked
+     * label to the corresponding domain object. For {@code MultiSelect} fields
+     * the controller wraps converted elements into a {@link LinkedHashSet}
+     * before {@link HasValue#setValue}. Later calls for the same field
+     * overwrite earlier ones.
+     * <p>
+     * Use {@link #valueOptions(ValueOptions) the single-argument overload} for
+     * {@link String}-typed fields; the converter is implicit there.
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            {@code options(...)} (fixed or queryable) set
+     *            its label source set via either
+     *            {@link ValueOptions#options(Collection)} or
+     *            {@link ValueOptions#options(BiFunction)}
      * @param toValue
      *            converts a chosen label to one element of the field's value
      *            type, not {@code null}
      * @param <V>
-     *            the per-label item type (the field's value type for
-     *            single-value fields, the per-element type for multi-select)
+     *            the per-label item type — the field's value type for
+     *            single-value fields, the per-element type for multi-select
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} or {@code toValue} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no {@code options(...)} set; if the
-     *             developer routed a {@code MultiSelect} field through the
-     *             single-value {@code forField} overload (upcast reference); or
-     *             if the field's value type is a Collection but the field does
-     *             not implement {@link MultiSelect}
+     *             if the registration has no label source set; if the developer
+     *             routed a {@code MultiSelect} field through the single-value
+     *             {@code forField} overload (upcast reference); or if the
+     *             field's value type is a Collection but the field does not
+     *             implement {@link MultiSelect}
      */
     public <V> FormAIController valueOptions(ValueOptions<V> config,
             Function<String, V> toValue) {
