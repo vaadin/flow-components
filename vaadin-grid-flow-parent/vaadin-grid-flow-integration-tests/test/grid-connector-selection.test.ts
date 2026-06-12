@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { init, getBodyCellContent, setRootItems } from './shared.js';
-import type { FlowGrid } from './shared.js';
+import type { FlowGrid, Item } from './shared.js';
 import sinon from 'sinon';
 
 describe('grid connector - selection', () => {
@@ -144,7 +144,7 @@ describe('grid connector - selection', () => {
     });
 
     describe('conditional selection', () => {
-      let items;
+      let items: Item[];
 
       beforeEach(async () => {
         items = Array.from({ length: 4 }, (_, i) => ({
@@ -192,7 +192,7 @@ describe('grid connector - selection', () => {
         setRootItems(grid.$connector, updatedItems);
 
         // active item still references the original item with selectable: true
-        expect(grid.activeItem.selectable).to.be.true;
+        expect(grid.activeItem!.selectable).to.be.true;
 
         // however clicking the row should not deselect the item
         getBodyCellContent(grid, 2, 0)!.click();
