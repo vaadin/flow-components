@@ -154,6 +154,8 @@ jobs:
           fi
           if [ -n "$elements" ]; then
             echo "Running partial validation for: $elements"
+          else
+            echo "Running full validation for all components"
           fi
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
