@@ -136,31 +136,27 @@ jobs:
         if: steps.skip-ci.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          INPUT_COMPONENTS: ${{ github.event.inputs.components || '' }}
         run: |
-          elements="${{ github.event.inputs.components || '' }}"
-          changed_files=""
-          if [ -n "$elements" ]; then
-            echo "elements=$elements" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            pr_number="${{ github.event.pull_request.number }}"
-            changed_files=$(gh api "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
-          elif [ "${{ github.event_name }}" = "merge_group" ]; then
-            changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
-          fi
-          if [ -n "$changed_files" ]; then
-            modified=$(echo "$changed_files" \
-              | grep 'vaadin.*flow-parent' \
-              | sed 's,^vaadin-\(.*\)-flow-parent.*,\1,' \
-              | sort -u)
-            nmods=$(echo "$modified" | wc -w | tr -d ' ')
-            all_files=$(echo "$changed_files" | sort -u | tr -d '[:space:]')
-            component_files=$(echo "$changed_files" | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]')
-            if [ "$nmods" -lt 5 ] && [ ${#all_files} -eq ${#component_files} ]; then
-              elements=$(echo $modified | tr '\n' ' ')
-              echo "Running partial build for: $elements"
+          if [ -n "$INPUT_COMPONENTS" ]; then
+            # Explicitly specified components are used as-is, without adding
+            # dependent components
+            elements="$INPUT_COMPONENTS"
+          else
+            changed_files=""
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              pr_number="${{ github.event.pull_request.number }}"
+              changed_files=$(gh api --paginate "repos/${{ github.repository }}/pulls/$pr_number/files" --jq '.[].filename')
+            elif [ "${{ github.event_name }}" = "merge_group" ]; then
+              changed_files=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
             fi
+            mapfile -t files <<< "$changed_files"
+            elements=$(node scripts/computeModules.js --changed-files -- "${files[@]}")
+          fi
+          if [ -n "$elements" ]; then
+            echo "Running partial validation for: $elements"
+          else
+            echo "Running full validation for all components"
           fi
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
@@ -336,7 +332,26 @@ jobs:
 
       - name: Run unit tests
         if: matrix.type == 'unit'
-        run: mvn test -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
+        env:
+          COMPONENTS: ${{ needs.build.outputs.components }}
+        run: |
+          shopt -s nullglob
+          pl=""
+          for component in $COMPONENTS; do
+            for pom in vaadin-$component-flow-parent/*/pom.xml; do
+              dir=${pom%/pom.xml}
+              case "$dir" in
+                *-integration-tests|*-testbench) continue ;;
+              esac
+              pl+="${pl:+,}$dir"
+            done
+          done
+          pl_arg=""
+          if [ -n "$pl" ]; then
+            echo "Running unit tests for: $pl"
+            pl_arg="-pl $pl"
+          fi
+          mvn test $pl_arg -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
 
       - name: Upload unit test reports
         if: always() && matrix.type == 'unit'
