@@ -118,7 +118,7 @@ class LoginFormTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginForm.class))
                     .thenReturn(mockedLogger);
 
@@ -147,7 +147,7 @@ class LoginFormTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginForm.class))
                     .thenReturn(mockedLogger);
 
