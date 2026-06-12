@@ -139,13 +139,10 @@ public final class ValueOptions<I> {
      * the labels the callback returns when writing the field. Mutually
      * exclusive with {@link #options(Collection)} — calling either clears the
      * other.
-     * <p>
-     * The callback runs on the LLM provider's tool-dispatch thread.
      *
      * @param query
-     *            invoked with two arguments: a filter string the LLM picked (a
-     *            user-typed search prefix, or empty for a top-N sample), and a
-     *            positive limit on how many labels to return. Returns the
+     *            invoked with two arguments: a filter string the LLM picked,
+     *            and a positive limit on how many labels to return. Returns the
      *            matching labels in display order, not {@code null} (an empty
      *            list signals "no matches" to the LLM)
      * @return this registration, for chaining
