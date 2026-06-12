@@ -23,9 +23,65 @@ describe('grid connector - row details', () => {
     await nextFrame();
   });
 
+  it('should not inform server about details visibility on attach', async () => {
+    // Initialize the connector for a detached grid and attach it afterwards,
+    // like Flow does
+    const detachedGrid = document.createElement('vaadin-grid') as FlowGrid;
+    init(detachedGrid);
+
+    grid.parentElement!.appendChild(detachedGrid);
+    await nextFrame();
+
+    expect(detachedGrid.$server.setDetailsVisible.called).to.be.false;
+    detachedGrid.remove();
+  });
+
   it('should set details visible on click', () => {
     getBodyCellContent(grid, 0, 0)!.click();
     expect(grid.$server.setDetailsVisible).to.be.calledWith('0');
+  });
+
+  it('should open details for items opened from data', async () => {
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo', detailsOpened: true },
+      { key: '1', name: 'bar' }
+    ]);
+    expect(grid.detailsOpenedItems).to.have.lengthOf(1);
+    expect(grid.detailsOpenedItems[0].key).to.equal('0');
+  });
+
+  it('should close details for items closed from data', async () => {
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo', detailsOpened: true },
+      { key: '1', name: 'bar' }
+    ]);
+
+    grid.$connector.set(0, [{ key: '0', name: 'foo' }]);
+    expect(grid.detailsOpenedItems).to.be.empty;
+  });
+
+  it('should close details for cleared items', async () => {
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo', detailsOpened: true },
+      { key: '1', name: 'bar' }
+    ]);
+
+    grid.$connector.clear(0, 2);
+    expect(grid.detailsOpenedItems).to.be.empty;
+  });
+
+  describe('updateFlatData', () => {
+    it('should open details for updated items', () => {
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
+      expect(grid.detailsOpenedItems).to.have.lengthOf(1);
+      expect(grid.detailsOpenedItems[0].key).to.equal('0');
+    });
+
+    it('should close details for updated items', () => {
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo' }]);
+      expect(grid.detailsOpenedItems).to.be.empty;
+    });
   });
 
   it('should set details hidden on another item click', () => {

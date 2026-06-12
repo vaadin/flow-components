@@ -73,6 +73,41 @@ describe('grid connector - selection', () => {
       expect(grid.selectedItems).to.be.empty;
     });
 
+    it('should apply selection from server when grid is disabled', async () => {
+      grid.disabled = true;
+      await nextFrame();
+      grid.$connector.doSelection([{ key: '0' }], false);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+      expect(grid.selectedItems[0].key).to.equal('0');
+    });
+
+    it('should not deselect items on user interaction when grid is disabled', async () => {
+      grid.$connector.doSelection([{ key: '0' }], false);
+      grid.disabled = true;
+      await nextFrame();
+      grid.$connector.doDeselection([{ key: '0' }], true);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+      expect(grid.$server.deselect.called).to.be.false;
+    });
+
+    it('should not request deselect for an active item that is not selected', () => {
+      // Select an item by clicking it
+      getBodyCellContent(grid, 0, 0)!.click();
+
+      // Deselect the item from the server
+      grid.$connector.doDeselection([{ key: '0' }], false);
+
+      // Click the item again to clear the active item
+      getBodyCellContent(grid, 0, 0)!.click();
+      expect(grid.$server.deselect.called).to.be.false;
+    });
+
+    it('should deselect cleared items', () => {
+      grid.$connector.doSelection([{ key: '0' }], false);
+      grid.$connector.clear(0, 2);
+      expect(grid.selectedItems).to.be.empty;
+    });
+
     it('should select on server', () => {
       getBodyCellContent(grid, 0, 0)!.click();
       expect(grid.$server.select).to.be.calledWith('0');
