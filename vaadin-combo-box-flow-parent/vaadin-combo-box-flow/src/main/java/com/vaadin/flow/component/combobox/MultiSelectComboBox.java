@@ -97,7 +97,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.2.0-beta2")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -511,8 +511,8 @@ public class MultiSelectComboBox<TItem>
      * Expansion only works with undefined size in the desired direction (i.e.
      * setting `max-width` limits the component's width).
      *
-     * @param {AutoExpandMode}
-     *            autoExpandMode
+     * @param autoExpandMode
+     *            the auto-expand mode
      * @since 24.3
      */
     public void setAutoExpand(AutoExpandMode autoExpandMode) {

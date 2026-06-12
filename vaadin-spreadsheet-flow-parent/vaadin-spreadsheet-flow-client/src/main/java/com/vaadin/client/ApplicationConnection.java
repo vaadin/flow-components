@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetOverlay;
 import com.vaadin.client.ApplicationConfiguration.ErrorMessage;
 import com.vaadin.client.communication.ConnectionStateHandler;
 import com.vaadin.client.communication.Heartbeat;
@@ -363,6 +362,7 @@ public class ApplicationConnection implements HasHandlers {
      * source code.
      *
      * @param serverConnector
+     *            the server-side connector to highlight
      * @deprecated as of 7.1. Replaced by
      *             {@link UIConnector#showServerDebugInfo(ServerConnector)}
      */
@@ -404,7 +404,7 @@ public class ApplicationConnection implements HasHandlers {
      * Checks whether or not the CSS is loaded. By default checks the size of
      * the loading indicator element.
      *
-     * @return
+     * @return {@code true} if CSS is loaded, {@code false} otherwise
      */
     protected boolean isCSSLoaded() {
         return cssLoaded;
@@ -724,6 +724,7 @@ public class ApplicationConnection implements HasHandlers {
      * Does absolutely nothing. Replaced by {@link LayoutManager}.
      *
      * @param container
+     *            the container
      * @deprecated As of 7.0, serves no purpose
      */
     @Deprecated
@@ -744,6 +745,7 @@ public class ApplicationConnection implements HasHandlers {
      * Returns false
      *
      * @param paintable
+     *            the paintable connector
      * @return false, always
      * @deprecated As of 7.0, serves no purpose
      */
@@ -756,6 +758,7 @@ public class ApplicationConnection implements HasHandlers {
      * Returns false.
      *
      * @param widget
+     *            the widget
      * @return false, always
      * @deprecated As of 7.0, serves no purpose
      */
@@ -849,16 +852,26 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Singleton method to get instance of app's context menu.
+     * Returns the context menu associated with this connection, previously set
+     * via {@link #setContextMenu(VContextMenu)}.
      *
-     * @return VContextMenu object
+     * @return VContextMenu object, or {@code null} if not yet assigned
      */
     public VContextMenu getContextMenu() {
-        if (contextMenu == null) {
-            contextMenu = new SpreadsheetOverlay.SpreadsheetContextMenu();
-            contextMenu.setOwner(uIConnector.getWidget());
-        }
         return contextMenu;
+    }
+
+    /**
+     * Assigns the context menu instance for this connection and wires its owner
+     * to the connection's UI widget. Called by the spreadsheet connector once
+     * the overlay container is known.
+     *
+     * @param contextMenu
+     *            the context menu instance, not null
+     */
+    public void setContextMenu(VContextMenu contextMenu) {
+        this.contextMenu = contextMenu;
+        contextMenu.setOwner(uIConnector.getWidget());
     }
 
     /**
@@ -866,6 +879,7 @@ public class ApplicationConnection implements HasHandlers {
      *
      * @since 7.2
      * @param uri
+     *            the URI
      * @return Icon object
      */
     public Icon getIcon(String uri) {
@@ -998,10 +1012,14 @@ public class ApplicationConnection implements HasHandlers {
      * return true if the UIDL is a "cached" update.
      *
      * @param component
+     *            the component
      * @param uidl
+     *            the UIDL
      * @param manageCaption
+     *            whether to manage the caption
      * @deprecated As of 7.0, no longer serves any purpose
-     * @return
+     * @return {@code true} if the UIDL is a cached update, {@code false}
+     *         otherwise
      */
     @Deprecated
     public boolean updateComponent(Widget component, UIDL uidl,
@@ -1030,7 +1048,7 @@ public class ApplicationConnection implements HasHandlers {
         if (connector == null) {
             /*
              * No connector will exist in cases where Vaadin widgets have been
-             * re-used without implementing server<->client communication.
+             * reused without implementing server<->client communication.
              */
             return false;
         }
@@ -1056,7 +1074,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Sets the delegate that is called whenever a communication error occurrs.
+     * Sets the delegate that is called whenever a communication error occurs.
      *
      * @param delegate
      *            the delegate.
@@ -1146,7 +1164,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Returns the hearbeat instance.
+     * Returns the heartbeat instance.
      */
     public Heartbeat getHeartbeat() {
         return null;

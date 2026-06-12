@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 class BreadcrumbsTest {
 
@@ -38,5 +39,11 @@ class BreadcrumbsTest {
         Assertions.assertEquals("vaadin-breadcrumbs-item",
                 item.getElement().getTag());
         Assertions.assertEquals("Home", item.getText());
+    }
+
+    @Test
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Breadcrumbs.class));
     }
 }

@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.breadcrumbs;
 
+import java.io.Serializable;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -26,6 +30,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Breadcrumbs is a component for displaying a navigation trail that shows the
@@ -37,10 +43,79 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-breadcrumbs")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-beta2")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs.js")
 public class Breadcrumbs extends Component implements HasSize, HasStyle,
-        HasAriaLabel, HasComponentsOfType<BreadcrumbsItem> {
+        HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
+        HasThemeVariant<BreadcrumbsVariant> {
+
+    /**
+     * The mode that determines how the breadcrumb trail is populated.
+     */
+    public enum Mode {
+        /**
+         * The trail is populated automatically from the active route hierarchy.
+         */
+        ROUTER,
+        /**
+         * The trail is populated manually by the application through
+         * {@code add} / {@code remove} methods.
+         */
+        MANUAL
+    }
+
+    private Mode mode;
+
+    private BreadcrumbsI18n i18n;
+
+    /**
+     * Creates a new breadcrumbs component in {@link Mode#ROUTER} mode.
+     */
+    public Breadcrumbs() {
+        this(Mode.ROUTER);
+    }
+
+    /**
+     * Creates a new breadcrumbs component in the given mode.
+     *
+     * @param mode
+     *            the mode that determines how the trail is populated, not
+     *            {@code null}
+     */
+    public Breadcrumbs(Mode mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Gets the mode that determines how the breadcrumb trail is populated.
+     *
+     * @return the current mode
+     */
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the mode that determines how the breadcrumb trail is populated.
+     * <p>
+     * Switching to a different mode discards the existing children: both the
+     * {@code ROUTER -> MANUAL} and {@code MANUAL -> ROUTER} transitions clear
+     * the current trail so the new mode can start fresh. Setting the mode to
+     * its current value is a no-op and leaves the children untouched.
+     *
+     * @param newMode
+     *            the mode that determines how the trail is populated, not
+     *            {@code null}
+     */
+    public void setMode(Mode newMode) {
+        if (newMode == mode) {
+            return;
+        }
+        this.mode = newMode;
+        // Listener register/unregister and the initial router rebuild are
+        // deferred to a later task; for now just clear the existing children.
+        removeAll();
+    }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -54,6 +129,62 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         if (!featureFlags.isEnabled(
                 BreadcrumbsFeatureFlagProvider.BREADCRUMBS_COMPONENT)) {
             throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(BreadcrumbsI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public BreadcrumbsI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(BreadcrumbsI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * The internationalization properties for {@link Breadcrumbs}.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class BreadcrumbsI18n implements Serializable {
+        private String moreItems;
+
+        /**
+         * Gets the accessible label announced by screen readers for the
+         * overflow button that reveals the hidden breadcrumb items.
+         *
+         * @return the translated label for the overflow button
+         */
+        public String getMoreItems() {
+            return moreItems;
+        }
+
+        /**
+         * Sets the accessible label announced by screen readers for the
+         * overflow button that reveals the hidden breadcrumb items.
+         *
+         * @param moreItems
+         *            the translated label for the overflow button
+         * @return this instance for method chaining
+         */
+        public BreadcrumbsI18n setMoreItems(String moreItems) {
+            this.moreItems = moreItems;
+            return this;
         }
     }
 }

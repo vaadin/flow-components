@@ -44,7 +44,9 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.JsonNode;
 
@@ -53,6 +55,15 @@ import tools.jackson.databind.JsonNode;
  * attached files. Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)
  * withController(...)}.
+ *
+ * <pre>
+ * var controller = new FormAIController(formLayout, binder);
+ * controller.describe(discountField, "Discount as a percentage, not an amount")
+ *         .ignore(internalReferenceField);
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .build();
+ * </pre>
  *
  * <p>
  * The controller accepts any {@link HasComponents} container. It discovers
@@ -77,23 +88,25 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
- * <b>Field identifiers:</b> the controller assigns an opaque UUID to each field
- * at discovery time and uses that UUID as the field's id in every tool call the
- * LLM makes. Developers never see UUIDs; the LLM never sees field labels in the
- * id slot. Semantic meaning travels through each field's <i>description</i> —
- * the field's label, helper text, and the {@link #describe(HasValue, String)}
- * hint.
+ * <b>How the LLM understands fields:</b> everything the LLM knows about a field
+ * comes from the field's label, its helper text, and the
+ * {@link #describe(HasValue, String)} hint. Make sure every field carries a
+ * meaningful label, or add a {@code describe(...)} hint for fields whose
+ * purpose is not evident from the label alone.
  * </p>
  *
  * <p>
  * <b>Binder integration:</b> the two-argument constructor accepts a
- * {@link Binder}. For every named binding ({@code bind("propertyName")},
+ * {@link Binder}, which affects the workflow in two ways. First, for every
+ * named binding ({@code bind("propertyName")},
  * {@code bindInstanceFields(this)}, or {@code @PropertyId}) the property name
- * is used as a default field description so the LLM can refer to the field by
- * its bean-side name. The default only applies when no explicit
- * {@link #describe(HasValue, String)} has been registered; calling
+ * is used as a default field description, so the LLM can recognize what the
+ * field means even when it has no label. The default only applies when no
+ * explicit {@link #describe(HasValue, String)} has been registered; calling
  * {@code describe(...)} always wins. Lambda-bound bindings carry no property
- * name and contribute no default.
+ * name and contribute no default. Second, the binder drives validation of the
+ * values the LLM writes, including bean-level cross-field rules — see
+ * <b>Validation</b> below.
  * </p>
  *
  * <p>
@@ -103,7 +116,11 @@ import tools.jackson.databind.JsonNode;
  * that exposes a default validator is validated through that validator. A value
  * that fails validation stays in the field and the failure is reported back to
  * the LLM as a rejection, so it can supply a corrected value within the same
- * turn.
+ * turn. When the controller was created with a {@link Binder} and a bean is set
+ * ({@code setBean}), the binder's bean-level validators
+ * ({@code binder.withValidator(...)}) also run after the writes; a cross-field
+ * failure (for example "start date must precede end date") is likewise reported
+ * back to the LLM so it can adjust the offending fields within the same turn.
  * </p>
  *
  * <p>
@@ -114,10 +131,18 @@ import tools.jackson.databind.JsonNode;
  * Application code that turns a locked field read-only mid-turn (e.g. from a
  * value-change listener reacting to the LLM's writes) is not honoured: the
  * field already reports read-only because of the lock, so the controller cannot
- * tell the application's toggle apart from its own lock. {@code fill_form}
- * still writes the field, and the lock is released at turn end regardless.
- * Applications should avoid toggling read-only state during a fill turn, or
- * reapply it after the turn completes.
+ * tell the application's toggle apart from its own lock. The AI can still write
+ * the field, and the lock is released at turn end regardless. Applications
+ * should avoid toggling read-only state during a fill turn, or reapply it after
+ * the turn completes.
+ * </p>
+ *
+ * <p>
+ * <b>Change tracking and highlight:</b> a listener registered through
+ * {@link #addFieldValueChangedListener(SerializableConsumer)} fires once per
+ * successful turn with the fields whose value changed during the turn — the
+ * common driver for {@link #showHighlight(HasValue)} / {@link #hideHighlight}
+ * to flash the AI's edits in the UI.
  * </p>
  *
  * <p>
@@ -125,9 +150,8 @@ import tools.jackson.databind.JsonNode;
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
- * Re-register the same {@code describe} / {@code valueOptions} hints; field ids
- * remain stable across the round-trip because they live on the field Components
- * themselves.
+ * Re-register the same {@code describe} / {@code valueOptions} / {@code ignore}
+ * hints on the new controller.
  * </p>
  *
  * @author Vaadin Ltd
@@ -213,6 +237,15 @@ public class FormAIController implements AIController {
     private final Binder<?> binder;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
+    private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
+    private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
+    /**
+     * Per-field attach-listener registrations that re-apply the AI highlight
+     * after detach/re-attach. Populated on the first {@link #showHighlight}
+     * call for a field; entries are removed by {@link #hideHighlight}.
+     */
+    private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
+    private final List<SerializableConsumer<List<FieldValueChange>>> fieldValuesChangedListeners = new ArrayList<>();
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -236,9 +269,12 @@ public class FormAIController implements AIController {
      * Creates a new form AI controller for the given container and binder. For
      * every named binding on the binder, the bean property name is used as a
      * default {@link #describe(HasValue, String) description} when the
-     * developer has not registered one explicitly; the controller itself still
-     * uses an opaque UUID as the field's tool-call id. Lambda-bound bindings
-     * carry no property name and contribute no default.
+     * developer has not registered one explicitly; lambda-bound bindings carry
+     * no property name and contribute no default. The binder also drives
+     * validation of the values the LLM writes: bound fields are validated
+     * through their bindings (converter and validators as one unit), and
+     * bean-level cross-field validators run as well when a bean is set. See the
+     * class-level documentation for details.
      *
      * @param form
      *            the container whose fields the LLM may populate, not
@@ -392,9 +428,10 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Hides the given field from the LLM. The field is excluded from the tool
-     * surface and is not locked during a fill. Use this for fields the AI must
-     * not read or write (password fields, internal IDs, PII).
+     * Hides the given field from the LLM. The field's value is never exposed to
+     * the LLM, the LLM cannot write to it, and it is not locked during a fill.
+     * Use this for fields the AI must not read or write (internal IDs, PII).
+     * Password fields are excluded automatically and do not need to be ignored.
      *
      * @param field
      *            the field to hide, not {@code null}
@@ -403,6 +440,114 @@ public class FormAIController implements AIController {
     public FormAIController ignore(HasValue<?, ?> field) {
         hintsFor(field).ignored = true;
         return this;
+    }
+
+    /**
+     * Registers a listener that is invoked once per successful turn with the
+     * fields whose value differs from what was read at the start of the turn.
+     * Comparison is by {@link Objects#equals(Object, Object)} so multi-select
+     * sets, dates, and other value-objects work naturally.
+     * <p>
+     * Multiple listeners are supported and fire in registration order. If one
+     * listener throws, the exception is logged and the remaining listeners
+     * still fire.
+     * <p>
+     * Only non-ignored fields are tracked, and only changed fields appear in
+     * the list. A field's pre-turn value is captured regardless of its current
+     * visibility, so a value cascaded into a freshly-revealed field is reported
+     * with the field's real pre-turn value rather than a spurious {@code null}.
+     * The listener is not called when the turn ended in error or when no field
+     * changed. The list iterates in document order; modifying it has no effect
+     * on the controller.
+     * <p>
+     * The listener runs on the UI thread with the session lock held, so it can
+     * update components and call {@link #showHighlight} /
+     * {@link #hideHighlight} directly without {@code ui.access(...)}. A typical
+     * use is to flash the AI's edits by calling {@code showHighlight} on every
+     * changed field.
+     *
+     * @param listener
+     *            the listener to register, not {@code null}
+     * @return a {@link Registration} that removes the listener when called
+     * @throws NullPointerException
+     *             if {@code listener} is {@code null}
+     */
+    public Registration addFieldValueChangedListener(
+            SerializableConsumer<List<FieldValueChange>> listener) {
+        Objects.requireNonNull(listener, "Listener must not be null");
+        fieldValuesChangedListeners.add(listener);
+        return () -> fieldValuesChangedListeners.remove(listener);
+    }
+
+    /**
+     * Paints a highlight on the field via the {@code vaadin-field-highlighter}
+     * web component. Repeated calls keep exactly one highlight on the field.
+     * Call {@link #hideHighlight} to clear it. The field can be any
+     * {@link HasValue} {@link Component}, in or out of this controller's form,
+     * and each field's highlight state is independent of the others.
+     * <p>
+     * The AI user added to the field carries an id unique to this controller,
+     * so the highlight coexists with any other {@code vaadin-field-highlighter}
+     * users the application keeps on the field (e.g. from a collaboration
+     * session) as long as those consumers also use {@code addUser} /
+     * {@code removeUser} rather than {@code setUsers}.
+     * <p>
+     * The first {@code showHighlight} call on a field also registers an attach
+     * listener that re-applies the AI user every time the field re-enters the
+     * DOM, so the highlight survives detach/re-attach. The listener is removed
+     * by {@link #hideHighlight}.
+     *
+     * @param field
+     *            the field to highlight, not {@code null}; must be a
+     *            {@link Component}
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code field} is not a {@link Component}
+     */
+    public void showHighlight(HasValue<?, ?> field) {
+        var component = requireFieldComponent(field);
+        var element = component.getElement();
+        highlightedFields.computeIfAbsent(field,
+                ignored -> component.addAttachListener(
+                        event -> FormFieldHighlighter.show(element, aiUserId)));
+        FormFieldHighlighter.show(element, aiUserId);
+    }
+
+    /**
+     * Clears any highlight previously applied to the field via
+     * {@link #showHighlight}. A no-op when no highlight is currently shown.
+     * Only this controller's AI user is removed; other users on the field stay
+     * highlighted. The field can be any {@link HasValue} {@link Component}, in
+     * or out of this controller's form, and clearing one field's highlight has
+     * no effect on others. The re-attach listener registered by
+     * {@link #showHighlight} is also removed, so the highlight does not come
+     * back if the field leaves and returns to the DOM after this call.
+     *
+     * @param field
+     *            the field to clear the highlight from, not {@code null}; must
+     *            be a {@link Component}
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code field} is not a {@link Component}
+     */
+    public void hideHighlight(HasValue<?, ?> field) {
+        var element = requireFieldComponent(field).getElement();
+        var registration = highlightedFields.remove(field);
+        if (registration != null) {
+            registration.remove();
+        }
+        FormFieldHighlighter.hide(element, aiUserId);
+    }
+
+    private static Component requireFieldComponent(HasValue<?, ?> field) {
+        Objects.requireNonNull(field, "Field must not be null");
+        if (!(field instanceof Component component)) {
+            throw new IllegalArgumentException(
+                    "Field must be a Component: " + field.getClass().getName());
+        }
+        return component;
     }
 
     @Override
@@ -457,14 +602,81 @@ public class FormAIController implements AIController {
         attachIds();
         seedDescriptionsFromBinder();
         lockFields();
+        snapshotPreTurnValues();
     }
 
     @Override
     public void onResponse(Throwable error) {
-        // Unlock regardless of success or failure: locks set in onRequest
-        // must be released so the user can edit again. The failure path
-        // doesn't have any committed state to discard.
-        unlockFields();
+        try {
+            fireFieldValuesChanged(error);
+        } finally {
+            // Unlock regardless of success or failure: locks set in onRequest
+            // must be released so the user can edit again. The failure path
+            // doesn't have any committed state to discard.
+            unlockFields();
+        }
+    }
+
+    /**
+     * Captures the current value of every known field before the LLM runs. The
+     * snapshot is consulted in {@link #onResponse} to compute the before /
+     * after diff for {@link #addFieldValueChangedListener}. Skipped when no
+     * listener is registered to avoid copying values that no one will read.
+     * <p>
+     * Hidden and disabled fields are included so a value cascaded into a field
+     * that's revealed during the turn can still be compared against a real
+     * pre-turn value rather than {@code null}.
+     */
+    private void snapshotPreTurnValues() {
+        preTurnValues.clear();
+        if (fieldValuesChangedListeners.isEmpty()) {
+            return;
+        }
+        for (var field : collectKnownFields()) {
+            preTurnValues.put(field, field.getValue());
+        }
+    }
+
+    /**
+     * Builds the change list from the pre-turn snapshot and the post-turn value
+     * of every known field, then invokes every registered listener if anything
+     * changed. The post-turn walk picks up fields that were hidden (or absent)
+     * at turn start but became visible / were added during the turn, so
+     * visibility cascades report their value changes correctly. On error the
+     * snapshot is discarded and no listener fires — the application learns
+     * about errors through the orchestrator's response listener instead. A
+     * throwing listener is logged and otherwise ignored so subsequent listeners
+     * still fire and the rest of the response lifecycle (notably
+     * {@link #unlockFields}) still runs.
+     */
+    private void fireFieldValuesChanged(Throwable error) {
+        if (preTurnValues.isEmpty() || error != null) {
+            preTurnValues.clear();
+            return;
+        }
+        var changes = new ArrayList<FieldValueChange>();
+        for (var field : collectKnownFields()) {
+            var oldValue = preTurnValues.get(field);
+            var newValue = field.getValue();
+            if (!Objects.equals(oldValue, newValue)) {
+                changes.add(new FieldValueChange(field, oldValue, newValue));
+            }
+        }
+        preTurnValues.clear();
+        if (changes.isEmpty()) {
+            return;
+        }
+        // Snapshot the list before iterating so a listener that adds or
+        // removes listeners (its own Registration included) doesn't break
+        // the dispatch.
+        for (var listener : List.copyOf(fieldValuesChangedListeners)) {
+            try {
+                listener.accept(changes);
+            } catch (Exception ex) {
+                LOGGER.warn("Field-values-changed listener threw an exception",
+                        ex);
+            }
+        }
     }
 
     /**
@@ -512,18 +724,28 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Returns the discovered fields the controller acts on — every
-     * {@link HasValue} in the form tree minus those hidden via
-     * {@link #ignore(HasValue)} and minus those that are not currently visible.
-     * Disabled and read-only fields are kept: the LLM reads them as context but
-     * cannot write them (see {@link #isDisabled} /
-     * {@link #isApplicationReadOnly}). Use this anywhere the LLM-visible field
-     * set matters (locking, tool inputs and outputs).
+     * Returns every {@link HasValue} in the form tree that the controller
+     * tracks — i.e. all discovered fields minus those hidden via
+     * {@link #ignore(HasValue)}. Visibility and enabled state are NOT filtered,
+     * so this is the right set for the snapshot + diff used by
+     * {@link #addFieldValueChangedListener}: a field hidden at turn start may
+     * be revealed during the turn, and a value cascaded into it should compare
+     * against its real pre-turn value rather than {@code null}.
+     */
+    private List<HasValue<?, ?>> collectKnownFields() {
+        return FormFieldDiscovery.collectFields(form).stream()
+                .filter(field -> !isIgnored(field)).toList();
+    }
+
+    /**
+     * Returns the subset of {@link #collectKnownFields()} the LLM currently
+     * acts on — visible fields only. Disabled and read-only fields are kept:
+     * the LLM reads them as context but cannot write them (see
+     * {@link #isDisabled} / {@link #isApplicationReadOnly}). Use this anywhere
+     * the LLM-visible field set matters (locking, tool inputs and outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
-        return FormFieldDiscovery.collectFields(form).stream()
-                .filter(field -> !isIgnored(field)).filter(this::isVisible)
-                .toList();
+        return collectKnownFields().stream().filter(this::isVisible).toList();
     }
 
     /**

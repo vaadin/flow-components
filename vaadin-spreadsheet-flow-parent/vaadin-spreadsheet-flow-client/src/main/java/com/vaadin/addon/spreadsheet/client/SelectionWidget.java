@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.MeasuredSize;
 import com.vaadin.client.WidgetUtil;
-import com.vaadin.client.ui.VOverlay;
 
 public class SelectionWidget extends Composite {
 
@@ -576,7 +575,7 @@ public class SelectionWidget extends Composite {
     private int selectionStartCol;
     private int selectionStartRow;
 
-    private VOverlay touchActions;
+    private SpreadsheetOverlay touchActions;
 
     private boolean dragging;
 
@@ -859,6 +858,7 @@ public class SelectionWidget extends Composite {
             }
 
             touchActions = new SpreadsheetOverlay(true);
+            touchActions.setOverlayContainer(sheetWidget.getOverlayContainer());
             touchActions.setOwner((Widget) sheetWidget.actionHandler);
             touchActions.addStyleName("v-contextmenu");
 
@@ -1032,11 +1032,12 @@ public class SelectionWidget extends Composite {
     /**
      *
      * @param sizes
+     *            the cell sizes
      * @param beginIndex
      *            1-based inclusive
      * @param endIndex
      *            1-based exclusive
-     * @return
+     * @return the sum of the sizes in the range
      */
     public int countSum(int[] sizes, int beginIndex, int endIndex) {
         if (sizes == null || sizes.length < endIndex - 1) {
@@ -1064,7 +1065,7 @@ public class SelectionWidget extends Composite {
      * @param forSelection
      *            true if the result is used for touch selection, false if it's
      *            used for painting cells
-     * @return
+     * @return the closest cell edge index
      */
     public int closestCellEdgeIndexToCursor(int cellSizes[], int startIndex,
             int cursorPosition, boolean forSelection) {

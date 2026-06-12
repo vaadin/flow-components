@@ -61,6 +61,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
          * Right click (event) on top of row header at the index
          *
          * @param nativeEvent
+         *            the native event
          * @param rowIndex
          *            1-based
          */
@@ -70,6 +71,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
          * Right click (event) on top of column header at the index
          *
          * @param nativeEvent
+         *            the native event
          * @param columnIndex
          *            1-based
          */
@@ -1597,9 +1599,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * update the sheet display after editing has finished
      *
+     * @param value
+     *            the cell value
      * @param focusSheet
-     *
-     * @param focusSheet
+     *            whether to focus the sheet after editing
      */
     private void cellEditingDone(String value, boolean focusSheet) {
         inlineEditing = false;
@@ -1622,7 +1625,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      *
      * @param value
+     *            the value
      * @param focusSheet
+     *            whether to focus the sheet
      */
     private void doDeferredCellValueCommit(final String value,
             final boolean focusSheet) {
@@ -2006,6 +2011,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * the client side cache, but the cell is not actually visible.
      *
      * @param updatedCellData
+     *            the updated cell data
      */
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
         sheetWidget.cellValuesUpdated(updatedCellData);
@@ -2045,10 +2051,30 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 initialSelection);
     }
 
+    /**
+     * Selects the given cell range, optionally scrolling it into view.
+     * <p>
+     * The call may be deferred until the sheet layout is ready. Sheet layout
+     * state is populated by a {@code scheduleDeferred} command in
+     * {@link SheetWidget#resetFromModel}, so this method can be called before
+     * {@link SheetWidget#isLoaded()} flips {@code true} — for instance when
+     * property writes and RPCs are flushed within the same task. In that
+     * window, {@code scrollAreaIntoView} would dereference an uninitialized
+     * {@code definedRowHeights}, so when the widget has not loaded yet the call
+     * is deferred via the same scheduler to run after the layout init command.
+     * Only this RPC touches row/column metrics, so only it needs deferring.
+     */
     public void selectCellRange(String name, int selectedCellColumn,
             int selectedCellRow, int firstColumn, int lastColumn, int firstRow,
             int lastRow, boolean scroll) {
-
+        if (!sheetWidget.isLoaded()) {
+            Scheduler.get()
+                    .scheduleDeferred(() -> selectionHandler.selectCellRange(
+                            name, selectedCellColumn, selectedCellRow,
+                            firstColumn, lastColumn, firstRow, lastRow,
+                            scroll));
+            return;
+        }
         selectionHandler.selectCellRange(name, selectedCellColumn,
                 selectedCellRow, firstColumn, lastColumn, firstRow, lastRow,
                 scroll);
@@ -2186,8 +2212,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarWidget.setNamedRanges(namedRanges);
     }
 
-    public void setHost(Element host, Node renderRoot) {
-        sheetWidget.setHost(host, renderRoot);
+    public void setHost(Element host, Node renderRoot,
+            Element overlayContainer) {
+        sheetWidget.setHost(host, renderRoot, overlayContainer);
     }
 
     /**

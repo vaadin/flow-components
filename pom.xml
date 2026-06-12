@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.3</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
     <version>25.3-SNAPSHOT</version>
@@ -83,11 +83,11 @@
         <jetty.stop.port>9999</jetty.stop.port>
         <jetty.scan>0</jetty.scan>
         <karaf-maven-plugin.version>4.4.11</karaf-maven-plugin.version>
-        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.5</maven.failsafe.plugin.version>
+        <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <spotless.plugin.version>3.6.0</spotless.plugin.version>
-        <checkstyle.version>13.4.2</checkstyle.version>
+        <checkstyle.version>13.5.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -102,12 +102,12 @@
         <cvdlName/>
         <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.5</spring-data-commons.version>
-        <reactor-core.version>3.8.5</reactor-core.version>
-        <langchain4j.version>1.14.1</langchain4j.version>
-        <spring-ai.version>2.0.0-M8</spring-ai.version>
+        <spring-data-commons.version>4.1.0</spring-data-commons.version>
+        <reactor-core.version>3.8.6</reactor-core.version>
+        <langchain4j.version>1.16.1</langchain4j.version>
+        <spring-ai.version>2.0.0-RC2</spring-ai.version>
         <junit.version>4.13.2</junit.version>
-        <junit.jupiter.version>6.0.3</junit.jupiter.version>
+        <junit.jupiter.version>6.1.0</junit.jupiter.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
@@ -308,7 +308,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>7.2.3</version>
+                    <version>7.3.0</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -319,14 +319,9 @@
 
                           dash: -
                           packageNameWithoutDash: ${replacestring;${packageNameWithDash};${dash};}
+                          packageName: ${replacestring;${packageNameWithoutDash};icons;icon}
 
-                          packageNameTmp: ${replacestring;${packageNameWithoutDash};icons;icon}
-
-                          isDemoPattern: .*-flow-demo
-                          isDemo: ${matches;${project.artifactId};${isDemoPattern}}
-                          packageName: ${packageNameTmp}${if;${isDemo};.demo}
-
-                          exportPackageDefault: ${project.groupId}.flow.component.*${packageName}.*
+                          exportPackageDefault: ${project.groupId}.flow.component.${packageName}.*
                           isExportPackageDefault: ${is;${osgi.export.package};default}
                           exportPackage: ${if;${isExportPackageDefault};${exportPackageDefault};${osgi.export.package}}
                           symbolicNameDefault: ${project.groupId}.flow.component.${packageName}
@@ -336,16 +331,13 @@
                           Bundle-SymbolicName: ${symbolicName}
 
                           Import-Package: *
-                          Export-Package: ${exportPackage};-noimport:=true
+                          Export-Package: ${join;${exportPackage};${osgi.export.package.additional}}
                           Bundle-License: ${osgi.bundle.license}
 
                           CvdlName: ${cvdlName}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                   includeresource.resources: -src/main/resources
-
-                          //if profile war is used in demos
-                  fixupmessages: "Classes found in the wrong directory";is:=warning
 
                           ]]></bnd>
                     </configuration>
@@ -434,7 +426,6 @@
                     <configuration>
                         <forkCount>${failsafe.forkCount}</forkCount>
                         <argLine>-Xmx2048m</argLine>
-                        <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
@@ -554,7 +545,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>3.6.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

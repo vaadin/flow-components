@@ -71,9 +71,7 @@ jobs:
       - name: Compute build cache key
         id: build-key
         if: steps.skip-ci.outputs.skip != 'true'
-        env:
-          KEY: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', '!integration-tests/**', '!**/frontend/generated/**', 'vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/*.js') }}
-        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
+        run: echo "key=${{ runner.os }}-build-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
       - name: Restore build cache
         id: build-cache
@@ -84,6 +82,17 @@ jobs:
             ~/.m2/repository/com/vaadin
             vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
           key: ${{ steps.build-key.outputs.key }}
+
+      # The build cache key never hits across runs, so without this cache the
+      # charts SVG generator (npm install + webpack + mocha) rebuilds on every
+      # run (~40s) even though its sources rarely change.
+      - name: Restore charts SVG generator cache
+        id: svg-cache
+        if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/cache@v5
+        with:
+          path: vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
+          key: ${{ runner.os }}-charts-svg-generator-${{ hashFiles('vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/**') }}
 
       - name: Setup JDK 21
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
@@ -111,11 +120,15 @@ jobs:
 
       - name: Install artifacts
         if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        env:
+          # On an SVG generator cache hit, skip its npm install/build/test and
+          # use the restored output instead.
+          SKIP_SVG_BUILD: ${{ steps.svg-cache.outputs.cache-hit == 'true' }}
         run: |
-          mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
+          mvn install -Dmaven.test.skip=true -DskipSvgChartsBuild=$SKIP_SVG_BUILD -Drelease -T $FORK_COUNT $MAVEN_ARGS || {
             echo "::warning::First attempt failed (Maven multi-thread race). Retrying..."
             sleep 15
-            mvn install -Dmaven.test.skip=true -Drelease -T $FORK_COUNT $MAVEN_ARGS
+            mvn install -Dmaven.test.skip=true -DskipSvgChartsBuild=$SKIP_SVG_BUILD -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
 
       - name: Detect modified components
@@ -152,7 +165,7 @@ jobs:
           echo "elements=$elements" >> "$GITHUB_OUTPUT"
 
   fast-tests:
-    name: ${{ matrix.name }}
+    name: Fast tests (${{ matrix.name }})
     needs: build
     if: needs.build.outputs.skip != 'true'
     runs-on: ubuntu-latest
@@ -500,9 +513,9 @@ jobs:
           if-no-files-found: ignore
 
   results:
-    name: Collect tests
+    name: Validation result
     needs: [build, fast-tests, its]
-    if: always() && needs.build.result == 'success'
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -670,10 +683,16 @@ jobs:
               gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id" || true
             done
 
-      - name: Fail if any test failed
+      - name: Fail if any job or test failed
         if: always()
         run: |
           failed=false
+          # Job-level failures (build/setup/compile/packaging/infra).
+          # Skipped is OK: skip-ci skips fast-tests/its, empty builds skip its.
+          for r in "${{ needs.build.result }}" "${{ needs.fast-tests.result }}" "${{ needs.its.result }}"; do
+            [[ "$r" == "failure" || "$r" == "cancelled" ]] && failed=true
+          done
+          # Actual test failures captured in the published reports.
           [[ "${{ steps.unit-dorny.outputs.conclusion }}" == "failure" ]] && failed=true
           [[ "${{ steps.wtr-dorny.outputs.conclusion }}"  == "failure" ]] && failed=true
           [[ "${{ steps.it-dorny.outputs.conclusion }}"   == "failure" ]] && failed=true

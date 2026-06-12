@@ -28,7 +28,7 @@ public class ValidationUtil {
     }
 
     /**
-     * Checks if the value satistifies the required constraint and returns a
+     * Checks if the value satisfies the required constraint and returns a
      * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with an
      * empty error message depending on the result.
      *
@@ -53,7 +53,7 @@ public class ValidationUtil {
     }
 
     /**
-     * Checks if the value satistifies the required constraint and returns a
+     * Checks if the value satisfies the required constraint and returns a
      * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
      * the given error message depending on the result.
      *

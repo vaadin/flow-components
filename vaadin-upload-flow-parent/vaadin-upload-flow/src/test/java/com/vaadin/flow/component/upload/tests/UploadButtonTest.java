@@ -25,10 +25,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.upload.ModularUploadFeatureFlagProvider;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -37,9 +35,6 @@ import net.jcip.annotations.NotThreadSafe;
 class UploadButtonTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            ModularUploadFeatureFlagProvider.MODULAR_UPLOAD);
 
     private Div owner;
     private UploadManager manager;
