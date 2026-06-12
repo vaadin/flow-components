@@ -435,7 +435,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   // Have the multi-selectable state updated on attach
-  grid._createPropertyObserver('isAttached', () => grid.$connector.updateMultiSelectable());
+  grid.__updateMultiSelectable = () => grid.$connector.updateMultiSelectable();
+  grid._createPropertyObserver('isAttached', '__updateMultiSelectable');
 
   const singleTimeRenderer = (renderer) => {
     return (root) => {
