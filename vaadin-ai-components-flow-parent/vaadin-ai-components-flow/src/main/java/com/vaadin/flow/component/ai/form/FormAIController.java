@@ -56,6 +56,15 @@ import tools.jackson.databind.JsonNode;
  * {@link AIOrchestrator.Builder#withController(AIController)
  * withController(...)}.
  *
+ * <pre>
+ * var controller = new FormAIController(formLayout, binder);
+ * controller.describe(discountField, "Discount as a percentage, not an amount")
+ *         .ignore(internalReferenceField);
+ * AIOrchestrator orchestrator = AIOrchestrator
+ *         .builder(llmProvider, systemPrompt).withController(controller)
+ *         .build();
+ * </pre>
+ *
  * <p>
  * The controller accepts any {@link HasComponents} container. It discovers
  * fields by walking the container's component tree and collecting every
@@ -79,23 +88,25 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
- * <b>Field identifiers:</b> the controller assigns an opaque UUID to each field
- * at discovery time and uses that UUID as the field's id in every tool call the
- * LLM makes. Developers never see UUIDs; the LLM never sees field labels in the
- * id slot. Semantic meaning travels through each field's <i>description</i> —
- * the field's label, helper text, and the {@link #describe(HasValue, String)}
- * hint.
+ * <b>How the LLM understands fields:</b> everything the LLM knows about a field
+ * comes from the field's label, its helper text, and the
+ * {@link #describe(HasValue, String)} hint. Make sure every field carries a
+ * meaningful label, or add a {@code describe(...)} hint for fields whose
+ * purpose is not evident from the label alone.
  * </p>
  *
  * <p>
  * <b>Binder integration:</b> the two-argument constructor accepts a
- * {@link Binder}. For every named binding ({@code bind("propertyName")},
+ * {@link Binder}, which affects the workflow in two ways. First, for every
+ * named binding ({@code bind("propertyName")},
  * {@code bindInstanceFields(this)}, or {@code @PropertyId}) the property name
- * is used as a default field description so the LLM can refer to the field by
- * its bean-side name. The default only applies when no explicit
- * {@link #describe(HasValue, String)} has been registered; calling
+ * is used as a default field description, so the LLM can recognize what the
+ * field means even when it has no label. The default only applies when no
+ * explicit {@link #describe(HasValue, String)} has been registered; calling
  * {@code describe(...)} always wins. Lambda-bound bindings carry no property
- * name and contribute no default.
+ * name and contribute no default. Second, the binder drives validation of the
+ * values the LLM writes, including bean-level cross-field rules — see
+ * <b>Validation</b> below.
  * </p>
  *
  * <p>
@@ -105,7 +116,11 @@ import tools.jackson.databind.JsonNode;
  * that exposes a default validator is validated through that validator. A value
  * that fails validation stays in the field and the failure is reported back to
  * the LLM as a rejection, so it can supply a corrected value within the same
- * turn.
+ * turn. When the controller was created with a {@link Binder} and a bean is set
+ * ({@code setBean}), the binder's bean-level validators
+ * ({@code binder.withValidator(...)}) also run after the writes; a cross-field
+ * failure (for example "start date must precede end date") is likewise reported
+ * back to the LLM so it can adjust the offending fields within the same turn.
  * </p>
  *
  * <p>
@@ -116,10 +131,10 @@ import tools.jackson.databind.JsonNode;
  * Application code that turns a locked field read-only mid-turn (e.g. from a
  * value-change listener reacting to the LLM's writes) is not honoured: the
  * field already reports read-only because of the lock, so the controller cannot
- * tell the application's toggle apart from its own lock. {@code fill_form}
- * still writes the field, and the lock is released at turn end regardless.
- * Applications should avoid toggling read-only state during a fill turn, or
- * reapply it after the turn completes.
+ * tell the application's toggle apart from its own lock. The AI can still write
+ * the field, and the lock is released at turn end regardless. Applications
+ * should avoid toggling read-only state during a fill turn, or reapply it after
+ * the turn completes.
  * </p>
  *
  * <p>
@@ -135,9 +150,8 @@ import tools.jackson.databind.JsonNode;
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
- * Re-register the same {@code describe} / {@code valueOptions} hints; field ids
- * remain stable across the round-trip because they live on the field Components
- * themselves.
+ * Re-register the same {@code describe} / {@code valueOptions} / {@code ignore}
+ * hints on the new controller.
  * </p>
  *
  * @author Vaadin Ltd
@@ -255,9 +269,12 @@ public class FormAIController implements AIController {
      * Creates a new form AI controller for the given container and binder. For
      * every named binding on the binder, the bean property name is used as a
      * default {@link #describe(HasValue, String) description} when the
-     * developer has not registered one explicitly; the controller itself still
-     * uses an opaque UUID as the field's tool-call id. Lambda-bound bindings
-     * carry no property name and contribute no default.
+     * developer has not registered one explicitly; lambda-bound bindings carry
+     * no property name and contribute no default. The binder also drives
+     * validation of the values the LLM writes: bound fields are validated
+     * through their bindings (converter and validators as one unit), and
+     * bean-level cross-field validators run as well when a bean is set. See the
+     * class-level documentation for details.
      *
      * @param form
      *            the container whose fields the LLM may populate, not
@@ -411,9 +428,10 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Hides the given field from the LLM. The field is excluded from the tool
-     * surface and is not locked during a fill. Use this for fields the AI must
-     * not read or write (password fields, internal IDs, PII).
+     * Hides the given field from the LLM. The field's value is never exposed to
+     * the LLM, the LLM cannot write to it, and it is not locked during a fill.
+     * Use this for fields the AI must not read or write (internal IDs, PII).
+     * Password fields are excluded automatically and do not need to be ignored.
      *
      * @param field
      *            the field to hide, not {@code null}
@@ -468,11 +486,11 @@ public class FormAIController implements AIController {
      * {@link HasValue} {@link Component}, in or out of this controller's form,
      * and each field's highlight state is independent of the others.
      * <p>
-     * The AI user added to the field carries a UUID id unique to this
-     * controller, so the highlight coexists with any other
-     * {@code vaadin-field-highlighter} users the application keeps on the field
-     * (e.g. from a collaboration session) as long as those consumers also use
-     * {@code addUser} / {@code removeUser} rather than {@code setUsers}.
+     * The AI user added to the field carries an id unique to this controller,
+     * so the highlight coexists with any other {@code vaadin-field-highlighter}
+     * users the application keeps on the field (e.g. from a collaboration
+     * session) as long as those consumers also use {@code addUser} /
+     * {@code removeUser} rather than {@code setUsers}.
      * <p>
      * The first {@code showHighlight} call on a field also registers an attach
      * listener that re-applies the AI user every time the field re-enters the
