@@ -22,6 +22,7 @@ export type GridConnector = {
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number) => void;
   setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
+  getRenderedRange: () => [number, number];
   setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
 };
 
