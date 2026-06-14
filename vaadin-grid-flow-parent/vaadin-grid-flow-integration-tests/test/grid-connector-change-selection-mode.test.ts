@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { init, getBodyCellContent, setRootItems, initSelectionColumn } from './shared.js';
-import type { FlowGrid } from './shared.js';
+import type { FlowGrid, FlowGridSelectionColumn } from './shared.js';
 
 describe('grid connector - change selection mode', () => {
   let grid: FlowGrid;
 
   function clickSelectCheckbox(row: number) {
-    getBodyCellContent(grid, row, 0)!.querySelector('vaadin-checkbox')!.click();
+    getBodyCellContent(grid, row, 0)!.querySelector<HTMLElement>('vaadin-checkbox')!.click();
   }
 
   beforeEach(async () => {
@@ -20,7 +20,7 @@ describe('grid connector - change selection mode', () => {
 
     init(grid);
 
-    const selectionColumn = grid.querySelector('vaadin-grid-flow-selection-column')!;
+    const selectionColumn = grid.querySelector<FlowGridSelectionColumn>('vaadin-grid-flow-selection-column')!;
     initSelectionColumn(grid, selectionColumn);
 
     setRootItems(grid.$connector, [

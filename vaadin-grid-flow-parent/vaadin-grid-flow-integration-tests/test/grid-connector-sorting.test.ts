@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { getHeaderCellContent, init, setRootItems } from './shared.js';
 import type { FlowGrid, FlowGridSorter, Item } from './shared.js';
-import { GridColumn } from '@vaadin/grid';
+import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
 
 describe('grid connector - sorting', () => {

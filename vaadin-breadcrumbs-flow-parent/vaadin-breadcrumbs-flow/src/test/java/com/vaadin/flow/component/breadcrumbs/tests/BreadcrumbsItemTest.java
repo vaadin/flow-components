@@ -94,6 +94,35 @@ class BreadcrumbsItemTest {
     }
 
     @Test
+    void setPathWithUnsafeScheme_throws() {
+        var item = new BreadcrumbsItem("Docs");
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> item.setPath("javascript:alert(1)"));
+    }
+
+    @Test
+    void setUnsafePathWithUnsafeScheme_pathSet() {
+        var item = new BreadcrumbsItem("Docs");
+        item.setUnsafePath("javascript:alert(1)");
+
+        Assertions.assertEquals("javascript:alert(1)", item.getPath());
+    }
+
+    @Test
+    void constructor_textPath_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)"));
+    }
+
+    @Test
+    void constructor_textPathPrefixComponent_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)",
+                        new Div()));
+    }
+
+    @Test
     void setNullStringPath_pathAttributeRemoved() {
         var item = new BreadcrumbsItem("Docs", "/docs");
         item.setPath((String) null);

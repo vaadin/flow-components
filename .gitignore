@@ -20,6 +20,7 @@ pom.xml.bak
 .vscode
 types.d.ts
 tsconfig.json
+!**/test/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts

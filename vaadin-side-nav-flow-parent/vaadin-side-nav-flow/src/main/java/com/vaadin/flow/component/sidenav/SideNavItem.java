@@ -44,6 +44,7 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+import com.vaadin.flow.server.InitParameters;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -86,6 +87,11 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the label for the item
      * @param path
      *            the path to link to
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public SideNavItem(String label, String path) {
         setPath(path);
@@ -153,6 +159,11 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the path to link to
      * @param prefixComponent
      *            the prefix component for the item (usually an icon)
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      */
     public SideNavItem(String label, String path, Component prefixComponent) {
         setPath(path);
@@ -251,6 +262,34 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
+        if (path != null && !UrlUtil.isSafeUrl(path)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "path", path, "setUnsafePath(String)"));
+        }
+        doSetPath(path);
+    }
+
+    /**
+     * Sets the path this navigation item links to without validating its
+     * scheme.
+     * <p>
+     * Unlike {@link #setPath(String)}, this method does not reject paths based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for paths that are fully under your control and known to be safe,
+     * such as a hard-coded {@code javascript:} URL. Passing untrusted input
+     * here can expose the application to cross-site scripting (XSS) attacks.
+     *
+     * @see #setPath(String)
+     *
+     * @param path
+     *            The path to link to. Set to null to disable navigation for
+     *            this item.
+     */
+    public void setUnsafePath(String path) {
+        doSetPath(path);
+    }
+
+    private void doSetPath(String path) {
         if (path == null) {
             getElement().removeAttribute("path");
         } else {
