@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.tests;
 import java.util.Map;
 
 import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -26,11 +27,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 /**
- * Manual test page for the AI field marker that {@link FormAIController} applies
- * to fields it fills. "Fill with AI" simulates an AI turn that writes values
- * into the form and marks every changed field. The marker shows an "AI" badge
- * with a popover that explains the fill and offers a revert control; reverting
- * restores the field's pre-fill value and clears the marker.
+ * Manual test page for the AI field marker that {@link FormAIController}
+ * applies to fields it fills. "Fill with AI" simulates an AI turn that writes
+ * values into the form and marks every changed field. The marker shows an "AI"
+ * badge with a popover that explains the fill and offers a revert control;
+ * reverting restores the field's pre-fill value and clears the marker.
  *
  * @author Vaadin Ltd
  */
@@ -50,6 +51,14 @@ public class FormFieldMarkerPage extends VerticalLayout {
         // Pre-existing user input that the simulated AI fill will overwrite, so
         // reverting visibly differs from the AI-filled value.
         company.setValue("Acme Inc.");
+
+        // Slot custom content into this field's marker popover. The marker
+        // forwards a field child with slot="ai-field-marker-popover-content"
+        // into the popover, below the explanation and above the revert control.
+        var explanation = new Anchor("#", "Why was this filled in?");
+        explanation.getElement().setAttribute("slot",
+                "ai-field-marker-popover-content");
+        company.getElement().appendChild(explanation.getElement());
 
         var form = new VerticalLayout(name, email, company, bio);
         form.setId("form");
