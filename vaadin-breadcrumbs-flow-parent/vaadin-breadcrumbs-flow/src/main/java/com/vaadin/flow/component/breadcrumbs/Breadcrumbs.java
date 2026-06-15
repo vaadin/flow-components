@@ -37,6 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -72,7 +73,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
 
     private Mode mode;
 
-    private boolean routerUpdateInProgress;
+    private boolean internalChildUpdate;
 
     private BreadcrumbsI18n i18n;
 
@@ -114,10 +115,19 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
      * @param newMode
      *            the mode that determines how the trail is populated, not
      *            {@code null}
+     * @throws IllegalStateException
+     *             if a children binding set via {@code bindChildren} is active;
+     *             such a binding takes over the trail and cannot be handed back
+     *             to component-controlled population, so it must be removed
+     *             before switching modes
      */
     public void setMode(Mode newMode) {
         if (newMode == mode) {
             return;
+        }
+        if (hasChildrenBinding()) {
+            throw new IllegalStateException(
+                    "Cannot change the mode while a children binding is active.");
         }
         this.mode = newMode;
         // Listener register/unregister and the initial router rebuild are
@@ -186,12 +196,12 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
      * Throws if manual child mutation is not allowed in the current mode.
      * <p>
      * Mutating children is rejected while in {@link Mode#ROUTER}, unless the
-     * internal {@link #routerUpdateInProgress} flag is set (i.e. the change
-     * originates from the router-driven rebuild via
-     * {@link #updateChildrenInternal(List)}).
+     * internal {@link #internalChildUpdate} flag is set (i.e. the change
+     * originates from an internal child update such as a mode switch or a
+     * router-driven rebuild via {@link #updateChildrenInternal(List)}).
      */
     private void checkManualMutationAllowed() {
-        if (mode == Mode.ROUTER && !routerUpdateInProgress) {
+        if (mode == Mode.ROUTER && !internalChildUpdate) {
             throw new IllegalStateException(
                     "Cannot modify breadcrumb items manually in Mode.ROUTER. "
                             + "Switch to Mode.MANUAL to manage items directly.");
@@ -199,21 +209,38 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
     }
 
     /**
-     * Replaces the current children with the given router-derived trail,
-     * bypassing the {@link Mode#ROUTER} mutation guard for the duration of the
-     * update.
+     * Replaces the current children with the given trail, bypassing the
+     * {@link Mode#ROUTER} mutation guard for the duration of the update. Used
+     * both for the router-driven rebuild and for clearing children on a mode
+     * switch.
      *
      * @param trail
      *            the breadcrumb items to set as the new children
      */
     void updateChildrenInternal(List<BreadcrumbsItem> trail) {
-        routerUpdateInProgress = true;
+        internalChildUpdate = true;
         try {
             removeAll();
             add(trail.toArray(BreadcrumbsItem[]::new));
         } finally {
-            routerUpdateInProgress = false;
+            internalChildUpdate = false;
         }
+    }
+
+    /**
+     * Checks whether a children binding (set via {@code bindChildren}) is
+     * currently active on this component's element. Mirrors the internal check
+     * Flow core performs, reading the binding state from the element node
+     * rather than tracking a separate field.
+     *
+     * @return {@code true} if a children binding is active
+     */
+    private boolean hasChildrenBinding() {
+        return getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .map(feature -> feature
+                        .hasBinding(SignalBindingFeature.CHILDREN))
+                .orElse(false);
     }
 
     @Override
