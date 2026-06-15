@@ -92,7 +92,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
 
     private BreadcrumbsI18n i18n;
 
-    private transient Registration navigationRegistration;
+    private Registration navigationRegistration;
 
     /**
      * Creates a new breadcrumbs component in {@link Mode#ROUTER} mode.
