@@ -51,7 +51,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyId;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
@@ -1444,12 +1446,11 @@ class FormAIControllerTest {
     @Nested
     class Highlight {
 
-        // Field-highlighter integration is exercised through the JS
-        // invocations the controller queues on the field's element. We
-        // assert on the queued script text rather than DOM side effects
-        // because the real visual change happens in the web component, on
-        // the client. Tests use a minimal UI so executeJs lands in the
-        // pending-invocation list.
+        // Marker integration is exercised through the JS invocations the
+        // controller queues on the field's element. We assert on the queued
+        // script text rather than DOM side effects because the real visual
+        // change happens in the web component, on the client. Tests use a
+        // minimal UI so executeJs lands in the pending-invocation list.
 
         private UI ui;
 
@@ -1461,67 +1462,48 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showHighlightQueuesAddUserWithSingleAIUser() {
+        void showHighlightQueuesMarkScript() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.showHighlight(field);
-            var invocations = drainPendingJs();
-            var scripts = scriptsOn(invocations, field);
+            var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(1, scripts.size(),
                     "showHighlight must queue exactly one script; got: "
                             + scripts);
-            var script = scripts.getFirst();
-            Assertions.assertTrue(script.contains(
-                    "customElements.get('vaadin-field-highlighter').addUser")
-                    && script.contains("'AI'"),
-                    "Script must invoke the field-highlighter addUser with "
-                            + "the AI user; got: " + script);
-            Assertions.assertTrue(
-                    paramsOn(invocations, field).stream()
-                            .anyMatch(p -> p instanceof String s
-                                    && s.startsWith("vaadin-ai-")),
-                    "addUser must be parameterised with a vaadin-ai- prefixed "
-                            + "UUID so it cannot collide with other users on "
-                            + "the field");
+            Assertions.assertTrue(scripts.getFirst().contains(
+                    "customElements.get('vaadin-ai-field-marker').mark(this)"),
+                    "Script must invoke the marker's mark(this); got: "
+                            + scripts.getFirst());
         }
 
         @Test
-        void hideHighlightQueuesRemoveUserWithControllerId() {
+        void hideHighlightQueuesUnmarkScript() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.hideHighlight(field);
-            var invocations = drainPendingJs();
-            var scripts = scriptsOn(invocations, field);
+            var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(1, scripts.size(),
                     "hideHighlight must queue exactly one script; got: "
                             + scripts);
-            var script = scripts.getFirst();
-            Assertions.assertTrue(script.contains(
-                    "customElements.get('vaadin-field-highlighter').removeUser"),
-                    "Script must invoke removeUser keyed by the controller's "
-                            + "AI user id; got: " + script);
-            Assertions.assertTrue(
-                    paramsOn(invocations, field).stream()
-                            .anyMatch(p -> p instanceof String s
-                                    && s.startsWith("vaadin-ai-")),
-                    "removeUser must be parameterised with the controller's "
-                            + "vaadin-ai- prefixed UUID so it removes only the "
-                            + "AI user and leaves other users untouched");
+            Assertions.assertTrue(scripts.getFirst().contains(
+                    "customElements.get('vaadin-ai-field-marker').unmark(this)"),
+                    "Script must invoke the marker's unmark(this); got: "
+                            + scripts.getFirst());
         }
 
         @Test
         void showHighlightTwiceQueuesIdenticalScripts() {
-            // The web component dedups by user id, so repeated addUser with
-            // the same id collapses to one entry on the client. The Java
-            // side simply queues the same script twice.
+            // mark() is idempotent on the client, so repeated calls collapse
+            // to a single marker. The Java side simply queues the same script
+            // twice.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
@@ -1622,7 +1604,7 @@ class FormAIControllerTest {
         @Test
         void highlightOnOneFieldDoesNotEmitJsForAnother() {
             // Two fields, only one is highlighted. The other field must not
-            // receive any field-highlighter script.
+            // receive any marker script.
             var highlighted = new TestField();
             var untouched = new TestField();
             var form = new Div(highlighted, untouched);
@@ -1696,7 +1678,7 @@ class FormAIControllerTest {
         @Test
         void showHighlightReappliesOnReattach() {
             // Detach drops the client-side highlight; the controller's
-            // attach listener must re-issue addUser on the next attach so
+            // attach listener must re-issue mark on the next attach so
             // the user does not lose the visual cue.
             var field = new TestField();
             var form = new Div(field);
@@ -1709,17 +1691,17 @@ class FormAIControllerTest {
             form.remove(field);
             form.add(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
+            var markScripts = pendingJsOn(field).stream()
                     .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
-                    "Re-attach must re-issue exactly one addUser script; "
-                            + "got: " + addUserScripts);
+            Assertions.assertEquals(1, markScripts.size(),
+                    "Re-attach must re-issue exactly one mark script; "
+                            + "got: " + markScripts);
         }
 
         @Test
         void hideHighlightCancelsReapplyOnReattach() {
             // hide removes the attach listener as well as queueing
-            // removeUser; a subsequent detach/re-attach must not bring the
+            // unmark; a subsequent detach/re-attach must not bring the
             // highlight back.
             var field = new TestField();
             var form = new Div(field);
@@ -1733,17 +1715,17 @@ class FormAIControllerTest {
             form.remove(field);
             form.add(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
+            var markScripts = pendingJsOn(field).stream()
                     .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(0, addUserScripts.size(),
-                    "After hide, re-attach must not re-issue addUser; got: "
-                            + addUserScripts);
+            Assertions.assertEquals(0, markScripts.size(),
+                    "After hide, re-attach must not re-issue mark; got: "
+                            + markScripts);
         }
 
         @Test
         void repeatedShowDoesNotStackReapplyListeners() {
             // Two showHighlight calls must register exactly one attach
-            // listener. Otherwise re-attach would queue duplicate addUser
+            // listener. Otherwise re-attach would queue duplicate mark
             // scripts and leak listeners across the field's lifetime.
             var field = new TestField();
             var form = new Div(field);
@@ -1757,12 +1739,12 @@ class FormAIControllerTest {
             form.remove(field);
             form.add(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
+            var markScripts = pendingJsOn(field).stream()
                     .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
+            Assertions.assertEquals(1, markScripts.size(),
                     "Repeated show calls must collapse to one attach "
-                            + "listener; re-attach must re-issue addUser "
-                            + "exactly once; got: " + addUserScripts);
+                            + "listener; re-attach must re-issue mark "
+                            + "exactly once; got: " + markScripts);
         }
 
         @Test
@@ -1783,25 +1765,84 @@ class FormAIControllerTest {
             form.remove(field);
             form.add(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
+            var markScripts = pendingJsOn(field).stream()
                     .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
+            Assertions.assertEquals(1, markScripts.size(),
                     "Show after hide must reinstall the re-apply listener; "
-                            + "re-attach must re-issue addUser exactly once; "
-                            + "got: " + addUserScripts);
+                            + "re-attach must re-issue mark exactly once; "
+                            + "got: " + markScripts);
         }
 
-        // Tie the JS-shape check to the conceptual operation so call
-        // sites read as "is this a show / hide?" instead of grepping the
-        // raw JS string. The canonical add/remove-user test (above) pins
-        // the exact JS contract; these helpers are for follow-on tests
-        // that only need to distinguish show from hide.
+        @Test
+        void revertEventRestoresPreTurnValueAndClearsMarker() {
+            // The documented usage: highlight changed fields from the
+            // values-changed listener. The marker's ai-field-revert event must
+            // then restore the field's pre-turn value and clear the marker.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+            controller.addFieldValueChangedListener(changes -> changes.forEach(
+                    change -> controller.showHighlight(change.field())));
+
+            field.setValue("old");
+            controller.onRequest();
+            field.setValue("new");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            fireRevert(field);
+
+            Assertions.assertEquals("old", field.getValue(),
+                    "Revert must restore the field's pre-turn value");
+            Assertions.assertTrue(pendingJsOn(field).stream()
+                    .anyMatch(Highlight::isHideScript),
+                    "Revert must clear the marker via unmark");
+        }
+
+        @Test
+        void revertWithoutTrackedValueOnlyClearsMarker() {
+            // showHighlight outside a turn captures no revert value, so revert
+            // must leave the value alone and only clear the marker.
+            var field = new TestField();
+            field.setValue("current");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showHighlight(field);
+            drainPendingJs();
+
+            fireRevert(field);
+
+            Assertions.assertEquals("current", field.getValue(),
+                    "With no tracked value, revert must not change the value");
+            Assertions.assertTrue(pendingJsOn(field).stream()
+                    .anyMatch(Highlight::isHideScript),
+                    "Revert must still clear the marker via unmark");
+        }
+
+        // Tie the JS-shape check to the conceptual operation so call sites
+        // read as "is this a mark / unmark?" instead of grepping the raw JS
+        // string. The canonical mark/unmark tests (above) pin the exact JS
+        // contract; these helpers are for follow-on tests that only need to
+        // distinguish the two. "unmark" contains "mark", so match the leading
+        // dot to tell them apart.
         private static boolean isShowScript(String script) {
-            return script.contains("addUser");
+            return script.contains(".mark(");
         }
 
         private static boolean isHideScript(String script) {
-            return script.contains("removeUser");
+            return script.contains(".unmark(");
+        }
+
+        // Dispatch the marker's revert event server-side so tests can drive
+        // the revert path without a real client.
+        private static void fireRevert(Component field) {
+            var element = field.getElement();
+            element.getNode().getFeature(ElementListenerMap.class).fireEvent(
+                    new DomEvent(element, "ai-field-revert",
+                            JacksonUtils.createObjectNode()));
         }
 
         private List<String> pendingJsOn(HasElement target) {
@@ -1825,18 +1866,6 @@ class FormAIControllerTest {
                     .filter(p -> p.getInvocation().getParameters()
                             .contains(target.getElement()))
                     .map(p -> p.getInvocation().getExpression()).toList();
-        }
-
-        // Flattened parameter list for every invocation targeted at `target`.
-        // Used to assert on the values bound to $0, $1, ... in the queued
-        // script expressions.
-        private static List<Object> paramsOn(
-                List<PendingJavaScriptInvocation> dump, HasElement target) {
-            return dump.stream()
-                    .filter(p -> p.getInvocation().getParameters()
-                            .contains(target.getElement()))
-                    .flatMap(p -> p.getInvocation().getParameters().stream())
-                    .map(p -> (Object) p).toList();
         }
     }
 

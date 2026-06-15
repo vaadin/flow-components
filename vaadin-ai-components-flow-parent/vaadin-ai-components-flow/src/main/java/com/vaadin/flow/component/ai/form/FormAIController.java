@@ -252,13 +252,20 @@ public class FormAIController implements AIController {
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
-    private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
     /**
-     * Per-field attach-listener registrations that re-apply the AI highlight
-     * after detach/re-attach. Populated on the first {@link #showHighlight}
-     * call for a field; entries are removed by {@link #hideHighlight}.
+     * Per-field registrations that re-apply the AI marker after detach/re-attach
+     * and listen for the field's {@code ai-field-revert} event. Populated on the
+     * first {@link #showHighlight} call for a field; entries are removed by
+     * {@link #hideHighlight}.
      */
     private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
+    /**
+     * Per-field value to restore when the user reverts the AI fill. Captured
+     * from the turn diff in {@link #fireFieldValuesChanged} and consumed by the
+     * {@code ai-field-revert} handler; entries are removed by
+     * {@link #hideHighlight}.
+     */
+    private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
     private final List<SerializableConsumer<List<FieldValueChange>>> fieldValuesChangedListeners = new ArrayList<>();
 
     /**
@@ -561,26 +568,25 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Paints a highlight on the field via the {@code vaadin-field-highlighter}
-     * web component. Repeated calls keep exactly one highlight on the field.
-     * Call {@link #hideHighlight} to clear it. The field can be any
+     * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
+     * component: it shows an "AI" badge and a popover that explains the fill and
+     * offers a revert control. Repeated calls keep exactly one marker on the
+     * field. Call {@link #hideHighlight} to clear it. The field can be any
      * {@link HasValue} {@link Component}, in or out of this controller's form,
-     * and each field's highlight state is independent of the others.
+     * and each field's marker state is independent of the others.
      * <p>
-     * The AI user added to the field carries an id unique to this controller,
-     * so the highlight coexists with any other {@code vaadin-field-highlighter}
-     * users the application keeps on the field (e.g. from a collaboration
-     * session) as long as those consumers also use {@code addUser} /
-     * {@code removeUser} rather than {@code setUsers}.
-     * <p>
-     * The first {@code showHighlight} call on a field also registers an attach
-     * listener that re-applies the AI user every time the field re-enters the
-     * DOM, so the highlight survives detach/re-attach. The listener is removed
-     * by {@link #hideHighlight}.
+     * The first {@code showHighlight} call on a field registers an attach
+     * listener that re-applies the marker every time the field re-enters the DOM
+     * (so it survives detach/re-attach) and a listener for the marker's
+     * {@code ai-field-revert} event that restores the field's pre-fill value and
+     * clears the marker. The value restored is the one captured for the most
+     * recent turn in which the field changed (see
+     * {@link #addFieldValueChangedListener}); when no such value is known the
+     * revert only clears the marker. Both listeners are removed by
+     * {@link #hideHighlight}.
      *
      * @param field
-     *            the field to highlight, not {@code null}; must be a
-     *            {@link Component}
+     *            the field to mark, not {@code null}; must be a {@link Component}
      * @throws NullPointerException
      *             if {@code field} is {@code null}
      * @throws IllegalArgumentException
@@ -589,25 +595,31 @@ public class FormAIController implements AIController {
     public void showHighlight(HasValue<?, ?> field) {
         var component = requireFieldComponent(field);
         var element = component.getElement();
-        highlightedFields.computeIfAbsent(field,
-                ignored -> component.addAttachListener(
-                        event -> FormFieldHighlighter.show(element, aiUserId)));
-        FormFieldHighlighter.show(element, aiUserId);
+        highlightedFields.computeIfAbsent(field, ignored -> {
+            var attach = component
+                    .addAttachListener(event -> FormFieldMarker.mark(element));
+            var revert = element.addEventListener("ai-field-revert",
+                    event -> revertField(field));
+            return () -> {
+                attach.remove();
+                revert.remove();
+            };
+        });
+        FormFieldMarker.mark(element);
     }
 
     /**
-     * Clears any highlight previously applied to the field via
-     * {@link #showHighlight}. A no-op when no highlight is currently shown.
-     * Only this controller's AI user is removed; other users on the field stay
-     * highlighted. The field can be any {@link HasValue} {@link Component}, in
-     * or out of this controller's form, and clearing one field's highlight has
-     * no effect on others. The re-attach listener registered by
-     * {@link #showHighlight} is also removed, so the highlight does not come
-     * back if the field leaves and returns to the DOM after this call.
+     * Clears any marker previously applied to the field via
+     * {@link #showHighlight}. A no-op when no marker is currently shown. The
+     * field can be any {@link HasValue} {@link Component}, in or out of this
+     * controller's form, and clearing one field's marker has no effect on
+     * others. The re-attach and revert listeners registered by
+     * {@link #showHighlight} are removed, so the marker does not come back if
+     * the field leaves and returns to the DOM after this call.
      *
      * @param field
-     *            the field to clear the highlight from, not {@code null}; must
-     *            be a {@link Component}
+     *            the field to clear the marker from, not {@code null}; must be a
+     *            {@link Component}
      * @throws NullPointerException
      *             if {@code field} is {@code null}
      * @throws IllegalArgumentException
@@ -619,7 +631,39 @@ public class FormAIController implements AIController {
         if (registration != null) {
             registration.remove();
         }
-        FormFieldHighlighter.hide(element, aiUserId);
+        revertValues.remove(field);
+        FormFieldMarker.unmark(element);
+    }
+
+    /**
+     * Restores the field's pre-fill value (when known) and clears its marker.
+     * Invoked by the {@code ai-field-revert} event the marker fires when the
+     * user activates the revert control.
+     *
+     * @param field
+     *            the field to revert, not {@code null}
+     */
+    private void revertField(HasValue<?, ?> field) {
+        if (revertValues.containsKey(field)) {
+            restoreValue(field, revertValues.get(field));
+        }
+        hideHighlight(field);
+    }
+
+    /**
+     * Writes {@code value} back to {@code field}. The value originates from the
+     * field's own {@link HasValue#getValue()} captured at turn start, so the
+     * cast is type-safe at runtime; a {@code null} is restored via
+     * {@link HasValue#clear()} because some fields reject
+     * {@code setValue(null)}.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void restoreValue(HasValue field, Object value) {
+        if (value == null) {
+            field.clear();
+        } else {
+            field.setValue(value);
+        }
     }
 
     private static Component requireFieldComponent(HasValue<?, ?> field) {
@@ -741,6 +785,10 @@ public class FormAIController implements AIController {
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
                 changes.add(new FieldValueChange(field, oldValue, newValue));
+                // Remember the pre-turn value so a later showHighlight on this
+                // field can revert to it. Captured before listeners run because
+                // they call showHighlight and preTurnValues is cleared below.
+                revertValues.put(field, oldValue);
             }
         }
         preTurnValues.clear();
