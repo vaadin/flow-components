@@ -1,0 +1,80 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.spreadsheet;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.HashMap;
+
+import org.apache.poi.ss.usermodel.Cell;
+
+/**
+ * Decides whether a formatted cell value fits the cell's column width given the
+ * cell's style-specific character-width ratio. Used to drive scientific
+ * notation fallback for numeric cells whose formatted value would overflow.
+ *
+ * <p>
+ * Owns the {@code cellStyleIndex → characterWidthRatio} map (sent from the
+ * client side as cells are measured). When the map has no entry for a style
+ * index, the calculator assumes the value fits — the client will measure on the
+ * next sync.
+ *
+ * <p>
+ * The cell-width measurement (which accounts for merged-region spans) lives on
+ * {@link CellValueManager#getCellWidth(Cell)} and is passed in as a parameter —
+ * the calculator stays free of POI-merged-region knowledge.
+ */
+final class CellFitCalculator implements Serializable {
+
+    private HashMap<Integer, Float> cellStyleWidthRatioMap;
+
+    CellFitCalculator() {
+    }
+
+    void onWidthRatioUpdate(HashMap<Integer, Float> ratios) {
+        // Replace, don't merge — matches the original CellValueManager
+        // behavior (the field was reassigned, not putAll'd). Callers expect a
+        // full overwrite per ratio-update payload from the client.
+        cellStyleWidthRatioMap = ratios;
+    }
+
+    /**
+     * {@code true} if no width-ratio entry exists yet (caller must assume fit)
+     * or if the value's pixel width is within the cell's column width minus 4px
+     * for left/right padding.
+     */
+    boolean doesValueFit(Cell cell, String value, int cellWidthPixels) {
+        if (cellStyleWidthRatioMap == null) {
+            return true;
+        }
+        Float r = cellStyleWidthRatioMap
+                .get((int) cell.getCellStyle().getIndex());
+        if (r == null) {
+            return true;
+        }
+        BigDecimal ratio = BigDecimal.valueOf(r);
+        BigDecimal stringPixels = ratio
+                .multiply(BigDecimal.valueOf(value.length()));
+        // The -4 here is for 2px cell left/right padding
+        BigDecimal columnWidth = BigDecimal.valueOf(cellWidthPixels - 4d);
+        return stringPixels.compareTo(columnWidth) <= 0;
+    }
+
+    /**
+     * Width-ratio for the given style index, or {@code null} if the client
+     * hasn't reported one yet. Used by the scientific-notation branch to feed
+     * {@link CellValueFormatter#getScientificNotationStringForNumericCell}.
+     */
+    Float getRatioForStyleIndex(int styleIndex) {
+        if (cellStyleWidthRatioMap == null) {
+            return null;
+        }
+        return cellStyleWidthRatioMap.get(styleIndex);
+    }
+}

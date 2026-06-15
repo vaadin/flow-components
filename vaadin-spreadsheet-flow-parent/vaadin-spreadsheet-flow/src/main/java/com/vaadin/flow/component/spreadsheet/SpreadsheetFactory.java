@@ -518,6 +518,19 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void calculateSheetSizes(final Spreadsheet spreadsheet,
             final Sheet sheet) {
+        int maxCellsAcrossRows = calculateRowHeights(spreadsheet, sheet);
+        calculateColumnWidths(spreadsheet, sheet, maxCellsAcrossRows);
+    }
+
+    /**
+     * Sizes the row-height array for {@code sheet}, computes per-row heights
+     * (using sheet defaults for empty rows past the last populated row, 0.0f
+     * for {@code getZeroHeight()} rows), and records the row indices that came
+     * back hidden. Returns the maximum {@code row.getLastCellNum()} observed —
+     * the column-width pass needs it to size its own array.
+     */
+    private static int calculateRowHeights(final Spreadsheet spreadsheet,
+            final Sheet sheet) {
         // Always have at least the default amount of rows
         int rows = sheet.getLastRowNum() + 1;
         if (rows < spreadsheet.getDefaultRowCount()) {
@@ -564,7 +577,18 @@ public class SpreadsheetFactory implements Serializable {
         }
         spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
         spreadsheet.setRowH(rowHeights);
+        return cols;
+    }
 
+    /**
+     * Sizes the column-width array (using {@code maxCellsAcrossRows} as the
+     * floor, bumped up to the default column count if smaller), and reads each
+     * column's width in pixels from POI, recording the column indices that are
+     * hidden as 0-width.
+     */
+    private static void calculateColumnWidths(final Spreadsheet spreadsheet,
+            final Sheet sheet, int maxCellsAcrossRows) {
+        int cols = maxCellsAcrossRows;
         // Always have at least the default amount of columns
         if (cols < spreadsheet.getDefaultColumnCount()) {
             cols = spreadsheet.getDefaultColumnCount();
@@ -588,6 +612,13 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Loads all data relating to grouping if the current sheet is a
      * {@link XSSFSheet}.
+     *
+     * <p>
+     * Top-level orchestrator: bail out for HSSF, capture sheet-protection /
+     * outline-pr settings, then process the column and row outlines separately.
+     * The two outline-processing branches are independent (they touch different
+     * POI types and different Spreadsheet setters), so they live in dedicated
+     * helpers below.
      */
     static void loadGrouping(Spreadsheet spreadsheet) {
 
@@ -618,19 +649,24 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.setRowGroupingInversed(false);
         }
 
-        // COLS
+        loadColumnGrouping(spreadsheet, ctWorksheet);
+        loadRowGrouping(spreadsheet);
+    }
 
+    /**
+     * Column-outline branch of {@link #loadGrouping}.
+     *
+     * <p>
+     * Columns are grouped so that columns that are beside each other and share
+     * properties have a single {@code CTCol} with a min and max index. A column
+     * that is part of a group has an outline level. Each col also has a
+     * property called 'collapsed', which doesn't appear to be used for
+     * anything. If a group is collapsed, each col in the group has its
+     * 'visibility' property set to false.
+     */
+    private static void loadColumnGrouping(Spreadsheet spreadsheet,
+            CTWorksheet ctWorksheet) {
         CTCols colsArray = ctWorksheet.getColsArray(0);
-
-        /*
-         * Columns are grouped so that columns that are beside each other and
-         * share properties have a single CTCol with a min and max index.
-         *
-         * A column that is part of a group has an outline level. Each col also
-         * has a property called 'collapsed', which doesn't appear to be used
-         * for anything. If a group is collapsed, each col in the group has its
-         * 'visibility' property set to false.
-         */
 
         List<GroupingData> data = new ArrayList<GroupingData>();
 
@@ -719,25 +755,26 @@ public class SpreadsheetFactory implements Serializable {
         data.removeAll(toRemove);
 
         spreadsheet.setColGroupingData(data);
+    }
 
-        // ROWS
-
-        data = new ArrayList<GroupingData>();
-
-        /*
-         * Each row that has data (or grouping props) exists separately, they
-         * are not grouped like columns.
-         *
-         * Each row that is part of a group has a set outline level. Unlike
-         * cols, the 'collapse' property is actually used for rows, in
-         * conjuction with the 'hidden' prop. If a group is collapsed, each row
-         * in the group has its 'hidden' prop set to true. Also, the column
-         * after the group (or before, if inverted) has its 'collapsed' property
-         * set to true.
-         */
+    /**
+     * Row-outline branch of {@link #loadGrouping}.
+     *
+     * <p>
+     * Each row that has data (or grouping props) exists separately, they are
+     * not grouped like columns. Each row that is part of a group has a set
+     * outline level. Unlike cols, the 'collapse' property is actually used for
+     * rows, in conjuction with the 'hidden' prop. If a group is collapsed, each
+     * row in the group has its 'hidden' prop set to true. Also, the column
+     * after the group (or before, if inverted) has its 'collapsed' property set
+     * to true.
+     */
+    private static void loadRowGrouping(Spreadsheet spreadsheet) {
+        List<GroupingData> data = new ArrayList<GroupingData>();
+        Set<GroupingData> toRemove;
 
         Stack<GroupingData> rows = new Stack<GroupingData>();
-        lastlevel = 0;
+        short lastlevel = 0;
         for (int i = 0; i <= spreadsheet.getRows(); i++) {
 
             XSSFRow row = (XSSFRow) spreadsheet.getActiveSheet().getRow(i);

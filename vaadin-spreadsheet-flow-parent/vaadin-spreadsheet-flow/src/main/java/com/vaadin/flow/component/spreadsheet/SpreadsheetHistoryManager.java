@@ -11,39 +11,48 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
-
-import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.command.Command;
-import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
 
 /**
  * SpreadsheetHistoryManager is an utility class of the Spreadsheet add-on. This
  * class handles remembering any actions done in the Spreadsheet. The purpose is
  * to allow the user to undo and redo any action.
  *
+ * <p>
+ * Coordinator for undo/redo. Two single-purpose helpers do the work:
+ * {@link CommandStack} owns the bounded command list and the cursor;
+ * {@link CommandReplayer} applies the side effects of replaying a command on
+ * the target {@link Spreadsheet}. This class wires the two together and exposes
+ * the public/protected API that callers and subclasses depend on.
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 public class SpreadsheetHistoryManager implements Serializable {
 
-    private int historySize = 20;
-
     /**
-     * Current index within the history
+     * Current index within the history.
+     * <p>
+     * This field exists for subclass observation. It mirrors the underlying
+     * {@link CommandStack}'s cursor and is rewritten by the public methods
+     * after every stack mutation. Do not mutate directly.
      */
     protected int historyIndex = -1;
 
     /**
-     * All executed command in chronological order
+     * All executed commands in chronological order. Shared by reference with
+     * the {@link CommandStack}; subclasses may read this list. Direct mutation
+     * is undefined.
      */
     protected final LinkedList<Command> commands = new LinkedList<Command>();
 
     /**
-     * Target Spreadsheet component
+     * Target Spreadsheet component.
      */
     protected final Spreadsheet spreadsheet;
+
+    private final CommandStack stack = new CommandStack(commands, 20);
+    private final CommandReplayer replayer;
 
     /**
      * Creates a new history manager for the given Spreadsheet.
@@ -53,14 +62,15 @@ public class SpreadsheetHistoryManager implements Serializable {
      */
     public SpreadsheetHistoryManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
+        this.replayer = new CommandReplayer(spreadsheet);
     }
 
     /**
      * Clears the history.
      */
     public void clear() {
-        historyIndex = -1;
-        commands.clear();
+        stack.clear();
+        historyIndex = stack.getCursor();
     }
 
     /**
@@ -72,13 +82,8 @@ public class SpreadsheetHistoryManager implements Serializable {
      */
     public void addCommand(Command command) {
         SpreadsheetFactory.logMemoryUsage();
-        discardAllAfter(historyIndex);
-        commands.add(command);
-        if (commands.size() > historySize) {
-            commands.removeFirst();
-        } else {
-            historyIndex++;
-        }
+        stack.push(command);
+        historyIndex = stack.getCursor();
         SpreadsheetFactory.logMemoryUsage();
     }
 
@@ -100,7 +105,7 @@ public class SpreadsheetHistoryManager implements Serializable {
      * @return true if {@link #redo()} possible, false otherwise.
      */
     public boolean canRedo() {
-        return (historyIndex + 1) < commands.size();
+        return stack.canRedo();
     }
 
     /**
@@ -110,7 +115,7 @@ public class SpreadsheetHistoryManager implements Serializable {
      * @return true if {@link #undo()} possible, false otherwise.
      */
     public boolean canUndo() {
-        return historyIndex >= 0;
+        return stack.canUndo();
     }
 
     /**
@@ -118,12 +123,10 @@ public class SpreadsheetHistoryManager implements Serializable {
      * command belongs to and updates the selection if needed.
      */
     public void redo() {
-        if (canRedo()) {
-            Command command = commands.get(++historyIndex);
-            makeSureCorrectSheetActive(command);
-            command.execute();
-            changeSelection(command);
-            fireCellValueChangeEvent(command);
+        Command command = stack.nextForRedo();
+        if (command != null) {
+            historyIndex = stack.getCursor();
+            applyCommand(command);
         }
     }
 
@@ -132,21 +135,20 @@ public class SpreadsheetHistoryManager implements Serializable {
      * command belongs to and updates the selection if needed.
      */
     public void undo() {
-        if (canUndo()) {
-            Command command = commands.get(historyIndex--);
-            makeSureCorrectSheetActive(command);
-            command.execute();
-            changeSelection(command);
-            fireCellValueChangeEvent(command);
+        Command command = stack.nextForUndo();
+        if (command != null) {
+            historyIndex = stack.getCursor();
+            applyCommand(command);
         }
     }
 
-    private void fireCellValueChangeEvent(Command command) {
-        if (command instanceof ValueChangeCommand) {
-            ValueChangeCommand valueUpdaterCommand = (ValueChangeCommand) command;
-            spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
-                    valueUpdaterCommand.getChangedCells()));
-        }
+    private void applyCommand(Command command) {
+        // Calls through this manager's protected hooks so subclasses that
+        // override makeSureCorrectSheetActive or changeSelection keep working.
+        makeSureCorrectSheetActive(command);
+        command.execute();
+        changeSelection(command);
+        replayer.fireCellValueChangeEvent(command);
     }
 
     /**
@@ -157,8 +159,7 @@ public class SpreadsheetHistoryManager implements Serializable {
      *            New size for Command history
      */
     public void setHistorySize(int historySize) {
-        this.historySize = historySize;
-        discardAllAfter(historySize);
+        stack.setMaxSize(historySize);
     }
 
     /**
@@ -168,7 +169,7 @@ public class SpreadsheetHistoryManager implements Serializable {
      * @return Current size of history.
      */
     public int getHistorySize() {
-        return historySize;
+        return stack.getMaxSize();
     }
 
     /**
@@ -182,54 +183,24 @@ public class SpreadsheetHistoryManager implements Serializable {
 
     /**
      * Ensures that the correct sheet is active, as recorded in the given
-     * Command.
+     * Command. Subclasses may override to inject custom sheet-switch behavior.
      *
      * @param command
      *            Command to fetch the sheet from
      */
     protected void makeSureCorrectSheetActive(Command command) {
-        if (spreadsheet.getActiveSheetIndex() != command
-                .getActiveSheetIndex()) {
-            spreadsheet.setActiveSheetIndex(command.getActiveSheetIndex());
-            CellRangeAddress paintedCellRange = command.getPaintedCellRange();
-            CellReference selectedCellReference = command
-                    .getSelectedCellReference();
-            String initialSheetSelection = paintedCellRange != null
-                    ? paintedCellRange.formatAsString()
-                    : selectedCellReference != null
-                            ? selectedCellReference.formatAsString()
-                            : "A1";
-            spreadsheet.initialSheetSelection = initialSheetSelection;
-        }
+        replayer.makeSureCorrectSheetActive(command);
     }
 
     /**
-     * Applies the cell selection from the given Command.
+     * Applies the cell selection from the given Command. Subclasses may
+     * override to inject custom selection behavior.
      *
      * @param command
      *            Command to fetch the cell selection from.
      */
     protected void changeSelection(Command command) {
-        // if the sheet has changed, the selected cell can't be set
-        if (!spreadsheet.isRerenderPending()) {
-            CellReference selectedCellReference = command
-                    .getSelectedCellReference();
-            CellRangeAddress paintedCellRange = command.getPaintedCellRange();
-            if (selectedCellReference != null) {
-                if (paintedCellRange == null) {
-                    spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                            selectedCellReference.formatAsString(), false);
-                } else {
-                    spreadsheet.getCellSelectionManager()
-                            .handleCellRangeSelection(selectedCellReference,
-                                    paintedCellRange, true);
-                }
-            } else {
-                // the selected cell value might have changed, thus need to
-                // make sure it gets updated to formula field
-                spreadsheet.getCellSelectionManager().reSelectSelectedCell();
-            }
-        }
+        replayer.changeSelection(command);
     }
 
     /**
@@ -240,8 +211,6 @@ public class SpreadsheetHistoryManager implements Serializable {
      *            History index to start the clearing from.
      */
     protected void discardAllAfter(int index) {
-        while (commands.size() > (index + 1)) {
-            commands.removeLast();
-        }
+        stack.clipAfter(index);
     }
 }
