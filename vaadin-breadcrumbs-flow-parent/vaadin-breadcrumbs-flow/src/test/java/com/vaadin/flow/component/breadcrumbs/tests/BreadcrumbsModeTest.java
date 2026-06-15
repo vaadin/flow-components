@@ -123,8 +123,8 @@ class BreadcrumbsModeTest extends AbstractSignalsTest {
         breadcrumbs.bindChildren(listSignal,
                 signal -> new BreadcrumbsItem(signal.peek()));
 
-        // A children binding takes over the trail; switching modes must fail
-        // rather than silently dropping the binding.
+        // A binding controls the children and cannot be removed; switching
+        // modes would clear them, so setMode must fail.
         Assertions.assertThrows(IllegalStateException.class,
                 () -> breadcrumbs.setMode(Mode.ROUTER));
     }

@@ -118,8 +118,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
      * @throws IllegalStateException
      *             if a children binding set via {@code bindChildren} is active;
      *             such a binding takes over the trail and cannot be handed back
-     *             to component-controlled population, so it must be removed
-     *             before switching modes
+     *             to component-controlled population
      */
     public void setMode(Mode newMode) {
         if (newMode == mode) {
@@ -230,8 +229,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
     /**
      * Checks whether a children binding (set via {@code bindChildren}) is
      * currently active on this component's element. Mirrors the internal check
-     * Flow core performs, reading the binding state from the element node
-     * rather than tracking a separate field.
+     * Flow core performs, reading the binding state from the element node.
      *
      * @return {@code true} if a children binding is active
      */
