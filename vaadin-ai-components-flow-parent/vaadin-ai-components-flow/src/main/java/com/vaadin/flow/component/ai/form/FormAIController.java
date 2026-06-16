@@ -443,6 +443,14 @@ public class FormAIController implements AIController {
      * the LLM, the LLM cannot write to it, and it is not locked during a fill.
      * Use this for fields the AI must not read or write (internal IDs, PII).
      * Password fields are excluded automatically and do not need to be ignored.
+     * <p>
+     * The field is kept out of the form state and the {@code fill_form}
+     * response entirely, so the LLM does not even learn it exists. It can still
+     * be exposed through a bean-level cross-field validator: a
+     * {@code binder.withValidator((bean, ctx) -> ...)} rule reads the whole
+     * bean, so a rejection message it builds is sent to the LLM as-is. Such a
+     * message must not reveal anything about an ignored field — neither its
+     * value nor its existence.
      *
      * @param field
      *            the field to hide, not {@code null}
@@ -468,14 +476,14 @@ public class FormAIController implements AIController {
      * {@link #ignore(HasValue)}.
      * <p>
      * Values can still reach the LLM through validation rejection messages,
-     * which are sent as-is. A masked field stays fillable, so its own
-     * validators run on what the AI writes, and a bean-level cross-field
-     * validator ({@code binder.withValidator((bean, ctx) -> ...)}) reads the
-     * whole bean and so can name any field's value. A validator message must
-     * not embed a field's value.
+     * which are sent as-is. A field stays fillable while its value is hidden,
+     * so its own validators run on what the AI writes, and a bean-level
+     * cross-field validator ({@code binder.withValidator((bean, ctx) -> ...)})
+     * reads the whole bean and so can name any field's value. A validator
+     * message must not embed a field's value.
      *
      * @param valuesHidden
-     *            {@code true} to mask every field's value, {@code false} to
+     *            {@code true} to hide every field's value, {@code false} to
      *            send values as usual
      * @return this controller, for chaining
      */
@@ -485,7 +493,7 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Returns whether field values are masked in the form state sent to the
+     * Returns whether field values are hidden in the form state sent to the
      * LLM.
      *
      * @return {@code true} when every field's value is hidden, {@code false}
