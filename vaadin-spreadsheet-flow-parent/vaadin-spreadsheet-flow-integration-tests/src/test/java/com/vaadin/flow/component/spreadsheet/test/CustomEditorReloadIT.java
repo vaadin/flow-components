@@ -20,11 +20,12 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
- * Tests that reloading the visible cell contents does not re-fire
- * {@code onCustomEditorDisplayed} or wipe/duplicate custom editors
+ * Tests custom editor handling on scroll versus explicit refresh
  * (vaadin/flow-components#9180). The factory returns a new editor instance on
- * every call, so the framework must preserve the editor already shown for a
- * cell instead of re-creating it.
+ * every call. Scrolling must reuse the editor already shown for a cell, so its
+ * value survives and {@code onCustomEditorDisplayed} is not re-fired for an
+ * unchanged selection. An explicit refresh keeps the long-standing behavior of
+ * recreating editors from the factory.
  */
 @TestPath("vaadin-spreadsheet/custom-editor-reload")
 public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
@@ -40,13 +41,8 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void editorSelected_visibleContentsReloaded_callbackNotRefiredAndValuePreserved() {
-        // Select the editor cell B2 via keyboard (select a plain cell, then
-        // Tab) rather than clicking the combobox, which is an unreliable way
-        // to change the selection.
-        selectCell("A2");
-        getSpreadsheet().sendKeys(Keys.TAB);
-        getCommandExecutor().waitForVaadin();
+    public void editorSelected_scrolledAwayAndBack_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
 
         // B2 is column index 1, so the factory sets the editor value to
         // FRUITS[1] = "Banana".
@@ -54,16 +50,42 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("Banana", getComboBoxValue("B2"));
         int comboBoxes = countComboBoxes();
 
-        // Reloading keeps the selection on B2, so the callback must not fire
-        // again, the editor value must be preserved, and no orphan editors
-        // should accumulate across repeated reloads.
-        for (int i = 0; i < 3; i++) {
-            clickReload();
-            getCommandExecutor().waitForVaadin();
-            Assert.assertEquals("1", getCallbackCount());
-            Assert.assertEquals("Banana", getComboBoxValue("B2"));
-            Assert.assertEquals(comboBoxes, countComboBoxes());
-        }
+        // Scroll the editor row out of view and back. The selection stays on
+        // B2, so its editor must be reused: the callback must not fire again,
+        // the editor value must be preserved, and no orphan editors should
+        // accumulate.
+        getSpreadsheet().scroll(5000);
+        getCommandExecutor().waitForVaadin();
+        getSpreadsheet().scroll(0);
+        getCommandExecutor().waitForVaadin();
+        waitUntil(driver -> countComboBoxes() == comboBoxes);
+
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        Assert.assertEquals(comboBoxes, countComboBoxes());
+    }
+
+    @Test
+    public void editorSelected_visibleContentsReloaded_editorRecreated() {
+        selectEditorCellB2();
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+
+        // An explicit refresh recreates editors from the factory (preserving
+        // the long-standing behavior of reloadVisibleCellContents). The factory
+        // returns a blank editor and a refresh does not invoke the callback, so
+        // the previously shown value is gone.
+        clickReload();
+        getCommandExecutor().waitForVaadin();
+        Assert.assertEquals("", getComboBoxValue("B2"));
+    }
+
+    private void selectEditorCellB2() {
+        // Select the editor cell B2 via keyboard (select a plain cell, then
+        // Tab) rather than clicking the combobox, which is an unreliable way to
+        // change the selection.
+        selectCell("A2");
+        getSpreadsheet().sendKeys(Keys.TAB);
+        getCommandExecutor().waitForVaadin();
     }
 
     private String getCallbackCount() {

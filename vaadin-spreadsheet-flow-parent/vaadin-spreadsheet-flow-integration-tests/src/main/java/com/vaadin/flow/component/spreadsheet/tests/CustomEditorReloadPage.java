@@ -23,17 +23,19 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.flow.router.Route;
 
 /**
- * View for verifying that reloading the visible cell contents does not re-fire
- * {@code onCustomEditorDisplayed} or wipe/duplicate custom editors
+ * View for verifying custom editor handling on scroll versus explicit refresh
  * (vaadin/flow-components#9180).
  * <p>
  * The factory returns a new {@link ComboBox} on every
- * {@code getCustomEditorForCell} call (a common usage pattern), so without the
- * fix a reload would re-create empty editors. The callback counter is rendered
- * on the page (id {@code callbackCount}) rather than inside a cell, so it stays
- * visible regardless of scrolling. The {@code reloadBtn} triggers
- * {@link Spreadsheet#reloadVisibleCellContents()} without changing the
- * selection.
+ * {@code getCustomEditorForCell} call (a common usage pattern). Scrolling must
+ * reuse the editor already shown for a cell, so its value survives and
+ * {@code onCustomEditorDisplayed} is not re-fired for an unchanged selection.
+ * An explicit refresh via {@link Spreadsheet#reloadVisibleCellContents()}
+ * ({@code reloadBtn}) keeps the long-standing behavior of recreating editors
+ * from the factory.
+ * <p>
+ * The callback counter is rendered on the page (id {@code callbackCount})
+ * rather than inside a cell, so it stays visible regardless of scrolling.
  */
 @Route("vaadin-spreadsheet/custom-editor-reload")
 public class CustomEditorReloadPage extends VerticalLayout {

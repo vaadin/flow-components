@@ -1614,7 +1614,11 @@ public class Spreadsheet extends Component
             this.lastRow = lastRow;
             this.firstColumn = firstColumn;
             this.lastColumn = lastColumn;
-            loadCells(firstRow, firstColumn, lastRow, lastColumn);
+            // Scrolling keeps the current selection, so reuse the editors
+            // already shown for cells instead of recreating them. This keeps
+            // editor state (e.g. an uncommitted ComboBox value) and avoids
+            // re-firing onCustomEditorDisplayed for the unchanged selection.
+            loadCells(firstRow, firstColumn, lastRow, lastColumn, false);
         }
         if (initialSheetSelection != null) {
             selectionManager.onSheetAddressChanged(initialSheetSelection, true);
@@ -1783,7 +1787,7 @@ public class Spreadsheet extends Component
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
             // updated node id's).
-            loadCustomComponents();
+            loadCustomComponents(true);
         }
     }
 
@@ -1942,7 +1946,7 @@ public class Spreadsheet extends Component
         // if the currently active sheet was protected, the protection for the
         // currently selected cell might have changed
         if (sheetPOIIndex == workbook.getActiveSheetIndex()) {
-            loadCustomComponents();
+            loadCustomComponents(true);
             selectionManager.reSelectSelectedCell();
         }
     }
@@ -3618,7 +3622,7 @@ public class Spreadsheet extends Component
      * comments and cells' contents. Also updates styles for the visible area.
      */
     public void reloadVisibleCellContents() {
-        loadCustomComponents();
+        loadCustomComponents(true);
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn);
     }
@@ -4078,7 +4082,12 @@ public class Spreadsheet extends Component
      */
     protected void loadCells(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        loadCustomComponents();
+        loadCells(firstRow, firstColumn, lastRow, lastColumn, true);
+    }
+
+    private void loadCells(int firstRow, int firstColumn, int lastRow,
+            int lastColumn, boolean recreateEditors) {
+        loadCustomComponents(recreateEditors);
         loadHyperLinks();
         loadCellComments();
         loadOrUpdateOverlays();
@@ -4665,8 +4674,20 @@ public class Spreadsheet extends Component
     /**
      * Loads the custom components for the currently viewed cells and clears
      * previous components that are not currently visible.
+     *
+     * @param recreateEditors
+     *            {@code true} to recreate custom editors from the factory (the
+     *            default for explicit refreshes), {@code false} to reuse the
+     *            editor already shown for a cell so its state survives the
+     *            re-render. Only the scroll handler reuses editors.
      */
-    private void loadCustomComponents() {
+    private void loadCustomComponents(boolean recreateEditors) {
+        if (recreateEditors) {
+            // Drop the cached editors (and the callback tracker) so the loop
+            // below asks the factory for fresh instances and the callback fires
+            // again for the selected cell.
+            clearCustomEditorCache();
+        }
         if (customComponentFactory != null) {
             HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
             HashSet<Component> newCustomComponents = new HashSet<Component>();
@@ -4932,7 +4953,7 @@ public class Spreadsheet extends Component
         // previous factory's editors by cell-key.
         clearCustomEditorCache();
         if (firstRow != -1) {
-            loadCustomComponents();
+            loadCustomComponents(true);
             loadCustomEditorOnSelectedCell();
         } else {
             clearClientEditorMap();
