@@ -316,11 +316,10 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Constrains a {@link String}-typed field to a known set of labels. The LLM
-     * may only write a label from the registered set; any other write is
-     * rejected back to the LLM with a reason, and the model can correct on the
-     * next turn. No converter is needed — the chosen label is itself the value
-     * written to the field. For any non-{@link String} value type, use
+     * Registers a known set of labels for a {@link String}-typed field. The
+     * labels are presented to the LLM as the field's choices. No converter is
+     * needed — the chosen label is itself the value written to the field. For
+     * any non-{@link String} value type, use
      * {@link #valueOptions(ValueOptions, Function) the two-argument overload}
      * to supply a converter; this is enforced at compile time.
      * <p>
