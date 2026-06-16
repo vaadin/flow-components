@@ -253,7 +253,10 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Request changes on PR for @NpmPackage version bump
+      # Start the separate block + 24h auto-unblock gate (npm-package-gate.yml).
+      # We only fire it once per block: if the block review already exists, the
+      # gate is already running and re-dispatching would spawn a second waiter.
+      - name: Trigger NpmPackage 24h gate
         if: >-
           matrix.type == 'war'
           && steps.npm-changes.outputs.changed == 'true'
@@ -267,18 +270,13 @@ jobs:
           existing=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
             --jq "[.[] | select(.state == \"CHANGES_REQUESTED\") | select(.body | contains(\"$MARKER\"))] | length")
           if [ "$existing" -gt 0 ]; then
-            echo "Existing CHANGES_REQUESTED review found, skipping."
+            echo "Block review already present, gate already running."
             exit 0
           fi
-          BODY=$(sed 's/^          //' <<'EOF'
-          <!-- vaadin-flow-components:npm-package-bump-review -->
-          This PR is updating the @NpmPackage version. Due to the default value of `vaadin.npm.minimumFrontendPackageAgeDays` is 1, I'm blocking this PR for now.
-          In order to not producing a failed snapshot for other projects, please come back one day after to unblock and merge it.
-          EOF
-          )
-          gh api -X POST "repos/$REPO/pulls/$PR_NUMBER/reviews" \
-            -f event=REQUEST_CHANGES \
-            -f body="$BODY"
+          # A PAT/app token is required here: events sent with the default
+          # GITHUB_TOKEN do not trigger other workflows (anti-recursion rule).
+          gh api -X POST "repos/$REPO/dispatches" --input - \
+            <<<"{\"event_type\":\"npm-package-blocked\",\"client_payload\":{\"pr\":$PR_NUMBER}}"
 
       - name: Merge ITs
         if: matrix.type == 'war'
