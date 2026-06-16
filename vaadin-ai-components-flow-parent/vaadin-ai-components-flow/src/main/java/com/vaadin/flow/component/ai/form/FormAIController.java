@@ -349,13 +349,13 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Constrains a field to a known set of labels and pairs the registration
-     * with a converter that resolves a chosen label to the field's value type.
-     * The LLM picks a label, the controller calls {@code toValue} on it, and
-     * writes the result to the field. The converter is also the validation step
-     * — a label that does not resolve (because {@code toValue} returns
-     * {@code null} or throws) is rejected back to the LLM with a reason, and
-     * the model can correct on the next turn.
+     * Registers a known set of labels for a field, paired with a converter that
+     * resolves a chosen label to the field's value type. When the LLM picks a
+     * label, the controller calls {@code toValue} on it and writes the result
+     * to the field. If {@code toValue} returns {@code null} or throws — for
+     * example because the LLM picked a label the converter does not recognize —
+     * the write is rejected back to the LLM with a reason and the model can
+     * correct on the next turn.
      * <p>
      * A typical converter delegates to a service or repository that looks the
      * domain object up by its display name, for example

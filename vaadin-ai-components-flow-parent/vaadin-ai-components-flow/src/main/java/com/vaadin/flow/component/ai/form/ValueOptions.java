@@ -32,8 +32,8 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * demand by a callback ({@link #options(BiFunction)}); exactly one of the two
  * must be set, with the last call winning. Pass the configured registration to
  * {@link FormAIController#valueOptions(ValueOptions)
- * controller.valueOptions(...)} to apply it — a label outside the registered
- * set is then rejected back to the LLM as a validation failure.
+ * controller.valueOptions(...)} to apply it; the labels are then presented to
+ * the LLM as the field's choices.
  * <p>
  * Labels are always {@link String} values, regardless of the field's value
  * type. For a non-{@link String} field, supply a label-to-value converter
