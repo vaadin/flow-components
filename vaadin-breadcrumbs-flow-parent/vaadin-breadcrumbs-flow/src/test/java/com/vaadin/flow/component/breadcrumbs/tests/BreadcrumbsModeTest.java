@@ -32,11 +32,15 @@ import com.vaadin.flow.component.breadcrumbs.BreadcrumbsFeatureFlagProvider;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.DynamicPageTitle;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.LocationChangeEvent;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PageTitleContext;
+import com.vaadin.flow.router.PageTitleGenerator;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
@@ -245,6 +249,44 @@ class BreadcrumbsModeTest {
     }
 
     @Test
+    void routerMode_currentItemTitle_resolvedWithQueryParameters() {
+        installRouter(HomeView.class, QueryTitleView.class);
+        var breadcrumbs = new Breadcrumbs(Mode.ROUTER);
+        ui.add(breadcrumbs);
+
+        fireAfterNavigation(breadcrumbs,
+                List.of(new QueryTitleView(), new HomeView()),
+                QueryParameters.of("product", "5"));
+
+        var items = breadcrumbs.getChildren().map(BreadcrumbsItem.class::cast)
+                .toList();
+        Assertions.assertEquals(2, items.size());
+        // The current item's instance-free title generator sees the query
+        // parameters of the current navigation.
+        Assertions.assertEquals("Product 5", items.get(1).getText());
+    }
+
+    @Test
+    void routerMode_ancestorTitle_resolvedWithoutQueryParameters() {
+        installRouter(HomeView.class, QueryTitleView.class,
+                PlainLeafView.class);
+        var breadcrumbs = new Breadcrumbs(Mode.ROUTER);
+        ui.add(breadcrumbs);
+
+        fireAfterNavigation(breadcrumbs, List.of(new PlainLeafView(),
+                new QueryTitleView(), new HomeView()),
+                QueryParameters.of("product", "5"));
+
+        var items = breadcrumbs.getChildren().map(BreadcrumbsItem.class::cast)
+                .toList();
+        Assertions.assertEquals(3, items.size());
+        // The ancestor's title generator is resolved without query parameters,
+        // so it falls back to the no-parameter label.
+        Assertions.assertEquals("Product", items.get(1).getText());
+        Assertions.assertEquals("Leaf", items.get(2).getText());
+    }
+
+    @Test
     void routerMode_lateCallbackAfterDetach_isNoOp() {
         installRouter(HomeView.class, CustomersView.class, AcmeView.class);
         var breadcrumbs = new Breadcrumbs(Mode.ROUTER);
@@ -335,18 +377,31 @@ class BreadcrumbsModeTest {
 
     private void fireAfterNavigation(Breadcrumbs breadcrumbs,
             List<? extends Component> leafFirstChain) {
-        afterNavigationListeners().forEach(listener -> listener
-                .afterNavigation(afterNavigationEvent(leafFirstChain)));
+        fireAfterNavigation(breadcrumbs, leafFirstChain,
+                QueryParameters.empty());
+    }
+
+    private void fireAfterNavigation(Breadcrumbs breadcrumbs,
+            List<? extends Component> leafFirstChain,
+            QueryParameters queryParameters) {
+        afterNavigationListeners().forEach(listener -> listener.afterNavigation(
+                afterNavigationEvent(leafFirstChain, queryParameters)));
     }
 
     private AfterNavigationEvent afterNavigationEvent(
             List<? extends Component> leafFirstChain) {
+        return afterNavigationEvent(leafFirstChain, QueryParameters.empty());
+    }
+
+    private AfterNavigationEvent afterNavigationEvent(
+            List<? extends Component> leafFirstChain,
+            QueryParameters queryParameters) {
         UI realUI = ui.getUI();
         Router router = realUI.getInternals().getRouter();
         List<HasElement> chain = List.copyOf(leafFirstChain);
         LocationChangeEvent locationChangeEvent = new LocationChangeEvent(
                 router, realUI, NavigationTrigger.PROGRAMMATIC,
-                new Location("acme"), chain);
+                new Location("acme", queryParameters), chain);
         return new AfterNavigationEvent(locationChangeEvent,
                 RouteParameters.empty());
     }
@@ -377,6 +432,29 @@ class BreadcrumbsModeTest {
         @Override
         public String getPageTitle() {
             return "Acme Dynamic";
+        }
+    }
+
+    // Resolves its title via an instance-free PageTitleGenerator that reads the
+    // "product" query parameter, falling back to "Product" when it is absent.
+    @Route("query-title")
+    @RouteParent(HomeView.class)
+    @DynamicPageTitle(ProductTitleGenerator.class)
+    public static class QueryTitleView extends Div {
+    }
+
+    @Route("leaf")
+    @RouteParent(QueryTitleView.class)
+    @PageTitle("Leaf")
+    public static class PlainLeafView extends Div {
+    }
+
+    public static class ProductTitleGenerator implements PageTitleGenerator {
+        @Override
+        public String generatePageTitle(PageTitleContext context) {
+            List<String> product = context.queryParameters()
+                    .getParameters("product");
+            return product.isEmpty() ? "Product" : "Product " + product.get(0);
         }
     }
 }

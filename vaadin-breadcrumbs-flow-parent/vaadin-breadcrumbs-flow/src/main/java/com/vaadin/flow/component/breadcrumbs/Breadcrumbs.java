@@ -331,7 +331,8 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         Class<? extends Component> currentTarget = currentView instanceof Component
                 ? ((Component) currentView).getClass()
                 : null;
-        rebuildTrail(currentTarget, event.getRouteParameters(), currentView);
+        rebuildTrail(currentTarget, event.getRouteParameters(),
+                event.getLocation().getQueryParameters(), currentView);
     }
 
     /**
@@ -347,6 +348,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
             return;
         }
         rebuildTrail(state.navigationTarget(), state.routeParameters(),
+                state.location().getQueryParameters(),
                 state.currentView().orElse(null));
     }
 
@@ -358,17 +360,26 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
      * (the breadcrumb does no walking of its own). Ancestor labels are resolved
      * without instantiating their views; the last (current) item prefers the
      * live {@link HasDynamicTitle} of the already-instantiated current view.
+     * <p>
+     * The query parameters of the current navigation are applied only when
+     * resolving the current (last) item's title; ancestor titles and links are
+     * resolved without query parameters, since query parameters describe the
+     * current navigation as a whole and ancestor links never carry them.
      *
      * @param currentTarget
      *            the current navigation target class, or {@code null} if it
      *            cannot be resolved
      * @param parameters
      *            the route parameters of the current navigation
+     * @param queryParameters
+     *            the query parameters of the current navigation, applied to the
+     *            current item's title resolution only
      * @param currentView
      *            the current view instance, or {@code null} if not available
      */
     private void rebuildTrail(Class<? extends Component> currentTarget,
-            RouteParameters parameters, HasElement currentView) {
+            RouteParameters parameters, QueryParameters queryParameters,
+            HasElement currentView) {
         if (currentTarget == null) {
             updateChildrenInternal(List.of());
             return;
@@ -384,10 +395,10 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
             RouteReference reference = hierarchy.get(i);
             boolean isLast = i == hierarchy.size() - 1;
             if (isLast) {
-                trail.add(new BreadcrumbsItem(
-                        resolveCurrentTitle(reference, currentView)));
+                trail.add(new BreadcrumbsItem(resolveCurrentTitle(reference,
+                        queryParameters, currentView)));
             } else {
-                String title = resolveTitle(reference);
+                String title = resolveTitle(reference, QueryParameters.empty());
                 trail.add(
                         new BreadcrumbsItem(title, reference.navigationTarget(),
                                 reference.routeParameters()));
@@ -400,26 +411,30 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
     /**
      * Resolves the label of the current (last) route, preferring the live
      * {@link HasDynamicTitle} of the already-instantiated current view over the
-     * instance-free title resolution.
+     * instance-free title resolution. The given query parameters are passed to
+     * the instance-free resolution so a query-parameter-dependent title
+     * generator resolves correctly.
      */
     private String resolveCurrentTitle(RouteReference reference,
-            HasElement currentView) {
+            QueryParameters queryParameters, HasElement currentView) {
         if (currentView instanceof HasDynamicTitle) {
             return ((HasDynamicTitle) currentView).getPageTitle();
         }
-        return resolveTitle(reference);
+        return resolveTitle(reference, queryParameters);
     }
 
     /**
-     * Resolves the label of a route without instantiating its view, falling
-     * back to an empty string when the route declares no title.
+     * Resolves the label of a route without instantiating its view, using the
+     * given query parameters and falling back to an empty string when the route
+     * declares no title.
      */
-    private String resolveTitle(RouteReference reference) {
+    private String resolveTitle(RouteReference reference,
+            QueryParameters queryParameters) {
         Instantiator instantiator = VaadinService.getCurrent()
                 .getInstantiator();
         return RouteUtil
                 .resolvePageTitle(instantiator, reference.navigationTarget(),
-                        reference.routeParameters(), QueryParameters.empty())
+                        reference.routeParameters(), queryParameters)
                 .orElse("");
     }
 
