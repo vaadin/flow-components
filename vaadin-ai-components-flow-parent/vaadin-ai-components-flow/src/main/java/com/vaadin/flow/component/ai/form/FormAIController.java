@@ -465,12 +465,15 @@ public class FormAIController implements AIController {
     /**
      * Controls whether the current value of every field is sent to the LLM as
      * part of the form state. When {@code true}, each field still appears with
-     * its description and type so the LLM can fill it, but its value is masked:
-     * it is rendered {@code null} with a {@code valueHidden} flag instead of
-     * the real content. Use this when the form may already hold data the AI
-     * should not read (for example personal data the user typed in) but should
-     * still be able to populate. Defaults to {@code false}, meaning values are
-     * sent. To hide a single field's value or content entirely, use
+     * its description and type so the LLM can fill it, but its value is hidden.
+     * Use this when the form may already hold values the AI should not read
+     * (for example personal data the user typed in) but should still be able to
+     * populate. Defaults to {@code false}, meaning values are sent.
+     * <p>
+     * Only the value is hidden: a field's description, type, and any option or
+     * {@code enum} labels are still sent, since the LLM needs them to fill the
+     * field. For choice fields whose option labels are themselves sensitive, or
+     * to hide a single field's value or content entirely, use
      * {@link #ignore(HasValue)}.
      *
      * @param valuesHidden
