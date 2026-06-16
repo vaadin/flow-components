@@ -50,7 +50,7 @@ jobs:
 
           **No action needed — this is fully automated:**
           - I posted this block automatically when CI detected the `@NpmPackage` version bump.
-          - **24 hours after this message**, I will automatically dismiss this review and approve the PR, making it mergeable.
+          - **24 hours after this message**, I will automatically dismiss this review, approve the PR, and enable auto-merge (squash) so it merges as soon as all required checks pass.
 
           **What affects the 24h timer:**
           - New commits / pushes **do not** reset it — the countdown is anchored to this message, so it keeps running no matter how many times you push.
@@ -100,3 +100,6 @@ jobs:
           gh api -X POST "repos/$REPO/pulls/$PR_NUMBER/reviews" \
             -f event=APPROVE \
             -f body="Automatically approved 24 hours after the @NpmPackage version bump block."
+          echo "Enabling auto-merge for PR #$PR_NUMBER"
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --auto --squash \
+            || echo "::warning::Could not enable auto-merge for PR #$PR_NUMBER (already merged, or no pending required checks)."
