@@ -316,15 +316,17 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers options for a {@link String}-typed field. No label-to-value
-     * converter is needed because the chosen label is itself the field's value.
-     * For non-{@link String} value types, use
-     * {@link #valueOptions(ValueOptions, Function) the two-argument overload};
-     * the type system enforces at compile time that a non-{@link String} field
-     * is paired with an explicit converter. For {@link MultiSelect MultiSelect}
-     * fields the controller wraps the chosen labels into a
-     * {@link LinkedHashSet} before {@link HasValue#setValue}. Later calls for
-     * the same field overwrite earlier ones.
+     * Registers a known set of labels for a {@link String}-typed field. The
+     * labels are presented to the LLM as the field's choices. No converter is
+     * needed — the chosen label is itself the value written to the field. For
+     * any non-{@link String} value type, use
+     * {@link #valueOptions(ValueOptions, Function) the two-argument overload}
+     * to supply a converter; this is enforced at compile time.
+     * <p>
+     * For {@link MultiSelect MultiSelect} fields the controller wraps the
+     * chosen labels into a {@link LinkedHashSet} before
+     * {@link HasValue#setValue}. Later calls for the same field overwrite
+     * earlier ones.
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
@@ -347,16 +349,24 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers options for a field paired with a label-to-value converter. The
-     * converter runs once per LLM-chosen label and returns one element of the
-     * field's value type (or per-element type for a {@link MultiSelect
-     * MultiSelect} field) — typically a service lookup that maps the picked
-     * label to the corresponding domain object. For {@code MultiSelect} fields
-     * the controller wraps converted elements into a {@link LinkedHashSet}
-     * before {@link HasValue#setValue}. Later calls for the same field
-     * overwrite earlier ones.
+     * Registers a known set of labels for a field, paired with a converter that
+     * resolves a chosen label to the field's value type. When the LLM picks a
+     * label, the controller calls {@code toValue} on it and writes the result
+     * to the field. If {@code toValue} returns {@code null} or throws — for
+     * example because the LLM picked a label the converter does not recognize —
+     * the write is rejected back to the LLM with a reason and the model can
+     * correct on the next turn.
      * <p>
-     * Use {@link #valueOptions(ValueOptions) the single-argument overload} for
+     * A typical converter delegates to a service or repository that looks the
+     * domain object up by its display name, for example
+     * {@code label -> projectService.findByName(label)} for a
+     * {@code ComboBox<Project>}. For {@link MultiSelect MultiSelect} fields the
+     * converter runs once per chosen label and the controller wraps the
+     * resolved elements into a {@link LinkedHashSet} before
+     * {@link HasValue#setValue}.
+     * <p>
+     * Later calls for the same field overwrite earlier ones. Use
+     * {@link #valueOptions(ValueOptions) the single-argument overload} for
      * {@link String}-typed fields; the converter is implicit there.
      *
      * @param config
