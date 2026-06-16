@@ -78,7 +78,15 @@ final class FormFieldSchema {
             node.put("readOnly", true);
         }
         applyType(node, field, type, hints);
-        applyValue(node, field, type, hints);
+        if (descriptor.hideValue()) {
+            // The value is kept private: render null and flag it, whether or
+            // not a value is set, so the LLM never sees the value yet still
+            // knows the field exists and can be written.
+            node.putNull(FIELD_VALUE);
+            node.put("valueHidden", true);
+        } else {
+            applyValue(node, field, type, hints);
+        }
         return node;
     }
 
