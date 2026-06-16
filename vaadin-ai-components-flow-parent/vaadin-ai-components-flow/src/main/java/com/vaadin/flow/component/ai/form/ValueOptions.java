@@ -27,22 +27,24 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.selection.MultiSelect;
 
 /**
- * Options registration passed to
+ * Per-field registration of the labels the LLM may pick from for a given field.
+ * The label set is either fixed ({@link #options(Collection)}) or supplied on
+ * demand by a callback ({@link #options(BiFunction)}); exactly one of the two
+ * must be set, with the last call winning. Pass the configured registration to
  * {@link FormAIController#valueOptions(ValueOptions)
- * controller.valueOptions(...)}. Tells the controller which labels the LLM may
- * pick from for a single-value or multi-select field. The label set is either
- * fixed ({@link #options(Collection)}) or supplied on demand by a callback
- * ({@link #options(BiFunction)}); exactly one of the two must be set, with the
- * last call winning.
+ * controller.valueOptions(...)} to apply it — a label outside the registered
+ * set is then rejected back to the LLM as a validation failure.
  * <p>
- * For non-{@link String} value types, the label-to-value converter is supplied
- * separately to the controller — see
- * {@link FormAIController#valueOptions(ValueOptions, Function)
- * valueOptions(config, toValue)}.
+ * Labels are always {@link String} values, regardless of the field's value
+ * type. For a non-{@link String} field, supply a label-to-value converter
+ * through {@link FormAIController#valueOptions(ValueOptions, Function)
+ * valueOptions(config, toValue)} — the converter resolves a chosen label to the
+ * field's value type before the controller writes it.
  *
  * @param <I>
- *            the per-label item type — the field's value type for single-value
- *            fields, the per-element type for multi-select fields
+ *            the per-label item type the converter must produce — the field's
+ *            value type for single-value fields, the per-element type for
+ *            multi-select fields
  *
  * @author Vaadin Ltd
  */
@@ -135,10 +137,10 @@ public final class ValueOptions<I> {
      * Sets a callback the controller invokes whenever the LLM needs to see the
      * field's options. Use this when the option set is too large or too dynamic
      * for a fixed list via {@link #options(Collection)} — for example options
-     * that come from a database query or a remote service. The LLM picks from
-     * the labels the callback returns when writing the field. Mutually
-     * exclusive with {@link #options(Collection)} — calling either clears the
-     * other.
+     * that come from a database query or a remote service. The callback returns
+     * the labels the LLM may pick from; labels are always {@link String}
+     * values, regardless of the field's value type. Mutually exclusive with
+     * {@link #options(Collection)} — calling either clears the other.
      *
      * @param query
      *            invoked with two arguments: a filter string the LLM picked,
