@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: '30 23 * * *'
   pull_request:
-    branches: ['main', '25.*']
   merge_group:
   workflow_dispatch:
     inputs:
