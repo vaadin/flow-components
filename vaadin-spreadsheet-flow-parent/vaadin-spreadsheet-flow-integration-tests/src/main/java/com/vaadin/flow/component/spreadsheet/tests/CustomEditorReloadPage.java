@@ -77,9 +77,9 @@ public class CustomEditorReloadPage extends VerticalLayout {
         @Override
         public Component getCustomEditorForCell(Cell cell, int rowIndex,
                 int columnIndex, Spreadsheet spreadsheet, Sheet sheet) {
-            // Editors in B2:E2. A new instance is returned on every call to
+            // Editor in B2. A new instance is returned on every call to
             // exercise the editor-preservation logic.
-            if (rowIndex == 1 && columnIndex >= 1 && columnIndex <= 4) {
+            if (rowIndex == 1 && columnIndex == 1) {
                 ComboBox<String> comboBox = new ComboBox<>();
                 comboBox.setItems(FRUITS);
                 comboBox.setWidthFull();

@@ -14,18 +14,21 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 /**
- * Tests custom editor handling on scroll versus explicit refresh
+ * Tests custom editor handling on the paths that re-render the visible cells
  * (vaadin/flow-components#9180). The factory returns a new editor instance on
- * every call. Scrolling must reuse the editor already shown for a cell, so its
- * value survives and {@code onCustomEditorDisplayed} is not re-fired for an
- * unchanged selection. An explicit refresh keeps the long-standing behavior of
- * recreating editors from the factory.
+ * every call. Scrolling, changing the selection (column, row, or range) and
+ * resizing rows or columns all keep the same cells visible, so the editor
+ * already shown for a cell must be reused: its value survives and
+ * {@code onCustomEditorDisplayed} is not re-fired for an unchanged selection.
+ * An explicit refresh keeps the long-standing behavior of recreating editors
+ * from the factory.
  */
 @TestPath("vaadin-spreadsheet/custom-editor-reload")
 public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
@@ -34,10 +37,11 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         setSpreadsheet($(SpreadsheetElement.class).first());
-        // Wait until the always-visible editors (B2:E2) have rendered, so the
-        // first selection reliably lands on the editor instead of an
-        // not-yet-loaded cell.
-        waitUntil(driver -> countComboBoxes() == 4);
+        // Wait until the always-visible editor (B2) has rendered, so the first
+        // selection reliably lands on the editor instead of a not-yet-loaded
+        // cell.
+        waitUntil(driver -> !getSpreadsheet()
+                .findElements(By.tagName("vaadin-combo-box")).isEmpty());
     }
 
     @Test
@@ -48,21 +52,83 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
         // FRUITS[1] = "Banana".
         Assert.assertEquals("1", getCallbackCount());
         Assert.assertEquals("Banana", getComboBoxValue("B2"));
-        int comboBoxes = countComboBoxes();
 
         // Scroll the editor row out of view and back. The selection stays on
-        // B2, so its editor must be reused: the callback must not fire again,
-        // the editor value must be preserved, and no orphan editors should
-        // accumulate.
+        // B2, so its editor must be reused: the callback must not fire again
+        // and the editor value must be preserved.
         getSpreadsheet().scroll(5000);
         getCommandExecutor().waitForVaadin();
         getSpreadsheet().scroll(0);
         getCommandExecutor().waitForVaadin();
-        waitUntil(driver -> countComboBoxes() == comboBoxes);
+        waitUntil(driver -> !getSpreadsheet()
+                .findElements(By.tagName("vaadin-combo-box")).isEmpty());
 
         Assert.assertEquals("1", getCallbackCount());
         Assert.assertEquals("Banana", getComboBoxValue("B2"));
-        Assert.assertEquals(comboBoxes, countComboBoxes());
+    }
+
+    @Test
+    public void editorSelected_columnSelected_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+
+        // Selecting a column re-renders the visible cells. B2's editor stays
+        // visible, so it must be reused and its value preserved. The new
+        // selected cell (B1) has no editor, so the callback does not fire
+        // again.
+        selectColumn("B");
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+    }
+
+    @Test
+    public void editorSelected_rangeSelected_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+
+        // Extending the selection to a range (B2:B5) keeps B2 as the selected
+        // cell and re-renders the visible cells. The editor must be reused: the
+        // callback must not fire again for the unchanged selection and the
+        // editor value must be preserved.
+        selectCell("B5", false, true);
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+    }
+
+    @Test
+    public void editorSelected_rowResized_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+
+        // Resizing the editor row re-renders the visible cells while the
+        // selection stays on B2, so the editor must be reused: the callback
+        // must not fire again and the editor value must be preserved.
+        resizeRow(2);
+
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+    }
+
+    @Test
+    public void editorSelected_columnResized_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+
+        // Resizing the editor column re-renders the visible cells while the
+        // selection stays on B2, so the editor must be reused: the callback
+        // must not fire again and the editor value must be preserved.
+        resizeColumn("B");
+
+        Assert.assertEquals("1", getCallbackCount());
+        Assert.assertEquals("Banana", getComboBoxValue("B2"));
     }
 
     @Test
@@ -88,6 +154,21 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
         getCommandExecutor().waitForVaadin();
     }
 
+    private void resizeColumn(String column) {
+        int index = column.charAt(0) - 'A' + 1;
+        var handle = getSpreadsheet().getColumnHeader(index).getResizeHandle();
+        var target = getSpreadsheet().getColumnHeader(index + 1);
+        new Actions(getDriver()).dragAndDrop(handle, target).perform();
+        getCommandExecutor().waitForVaadin();
+    }
+
+    private void resizeRow(int row) {
+        var handle = getSpreadsheet().getRowHeader(row).getResizeHandle();
+        var target = getSpreadsheet().getRowHeader(row + 1);
+        new Actions(getDriver()).dragAndDrop(handle, target).perform();
+        getCommandExecutor().waitForVaadin();
+    }
+
     private String getCallbackCount() {
         return $(TestBenchElement.class).id("callbackCount").getText();
     }
@@ -108,10 +189,5 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
         } catch (NoSuchElementException e) {
             return null;
         }
-    }
-
-    private int countComboBoxes() {
-        return getSpreadsheet().findElements(By.tagName("vaadin-combo-box"))
-                .size();
     }
 }

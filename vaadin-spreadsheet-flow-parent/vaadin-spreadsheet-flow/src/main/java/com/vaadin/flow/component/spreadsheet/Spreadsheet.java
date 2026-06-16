@@ -1066,17 +1066,19 @@ public class Spreadsheet extends Component
 
     /**
      * Editor instance currently shown for each cell key. Used to reuse the same
-     * editor across re-renders (scroll, refresh) instead of re-creating it from
-     * the factory, which would discard editor state such as an uncommitted
-     * ComboBox value. Editor-only; cleared on sheet switch and factory
-     * replacement.
+     * editor across re-renders that keep the same cells visible (scroll,
+     * selection, resize) instead of re-creating it from the factory, which
+     * would discard editor state such as an uncommitted ComboBox value.
+     * Editor-only; cleared whenever editors are recreated from the factory (see
+     * {@link #clearCustomEditorCache()}).
      */
     private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
     /**
      * Cell key and editor instance that {@code onCustomEditorDisplayed} was
      * last invoked for, so the callback fires only on a real selection change
-     * and not on scroll/refresh re-renders of the same selection.
+     * and not on re-renders that keep the same selection (scroll, resize,
+     * extending a range).
      */
     private String lastEditorCallbackKey;
 
@@ -1614,11 +1616,7 @@ public class Spreadsheet extends Component
             this.lastRow = lastRow;
             this.firstColumn = firstColumn;
             this.lastColumn = lastColumn;
-            // Scrolling keeps the current selection, so reuse the editors
-            // already shown for cells instead of recreating them. This keeps
-            // editor state (e.g. an uncommitted ComboBox value) and avoids
-            // re-firing onCustomEditorDisplayed for the unchanged selection.
-            loadCells(firstRow, firstColumn, lastRow, lastColumn, false);
+            loadCells(firstRow, firstColumn, lastRow, lastColumn);
         }
         if (initialSheetSelection != null) {
             selectionManager.onSheetAddressChanged(initialSheetSelection, true);
@@ -3809,10 +3807,10 @@ public class Spreadsheet extends Component
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             Component editor = cellKeyToEditor.get(key);
             if (editor != null) {
-                // Fire only on a real selection change. Scroll and refresh
-                // re-run this method for the same selection; re-firing would
-                // re-run the user's setValue and clobber in-progress editor
-                // input.
+                // Fire only on a real selection change. Re-renders that keep
+                // the same selection (scroll, resize, extending a range) re-run
+                // this method; re-firing would re-run the user's setValue and
+                // clobber in-progress editor input.
                 if (key.equals(lastEditorCallbackKey)
                         && editor == lastEditorCallbackComponent) {
                     return;
@@ -3842,8 +3840,9 @@ public class Spreadsheet extends Component
 
     /**
      * Drops the reuse cache and the callback tracker so custom editors are
-     * recreated from the factory. Called on sheet switch and factory
-     * replacement.
+     * recreated from the factory on the next load. Called on the paths that
+     * recreate editors instead of reusing them (see
+     * {@link #loadCustomComponents(boolean)}).
      */
     private void clearCustomEditorCache() {
         cellKeyToEditor.clear();
@@ -4082,12 +4081,10 @@ public class Spreadsheet extends Component
      */
     protected void loadCells(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        loadCells(firstRow, firstColumn, lastRow, lastColumn, true);
-    }
-
-    private void loadCells(int firstRow, int firstColumn, int lastRow,
-            int lastColumn, boolean recreateEditors) {
-        loadCustomComponents(recreateEditors);
+        // Reuse the editors already shown for cells instead of recreating them.
+        // For all existing callers of this method (scrolling, selection,
+        // row/column resize) it makes sense to preserve editor state.
+        loadCustomComponents(false);
         loadHyperLinks();
         loadCellComments();
         loadOrUpdateOverlays();
@@ -4676,10 +4673,12 @@ public class Spreadsheet extends Component
      * previous components that are not currently visible.
      *
      * @param recreateEditors
-     *            {@code true} to recreate custom editors from the factory (the
-     *            default for explicit refreshes), {@code false} to reuse the
-     *            editor already shown for a cell so its state survives the
-     *            re-render. Only the scroll handler reuses editors.
+     *            {@code true} to recreate custom editors from the factory, used
+     *            when the application forces a refresh, changes the factory, or
+     *            the sheet changes; {@code false} to reuse the editor already
+     *            shown for a cell so its state survives the re-render, used
+     *            when the same cells stay visible (scrolling, selection,
+     *            resize).
      */
     private void loadCustomComponents(boolean recreateEditors) {
         if (recreateEditors) {
