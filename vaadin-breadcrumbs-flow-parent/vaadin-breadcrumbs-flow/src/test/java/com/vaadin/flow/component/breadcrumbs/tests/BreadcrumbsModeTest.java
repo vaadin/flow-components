@@ -19,14 +19,18 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs.Mode;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsTest;
+import com.vaadin.tests.MockUIExtension;
 
-class BreadcrumbsModeTest extends AbstractSignalsTest {
+class BreadcrumbsModeTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
     void defaultConstructor_modeIsRouter() {
