@@ -15,12 +15,11 @@
  */
 package com.vaadin.flow.component.breadcrumbs.testbench;
 
-import java.util.List;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -59,9 +58,7 @@ public class BreadcrumbsItemElement extends TestBenchElement {
     }
 
     /**
-     * Returns {@code true} if this item represents the current page. Reads the
-     * {@code current} state attribute set by the parent
-     * {@code <vaadin-breadcrumbs>} on the last item when it has no path.
+     * Returns {@code true} if this item represents the current page.
      *
      * @return {@code true} if this is the current item, {@code false} otherwise
      */
@@ -70,8 +67,7 @@ public class BreadcrumbsItemElement extends TestBenchElement {
     }
 
     /**
-     * Returns {@code true} if this item has content in the prefix slot. Reads
-     * the {@code has-prefix} state attribute.
+     * Returns {@code true} if this item has content in the prefix slot.
      *
      * @return {@code true} if a prefix component is present, {@code false}
      *         otherwise
@@ -87,15 +83,9 @@ public class BreadcrumbsItemElement extends TestBenchElement {
      * @return the prefix slot element, or {@code null} if no prefix is set
      */
     public TestBenchElement getPrefixSlotContent() {
-        WebElement prefixSlot = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("slot[name='prefix']"));
-        List<?> assigned = (List<?>) executeScript(
-                "return arguments[0].assignedElements()", prefixSlot);
-        if (assigned == null || assigned.isEmpty()) {
-            return null;
-        }
-        return (TestBenchElement) wrapElement((WebElement) assigned.get(0),
-                getCommandExecutor());
+        ElementQuery<TestBenchElement> prefix = $("*").withAttribute("slot",
+                "prefix");
+        return prefix.exists() ? prefix.first() : null;
     }
 
     /**

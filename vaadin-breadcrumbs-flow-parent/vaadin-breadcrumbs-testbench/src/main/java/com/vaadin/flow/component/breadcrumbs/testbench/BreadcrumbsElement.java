@@ -17,10 +17,6 @@ package com.vaadin.flow.component.breadcrumbs.testbench;
 
 import java.util.List;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -81,7 +77,7 @@ public class BreadcrumbsElement extends TestBenchElement {
 
     /**
      * Returns {@code true} if one or more items are currently collapsed into
-     * the overflow overlay. Reads the {@code has-overflow} state attribute.
+     * the overflow overlay.
      *
      * @return {@code true} if the breadcrumbs has overflow, {@code false}
      *         otherwise
@@ -91,42 +87,31 @@ public class BreadcrumbsElement extends TestBenchElement {
     }
 
     /**
-     * Gets the overflow button element from the shadow DOM.
+     * Gets the overflow button that expands the collapsed items.
      *
-     * @return the shadow-DOM element with {@code part="overflow-button"}
-     * @throws NoSuchElementException
-     *             if the overflow button is not found in the shadow DOM
+     * @return the overflow button element
      */
     public TestBenchElement getOverflowButton() {
-        WebElement button = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("[part='overflow-button']"));
-        return (TestBenchElement) wrapElement(button, getCommandExecutor());
+        return $(TestBenchElement.class)
+                .withAttribute("part", "overflow-button").first();
     }
 
     /**
      * Opens the overflow overlay by clicking the overflow button and waits
-     * until the overlay element reports that it is open.
+     * until the collapsed items become visible.
      */
     public void openOverflowOverlay() {
-        WebElement button = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("[part='overflow-button']"));
         // click() on elements in shadow DOM does not work with Chrome driver
-        executeScript("arguments[0].click();", button);
-        waitUntil(driver -> getOverflowOverlay().hasAttribute("opened"));
-    }
-
-    /**
-     * Gets the {@code <vaadin-breadcrumbs-overlay>} element.
-     *
-     * @return the overlay element
-     */
-    public TestBenchElement getOverflowOverlay() {
-        return $("vaadin-breadcrumbs-overlay").first();
+        executeScript("arguments[0].click();", getOverflowButton());
+        waitUntil(driver -> {
+            List<TestBenchElement> items = getOverflowItems();
+            return !items.isEmpty() && items.get(0).isDisplayed();
+        });
     }
 
     /**
      * Gets the breadcrumb item elements that are currently shown inside the
-     * open overflow overlay (i.e. items with {@code slot="overlay"}).
+     * open overflow overlay.
      *
      * @return list of breadcrumb item elements inside the open overlay
      */
