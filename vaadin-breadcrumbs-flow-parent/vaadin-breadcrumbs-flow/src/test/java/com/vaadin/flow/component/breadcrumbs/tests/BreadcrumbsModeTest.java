@@ -365,11 +365,14 @@ class BreadcrumbsModeTest {
             routeConfiguration.setAnnotatedRoute(route);
         }
 
-        // A mock Router returns the application registry directly, avoiding
-        // Router#getRegistry()'s session-scoped wrapping (which would delegate
-        // to a parent registry that the mock service cannot provide).
-        Router router = Mockito.mock(Router.class);
-        Mockito.when(router.getRegistry()).thenReturn(routeRegistry);
+        // A spy over a real Router runs the real resolvePageTitle (used to
+        // resolve item titles) while getRegistry() is stubbed to return the
+        // application registry directly, avoiding Router#getRegistry()'s
+        // session-scoped wrapping (which would delegate to a parent registry
+        // that the mock service cannot provide). doReturn avoids calling the
+        // real getRegistry during stubbing.
+        Router router = Mockito.spy(new Router(routeRegistry));
+        Mockito.doReturn(routeRegistry).when(router).getRegistry();
         Mockito.when(ui.getService().getRouter()).thenReturn(router);
         // Title resolution reads the current service's instantiator.
         VaadinService.setCurrent(ui.getService());
