@@ -27,6 +27,10 @@ concurrency:
 
 env:
   FORK_COUNT: 4
+  # Internal validation has no reason to enforce the frontend package age
+  # requirement (it only protects downstream framework users), so accept
+  # freshly published @NpmPackage bumps.
+  MAVEN_OPTS: -Dvaadin.npm.minimumFrontendPackageAgeDays=0
 
 jobs:
   build:
@@ -221,61 +225,6 @@ jobs:
       - name: npm install
         if: matrix.type != 'unit'
         run: npm ci --ignore-scripts
-
-      - name: Detect @NpmPackage version changes
-        id: npm-changes
-        if: matrix.type != 'unit'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          changed=false
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # Use the PR files API so we diff against the merge base, not against
-            # main's current tip — otherwise unrelated @NpmPackage commits already
-            # merged into main since the PR branched would trigger a false positive.
-            if gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
-                 --jq '.[] | select(.filename | endswith(".java")) | .patch // ""' \
-               | grep -qE '^\+.*@NpmPackage'; then
-              changed=true
-            fi
-          else
-            base="${{ github.base_ref || 'main' }}"
-            if git fetch --depth=1 origin "$base" 2>/dev/null && \
-               git diff FETCH_HEAD -- '*.java' | grep -q '@NpmPackage'; then
-              changed=true
-            fi
-          fi
-          if [ "$changed" = "true" ]; then
-            echo "MAVEN_OPTS=${MAVEN_OPTS} -Dvaadin.npm.minimumFrontendPackageAgeDays=0" >> "$GITHUB_ENV"
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Start the separate block + 24h auto-unblock gate (npm-package-gate.yml).
-      # We only fire it once per block: if the block review already exists, the
-      # gate is already running and re-dispatching would spawn a second waiter.
-      - name: Trigger NpmPackage 24h gate
-        if: >-
-          matrix.type == 'war'
-          && steps.npm-changes.outputs.changed == 'true'
-          && github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          MARKER="<!-- vaadin-flow-components:npm-package-bump-review -->"
-          existing=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
-            --jq "[.[] | select(.state == \"CHANGES_REQUESTED\") | select(.body | contains(\"$MARKER\"))] | length")
-          if [ "$existing" -gt 0 ]; then
-            echo "Block review already present, gate already running."
-            exit 0
-          fi
-          # A PAT/app token is required here: events sent with the default
-          # GITHUB_TOKEN do not trigger other workflows (anti-recursion rule).
-          gh api -X POST "repos/$REPO/dispatches" --input - \
-            <<<"{\"event_type\":\"npm-package-blocked\",\"client_payload\":{\"pr\":$PR_NUMBER}}"
 
       - name: Merge ITs
         if: matrix.type == 'war'
