@@ -39,7 +39,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
@@ -50,8 +49,6 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterState;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -430,10 +427,8 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
      */
     private String resolveTitle(RouteReference reference,
             QueryParameters queryParameters) {
-        Instantiator instantiator = VaadinService.getCurrent()
-                .getInstantiator();
-        return RouteUtil
-                .resolvePageTitle(instantiator, reference.navigationTarget(),
+        return ComponentUtil.getRouter(this)
+                .resolvePageTitle(reference.navigationTarget(),
                         reference.routeParameters(), queryParameters)
                 .orElse("");
     }
