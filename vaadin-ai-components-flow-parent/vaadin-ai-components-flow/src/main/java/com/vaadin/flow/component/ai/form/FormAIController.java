@@ -237,6 +237,15 @@ public class FormAIController implements AIController {
             try to write to "__form__" itself.
             """;
 
+    /**
+     * Rejection reason returned in place of a validator's own message while
+     * {@link #setValuesHidden(boolean) values are hidden}. A validator message
+     * can embed a field's current value (for example a cross-field rule that
+     * names the other field's value), which would leak past the value masking;
+     * a generic reason keeps the privacy guarantee intact.
+     */
+    private static final String VALUE_HIDDEN_REJECTION_REASON = "Value rejected by a validation rule. The reason is withheld because field values are hidden.";
+
     private final Component form;
     private final Binder<?> binder;
     private boolean valuesHidden;
@@ -467,9 +476,11 @@ public class FormAIController implements AIController {
      * @param valuesHidden
      *            {@code true} to mask every field's value, {@code false} to
      *            send values as usual
+     * @return this controller, for chaining
      */
-    public void setValuesHidden(boolean valuesHidden) {
+    public FormAIController setValuesHidden(boolean valuesHidden) {
         this.valuesHidden = valuesHidden;
+        return this;
     }
 
     /**
@@ -1044,7 +1055,7 @@ public class FormAIController implements AIController {
                 var binding = BinderReflection.findBinding(binder, written);
                 FormFieldValidation.firstError(written, binding).ifPresent(
                         reason -> rejected.add(new RejectedEntry(entry.getKey(),
-                                entry.getValue(), reason)));
+                                entry.getValue(), maskReason(reason))));
             }
             // Bean-level cross-field rules are not tied to a single field, so
             // they are surfaced under the FORM_LEVEL_REJECTION_ID sentinel.
@@ -1055,7 +1066,7 @@ public class FormAIController implements AIController {
             for (var message : FormFieldValidation.beanErrors(binder)) {
                 rejected.add(new RejectedEntry(
                         FormFieldValidation.FORM_LEVEL_REJECTION_ID, null,
-                        message));
+                        maskReason(message)));
             }
             // Re-snapshot the visible field set after writes so the response
             // reflects value-change listener cascades, structural changes,
@@ -1111,6 +1122,20 @@ public class FormAIController implements AIController {
                 return false;
             }
             return true;
+        }
+
+        /**
+         * Returns the rejection reason to expose to the LLM. While values are
+         * hidden, a validator message may embed a field's current value, so the
+         * detailed reason is replaced with a generic one; otherwise the reason
+         * is returned unchanged.
+         *
+         * @param reason
+         *            the validator's own rejection message
+         * @return the reason to send, generic when values are hidden
+         */
+        private String maskReason(String reason) {
+            return valuesHidden ? VALUE_HIDDEN_REJECTION_REASON : reason;
         }
 
         /**
