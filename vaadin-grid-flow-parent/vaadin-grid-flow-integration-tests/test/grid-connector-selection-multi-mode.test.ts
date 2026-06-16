@@ -30,7 +30,7 @@ describe('grid connector - selection – multi mode', () => {
 
     grid.$connector.setSelectionMode('MULTI');
 
-    [selectAllCheckbox, ...selectRowCheckboxes] = [...grid.querySelectorAll('vaadin-checkbox')];
+    [selectAllCheckbox, ...selectRowCheckboxes] = [...grid.querySelectorAll<HTMLElement>('vaadin-checkbox')];
   });
 
   async function mouseClick(element: HTMLElement) {

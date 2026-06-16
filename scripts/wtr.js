@@ -6,13 +6,21 @@
 const fs = require('fs');
 const xml2js = require('xml2js');
 const { execSync } = require('child_process');
+const { parseArgs } = require('util');
+
+const { values: options, positionals } = parseArgs({
+  options: {
+    watch: { type: 'boolean', default: false }
+  },
+  allowPositionals: true
+});
 
 let modules = [];
 async function computeModules() {
-  if (process.argv.length > 2) {
+  if (positionals.length > 0) {
     // Modules are passed as arguments
-    for (let i = 2; i < process.argv.length; i++) {
-      modules.push(`vaadin-${process.argv[i]}-flow-parent`);
+    for (const positional of positionals) {
+      modules.push(`vaadin-${positional}-flow-parent`);
     }
   } else {
     // Read modules from the parent pom.xml
@@ -86,7 +94,8 @@ async function runTests() {
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
       try {
-        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
+        const watchFlag = options.watch ? ' --watch' : '';
+        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve${watchFlag}`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
