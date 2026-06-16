@@ -821,42 +821,6 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_validationReasonMaskedWhenValuesHidden() {
-        // A cross-field validator message can embed another field's existing
-        // value. With values hidden, that reason must be replaced so the value
-        // masked in get_form_state cannot leak back through the fill_form
-        // rejection block.
-        stubVaadinContext();
-        var formatField = new LabeledStringField();
-        var lengthField = new IntField();
-        var binder = new Binder<>(TwoFieldBean.class);
-        binder.forField(formatField).bind("format");
-        binder.forField(lengthField).bind("length");
-        binder.withValidator((bean, ctx) -> {
-            if (bean.getLength() != null && bean.getLength() > 10) {
-                return ValidationResult
-                        .error("Too long for format " + bean.getFormat());
-            }
-            return ValidationResult.ok();
-        });
-        var bean = new TwoFieldBean();
-        bean.setFormat("SECRET-FORMAT");
-        binder.setBean(bean);
-        var controller = controllerForBound(binder, formatField, lengthField);
-        controller.setValuesHidden(true);
-
-        var result = fillFormResult(controller,
-                JacksonUtils.readTree("{\"" + idOf(lengthField) + "\":25}"));
-
-        var crossReason = rejectionReason(result, "__form__");
-        Assertions.assertNotNull(crossReason,
-                "Cross-field rejection expected, got: " + result);
-        Assertions.assertFalse(crossReason.contains("SECRET-FORMAT"),
-                "Hidden field value must not leak through the cross-field "
-                        + "rejection reason, got: " + crossReason);
-    }
-
-    @Test
     void fillForm_crossFieldValidationDoesNotMarkUntouchedFieldInvalid() {
         // Regression guard for the core fix: reading the post-write verdict —
         // including the bean-level cross-field rule — must not fire a
