@@ -31,11 +31,9 @@ import com.vaadin.testbench.elementsbase.Element;
 public class BreadcrumbsItemElement extends TestBenchElement {
 
     /**
-     * Gets the visible text of this breadcrumb item. Reads the text content
-     * assigned to the default slot inside the shadow {@code [part="label"]}
-     * element.
+     * Gets the visible text of this breadcrumb item.
      *
-     * @return the item's label text
+     * @return the item's text
      */
     @Override
     public String getText() {
@@ -48,10 +46,9 @@ public class BreadcrumbsItemElement extends TestBenchElement {
     }
 
     /**
-     * Gets the value of the {@code path} attribute on this breadcrumb item.
-     * Returns {@code null} for the current (non-link) item, which has no path.
+     * Gets the path this breadcrumb item links to.
      *
-     * @return the path attribute value, or {@code null} if not set
+     * @return the path, or {@code null} for the current item, which has no path
      */
     public String getPath() {
         return getDomAttribute("path");
@@ -67,7 +64,7 @@ public class BreadcrumbsItemElement extends TestBenchElement {
     }
 
     /**
-     * Returns {@code true} if this item has content in the prefix slot.
+     * Returns {@code true} if this item has a prefix component.
      *
      * @return {@code true} if a prefix component is present, {@code false}
      *         otherwise
@@ -77,32 +74,32 @@ public class BreadcrumbsItemElement extends TestBenchElement {
     }
 
     /**
-     * Gets the element slotted into the {@code prefix} slot of this breadcrumb
-     * item.
+     * Gets the prefix component of this breadcrumb item.
      *
-     * @return the prefix slot element, or {@code null} if no prefix is set
+     * @return the prefix component, or {@code null} if none is set
      */
-    public TestBenchElement getPrefixSlotContent() {
+    public TestBenchElement getPrefixComponent() {
         ElementQuery<TestBenchElement> prefix = $("*").withAttribute("slot",
                 "prefix");
-        return prefix.exists() ? prefix.first() : null;
+        return prefix.exists() ? prefix.single() : null;
     }
 
     /**
-     * Clicks the anchor element in the shadow DOM of this breadcrumb item. This
-     * only applies to items that have a {@code path} set; for current
-     * (non-link) items the click is a no-op.
+     * Navigates by activating this breadcrumb item's link.
+     *
+     * @throws NoSuchElementException
+     *             if this item has no link, such as the current item
      */
-    @Override
-    public void click() {
+    public void navigate() {
+        WebElement anchor;
         try {
-            WebElement anchor = getWrappedElement().getShadowRoot()
-                    .findElement(By.cssSelector("[part='link']"));
-            // click() on elements in shadow DOM does not work with Chrome
-            // driver
-            executeScript("arguments[0].click();", anchor);
+            anchor = getWrappedElement().getShadowRoot()
+                    .findElement(By.cssSelector("a"));
         } catch (NoSuchElementException e) {
-            // Current item renders as <span part="nolink"> — nothing to click
+            throw new NoSuchElementException("Item does not contain an anchor",
+                    e);
         }
+        // click() on elements in shadow DOM does not work with Chrome driver
+        executeScript("arguments[0].click();", anchor);
     }
 }

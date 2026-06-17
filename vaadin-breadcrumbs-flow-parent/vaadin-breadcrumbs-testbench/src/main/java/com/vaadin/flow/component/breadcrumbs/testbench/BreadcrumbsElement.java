@@ -37,11 +37,9 @@ public class BreadcrumbsElement extends TestBenchElement {
     }
 
     /**
-     * Gets the current item — the item that represents the current page. The
-     * current item is the last item without a path and carries the
-     * {@code current} state attribute.
+     * Gets the item that represents the current page.
      *
-     * @return the current breadcrumb item element, or {@code null} if none
+     * @return the current breadcrumb item, or {@code null} if none
      */
     public BreadcrumbsItemElement getCurrentItem() {
         return getItems().stream().filter(BreadcrumbsItemElement::isCurrent)
@@ -53,8 +51,7 @@ public class BreadcrumbsElement extends TestBenchElement {
      *
      * @param text
      *            the text to search for
-     * @return the matching breadcrumb item element, or {@code null} if not
-     *         found
+     * @return the matching breadcrumb item, or {@code null} if not found
      */
     public BreadcrumbsItemElement getItemByText(String text) {
         return getItems().stream().filter(item -> text.equals(item.getText()))
@@ -62,61 +59,14 @@ public class BreadcrumbsElement extends TestBenchElement {
     }
 
     /**
-     * Gets the breadcrumb item whose {@code path} attribute matches the given
-     * path.
+     * Gets the breadcrumb item whose path matches the given path.
      *
      * @param path
      *            the path to search for
-     * @return the matching breadcrumb item element, or {@code null} if not
-     *         found
+     * @return the matching breadcrumb item, or {@code null} if not found
      */
     public BreadcrumbsItemElement getItemByPath(String path) {
         return getItems().stream().filter(item -> path.equals(item.getPath()))
                 .findFirst().orElse(null);
-    }
-
-    /**
-     * Returns {@code true} if one or more items are currently collapsed into
-     * the overflow overlay.
-     *
-     * @return {@code true} if the breadcrumbs has overflow, {@code false}
-     *         otherwise
-     */
-    public boolean hasOverflow() {
-        return hasAttribute("has-overflow");
-    }
-
-    /**
-     * Gets the overflow button that expands the collapsed items.
-     *
-     * @return the overflow button element
-     */
-    public TestBenchElement getOverflowButton() {
-        return $(TestBenchElement.class)
-                .withAttribute("part", "overflow-button").first();
-    }
-
-    /**
-     * Opens the overflow overlay by clicking the overflow button and waits
-     * until the collapsed items become visible.
-     */
-    public void openOverflowOverlay() {
-        // click() on elements in shadow DOM does not work with Chrome driver
-        executeScript("arguments[0].click();", getOverflowButton());
-        waitUntil(driver -> {
-            List<TestBenchElement> items = getOverflowItems();
-            return !items.isEmpty() && items.get(0).isDisplayed();
-        });
-    }
-
-    /**
-     * Gets the breadcrumb item elements that are currently shown inside the
-     * open overflow overlay.
-     *
-     * @return list of breadcrumb item elements inside the open overlay
-     */
-    public List<TestBenchElement> getOverflowItems() {
-        return $(BreadcrumbsItemElement.class).withAttribute("slot", "overlay")
-                .all().stream().map(el -> (TestBenchElement) el).toList();
     }
 }
