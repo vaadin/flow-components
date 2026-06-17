@@ -7,8 +7,8 @@ import sinon from 'sinon';
 import type { Grid } from '@vaadin/grid';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
-import type { } from '@web/test-runner-mocha';
-import type { } from 'sinon-chai';
+import type {} from '@web/test-runner-mocha';
+import type {} from 'sinon-chai';
 
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
