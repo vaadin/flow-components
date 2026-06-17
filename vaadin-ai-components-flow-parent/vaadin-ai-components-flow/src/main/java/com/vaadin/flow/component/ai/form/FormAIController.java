@@ -264,11 +264,13 @@ public class FormAIController implements AIController {
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
     /**
-     * Fields showing the "AI is working" shimmer for the current turn, tracked
-     * so {@link #onResponse} clears exactly the ones {@link #onRequest} set
-     * even if the active field set changed during the turn.
+     * Fields showing the "AI is working" shimmer for the current turn, mapped
+     * to the attach-listener registration that re-applies the shimmer when the
+     * field re-enters the DOM, so it survives a detach/re-attach mid-turn.
+     * Tracked so {@link #onResponse} clears exactly the ones {@link #onRequest}
+     * set even if the active field set changed during the turn.
      */
-    private final List<Component> workingFields = new ArrayList<>();
+    private final Map<Component, Registration> workingFields = new LinkedHashMap<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     /**
      * Per-field registrations that re-apply the AI marker after
@@ -906,27 +908,33 @@ public class FormAIController implements AIController {
     /**
      * Shows the "AI is working" shimmer on every visible field at the start of
      * a turn, so the whole form reads as being worked on while the AI runs.
-     * Tracks the affected fields so {@link #stopWorking()} clears exactly these
-     * at turn end.
+     * Each field also gets an attach listener that re-applies the shimmer when
+     * the field re-enters the DOM, so it survives a detach/re-attach mid-turn,
+     * mirroring the marker's own re-apply behaviour. Tracks the affected fields
+     * so {@link #stopWorking()} clears exactly these at turn end.
      */
     private void startWorking() {
-        workingFields.clear();
+        stopWorking();
         for (var field : collectActiveFields()) {
             if (field instanceof Component component) {
-                FormFieldMarker.startWorking(component.getElement());
-                workingFields.add(component);
+                var element = component.getElement();
+                var attach = component.addAttachListener(
+                        event -> FormFieldMarker.startWorking(element));
+                workingFields.put(component, attach);
+                FormFieldMarker.startWorking(element);
             }
         }
     }
 
     /**
      * Clears the "AI is working" shimmer from the fields
-     * {@link #startWorking()} set, leaving any AI marker applied during the
-     * turn in place.
+     * {@link #startWorking()} set and removes their re-apply attach listeners,
+     * leaving any AI marker applied during the turn in place.
      */
     private void stopWorking() {
-        for (var component : workingFields) {
-            FormFieldMarker.stopWorking(component.getElement());
+        for (var entry : workingFields.entrySet()) {
+            entry.getValue().remove();
+            FormFieldMarker.stopWorking(entry.getKey().getElement());
         }
         workingFields.clear();
     }

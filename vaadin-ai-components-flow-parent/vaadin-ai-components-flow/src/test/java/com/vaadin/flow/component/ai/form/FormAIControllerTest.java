@@ -1840,6 +1840,52 @@ class FormAIControllerTest {
         }
 
         @Test
+        void workingShimmerReappliesOnReattach() {
+            // Detaching a field mid-turn drops the client-side shimmer; the
+            // re-apply attach listener must re-issue it on the next attach so
+            // the working state survives detach/re-attach.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest(); // turn in progress, shimmer applied
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var startScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isWorkingStartScript).toList();
+            Assertions.assertEquals(1, startScripts.size(),
+                    "Re-attach during a turn must re-issue the working shimmer "
+                            + "exactly once; got: " + startScripts);
+        }
+
+        @Test
+        void stopWorkingCancelsReapplyOnReattach() {
+            // Ending the turn removes the re-apply attach listener, so a later
+            // detach/re-attach must not bring the shimmer back.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            controller.onResponse(null);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            var startScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isWorkingStartScript).toList();
+            Assertions.assertEquals(0, startScripts.size(),
+                    "After the turn ends, re-attach must not re-issue the "
+                            + "working shimmer; got: " + startScripts);
+        }
+
+        @Test
         void changedFieldIsHighlightedAutomatically() {
             // A turn that changes a field marks it without any showHighlight
             // wiring on the application's side.
