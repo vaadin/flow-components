@@ -71,7 +71,9 @@ for common interactions (`open()`, `selectByText(String)`). Keep it lean.
 JUnit 4 + TestBench, served by Jetty, extending `AbstractComponentIT`. A test
 view (`{Component}Page` under `src/main/.../tests`) with `@Route` exposes
 elements by `id`; the IT (`{Component}IT` under `src/test/.../tests`) with a
-matching `@TestPath` drives a real browser.
+matching `@TestPath` drives a real browser. The module includes a
+`TestAppShell` (`AppShellConfigurator`) applying the Lumo theme, so ITs run
+against Lumo-styled components.
 
 ```java
 @TestPath("vaadin-example")
