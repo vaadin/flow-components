@@ -300,8 +300,14 @@ class FormAIControllerTest {
     @Nested
     class FieldLocking {
 
+        // The user-interaction guard during a turn is applied on the client
+        // only (the field's `readonly` property, toggled with the "AI is
+        // working" highlight — see the Highlight tests). The controller must
+        // never change the field's server-side read-only state, so these tests
+        // assert that invariant via isReadOnly().
+
         @Test
-        void onRequestLocksAllDiscoveredFields() {
+        void onRequestDoesNotChangeServerReadOnlyState() {
             var a = new TestField();
             var b = new TestField();
             var nested = new TestField();
@@ -310,13 +316,14 @@ class FormAIControllerTest {
 
             controller.onRequest();
 
-            Assertions.assertTrue(a.isReadOnly());
-            Assertions.assertTrue(b.isReadOnly());
-            Assertions.assertTrue(nested.isReadOnly());
+            Assertions.assertFalse(a.isReadOnly(),
+                    "The controller must not flip server-side read-only");
+            Assertions.assertFalse(b.isReadOnly());
+            Assertions.assertFalse(nested.isReadOnly());
         }
 
         @Test
-        void onResponseReleasesLockedFieldsOnSuccess() {
+        void onResponseLeavesServerReadOnlyUntouched() {
             var a = new TestField();
             var b = new TestField();
             var controller = new FormAIController(new Div(a, b));
@@ -329,135 +336,23 @@ class FormAIControllerTest {
         }
 
         @Test
-        void onResponseReleasesLockedFieldsOnFailure() {
-            var a = new TestField();
-            var b = new TestField();
-            var controller = new FormAIController(new Div(a, b));
-
-            controller.onRequest();
-            controller.onResponse(new RuntimeException("boom"));
-
-            Assertions.assertFalse(a.isReadOnly());
-            Assertions.assertFalse(b.isReadOnly());
-        }
-
-        @Test
-        void ignoredFieldsAreNotLocked() {
-            var visible = new TestField();
-            var hidden = new TestField();
-            var controller = new FormAIController(new Div(visible, hidden));
-            controller.ignore(hidden);
-
-            controller.onRequest();
-
-            Assertions.assertTrue(visible.isReadOnly());
-            Assertions.assertFalse(hidden.isReadOnly(),
-                    "Ignored fields must not be locked during a fill");
-        }
-
-        @Test
-        void preexistingReadOnlyFieldsStayReadOnlyAfterRelease() {
-            // A field the application put into read-only state before the
-            // turn started must remain read-only after the turn ends —
-            // unlocking should only revert fields the controller itself
-            // locked.
+        void applicationReadOnlyIsPreservedAcrossTurn() {
+            // A field the application set read-only must stay read-only: the
+            // controller never touches the server-side state, so there is no
+            // unlock to clobber it.
             var editable = new TestField();
-            var preReadOnly = new TestField();
-            preReadOnly.setReadOnly(true);
+            var appReadOnly = new TestField();
+            appReadOnly.setReadOnly(true);
             var controller = new FormAIController(
-                    new Div(editable, preReadOnly));
+                    new Div(editable, appReadOnly));
 
             controller.onRequest();
-            Assertions.assertTrue(editable.isReadOnly());
-            Assertions.assertTrue(preReadOnly.isReadOnly());
-
             controller.onResponse(null);
+
             Assertions.assertFalse(editable.isReadOnly());
-            Assertions.assertTrue(preReadOnly.isReadOnly(),
-                    "A field that was already read-only before the fill "
-                            + "must remain read-only after the fill ends");
-        }
-
-        @Test
-        void describedFieldIsLocked() {
-            // describe() registers a hint but does not ignore the field;
-            // the controller must distinguish "has a hint entry" from "is
-            // ignored". If they collapse, every described or
-            // valueOptions-bound field would silently escape locking.
-            var described = new TestField();
-            var controller = new FormAIController(new Div(described));
-            controller.describe(described, "the merchant name");
-
-            controller.onRequest();
-
-            Assertions.assertTrue(described.isReadOnly(),
-                    "A field with a description hint but no ignore() call "
-                            + "must still be locked during a fill");
-        }
-
-        @Test
-        void appReadOnlyBetweenTurnsSurvivesNextRelease() {
-            // The application may legitimately switch a field to
-            // read-only between turns. The next turn's unlock must only
-            // release fields locked by *that* turn — leftover tracking
-            // from a previous turn would clobber the app's state.
-            var field = new TestField();
-            var controller = new FormAIController(new Div(field));
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            field.setReadOnly(true);
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            Assertions.assertTrue(field.isReadOnly(),
-                    "A field the application set read-only between turns "
-                            + "must stay read-only after a subsequent fill "
-                            + "releases its own locks");
-        }
-
-        @Test
-        void fieldAddedBetweenTurnsIsLockedOnNextRequest() {
-            var initial = new TestField();
-            var form = new Div(initial);
-            var controller = new FormAIController(form);
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            var added = new TestField();
-            form.add(added);
-
-            controller.onRequest();
-
-            Assertions.assertTrue(initial.isReadOnly());
-            Assertions.assertTrue(added.isReadOnly(),
-                    "Fields added between turns must be locked on the next "
-                            + "request");
-        }
-
-        @Test
-        void fieldIgnoredBetweenTurnsIsNotLockedOnNextRequest() {
-            // The application may flag a field as ignored after the
-            // controller has been wired up — e.g., a feature toggle hides
-            // PII from the AI. The next turn must respect that. Today this
-            // works only because discovery re-evaluates each request; if
-            // anyone caches the active set "for performance", this
-            // regression slips through.
-            var field = new TestField();
-            var controller = new FormAIController(new Div(field));
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            controller.ignore(field);
-            controller.onRequest();
-
-            Assertions.assertFalse(field.isReadOnly(),
-                    "A field ignored after a previous turn must not be "
-                            + "locked by the next turn");
+            Assertions.assertTrue(appReadOnly.isReadOnly(),
+                    "An application-set read-only field must be left "
+                            + "untouched across a turn");
         }
     }
 
@@ -1774,9 +1669,11 @@ class FormAIControllerTest {
         }
 
         @Test
-        void turnStartShowsWorkingShimmerOnAllVisibleFields() {
-            // Every visible field enters the "AI is working" state at turn
-            // start, regardless of whether the AI ends up changing it.
+        void turnStartShimmersAndClientLocksEditableFields() {
+            // Every editable field enters the "AI is working" state at turn
+            // start: the shimmer plus a client-side read-only guard, applied in
+            // the same script, regardless of whether the AI ends up changing
+            // it.
             var changed = new TestField();
             var untouched = new TestField();
             var form = new Div(changed, untouched);
@@ -1786,20 +1683,58 @@ class FormAIControllerTest {
             controller.onRequest();
             var dump = drainPendingJs();
 
-            Assertions.assertTrue(
-                    scriptsOn(dump, changed).stream()
-                            .anyMatch(Highlight::isWorkingStartScript),
-                    "A field must show the working shimmer at turn start");
-            Assertions.assertTrue(
-                    scriptsOn(dump, untouched).stream()
-                            .anyMatch(Highlight::isWorkingStartScript),
-                    "Every visible field, even ones the AI won't change, must "
-                            + "show the working shimmer at turn start");
+            for (var field : List.of(changed, untouched)) {
+                var start = scriptsOn(dump, field).stream()
+                        .filter(Highlight::isWorkingStartScript).findFirst();
+                Assertions.assertTrue(start.isPresent(),
+                        "Every editable field must enter the working state at "
+                                + "turn start");
+                Assertions.assertTrue(locksReadonly(start.get()),
+                        "The working-state script must also set the field "
+                                + "read-only on the client; got: "
+                                + start.get());
+            }
+            // The server-side read-only state is never touched.
+            Assertions.assertFalse(changed.isReadOnly());
+            Assertions.assertFalse(untouched.isReadOnly());
         }
 
         @Test
-        void turnEndClearsWorkingShimmer() {
-            // The shimmer is removed when the turn ends, on changed and
+        void turnStartSkipsFieldsTheAiCannotWrite() {
+            // Disabled, application-read-only and ignored fields are not
+            // "worked
+            // on" — the AI cannot write them — so they get no working state
+            // and,
+            // crucially, their read-only guard is never toggled.
+            var editable = new TestField();
+            var disabled = new TestField();
+            disabled.setEnabled(false);
+            var appReadOnly = new TestField();
+            appReadOnly.setReadOnly(true);
+            var ignored = new TestField();
+            var form = new Div(editable, disabled, appReadOnly, ignored);
+            ui.add(form);
+            var controller = new FormAIController(form);
+            controller.ignore(ignored);
+
+            controller.onRequest();
+            var dump = drainPendingJs();
+
+            Assertions.assertTrue(scriptsOn(dump, editable).stream()
+                    .anyMatch(Highlight::isWorkingStartScript));
+            for (var field : List.of(disabled, appReadOnly, ignored)) {
+                Assertions.assertFalse(
+                        scriptsOn(dump, field).stream()
+                                .anyMatch(Highlight::isWorkingStartScript),
+                        "A field the AI cannot write must not enter the "
+                                + "working state; offending field: " + field);
+            }
+        }
+
+        @Test
+        void turnEndClearsWorkingStateAndClientLock() {
+            // The working state is removed when the turn ends — shimmer and the
+            // client read-only guard, in the same script — on changed and
             // unchanged fields alike.
             var changed = new TestField();
             var untouched = new TestField();
@@ -1812,14 +1747,15 @@ class FormAIControllerTest {
             controller.onResponse(null);
             var dump = drainPendingJs();
 
-            Assertions.assertTrue(
-                    scriptsOn(dump, changed).stream()
-                            .anyMatch(Highlight::isWorkingStopScript),
-                    "A changed field's working shimmer must be cleared");
-            Assertions.assertTrue(
-                    scriptsOn(dump, untouched).stream()
-                            .anyMatch(Highlight::isWorkingStopScript),
-                    "An unchanged field's working shimmer must be cleared too");
+            for (var field : List.of(changed, untouched)) {
+                var stop = scriptsOn(dump, field).stream()
+                        .filter(Highlight::isWorkingStopScript).findFirst();
+                Assertions.assertTrue(stop.isPresent(),
+                        "Each field's working state must be cleared at turn end");
+                Assertions.assertTrue(unlocksReadonly(stop.get()),
+                        "The clear script must also release the client "
+                                + "read-only guard; got: " + stop.get());
+            }
         }
 
         @Test
@@ -2096,6 +2032,14 @@ class FormAIControllerTest {
 
         private static boolean isWorkingStopScript(String script) {
             return script.contains(".remove('ai-working')");
+        }
+
+        private static boolean locksReadonly(String script) {
+            return script.contains("readonly = true");
+        }
+
+        private static boolean unlocksReadonly(String script) {
+            return script.contains("readonly = false");
         }
 
         // Dispatch the marker's revert event server-side so tests can drive

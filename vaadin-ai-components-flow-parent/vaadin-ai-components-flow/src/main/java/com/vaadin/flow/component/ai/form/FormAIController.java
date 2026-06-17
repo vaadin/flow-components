@@ -135,15 +135,16 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * the user can currently edit (visible, enabled, and not already read-only) is
- * set to read-only so the user cannot type into a field the AI is about to
- * overwrite. Locks are released when the turn ends, successfully or otherwise.
- * Application code that turns a locked field read-only mid-turn (e.g. from a
- * value-change listener reacting to the LLM's writes) is not honoured: the
- * field already reports read-only because of the lock, so the controller cannot
- * tell the application's toggle apart from its own lock. The AI can still write
- * the field, and the lock is released at turn end regardless. Applications
- * should avoid toggling read-only state during a fill turn, or reapply it after
- * the turn completes.
+ * made read-only <em>on the client</em> so the user cannot type into a field
+ * the AI is about to overwrite. This is a UX guard only: the field's
+ * server-side read-only state is never changed, so it does not affect what the
+ * LLM sees or writes, and a field's application-set read-only state is left
+ * untouched. The guard is applied and cleared together with the "AI is working"
+ * highlight (see below), so it is released when the turn ends, successfully or
+ * otherwise. Applications should avoid toggling a field's server-side read-only
+ * state during a fill turn: a field switched to read-only mid-turn keeps the
+ * client guard cleared at turn end, which can briefly leave the client editable
+ * while the server treats the field as read-only.
  * </p>
  *
  * <p>
@@ -262,13 +263,13 @@ public class FormAIController implements AIController {
      */
     private boolean filling;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
-    private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
     /**
-     * Fields showing the "AI is working" shimmer for the current turn, mapped
-     * to the attach-listener registration that re-applies the shimmer when the
-     * field re-enters the DOM, so it survives a detach/re-attach mid-turn.
-     * Tracked so {@link #onResponse} clears exactly the ones {@link #onRequest}
-     * set even if the active field set changed during the turn.
+     * Fields showing the "AI is working" state (shimmer + client-side read-only
+     * guard) for the current turn, mapped to the attach-listener registration
+     * that re-applies it when the field re-enters the DOM, so it survives a
+     * detach/re-attach mid-turn. Tracked so {@link #onResponse} clears exactly
+     * the ones {@link #onRequest} set even if the active field set changed
+     * during the turn.
      */
     private final Map<Component, Registration> workingFields = new LinkedHashMap<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
@@ -768,7 +769,6 @@ public class FormAIController implements AIController {
         // are picked up.
         attachIds();
         seedDescriptionsFromBinder();
-        lockFields();
         snapshotPreTurnValues();
         startWorking();
     }
@@ -776,15 +776,13 @@ public class FormAIController implements AIController {
     @Override
     public void onResponse(Throwable error) {
         try {
-            // Clear the working shimmer before applying markers, so a changed
-            // field transitions straight from working to marked.
+            // Clear the working state (shimmer + client read-only guard) before
+            // applying markers, so a changed field transitions straight from
+            // working to marked. Runs regardless of success or failure so the
+            // fields never stay locked for the user.
             stopWorking();
             fireFieldValuesChanged(error);
         } finally {
-            // Unlock regardless of success or failure: locks set in onRequest
-            // must be released so the user can edit again. The failure path
-            // doesn't have any committed state to discard.
-            unlockFields();
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the highlight pass) count as AI writes rather
             // than user edits that would clear the marker.
@@ -820,7 +818,7 @@ public class FormAIController implements AIController {
      * highlighted or reported — the application learns about errors through the
      * orchestrator's response listener instead. A throwing listener is logged
      * and otherwise ignored so subsequent listeners still fire and the rest of
-     * the response lifecycle (notably {@link #unlockFields}) still runs.
+     * the response lifecycle still runs.
      */
     private void fireFieldValuesChanged(Throwable error) {
         if (preTurnValues.isEmpty() || error != null) {
@@ -889,33 +887,25 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Puts every discovered, non-ignored, currently writable field into
-     * read-only state so the user cannot type into a field the AI is about to
-     * overwrite. Fields that are disabled or were already read-only when the
-     * turn started are not writable, so they are left untouched and will not be
-     * unlocked at turn end.
-     */
-    private void lockFields() {
-        for (var field : collectActiveFields()) {
-            if (isDisabled(field) || isApplicationReadOnly(field)) {
-                continue;
-            }
-            field.setReadOnly(true);
-            lockedFields.add(field);
-        }
-    }
-
-    /**
-     * Shows the "AI is working" shimmer on every visible field at the start of
-     * a turn, so the whole form reads as being worked on while the AI runs.
-     * Each field also gets an attach listener that re-applies the shimmer when
-     * the field re-enters the DOM, so it survives a detach/re-attach mid-turn,
-     * mirroring the marker's own re-apply behaviour. Tracks the affected fields
-     * so {@link #stopWorking()} clears exactly these at turn end.
+     * Puts every field the AI can write this turn into the "AI is working"
+     * state: a shimmer plus a client-side read-only guard so the user cannot
+     * type into a field the AI is about to overwrite. The read-only guard is
+     * applied on the client only — it never changes the field's server-side
+     * read-only state, so it is purely a UX measure and does not affect what the
+     * LLM sees. Fields that are disabled or already read-only are skipped: the
+     * AI cannot write them, so they are not "worked on" and their read-only
+     * state must not be touched. Each affected field also gets an attach
+     * listener that re-applies the state when the field re-enters the DOM, so it
+     * survives a detach/re-attach mid-turn, mirroring the marker's own re-apply
+     * behaviour. Tracks the affected fields so {@link #stopWorking()} clears
+     * exactly these at turn end.
      */
     private void startWorking() {
         stopWorking();
         for (var field : collectActiveFields()) {
+            if (isDisabled(field) || isApplicationReadOnly(field)) {
+                continue;
+            }
             if (field instanceof Component component) {
                 var element = component.getElement();
                 var attach = component.addAttachListener(
@@ -927,9 +917,9 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Clears the "AI is working" shimmer from the fields
-     * {@link #startWorking()} set and removes their re-apply attach listeners,
-     * leaving any AI marker applied during the turn in place.
+     * Clears the "AI is working" state (shimmer + client-side read-only guard)
+     * from the fields {@link #startWorking()} set and removes their re-apply
+     * attach listeners, leaving any AI marker applied during the turn in place.
      */
     private void stopWorking() {
         for (var entry : workingFields.entrySet()) {
@@ -958,7 +948,8 @@ public class FormAIController implements AIController {
      * acts on — visible fields only. Disabled and read-only fields are kept:
      * the LLM reads them as context but cannot write them (see
      * {@link #isDisabled} / {@link #isApplicationReadOnly}). Use this anywhere
-     * the LLM-visible field set matters (locking, tool inputs and outputs).
+     * the LLM-visible field set matters (the working state, tool inputs and
+     * outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
         return collectKnownFields().stream().filter(this::isVisible).toList();
@@ -1002,32 +993,18 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Whether the application set the field read-only, as opposed to the
-     * controller's own turn lock. Between {@link #lockFields()} and
-     * {@link #unlockFields()} every writable field reports read-only, so a
-     * field counts as application-read-only only when it reports read-only yet
-     * is not one this controller locked (the {@code lockedFields} set). Such a
-     * field is shown to the LLM as read-only context but cannot be written.
+     * Whether the field is read-only. The controller never sets a field's
+     * server-side read-only state — it guards against user edits during a turn
+     * with a client-side read-only only (see {@link #startWorking()}) — so any
+     * read-only state here is application-controlled. Such a field is shown to
+     * the LLM as read-only context but cannot be written.
      *
      * @param field
      *            the discovered field to test, not {@code null}
-     * @return {@code true} when the field is read-only independently of the
-     *         controller's turn lock, {@code false} otherwise
+     * @return {@code true} when the field is read-only, {@code false} otherwise
      */
     private boolean isApplicationReadOnly(HasValue<?, ?> field) {
-        return field.isReadOnly() && !lockedFields.contains(field);
-    }
-
-    /**
-     * Restores fields locked by {@link #lockFields()} to read-write. Fields the
-     * application set to read-only before the turn started are not touched
-     * (they were skipped at lock time).
-     */
-    private void unlockFields() {
-        for (var field : lockedFields) {
-            field.setReadOnly(false);
-        }
-        lockedFields.clear();
+        return field.isReadOnly();
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
