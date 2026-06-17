@@ -43,7 +43,6 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
-import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -154,6 +153,33 @@ class FillFormToolTest {
                 "Ignored field's label must not appear, got: " + raw);
         Assertions.assertFalse(raw.contains("classified"),
                 "Ignored field's value must not appear, got: " + raw);
+    }
+
+    @Test
+    void fillForm_writesFieldsButMasksValuesWhenValuesHidden() {
+        // setValuesHidden keeps every field writable: the AI can fill them.
+        // The writes must land, but the response must still mask the values
+        // (null + valueHidden) rather than echoing what was written.
+        var name = new LabeledStringField();
+        name.setLabel("Name");
+        var controller = controllerFor(name);
+        controller.setValuesHidden(true);
+
+        var result = fillFormResult(controller, payload(name, "\"Acme Corp\""));
+
+        Assertions.assertEquals("Acme Corp", name.getValue(),
+                "Field must still accept the write while values are hidden");
+        Assertions.assertTrue(success(result),
+                "Write must not be rejected, got: " + result);
+        var node = fieldEntry(result, idOf(name));
+        Assertions.assertTrue(node.path("value").isNull(),
+                "Response must mask the value, got: " + node);
+        Assertions.assertTrue(node.path("valueHidden").asBoolean(false),
+                "Response must flag the masked value, got: " + node);
+        Assertions.assertFalse(
+                fillFormPayload(controller, payload(name, "\"Acme Corp\""))
+                        .contains("Acme Corp"),
+                "The written value must never appear in the response");
     }
 
     @Test
