@@ -19,9 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
 /**
- * A routed target view used by {@link ManualBreadcrumbsPage} so that a
- * breadcrumb item built with a route class resolves to a real URL via the route
- * registry.
+ * Routed target for a {@link ManualBreadcrumbsPage} breadcrumb item.
  */
 @Route("vaadin-breadcrumbs/manual-target")
 public class ManualBreadcrumbsTargetPage extends Div {

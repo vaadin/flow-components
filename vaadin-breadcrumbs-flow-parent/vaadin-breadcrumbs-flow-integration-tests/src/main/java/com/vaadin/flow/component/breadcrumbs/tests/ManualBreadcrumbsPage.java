@@ -23,12 +23,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 /**
- * Test view for the {@link Breadcrumbs} component in {@link Mode#MANUAL} mode.
- * <p>
- * Builds a trail with three items declaratively: one whose path is resolved
- * from a route class, one with a plain string path, and one with no path that
- * represents the current page. The add / remove buttons let the integration
- * test exercise reactive updates of the manually managed trail.
+ * Test view for {@link Breadcrumbs} in {@link Mode#MANUAL} mode.
  */
 @Route("vaadin-breadcrumbs/manual")
 public class ManualBreadcrumbsPage extends Div {

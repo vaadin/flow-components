@@ -27,9 +27,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Integration tests for {@link DataDrivenBreadcrumbsPage}, covering requirement
- * 16: a trail built from loaded domain data with a data-derived ancestor that
- * has no backing {@code @Route}.
+ * Integration tests for {@link DataDrivenBreadcrumbsPage}.
  */
 @TestPath("vaadin-breadcrumbs/data-driven")
 public class DataDrivenBreadcrumbsIT extends AbstractComponentIT {

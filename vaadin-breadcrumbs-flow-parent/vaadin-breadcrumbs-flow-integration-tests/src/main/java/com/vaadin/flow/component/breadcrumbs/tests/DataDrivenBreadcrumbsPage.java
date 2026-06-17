@@ -24,21 +24,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
 /**
- * Test view showing how a route can dynamically supply its breadcrumb
- * contribution from loaded domain data (requirement 16).
- * <p>
- * The trail {@code Home > Customers > Enterprise > Acme Corp} is built in
- * {@link Mode#MANUAL} from a simulated loaded customer. The {@code Enterprise}
- * segment and the {@code Acme Corp} current-page label are derived from the
- * data and have no backing {@code @Route}, which is the part of requirement 16
- * that {@link Mode#ROUTER} cannot express.
+ * Test view building a {@link Mode#MANUAL} trail from loaded data (requirement
+ * 16).
  */
 @Route("vaadin-breadcrumbs/data-driven")
 public class DataDrivenBreadcrumbsPage extends Div {
 
-    /**
-     * A simulated piece of loaded domain data.
-     */
     private record Customer(String name,
             String segment) implements Serializable {
     }
