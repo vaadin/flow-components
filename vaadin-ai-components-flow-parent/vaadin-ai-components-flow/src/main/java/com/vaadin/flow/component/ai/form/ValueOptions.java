@@ -31,15 +31,15 @@ import com.vaadin.flow.data.selection.MultiSelect;
  * The label set is either fixed ({@link #options(Collection)}) or supplied on
  * demand by a callback ({@link #options(BiFunction)}); exactly one of the two
  * must be set, with the last call winning. Pass the configured registration to
- * {@link FormAIController#valueOptions(ValueOptions)
- * controller.valueOptions(...)} to apply it; the labels are then presented to
- * the LLM as the field's choices.
+ * {@link FormAIController#fieldValueOptions(ValueOptions)
+ * controller.fieldValueOptions(...)} to apply it; the labels are then presented
+ * to the LLM as the field's choices.
  * <p>
  * Labels are always {@link String} values, regardless of the field's value
  * type. For a non-{@link String} field, supply a label-to-value converter
- * through {@link FormAIController#valueOptions(ValueOptions, Function)
- * valueOptions(config, toValue)} — the converter resolves a chosen label to the
- * field's value type before the controller writes it.
+ * through {@link FormAIController#fieldValueOptions(ValueOptions, Function)
+ * fieldValueOptions(config, toValue)} — the converter resolves a chosen label
+ * to the field's value type before the controller writes it.
  *
  * @param <I>
  *            the per-label item type the converter must produce — the field's
@@ -64,9 +64,9 @@ public final class ValueOptions<I> {
      * Starts an options registration for a single-value field. The field's
      * value type {@code V} flows through; for any {@code V} other than
      * {@link String}, the controller's two-argument
-     * {@link FormAIController#valueOptions(ValueOptions, Function)} overload
-     * must be used to supply a label-to-value converter (a compile-time
-     * requirement, not a runtime check).
+     * {@link FormAIController#fieldValueOptions(ValueOptions, Function)}
+     * overload must be used to supply a label-to-value converter (a
+     * compile-time requirement, not a runtime check).
      *
      * @param field
      *            the single-value field whose options the LLM may pick from,
@@ -87,9 +87,9 @@ public final class ValueOptions<I> {
      * statically typed as {@link MultiSelect}. The per-element type {@code T}
      * flows through; for any {@code T} other than {@link String}, the
      * controller's two-argument
-     * {@link FormAIController#valueOptions(ValueOptions, Function)} overload
-     * must be used. The controller aggregates resolved per-label items into a
-     * {@link LinkedHashSet} before {@link HasValue#setValue}.
+     * {@link FormAIController#fieldValueOptions(ValueOptions, Function)}
+     * overload must be used. The controller aggregates resolved per-label items
+     * into a {@link LinkedHashSet} before {@link HasValue#setValue}.
      *
      * @param field
      *            the multi-select field whose options the LLM may pick from,

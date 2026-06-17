@@ -137,7 +137,7 @@ class FormAIControllerTest {
 
             for (var anchor : List.of("get_form_state", "fill_form",
                     "query_field_options", "queryable", "enum", "rejected",
-                    ".ignore()", "SAME turn", "newly-appeared",
+                    ".ignoreField()", "SAME turn", "newly-appeared",
                     // bean-level cross-field rejections key on the "__form__"
                     // sentinel id, not a real field id.
                     "__form__", "cross-field")) {
@@ -344,7 +344,7 @@ class FormAIControllerTest {
             var visible = new TestField();
             var hidden = new TestField();
             var controller = new FormAIController(new Div(visible, hidden));
-            controller.ignore(hidden);
+            controller.ignoreField(hidden);
 
             controller.onRequest();
 
@@ -378,18 +378,18 @@ class FormAIControllerTest {
 
         @Test
         void describedFieldIsLocked() {
-            // describe() registers a hint but does not ignore the field;
+            // describeField() registers a hint but does not ignore the field;
             // the controller must distinguish "has a hint entry" from "is
             // ignored". If they collapse, every described or
-            // valueOptions-bound field would silently escape locking.
+            // fieldValueOptions-bound field would silently escape locking.
             var described = new TestField();
             var controller = new FormAIController(new Div(described));
-            controller.describe(described, "the merchant name");
+            controller.describeField(described, "the merchant name");
 
             controller.onRequest();
 
             Assertions.assertTrue(described.isReadOnly(),
-                    "A field with a description hint but no ignore() call "
+                    "A field with a description hint but no ignoreField() call "
                             + "must still be locked during a fill");
         }
 
@@ -450,7 +450,7 @@ class FormAIControllerTest {
             controller.onRequest();
             controller.onResponse(null);
 
-            controller.ignore(field);
+            controller.ignoreField(field);
             controller.onRequest();
 
             Assertions.assertFalse(field.isReadOnly(),
@@ -467,11 +467,11 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div());
 
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.describe(null, "x"));
+                    () -> controller.describeField(null, "x"));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.ignore(null));
+                    () -> controller.ignoreField(null));
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(null));
+                    () -> controller.fieldValueOptions(null));
             Assertions.assertThrows(NullPointerException.class,
                     () -> ValueOptions.forField((HasValue<?, String>) null));
             Assertions.assertThrows(NullPointerException.class,
@@ -485,7 +485,7 @@ class FormAIControllerTest {
             // filter on the supplied labels.
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(ValueOptions.forField(field)
+            controller.fieldValueOptions(ValueOptions.forField(field)
                     .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
@@ -508,7 +508,7 @@ class FormAIControllerTest {
             var config = ValueOptions.forField(field);
 
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.describe(field, null));
+                    () -> controller.describeField(field, null));
             Assertions.assertThrows(NullPointerException.class,
                     () -> config.options(
                             (java.util.function.BiFunction<String, Integer, List<String>>) null));
@@ -517,7 +517,7 @@ class FormAIControllerTest {
             // A null converter passed to the controller's two-argument
             // overload throws NPE.
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.valueOptions(ValueOptions
+                    () -> controller.fieldValueOptions(ValueOptions
                             .forField(new IntField()).options(List.of("a")),
                             null));
             // An empty fixed-options list leaves the field un-fillable;
@@ -531,18 +531,18 @@ class FormAIControllerTest {
             // corresponding runtime test.
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> controller
-                            .valueOptions(ValueOptions.forField(field)));
+                            .fieldValueOptions(ValueOptions.forField(field)));
         }
 
         @Test
-        void valueOptionsAcceptsNonStringFieldWithToValueConverter() {
-            // valueOptions is generic over the field's value type — verify
+        void fieldValueOptionsAcceptsNonStringFieldWithToValueConverter() {
+            // fieldValueOptions is generic over the field's value type — verify
             // that an Integer-valued field can be registered with a label
             // -> Integer converter, and that the labels still flow through
             // the query tool unchanged.
             var field = new IntField();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(ValueOptions.forField(field)
+            controller.fieldValueOptions(ValueOptions.forField(field)
                     .options(List.of("1", "2", "3")), Integer::parseInt);
             controller.onRequest();
 
@@ -559,9 +559,9 @@ class FormAIControllerTest {
             var fixedField = new TestField();
             var controller = new FormAIController(
                     new Div(queriedField, fixedField));
-            controller.valueOptions(ValueOptions.forField(queriedField)
+            controller.fieldValueOptions(ValueOptions.forField(queriedField)
                     .options((filter, limit) -> List.of("alpha", "beta")));
-            controller.valueOptions(ValueOptions.forField(fixedField)
+            controller.fieldValueOptions(ValueOptions.forField(fixedField)
                     .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
@@ -573,16 +573,17 @@ class FormAIControllerTest {
 
         @Test
         void reregisteringWithBiFunctionClearsPriorFixedOptionsFlag() {
-            // Each valueOptions call replaces the previous registration for
+            // Each fieldValueOptions call replaces the previous registration
+            // for
             // the same field. The fixed-options variant sets a flag that
             // makes the schema render options as 'enum'; re-registering with
             // a query callback must reset that flag so the schema rendering
             // matches the new registration (queryable, not enum).
             var combo = new SingleSelectField<String>();
             var controller = new FormAIController(new Div(combo));
-            controller.valueOptions(ValueOptions.forField(combo)
+            controller.fieldValueOptions(ValueOptions.forField(combo)
                     .options(List.of("EUR", "USD")));
-            controller.valueOptions(ValueOptions.forField(combo)
+            controller.fieldValueOptions(ValueOptions.forField(combo)
                     .options((filter, limit) -> List.of("EUR", "USD")));
 
             var schema = json(findTool(controller.getTools(), "get_form_state")
@@ -590,7 +591,7 @@ class FormAIControllerTest {
             var field = schema.path("fields").get(0);
 
             Assertions.assertTrue(field.path("queryable").asBoolean(),
-                    "Re-registering valueOptions with a BiFunction must "
+                    "Re-registering fieldValueOptions with a BiFunction must "
                             + "make the field queryable, got: " + field);
             Assertions.assertTrue(field.path("enum").isMissingNode(),
                     "Stale enum block must not survive re-registration with "
@@ -598,7 +599,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void valueOptionsForFieldOnUpcastMultiSelectReferenceThrowsIllegalArgument() {
+        void fieldValueOptionsForFieldOnUpcastMultiSelectReferenceThrowsIllegalArgument() {
             // A MultiSelect statically typed as such picks the MultiSelect-
             // typed forField overload at compile time. This runtime check
             // is for the upcast case: the developer holds a HasValue
@@ -610,7 +611,7 @@ class FormAIControllerTest {
             HasValue<?, java.util.Set<String>> upcast = multiSelect;
             var controller = new FormAIController(new Div(multiSelect));
             var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.valueOptions(
+                    () -> controller.fieldValueOptions(
                             ValueOptions.forField(upcast).options(List.of("a")),
                             label -> java.util.Set.of(label)));
             Assertions.assertTrue(ex.getMessage().contains("MultiSelect"),
@@ -620,14 +621,14 @@ class FormAIControllerTest {
         }
 
         @Test
-        void valueOptionsRejectsCollectionValuedFieldNotImplementingMultiSelect() {
+        void fieldValueOptionsRejectsCollectionValuedFieldNotImplementingMultiSelect() {
             // Collection-valued fields must implement MultiSelect; otherwise
             // there is no defined aggregation for per-label converter results
             // and the controller refuses to register them.
             var field = new FormTestFields.CollectionWithoutMultiSelectField();
             var controller = new FormAIController(new Div(field));
             var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.valueOptions(
+                    () -> controller.fieldValueOptions(
                             ValueOptions.forField(field).options(List.of("a")),
                             label -> List.of(label)));
             Assertions.assertTrue(
@@ -639,20 +640,20 @@ class FormAIControllerTest {
         }
 
         @Test
-        void valueOptionsAcceptsTypedMultiSelectFieldWithNonStringConverter() {
+        void fieldValueOptionsAcceptsTypedMultiSelectFieldWithNonStringConverter() {
             // Counterpart to the Collection-value rejection: a MultiSelect-
             // typed field with a non-String per-element type and an explicit
             // converter must remain accepted, even though its empty value is
             // itself a Collection.
             var field = new FormTestFields.MultiSelectField<Integer>();
             var controller = new FormAIController(new Div(field));
-            Assertions.assertDoesNotThrow(() -> controller.valueOptions(
+            Assertions.assertDoesNotThrow(() -> controller.fieldValueOptions(
                     ValueOptions.forField(field).options(List.of("1", "2")),
                     Integer::parseInt));
         }
 
         @Test
-        void valueOptionsConfigFixedAndQueryClearEachOther() {
+        void fieldValueOptionsConfigFixedAndQueryClearEachOther() {
             // The two options(...) overloads (fixed Collection, queryable
             // BiFunction) clear each other so a half-finished config can't
             // resurrect stale state. fixed-then-queryable lands as
@@ -661,10 +662,10 @@ class FormAIControllerTest {
             var fixedWins = new TestField();
             var controller = new FormAIController(
                     new Div(queryWins, fixedWins));
-            controller.valueOptions(
+            controller.fieldValueOptions(
                     ValueOptions.forField(queryWins).options(List.of("a", "b"))
                             .options((filter, limit) -> List.of("x", "y")));
-            controller.valueOptions(ValueOptions.forField(fixedWins)
+            controller.fieldValueOptions(ValueOptions.forField(fixedWins)
                     .options((filter, limit) -> List.of("x", "y"))
                     .options(List.of("a", "b")));
 
@@ -690,13 +691,13 @@ class FormAIControllerTest {
 
         @Test
         void multiSelectFixedOptionsRenderAsItemsEnum() {
-            // valueOptions on a MultiSelectField surfaces labels inside
+            // fieldValueOptions on a MultiSelectField surfaces labels inside
             // items.enum (multi-select schema) rather than at the node
             // level — pin that the same nesting path applies whether or
             // not the field is multi-select.
             var field = new FormTestFields.MultiSelectField<String>();
             var controller = new FormAIController(new Div(field));
-            controller.valueOptions(ValueOptions.forField(field)
+            controller.fieldValueOptions(ValueOptions.forField(field)
                     .options(List.of("alpha", "beta")));
 
             var schema = json(findTool(controller.getTools(), "get_form_state")
@@ -786,13 +787,14 @@ class FormAIControllerTest {
 
         @Test
         void describeOverridesBinderSeeding() {
-            // Explicit describe() always wins: seeding only fills nulls, so
+            // Explicit describeField() always wins: seeding only fills nulls,
+            // so
             // a developer's description suppresses the bean property name.
             var field = new LabeledField("Customer Name");
             var binder = new Binder<>(TestBean.class);
             binder.forField(field).bind("name");
             var controller = new FormAIController(new Div(field), binder);
-            controller.describe(field, "Full legal name");
+            controller.describeField(field, "Full legal name");
 
             controller.onRequest();
             var entry = formStateFields(controller).get(0);
@@ -801,7 +803,7 @@ class FormAIControllerTest {
             Assertions.assertEquals("Customer Name | Full legal name",
                     description);
             Assertions.assertFalse(description.contains("name | "),
-                    "Property name must not appear when describe() set "
+                    "Property name must not appear when describeField() set "
                             + "the description explicitly, got: "
                             + description);
         }
@@ -809,7 +811,8 @@ class FormAIControllerTest {
         @Test
         void lambdaBoundFieldHasNoSeededDescription() {
             // Lambda-bound bindings carry no property name; the description
-            // falls back to whatever label/helper/describe() provides — here
+            // falls back to whatever label/helper/describeField() provides —
+            // here
             // just the label.
             var field = new LabeledField("Email");
             var binder = new Binder<>(TestBean.class);
@@ -845,7 +848,7 @@ class FormAIControllerTest {
 
             Assertions.assertTrue(
                     unboundEntry.path("description").isMissingNode(),
-                    "Unbound field with no label / helper / describe() must "
+                    "Unbound field with no label / helper / describeField() must "
                             + "have no description, got: " + unboundEntry);
         }
 
@@ -1008,14 +1011,16 @@ class FormAIControllerTest {
 
         @Test
         void ignoredFieldsDoNotAppearEvenIfTheirValueChanged() {
-            // Application-driven cascades into a field marked ignore() must
-            // not leak into the change list — ignore() is the application's
+            // Application-driven cascades into a field marked ignoreField()
+            // must
+            // not leak into the change list — ignoreField() is the
+            // application's
             // opt-out from AI-driven tracking on either side of the lifecycle.
             var visible = new TestField();
             var ignored = new TestField();
             visible.addValueChangeListener(e -> ignored.setValue("cascade"));
             var controller = new FormAIController(new Div(visible, ignored));
-            controller.ignore(ignored);
+            controller.ignoreField(ignored);
             var captured = new AtomicReference<List<FieldValueChange>>();
             controller.addFieldValueChangedListener(captured::set);
 
@@ -1461,18 +1466,18 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showHighlightQueuesAddUserWithSingleAIUser() {
+        void showFieldHighlightQueuesAddUserWithSingleAIUser() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
             var invocations = drainPendingJs();
             var scripts = scriptsOn(invocations, field);
 
             Assertions.assertEquals(1, scripts.size(),
-                    "showHighlight must queue exactly one script; got: "
+                    "showFieldHighlight must queue exactly one script; got: "
                             + scripts);
             var script = scripts.getFirst();
             Assertions.assertTrue(script.contains(
@@ -1490,18 +1495,18 @@ class FormAIControllerTest {
         }
 
         @Test
-        void hideHighlightQueuesRemoveUserWithControllerId() {
+        void hideFieldHighlightQueuesRemoveUserWithControllerId() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.hideHighlight(field);
+            controller.hideFieldHighlight(field);
             var invocations = drainPendingJs();
             var scripts = scriptsOn(invocations, field);
 
             Assertions.assertEquals(1, scripts.size(),
-                    "hideHighlight must queue exactly one script; got: "
+                    "hideFieldHighlight must queue exactly one script; got: "
                             + scripts);
             var script = scripts.getFirst();
             Assertions.assertTrue(script.contains(
@@ -1518,7 +1523,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showHighlightTwiceQueuesIdenticalScripts() {
+        void showFieldHighlightTwiceQueuesIdenticalScripts() {
             // The web component dedups by user id, so repeated addUser with
             // the same id collapses to one entry on the client. The Java
             // side simply queues the same script twice.
@@ -1527,12 +1532,12 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
+            controller.showFieldHighlight(field);
             var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(2, scripts.size(),
-                    "Each showHighlight call queues its own script; got: "
+                    "Each showFieldHighlight call queues its own script; got: "
                             + scripts);
             Assertions.assertEquals(scripts.get(0), scripts.get(1),
                     "Both invocations must produce identical scripts so the "
@@ -1551,9 +1556,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
-            controller.hideHighlight(field);
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
+            controller.hideFieldHighlight(field);
+            controller.showFieldHighlight(field);
             var scripts = pendingJsOn(field);
 
             Assertions.assertEquals(3, scripts.size(),
@@ -1576,11 +1581,11 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div());
 
             var showNpe = Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.showHighlight(null));
+                    () -> controller.showFieldHighlight(null));
             Assertions.assertEquals("Field must not be null",
                     showNpe.getMessage());
             var hideNpe = Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.hideHighlight(null));
+                    () -> controller.hideFieldHighlight(null));
             Assertions.assertEquals("Field must not be null",
                     hideNpe.getMessage());
         }
@@ -1591,15 +1596,16 @@ class FormAIControllerTest {
             var nonComponent = new NonComponentField();
 
             Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.showHighlight(nonComponent));
+                    () -> controller.showFieldHighlight(nonComponent));
             Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.hideHighlight(nonComponent));
+                    () -> controller.hideFieldHighlight(nonComponent));
         }
 
         @Test
         void highlightWorksForFieldOutsideTheControllerForm() {
             // Controller's form intentionally does not contain `outsideField`.
-            // Pins the contract that showHighlight / hideHighlight operate on
+            // Pins the contract that showFieldHighlight / hideFieldHighlight
+            // operate on
             // any HasValue Component, regardless of form membership.
             var formField = new TestField();
             var outsideField = new TestField();
@@ -1609,11 +1615,11 @@ class FormAIControllerTest {
             ui.add(siblingDiv);
             var controller = new FormAIController(formDiv);
 
-            controller.showHighlight(outsideField);
+            controller.showFieldHighlight(outsideField);
             var scripts = pendingJsOn(outsideField);
 
             Assertions.assertEquals(1, scripts.size(),
-                    "showHighlight must queue a script even when the field "
+                    "showFieldHighlight must queue a script even when the field "
                             + "is outside the controller's form; got: "
                             + scripts);
             Assertions.assertTrue(isShowScript(scripts.getFirst()));
@@ -1629,7 +1635,7 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(highlighted);
+            controller.showFieldHighlight(highlighted);
 
             var dump = drainPendingJs();
             Assertions.assertEquals(1, scriptsOn(dump, highlighted).size());
@@ -1639,7 +1645,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void hideHighlightOnOneFieldDoesNotEmitJsForAnother() {
+        void hideFieldHighlightOnOneFieldDoesNotEmitJsForAnother() {
             // Sibling-independence check on the clearing path: hiding one
             // field's highlight must leave another field's script queue
             // untouched.
@@ -1649,7 +1655,7 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.hideHighlight(cleared);
+            controller.hideFieldHighlight(cleared);
 
             var dump = drainPendingJs();
             Assertions.assertEquals(1, scriptsOn(dump, cleared).size());
@@ -1657,7 +1663,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void hideHighlightLeavesOtherHighlightedFieldsAlone() {
+        void hideFieldHighlightLeavesOtherHighlightedFieldsAlone() {
             // Pin behavioural independence: with two fields already
             // highlighted, hiding one must only emit the clear-script on the
             // hidden field. The other field's queue keeps its show-script
@@ -1668,9 +1674,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(keep);
-            controller.showHighlight(clear);
-            controller.hideHighlight(clear);
+            controller.showFieldHighlight(keep);
+            controller.showFieldHighlight(clear);
+            controller.hideFieldHighlight(clear);
 
             var dump = drainPendingJs();
             var keepScripts = scriptsOn(dump, keep);
@@ -1694,7 +1700,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showHighlightReappliesOnReattach() {
+        void showFieldHighlightReappliesOnReattach() {
             // Detach drops the client-side highlight; the controller's
             // attach listener must re-issue addUser on the next attach so
             // the user does not lose the visual cue.
@@ -1703,7 +1709,7 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
             drainPendingJs();
 
             form.remove(field);
@@ -1717,7 +1723,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void hideHighlightCancelsReapplyOnReattach() {
+        void hideFieldHighlightCancelsReapplyOnReattach() {
             // hide removes the attach listener as well as queueing
             // removeUser; a subsequent detach/re-attach must not bring the
             // highlight back.
@@ -1726,8 +1732,8 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
-            controller.hideHighlight(field);
+            controller.showFieldHighlight(field);
+            controller.hideFieldHighlight(field);
             drainPendingJs();
 
             form.remove(field);
@@ -1742,7 +1748,7 @@ class FormAIControllerTest {
 
         @Test
         void repeatedShowDoesNotStackReapplyListeners() {
-            // Two showHighlight calls must register exactly one attach
+            // Two showFieldHighlight calls must register exactly one attach
             // listener. Otherwise re-attach would queue duplicate addUser
             // scripts and leak listeners across the field's lifetime.
             var field = new TestField();
@@ -1750,8 +1756,8 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
+            controller.showFieldHighlight(field);
             drainPendingJs();
 
             form.remove(field);
@@ -1766,7 +1772,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showHighlightAfterHideReinstallsReapply() {
+        void showFieldHighlightAfterHideReinstallsReapply() {
             // show → hide → show on the same field must end with a working
             // attach listener again, because hide removed the previous one
             // and the second show installs a fresh registration.
@@ -1775,9 +1781,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showHighlight(field);
-            controller.hideHighlight(field);
-            controller.showHighlight(field);
+            controller.showFieldHighlight(field);
+            controller.hideFieldHighlight(field);
+            controller.showFieldHighlight(field);
             drainPendingJs();
 
             form.remove(field);
