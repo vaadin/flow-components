@@ -456,8 +456,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
 
     column.headerRenderer = singleTimeRenderer((root) => {
-      // Clear previous contents
-      root.innerHTML = '';
       // Render sorter
       let contentRoot = root;
       if (showSorter) {
@@ -524,8 +522,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
 
     column.footerRenderer = singleTimeRenderer((root) => {
-      // Clear previous contents
-      root.innerHTML = '';
       // Add content
       if (content instanceof Node) {
         root.appendChild(content);

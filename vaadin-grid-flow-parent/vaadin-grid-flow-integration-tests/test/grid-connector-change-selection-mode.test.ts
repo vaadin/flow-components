@@ -72,5 +72,16 @@ describe('grid connector - change selection mode', () => {
 
       expect(grid.selectedItems).to.be.empty;
     });
+
+    it('should not restore items selected before mode change on subsequent selections', () => {
+      grid.$connector.setSelectionMode('MULTI');
+      grid.$connector.doSelection([{ key: '0' }], false);
+
+      grid.$connector.setSelectionMode('MULTI');
+
+      grid.$connector.doSelection([{ key: '1' }], false);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+      expect(grid.selectedItems[0].key).to.equal('1');
+    });
   });
 });
