@@ -53,10 +53,15 @@ final class FormAITools {
      * not edit: the LLM reads it for context, while {@code fill_form} rejects
      * any write to it. {@code readOnly} already excludes the controller's own
      * turn lock, so it reflects only application-set read-only state.
+     * <p>
+     * {@code hideValue} masks the field's current value in the rendered state:
+     * it is sent as {@code null} with a {@code valueHidden} flag, while the
+     * field stays listed and writable. Set when the controller is configured to
+     * hide all field values.
      */
     record FormFieldDescriptor(String id, HasValue<?, ?> field,
             FormFieldType type, FormFieldHints hints, boolean disabled,
-            boolean readOnly) {
+            boolean readOnly, boolean hideValue) {
     }
 
     /**
