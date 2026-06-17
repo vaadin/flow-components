@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,6 +46,8 @@ import org.mockito.Mockito;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -59,6 +62,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
@@ -447,6 +451,43 @@ class AIOrchestratorTest {
         orchestrator.prompt("do it");
 
         Mockito.verify(fakeTool).execute(Mockito.any());
+        Mockito.verify(controller).onResponse(null);
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    void prompt_whenUiDetachesMidTurn_streamsAndCleansUpViaSession() {
+        // Refreshing the page mid-turn detaches the UI captured at turn start
+        // while keeping the session alive (as @PreserveOnRefresh does). The
+        // streaming updates and the controller cleanup must fall back to the
+        // session lock instead of failing with a UIDetachedException, so the
+        // controller is not left stuck (locks / working state never cleared).
+        var session = ui.getSession();
+        var detachedUi = new UI() {
+            @Override
+            public Future<Void> access(Command command) {
+                throw new UIDetachedException();
+            }
+        };
+        detachedUi.getInternals().setSession(session);
+        UI.setCurrent(detachedUi);
+
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var controller = Mockito.mock(AIController.class);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .build();
+
+        Assertions.assertDoesNotThrow(() -> orchestrator.prompt("Hi"),
+                "A UI detaching mid-turn must not surface as an error");
+        Mockito.verify(mockMessage).appendText("Hello");
         Mockito.verify(controller).onResponse(null);
     }
 

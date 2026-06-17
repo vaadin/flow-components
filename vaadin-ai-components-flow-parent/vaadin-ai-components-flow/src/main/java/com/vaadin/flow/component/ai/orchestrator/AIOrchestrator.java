@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
@@ -59,6 +60,8 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 import tools.jackson.databind.JsonNode;
@@ -404,6 +407,10 @@ public class AIOrchestrator implements Serializable {
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
             AIMessage assistantMessage, UI ui) {
+        // Capture the session while the UI is still attached: it outlives the
+        // UI across a page refresh (@PreserveOnRefresh) and is used to keep
+        // running UI updates when the captured UI has since detached.
+        var session = ui.getSession();
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
@@ -412,7 +419,7 @@ public class AIOrchestrator implements Serializable {
         }).subscribe(token -> {
             responseBuilder.append(token);
             if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.appendText(token));
+                accessUi(ui, session, () -> assistantMessage.appendText(token));
             }
         }, error -> {
             String userMessage;
@@ -425,9 +432,10 @@ public class AIOrchestrator implements Serializable {
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.setText(userMessage));
+                accessUi(ui, session,
+                        () -> assistantMessage.setText(userMessage));
             }
-            fireResponseListener("", error, ui);
+            fireResponseListener("", error, ui, session);
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -435,9 +443,38 @@ public class AIOrchestrator implements Serializable {
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
             }
-            fireResponseListener(responseText, null, ui);
+            fireResponseListener(responseText, null, ui, session);
             LOGGER.debug("LLM streaming completed successfully");
         });
+    }
+
+    /**
+     * Runs {@code command} on the UI thread, tolerating the UI captured at turn
+     * start having detached since — typically because the user refreshed or
+     * closed the page mid-stream. A detached UI can no longer be accessed, so
+     * the command is retried under the session lock, which a page refresh keeps
+     * alive (and under {@link com.vaadin.flow.router.PreserveOnRefresh} the
+     * same components move to the new UI, so the update still lands). When
+     * neither is available the command is skipped with a debug log rather than
+     * failing the stream with a {@link UIDetachedException}.
+     */
+    private static void accessUi(UI ui, VaadinSession session,
+            Command command) {
+        try {
+            ui.access(command);
+        } catch (UIDetachedException uiGone) {
+            if (session == null) {
+                LOGGER.debug("Skipping UI update; UI detached mid-turn and no "
+                        + "session was captured", uiGone);
+                return;
+            }
+            try {
+                session.access(command);
+            } catch (RuntimeException sessionGone) {
+                LOGGER.debug("Skipping UI update; UI and session both gone "
+                        + "(page closed mid-turn)", sessionGone);
+            }
+        }
     }
 
     private void doPrompt(String userMessage,
@@ -470,7 +507,7 @@ public class AIOrchestrator implements Serializable {
             // failed first — in which case nothing past it executed.
             var currentUi = UI.getCurrent();
             if (currentUi != null) {
-                fireResponseListener("", t, currentUi);
+                fireResponseListener("", t, currentUi, currentUi.getSession());
             }
             throw t;
         }
@@ -678,7 +715,7 @@ public class AIOrchestrator implements Serializable {
     }
 
     private void fireResponseListener(String responseText, Throwable error,
-            UI ui) {
+            UI ui, VaadinSession session) {
         if (responseListener != null) {
             try {
                 responseListener.onResponse(new ResponseListener.ResponseEvent(
@@ -688,7 +725,7 @@ public class AIOrchestrator implements Serializable {
             }
         }
         if (controller != null) {
-            ui.access(() -> {
+            accessUi(ui, session, () -> {
                 try {
                     controller.onResponse(error);
                 } catch (Exception e) {
