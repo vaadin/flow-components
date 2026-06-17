@@ -27,10 +27,6 @@ concurrency:
 
 env:
   FORK_COUNT: 4
-  # Internal validation has no reason to enforce the frontend package age
-  # requirement (it only protects downstream framework users), so accept
-  # freshly published @NpmPackage bumps.
-  MAVEN_OPTS: -Dvaadin.npm.minimumFrontendPackageAgeDays=0
 
 jobs:
   build:
@@ -229,6 +225,15 @@ jobs:
       - name: Merge ITs
         if: matrix.type == 'war'
         run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
+
+      # Let @vaadin/* web component bumps bypass the frontend package age check
+      - name: Configure pnpm package age exclude
+        if: matrix.type == 'war'
+        run: |
+          cat > integration-tests/pnpm-workspace.yaml <<'EOF'
+          minimumReleaseAgeExclude:
+            - '@vaadin/*'
+          EOF
 
       - name: Compute WAR cache key
         if: matrix.type == 'war'
