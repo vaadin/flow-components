@@ -23,8 +23,10 @@ import com.vaadin.flow.dom.Element;
  * Bridges {@link FormAIController#showHighlight} /
  * {@link FormAIController#hideHighlight} to the {@code vaadin-ai-field-marker}
  * web component, which annotates a field as AI-filled and offers a popover to
- * review and revert the value. The annotations on this class load the web
- * component on the client.
+ * review and revert the value. It also toggles the field's "AI is working"
+ * shimmer ({@link #startWorking} / {@link #stopWorking}) shown while a fill is
+ * in progress. The annotations on this class load the web component on the
+ * client.
  */
 @NpmPackage(value = "@vaadin/field-base", version = "25.2.0-beta2")
 @JsModule("@vaadin/field-base/src/vaadin-ai-field-marker.js")
@@ -49,5 +51,30 @@ final class FormFieldMarker {
     static void unmark(Element field) {
         field.executeJs(
                 "customElements.get('vaadin-ai-field-marker').unmark(this)");
+    }
+
+    /**
+     * Shows the "AI is working" shimmer on the field while a fill is in
+     * progress, via the {@code ai-working} class the web component styles. The
+     * class animation lives in the marker's stylesheet, which is adopted into
+     * the DOM only by {@code mark} / {@code unmark}; calling {@code unmark} on
+     * a field that has no marker yet adopts the stylesheet without other
+     * effect, so it is invoked only when no marker is present (a marked field
+     * keeps its badge through the working state).
+     */
+    static void startWorking(Element field) {
+        field.executeJs("""
+                if (!this.querySelector('vaadin-ai-field-marker')) {
+                  customElements.get('vaadin-ai-field-marker').unmark(this);
+                }
+                this.classList.add('ai-working');""");
+    }
+
+    /**
+     * Removes the "AI is working" shimmer from the field, leaving any AI marker
+     * the fill applied in place.
+     */
+    static void stopWorking(Element field) {
+        field.executeJs("this.classList.remove('ai-working')");
     }
 }

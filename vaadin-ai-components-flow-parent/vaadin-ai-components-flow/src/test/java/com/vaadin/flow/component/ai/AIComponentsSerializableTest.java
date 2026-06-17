@@ -88,7 +88,8 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldValidation.*",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormValueConverter.*",
                 // Stateless bridge to the vaadin-ai-field-marker web component;
-                // a utility with only static methods, not Serializable by design.
+                // a utility with only static methods, not Serializable by
+                // design.
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.FormFieldMarker(\\$\\d+)?",
                 "com\\.vaadin\\.flow\\.component\\.ai\\.form\\.BinderReflection(\\$\\d+)?",
                 // ValueOptions is a transient registration helper: the

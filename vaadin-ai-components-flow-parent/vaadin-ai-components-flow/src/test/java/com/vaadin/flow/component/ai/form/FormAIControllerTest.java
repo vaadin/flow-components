@@ -1774,16 +1774,192 @@ class FormAIControllerTest {
         }
 
         @Test
-        void revertEventRestoresPreTurnValueAndClearsMarker() {
-            // The documented usage: highlight changed fields from the
-            // values-changed listener. The marker's ai-field-revert event must
-            // then restore the field's pre-turn value and clear the marker.
+        void turnStartShowsWorkingShimmerOnAllVisibleFields() {
+            // Every visible field enters the "AI is working" state at turn
+            // start, regardless of whether the AI ends up changing it.
+            var changed = new TestField();
+            var untouched = new TestField();
+            var form = new Div(changed, untouched);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            var dump = drainPendingJs();
+
+            Assertions.assertTrue(
+                    scriptsOn(dump, changed).stream()
+                            .anyMatch(Highlight::isWorkingStartScript),
+                    "A field must show the working shimmer at turn start");
+            Assertions.assertTrue(
+                    scriptsOn(dump, untouched).stream()
+                            .anyMatch(Highlight::isWorkingStartScript),
+                    "Every visible field, even ones the AI won't change, must "
+                            + "show the working shimmer at turn start");
+        }
+
+        @Test
+        void turnEndClearsWorkingShimmer() {
+            // The shimmer is removed when the turn ends, on changed and
+            // unchanged fields alike.
+            var changed = new TestField();
+            var untouched = new TestField();
+            var form = new Div(changed, untouched);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            changed.setValue("filled");
+            controller.onResponse(null);
+            var dump = drainPendingJs();
+
+            Assertions.assertTrue(
+                    scriptsOn(dump, changed).stream()
+                            .anyMatch(Highlight::isWorkingStopScript),
+                    "A changed field's working shimmer must be cleared");
+            Assertions.assertTrue(
+                    scriptsOn(dump, untouched).stream()
+                            .anyMatch(Highlight::isWorkingStopScript),
+                    "An unchanged field's working shimmer must be cleared too");
+        }
+
+        @Test
+        void workingShimmerClearedEvenWhenTurnFails() {
+            // A failed turn must not strand the shimmer on the form.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
-            controller.addFieldValueChangedListener(changes -> changes.forEach(
-                    change -> controller.showHighlight(change.field())));
+
+            controller.onRequest();
+            controller.onResponse(new RuntimeException("boom"));
+
+            Assertions.assertTrue(
+                    pendingJsOn(field).stream()
+                            .anyMatch(Highlight::isWorkingStopScript),
+                    "Working shimmer must clear even when the turn fails");
+        }
+
+        @Test
+        void changedFieldIsHighlightedAutomatically() {
+            // A turn that changes a field marks it without any showHighlight
+            // wiring on the application's side.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            var markScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(1, markScripts.size(),
+                    "A field changed during a turn must be highlighted "
+                            + "automatically; got: " + markScripts);
+        }
+
+        @Test
+        void unchangedFieldIsNotHighlighted() {
+            // A turn that leaves a field's value untouched must not mark it.
+            var field = new TestField();
+            field.setValue("kept");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            // No write to the field during the turn.
+            controller.onResponse(null);
+
+            var markScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isShowScript).toList();
+            Assertions.assertEquals(0, markScripts.size(),
+                    "An unchanged field must not be highlighted; got: "
+                            + markScripts);
+        }
+
+        @Test
+        void userEditAfterTurnClearsTheMarker() {
+            // A turn highlights the field; a subsequent user edit must clear
+            // the marker so a stale "AI filled this" cue doesn't linger.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("ai");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            // User edits the field after the turn.
+            field.setValue("edited by user");
+
+            Assertions.assertTrue(
+                    pendingJsOn(field).stream()
+                            .anyMatch(Highlight::isHideScript),
+                    "Editing a highlighted field must clear the marker");
+        }
+
+        @Test
+        void aiWritesDuringTurnDoNotClearTheMarker() {
+            // The AI may change an already-highlighted field again on a later
+            // turn. Those in-turn writes must not trip the auto-hide listener.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("second"); // AI write while a turn is in progress
+            controller.onResponse(null);
+
+            var unmarkScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isHideScript).toList();
+            Assertions.assertEquals(0, unmarkScripts.size(),
+                    "An AI write during a turn must not clear the marker; "
+                            + "got: " + unmarkScripts);
+        }
+
+        @Test
+        void userEditAfterMarkerClearedDoesNotReClear() {
+            // Once the marker is cleared by a user edit, its value-change
+            // listener is gone, so further edits must not queue more unmark
+            // scripts.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("ai");
+            controller.onResponse(null);
+            field.setValue("first edit"); // clears the marker
+            drainPendingJs();
+
+            field.setValue("second edit");
+
+            var unmarkScripts = pendingJsOn(field).stream()
+                    .filter(Highlight::isHideScript).toList();
+            Assertions.assertEquals(0, unmarkScripts.size(),
+                    "Editing after the marker was cleared must not queue "
+                            + "another unmark; got: " + unmarkScripts);
+        }
+
+        @Test
+        void revertEventRestoresPreTurnValueAndClearsMarker() {
+            // A turn that changes a field highlights it automatically. The
+            // marker's ai-field-revert event must then restore the field's
+            // pre-turn value and clear the marker.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
 
             field.setValue("old");
             controller.onRequest();
@@ -1795,9 +1971,38 @@ class FormAIControllerTest {
 
             Assertions.assertEquals("old", field.getValue(),
                     "Revert must restore the field's pre-turn value");
-            Assertions.assertTrue(pendingJsOn(field).stream()
-                    .anyMatch(Highlight::isHideScript),
+            Assertions.assertTrue(
+                    pendingJsOn(field).stream()
+                            .anyMatch(Highlight::isHideScript),
                     "Revert must clear the marker via unmark");
+        }
+
+        @Test
+        void revertRestoresValueFromBeforeFirstAiChangeAcrossTurns() {
+            // The AI may change the same field over several turns. Revert must
+            // restore the value from before the FIRST change, not the value the
+            // field held at the start of the most recent turn.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("second");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            fireRevert(field);
+
+            Assertions.assertEquals("original", field.getValue(),
+                    "Revert must restore the value from before the AI's first "
+                            + "change, not the most recent turn's pre-turn "
+                            + "value");
         }
 
         @Test
@@ -1817,8 +2022,9 @@ class FormAIControllerTest {
 
             Assertions.assertEquals("current", field.getValue(),
                     "With no tracked value, revert must not change the value");
-            Assertions.assertTrue(pendingJsOn(field).stream()
-                    .anyMatch(Highlight::isHideScript),
+            Assertions.assertTrue(
+                    pendingJsOn(field).stream()
+                            .anyMatch(Highlight::isHideScript),
                     "Revert must still clear the marker via unmark");
         }
 
@@ -1827,21 +2033,31 @@ class FormAIControllerTest {
         // string. The canonical mark/unmark tests (above) pin the exact JS
         // contract; these helpers are for follow-on tests that only need to
         // distinguish the two. "unmark" contains "mark", so match the leading
-        // dot to tell them apart.
+        // dot to tell them apart. The working-shimmer script also calls unmark
+        // (to adopt the stylesheet), so exclude any ai-working script here.
         private static boolean isShowScript(String script) {
-            return script.contains(".mark(");
+            return script.contains(".mark(") && !script.contains("ai-working");
         }
 
         private static boolean isHideScript(String script) {
-            return script.contains(".unmark(");
+            return script.contains(".unmark(")
+                    && !script.contains("ai-working");
+        }
+
+        private static boolean isWorkingStartScript(String script) {
+            return script.contains(".add('ai-working')");
+        }
+
+        private static boolean isWorkingStopScript(String script) {
+            return script.contains(".remove('ai-working')");
         }
 
         // Dispatch the marker's revert event server-side so tests can drive
         // the revert path without a real client.
         private static void fireRevert(Component field) {
             var element = field.getElement();
-            element.getNode().getFeature(ElementListenerMap.class).fireEvent(
-                    new DomEvent(element, "ai-field-revert",
+            element.getNode().getFeature(ElementListenerMap.class)
+                    .fireEvent(new DomEvent(element, "ai-field-revert",
                             JacksonUtils.createObjectNode()));
         }
 

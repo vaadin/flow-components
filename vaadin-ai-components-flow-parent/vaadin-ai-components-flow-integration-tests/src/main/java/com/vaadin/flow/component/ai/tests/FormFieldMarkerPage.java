@@ -71,10 +71,9 @@ public class FormFieldMarkerPage extends VerticalLayout {
         var form = new VerticalLayout(name, email, company, bio, licensePlate);
         form.setId("form");
 
+        // The controller highlights every field it changes automatically; no
+        // showHighlight wiring is needed.
         var controller = new FormAIController(form);
-        // Mark every field the AI changed during the turn.
-        controller.addFieldValueChangedListener(changes -> changes
-                .forEach(change -> controller.showHighlight(change.field())));
 
         Map<HasValue<?, String>, String> filled = Map.of(name, "Ada Lovelace",
                 email, "ada@example.com", company, "Analytical Engines Ltd.",
@@ -96,8 +95,8 @@ public class FormFieldMarkerPage extends VerticalLayout {
 
     /**
      * Composite custom field that edits a license plate as separate letters and
-     * numbers but exposes a single {@code "ABC-123"} string value, mirroring the
-     * web-component dev page example. Lets the marker be exercised on a
+     * numbers but exposes a single {@code "ABC-123"} string value, mirroring
+     * the web-component dev page example. Lets the marker be exercised on a
      * {@link CustomField} in addition to plain fields.
      */
     private static class LicensePlateField extends CustomField<String> {
@@ -133,13 +132,12 @@ public class FormFieldMarkerPage extends VerticalLayout {
             }
             var parts = value.split("-", 2);
             letters.setValue(parts[0]);
-            numbers.setValue(
-                    parts.length > 1 ? parseNumber(parts[1]) : null);
+            numbers.setValue(parts.length > 1 ? parseNumber(parts[1]) : null);
         }
 
         /**
-         * @return the parsed integer, or {@code null} when {@code text} is not a
-         *         plain integer
+         * @return the parsed integer, or {@code null} when {@code text} is not
+         *         a plain integer
          */
         private static Integer parseNumber(String text) {
             var trimmed = text.trim();
