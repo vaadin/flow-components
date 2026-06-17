@@ -88,6 +88,15 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
+ * <b>Hiding field values:</b> {@link #setValuesHidden(boolean)} keeps the
+ * current value of every field private while still letting the LLM see and fill
+ * the fields — useful when the form may already hold data the AI should not
+ * read (for example personal data the user typed in). To hide a single field
+ * entirely, so the LLM does not even learn it exists, use
+ * {@link #ignore(HasValue)}.
+ * </p>
+ *
+ * <p>
  * <b>How the LLM understands fields:</b> everything the LLM knows about a field
  * comes from the field's label, its helper text, and the
  * {@link #describe(HasValue, String)} hint. Make sure every field carries a
