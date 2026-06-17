@@ -30,10 +30,8 @@ import com.vaadin.flow.router.Route;
  * represents the current page. The add / remove buttons let the integration
  * test exercise reactive updates of the manually managed trail.
  */
-@Route(ManualBreadcrumbsPage.ROUTE)
+@Route("vaadin-breadcrumbs/manual")
 public class ManualBreadcrumbsPage extends Div {
-
-    public static final String ROUTE = "vaadin-breadcrumbs/manual";
 
     public ManualBreadcrumbsPage() {
         Breadcrumbs breadcrumbs = new Breadcrumbs(Mode.MANUAL);

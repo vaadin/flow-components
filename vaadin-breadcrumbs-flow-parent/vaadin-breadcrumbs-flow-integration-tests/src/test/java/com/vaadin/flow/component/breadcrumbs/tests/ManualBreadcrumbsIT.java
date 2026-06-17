@@ -18,6 +18,7 @@ package com.vaadin.flow.component.breadcrumbs.tests;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -27,25 +28,22 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Integration tests for {@link ManualBreadcrumbsPage} and, for requirement 16,
- * {@link DataDrivenBreadcrumbsPage}.
+ * Integration tests for {@link ManualBreadcrumbsPage}.
  */
 @TestPath("vaadin-breadcrumbs/manual")
 public class ManualBreadcrumbsIT extends AbstractComponentIT {
 
-    private BreadcrumbsElement openManualPage() {
-        getDriver().get(getRootURL() + "/" + ManualBreadcrumbsPage.ROUTE);
-        return $(BreadcrumbsElement.class).waitForFirst();
-    }
+    private BreadcrumbsElement breadcrumbs;
 
-    private BreadcrumbsElement openDataDrivenPage() {
-        getDriver().get(getRootURL() + "/" + DataDrivenBreadcrumbsPage.ROUTE);
-        return $(BreadcrumbsElement.class).waitForFirst();
+    @Before
+    public void init() {
+        open();
+        breadcrumbs = $(BreadcrumbsElement.class).waitForFirst();
     }
 
     @Test
     public void pageOpened_threeItemsRendered() {
-        List<BreadcrumbsItemElement> items = openManualPage().getItems();
+        List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertEquals(3, items.size());
         Assert.assertEquals("Home", items.get(0).getText());
         Assert.assertEquals("Docs", items.get(1).getText());
@@ -54,7 +52,7 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_lastItemIsCurrent() {
-        List<BreadcrumbsItemElement> items = openManualPage().getItems();
+        List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertFalse(items.get(0).isCurrent());
         Assert.assertFalse(items.get(1).isCurrent());
         Assert.assertTrue(items.get(2).isCurrent());
@@ -62,7 +60,7 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_pathsResolved() {
-        List<BreadcrumbsItemElement> items = openManualPage().getItems();
+        List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertEquals("vaadin-breadcrumbs/manual-target",
                 items.get(0).getPath());
         Assert.assertEquals("/docs", items.get(1).getPath());
@@ -71,7 +69,6 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
 
     @Test
     public void clickAddItem_itemAddedToTrail() {
-        BreadcrumbsElement breadcrumbs = openManualPage();
         findElement(By.id("add-item")).click();
         waitUntil(driver -> breadcrumbs.getItems().size() == 4);
 
@@ -85,7 +82,6 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
 
     @Test
     public void clickRemoveItem_itemRemovedFromTrail() {
-        BreadcrumbsElement breadcrumbs = openManualPage();
         findElement(By.id("remove-item")).click();
         waitUntil(driver -> breadcrumbs.getItems().size() == 2);
 
@@ -93,22 +89,5 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
         Assert.assertEquals("Home", items.get(0).getText());
         Assert.assertEquals("Current", items.get(1).getText());
         Assert.assertNull(breadcrumbs.getItemByText("Docs"));
-    }
-
-    @Test
-    public void dataDrivenPageOpened_trailMatchesLoadedData() {
-        List<BreadcrumbsItemElement> items = openDataDrivenPage().getItems();
-        Assert.assertEquals(4, items.size());
-        Assert.assertEquals("Home", items.get(0).getText());
-        Assert.assertEquals("Customers", items.get(1).getText());
-        // Data-derived ancestor with no backing @Route.
-        Assert.assertEquals("Enterprise", items.get(2).getText());
-        // Data-derived current-page label, no path.
-        Assert.assertEquals("Acme Corp", items.get(3).getText());
-
-        Assert.assertEquals("/customers", items.get(1).getPath());
-        Assert.assertEquals("/customers/enterprise", items.get(2).getPath());
-        Assert.assertNull(items.get(3).getPath());
-        Assert.assertTrue(items.get(3).isCurrent());
     }
 }

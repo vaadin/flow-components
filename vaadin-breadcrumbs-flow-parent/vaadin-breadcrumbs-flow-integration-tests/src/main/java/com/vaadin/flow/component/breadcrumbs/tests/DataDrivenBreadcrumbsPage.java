@@ -33,10 +33,8 @@ import com.vaadin.flow.router.Route;
  * data and have no backing {@code @Route}, which is the part of requirement 16
  * that {@link Mode#ROUTER} cannot express.
  */
-@Route(DataDrivenBreadcrumbsPage.ROUTE)
+@Route("vaadin-breadcrumbs/data-driven")
 public class DataDrivenBreadcrumbsPage extends Div {
-
-    public static final String ROUTE = "vaadin-breadcrumbs/data-driven";
 
     /**
      * A simulated piece of loaded domain data.
