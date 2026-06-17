@@ -553,30 +553,30 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Pushes the editor map to the client, derived from
-     * {@link #cellKeyToEditor} (the single source of truth). The client
-     * property maps each cell key to its editor's node id, so it is recomputed
-     * from the live editor instances on every push and cannot drift from the
-     * server-side cache.
+     * Sets the cell-key-to-editor map and pushes it to the client. The client
+     * property maps each cell key to its editor's node id, derived from the
+     * live editor instances so it cannot drift from the server-side map.
+     * <p>
+     * Passing {@code null} clears the server map and the callback tracker and
+     * sends a {@code null} property. A {@code null} property has different
+     * client semantics than an empty map (see
+     * {@code SpreadsheetConnector.setupCustomEditors}), so the reset paths
+     * (sheet switch, factory removal/replacement, forced refresh) rely on it.
      */
-    private void updateClientEditorMap() {
-        HashMap<String, String> editorIds = new HashMap<>();
-        cellKeyToEditor.forEach((key, editor) -> editorIds.put(key,
-                getComponentNodeId(editor)));
-        getElement().setProperty("cellKeysToEditorIdMap",
-                Serializer.serialize(editorIds));
-    }
-
-    /**
-     * Tells the client to drop all custom editors along with the editor factory
-     * and slot cache. A {@code null} property has different client semantics
-     * than an empty map (see {@code SpreadsheetConnector.setupCustomEditors}),
-     * so the reset paths (sheet switch, factory removal) must send
-     * {@code null}.
-     */
-    private void clearClientEditorMap() {
-        getElement().setProperty("cellKeysToEditorIdMap",
-                Serializer.serialize((HashMap<String, String>) null));
+    private void setCellKeyToEditorMap(Map<String, Component> cellKeyToEditor) {
+        if (cellKeyToEditor == null) {
+            this.cellKeyToEditor.clear();
+            resetEditorCallbackTracker();
+            getElement().setProperty("cellKeysToEditorIdMap",
+                    Serializer.serialize((HashMap<String, String>) null));
+        } else {
+            this.cellKeyToEditor = cellKeyToEditor;
+            HashMap<String, String> editorIds = new HashMap<>();
+            cellKeyToEditor.forEach((key, editor) -> editorIds.put(key,
+                    getComponentNodeId(editor)));
+            getElement().setProperty("cellKeysToEditorIdMap",
+                    Serializer.serialize(editorIds));
+        }
     }
 
     private void setComponentIDtoCellKeysMap(
@@ -1070,7 +1070,7 @@ public class Spreadsheet extends Component
      * selection, resize) instead of re-creating it from the factory, which
      * would discard editor state such as an uncommitted ComboBox value.
      * Editor-only; cleared whenever editors are recreated from the factory (see
-     * {@link #clearCustomEditorCache()}).
+     * {@link #setCellKeyToEditorMap(Map)}).
      */
     private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
@@ -3744,7 +3744,7 @@ public class Spreadsheet extends Component
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
         setSheetProtected(getActiveSheet().getProtect());
-        clearClientEditorMap();
+        setCellKeyToEditorMap(null);
         setHyperlinksTooltips(null);
         setComponentIDtoCellKeysMap(null);
         setOverlays(null);
@@ -3758,8 +3758,6 @@ public class Spreadsheet extends Component
             unRegisterCustomComponent(c);
         }
         customComponents.clear();
-        // Editors belong to a sheet; recreate them for the new sheet.
-        clearCustomEditorCache();
 
         if (attachedPopupButtons != null && !attachedPopupButtons.isEmpty()) {
             for (PopupButton sf : new ArrayList<PopupButton>(
@@ -3834,19 +3832,7 @@ public class Spreadsheet extends Component
             // Selected cell has no custom editor: forget the last-fired editor
             // so a later return to an editor cell fires the callback again.
             resetEditorCallbackTracker();
-            updateClientEditorMap();
         }
-    }
-
-    /**
-     * Drops the reuse cache and the callback tracker so custom editors are
-     * recreated from the factory on the next load. Called on the paths that
-     * recreate editors instead of reusing them (see
-     * {@link #loadCustomComponents(boolean)}).
-     */
-    private void clearCustomEditorCache() {
-        cellKeyToEditor.clear();
-        resetEditorCallbackTracker();
     }
 
     private void resetEditorCallbackTracker() {
@@ -4685,7 +4671,7 @@ public class Spreadsheet extends Component
             // Drop the cached editors (and the callback tracker) so the loop
             // below asks the factory for fresh instances and the callback fires
             // again for the selected cell.
-            clearCustomEditorCache();
+            setCellKeyToEditorMap(null);
         }
         if (customComponentFactory != null) {
             HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
@@ -4740,9 +4726,8 @@ public class Spreadsheet extends Component
             // cell that lost its editor); keep those still in use, including
             // out-of-view cells whose editors remain registered.
             _cellKeyToEditor.values().retainAll(customComponents);
-            cellKeyToEditor = _cellKeyToEditor;
 
-            updateClientEditorMap();
+            setCellKeyToEditorMap(_cellKeyToEditor);
             setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
 
             if (!rowsWithComponents.isEmpty()) {
@@ -4750,9 +4735,8 @@ public class Spreadsheet extends Component
             }
 
         } else {
-            clearClientEditorMap();
+            setCellKeyToEditorMap(null);
             setComponentIDtoCellKeysMap(null);
-            clearCustomEditorCache();
             if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
@@ -4948,14 +4932,13 @@ public class Spreadsheet extends Component
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
-        // A new factory produces its own editors, so don't preserve the
-        // previous factory's editors by cell-key.
-        clearCustomEditorCache();
         if (firstRow != -1) {
+            // A new factory produces its own editors, so recreate them instead
+            // of reusing the previous factory's by cell-key.
             loadCustomComponents(true);
             loadCustomEditorOnSelectedCell();
         } else {
-            clearClientEditorMap();
+            setCellKeyToEditorMap(null);
             if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
