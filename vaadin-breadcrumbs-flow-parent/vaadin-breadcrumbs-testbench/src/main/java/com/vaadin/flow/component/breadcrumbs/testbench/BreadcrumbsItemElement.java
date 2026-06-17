@@ -96,7 +96,10 @@ public class BreadcrumbsItemElement extends TestBenchElement {
             throw new NoSuchElementException("Item does not contain an anchor",
                     e);
         }
-        // click() on elements in shadow DOM does not work with Chrome driver
+        // click() on elements in shadow DOM does not work with Chrome driver.
+        // Using executeScript also navigates items that are collapsed into the
+        // overflow overlay, which are not visible on the page when the overflow
+        // is not opened.
         executeScript("arguments[0].click();", anchor);
     }
 }
