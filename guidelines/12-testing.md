@@ -47,8 +47,19 @@ void isSerializable() throws Exception {
 }
 ```
 
-Also add `{Component}VariantTest` (each enum value → expected token) and
-`{Component}I18nTest` where applicable.
+### Interface test
+
+Assert a component declares an expected mixin interface:
+
+```java
+@Test
+void implementsHasThemeVariant() {
+    Assertions.assertTrue(
+            HasThemeVariant.class.isAssignableFrom(Breadcrumbs.class));
+}
+```
+
+Also add `{Component}I18nTest` where applicable.
 
 ## TestBench element
 
