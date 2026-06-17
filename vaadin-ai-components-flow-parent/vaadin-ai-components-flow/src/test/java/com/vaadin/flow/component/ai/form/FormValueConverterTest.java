@@ -548,13 +548,13 @@ class FormValueConverterTest {
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type) {
         return new FormFieldDescriptor("test-id", field, type, null, false,
-                false);
+                false, false);
     }
 
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type, FormFieldHints hints) {
         return new FormFieldDescriptor("test-id", field, type, hints, false,
-                false);
+                false, false);
     }
 
     private static FormFieldHints hintsWithToValue(

@@ -7,13 +7,15 @@ import sinon from 'sinon';
 import type { Grid } from '@vaadin/grid';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
-import type {} from '@web/test-runner-mocha';
-import type {} from 'sinon-chai';
+import type { } from '@web/test-runner-mocha';
+import type { } from 'sinon-chai';
 
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
   initLazy: (grid: Grid) => void;
   updateSize: (size: number) => void;
+  updateUniqueItemIdPath: (path: string) => void;
+  hasRootRequestQueue: () => boolean;
   set: (index: number, items: any[]) => void;
   confirm: (index: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
@@ -23,7 +25,9 @@ export type GridConnector = {
   clear: (index: number, length: number) => void;
   setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
   getRenderedRange: () => [number, number];
-  setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
+  setHeaderRenderer: (column: GridColumn, options: { content: Node | string | null, showSorter?: boolean, sorterPath?: string }) => void;
+  setFooterRenderer: (column: GridColumn, options: { content: Node | string | null }) => void;
+  scrollToItem: (itemKey: string, index: number) => void;
 };
 
 export type GridServer = {
@@ -37,6 +41,7 @@ export type GridServer = {
   setViewportRange: ((firstIndex: number, size: number) => Promise<void>) & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
   sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
   setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
+  updateContextMenuTargetItem: ((key: string, columnId: string) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
@@ -50,6 +55,9 @@ export type Item = {
   detailsOpened?: boolean;
   style?: Record<string, string>;
   part?: Record<string, string>;
+  dragData?: Record<string, string>;
+  dragDisabled?: boolean;
+  dropDisabled?: boolean;
 };
 
 export type FlowGrid = Grid<Item> & {
@@ -57,9 +65,14 @@ export type FlowGrid = Grid<Item> & {
   $server: GridServer;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
+  __dragDataTypes?: string[];
+  __selectionDragData?: Record<string, string>;
+  __selectionDraggedItemsCount?: number;
   _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+  preventContextMenu: (event: Event) => boolean;
+  getContextMenuBeforeOpenDetail: (event: { detail: { sourceEvent?: Event } }) => { key: string, columnId: string };
 };
 
 export type FlowGridSorter = GridSorter & {
@@ -103,6 +116,7 @@ export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector):
     }),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
+    updateContextMenuTargetItem: sinon.spy(),
   };
 
   gridConnector.initLazy(grid);
@@ -129,6 +143,13 @@ export function getBodyRowCount(grid: FlowGrid): number {
  */
 export function getHeaderCellContent(column: GridColumn): HTMLElement {
   return (column as any)._headerCell._content as HTMLElement;
+}
+
+/**
+ * Returns the content of a footer cell.
+ */
+export function getFooterCellContent(column: GridColumn): HTMLElement {
+  return (column as any)._footerCell._content as HTMLElement;
 }
 
 /**

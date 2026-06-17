@@ -53,6 +53,18 @@ describe('grid connector - item click', () => {
     expect(spy.called).to.be.false;
   });
 
+  it('should not dispatch an item-click event on overlay content click', async () => {
+    column.renderer = (root: HTMLElement) => {
+      root.innerHTML = '<foo-overlay><span>overlay content</span></foo-overlay>';
+    };
+
+    const spy = sinon.spy();
+    grid.addEventListener('item-click' as any, spy);
+
+    getBodyCellContent(grid, 0, 0)?.querySelector('span')?.click();
+    expect(spy.called).to.be.false;
+  });
+
   it('should not dispatch an item-click event on focusable click', async () => {
     column.renderer = (root: HTMLElement) => {
       root.innerHTML = '<input>';
