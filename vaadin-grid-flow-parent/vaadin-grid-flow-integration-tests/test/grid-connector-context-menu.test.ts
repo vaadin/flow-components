@@ -53,7 +53,9 @@ describe('grid connector - context menu', () => {
 
   it('should prevent context menu on selection column left click', () => {
     let prevented: boolean;
-    grid.addEventListener('click', (e) => (prevented = grid.preventContextMenu(e)));
+    grid.addEventListener('click', (e) => {
+      prevented = grid.preventContextMenu(e);
+    });
 
     getBodyCellContent(grid, 0, 0)!.click();
     expect(prevented!).to.be.true;
@@ -61,7 +63,9 @@ describe('grid connector - context menu', () => {
 
   it('should not prevent context menu on regular column left click', () => {
     let prevented: boolean;
-    grid.addEventListener('click', (e) => (prevented = grid.preventContextMenu(e)));
+    grid.addEventListener('click', (e) => {
+      prevented = grid.preventContextMenu(e);
+    });
 
     getBodyCellContent(grid, 0, 1)!.click();
     expect(prevented!).to.be.false;

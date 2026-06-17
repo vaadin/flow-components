@@ -59,8 +59,9 @@ describe('grid connector - aria attributes', () => {
 
   describe('aria-selected', () => {
     it('should remove aria-selected from rows and cells in none selection mode', async () => {
+      // Select an item first so switching to NONE re-renders the affected rows
+      grid.$connector.doSelection([{ key: '0' }], false);
       grid.$connector.setSelectionMode('NONE');
-      grid.requestContentUpdate();
       await nextFrame();
 
       const cell = getBodyCell(grid, 0, 0)!;
@@ -71,7 +72,6 @@ describe('grid connector - aria attributes', () => {
 
     it('should keep aria-selected on rows and cells in single selection mode', async () => {
       grid.$connector.setSelectionMode('SINGLE');
-      grid.requestContentUpdate();
       await nextFrame();
 
       const cell = getBodyCell(grid, 0, 0)!;

@@ -59,11 +59,9 @@ describe('grid connector - item click', () => {
     };
 
     const spy = sinon.spy();
-    const content = getBodyCellContent(grid, 0, 0);
-    const overlayContent = content?.querySelector('span');
-
     grid.addEventListener('item-click' as any, spy);
-    overlayContent?.click();
+
+    getBodyCellContent(grid, 0, 0)?.querySelector('span')?.click();
     expect(spy.called).to.be.false;
   });
 

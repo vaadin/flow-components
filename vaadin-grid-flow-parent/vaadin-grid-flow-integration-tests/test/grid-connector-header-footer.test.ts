@@ -62,7 +62,7 @@ describe('grid connector - header and footer renderers', () => {
       // With no header renderer, the column falls back to the default
       // path-based header
       expect(getHeaderCellContent(column).textContent).to.equal('Name');
-      expect(column.headerRenderer === null).to.be.true;
+      expect(column.headerRenderer).to.be.null;
     });
 
     describe('sorter', () => {
@@ -122,7 +122,7 @@ describe('grid connector - header and footer renderers', () => {
       await nextFrame();
 
       expect(getFooterCellContent(column).textContent).to.equal('');
-      expect(column.footerRenderer === null).to.be.true;
+      expect(column.footerRenderer).to.be.null;
     });
   });
 });
