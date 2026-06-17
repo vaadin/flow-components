@@ -58,8 +58,10 @@ import tools.jackson.databind.JsonNode;
  *
  * <pre>
  * var controller = new FormAIController(formLayout, binder);
- * controller.describe(discountField, "Discount as a percentage, not an amount")
- *         .ignore(internalReferenceField);
+ * controller
+ *         .describeField(discountField,
+ *                 "Discount as a percentage, not an amount")
+ *         .ignoreField(internalReferenceField);
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .build();
@@ -74,33 +76,34 @@ import tools.jackson.databind.JsonNode;
  *
  * <p>
  * <b>Per-field configuration:</b> use the chained
- * {@link #describe(HasValue, String) describe}, {@link #ignore(HasValue)
- * ignore}, and {@link #valueOptions(ValueOptions) valueOptions} methods.
- * {@code valueOptions} takes a {@link ValueOptions} built via
+ * {@link #describeField(HasValue, String) describeField},
+ * {@link #ignoreField(HasValue) ignoreField}, and
+ * {@link #fieldValueOptions(ValueOptions) fieldValueOptions} methods.
+ * {@code fieldValueOptions} takes a {@link ValueOptions} built via
  * {@link ValueOptions#forField(HasValue) forField} — the compiler picks the
  * {@link ValueOptions#forField(MultiSelect) MultiSelect overload} automatically
  * for fields statically typed as {@link MultiSelect}. For fields whose value
  * type is anything other than {@link String}, the
- * {@link #valueOptions(ValueOptions, Function) two-argument overload} also
+ * {@link #fieldValueOptions(ValueOptions, Function) two-argument overload} also
  * accepts a label-to-value converter, which the controller applies per label;
  * for multi-select fields the resolved elements are then aggregated into a
  * {@link LinkedHashSet} before {@link HasValue#setValue}.
  * </p>
  *
  * <p>
- * <b>Hiding field values:</b> {@link #setValuesHidden(boolean)} keeps the
+ * <b>Hiding field values:</b> {@link #setFieldValuesHidden(boolean)} keeps the
  * current value of every field private while still letting the LLM see and fill
  * the fields — useful when the form may already hold data the AI should not
  * read (for example personal data the user typed in). To hide a single field
  * entirely, so the LLM does not even learn it exists, use
- * {@link #ignore(HasValue)}.
+ * {@link #ignoreField(HasValue)}.
  * </p>
  *
  * <p>
  * <b>How the LLM understands fields:</b> everything the LLM knows about a field
  * comes from the field's label, its helper text, and the
- * {@link #describe(HasValue, String)} hint. Make sure every field carries a
- * meaningful label, or add a {@code describe(...)} hint for fields whose
+ * {@link #describeField(HasValue, String)} hint. Make sure every field carries
+ * a meaningful label, or add a {@code describeField(...)} hint for fields whose
  * purpose is not evident from the label alone.
  * </p>
  *
@@ -111,11 +114,11 @@ import tools.jackson.databind.JsonNode;
  * {@code bindInstanceFields(this)}, or {@code @PropertyId}) the property name
  * is used as a default field description, so the LLM can recognize what the
  * field means even when it has no label. The default only applies when no
- * explicit {@link #describe(HasValue, String)} has been registered; calling
- * {@code describe(...)} always wins. Lambda-bound bindings carry no property
- * name and contribute no default. Second, the binder drives validation of the
- * values the LLM writes, including bean-level cross-field rules — see
- * <b>Validation</b> below.
+ * explicit {@link #describeField(HasValue, String)} has been registered;
+ * calling {@code describeField(...)} always wins. Lambda-bound bindings carry
+ * no property name and contribute no default. Second, the binder drives
+ * validation of the values the LLM writes, including bean-level cross-field
+ * rules — see <b>Validation</b> below.
  * </p>
  *
  * <p>
@@ -150,8 +153,8 @@ import tools.jackson.databind.JsonNode;
  * <b>Change tracking and highlight:</b> a listener registered through
  * {@link #addFieldValueChangedListener(SerializableConsumer)} fires once per
  * successful turn with the fields whose value changed during the turn — the
- * common driver for {@link #showHighlight(HasValue)} / {@link #hideHighlight}
- * to flash the AI's edits in the UI.
+ * common driver for {@link #showFieldHighlight(HasValue)} /
+ * {@link #hideFieldHighlight} to flash the AI's edits in the UI.
  * </p>
  *
  * <p>
@@ -159,8 +162,8 @@ import tools.jackson.databind.JsonNode;
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
- * Re-register the same {@code describe} / {@code valueOptions} / {@code ignore}
- * hints on the new controller.
+ * Re-register the same {@code describeField} / {@code fieldValueOptions} /
+ * {@code ignoreField} hints on the new controller.
  * </p>
  *
  * @author Vaadin Ltd
@@ -217,9 +220,10 @@ public class FormAIController implements AIController {
             Conventions:
             - Field ids are opaque session-scoped strings; never invent them \
             and never reuse an id across forms.
-            - Fields the application has hidden via .ignore() (and password \
-            fields) never appear in get_form_state and cannot be written by \
-            fill_form. Do not try, even if the user message asks for them.
+            - Fields the application has hidden via .ignoreField() (and \
+            password fields) never appear in get_form_state and cannot be \
+            written by fill_form. Do not try, even if the user message asks \
+            for them.
             - get_form_state lists every visible field. A field tagged \
             "disabled": true or "readOnly": true is context only — read its \
             value, but fill_form will reject any write to it. Such a field \
@@ -255,8 +259,9 @@ public class FormAIController implements AIController {
     private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
     /**
      * Per-field attach-listener registrations that re-apply the AI highlight
-     * after detach/re-attach. Populated on the first {@link #showHighlight}
-     * call for a field; entries are removed by {@link #hideHighlight}.
+     * after detach/re-attach. Populated on the first
+     * {@link #showFieldHighlight} call for a field; entries are removed by
+     * {@link #hideFieldHighlight}.
      */
     private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
     private final List<SerializableConsumer<List<FieldValueChange>>> fieldValuesChangedListeners = new ArrayList<>();
@@ -282,7 +287,7 @@ public class FormAIController implements AIController {
     /**
      * Creates a new form AI controller for the given container and binder. For
      * every named binding on the binder, the bean property name is used as a
-     * default {@link #describe(HasValue, String) description} when the
+     * default {@link #describeField(HasValue, String) description} when the
      * developer has not registered one explicitly; lambda-bound bindings carry
      * no property name and contribute no default. The binder also drives
      * validation of the values the LLM writes: bound fields are validated
@@ -323,7 +328,8 @@ public class FormAIController implements AIController {
      *            the description text, not {@code null}
      * @return this controller, for chaining
      */
-    public FormAIController describe(HasValue<?, ?> field, String description) {
+    public FormAIController describeField(HasValue<?, ?> field,
+            String description) {
         Objects.requireNonNull(description, "Description must not be null");
         hintsFor(field).description = description;
         return this;
@@ -334,8 +340,8 @@ public class FormAIController implements AIController {
      * labels are presented to the LLM as the field's choices. No converter is
      * needed — the chosen label is itself the value written to the field. For
      * any non-{@link String} value type, use
-     * {@link #valueOptions(ValueOptions, Function) the two-argument overload}
-     * to supply a converter; this is enforced at compile time.
+     * {@link #fieldValueOptions(ValueOptions, Function) the two-argument
+     * overload} to supply a converter; this is enforced at compile time.
      * <p>
      * For {@link MultiSelect MultiSelect} fields the controller wraps the
      * chosen labels into a {@link LinkedHashSet} before
@@ -357,7 +363,7 @@ public class FormAIController implements AIController {
      *             field's value type is a Collection but the field does not
      *             implement {@link MultiSelect}
      */
-    public FormAIController valueOptions(ValueOptions<String> config) {
+    public FormAIController fieldValueOptions(ValueOptions<String> config) {
         Objects.requireNonNull(config, "Value options must not be null");
         return applyValueOptions(config, Function.identity());
     }
@@ -380,7 +386,7 @@ public class FormAIController implements AIController {
      * {@link HasValue#setValue}.
      * <p>
      * Later calls for the same field overwrite earlier ones. Use
-     * {@link #valueOptions(ValueOptions) the single-argument overload} for
+     * {@link #fieldValueOptions(ValueOptions) the single-argument overload} for
      * {@link String}-typed fields; the converter is implicit there.
      *
      * @param config
@@ -404,7 +410,7 @@ public class FormAIController implements AIController {
      *             field's value type is a Collection but the field does not
      *             implement {@link MultiSelect}
      */
-    public <V> FormAIController valueOptions(ValueOptions<V> config,
+    public <V> FormAIController fieldValueOptions(ValueOptions<V> config,
             Function<String, V> toValue) {
         Objects.requireNonNull(config, "Value options must not be null");
         Objects.requireNonNull(toValue, "Value converter must not be null");
@@ -442,7 +448,7 @@ public class FormAIController implements AIController {
                     "Field's value type is a Collection but the field does "
                             + "not implement MultiSelect. Collection-valued "
                             + "fields must implement MultiSelect to be "
-                            + "registered via valueOptions(...).");
+                            + "registered via fieldValueOptions(...).");
         }
         var hints = hintsFor(config.field());
         hints.valueOptionsToValue = toValue;
@@ -475,7 +481,7 @@ public class FormAIController implements AIController {
      *            the field to hide, not {@code null}
      * @return this controller, for chaining
      */
-    public FormAIController ignore(HasValue<?, ?> field) {
+    public FormAIController ignoreField(HasValue<?, ?> field) {
         hintsFor(field).ignored = true;
         return this;
     }
@@ -492,7 +498,7 @@ public class FormAIController implements AIController {
      * {@code enum} labels are still sent, since the LLM needs them to fill the
      * field. For choice fields whose option labels are themselves sensitive, or
      * to hide a single field's value or content entirely, use
-     * {@link #ignore(HasValue)}.
+     * {@link #ignoreField(HasValue)}.
      * <p>
      * Values can still reach the LLM through validation rejection messages,
      * which are sent as-is. A field stays fillable while its value is hidden,
@@ -506,7 +512,7 @@ public class FormAIController implements AIController {
      *            send values as usual
      * @return this controller, for chaining
      */
-    public FormAIController setValuesHidden(boolean valuesHidden) {
+    public FormAIController setFieldValuesHidden(boolean valuesHidden) {
         this.valuesHidden = valuesHidden;
         return this;
     }
@@ -517,9 +523,9 @@ public class FormAIController implements AIController {
      *
      * @return {@code true} when every field's value is hidden, {@code false}
      *         when values are sent
-     * @see #setValuesHidden(boolean)
+     * @see #setFieldValuesHidden(boolean)
      */
-    public boolean isValuesHidden() {
+    public boolean isFieldValuesHidden() {
         return valuesHidden;
     }
 
@@ -542,10 +548,10 @@ public class FormAIController implements AIController {
      * on the controller.
      * <p>
      * The listener runs on the UI thread with the session lock held, so it can
-     * update components and call {@link #showHighlight} /
-     * {@link #hideHighlight} directly without {@code ui.access(...)}. A typical
-     * use is to flash the AI's edits by calling {@code showHighlight} on every
-     * changed field.
+     * update components and call {@link #showFieldHighlight} /
+     * {@link #hideFieldHighlight} directly without {@code ui.access(...)}. A
+     * typical use is to flash the AI's edits by calling
+     * {@code showFieldHighlight} on every changed field.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -563,7 +569,7 @@ public class FormAIController implements AIController {
     /**
      * Paints a highlight on the field via the {@code vaadin-field-highlighter}
      * web component. Repeated calls keep exactly one highlight on the field.
-     * Call {@link #hideHighlight} to clear it. The field can be any
+     * Call {@link #hideFieldHighlight} to clear it. The field can be any
      * {@link HasValue} {@link Component}, in or out of this controller's form,
      * and each field's highlight state is independent of the others.
      * <p>
@@ -573,10 +579,10 @@ public class FormAIController implements AIController {
      * session) as long as those consumers also use {@code addUser} /
      * {@code removeUser} rather than {@code setUsers}.
      * <p>
-     * The first {@code showHighlight} call on a field also registers an attach
-     * listener that re-applies the AI user every time the field re-enters the
-     * DOM, so the highlight survives detach/re-attach. The listener is removed
-     * by {@link #hideHighlight}.
+     * The first {@code showFieldHighlight} call on a field also registers an
+     * attach listener that re-applies the AI user every time the field
+     * re-enters the DOM, so the highlight survives detach/re-attach. The
+     * listener is removed by {@link #hideFieldHighlight}.
      *
      * @param field
      *            the field to highlight, not {@code null}; must be a
@@ -586,7 +592,7 @@ public class FormAIController implements AIController {
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public void showHighlight(HasValue<?, ?> field) {
+    public void showFieldHighlight(HasValue<?, ?> field) {
         var component = requireFieldComponent(field);
         var element = component.getElement();
         highlightedFields.computeIfAbsent(field,
@@ -597,13 +603,14 @@ public class FormAIController implements AIController {
 
     /**
      * Clears any highlight previously applied to the field via
-     * {@link #showHighlight}. A no-op when no highlight is currently shown.
-     * Only this controller's AI user is removed; other users on the field stay
-     * highlighted. The field can be any {@link HasValue} {@link Component}, in
-     * or out of this controller's form, and clearing one field's highlight has
-     * no effect on others. The re-attach listener registered by
-     * {@link #showHighlight} is also removed, so the highlight does not come
-     * back if the field leaves and returns to the DOM after this call.
+     * {@link #showFieldHighlight}. A no-op when no highlight is currently
+     * shown. Only this controller's AI user is removed; other users on the
+     * field stay highlighted. The field can be any {@link HasValue}
+     * {@link Component}, in or out of this controller's form, and clearing one
+     * field's highlight has no effect on others. The re-attach listener
+     * registered by {@link #showFieldHighlight} is also removed, so the
+     * highlight does not come back if the field leaves and returns to the DOM
+     * after this call.
      *
      * @param field
      *            the field to clear the highlight from, not {@code null}; must
@@ -613,7 +620,7 @@ public class FormAIController implements AIController {
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public void hideHighlight(HasValue<?, ?> field) {
+    public void hideFieldHighlight(HasValue<?, ?> field) {
         var element = requireFieldComponent(field).getElement();
         var registration = highlightedFields.remove(field);
         if (registration != null) {
@@ -764,7 +771,7 @@ public class FormAIController implements AIController {
      * Walks the binder's property names and defaults {@code hints.description}
      * for any bound field that does not already have an explicit description.
      * Called at the start of every turn so bindings added or removed between
-     * turns are reflected; an explicit {@link #describe(HasValue, String)}
+     * turns are reflected; an explicit {@link #describeField(HasValue, String)}
      * always wins because the seeding only fills in nulls. Safe to call when
      * the controller was built without a binder — {@link BinderReflection}
      * returns an empty map for a {@code null} binder.
@@ -807,8 +814,8 @@ public class FormAIController implements AIController {
     /**
      * Returns every {@link HasValue} in the form tree that the controller
      * tracks — i.e. all discovered fields minus those hidden via
-     * {@link #ignore(HasValue)}. Visibility and enabled state are NOT filtered,
-     * so this is the right set for the snapshot + diff used by
+     * {@link #ignoreField(HasValue)}. Visibility and enabled state are NOT
+     * filtered, so this is the right set for the snapshot + diff used by
      * {@link #addFieldValueChangedListener}: a field hidden at turn start may
      * be revealed during the turn, and a value cascaded into it should compare
      * against its real pre-turn value rather than {@code null}.
