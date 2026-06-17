@@ -23,14 +23,14 @@ import java.util.function.Function;
  * Mutable per-field hint state held by {@link FormAIController}, keyed by the
  * field's opaque id.
  * <p>
- * Set by {@link FormAIController#valueOptions(ValueOptions)
- * controller.valueOptions(...)}: {@link #valueOptionsQuery} carries the filter
- * callback (or a fixed-options snapshot wrapped in one), {@link #fixedOptions}
- * flags whether the schema should render the options as {@code enum} or
- * {@code queryable}, and {@link #valueOptionsToValue} resolves one label to one
- * element. For multi-select fields the controller wraps the resolved elements
- * into a {@link java.util.LinkedHashSet} before {@code setValue}; the hint
- * state is the same shape in both cases.
+ * Set by {@link FormAIController#fieldValueOptions(ValueOptions)
+ * controller.fieldValueOptions(...)}: {@link #valueOptionsQuery} carries the
+ * filter callback (or a fixed-options snapshot wrapped in one),
+ * {@link #fixedOptions} flags whether the schema should render the options as
+ * {@code enum} or {@code queryable}, and {@link #valueOptionsToValue} resolves
+ * one label to one element. For multi-select fields the controller wraps the
+ * resolved elements into a {@link java.util.LinkedHashSet} before
+ * {@code setValue}; the hint state is the same shape in both cases.
  *
  * @author Vaadin Ltd
  */
