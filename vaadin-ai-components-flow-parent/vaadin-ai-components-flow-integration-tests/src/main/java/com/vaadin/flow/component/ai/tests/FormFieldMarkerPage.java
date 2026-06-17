@@ -17,11 +17,15 @@ package com.vaadin.flow.component.ai.tests;
 
 import java.util.Map;
 
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -47,10 +51,14 @@ public class FormFieldMarkerPage extends VerticalLayout {
         company.setId("company");
         var bio = new TextArea("Bio");
         bio.setId("bio");
+        // Composite custom field, to exercise the marker on a CustomField too.
+        var licensePlate = new LicensePlateField();
+        licensePlate.setId("license-plate");
 
         // Pre-existing user input that the simulated AI fill will overwrite, so
         // reverting visibly differs from the AI-filled value.
         company.setValue("Acme Inc.");
+        licensePlate.setValue("ABC-123");
 
         // Slot custom content into this field's marker popover. The marker
         // forwards a field child with slot="ai-field-marker-popover-content"
@@ -60,7 +68,7 @@ public class FormFieldMarkerPage extends VerticalLayout {
                 "ai-field-marker-popover-content");
         company.getElement().appendChild(explanation.getElement());
 
-        var form = new VerticalLayout(name, email, company, bio);
+        var form = new VerticalLayout(name, email, company, bio, licensePlate);
         form.setId("form");
 
         var controller = new FormAIController(form);
@@ -68,10 +76,11 @@ public class FormFieldMarkerPage extends VerticalLayout {
         controller.addFieldValueChangedListener(changes -> changes
                 .forEach(change -> controller.showHighlight(change.field())));
 
-        var filled = Map.of(name, "Ada Lovelace", email, "ada@example.com",
-                company, "Analytical Engines Ltd.", bio,
-                "Mathematician and writer, known for work on the "
-                        + "Analytical Engine.");
+        Map<HasValue<?, String>, String> filled = Map.of(name, "Ada Lovelace",
+                email, "ada@example.com", company, "Analytical Engines Ltd.",
+                bio, "Mathematician and writer, known for work on the "
+                        + "Analytical Engine.",
+                licensePlate, "AI-987");
 
         var fill = new NativeButton("Fill with AI", e -> {
             // Drive one controller turn: snapshot pre-fill values, write the
@@ -83,5 +92,58 @@ public class FormFieldMarkerPage extends VerticalLayout {
         fill.setId("fill");
 
         add(form, fill);
+    }
+
+    /**
+     * Composite custom field that edits a license plate as separate letters and
+     * numbers but exposes a single {@code "ABC-123"} string value, mirroring the
+     * web-component dev page example. Lets the marker be exercised on a
+     * {@link CustomField} in addition to plain fields.
+     */
+    private static class LicensePlateField extends CustomField<String> {
+
+        private final TextField letters = new TextField();
+        private final IntegerField numbers = new IntegerField();
+
+        LicensePlateField() {
+            setLabel("License plate");
+            letters.setAriaLabel("Letters");
+            letters.setPlaceholder("ABC");
+            numbers.setAriaLabel("Numbers");
+            numbers.setPlaceholder("123");
+            add(letters, new Span("-"), numbers);
+        }
+
+        @Override
+        protected String generateModelValue() {
+            var prefix = letters.getValue();
+            var number = numbers.getValue();
+            if (prefix == null || prefix.isEmpty() || number == null) {
+                return "";
+            }
+            return prefix + "-" + number;
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            if (value == null || value.isEmpty()) {
+                letters.clear();
+                numbers.clear();
+                return;
+            }
+            var parts = value.split("-", 2);
+            letters.setValue(parts[0]);
+            numbers.setValue(
+                    parts.length > 1 ? parseNumber(parts[1]) : null);
+        }
+
+        /**
+         * @return the parsed integer, or {@code null} when {@code text} is not a
+         *         plain integer
+         */
+        private static Integer parseNumber(String text) {
+            var trimmed = text.trim();
+            return trimmed.matches("\\d+") ? Integer.valueOf(trimmed) : null;
+        }
     }
 }
