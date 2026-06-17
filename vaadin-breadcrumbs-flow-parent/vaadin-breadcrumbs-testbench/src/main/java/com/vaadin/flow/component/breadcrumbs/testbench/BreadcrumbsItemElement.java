@@ -37,12 +37,9 @@ public class BreadcrumbsItemElement extends TestBenchElement {
      */
     @Override
     public String getText() {
-        WebElement labelSlot = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("[part='label'] slot:not([name])"));
-        return (String) executeScript("return arguments[0].assignedNodes()"
-                + ".map(node => (node.nodeType === Node.TEXT_NODE)"
-                + "  ? node.textContent.trim() : '')"
-                + ".filter(Boolean).join(' ')", labelSlot);
+        // The default implementation uses innerText, which adds a lot of
+        // whitespace in some browsers.
+        return getPropertyString("textContent");
     }
 
     /**
