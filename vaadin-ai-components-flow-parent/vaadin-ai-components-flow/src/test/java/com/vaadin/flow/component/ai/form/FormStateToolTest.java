@@ -401,6 +401,66 @@ class FormStateToolTest {
     }
 
     @Test
+    void valuesHiddenDefaultsToFalse() {
+        var controller = new FormAIController(new Div(new TestField()));
+
+        Assertions.assertFalse(controller.isValuesHidden(),
+                "Values must be sent by default");
+    }
+
+    @Test
+    void getFormStateMasksEveryValueWhenValuesHidden() {
+        // With the controller-level flag on, every field keeps its id,
+        // description and type so the AI can still fill it, but its value is
+        // masked: null + valueHidden, regardless of whether a value is set.
+        var text = new TestField();
+        text.setValue("secret");
+        var number = new DoubleField();
+        number.setValue(58.4);
+        var empty = new TestField();
+        var controller = new FormAIController(new Div(text, number, empty));
+        controller.setValuesHidden(true);
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(3, fields.size(),
+                "Fields must still be listed, got: " + fields);
+        for (var f : fields) {
+            Assertions.assertTrue(f.path("value").isNull(),
+                    "Value must be masked as null, got: " + f);
+            Assertions.assertTrue(f.path("valueHidden").asBoolean(false),
+                    "Field must carry valueHidden=true, got: " + f);
+        }
+        var raw = findTool(controller.getTools(), "get_form_state")
+                .execute(JacksonUtils.createObjectNode());
+        Assertions.assertFalse(raw.contains("secret"),
+                "No field value may leak into the payload, got: " + raw);
+        Assertions.assertFalse(raw.contains("58.4"),
+                "No field value may leak into the payload, got: " + raw);
+    }
+
+    @Test
+    void getFormStateKeepsTypeMetadataWhenValuesHidden() {
+        // Masking the value must not strip the type signal: the AI still needs
+        // type/enum to know how to fill the field.
+        var combo = new SingleSelectField<String>();
+        combo.setItems("EUR", "USD");
+        combo.setValue("EUR");
+        var controller = new FormAIController(new Div(combo));
+        controller.setValuesHidden(true);
+
+        var f = formStateFields(controller).get(0);
+
+        Assertions.assertEquals("string", f.path("type").asString());
+        var values = new ArrayList<String>();
+        f.path("enum").forEach(n -> values.add(n.asString()));
+        Assertions.assertEquals(List.of("EUR", "USD"), values,
+                "Type/enum metadata must survive value masking, got: " + f);
+        Assertions.assertTrue(f.path("value").isNull());
+        Assertions.assertTrue(f.path("valueHidden").asBoolean(false));
+    }
+
+    @Test
     void getFormStateMapsStringValueTypeToTypeString() {
         assertTypeOnly(typeNodeFor(new TestField()), "string");
     }
