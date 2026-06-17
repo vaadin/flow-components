@@ -27,35 +27,24 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.selection.MultiSelect;
 
 /**
- * Per-field options registration passed to
+ * Per-field registration of the labels the LLM may pick from for a given field.
+ * The label set is either fixed ({@link #options(Collection)}) or supplied on
+ * demand by a callback ({@link #options(BiFunction)}); exactly one of the two
+ * must be set, with the last call winning. Pass the configured registration to
  * {@link FormAIController#valueOptions(ValueOptions)
- * controller.valueOptions(...)}. Carries the field together with either a fixed
- * label list or a query callback. The label-to-value converter is supplied
- * separately to the controller at registration time, not on this object — see
- * {@link FormAIController#valueOptions(ValueOptions, Function)
- * valueOptions(config, toValue)}.
+ * controller.valueOptions(...)} to apply it; the labels are then presented to
+ * the LLM as the field's choices.
  * <p>
- * Two {@code forField} factories cover all field shapes:
- * <ul>
- * <li>{@link #forField(HasValue)} — single-value fields. The type parameter
- * {@code V} of the field flows through.</li>
- * <li>{@link #forField(MultiSelect)} — multi-select fields. Picked by the
- * compiler whenever the reference is statically typed as {@link MultiSelect}.
- * The per-element type flows through; the controller aggregates resolved
- * per-label items into a {@link LinkedHashSet} before
- * {@link HasValue#setValue}.</li>
- * </ul>
- * Exactly one of {@link #options(Collection)} (fixed labels) and
- * {@link #options(BiFunction)} (queryable labels) must be set; calling one
- * clears the other so the last setter wins.
+ * Labels are always {@link String} values, regardless of the field's value
+ * type. For a non-{@link String} field, supply a label-to-value converter
+ * through {@link FormAIController#valueOptions(ValueOptions, Function)
+ * valueOptions(config, toValue)} — the converter resolves a chosen label to the
+ * field's value type before the controller writes it.
  *
  * @param <I>
- *            the per-label item type the controller's converter must produce.
- *            For a single-value field {@code I} is the field's value type; for
- *            a multi-select field {@code I} is the per-element type. The
- *            controller's {@code valueOptions(...)} overload set enforces at
- *            compile time that a converter is supplied for every {@code I}
- *            other than {@link String}
+ *            the per-label item type the converter must produce — the field's
+ *            value type for single-value fields, the per-element type for
+ *            multi-select fields
  *
  * @author Vaadin Ltd
  */
@@ -72,20 +61,20 @@ public final class ValueOptions<I> {
     }
 
     /**
-     * Starts a single-value options registration. The field's value type
-     * {@code V} flows through; for a {@code V} other than {@link String}, the
-     * controller's two-argument
+     * Starts an options registration for a single-value field. The field's
+     * value type {@code V} flows through; for any {@code V} other than
+     * {@link String}, the controller's two-argument
      * {@link FormAIController#valueOptions(ValueOptions, Function)} overload
-     * must be used to supply a converter — that is a compile-time requirement,
-     * not a runtime check.
+     * must be used to supply a label-to-value converter (a compile-time
+     * requirement, not a runtime check).
      *
      * @param field
      *            the single-value field whose options the LLM may pick from,
      *            not {@code null}
      * @param <V>
      *            the field's value type
-     * @return a fresh registration ready to receive {@link #options(Collection)
-     *         options(...)}
+     * @return a fresh registration ready to receive
+     *         {@link #options(Collection)} or {@link #options(BiFunction)}
      */
     public static <V> ValueOptions<V> forField(HasValue<?, V> field) {
         Objects.requireNonNull(field, "Field must not be null");
@@ -93,10 +82,11 @@ public final class ValueOptions<I> {
     }
 
     /**
-     * Starts a multi-select options registration. Picked by the compiler over
-     * {@link #forField(HasValue)} whenever the reference is statically typed as
-     * {@link MultiSelect}. The per-element type flows through; for any type
-     * other than {@link String}, the controller's two-argument
+     * Starts an options registration for a multi-select field. Picked by the
+     * compiler over {@link #forField(HasValue)} whenever the reference is
+     * statically typed as {@link MultiSelect}. The per-element type {@code T}
+     * flows through; for any {@code T} other than {@link String}, the
+     * controller's two-argument
      * {@link FormAIController#valueOptions(ValueOptions, Function)} overload
      * must be used. The controller aggregates resolved per-label items into a
      * {@link LinkedHashSet} before {@link HasValue#setValue}.
@@ -108,8 +98,8 @@ public final class ValueOptions<I> {
      *            the per-element type
      * @param <C>
      *            the field's source-component type
-     * @return a fresh registration ready to receive {@link #options(Collection)
-     *         options(...)}
+     * @return a fresh registration ready to receive
+     *         {@link #options(Collection)} or {@link #options(BiFunction)}
      */
     public static <T, C extends Component> ValueOptions<T> forField(
             MultiSelect<C, T> field) {
@@ -119,7 +109,9 @@ public final class ValueOptions<I> {
 
     /**
      * Sets a fixed label list. A defensive copy is taken so later mutations of
-     * the caller's collection have no effect. Mutually exclusive with
+     * the caller's collection have no effect. Use this when the option set is
+     * known up front and small enough to enumerate; for large or dynamic sets
+     * use {@link #options(BiFunction)} instead. Mutually exclusive with
      * {@link #options(BiFunction)} — calling either clears the other.
      *
      * @param options
@@ -142,13 +134,19 @@ public final class ValueOptions<I> {
     }
 
     /**
-     * Sets a queryable label callback the LLM drives via
-     * {@code query_field_options}. Mutually exclusive with
+     * Sets a callback the controller invokes whenever the LLM needs to see the
+     * field's options. Use this when the option set is too large or too dynamic
+     * for a fixed list via {@link #options(Collection)} — for example options
+     * that come from a database query or a remote service. The callback returns
+     * the labels the LLM may pick from; labels are always {@link String}
+     * values, regardless of the field's value type. Mutually exclusive with
      * {@link #options(Collection)} — calling either clears the other.
      *
      * @param query
-     *            the filter callback returning labels for the LLM, not
-     *            {@code null}
+     *            invoked with two arguments: a filter string the LLM picked,
+     *            and a positive limit on how many labels to return. Returns the
+     *            matching labels in display order, not {@code null} (an empty
+     *            list signals "no matches" to the LLM)
      * @return this registration, for chaining
      */
     public ValueOptions<I> options(
