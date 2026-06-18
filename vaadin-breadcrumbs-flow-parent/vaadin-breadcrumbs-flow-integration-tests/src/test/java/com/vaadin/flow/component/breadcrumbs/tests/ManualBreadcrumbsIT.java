@@ -42,29 +42,22 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void pageOpened_threeItemsRendered() {
+    public void initialTrailRendered() {
         List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertEquals(3, items.size());
+
         Assert.assertEquals("Home", items.get(0).getText());
-        Assert.assertEquals("Docs", items.get(1).getText());
-        Assert.assertEquals("Current", items.get(2).getText());
-    }
-
-    @Test
-    public void pageOpened_lastItemIsCurrent() {
-        List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
-        Assert.assertFalse(items.get(0).isCurrent());
-        Assert.assertFalse(items.get(1).isCurrent());
-        Assert.assertTrue(items.get(2).isCurrent());
-    }
-
-    @Test
-    public void pageOpened_pathsResolved() {
-        List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertEquals("vaadin-breadcrumbs/manual-target",
                 items.get(0).getPath());
+        Assert.assertFalse(items.get(0).isCurrent());
+
+        Assert.assertEquals("Docs", items.get(1).getText());
         Assert.assertEquals("/docs", items.get(1).getPath());
+        Assert.assertFalse(items.get(1).isCurrent());
+
+        Assert.assertEquals("Current", items.get(2).getText());
         Assert.assertNull(items.get(2).getPath());
+        Assert.assertTrue(items.get(2).isCurrent());
     }
 
     @Test
@@ -76,8 +69,8 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
         Assert.assertEquals("Home", items.get(0).getText());
         Assert.assertEquals("Docs", items.get(1).getText());
         Assert.assertEquals("Settings", items.get(2).getText());
-        Assert.assertEquals("Current", items.get(3).getText());
         Assert.assertEquals("/settings", items.get(2).getPath());
+        Assert.assertEquals("Current", items.get(3).getText());
     }
 
     @Test
@@ -88,6 +81,12 @@ public class ManualBreadcrumbsIT extends AbstractComponentIT {
         List<BreadcrumbsItemElement> items = breadcrumbs.getItems();
         Assert.assertEquals("Home", items.get(0).getText());
         Assert.assertEquals("Current", items.get(1).getText());
-        Assert.assertNull(breadcrumbs.getItemByText("Docs"));
+    }
+
+    @Test
+    public void navigateItem_navigatesToItemPath() {
+        breadcrumbs.getItems().get(0).navigate();
+        waitUntil(driver -> driver.getCurrentUrl()
+                .endsWith("vaadin-breadcrumbs/manual-target"));
     }
 }
