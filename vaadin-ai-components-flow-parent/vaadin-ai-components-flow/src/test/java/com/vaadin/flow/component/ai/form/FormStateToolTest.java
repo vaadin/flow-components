@@ -91,7 +91,7 @@ class FormStateToolTest {
         var visible = new TestField();
         var hidden = new TestField();
         var controller = new FormAIController(new Div(visible, hidden));
-        controller.ignore(hidden);
+        controller.ignoreField(hidden);
 
         var fields = formStateFields(controller);
 
@@ -303,8 +303,8 @@ class FormStateToolTest {
         var password = new PasswordField();
         password.setValue("secret");
         var controller = new FormAIController(new Div(visible, password));
-        controller.describe(password, "Account password");
-        controller.valueOptions(
+        controller.describeField(password, "Account password");
+        controller.fieldValueOptions(
                 ValueOptions.forField(password).options(List.of("hunter2")));
 
         var fields = formStateFields(controller);
@@ -318,7 +318,8 @@ class FormStateToolTest {
     void getFormStateAutoIgnoresPasswordField() {
         // PasswordField is treated as UNSUPPORTED so secret values do not
         // flow into the LLM tool payload by default. The developer does not
-        // have to remember to call .ignore() for every form that happens to
+        // have to remember to call .ignoreField() for every form that happens
+        // to
         // include one.
         var visible = new TestField();
         var password = new PasswordField();
@@ -354,7 +355,7 @@ class FormStateToolTest {
         field.setLabel("Merchant");
         field.setHelperText("As shown on the receipt");
         var controller = new FormAIController(new Div(field));
-        controller.describe(field, "The vendor name");
+        controller.describeField(field, "The vendor name");
 
         var f = formStateFields(controller).get(0);
 
@@ -376,7 +377,7 @@ class FormStateToolTest {
         field.setLabel("Merchant.");
         field.setHelperText("As shown on the receipt.");
         var controller = new FormAIController(new Div(field));
-        controller.describe(field, "The vendor name.");
+        controller.describeField(field, "The vendor name.");
 
         var f = formStateFields(controller).get(0);
         var desc = f.get("description").asString();
@@ -404,7 +405,7 @@ class FormStateToolTest {
     void valuesHiddenDefaultsToFalse() {
         var controller = new FormAIController(new Div(new TestField()));
 
-        Assertions.assertFalse(controller.isValuesHidden(),
+        Assertions.assertFalse(controller.isFieldValuesHidden(),
                 "Values must be sent by default");
     }
 
@@ -419,7 +420,7 @@ class FormStateToolTest {
         number.setValue(58.4);
         var empty = new TestField();
         var controller = new FormAIController(new Div(text, number, empty));
-        controller.setValuesHidden(true);
+        controller.setFieldValuesHidden(true);
 
         var fields = formStateFields(controller);
 
@@ -447,7 +448,7 @@ class FormStateToolTest {
         combo.setItems("EUR", "USD");
         combo.setValue("EUR");
         var controller = new FormAIController(new Div(combo));
-        controller.setValuesHidden(true);
+        controller.setFieldValuesHidden(true);
 
         var f = formStateFields(controller).get(0);
 
@@ -624,19 +625,19 @@ class FormStateToolTest {
 
     @Test
     void getFormStateMultiSelectWithValueOptionsKeepsNodeShape() {
-        // Combining multi-select with valueOptions must still leave the
+        // Combining multi-select with fieldValueOptions must still leave the
         // node-level shape clean: array=true, no node-level type, and
         // queryable/enum sit inside the items block.
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(ValueOptions.forField(multi)
+        controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("a", "b")));
 
         var f = formStateFields(controller).get(0);
 
         Assertions.assertTrue(f.path("array").asBoolean());
         Assertions.assertTrue(f.path("type").isMissingNode(),
-                "Multi-select with valueOptions must not set node-level "
+                "Multi-select with fieldValueOptions must not set node-level "
                         + "type, got: " + f);
         Assertions.assertTrue(f.path("queryable").isMissingNode(),
                 "queryable must live inside items, not on the node, got: " + f);
@@ -647,20 +648,21 @@ class FormStateToolTest {
     @Test
     void getFormStateMultiSelectWithValueOptionsRendersValueAsArray() {
         // Multi-select value is a Set; serialising it as a single string
-        // (the path taken when valueOptions on non-selection fields rewrites
+        // (the path taken when fieldValueOptions on non-selection fields
+        // rewrites
         // to string) would corrupt the payload. Pin that multi-select wins
-        // over the valueOptions value-rewrite.
+        // over the fieldValueOptions value-rewrite.
         var multi = new MultiSelectField<String>();
         multi.setItems("a", "b", "c");
         multi.setValue(Set.of("a", "c"));
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(ValueOptions.forField(multi)
+        controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("a", "b", "c")));
 
         var f = formStateFields(controller).get(0);
 
         Assertions.assertTrue(f.path("value").isArray(),
-                "Multi-select with valueOptions must still render its value "
+                "Multi-select with fieldValueOptions must still render its value "
                         + "as a JSON array, got: " + f.path("value"));
         var rendered = new ArrayList<String>();
         f.path("value").forEach(n -> rendered.add(n.asString()));
@@ -673,14 +675,14 @@ class FormStateToolTest {
     void getFormStateSingleSelectWithValueOptionsRendersValueAsLabel() {
         // The mirror case for the multi-select test above: the
         // selection-aware path must keep using the field's own label
-        // renderer for the current value, not the generic valueOptions
+        // renderer for the current value, not the generic fieldValueOptions
         // value-rewrite branch.
         var combo = new SingleSelectField<Project>();
         combo.setItems(new Project("P-1", "Alpha"), new Project("P-2", "Beta"));
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
         combo.setValue(new Project("P-2", "Beta"));
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(combo).options(
                         (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta")),
                 label -> null);
@@ -695,7 +697,7 @@ class FormStateToolTest {
 
     @Test
     void getFormStateDescribedFieldHasNoQueryableFlag() {
-        // describe() registers a hint without a valueOptions callback. The
+        // describe() registers a hint without a fieldValueOptions callback. The
         // schema must distinguish "has a hint entry" from "has a query
         // callback": only the latter is queryable. Otherwise the LLM would
         // call query_field_options against a field that has no registered
@@ -704,18 +706,18 @@ class FormStateToolTest {
         // branch entirely and would not exercise this regression.
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.describe(combo, "Some descriptive text");
+        controller.describeField(combo, "Some descriptive text");
 
         var f = formStateFields(controller).get(0);
 
         Assertions.assertTrue(f.path("queryable").isMissingNode(),
-                "A field with describe() but no valueOptions must not carry "
+                "A field with describe() but no fieldValueOptions must not carry "
                         + "queryable=true, got: " + f);
     }
 
     @Test
     void getFormStateQueryableFieldDoesNotMixListDataProviderEnum() {
-        // When valueOptions(BiFunction) is registered on a selection
+        // When fieldValueOptions(BiFunction) is registered on a selection
         // component whose backing ListDataProvider also has items,
         // queryable=true must short-circuit before the data-provider items
         // would be enumerated as enum. Both signals in the same payload
@@ -724,7 +726,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<String>();
         combo.setItems("apple", "banana", "cherry");
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(ValueOptions.forField(combo)
+        controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of("apple", "banana")));
 
         var f = formStateFields(controller).get(0);
@@ -801,13 +803,13 @@ class FormStateToolTest {
 
     @Test
     void getFormStateEncodesEnumForFixedValueOptions() {
-        // Fixed valueOptions registered against a selection component
+        // Fixed fieldValueOptions registered against a selection component
         // surface in the JSON output as enum. The same registration against
         // a non-selection field would not (LLM uses query_field_options
         // instead).
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(ValueOptions.forField(combo)
+        controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
@@ -824,7 +826,7 @@ class FormStateToolTest {
     void getFormStateEncodesQueryableForBiFunctionValueOptions() {
         var combo = new SingleSelectField<String>();
         var controller = new FormAIController(new Div(combo));
-        controller.valueOptions(ValueOptions.forField(combo)
+        controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
@@ -840,7 +842,7 @@ class FormStateToolTest {
     void getFormStateExposesEnumForFixedValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("EUR", "USD", "GBP")));
 
         var f = formStateFields(controller).get(0);
@@ -854,7 +856,7 @@ class FormStateToolTest {
     void getFormStateExposesQueryableForBiFunctionValueOptionsOnStringField() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("Apollo", "Polaris")));
 
         var f = formStateFields(controller).get(0);
@@ -887,7 +889,7 @@ class FormStateToolTest {
         f.path("enum").forEach(n -> values.add(n.asString()));
         Assertions.assertEquals(List.of("alpha", "beta", "gamma"), values,
                 "ListDataProvider items must populate the enum when no "
-                        + "valueOptions hint is registered");
+                        + "fieldValueOptions hint is registered");
     }
 
     @Test
@@ -1015,7 +1017,7 @@ class FormStateToolTest {
 
     @Test
     void getFormStateRendersStringValueWhenValueOptionsOverrideType() {
-        // valueOptions on a non-String field rewrites the schema type to
+        // fieldValueOptions on a non-String field rewrites the schema type to
         // "string" + enum, but applyValue keeps following the field's
         // original FormFieldType — so the value half of the payload
         // disagrees with the schema half. A strict consumer validating
@@ -1023,7 +1025,7 @@ class FormStateToolTest {
         var field = new IntField();
         field.setValue(2);
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of("1", "2", "3")),
                 Integer::parseInt);
 
@@ -1081,7 +1083,7 @@ class FormStateToolTest {
     void getFormStateMultiSelectQueryableUsesItemsQueryable() {
         var multi = new MultiSelectField<String>();
         var controller = new FormAIController(new Div(multi));
-        controller.valueOptions(ValueOptions.forField(multi)
+        controller.fieldValueOptions(ValueOptions.forField(multi)
                 .options((filter, limit) -> List.of("x")));
 
         var f = formStateFields(controller).get(0);
@@ -1161,10 +1163,10 @@ class FormStateToolTest {
 
         var form = new Div(merchant, amount, currency, date, category, notes);
         var controller = new FormAIController(form);
-        controller.describe(merchant, "The vendor name");
-        controller.valueOptions(ValueOptions.forField(currency)
+        controller.describeField(merchant, "The vendor name");
+        controller.fieldValueOptions(ValueOptions.forField(currency)
                 .options(List.of("EUR", "USD", "GBP")));
-        controller.valueOptions(ValueOptions.forField(category).options(
+        controller.fieldValueOptions(ValueOptions.forField(category).options(
                 List.of("Travel", "Meals", "Software", "Office", "Other")));
 
         // Execute first so the controller walks the form and assigns ids to
@@ -1235,7 +1237,7 @@ class FormStateToolTest {
 
         var field = new TestField();
         var controllerWithIgnored = new FormAIController(new Div(field));
-        controllerWithIgnored.ignore(field);
+        controllerWithIgnored.ignoreField(field);
         Assertions.assertTrue(
                 controllerWithIgnored.getTools().stream()
                         .anyMatch(t -> t.getName().equals("get_form_state")),
