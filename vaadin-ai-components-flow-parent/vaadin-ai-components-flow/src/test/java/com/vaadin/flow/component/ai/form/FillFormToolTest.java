@@ -1292,16 +1292,18 @@ class FillFormToolTest {
         // The LLM speaks in labels for SINGLE_SELECT fields with
         // fieldValueOptions registered. The tool must apply toValue so the
         // field gets the domain instance, not the raw label string.
+        var apollo = new Project("P-1", "Apollo");
+        var projects = Map.of("Apollo", apollo);
         var field = new SingleSelectField<Project>();
-        var projects = Map.of("Apollo", new Project("P-1", "Apollo"));
+        field.setItemLabelGenerator(Project::name);
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
-                .options((filter, limit) -> List.of("Apollo")), projects::get);
+                .options((filter, limit) -> List.of(apollo)), projects::get);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
-        Assertions.assertEquals(new Project("P-1", "Apollo"), field.getValue(),
+        Assertions.assertEquals(apollo, field.getValue(),
                 "Field must receive the resolved domain object, not the "
                         + "raw label string");
         Assertions.assertTrue(success(result));
@@ -1397,9 +1399,13 @@ class FillFormToolTest {
         // match any option". The orchestrator must reject rather than
         // pass null to setValue (which would silently clear the field).
         var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
         var controller = newController(field);
-        controller.fieldValueOptions(ValueOptions.forField(field)
-                .options((filter, limit) -> List.of("Apollo")), label -> null);
+        controller.fieldValueOptions(
+                ValueOptions.forField(field)
+                        .options((filter, limit) -> List
+                                .of(new Project("P-1", "Apollo"))),
+                label -> null);
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
@@ -1418,19 +1424,21 @@ class FillFormToolTest {
         // fieldValueOptions on a MultiSelectField takes a single-item Function;
         // the converter accumulates per-label items into the Set<Project>
         // value type via an internal LinkedHashSet.
+        var apollo = new Project("Apollo", "Apollo");
+        var vega = new Project("Vega", "Vega");
         var field = new MultiSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field)
-                        .options((filter, limit) -> List.of("Apollo", "Vega")),
+                        .options((filter, limit) -> List.of(apollo, vega)),
                 label -> new Project(label, label));
         controller.onRequest();
 
         var result = fillFormResult(controller,
                 payload(field, "[\"Apollo\", \"Vega\"]"));
 
-        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
-                new Project("Vega", "Vega")), field.getValue());
+        Assertions.assertEquals(Set.of(apollo, vega), field.getValue());
         Assertions.assertTrue(success(result));
     }
 
@@ -1518,6 +1526,7 @@ class FillFormToolTest {
         // builds an empty LinkedHashSet so the field's setValue receives
         // an empty Set.
         var field = new MultiSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
@@ -1536,13 +1545,15 @@ class FillFormToolTest {
         // The LLM sends a bare string for a multi-select field. The
         // converter enforces the array shape so a stray scalar payload
         // doesn't reach setValue.
+        var apollo = new Project("Apollo", "Apollo");
         var field = new MultiSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field)
-                        .options((filter, limit) -> List.of("Apollo")),
+                        .options((filter, limit) -> List.of(apollo)),
                 label -> new Project(label, label));
         controller.onRequest();
 
@@ -1562,22 +1573,24 @@ class FillFormToolTest {
         // fieldValueOptions called twice on the same MultiSelect field — the
         // second call wins, including switching from fixed to queryable
         // and replacing the toValue function.
+        var first = new Project("v1", "First");
+        var second = new Project("v2", "Second");
         var field = new MultiSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
         var controller = newController(field);
         controller.fieldValueOptions(
-                ValueOptions.forField(field).options(List.of("First")),
+                ValueOptions.forField(field).options(List.of(first)),
                 label -> new Project("v1", label));
         controller.fieldValueOptions(
                 ValueOptions.forField(field)
-                        .options((filter, limit) -> List.of("Second")),
+                        .options((filter, limit) -> List.of(second)),
                 label -> new Project("v2", label));
         controller.onRequest();
 
         var result = fillFormResult(controller, payload(field, "[\"Second\"]"));
 
         Assertions.assertTrue(success(result));
-        Assertions.assertEquals(Set.of(new Project("v2", "Second")),
-                field.getValue(),
+        Assertions.assertEquals(Set.of(second), field.getValue(),
                 "Re-registration must hand the LLM-supplied label to the "
                         + "second toValue, not the first");
     }
@@ -1592,8 +1605,8 @@ class FillFormToolTest {
         var field = new IntField();
         var controller = newController(field);
         controller.fieldValueOptions(
-                ValueOptions.forField(field)
-                        .options((filter, limit) -> List.of("low", "high")),
+                ValueOptions.forField(field).options(List.of(1, 10))
+                        .itemLabelGenerator(v -> v == 1 ? "low" : "high"),
                 label -> "low".equals(label) ? 1 : 10);
         controller.onRequest();
 

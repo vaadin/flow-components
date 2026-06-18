@@ -157,8 +157,8 @@ final class FormFieldSchema {
             return;
         }
         var arr = target.putArray("enum");
-        items.stream().limit(ENUM_MAX_ITEMS).forEach(
-                item -> arr.add(FormValueConverter.renderItem(field, item)));
+        items.stream().limit(ENUM_MAX_ITEMS)
+                .forEach(item -> arr.add(renderItem(field, hints, item)));
     }
 
     private static void applyValue(ObjectNode node, HasValue<?, ?> field,
@@ -173,7 +173,7 @@ final class FormFieldSchema {
         // string so the two halves of the payload agree.
         if (hasValueOptions(hints) && type != FormFieldType.SINGLE_SELECT
                 && type != FormFieldType.MULTI_SELECT) {
-            node.put(FIELD_VALUE, FormValueConverter.renderItem(field, value));
+            node.put(FIELD_VALUE, renderItem(field, hints, value));
             return;
         }
         switch (type) {
@@ -188,10 +188,27 @@ final class FormFieldSchema {
             node.put(FIELD_VALUE, ((BigDecimal) value).toPlainString());
         case BOOLEAN -> node.put(FIELD_VALUE, (Boolean) value);
         case SINGLE_SELECT ->
-            node.put(FIELD_VALUE, FormValueConverter.renderItem(field, value));
-        case MULTI_SELECT -> applyMultiSelectValue(node, field, value);
+            node.put(FIELD_VALUE, renderItem(field, hints, value));
+        case MULTI_SELECT -> applyMultiSelectValue(node, field, hints, value);
         default -> node.put(FIELD_VALUE, value.toString());
         }
+    }
+
+    /**
+     * Renders one item to the LLM-facing label. Prefers the resolved
+     * valueOptions item-label generator (which honours an explicit
+     * {@link ValueOptions#itemLabelGenerator(com.vaadin.flow.component.ItemLabelGenerator)}
+     * over the field's own generator) so the value string agrees with the
+     * labels surfaced in {@code enum} / {@code query_field_options}. Falls back
+     * to {@link FormValueConverter#renderItem} when no valueOptions hint is
+     * registered.
+     */
+    private static String renderItem(HasValue<?, ?> field, FormFieldHints hints,
+            Object item) {
+        if (hints != null && hints.itemLabelGenerator != null) {
+            return hints.itemLabelGenerator.apply(item);
+        }
+        return FormValueConverter.renderItem(field, item);
     }
 
     private static void applyNumberValue(ObjectNode node, Object value) {
@@ -217,7 +234,7 @@ final class FormFieldSchema {
     }
 
     private static void applyMultiSelectValue(ObjectNode node,
-            HasValue<?, ?> field, Object value) {
+            HasValue<?, ?> field, FormFieldHints hints, Object value) {
         // MULTI_SELECT is only assigned when the field implements MultiSelect,
         // whose contract guarantees getValue() returns a Set. A non-Collection
         // value would be a contract violation and produces an empty array
@@ -225,7 +242,7 @@ final class FormFieldSchema {
         var arr = node.putArray(FIELD_VALUE);
         if (value instanceof Collection<?> coll) {
             for (var v : coll) {
-                arr.add(FormValueConverter.renderItem(field, v));
+                arr.add(renderItem(field, hints, v));
             }
         }
     }

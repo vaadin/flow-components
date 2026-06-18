@@ -677,14 +677,16 @@ class FormStateToolTest {
         // selection-aware path must keep using the field's own label
         // renderer for the current value, not the generic fieldValueOptions
         // value-rewrite branch.
+        var alpha = new Project("P-1", "Alpha");
+        var beta = new Project("P-2", "Beta");
         var combo = new SingleSelectField<Project>();
-        combo.setItems(new Project("P-1", "Alpha"), new Project("P-2", "Beta"));
+        combo.setItems(alpha, beta);
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
-        combo.setValue(new Project("P-2", "Beta"));
+        combo.setValue(beta);
         var controller = new FormAIController(new Div(combo));
         controller.fieldValueOptions(
-                ValueOptions.forField(combo).options(
-                        (filter, limit) -> List.of("P-1 Alpha", "P-2 Beta")),
+                ValueOptions.forField(combo)
+                        .options((filter, limit) -> List.of(alpha, beta)),
                 label -> null);
 
         var f = formStateFields(controller).get(0);
@@ -878,6 +880,172 @@ class FormStateToolTest {
     }
 
     @Test
+    void getFormStateValueOptionsExplicitLabelerOverridesFieldsLabelGenerator() {
+        // The labeler chain prefers an explicit itemLabelGenerator on
+        // ValueOptions over the field's setItemLabelGenerator, so the LLM
+        // can see different labels than the UI when an application needs
+        // to (e.g. a code instead of a display name).
+        var alpha = new Project("P-1", "Alpha");
+        var beta = new Project("P-2", "Beta");
+        var combo = new SingleSelectField<Project>();
+        combo.setItemLabelGenerator(Project::name);
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(
+                ValueOptions.forField(combo).options(List.of(alpha, beta))
+                        .itemLabelGenerator(Project::code),
+                label -> alpha);
+
+        var f = formStateFields(controller).get(0);
+        var labels = new ArrayList<String>();
+        f.path("enum").forEach(n -> labels.add(n.asString()));
+
+        Assertions.assertEquals(List.of("P-1", "P-2"), labels,
+                "Explicit ValueOptions labeler must override the field's "
+                        + "setItemLabelGenerator for the enum block, got: "
+                        + labels);
+    }
+
+    @Test
+    void getFormStateValueOptionsUsesFieldsLabelGeneratorWhenNoExplicit() {
+        // Second leg of the labeler chain: with no explicit labeler on
+        // ValueOptions, the controller reuses the field's own
+        // setItemLabelGenerator so the LLM-facing labels match what the
+        // UI already shows. No duplication of the V-to-label mapping.
+        var alpha = new Project("P-1", "Alpha");
+        var beta = new Project("P-2", "Beta");
+        var combo = new SingleSelectField<Project>();
+        combo.setItemLabelGenerator(Project::name);
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(
+                ValueOptions.forField(combo).options(List.of(alpha, beta)),
+                label -> alpha);
+
+        var f = formStateFields(controller).get(0);
+        var labels = new ArrayList<String>();
+        f.path("enum").forEach(n -> labels.add(n.asString()));
+
+        Assertions.assertEquals(List.of("Alpha", "Beta"), labels);
+    }
+
+    @Test
+    void getFormStateValueOptionsFallsBackToToStringWithoutAnyLabelGenerator() {
+        // Last leg of the labeler chain: no explicit labeler and no
+        // field-level setItemLabelGenerator falls back to
+        // String.valueOf(item) so Integer / String / enum-typed items
+        // self-label with no developer setup.
+        var field = new IntField();
+        var controller = new FormAIController(new Div(field));
+        controller.fieldValueOptions(
+                ValueOptions.forField(field).options(List.of(1, 2, 3)),
+                Integer::parseInt);
+
+        var f = formStateFields(controller).get(0);
+        var labels = new ArrayList<String>();
+        f.path("enum").forEach(n -> labels.add(n.asString()));
+
+        Assertions.assertEquals(List.of("1", "2", "3"), labels);
+    }
+
+    @Test
+    void getFormStateValueOptionsExplicitLabelerAlsoDrivesValueRendering() {
+        // When an explicit ValueOptions labeler is set, the current value
+        // emitted in the schema must use the same labeler so the LLM sees
+        // one label set across both reads (enum) and the current value —
+        // otherwise the LLM would pick a label from the enum that doesn't
+        // match what is reported as the value.
+        var alpha = new Project("P-1", "Alpha");
+        var combo = new SingleSelectField<Project>();
+        combo.setItemLabelGenerator(Project::name);
+        combo.setValue(alpha);
+        var controller = new FormAIController(new Div(combo));
+        controller
+                .fieldValueOptions(
+                        ValueOptions.forField(combo).options(List.of(alpha))
+                                .itemLabelGenerator(Project::code),
+                        label -> alpha);
+
+        var f = formStateFields(controller).get(0);
+
+        Assertions.assertEquals("P-1", f.path("value").asString(),
+                "Current value must render through the explicit ValueOptions "
+                        + "labeler, not the field's UI labeler, got: "
+                        + f.path("value"));
+    }
+
+    @Test
+    void getFormStateValueOptionsExplicitLabelerThrowingFallsBackToToString() {
+        // A throwing item-label generator must not collapse the
+        // get_form_state call; the controller catches the throw and falls
+        // back to String.valueOf for the offending item so the LLM still
+        // sees the entry.
+        var alpha = new Project("P-1", "Alpha");
+        var combo = new SingleSelectField<Project>();
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options(List.of(alpha)).itemLabelGenerator(p -> {
+                    throw new RuntimeException("boom");
+                }), label -> alpha);
+
+        var f = formStateFields(controller).get(0);
+        var labels = new ArrayList<String>();
+        f.path("enum").forEach(n -> labels.add(n.asString()));
+
+        Assertions.assertEquals(List.of(String.valueOf(alpha)), labels,
+                "Throwing labeler must fall back to String.valueOf(item) "
+                        + "for the offending item; got: " + labels);
+    }
+
+    @Test
+    void getFormStateValueOptionsExplicitLabelerReturningNullFallsBackToToString() {
+        // A null-returning item-label generator falls back to
+        // String.valueOf(item) so the LLM never receives a null or empty
+        // label in the enum block.
+        var alpha = new Project("P-1", "Alpha");
+        var combo = new SingleSelectField<Project>();
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options(List.of(alpha)).itemLabelGenerator(p -> null),
+                label -> alpha);
+
+        var f = formStateFields(controller).get(0);
+        var labels = new ArrayList<String>();
+        f.path("enum").forEach(n -> labels.add(n.asString()));
+
+        Assertions.assertEquals(List.of(String.valueOf(alpha)), labels,
+                "Null label from explicit generator must fall back to "
+                        + "String.valueOf(item); got: " + labels);
+    }
+
+    @Test
+    void getFormStateMultiSelectValueOptionsLabelerAppliesToItemsEnumAndValue() {
+        // Multi-select symmetry: the explicit labeler drives both
+        // items.enum and the per-element value strings, so reads and
+        // writes agree across both halves of the payload.
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        var multi = new MultiSelectField<Project>();
+        multi.setItemLabelGenerator(Project::name);
+        multi.setValue(Set.of(apollo));
+        var controller = new FormAIController(new Div(multi));
+        controller.fieldValueOptions(
+                ValueOptions.forField(multi).options(List.of(apollo, vega))
+                        .itemLabelGenerator(Project::code),
+                label -> apollo);
+
+        var f = formStateFields(controller).get(0);
+        var enumLabels = new ArrayList<String>();
+        f.path("items").path("enum").forEach(n -> enumLabels.add(n.asString()));
+        var valueLabels = new ArrayList<String>();
+        f.path("value").forEach(n -> valueLabels.add(n.asString()));
+
+        Assertions.assertEquals(List.of("APL", "VGA"), enumLabels,
+                "items.enum must use the explicit labeler, got: " + enumLabels);
+        Assertions.assertEquals(List.of("APL"), valueLabels,
+                "Selected value must use the explicit labeler, got: "
+                        + valueLabels);
+    }
+
+    @Test
     void getFormStateExposesListDataProviderItemsAsEnum() {
         var combo = new SingleSelectField<String>();
         combo.setItems("alpha", "beta", "gamma");
@@ -1026,7 +1194,7 @@ class FormStateToolTest {
         field.setValue(2);
         var controller = new FormAIController(new Div(field));
         controller.fieldValueOptions(
-                ValueOptions.forField(field).options(List.of("1", "2", "3")),
+                ValueOptions.forField(field).options(List.of(1, 2, 3)),
                 Integer::parseInt);
 
         var f = formStateFields(controller).get(0);

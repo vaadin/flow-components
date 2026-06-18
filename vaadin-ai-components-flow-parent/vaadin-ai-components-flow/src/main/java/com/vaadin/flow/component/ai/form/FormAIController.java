@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
@@ -87,7 +89,10 @@ import tools.jackson.databind.JsonNode;
  * {@link #fieldValueOptions(ValueOptions, Function) two-argument overload} also
  * accepts a label-to-value converter, which the controller applies per label;
  * for multi-select fields the resolved elements are then aggregated into a
- * {@link LinkedHashSet} before {@link HasValue#setValue}.
+ * {@link LinkedHashSet} before {@link HasValue#setValue}. LLM-facing labels for
+ * the registered items are derived from the field's
+ * {@code setItemLabelGenerator(...)} by default; see {@link ValueOptions} for
+ * the full resolution chain.
  * </p>
  *
  * <p>
@@ -339,10 +344,10 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers a known set of labels for a {@link String}-typed field. The
-     * labels are presented to the LLM as the field's choices. No converter is
-     * needed — the chosen label is itself the value written to the field. For
-     * any non-{@link String} value type, use
+     * Registers a known set of options for a {@link String}-typed field. Each
+     * item is also the label the LLM sees — the chosen label is itself the
+     * value written to the field, with no converter needed. For any
+     * non-{@link String} value type, use
      * {@link #fieldValueOptions(ValueOptions, Function) the two-argument
      * overload} to supply a converter; this is enforced at compile time.
      * <p>
@@ -353,14 +358,14 @@ public class FormAIController implements AIController {
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
+     *            its item source set via either
      *            {@link ValueOptions#options(Collection)} or
      *            {@link ValueOptions#options(BiFunction)}
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
+     *             if the registration has no item source set; if the developer
      *             routed a {@code MultiSelect} field through the single-value
      *             {@code forField} overload (upcast reference); or if the
      *             field's value type is a Collection but the field does not
@@ -372,13 +377,17 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers a known set of labels for a field, paired with a converter that
-     * resolves a chosen label to the field's value type. When the LLM picks a
-     * label, the controller calls {@code toValue} on it and writes the result
-     * to the field. If {@code toValue} returns {@code null} or throws — for
-     * example because the LLM picked a label the converter does not recognize —
-     * the write is rejected back to the LLM with a reason and the model can
-     * correct on the next turn.
+     * Registers a known set of items for a field, paired with a converter that
+     * resolves a chosen label to the field's value type. The controller derives
+     * the LLM-facing label for each item through this chain: an explicit
+     * {@link ValueOptions#itemLabelGenerator(ItemLabelGenerator)} if set,
+     * otherwise the field's own {@code setItemLabelGenerator(...)} (read
+     * reflectively), otherwise {@link String#valueOf(Object)} as a last resort.
+     * When the LLM picks a label, the controller calls {@code toValue} on it
+     * and writes the result to the field. If {@code toValue} returns
+     * {@code null} or throws — for example because the LLM picked a label the
+     * converter does not recognize — the write is rejected back to the LLM with
+     * a reason and the model can correct on the next turn.
      * <p>
      * A typical converter delegates to a service or repository that looks the
      * domain object up by its display name, for example
@@ -394,20 +403,20 @@ public class FormAIController implements AIController {
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
+     *            its item source set via either
      *            {@link ValueOptions#options(Collection)} or
      *            {@link ValueOptions#options(BiFunction)}
      * @param toValue
      *            converts a chosen label to one element of the field's value
      *            type, not {@code null}
      * @param <V>
-     *            the per-label item type — the field's value type for
-     *            single-value fields, the per-element type for multi-select
+     *            the item type — the field's value type for single-value
+     *            fields, the per-element type for multi-select
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} or {@code toValue} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
+     *             if the registration has no item source set; if the developer
      *             routed a {@code MultiSelect} field through the single-value
      *             {@code forField} overload (upcast reference); or if the
      *             field's value type is a Collection but the field does not
@@ -453,17 +462,64 @@ public class FormAIController implements AIController {
                             + "fields must implement MultiSelect to be "
                             + "registered via fieldValueOptions(...).");
         }
+        var labeler = resolveItemLabeler(config.field(),
+                config.itemLabelGenerator());
         var hints = hintsFor(config.field());
         hints.valueOptionsToValue = toValue;
+        hints.itemLabelGenerator = labeler;
         if (fixed != null) {
-            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(fixed,
-                    filter, limit);
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            List<Object> items = (List) fixed;
+            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(items,
+                    filter, limit, labeler);
             hints.fixedOptions = true;
         } else {
-            hints.valueOptionsQuery = query;
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            BiFunction<String, Integer, List<Object>> rawQuery = (BiFunction) query;
+            hints.valueOptionsQuery = (filter, limit) -> rawQuery
+                    .apply(filter, limit).stream().map(labeler).toList();
             hints.fixedOptions = false;
         }
         return this;
+    }
+
+    /**
+     * Resolves the V-to-label function for one valueOptions registration.
+     * Priority: an explicit {@link ItemLabelGenerator} on the registration,
+     * otherwise the field's own {@code getItemLabelGenerator()} (via
+     * {@link FormValueConverter#renderItem}, which also covers the
+     * {@link String#valueOf} fallback).
+     */
+    private static Function<Object, String> resolveItemLabeler(
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit) {
+        if (explicit != null) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            ItemLabelGenerator<Object> typed = (ItemLabelGenerator) explicit;
+            return item -> applyItemLabeler(typed, item);
+        }
+        return item -> FormValueConverter.renderItem(field, item);
+    }
+
+    /**
+     * Applies an explicit per-item label generator, falling back to
+     * {@link String#valueOf(Object)} for {@code null} items, {@code null}
+     * labels, and labelers that throw. Mirrors the safety guarantees of
+     * {@link FormValueConverter#renderItem} so a misbehaving label generator
+     * cannot collapse the whole tool call.
+     */
+    private static String applyItemLabeler(ItemLabelGenerator<Object> labeler,
+            Object item) {
+        if (item == null) {
+            return "";
+        }
+        try {
+            var label = labeler.apply(item);
+            return label != null ? label : String.valueOf(item);
+        } catch (Exception ex) {
+            LOGGER.warn("Item label generator threw for {}", item.getClass(),
+                    ex);
+            return String.valueOf(item);
+        }
     }
 
     /**
@@ -941,9 +997,9 @@ public class FormAIController implements AIController {
         return id;
     }
 
-    private static List<String> filterAndLimit(List<String> source,
-            String filter, int limit) {
-        var stream = source.stream();
+    private static List<String> filterAndLimit(List<Object> source,
+            String filter, int limit, Function<Object, String> labeler) {
+        var stream = source.stream().map(labeler);
         if (filter != null && !filter.isEmpty()) {
             var needle = filter.toLowerCase(Locale.ROOT);
             stream = stream

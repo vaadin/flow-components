@@ -514,11 +514,13 @@ class FormAIControllerTest {
                             (java.util.function.BiFunction<String, Integer, List<String>>) null));
             Assertions.assertThrows(NullPointerException.class,
                     () -> config.options((java.util.Collection<String>) null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> config.itemLabelGenerator(null));
             // A null converter passed to the controller's two-argument
             // overload throws NPE.
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.fieldValueOptions(ValueOptions
-                            .forField(new IntField()).options(List.of("a")),
+                            .forField(new IntField()).options(List.of(1)),
                             null));
             // An empty fixed-options list leaves the field un-fillable;
             // rejected at the options() call site.
@@ -536,14 +538,15 @@ class FormAIControllerTest {
 
         @Test
         void fieldValueOptionsAcceptsNonStringFieldWithToValueConverter() {
-            // fieldValueOptions is generic over the field's value type — verify
-            // that an Integer-valued field can be registered with a label
-            // -> Integer converter, and that the labels still flow through
-            // the query tool unchanged.
+            // fieldValueOptions is generic over the field's value type — an
+            // Integer-valued field carries Integer items, and the
+            // String.valueOf fallback renders the LLM-facing labels when
+            // the field has no item-label generator of its own.
             var field = new IntField();
             var controller = new FormAIController(new Div(field));
-            controller.fieldValueOptions(ValueOptions.forField(field)
-                    .options(List.of("1", "2", "3")), Integer::parseInt);
+            controller.fieldValueOptions(
+                    ValueOptions.forField(field).options(List.of(1, 2, 3)),
+                    Integer::parseInt);
             controller.onRequest();
 
             Assertions.assertEquals("1\n2\n3\n",
@@ -574,8 +577,7 @@ class FormAIControllerTest {
         @Test
         void reregisteringWithBiFunctionClearsPriorFixedOptionsFlag() {
             // Each fieldValueOptions call replaces the previous registration
-            // for
-            // the same field. The fixed-options variant sets a flag that
+            // for the same field. The fixed-options variant sets a flag that
             // makes the schema render options as 'enum'; re-registering with
             // a query callback must reset that flag so the schema rendering
             // matches the new registration (queryable, not enum).
@@ -599,6 +601,41 @@ class FormAIControllerTest {
         }
 
         @Test
+        void reregisteringValueOptionsOverwritesItemLabelGenerator() {
+            // Each fieldValueOptions call replaces the previous registration
+            // in full — including the item-label generator — so a stale
+            // labeler cannot survive a re-registration. Asserted on both the
+            // enum block (the wrapped query path) and the schema's value
+            // string (the value-rendering path) so a half-overwrite of one
+            // but not the other is caught.
+            var alpha = new FormTestFields.Project("P-1", "Alpha");
+            var combo = new FormTestFields.SingleSelectField<FormTestFields.Project>();
+            combo.setValue(alpha);
+            var controller = new FormAIController(new Div(combo));
+            controller.fieldValueOptions(
+                    ValueOptions.forField(combo).options(List.of(alpha))
+                            .itemLabelGenerator(FormTestFields.Project::code),
+                    label -> alpha);
+            controller.fieldValueOptions(
+                    ValueOptions.forField(combo).options(List.of(alpha))
+                            .itemLabelGenerator(FormTestFields.Project::name),
+                    label -> alpha);
+
+            var f = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode())).path("fields")
+                            .get(0);
+            var labels = new java.util.ArrayList<String>();
+            f.path("enum").forEach(n -> labels.add(n.asString()));
+
+            Assertions.assertEquals(List.of("Alpha"), labels,
+                    "Second registration's labeler must drive the enum "
+                            + "block; got: " + labels);
+            Assertions.assertEquals("Alpha", f.path("value").asString(),
+                    "Second registration's labeler must drive the value "
+                            + "rendering; got: " + f.path("value"));
+        }
+
+        @Test
         void fieldValueOptionsForFieldOnUpcastMultiSelectReferenceThrowsIllegalArgument() {
             // A MultiSelect statically typed as such picks the MultiSelect-
             // typed forField overload at compile time. This runtime check
@@ -612,7 +649,8 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(multiSelect));
             var ex = Assertions.assertThrows(IllegalArgumentException.class,
                     () -> controller.fieldValueOptions(
-                            ValueOptions.forField(upcast).options(List.of("a")),
+                            ValueOptions.forField(upcast)
+                                    .options(List.of(java.util.Set.of("a"))),
                             label -> java.util.Set.of(label)));
             Assertions.assertTrue(ex.getMessage().contains("MultiSelect"),
                     "Rejection must name MultiSelect so the developer can "
@@ -627,10 +665,14 @@ class FormAIControllerTest {
             // and the controller refuses to register them.
             var field = new FormTestFields.CollectionWithoutMultiSelectField();
             var controller = new FormAIController(new Div(field));
-            var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.fieldValueOptions(
-                            ValueOptions.forField(field).options(List.of("a")),
-                            label -> List.of(label)));
+            var ex = Assertions
+                    .assertThrows(IllegalArgumentException.class,
+                            () -> controller
+                                    .fieldValueOptions(
+                                            ValueOptions.forField(field)
+                                                    .options(List
+                                                            .of(List.of("a"))),
+                                            label -> List.of(label)));
             Assertions.assertTrue(
                     ex.getMessage().contains("Collection")
                             && ex.getMessage().contains("MultiSelect"),
@@ -648,7 +690,7 @@ class FormAIControllerTest {
             var field = new FormTestFields.MultiSelectField<Integer>();
             var controller = new FormAIController(new Div(field));
             Assertions.assertDoesNotThrow(() -> controller.fieldValueOptions(
-                    ValueOptions.forField(field).options(List.of("1", "2")),
+                    ValueOptions.forField(field).options(List.of(1, 2)),
                     Integer::parseInt));
         }
 

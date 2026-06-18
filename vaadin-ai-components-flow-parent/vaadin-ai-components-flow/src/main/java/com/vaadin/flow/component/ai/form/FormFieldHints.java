@@ -24,13 +24,17 @@ import java.util.function.Function;
  * field's opaque id.
  * <p>
  * Set by {@link FormAIController#fieldValueOptions(ValueOptions)
- * controller.fieldValueOptions(...)}: {@link #valueOptionsQuery} carries the
- * filter callback (or a fixed-options snapshot wrapped in one),
- * {@link #fixedOptions} flags whether the schema should render the options as
- * {@code enum} or {@code queryable}, and {@link #valueOptionsToValue} resolves
- * one label to one element. For multi-select fields the controller wraps the
- * resolved elements into a {@link java.util.LinkedHashSet} before
- * {@code setValue}; the hint state is the same shape in both cases.
+ * controller.fieldValueOptions(...)}: {@link #valueOptionsQuery} returns the
+ * labels the LLM sees for a given filter (the controller wraps the
+ * {@link ValueOptions}' item source + label generator into this single
+ * label-producing callback at registration time), {@link #fixedOptions} flags
+ * whether the schema should render the options as {@code enum} or
+ * {@code queryable}, {@link #valueOptionsToValue} resolves one label back to
+ * one element, and {@link #itemLabelGenerator} renders the field's current
+ * value through the same labeler so the value string matches the labels the LLM
+ * was offered. For multi-select fields the controller wraps the resolved
+ * elements into a {@link java.util.LinkedHashSet} before {@code setValue}; the
+ * hint state is the same shape in both cases.
  *
  * @author Vaadin Ltd
  */
@@ -39,6 +43,18 @@ final class FormFieldHints {
     String description;
     BiFunction<String, Integer, List<String>> valueOptionsQuery;
     Function<String, ?> valueOptionsToValue;
+    /**
+     * Item-to-label function used to render the current value when
+     * value-options is registered. Resolved at registration to the explicit
+     * {@link ValueOptions#itemLabelGenerator(com.vaadin.flow.component.ItemLabelGenerator)}
+     * or to a delegate that defers to {@link FormValueConverter#renderItem}
+     * (field's own {@code getItemLabelGenerator()}, then
+     * {@link String#valueOf(Object)}). Non-{@code null} whenever
+     * {@link #valueOptionsQuery} is set, so the schema's value string agrees
+     * with the labels emitted in the {@code enum} / {@code query_field_options}
+     * payloads.
+     */
+    Function<Object, String> itemLabelGenerator;
     /**
      * {@code true} when the field was registered with the fixed-options
      * variant; {@code false} when registered with a query callback or with no
