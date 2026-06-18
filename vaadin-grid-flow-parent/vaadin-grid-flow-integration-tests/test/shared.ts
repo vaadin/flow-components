@@ -7,8 +7,8 @@ import sinon from 'sinon';
 import type { Grid } from '@vaadin/grid';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
-import type { } from '@web/test-runner-mocha';
-import type { } from 'sinon-chai';
+import type {} from '@web/test-runner-mocha';
+import type {} from 'sinon-chai';
 
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
@@ -24,6 +24,7 @@ export type GridConnector = {
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number) => void;
   setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
+  getRenderedRange: () => [number, number];
   setHeaderRenderer: (column: GridColumn, options: { content: Node | string | null, showSorter?: boolean, sorterPath?: string }) => void;
   setFooterRenderer: (column: GridColumn, options: { content: Node | string | null }) => void;
   scrollToItem: (itemKey: string, index: number) => void;

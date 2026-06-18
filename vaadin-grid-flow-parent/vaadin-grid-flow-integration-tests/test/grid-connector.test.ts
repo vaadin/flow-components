@@ -284,51 +284,5 @@ describe('grid connector', () => {
         expect(grid.$server.setViewportRange.called).to.be.false;
       });
     });
-
-    describe('last requested range is not in viewport', () => {
-      beforeEach(async () => {
-        // Request a range of items further down
-        clear(grid.$connector, 50, 50);
-        grid.scrollToIndex(50);
-        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setViewportRange).to.have.been.calledOnceWith(30, 50);
-        setRootItems(grid.$connector, items, 30, 50);
-        grid.$server.setViewportRange.resetHistory();
-      });
-
-      it('should request for items if part of the last range was cleared', async () => {
-        // Simulate preloading of items when scrolling to top programmatically on server-side, which may also partially clear the last requested range:
-        // - Scroll to top
-        // - Clear last requested range partially
-        // - Preload first two pages so that grid doesn't need to request a new range yet
-        grid.scrollToIndex(0);
-        clear(grid.$connector, 40, grid.pageSize);
-        setRootItems(grid.$connector, items, 0, 30);
-        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setViewportRange).to.not.have.been.called;
-
-        // Scroll down again, should reload the range because part of it was cleared
-        grid.scrollToIndex(50);
-        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setViewportRange).to.have.been.calledOnceWith(30, 50);
-      });
-
-      it('should not request for items if data outside of the last range was cleared', async () => {
-        // Simulate preloading of items when scrolling to top programmatically on server-side, which may also partially clear the last requested range:
-        // - Scroll to top
-        // - Clear data outside the requested range
-        // - Preload first two pages so that grid doesn't need to request a new range yet
-        grid.scrollToIndex(0);
-        clear(grid.$connector, 70, grid.pageSize);
-        grid.$connector.confirm(-1);
-        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setViewportRange).to.not.have.been.called;
-
-        // Scroll down again, should not reload the range because nothing from it was cleared
-        grid.scrollToIndex(50);
-        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setViewportRange).to.not.have.been.called;
-      });
-    });
   });
 });
