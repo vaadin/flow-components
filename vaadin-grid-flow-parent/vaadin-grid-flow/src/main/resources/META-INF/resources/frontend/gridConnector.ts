@@ -1,12 +1,29 @@
 // @ts-nocheck
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
-import { timeOut, animationFrame } from '@vaadin/component-base/src/async.js';
-import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
+import { timeOut } from '@vaadin/component-base/src/async.js';
+import '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
 
 function isRangeEqual(range1, range2) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
+}
+
+function singleTimeRenderer(renderer) {
+  return (root) => {
+    if (renderer) {
+      renderer(root);
+      renderer = null;
+    }
+  };
+}
+
+function renderContent(root, content) {
+  if (content instanceof Node) {
+    root.appendChild(content);
+  } else {
+    root.textContent = content;
+  }
 }
 
 window.Vaadin.Flow.gridConnector = {};
@@ -60,7 +77,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
       // FYI: In single selection mode, the server can send items = [null]
       // which means a "Deselect All" command.
-      const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
+      const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key !== grid.activeItem.key;
       if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
         grid.activeItem = item;
       }
@@ -102,7 +119,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.__activeItemChanged = function (newVal, oldVal) {
-    if (selectionMode != 'SINGLE') {
+    if (selectionMode !== 'SINGLE') {
       return;
     }
     if (!newVal) {
@@ -122,7 +139,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doSelection([newVal], true);
     }
   };
-  grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
+  grid._createPropertyObserver('activeItem', '__activeItemChanged');
 
   grid.__activeItemChangedDetails = function (newVal, oldVal) {
     if (grid.__disallowDetailsOnClick) {
@@ -139,7 +156,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$server.setDetailsVisible(null);
     }
   };
-  grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
+  grid._createPropertyObserver('activeItem', '__activeItemChangedDetails');
 
   grid.$connector.getRenderedRange = function () {
     const renderedRows = grid._getRenderedRows();
@@ -228,7 +245,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.dataProvider = function (params, callback) {
-    if (params.pageSize != grid.pageSize) {
+    if (params.pageSize !== grid.pageSize) {
       throw 'Invalid pageSize';
     }
 
@@ -257,15 +274,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     sorterDirectionsSetFromServer = true;
     setTimeout(() => {
       try {
-        const sorters = Array.from(grid.querySelectorAll('vaadin-grid-sorter'));
-
         // Sorters for hidden columns are removed from DOM but stored in the web component.
         // We need to ensure that all the sorters are reset when using `grid.sort(null)`.
-        grid._sorters.forEach((sorter) => {
-          if (!sorters.includes(sorter)) {
-            sorters.push(sorter);
-          }
-        });
+        const sorters = [...new Set([...grid.querySelectorAll('vaadin-grid-sorter'), ...grid._sorters])];
 
         sorters.forEach((sorter) => {
           sorter.direction = null;
@@ -307,6 +318,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
+  function updateItemDetails(item) {
+    if (item.detailsOpened) {
+      grid.openItemDetails(item);
+    } else {
+      grid.closeItemDetails(item);
+    }
+  }
+
   grid.__updateRow = function (row, ...args) {
     if (preventRowUpdatesActive !== 0) {
       return;
@@ -333,13 +352,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
       grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
 
-      items.forEach((item) => {
-        if (item.detailsOpened) {
-          grid.openItemDetails(item);
-        } else {
-          grid.closeItemDetails(item);
-        }
-      });
+      items.forEach(updateItemDetails);
     });
 
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
@@ -362,13 +375,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
-      preventRowUpdates(() => {
-        if (item.detailsOpened) {
-          grid.openItemDetails(item);
-        } else {
-          grid.closeItemDetails(item);
-        }
-      });
+      preventRowUpdates(() => updateItemDetails(item));
 
       grid.__updateVisibleRows(index, index);
     });
@@ -377,7 +384,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.clear = function (index, length) {
     const { rootCache } = dataProviderController;
 
-    if (index % grid.pageSize != 0) {
+    if (index % grid.pageSize !== 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
@@ -391,9 +398,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       items.forEach((item) => grid.closeItemDetails(item));
     });
 
-    for (let i = index; i < index + length; i++) {
-      rootCache.items[i] = undefined;
-    }
+    rootCache.items.fill(undefined, index, index + length);
 
     grid.__updateVisibleRows(index, index + length - 1);
   };
@@ -455,15 +460,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.__updateMultiSelectable = () => grid.$connector.updateMultiSelectable();
   grid._createPropertyObserver('isAttached', '__updateMultiSelectable');
 
-  const singleTimeRenderer = (renderer) => {
-    return (root) => {
-      if (renderer) {
-        renderer(root);
-        renderer = null;
-      }
-    };
-  };
-
   grid.$connector.setHeaderRenderer = function (column, options) {
     const { content, showSorter, sorterPath } = options;
 
@@ -487,12 +483,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         // Use sorter as content root
         contentRoot = sorter;
       }
-      // Add content
-      if (content instanceof Node) {
-        contentRoot.appendChild(content);
-      } else {
-        contentRoot.textContent = content;
-      }
+
+      renderContent(contentRoot, content);
     });
   };
 
@@ -538,14 +530,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    column.footerRenderer = singleTimeRenderer((root) => {
-      // Add content
-      if (content instanceof Node) {
-        root.appendChild(content);
-      } else {
-        root.textContent = content;
-      }
-    });
+    column.footerRenderer = singleTimeRenderer((root) => renderContent(root, content));
   };
 
   grid.addEventListener('vaadin-context-menu-before-open', function (e) {
@@ -591,10 +576,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.addEventListener('column-reorder', (e) => {
     const columns = grid._columnTree
-      .slice(0)
-      .pop()
+      .at(-1)
       .filter((c) => c._flowId)
-      .sort((b, a) => b._order - a._order)
+      .sort((a, b) => a._order - b._order)
       .map((c) => c._flowId);
 
     grid.dispatchEvent(
@@ -606,19 +590,16 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.addEventListener('cell-focus', (e) => {
     const eventContext = grid.getEventContext(e);
-    const expectedSectionValues = ['header', 'body', 'footer'];
 
-    if (expectedSectionValues.indexOf(eventContext.section) === -1) {
+    if (!['header', 'body', 'footer'].includes(eventContext.section)) {
       return;
     }
 
     grid.dispatchEvent(
       new CustomEvent('grid-cell-focus', {
         detail: {
-          itemKey: eventContext.item ? eventContext.item.key : null,
-
-          internalColumnId: eventContext.column ? eventContext.column._flowId : null,
-
+          itemKey: eventContext.item?.key ?? null,
+          internalColumnId: eventContext.column?._flowId ?? null,
           section: eventContext.section
         }
       })
@@ -684,25 +665,25 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.dragFilter = (rowData) => rowData.item && !rowData.item.dragDisabled;
 
   grid.addEventListener('grid-dragstart', (e) => {
-    if (grid._isSelected(e.detail.draggedItems[0])) {
+    const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
+
+    if (grid._isSelected(draggedItems[0])) {
       // Dragging selected (possibly multiple) items
       if (grid.__selectionDragData) {
-        Object.keys(grid.__selectionDragData).forEach((type) => {
-          e.detail.setDragData(type, grid.__selectionDragData[type]);
-        });
+        Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
       } else {
         (grid.__dragDataTypes || []).forEach((type) => {
-          e.detail.setDragData(type, e.detail.draggedItems.map((item) => item.dragData[type]).join('\n'));
+          setDragData(type, draggedItems.map((item) => item.dragData[type]).join('\n'));
         });
       }
 
       if (grid.__selectionDraggedItemsCount > 1) {
-        e.detail.setDraggedItemsCount(grid.__selectionDraggedItemsCount);
+        setDraggedItemsCount(grid.__selectionDraggedItemsCount);
       }
     } else {
       // Dragging just one (non-selected) item
       (grid.__dragDataTypes || []).forEach((type) => {
-        e.detail.setDragData(type, e.detail.draggedItems[0].dragData[type]);
+        setDragData(type, draggedItems[0].dragData[type]);
       });
     }
   });
