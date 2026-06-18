@@ -224,6 +224,26 @@ public class Spreadsheet extends Component
 
     private boolean sheetProtected;
 
+    /**
+     * Editor instance currently shown for each cell key. Used to reuse the same
+     * editor across re-renders that keep the same cells visible (scroll,
+     * selection, resize) instead of re-creating it from the factory, which
+     * would discard editor state such as an uncommitted ComboBox value.
+     * Editor-only; cleared whenever editors are recreated from the factory (see
+     * {@link #setCellKeyToEditorMap(Map)}).
+     */
+    private Map<String, Component> cellKeyToEditor = new HashMap<>();
+
+    /**
+     * Cell key and editor instance that {@code onCustomEditorDisplayed} was
+     * last invoked for, so the callback fires only on a real selection change
+     * and not on re-renders that keep the same selection (scroll, resize,
+     * extending a range).
+     */
+    private String lastEditorCallbackKey;
+
+    private Component lastEditorCallbackComponent;
+
     private HashMap<String, String> componentIDtoCellKeysMap = new HashMap<>();
 
     // Cell CSS key to link tooltip (usually same as address)
@@ -1063,26 +1083,6 @@ public class Spreadsheet extends Component
     protected String initialSheetSelection = null;
 
     private Set<Component> customComponents = new HashSet<Component>();
-
-    /**
-     * Editor instance currently shown for each cell key. Used to reuse the same
-     * editor across re-renders that keep the same cells visible (scroll,
-     * selection, resize) instead of re-creating it from the factory, which
-     * would discard editor state such as an uncommitted ComboBox value.
-     * Editor-only; cleared whenever editors are recreated from the factory (see
-     * {@link #setCellKeyToEditorMap(Map)}).
-     */
-    private Map<String, Component> cellKeyToEditor = new HashMap<>();
-
-    /**
-     * Cell key and editor instance that {@code onCustomEditorDisplayed} was
-     * last invoked for, so the callback fires only on a real selection change
-     * and not on re-renders that keep the same selection (scroll, resize,
-     * extending a range).
-     */
-    private String lastEditorCallbackKey;
-
-    private Component lastEditorCallbackComponent;
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
