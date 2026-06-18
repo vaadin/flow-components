@@ -38,7 +38,6 @@ jobs:
     outputs:
       skip: ${{ steps.skip-ci.outputs.skip }}
       components: ${{ steps.components.outputs.elements }}
-      build-cache-key: ${{ steps.build-key.outputs.key }}
     steps:
       - name: Set Maven args
         run: |
@@ -67,24 +66,7 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Compute build cache key
-        id: build-key
-        if: steps.skip-ci.outputs.skip != 'true'
-        run: echo "key=${{ runner.os }}-build-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
-
-      - name: Restore build cache
-        id: build-cache
-        if: steps.skip-ci.outputs.skip != 'true'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2/repository/com/vaadin
-            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ steps.build-key.outputs.key }}
-
-      # The build cache key never hits across runs, so without this cache the
-      # charts SVG generator (npm install + webpack + mocha) rebuilds on every
-      # run (~40s) even though its sources rarely change.
+      # Cache SVG generator build output across runs unless it's sources change.
       - name: Restore charts SVG generator cache
         id: svg-cache
         if: steps.skip-ci.outputs.skip != 'true'
@@ -94,7 +76,7 @@ jobs:
           key: ${{ runner.os }}-charts-svg-generator-${{ hashFiles('vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/**') }}
 
       - name: Setup JDK 21
-        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
@@ -102,13 +84,13 @@ jobs:
           cache: 'maven'
 
       - name: Setup Node
-        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        if: steps.skip-ci.outputs.skip != 'true'
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
       - name: Show environment info
-        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        if: steps.skip-ci.outputs.skip != 'true'
         run: |
           java -version
           mvn -version
@@ -118,7 +100,7 @@ jobs:
           chromedriver --version
 
       - name: Install artifacts
-        if: steps.skip-ci.outputs.skip != 'true' && steps.build-cache.outputs.cache-hit != 'true'
+        if: steps.skip-ci.outputs.skip != 'true'
         env:
           # On an SVG generator cache hit, skip its npm install/build/test and
           # use the restored output instead.
@@ -129,6 +111,22 @@ jobs:
             sleep 15
             mvn install -Dmaven.test.skip=true -DskipSvgChartsBuild=$SKIP_SVG_BUILD -Drelease -T $FORK_COUNT $MAVEN_ARGS
           }
+
+      - name: Archive build output
+        if: steps.skip-ci.outputs.skip != 'true'
+        run: |
+          tar -Pczf build-output.tar.gz \
+            ~/.m2/repository/com/vaadin \
+            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated
+
+      - name: Upload build output
+        if: steps.skip-ci.outputs.skip != 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-output
+          path: build-output.tar.gz
+          retention-days: 1
+          overwrite: true
 
       - name: Detect modified components
         id: components
@@ -168,11 +166,10 @@ jobs:
     permissions:
       contents: read
     outputs:
-      matrix:        ${{ steps.shards.outputs.matrix }}
-      has-tests:     ${{ steps.shards.outputs.has-tests }}
-      war-cache-key: ${{ steps.war-key.outputs.key }}
-      unit-failed:   ${{ steps.type-failed.outputs.unit }}
-      wtr-failed:    ${{ steps.type-failed.outputs.wtr }}
+      matrix: ${{ steps.shards.outputs.matrix }}
+      has-tests: ${{ steps.shards.outputs.has-tests }}
+      unit-failed: ${{ steps.type-failed.outputs.unit }}
+      wtr-failed: ${{ steps.type-failed.outputs.wtr }}
     strategy:
       fail-fast: true
       matrix:
@@ -281,25 +278,7 @@ jobs:
         if: matrix.type == 'war'
         run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
 
-      - name: Compute WAR cache key
-        if: matrix.type == 'war'
-        id: war-key
-        env:
-          KEY: ${{ runner.os }}-war-${{ hashFiles('**/pom.xml', '**/src/main/java/**', '**/src/main/resources/**', 'integration-tests/src/test/java/**') }}
-        run: echo "key=$KEY" >> "$GITHUB_OUTPUT"
-
-      - name: Restore WAR cache
-        if: matrix.type == 'war'
-        id: war-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            integration-tests/pom.xml
-            integration-tests/target
-          key: ${{ steps.war-key.outputs.key }}
-
       - name: Setup JDK 21
-        if: steps.war-cache.outputs.cache-hit != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
@@ -307,7 +286,7 @@ jobs:
           cache: 'maven'
 
       - name: Install TestBench license
-        if: env.TB_LICENSE != '' && steps.war-cache.outputs.cache-hit != 'true'
+        if: env.TB_LICENSE != ''
         env:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
@@ -316,16 +295,13 @@ jobs:
           key="${TB_LICENSE#*/}"
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
-      - name: Restore build cache
-        if: steps.war-cache.outputs.cache-hit != 'true'
-        id: build-cache
-        uses: actions/cache@v5
+      - name: Download build output
+        uses: actions/download-artifact@v8
         with:
-          path: |
-            ~/.m2/repository/com/vaadin
-            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ needs.build.outputs.build-cache-key }}
-          fail-on-cache-miss: true
+          name: build-output
+
+      - name: Restore build output
+        run: tar -Pxzf build-output.tar.gz
 
       - name: Run unit tests
         if: matrix.type == 'unit'
@@ -373,7 +349,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package integration-tests WAR
-        if: matrix.type == 'war' && steps.war-cache.outputs.cache-hit != 'true'
+        if: matrix.type == 'war'
         run: |
           mvn package -pl integration-tests \
             -Dvaadin.pnpm.enable -Drun-it -Drelease \
@@ -381,8 +357,21 @@ jobs:
             -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 
       - name: Compile IT test sources
-        if: matrix.type == 'war' && steps.war-cache.outputs.cache-hit != 'true'
+        if: matrix.type == 'war'
         run: mvn test-compile -pl integration-tests -Drun-it -DskipFrontend -DskipJetty -DskipUnitTests $MAVEN_ARGS
+
+      - name: Archive packaged WAR
+        if: matrix.type == 'war'
+        run: tar -Pczf integration-tests-war.tar.gz integration-tests/pom.xml integration-tests/target
+
+      - name: Upload packaged WAR
+        if: matrix.type == 'war'
+        uses: actions/upload-artifact@v6
+        with:
+          name: integration-tests-war
+          path: integration-tests-war.tar.gz
+          retention-days: 1
+          overwrite: true
 
       - name: Compute IT shards
         if: matrix.type == 'war'
@@ -472,23 +461,21 @@ jobs:
           key="${TB_LICENSE#*/}"
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
-      - name: Restore build cache
-        uses: actions/cache@v5
+      - name: Download build output
+        uses: actions/download-artifact@v8
         with:
-          path: |
-            ~/.m2/repository/com/vaadin
-            vaadin-charts-flow-parent/vaadin-charts-flow-svg-generator/src/main/resources/META-INF/frontend/generated/
-          key: ${{ needs.build.outputs.build-cache-key }}
-          fail-on-cache-miss: true
+          name: build-output
 
-      - name: Restore WAR cache
-        uses: actions/cache@v5
+      - name: Restore build output
+        run: tar -Pxzf build-output.tar.gz
+
+      - name: Download packaged WAR
+        uses: actions/download-artifact@v8
         with:
-          path: |
-            integration-tests/pom.xml
-            integration-tests/target
-          key: ${{ needs.fast-tests.outputs.war-cache-key }}
-          fail-on-cache-miss: true
+          name: integration-tests-war
+
+      - name: Restore packaged WAR
+        run: tar -Pxzf integration-tests-war.tar.gz
 
       - name: Run integration tests (shard ${{ matrix.shard }})
         env:
@@ -688,7 +675,9 @@ jobs:
               (.name | startswith("error-screenshots-")) or
               (.name | startswith("failsafe-reports-")) or
               .name == "wtr-reports" or
-              .name == "surefire-reports"
+              .name == "surefire-reports" or
+              .name == "build-output" or
+              .name == "integration-tests-war"
             ) | "\(.id) \(.name)"' \
           | while read -r id name; do
               echo "Deleting artifact $name (id=$id)"
