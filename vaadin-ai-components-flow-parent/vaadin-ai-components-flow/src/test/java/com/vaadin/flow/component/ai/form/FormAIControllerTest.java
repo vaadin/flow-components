@@ -623,7 +623,7 @@ class FormAIControllerTest {
 
             var f = json(findTool(controller.getTools(), "get_form_state")
                     .execute(JacksonUtils.createObjectNode())).path("fields")
-                            .get(0);
+                    .get(0);
             var labels = new java.util.ArrayList<String>();
             f.path("enum").forEach(n -> labels.add(n.asString()));
 
