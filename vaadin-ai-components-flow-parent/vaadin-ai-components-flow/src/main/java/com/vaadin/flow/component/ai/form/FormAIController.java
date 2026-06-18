@@ -250,7 +250,7 @@ public class FormAIController implements AIController {
             try to write to "__form__" itself.
             """;
 
-    private final Component form;
+    private final Component fieldContainer;
     private final Binder<?> binder;
     private boolean valuesHidden;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
@@ -272,15 +272,17 @@ public class FormAIController implements AIController {
      * controller is asked for tools, so fields added or removed between turns
      * are picked up automatically.
      *
-     * @param form
+     * @param fieldContainer
      *            the container whose fields the LLM may populate, not
      *            {@code null}
      * @param <T>
      *            the container type
      */
-    public <T extends Component & HasComponents> FormAIController(T form) {
-        Objects.requireNonNull(form, "Form must not be null");
-        this.form = form;
+    public <T extends Component & HasComponents> FormAIController(
+            T fieldContainer) {
+        Objects.requireNonNull(fieldContainer,
+                "Field container must not be null");
+        this.fieldContainer = fieldContainer;
         this.binder = null;
     }
 
@@ -295,7 +297,7 @@ public class FormAIController implements AIController {
      * bean-level cross-field validators run as well when a bean is set. See the
      * class-level documentation for details.
      *
-     * @param form
+     * @param fieldContainer
      *            the container whose fields the LLM may populate, not
      *            {@code null}
      * @param binder
@@ -305,13 +307,14 @@ public class FormAIController implements AIController {
      * @param <T>
      *            the container type
      * @throws NullPointerException
-     *             if {@code form} or {@code binder} is {@code null}
+     *             if {@code fieldContainer} or {@code binder} is {@code null}
      */
-    public <T extends Component & HasComponents> FormAIController(T form,
-            Binder<?> binder) {
-        Objects.requireNonNull(form, "Form must not be null");
+    public <T extends Component & HasComponents> FormAIController(
+            T fieldContainer, Binder<?> binder) {
+        Objects.requireNonNull(fieldContainer,
+                "Field container must not be null");
         Objects.requireNonNull(binder, "Binder must not be null");
-        this.form = form;
+        this.fieldContainer = fieldContainer;
         this.binder = binder;
     }
 
@@ -821,7 +824,7 @@ public class FormAIController implements AIController {
      * against its real pre-turn value rather than {@code null}.
      */
     private List<HasValue<?, ?>> collectKnownFields() {
-        return FormFieldDiscovery.collectFields(form).stream()
+        return FormFieldDiscovery.collectFields(fieldContainer).stream()
                 .filter(field -> !isIgnored(field)).toList();
     }
 
@@ -921,7 +924,7 @@ public class FormAIController implements AIController {
      * across removals, re-additions, and discovery walks.
      */
     private void attachIds() {
-        FormFieldDiscovery.collectFields(form)
+        FormFieldDiscovery.collectFields(fieldContainer)
                 .forEach(FormAIController::getOrCreateId);
     }
 
@@ -1009,9 +1012,10 @@ public class FormAIController implements AIController {
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
-            var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
-                    "fill_form invoked on a controller whose form is not "
-                            + "attached to a UI"));
+            var ui = fieldContainer.getUI()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "fill_form invoked on a controller whose form is not "
+                                    + "attached to a UI"));
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
