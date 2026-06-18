@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -39,9 +40,10 @@ import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.QueryParameters;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.RouteAliasData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.Router;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import com.vaadin.flow.router.internal.HasUrlParameterFormat;
 import com.vaadin.flow.server.InitParameters;
@@ -254,6 +256,13 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * Sets the path in a form or a URL string this navigation item links to.
      * Note that there is also an alternative way of how to set the link path
      * via {@link SideNavItem#setPath(Class)}.
+     * <p>
+     * If the given path matches a route that is registered with a
+     * {@link com.vaadin.flow.router.RouteAlias}, the alias paths are also set
+     * as {@link #setPathAliases(Set) path aliases}, so that the item is marked
+     * as current when the alias route is active too. Any previously set path
+     * aliases are replaced. Call {@link #setPathAliases(Set)} after this method
+     * to override them.
      *
      * @param path
      *            The path to link to. Set to null to disable navigation for
@@ -267,6 +276,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
                     "path", path, "setUnsafePath(String)"));
         }
         doSetPath(path);
+        setPathAliases(getPathAliasesFromRegisteredRoute(path));
     }
 
     /**
@@ -374,8 +384,12 @@ public class SideNavItem extends Component implements HasSideNavItems,
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            setPath(routeConfiguration.getUrl(view, routeParameters));
-            setPathAliases(getPathAliasesFromView(view, routeParameters));
+            // The URL is resolved from the registry and is always safe, so it
+            // is set directly. Aliases are resolved from the view below, hence
+            // setPath(String) is bypassed to avoid resolving them twice.
+            doSetPath(routeConfiguration.getUrl(view, routeParameters));
+            setPathAliases(getPathAliasesFromView(routeConfiguration, view,
+                    routeParameters));
         }
     }
 
@@ -401,8 +415,9 @@ public class SideNavItem extends Component implements HasSideNavItems,
      */
     public void setQueryParameters(QueryParameters queryParameters) {
         this.queryParameters = queryParameters;
-        // Apply new query parameters to the path
-        setPath(getPath());
+        // Apply new query parameters to the path. Use doSetPath to keep the
+        // existing path aliases untouched.
+        doSetPath(getPath());
     }
 
     /**
@@ -555,12 +570,75 @@ public class SideNavItem extends Component implements HasSideNavItems,
         return "_blank".equals(getTarget());
     }
 
-    private Set<String> getPathAliasesFromView(Class<? extends Component> view,
-            RouteParameters routeParameters) {
-        RouteAlias[] routeAliases = view.getAnnotationsByType(RouteAlias.class);
-        return Arrays.stream(routeAliases).map(RouteAlias::value).map(
-                alias -> updateAliasWithRouteParameters(alias, routeParameters))
+    private Set<String> getPathAliasesFromView(
+            RouteConfiguration routeConfiguration,
+            Class<? extends Component> view, RouteParameters routeParameters) {
+        // Resolve the alias templates from the route registry instead of the
+        // raw @RouteAlias annotation values, so that route prefixes contributed
+        // by parent layouts (@RoutePrefix) are included. Otherwise an aliased
+        // item is not marked as current when its full URL contains a prefix.
+        return routeConfiguration.getAvailableRoutes().stream()
+                .filter(routeData -> routeData.getNavigationTarget()
+                        .equals(view))
+                .flatMap(routeData -> routeData.getRouteAliases().stream())
+                .map(RouteAliasData::getTemplate)
+                .map(alias -> updateAliasWithRouteParameters(alias,
+                        routeParameters))
                 .filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    /**
+     * Resolves the path aliases for the given path string by looking up the
+     * matching route in the registry. This makes an item that is created from a
+     * plain path (for example from a menu entry) also recognize the
+     * {@link com.vaadin.flow.router.RouteAlias} paths of the same view.
+     * <p>
+     * Returns an empty set when no router is available (for example before the
+     * item is attached and outside a request), when the path does not match a
+     * registered route, or for parameterized aliases whose parameters cannot be
+     * resolved from a plain path.
+     */
+    private Set<String> getPathAliasesFromRegisteredRoute(String path) {
+        if (path == null) {
+            return Collections.emptySet();
+        }
+        // Strip the query string and a leading slash to get the route path.
+        int startOfQuery = path.indexOf('?');
+        String routePath = startOfQuery == -1 ? path
+                : path.substring(0, startOfQuery);
+        if (routePath.startsWith("/")) {
+            routePath = routePath.substring(1);
+        }
+
+        Router router;
+        try {
+            router = ComponentUtil.getRouter(this);
+        } catch (NullPointerException | IllegalStateException e) {
+            // No router available (e.g. detached and outside a request)
+            return Collections.emptySet();
+        }
+
+        RouteConfiguration routeConfiguration = RouteConfiguration
+                .forRegistry(router.getRegistry());
+        Optional<Class<? extends Component>> target = routeConfiguration
+                .getRoute(routePath);
+        if (target.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        String lookupPath = routePath;
+        return routeConfiguration.getAvailableRoutes().stream()
+                .filter(routeData -> routeData.getNavigationTarget()
+                        .equals(target.get()))
+                .flatMap(routeData -> Stream.concat(
+                        Stream.of(routeData.getTemplate()),
+                        routeData.getRouteAliases().stream()
+                                .map(RouteAliasData::getTemplate)))
+                // Parameterized templates cannot be resolved from a plain path
+                .filter(template -> !template.contains(":"))
+                // The path itself is already matched via the path attribute
+                .filter(template -> !template.equals(lookupPath))
+                .collect(Collectors.toSet());
     }
 
     private String updateAliasWithRouteParameters(String alias,

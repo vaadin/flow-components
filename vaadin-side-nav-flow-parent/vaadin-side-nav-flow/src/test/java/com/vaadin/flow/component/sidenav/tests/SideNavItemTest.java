@@ -42,7 +42,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.RoutePrefix;
 import com.vaadin.flow.router.Router;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 
@@ -661,6 +663,65 @@ class SideNavItemTest {
     }
 
     @Test
+    void setPathAsComponentWithRoutePrefix_aliasesIncludePrefix() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithPrefixedAliases.class);
+
+            assertPath("parent/child");
+            // The alias path includes the prefix contributed by the parent
+            // layout. The parameterized alias is left out because no matching
+            // route parameter is provided.
+            assertPathAliases(Set.of("parent/alias"));
+        }, TestRouteWithPrefixedAliases.class);
+    }
+
+    @Test
+    void setPathAsComponentWithRoutePrefixAndParameters_aliasesIncludePrefix() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithPrefixedAliases.class,
+                    new RouteParameters("key1", "value1"));
+
+            assertPathAliases(Set.of("parent/alias", "parent/value1/alias"));
+        }, TestRouteWithPrefixedAliases.class);
+    }
+
+    @Test
+    void setPathAsString_aliasesResolvedFromRegisteredRoute() {
+        runWithMockRouter(() -> {
+            // Issue #9565: an item built from a plain string path (as the
+            // quickstart does via menuEntry.path()) should still pick up the
+            // @RouteAlias paths of the matching view.
+            sideNavItem.setPath("");
+
+            assertPath("");
+            assertPathAliases(Set.of("task"));
+        }, TestRouteWithStringAlias.class);
+    }
+
+    @Test
+    void setPathAsString_paramAliasesSkippedAndPathExcluded() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath("foo/bar");
+
+            assertPath("foo/bar");
+            // The primary path is excluded and parameterized aliases are
+            // skipped because their parameters cannot be resolved from a
+            // plain path.
+            assertPathAliases(Set.of("foo/baz", "foo/qux"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    void setPathAsString_unknownRoute_noAliasesResolved() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath("not/a/route");
+
+            assertPath("not/a/route");
+            assertPathAliases(Collections.emptySet());
+        }, TestRouteWithStringAlias.class);
+    }
+
+    @Test
     void createFromComponentWithHasUrlParameter_pathContainsParameters() {
         runWithMockRouter(() -> {
             sideNavItem = new SideNavItem("test",
@@ -875,6 +936,25 @@ class SideNavItemTest {
     @Route("bar/foo")
     @RouteAlias("baz/foo")
     private static class OtherTestRouteWithAliases extends Component {
+
+    }
+
+    @Route("")
+    @RouteAlias("task")
+    private static class TestRouteWithStringAlias extends Component {
+
+    }
+
+    @RoutePrefix("parent")
+    private static class ParentLayout extends Component
+            implements RouterLayout {
+
+    }
+
+    @Route(value = "child", layout = ParentLayout.class)
+    @RouteAlias(value = "alias", layout = ParentLayout.class)
+    @RouteAlias(value = ":key1/alias", layout = ParentLayout.class)
+    private static class TestRouteWithPrefixedAliases extends Component {
 
     }
 }
