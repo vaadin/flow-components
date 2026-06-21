@@ -53,6 +53,7 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jspecify.annotations.Nullable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
@@ -1969,7 +1970,7 @@ public class Spreadsheet extends Component
      *            Address of the Cell to return, e.g. "A3"
      * @return The cell at the given address, or null if not defined
      */
-    public Cell getCell(String cellAddress) {
+    public @Nullable Cell getCell(String cellAddress) {
         CellReference ref = new CellReference(cellAddress);
         Row r = workbook.getSheetAt(workbook.getActiveSheetIndex())
                 .getRow(ref.getRow());
@@ -1991,7 +1992,7 @@ public class Spreadsheet extends Component
      *            Column index of the cell to return, 0-based
      * @return The cell at the given coordinates, or null if not defined
      */
-    public Cell getCell(int row, int col) {
+    public @Nullable Cell getCell(int row, int col) {
         Sheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         return getCell(row, col, sheet);
     }
@@ -2009,7 +2010,7 @@ public class Spreadsheet extends Component
      *            Sheet of the cell
      * @return The cell at the given coordinates, or null if not defined
      */
-    public Cell getCell(int row, int col, Sheet sheet) {
+    public @Nullable Cell getCell(int row, int col, Sheet sheet) {
         Row r = sheet.getRow(row);
         if (r != null) {
             return r.getCell(col);
@@ -2024,11 +2025,11 @@ public class Spreadsheet extends Component
      * UPDATES (value, type, formatting or style) to mark the cell as "dirty".
      *
      * @param cellReference
-     *            Reference to the cell to return
+     *            Reference to the cell to return, may be null
      * @return The cell corresponding to the given reference, or null if not
      *         defined
      */
-    public Cell getCell(CellReference cellReference) {
+    public @Nullable Cell getCell(@Nullable CellReference cellReference) {
         return cellReference == null ? null
                 : getCell(cellReference.getSheetName(), cellReference.getRow(),
                         cellReference.getCol());
@@ -2047,7 +2048,8 @@ public class Spreadsheet extends Component
      *            Column index of the cell to return, 0-based
      * @return The cell at the given coordinates, or null if not defined
      */
-    public Cell getCell(String sheetName, int row, int column) {
+    public @Nullable Cell getCell(@Nullable String sheetName, int row,
+            int column) {
         if (sheetName == null)
             return getCell(row, column);
         return getCell(row, column, workbook.getSheet(sheetName));
@@ -2059,13 +2061,14 @@ public class Spreadsheet extends Component
      * UPDATES (value, type, formatting or style) to mark the cell as "dirty".
      *
      * @param cellReference
-     *            Reference to the cell to return
+     *            Reference to the cell to return, may be null
      * @param sheet
      *            Sheet of the cell
      * @return The cell corresponding to the given reference, or null if not
      *         defined
      */
-    public Cell getCell(CellReference cellReference, Sheet sheet) {
+    public @Nullable Cell getCell(@Nullable CellReference cellReference,
+            Sheet sheet) {
         return cellReference == null ? null
                 : getCell(cellReference.getRow(), cellReference.getCol(),
                         sheet);
@@ -4317,7 +4320,7 @@ public class Spreadsheet extends Component
      *
      * @return Current provider or null if not set.
      */
-    public CommentAuthorProvider getCommentAuthorProvider() {
+    public @Nullable CommentAuthorProvider getCommentAuthorProvider() {
         return commentAuthorProvider;
     }
 
