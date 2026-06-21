@@ -169,7 +169,7 @@ public class Spreadsheet extends Component
     private final SheetDimensions sheetDimensions = new SheetDimensions(this);
 
     /** should the sheet be reloaded on client side */
-    private boolean reload;
+    private final ClientReloadFlag clientReloadFlag = new ClientReloadFlag();
 
     /** 1-based */
     private final MirroredProperty<Integer> sheetIndex = MirroredProperty
@@ -430,11 +430,6 @@ public class Spreadsheet extends Component
 
     void setColW(int[] colW) {
         sheetDimensions.setColW(colW);
-    }
-
-    private void setReload(boolean reload) {
-        if (reload)
-            getElement().setProperty("reload", System.currentTimeMillis());
     }
 
     void setSheetIndex(int sheetIndex) {
@@ -931,7 +926,7 @@ public class Spreadsheet extends Component
 
     Workbook workbook;
 
-    private SheetState sheetState = new SheetState(this);
+    SheetState sheetState = new SheetState(this);
 
     /** image sizes need to be recalculated on column/row resizing */
     private final SheetOverlayStorage sheetOverlayStorage = new SheetOverlayStorage();
@@ -1442,7 +1437,7 @@ public class Spreadsheet extends Component
      * @return true if re-render will happen, false otherwise
      */
     public boolean isRerenderPending() {
-        return reload;
+        return clientReloadFlag.isPending();
     }
 
     /**
@@ -3110,15 +3105,7 @@ public class Spreadsheet extends Component
         sheetOverlayManager.clear();
         cellCommentLoader.resetTopLeftLoaded();
 
-        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
-            ui.beforeClientResponse(this, e -> {
-                if (reload) {
-                    this.updateReloadState();
-                }
-            });
-        });
-
-        reload = true;
+        clientReloadFlag.markPending(this);
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
@@ -3324,24 +3311,6 @@ public class Spreadsheet extends Component
      */
     protected SpreadsheetClientRpc getRpcProxy() {
         return clientRpc;
-    }
-
-    private void updateReloadState() {
-        if (reload) {
-            setReload(reload);
-            reload = false;
-            if (initialSheetSelection == null) {
-                if (sheetState
-                        .getSelectedCellsOnSheet(getActiveSheet()) == null) {
-                    initialSheetSelection = "A1";
-                } else {
-                    initialSheetSelection = sheetState
-                            .getSelectedCellsOnSheet(getActiveSheet());
-                }
-            }
-        } else {
-            setReload(reload);
-        }
     }
 
     /**
