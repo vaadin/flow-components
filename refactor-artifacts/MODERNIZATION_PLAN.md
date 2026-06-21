@@ -285,47 +285,238 @@ migration is a behavior change and needs justification.
 
 ## Tier 2 — Wire-protocol modernization
 
-**Scope**: Server changes that preserve the wire format. The GWT
-client keeps working. The parallel-DTO problem is the central target.
+### What the wire actually looks like (scoping investigation, 2026-06-22)
 
-**Why second**: depends on Tier 1's modernized server-side patterns
-being in place. Higher risk than Tier 1 because the wire format is
-load-bearing for the GWT client.
+The Tier 2 framing in the previous revision of this plan was
+hand-wavy. A scoping investigation produced concrete data:
 
-### Step 8 — `Serializer.java` audit
+**Topology**
 
-The custom `Serializer.serialize(...)` wraps Jackson. Audit whether
-it's still needed or if direct Jackson usage would simplify the call
-sites. Document any custom serialization logic that wouldn't survive a
-straight replacement.
+- **Server → client** is *already* on the modern Vaadin Flow API:
+  - 11 methods on `SpreadsheetClientRpc` (server-side façade
+    interface in `rpc/SpreadsheetClientRpc.java`). Each method's
+    implementation in `Spreadsheet.java` lines 679–755 is a one-line
+    wrapper that calls `getElement().callJsFunction("name", args)`.
+    There is no legacy Vaadin 8 ClientRpc in the path. The
+    `SpreadsheetClientRpc` interface is a typed façade kept so the
+    client-side GWT connector can see the same method names; it does
+    NOT mean Vaadin 8 RPC is still in use.
+  - 21 `MirroredProperty<T>` instances on Spreadsheet for the
+    property-mirror lane.
+  - 6 remaining inline `getElement().setProperty(...)` sites
+    (`id`, `cellStyleToCSSStyle`, `displayGridlines`,
+    `displayRowColHeadings`, `appId`, `dirty`), each with rationale
+    recorded in slices 94–96.
+- **Client → server** is *already* on the modern DomEvent API:
+  - Single `@DomEvent("spreadsheet-event")` declared on
+    `Spreadsheet.SpreadsheetEvent` (line 631). The event carries
+    `type` (`String`) + `data` (`JsonNode`) via `@EventData`.
+  - The client-side `vaadin-spreadsheet.js` dispatches
+    `CustomEvent('spreadsheet-event', {detail: {type, data}})`
+    from 5+ sites (lines 441, 445, 449, 453, 457).
+  - Server-side dispatch: `SpreadsheetEventListener` →
+    `SpreadsheetHandlerImpl` → typed methods (the
+    `SpreadsheetServerRpc extends SpreadsheetHandler` interface
+    chain is JUST a Java-interface façade for the dispatcher; not
+    Vaadin 8 ServerRpc).
 
-### Step 9 — DTO consolidation
+**What's "still legacy" then?**
 
-The 7 mirror-pair DTOs are the central pain point. Two paths:
+The wire-protocol RPC migration was completed BEFORE this plan was
+written — the previous Step 10 ("Vaadin 8 RPC → Element API") is
+already done. What remains as genuinely legacy:
 
-- **9a (lower risk)**: Maven plugin to generate the `@JsType`
-  GWT-side copies from the server-side originals. Single source of
-  truth, automated sync, no behavior change.
-- **9b (higher risk, higher payoff)**: Drop the GWT-side typed copies
-  entirely. Have the GWT widget consume plain JSON (`JsonObject`)
-  rather than JsType-annotated POJOs. Lets us eventually drop the
-  client module's JsInterop dependency.
+1. **Parallel-DTO problem** (the central pain point). 6 DTOs are
+   maintained as hand-synced copies between server-side and the
+   GWT-compiled client module:
+   - `CellData` (14 fields)
+   - `MergedRegion` (6 fields)
+   - `OverlayInfo` (9 fields)
+   - `SpreadsheetActionDetails` (5 fields)
+   - `PopupButtonState` (server `shared/`, client `client/`)
+   - `GroupingData` (server `shared/`, client `client/`)
 
-Decide which path during the audit. 9a is safer; 9b unlocks Tier 3.
+   Every wire-format field addition or rename has to be done in two
+   places by hand. A bug here would manifest as silent serialization
+   drift, not a compile error.
 
-### Step 10 — Vaadin 8 RPC → Vaadin Flow Element API
+2. **`SpreadsheetState` — vestigial Vaadin 8 shared-state class**
+   (66 public fields). Server-side it's defined but NEVER
+   instantiated. Client-side (`SpreadsheetJsApi` + `SpreadsheetConnector`)
+   it's STILL consumed by the GWT connector. So it's half-dead — the
+   server side has already migrated to the property/RPC lanes, but the
+   client side still references the old state-snapshot shape.
 
-Some server→client messages still use Vaadin 8 RPC interfaces
-(`SpreadsheetClientRpc`). Modern Vaadin Flow components use Element
-API (`element.setProperty`, `element.callJsFunction`) instead. Migrate
-where possible.
+3. **Handler-interface chain duplicated for the GWT client**.
+   `SpreadsheetHandler` (server-side `client/SpreadsheetHandler.java`)
+   defines the methods callable from the GWT widget. Its purpose was
+   to give the GWT connector a typed Java interface to compile against
+   — but with the wire now being a single `spreadsheet-event` DOM
+   event, the typed-interface duplication is mostly carrying its own
+   weight. Concrete dispatching is via `SpreadsheetEventListener` →
+   `SpreadsheetHandlerImpl`, NOT via the interface.
 
-### Step 11 — Complete the MirroredProperty rollout
+4. **`Serializer.java`** — 30-line Jackson wrapper. Configures
+   `NON_DEFAULT` inclusion and logs errors. 28 server-side call
+   sites. Audit conclusion: it earns its keep (the two pieces of
+   non-trivial config wouldn't survive a straight inline). Keep,
+   don't expand.
 
-Most server→client property mirrors now go through
-`MirroredProperty<T>`. A handful remain inline (`dirty` timestamp,
-`appId`, etc.). Audit and migrate the remainder OR document why each
-deliberately stays inline.
+**What CAN'T be done in Tier 2 without touching the GWT client**
+
+The GWT client (`vaadin-spreadsheet-flow-client`, 105 files,
+~26K LOC) deserializes JSON arrays directly into the @JsType-annotated
+mirror classes. As long as that module exists, the field shapes of the
+mirror DTOs are load-bearing on the wire. Therefore:
+
+- We can keep the wire format byte-stable while improving the
+  server-side authoring experience (generate one side from the
+  other, drop dead code, etc.).
+- We CANNOT remove the parallel-DTO maintenance burden entirely
+  without dropping the GWT client (= Tier 3).
+
+That re-shapes Tier 2 into: *make the maintenance-of-parallel-DTOs
+problem visible, automated, or both, without changing wire bytes*.
+
+### Step 8 — `Serializer.java` audit ✓ (audit done; no change)
+
+**Investigation**: 30-line Jackson wrapper. Two pieces of non-trivial
+behavior: (a) configures `JsonInclude.Include.NON_DEFAULT` globally,
+(b) catches `JacksonException`, logs at error, returns `null`.
+28 server-side call sites; ALL pass DTOs/collections, NOT primitive
+values, so the `value == null ? "" : ...` guard is reachable but
+not load-bearing.
+
+**Conclusion**: keep as-is. The audit asks "is the wrapper still
+needed" — yes, both pieces of non-trivial behavior are. Inlining 28
+call sites to use `JsonMapper.builder()...writeValueAsString(value)`
+with try/catch would *expand* duplication, not reduce it.
+
+**Test impact**: zero, no change recommended.
+
+### Step 9 — DTO consolidation (the real Tier 2 work)
+
+The 6 parallel-DTO pairs are the central target. Two paths, recorded
+during the original plan; the scoping investigation sharpens them:
+
+- **9a — generate one side from the other (lower risk, ship-ready)**.
+  The server-side classes are the source of truth. Add a build step
+  that emits the client-side `@JsType` versions from them.
+  Concretely:
+  - 6 DTOs × ~10 fields each = 60 fields to keep in lockstep.
+  - The fields are public, the equality semantics differ in some
+    cases (e.g. `CellData.equals` is by-position). The generator
+    must preserve method bodies, not just field declarations.
+  - Implementation option A: an annotation processor that scans
+    server-side classes annotated `@WireMirror` and emits the
+    client-side `@JsType` copy at build time. Pros: type-safe,
+    fails at compile time. Cons: new annotation processor to
+    maintain.
+  - Implementation option B: a Maven plugin or Maven exec step
+    that copies server-side files into the client module with a
+    package-rewrite + `@JsType` annotation injection. Pros:
+    simpler, no Java tooling. Cons: text-based, brittle to
+    formatting.
+  - Suggested choice: **option A**, an `@WireMirror` annotation
+    processor that emits the client-side file at every server-side
+    edit. Bias toward `option B` only if the annotation processor
+    proves unwieldy in the GWT build pipeline.
+
+- **9b — drop typed client-side copies, switch GWT widget to consume
+  `JsonObject` directly (higher risk, higher payoff)**. The wire
+  bytes don't change because JSON is JSON. The GWT widget would read
+  `obj.getString("value")` instead of `obj.value`. Pros: drops 6 copy
+  files and the JsInterop dependency. Cons: every site in the GWT
+  client that reads a DTO field changes. The audit must enumerate
+  read sites before estimating cost.
+
+**Slice shape for 9a**: single PR. New `@WireMirror` annotation +
+processor + generated-sources directory in the client module. The
+6 existing client copies are deleted; the regenerated files are
+byte-identical so the wire is unchanged. The acceptance gate is the
+existing `SpreadsheetHistoryManagerPayloadTest` snapshot — must pass
+unchanged before and after.
+
+**Slice shape for 9b**: 6 sub-slices, one DTO at a time. Each
+sub-slice converts the corresponding GWT-side reads from
+`obj.fieldName` to `obj.getString("fieldName")` etc. (and removes
+the typed mirror class). Each sub-slice must keep the snapshot test
+green. Total scope ~6 sessions; significantly higher than 9a.
+
+**Recommend 9a now; 9b deferred to Tier 3 prep** (since dropping
+typed mirrors is partial overlap with the GWT-widget rewrite).
+
+### Step 10 — ~~Vaadin 8 RPC → Element API~~ ✓ (already done)
+
+The original Step 10 framing was based on an outdated mental
+model. Both directions of the wire are already on Vaadin Flow's
+modern API:
+
+- Server → client: `getElement().callJsFunction(...)` via
+  `SpreadsheetClientRpc` façade.
+- Client → server: `@DomEvent("spreadsheet-event")` carrying
+  type + JsonNode data.
+
+The `SpreadsheetClientRpc` / `SpreadsheetServerRpc` / `SpreadsheetHandler`
+interface chain remains as a typed-API façade — NOT legacy Vaadin 8
+RPC. They could be collapsed/renamed as a cosmetic cleanup (slice
+9c) but no migration is needed.
+
+**No work in Tier 2.** Optional cosmetic cleanup deferred.
+
+### Step 11 — `SpreadsheetState` cleanup (replaces "complete MirroredProperty rollout")
+
+The MirroredProperty rollout the previous plan listed as Step 11 is
+essentially complete (21 instances live + 6 documented exceptions —
+slices 26–37, 94–96). What IS still legacy on the property-mirror
+lane is `SpreadsheetState`:
+
+- Server-side: `shared/SpreadsheetState.java` exists with 66 public
+  fields. The class is **never instantiated** server-side (verified
+  via grep). It's pure dead code waiting to be deleted.
+- Client-side: `vaadin-spreadsheet-flow-client/.../shared/SpreadsheetState.java`
+  is **actively consumed** by `SpreadsheetConnector` and
+  `SpreadsheetJsApi`. The connector deserializes the wire's
+  state-snapshot into this class.
+
+**Slice shape**: two-step.
+- **11a (server-side only, safe)**: delete the unused server-side
+  `SpreadsheetState.java`. Suite stays green (no callers). Cleans
+  up the half-dead artifact on the server side.
+- **11b (cross-module, harder)**: the client-side `SpreadsheetState`
+  consumption is part of the GWT connector's wire deserialization. If
+  modern properties already cover the same data (e.g. through
+  `MirroredProperty<T>`), the client-side state-snapshot path is
+  also vestigial — but VERIFYING this requires reading the GWT
+  connector code (`SpreadsheetConnector.java` in the client module)
+  to confirm none of the 66 fields are still consumed.
+
+**Test impact for 11a**: zero (deletion of unreferenced server-side
+code). **Test impact for 11b**: needs golden snapshot + the GWT-build
++ ITs as the safety net; same shape as a Tier 2 wire change.
+
+**Recommend 11a as a stand-alone slice**; 11b deferred until the
+GWT-side audit is run.
+
+### Tier 2 — revised step list
+
+| # | Step | State | Estimate |
+|---|------|-------|----------|
+| 8 | `Serializer.java` audit | ✓ done (audited; keep as-is) | done |
+| 9a | DTO consolidation: `@WireMirror` annotation processor | open | 1 session |
+| 9b | Drop typed client mirrors → JsonObject reads | deferred to Tier 3 prep | 6 sessions |
+| 9c | Rename/collapse `*ClientRpc` / `*ServerRpc` façade interfaces | cosmetic, optional | 0.5 session |
+| 10 | Vaadin 8 RPC → Element API | ✓ already done | done |
+| 11a | Delete unused server-side `SpreadsheetState` | open | 0.5 session |
+| 11b | Drop client-side `SpreadsheetState` (if redundant) | needs GWT audit | 1–2 sessions |
+
+**Total open Tier 2 work**: roughly 2 focused sessions for the safe
+slices (9a + 11a), plus 1–2 more if 11b's audit shows redundancy.
+9b is correctly held back as a Tier 3 prerequisite.
+
+**The wire format stays byte-identical** across all of these — the
+existing `SpreadsheetHistoryManagerPayloadTest` snapshot is the
+acceptance gate for each slice.
 
 ## Tier 3 — TS/Lit client rewrite
 
