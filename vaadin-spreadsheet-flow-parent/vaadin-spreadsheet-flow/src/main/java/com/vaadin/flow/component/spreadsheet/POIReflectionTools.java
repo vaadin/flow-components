@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,7 +23,6 @@ import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBooleanProperty;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +40,13 @@ import org.slf4j.LoggerFactory;
  * these utilities are the right API for downstream code.
  *
  * <p>
- * Reflection access is required because POI's public
- * {@code ConditionalFormatting} and {@code BorderFormatting} types don't
- * expose: rule priority, {@code stopIfTrue}, "border is set vs unset" (distinct
- * from "border is none"), or font strikethrough on conditional-formatting
- * rules. Future POI versions may add public APIs for these; this class is the
- * seam to swap to them.
+ * Reflection access is still required because POI's public
+ * {@code BorderFormatting} type doesn't expose the "border is set vs unset"
+ * distinction (separate from "border is none"), and the {@code FontFormatting}
+ * type's {@code isStruckout} only checks the first strike entry while we need
+ * to detect a {@code val=true} on ANY entry in the XML strike list. Rule
+ * priority and {@code stopIfTrue} are public on
+ * {@link XSSFConditionalFormattingRule} as of POI 5+ and read directly.
  */
 final class POIReflectionTools {
 
@@ -98,53 +97,29 @@ final class POIReflectionTools {
     }
 
     /**
-     * Returns the XSSF rules of {@code cf} sorted by their priority field (read
-     * via reflection, since POI doesn't expose it). Higher priority comes
-     * first.
+     * Returns the XSSF rules of {@code cf} sorted by priority descending.
+     * Higher priority comes first.
      */
     static List<XSSFConditionalFormattingRule> getOrderedRuleList(
             ConditionalFormatting cf) {
         XSSFConditionalFormatting xcf = (XSSFConditionalFormatting) cf;
-        List<XSSFConditionalFormattingRule> rules = new ArrayList<XSSFConditionalFormattingRule>();
+        List<XSSFConditionalFormattingRule> rules = new ArrayList<>();
         for (int i = 0; i < xcf.getNumberOfRules(); i++) {
             rules.add(xcf.getRule(i));
         }
-
-        Collections.sort(rules,
-                new Comparator<XSSFConditionalFormattingRule>() {
-
-                    @Override
-                    public int compare(XSSFConditionalFormattingRule o1,
-                            XSSFConditionalFormattingRule o2) {
-
-                        CTCfRule object = (CTCfRule) getFieldVal(o1, "_cfRule");
-                        CTCfRule object2 = (CTCfRule) getFieldVal(o2,
-                                "_cfRule");
-
-                        if (object != null && object2 != null) {
-                            // reverse order
-                            return object2.getPriority() - object.getPriority();
-                        }
-
-                        return 0;
-                    }
-                });
-
+        rules.sort(Comparator
+                .comparingInt(XSSFConditionalFormattingRule::getPriority)
+                .reversed());
         return rules;
     }
 
     /**
-     * {@code true} if {@code rule} has its {@code stopIfTrue} flag set
-     * (reflectively read since POI's API doesn't expose it).
+     * {@code true} if {@code rule} has its {@code stopIfTrue} flag set. Returns
+     * false for non-XSSF rules.
      */
     static boolean stopHere(ConditionalFormattingRule rule) {
-        if (rule instanceof XSSFConditionalFormattingRule) {
-            CTCfRule ctRule = (CTCfRule) getFieldVal(rule, "_cfRule");
-            if (ctRule != null) {
-                return ctRule.getStopIfTrue();
-            }
-        }
-        return false;
+        return rule instanceof XSSFConditionalFormattingRule xssfRule
+                && xssfRule.getStopIfTrue();
     }
 
     /**
