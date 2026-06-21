@@ -91,11 +91,11 @@ public class XSSFColorConverter implements ColorConverter {
         StringBuilder sb = new StringBuilder();
 
         XSSFColor color;
-        if (cellStyle instanceof XSSFCellStyle
-                && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
+        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
+                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
             // ApplyBorder is not working for Excel themes, so need to get the
             // color manually
-            color = getBorderColor((XSSFCellStyle) cellStyle, borderSide);
+            color = getBorderColor(xssfCellStyle, borderSide);
         } else {
             color = ((XSSFCellStyle) cellStyle).getBorderColor(borderSide);
         }

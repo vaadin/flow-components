@@ -34,8 +34,8 @@ final class TableLifecycle implements Serializable {
         for (PopupButton popupButton : table.getPopupButtons()) {
             spreadsheet.setPopup(popupButton.getCellReference(), null);
         }
-        if (table instanceof SpreadsheetFilterTable) {
-            ((SpreadsheetFilterTable) table).clearAllFilters();
+        if (table instanceof SpreadsheetFilterTable filterTable) {
+            filterTable.clearAllFilters();
         }
         table.clear();
     }

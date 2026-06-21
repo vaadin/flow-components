@@ -104,9 +104,8 @@ final class FontStyleComposer implements Serializable {
             sb.append(fontName);
             sb.append(",");
         }
-        if (font instanceof XSSFFont) {
-            FontFamily family = FontFamily
-                    .valueOf(((XSSFFont) font).getFamily());
+        if (font instanceof XSSFFont xssfFont) {
+            FontFamily family = FontFamily.valueOf(xssfFont.getFamily());
             switch (family) {
             case ROMAN:
                 sb.append("roman,");

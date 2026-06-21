@@ -110,19 +110,17 @@ final class RuleEvaluator implements Serializable {
         ValueEval eval = getValueEvalFromFormula(booleanFormula, cell,
                 deltaColumn, deltaRow);
 
-        if (eval instanceof ErrorEval) {
-            LOGGER.trace(((ErrorEval) eval).getErrorString(), eval);
+        if (eval instanceof ErrorEval err) {
+            LOGGER.trace(err.getErrorString(), eval);
         }
 
-        if (eval instanceof BoolEval) {
-            return ((BoolEval) eval).getBooleanValue();
-        } else {
-            if (eval instanceof NumberEval) {
-                return ((NumberEval) eval).getNumberValue() != 0;
-            } else {
-                return false;
-            }
+        if (eval instanceof BoolEval bool) {
+            return bool.getBooleanValue();
         }
+        if (eval instanceof NumberEval num) {
+            return num.getNumberValue() != 0;
+        }
+        return false;
     }
 
     boolean matchesValue(Cell cell, ConditionalFormattingRule rule,
@@ -147,8 +145,8 @@ final class RuleEvaluator implements Serializable {
         ValueEval eval = getValueEvalFromFormula(formula, cell, deltaColumn,
                 deltaRow);
 
-        if (eval instanceof ErrorEval) {
-            LOGGER.trace(((ErrorEval) eval).getErrorString(), eval);
+        if (eval instanceof ErrorEval err) {
+            LOGGER.trace(err.getErrorString(), eval);
             return false;
         }
 
@@ -159,10 +157,11 @@ final class RuleEvaluator implements Serializable {
         }
 
         // other than numerical types
-        if (eval instanceof StringEval && (cell.getCellType() == CellType.STRING
-                || isFormulaStringType)) {
+        if (eval instanceof StringEval str
+                && (cell.getCellType() == CellType.STRING
+                        || isFormulaStringType)) {
 
-            String formulaValue = ((StringEval) eval).getStringValue();
+            String formulaValue = str.getStringValue();
             String stringValue = cell.getStringCellValue();
 
             // Excel string comparison ignores case
@@ -173,12 +172,13 @@ final class RuleEvaluator implements Serializable {
                 return !stringValue.equalsIgnoreCase(formulaValue);
             }
         }
-        if (eval instanceof BoolEval && (cell.getCellType() == CellType.BOOLEAN
-                || isFormulaBooleanType)) {
+        if (eval instanceof BoolEval bool
+                && (cell.getCellType() == CellType.BOOLEAN
+                        || isFormulaBooleanType)) {
             // not sure if this is used, since no boolean option exists in
             // Excel..
 
-            boolean formulaVal = ((BoolEval) eval).getBooleanValue();
+            boolean formulaVal = bool.getBooleanValue();
 
             switch (comparisonOperation) {
             case ComparisonOperator.EQUAL:
@@ -236,8 +236,7 @@ final class RuleEvaluator implements Serializable {
 
         for (Ptg ptg : ptgs) {
             // base class for cell reference "things"
-            if (ptg instanceof RefPtgBase) {
-                RefPtgBase ref = (RefPtgBase) ptg;
+            if (ptg instanceof RefPtgBase ref) {
                 // re-calculate cell references
                 if (ref.isColRelative()) {
                     ref.setColumn(ref.getColumn() + deltaColumn);

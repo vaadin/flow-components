@@ -157,8 +157,8 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
         Workbook workbook = spreadsheet.getWorkbook();
-        if (workbook != null && workbook instanceof SXSSFWorkbook) {
-            ((SXSSFWorkbook) workbook).dispose();
+        if (workbook instanceof SXSSFWorkbook sxssf) {
+            sxssf.dispose();
         }
         final XSSFWorkbook newWorkbook = new XSSFWorkbook();
         final Sheet sheet = createNewSheet(newWorkbook);
@@ -258,8 +258,8 @@ public class SpreadsheetFactory implements Serializable {
         Workbook oldWorkbook = spreadsheet.getWorkbook();
         if (oldWorkbook != null) {
             spreadsheet.clearSheetServerSide();
-            if (oldWorkbook instanceof SXSSFWorkbook) {
-                ((SXSSFWorkbook) oldWorkbook).dispose();
+            if (oldWorkbook instanceof SXSSFWorkbook sxssf) {
+                sxssf.dispose();
             }
         }
         final Sheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
@@ -302,8 +302,8 @@ public class SpreadsheetFactory implements Serializable {
             fos = new FileOutputStream(file);
             workbook.write(fos);
             fos.close();
-            if (workbook instanceof SXSSFWorkbook) {
-                ((SXSSFWorkbook) workbook).dispose();
+            if (workbook instanceof SXSSFWorkbook sxssf) {
+                sxssf.dispose();
             }
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
@@ -335,8 +335,8 @@ public class SpreadsheetFactory implements Serializable {
             workbook.write(stream);
             stream.close();
             stream = null;
-            if (workbook instanceof SXSSFWorkbook) {
-                ((SXSSFWorkbook) workbook).dispose();
+            if (workbook instanceof SXSSFWorkbook sxssf) {
+                sxssf.dispose();
             }
         } finally {
             if (stream != null) {
@@ -453,10 +453,9 @@ public class SpreadsheetFactory implements Serializable {
      *            Target Spreadsheet
      */
     private static void loadSheetTables(Spreadsheet spreadsheet) {
-        if (spreadsheet.getActiveSheet() instanceof HSSFSheet)
+        if (!(spreadsheet.getActiveSheet() instanceof XSSFSheet sheet)) {
             return;
-
-        XSSFSheet sheet = (XSSFSheet) spreadsheet.getActiveSheet();
+        }
         CTAutoFilter autoFilter = sheet.getCTWorksheet().getAutoFilter();
 
         if (autoFilter != null
@@ -622,13 +621,12 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void loadGrouping(Spreadsheet spreadsheet) {
 
-        if (spreadsheet.getActiveSheet() instanceof HSSFSheet) {
-            // API not available
+        if (!(spreadsheet.getActiveSheet() instanceof XSSFSheet xssfSheet)) {
+            // API not available on HSSF
             return;
         }
 
-        CTWorksheet ctWorksheet = ((XSSFSheet) spreadsheet.getActiveSheet())
-                .getCTWorksheet();
+        CTWorksheet ctWorksheet = xssfSheet.getCTWorksheet();
         CTSheetProtection sheetProtection = ctWorksheet.getSheetProtection();
         if (sheetProtection != null) {
             spreadsheet
@@ -892,17 +890,16 @@ public class SpreadsheetFactory implements Serializable {
         final Sheet sheet = spreadsheet.getActiveSheet();
         Drawing<?> drawing = getDrawingPatriarch(sheet);
 
-        if (drawing instanceof XSSFDrawing) {
-            for (XSSFShape shape : ((XSSFDrawing) drawing).getShapes()) {
+        if (drawing instanceof XSSFDrawing xssfDrawing) {
+            for (XSSFShape shape : xssfDrawing.getShapes()) {
                 SheetOverlayWrapper overlayWrapper = null;
 
                 if (spreadsheet.isChartsEnabled()
-                        && shape instanceof XSSFGraphicFrame) {
-                    overlayWrapper = tryLoadChart(spreadsheet, drawing,
-                            (XSSFGraphicFrame) shape);
+                        && shape instanceof XSSFGraphicFrame frame) {
+                    overlayWrapper = tryLoadChart(spreadsheet, drawing, frame);
                 }
-                if (shape instanceof XSSFPicture) {
-                    overlayWrapper = loadXSSFPicture((XSSFPicture) shape);
+                if (shape instanceof XSSFPicture picture) {
+                    overlayWrapper = loadXSSFPicture(picture);
                 }
 
                 if (overlayWrapper != null) {
@@ -926,19 +923,19 @@ public class SpreadsheetFactory implements Serializable {
                 }
 
             }
-        } else if (drawing instanceof HSSFPatriarch) {
-            for (HSSFShape shape : ((HSSFPatriarch) drawing).getChildren()) {
-                if (shape instanceof HSSFPicture) {
-                    loadHSSFPicture(spreadsheet, shape);
+        } else if (drawing instanceof HSSFPatriarch patriarch) {
+            for (HSSFShape shape : patriarch.getChildren()) {
+                if (shape instanceof HSSFPicture picture) {
+                    loadHSSFPicture(spreadsheet, picture);
                 }
             }
         }
     }
 
     private static void loadHSSFPicture(Spreadsheet spreadsheet,
-            HSSFShape shape) {
-        HSSFClientAnchor anchor = (HSSFClientAnchor) shape.getAnchor();
-        HSSFPictureData pictureData = ((HSSFPicture) shape).getPictureData();
+            HSSFPicture picture) {
+        HSSFClientAnchor anchor = (HSSFClientAnchor) picture.getAnchor();
+        HSSFPictureData pictureData = picture.getPictureData();
         if (anchor != null) {
             SheetImageWrapper image = new SheetImageWrapper(anchor,
                     pictureData.getMimeType(), pictureData.getData());
@@ -998,16 +995,14 @@ public class SpreadsheetFactory implements Serializable {
         }
         cursor.dispose();
         if (parentXbean != null) {
-            if (parentXbean instanceof CTTwoCellAnchor) {
-                CTTwoCellAnchor ct = (CTTwoCellAnchor) parentXbean;
+            if (parentXbean instanceof CTTwoCellAnchor ct) {
                 anchor = new XSSFClientAnchor((int) ct.getFrom().getColOff(),
                         (int) ct.getFrom().getRowOff(),
                         (int) ct.getTo().getColOff(),
                         (int) ct.getTo().getRowOff(), ct.getFrom().getCol(),
                         ct.getFrom().getRow(), ct.getTo().getCol(),
                         ct.getTo().getRow());
-            } else if (parentXbean instanceof CTOneCellAnchor) {
-                CTOneCellAnchor ct = (CTOneCellAnchor) parentXbean;
+            } else if (parentXbean instanceof CTOneCellAnchor ct) {
                 anchor = new XSSFClientAnchor((int) ct.getFrom().getColOff(),
                         (int) ct.getFrom().getRowOff(), 0, 0,
                         ct.getFrom().getCol(), ct.getFrom().getRow(), 0, 0);
@@ -1036,13 +1031,12 @@ public class SpreadsheetFactory implements Serializable {
      * have to check each implementation. SXSSFSheet is unsupported.
      */
     private static Drawing<?> getDrawingPatriarch(Sheet sheet) {
-        if (sheet instanceof XSSFSheet) {
-            return ((XSSFSheet) sheet).getDrawingPatriarch();
-        } else if (sheet instanceof HSSFSheet) {
-            return ((HSSFSheet) sheet).getDrawingPatriarch();
-        } else {
-            return null;
+        if (sheet instanceof XSSFSheet xssf) {
+            return xssf.getDrawingPatriarch();
+        } else if (sheet instanceof HSSFSheet hssf) {
+            return hssf.getDrawingPatriarch();
         }
+        return null;
     }
 
     /**

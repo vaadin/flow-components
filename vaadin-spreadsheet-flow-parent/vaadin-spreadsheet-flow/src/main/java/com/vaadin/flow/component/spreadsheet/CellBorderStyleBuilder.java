@@ -126,10 +126,10 @@ final class CellBorderStyleBuilder implements Serializable {
         BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
                 .get(cellStyle.getBorderBottom());
 
-        if (cellStyle instanceof XSSFCellStyle
-                && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
+        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
+                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = ((XSSFCellStyle) cellStyle).getCoreXf();
+            final CTXf _cellXf = xssfCellStyle.getCoreXf();
             int idx = (int) _cellXf.getBorderId();
             CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
                     .getStylesSource().getBorderAt(idx).getCTBorder();
@@ -493,10 +493,10 @@ final class CellBorderStyleBuilder implements Serializable {
         StringBuilder sb = new StringBuilder();
         BorderStyle borderRight = SpreadsheetStyleFactory.BORDER
                 .get(cellStyle.getBorderRight());
-        if (cellStyle instanceof XSSFCellStyle
-                && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
+        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
+                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = ((XSSFCellStyle) cellStyle).getCoreXf();
+            final CTXf _cellXf = xssfCellStyle.getCoreXf();
             int idx = (int) _cellXf.getBorderId();
             CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
                     .getStylesSource().getBorderAt(idx).getCTBorder();
@@ -525,10 +525,10 @@ final class CellBorderStyleBuilder implements Serializable {
         StringBuilder sb = new StringBuilder();
         BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
                 .get(cellStyle.getBorderBottom());
-        if (cellStyle instanceof XSSFCellStyle
-                && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
+        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
+                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = ((XSSFCellStyle) cellStyle).getCoreXf();
+            final CTXf _cellXf = xssfCellStyle.getCoreXf();
             int idx = (int) _cellXf.getBorderId();
             CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
                     .getStylesSource().getBorderAt(idx).getCTBorder();

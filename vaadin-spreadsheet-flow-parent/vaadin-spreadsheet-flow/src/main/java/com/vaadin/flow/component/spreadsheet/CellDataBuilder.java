@@ -97,9 +97,8 @@ final class CellDataBuilder implements Serializable {
             }
 
             DataFormatter df = manager.numericFormatter.getDataFormatter();
-            if (df instanceof CustomDataFormatter) {
-                String color = ((CustomDataFormatter) df)
-                        .getCellTextColor(cell);
+            if (df instanceof CustomDataFormatter customDf) {
+                String color = customDf.getCellTextColor(cell);
                 if (color != null) {
                     cellData.textColor = color;
                 }

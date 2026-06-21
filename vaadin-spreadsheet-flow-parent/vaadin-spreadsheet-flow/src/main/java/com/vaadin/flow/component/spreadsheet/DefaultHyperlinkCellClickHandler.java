@@ -205,14 +205,13 @@ public class DefaultHyperlinkCellClickHandler
                                     cell.getRowIndex(), cell.getColumnIndex(),
                                     false, false));
 
-            if (value instanceof LazyRefEval) {
-                var refEvalValue = (LazyRefEval) value;
+            if (value instanceof LazyRefEval refEvalValue) {
                 value = refEvalValue
                         .getInnerValueEval(refEvalValue.getFirstSheetIndex());
             }
 
-            if (value instanceof StringEval) {
-                return ((StringEval) value).getStringValue();
+            if (value instanceof StringEval str) {
+                return str.getStringValue();
             }
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);

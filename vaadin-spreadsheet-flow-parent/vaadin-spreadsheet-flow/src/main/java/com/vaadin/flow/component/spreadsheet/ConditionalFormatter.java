@@ -80,8 +80,8 @@ public class ConditionalFormatter implements Serializable {
         this.spreadsheet = spreadsheet;
 
         final Workbook workbook = spreadsheet.getWorkbook();
-        if (workbook instanceof HSSFWorkbook) {
-            colorConverter = new HSSFColorConverter((HSSFWorkbook) workbook);
+        if (workbook instanceof HSSFWorkbook hssf) {
+            colorConverter = new HSSFColorConverter(hssf);
         } else {
             colorConverter = new XSSFColorConverter((XSSFWorkbook) workbook);
         }

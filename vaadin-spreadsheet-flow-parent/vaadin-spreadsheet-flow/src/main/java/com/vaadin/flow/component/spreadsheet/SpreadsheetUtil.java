@@ -290,10 +290,10 @@ public class SpreadsheetUtil implements Serializable {
                     ParsePosition parsePosition = new ParsePosition(0);
                     Object parsed = format.parseObject(value, parsePosition);
                     if (parsePosition.getIndex() == value.length()) {
-                        if (parsed instanceof Double) {
-                            return (Double) parsed;
-                        } else if (parsed instanceof Number) {
-                            return ((Number) parsed).doubleValue();
+                        if (parsed instanceof Double d) {
+                            return d;
+                        } else if (parsed instanceof Number n) {
+                            return n.doubleValue();
                         }
                     }
                 }
@@ -428,12 +428,12 @@ public class SpreadsheetUtil implements Serializable {
     }
 
     private static boolean styleHasQuotePrefix(Cell cell) {
-        if (!(cell instanceof XSSFCell)) {
+        if (!(cell instanceof XSSFCell xssfCell)) {
             // in 97 format all strings are prefixed
             return true;
         }
 
-        XSSFCellStyle cellStyle = (XSSFCellStyle) cell.getCellStyle();
+        XSSFCellStyle cellStyle = xssfCell.getCellStyle();
 
         if (cellStyle == null || cellStyle.getCoreXf() == null) {
             return false;
@@ -510,10 +510,9 @@ public class SpreadsheetUtil implements Serializable {
 
     private static void getAllReferencedCells(ValueEval rawEval,
             Spreadsheet spreadsheet, List<CellReference> cells) {
-        if (rawEval instanceof AreaEval) {
+        if (rawEval instanceof AreaEval areaEval) {
             // includes 2D and 3D contiguous ranges (1+ sheets, start/end
             // row/column)
-            final AreaEval areaEval = (AreaEval) rawEval;
             for (int s = areaEval.getFirstSheetIndex(); s <= areaEval
                     .getLastSheetIndex(); s++) {
                 for (int r = areaEval.getFirstRow(); r <= areaEval
@@ -526,18 +525,16 @@ public class SpreadsheetUtil implements Serializable {
                     }
                 }
             }
-        } else if (rawEval instanceof RefEval) {
+        } else if (rawEval instanceof RefEval refEval) {
             // same cell on 1+ sheets, by row/column index
-            final RefEval refEval = (RefEval) rawEval;
             for (int s = refEval.getFirstSheetIndex(); s <= refEval
                     .getLastSheetIndex(); s++) {
                 cells.add(new CellReference(
                         spreadsheet.getWorkbook().getSheetName(s),
                         refEval.getRow(), refEval.getColumn(), false, false));
             }
-        } else if (rawEval instanceof RefListEval) {
+        } else if (rawEval instanceof RefListEval list) {
             // list of evals, call this with each one
-            final RefListEval list = (RefListEval) rawEval;
             for (ValueEval eval : list.getList())
                 getAllReferencedCells(eval, spreadsheet, cells);
         } // ignore others, static values, not cell references

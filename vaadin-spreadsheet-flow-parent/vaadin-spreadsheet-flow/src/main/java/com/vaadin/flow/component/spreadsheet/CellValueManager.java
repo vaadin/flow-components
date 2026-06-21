@@ -161,9 +161,8 @@ public class CellValueManager implements Serializable {
     }
 
     private void setLeadingQuoteStyle(Cell cell, boolean leadingQuote) {
-        if (cell instanceof XSSFCell) {
-            ((XSSFCell) cell).getCellStyle().getCoreXf()
-                    .setQuotePrefix(leadingQuote);
+        if (cell instanceof XSSFCell xssfCell) {
+            xssfCell.getCellStyle().getCoreXf().setQuotePrefix(leadingQuote);
         }
     }
 
@@ -662,12 +661,12 @@ public class CellValueManager implements Serializable {
         if (oldFormat != null) {
             try {
                 final Object parsedObject = oldFormat.parseObject(value);
-                if (parsedObject instanceof Date) {
-                    cell.setCellValue((Date) parsedObject);
-                } else if (parsedObject instanceof Calendar) {
-                    cell.setCellValue((Calendar) parsedObject);
-                } else if (parsedObject instanceof Number) {
-                    cell.setCellValue(((Number) parsedObject).doubleValue());
+                if (parsedObject instanceof Date date) {
+                    cell.setCellValue(date);
+                } else if (parsedObject instanceof Calendar cal) {
+                    cell.setCellValue(cal);
+                } else if (parsedObject instanceof Number num) {
+                    cell.setCellValue(num.doubleValue());
                 } else {
                     cell.setCellValue(Double.parseDouble(value));
                 }

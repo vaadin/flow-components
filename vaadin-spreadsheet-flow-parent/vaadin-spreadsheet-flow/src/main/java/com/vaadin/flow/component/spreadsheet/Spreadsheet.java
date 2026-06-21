@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
@@ -2240,14 +2239,14 @@ public class Spreadsheet extends Component
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             valueManager.clearCellCache(key);
         }
-        if (value instanceof Double) {
-            cell.setCellValue((Double) value);
-        } else if (value instanceof Boolean) {
-            cell.setCellValue((Boolean) value);
-        } else if (value instanceof Date) {
-            cell.setCellValue((Date) value);
-        } else if (value instanceof Calendar) {
-            cell.setCellValue((Calendar) value);
+        if (value instanceof Double d) {
+            cell.setCellValue(d);
+        } else if (value instanceof Boolean b) {
+            cell.setCellValue(b);
+        } else if (value instanceof Date date) {
+            cell.setCellValue(date);
+        } else if (value instanceof Calendar cal) {
+            cell.setCellValue(cal);
         } else if (value != null) {
             cell.setCellValue(value.toString());
         }
@@ -2942,10 +2941,10 @@ public class Spreadsheet extends Component
         styler = createSpreadsheetStyleFactory();
 
         reloadActiveSheetData();
-        if (workbook instanceof HSSFWorkbook) {
-            setWorkbookProtected(((HSSFWorkbook) workbook).isWriteProtected());
-        } else if (workbook instanceof XSSFWorkbook) {
-            setWorkbookProtected(((XSSFWorkbook) workbook).isStructureLocked());
+        if (workbook instanceof HSSFWorkbook hssf) {
+            setWorkbookProtected(hssf.isWriteProtected());
+        } else if (workbook instanceof XSSFWorkbook xssf) {
+            setWorkbookProtected(xssf.isStructureLocked());
         }
         // clear all tables from memory
         tableRegistry.getAll().clear();
@@ -3549,9 +3548,8 @@ public class Spreadsheet extends Component
      */
     public void registerTable(SpreadsheetTable table) {
         tableRegistry.add(table);
-        if (table instanceof SpreadsheetFilterTable) {
-            columnAutofitter.refreshAutofittedColumnsInTable(
-                    (SpreadsheetFilterTable) table);
+        if (table instanceof SpreadsheetFilterTable filterTable) {
+            columnAutofitter.refreshAutofittedColumnsInTable(filterTable);
         }
     }
 
@@ -4500,11 +4498,9 @@ public class Spreadsheet extends Component
          * (which hides any levels underneath this).
          */
 
-        if (getActiveSheet() instanceof HSSFSheet) {
+        if (!(getActiveSheet() instanceof XSSFSheet xsheet)) {
             return;
         }
-
-        XSSFSheet xsheet = (XSSFSheet) getActiveSheet();
         CTWorksheet ctWorksheet = xsheet.getCTWorksheet();
 
         if (isCols) {
