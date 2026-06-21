@@ -144,6 +144,28 @@ declared otherwise. To verify:
   of the contract.
 - **Pin the contract before the change** if no test exists. Write a
   characterization test or payload snapshot first, then modernize.
+- **Persisted-data backward compatibility is non-negotiable.** If
+  the codebase consumes files, blobs, database rows, or any other
+  durable artifact produced by an earlier version of itself OR by an
+  external tool (Excel files, CSVs, exported configs, serialized
+  caches), the modernized code MUST load and render them identically.
+  This is the strongest contract in any modernization — stronger than
+  wire format, stronger than API surface — because the artifacts are
+  out in the wild and can't be re-issued. Specifically:
+  - **Old artifacts must load.** Modernizing the parser/loader must
+    not narrow the accepted input. Existing files keep working.
+  - **Old artifacts must render identically.** Styles, formatting,
+    layout, computed values — pixel-equivalent on the existing test
+    fixtures. Visual regression / golden-snapshot tests are the only
+    reliable safety net here.
+  - **Writing remains compatible.** A file written by the modernized
+    code must be readable by the un-modernized previous version
+    (unless an explicit major-version contract change is being
+    declared).
+  - **Test fixtures for back-compat live in the repo.** If you don't
+    already have a fixtures directory with sample artifacts produced
+    by older versions, that's the gap to close first — modernization
+    without it is flying blind.
 
 If the contract genuinely should change, that's a separate commit
 with its own justification — not snuck into a "modernization" diff.

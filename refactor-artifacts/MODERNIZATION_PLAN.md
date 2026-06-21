@@ -72,23 +72,64 @@ existing characterization tests pin the dispatch.
 "safe-already-using-switch" + "if-chain-rewrites" — depends on
 diff size. Single commit if under 200 LOC delta.
 
-### Step 2 — Sealed `Command` and `ValueChangeCommand` hierarchies
+### Step 2 — **DROPPED**: Sealed `Command` hierarchy is not safe
 
-Currently `Command` is an interface in `command/Command.java` with
-multiple known implementations. Making it `sealed interface Command
-permits CellValueCommand, ...` enforces the closed set at compile time
-and unlocks exhaustive pattern matching in callers.
+Originally planned but discovered to be unsafe on inspection
+(2026-06-22):
 
-**Sites:**
-- `command/Command.java` → `sealed interface`
-- `command/ValueChangeCommand.java` → `sealed interface extends Command`
-- All implementations get `non-sealed` or `final`
-- `CommandReplayer.fireCellValueChangeEvent` does `instanceof
-  ValueChangeCommand` — could become a pattern match
+- `Command` and `ValueChangeCommand` are `public` interfaces in the
+  `command/` package, documented with `@since 1.0`. They are part of
+  the publicly-supported Vaadin Spreadsheet API.
+- Sealing the interface would make downstream user implementations
+  (`MyCustomCommand implements Command`) a binary-incompatible
+  breaking change.
+- The interfaces are also heavily Mockito-mocked across the test
+  suite (`mock(Command.class)` at 12+ sites in `CommandStackTest`
+  alone). Mockito's standard subclass mock-maker can't generate a
+  permitted subclass for a sealed type.
 
-**Test impact**: zero. Sealing is API-tightening but no behavior change.
-Subclassing from outside the spreadsheet package is already
-package-private-effective.
+Per the `code-modernization` skill's pitfall list: "Sealing
+hierarchies you don't fully own ... If external consumers might
+subclass, you've made a breaking change. Verify zero external
+implementations exist OR sequence the sealing behind an API version
+bump." Neither precondition is met here. **Dropped.**
+
+If sealing ever becomes desirable, the correct path is: (a)
+deprecate `Command` as an extension point in a major version, (b)
+introduce a new `sealed` internal hierarchy for the internal
+discriminated-dispatch use cases, (c) keep `Command` un-sealed for
+external consumers.
+
+### Step 2 (replacement) — Pattern matching for `instanceof` ✓ slice 100
+
+Java 16+ allows `if (x instanceof Y y) { y.foo(); }` to bind the
+narrowed reference in one step. Eliminates the `instanceof` + cast
+double-pattern.
+
+**Status**: completed in slice 100. ~40 cast-after-check sites
+swept across 13 files (SpreadsheetFactory, RuleEvaluator,
+Spreadsheet, CellValueManager, SpreadsheetUtil, CellBorderStyleBuilder,
+XSSFColorConverter, DefaultHyperlinkCellClickHandler, FontStyleComposer,
+CellDataBuilder, ConditionalFormatter, SpreadsheetStyleFactory,
+TableLifecycle). Sites left untouched: bare `instanceof` guards that
+never cast inside the branch (anchor type checks in `SheetOverlayWrapper`
+and `SheetOverlayVisibility`, the `POIReflectionTools` reflection guards
+whose cast targets are `getFieldVal`'s return — not the instanceof
+target, the FormulaFormatter token checks that call only the supertype
+`toString`), and the two reflection-only branches in
+`CellValueManager.removeHyperlink` that don't bind the type.
+
+**Test impact**: zero. The pattern-variable binding produces
+byte-identical bytecode to the cast-after-check; the suite remained
+1050/0/0/4 green.
+
+**Two inverted-form rewrites worth noting**:
+- `loadSheetTables` + `loadGrouping` + `Spreadsheet.expandOrCollapseRowsOrColumns`
+  switched from `if (instanceof HSSF) return; cast-to-XSSF` to
+  `if (!(instanceof XSSFSheet xssf)) return;` — one fewer downcast.
+- `loadHSSFPicture` had its parameter narrowed from `HSSFShape` to
+  `HSSFPicture` since pattern-matching at the only callsite made the
+  widen-then-cast dance redundant.
 
 ### Step 3 — `serialVersionUID` audit
 
@@ -245,6 +286,43 @@ green on the unit suite + the payload-snapshot test
 (`SpreadsheetHistoryManagerPayloadTest`). For Tier 2 changes the
 payload snapshot is the load-bearing safety net — every diff must be
 verifiable as wire-format-preserving.
+
+## File-format backward compatibility (non-negotiable)
+
+**Existing `.xlsx` / `.xls` files produced by any prior version of
+this component, or by Excel / other tooling, MUST continue to load
+and render identically after modernization.** This is the strongest
+contract in the entire effort — stronger than the wire format,
+stronger than the public API — because the artifacts are out in the
+wild and can't be re-issued by users.
+
+Specifically:
+
+- **Load surface stays as-wide.** Any input the un-modernized code
+  accepted, the modernized code must also accept. POI version bumps,
+  reflection removals, and parser refactors must preserve the
+  accepted-input set.
+- **Style and layout rendering is identical.** Cell styles, fonts,
+  borders, alignment, conditional formatting, merged regions, freeze
+  panes, charts, images, hyperlinks, comments — everything that was
+  visible in the un-modernized component must look pixel-equivalent
+  in the modernized one. Visual / golden-snapshot regression tests
+  on a representative fixture set are the only reliable safety net.
+- **Write-back compatibility.** A file saved by the modernized
+  component must be readable by the previous version unless a major
+  contract change is explicitly declared and versioned.
+- **Test fixtures.** If the repo doesn't already carry sample
+  `.xlsx` / `.xls` fixtures produced by older versions, that gap
+  must be closed before any tier-2 / tier-3 modernization moves
+  start. The current ITs cover some rendering paths; a deliberate
+  back-compat fixture set is a missing artifact.
+
+This applies to every move in every tier. For tier 1 mechanical
+refactors (switch expressions, pattern matching) it's automatic — the
+bytecode behavior is unchanged and POI is untouched. For tier 2 wire-
+protocol consolidation it requires the payload snapshot AND the
+visual regression tests. For tier 3 client rewrite it's the central
+release-gate.
 
 ## What's explicitly OUT of scope
 
