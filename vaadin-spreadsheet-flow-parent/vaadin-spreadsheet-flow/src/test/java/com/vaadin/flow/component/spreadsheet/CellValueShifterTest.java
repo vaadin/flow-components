@@ -9,11 +9,15 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FormulaError;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -48,6 +52,8 @@ class CellValueShifterTest {
     private SpreadsheetStyleFactory styleFactory;
     @Mock
     private CellValueManager valueManager;
+    @Mock
+    private FormulaEvaluator formulaEvaluator;
 
     private XSSFWorkbook workbook;
     private Sheet sheet;
@@ -60,6 +66,8 @@ class CellValueShifterTest {
         sheet = workbook.createSheet();
         when(spreadsheet.getSpreadsheetStyleFactory()).thenReturn(styleFactory);
         when(spreadsheet.getCellValueManager()).thenReturn(valueManager);
+        lenient().when(valueManager.getFormulaEvaluator())
+                .thenReturn(formulaEvaluator);
         shifter = new CellValueShifter(spreadsheet);
     }
 
@@ -212,5 +220,132 @@ class CellValueShifterTest {
         assertEquals("", src.getStringCellValue());
         verify(valueManager).cellDeleted(src);
         verify(valueManager).cellUpdated(dst);
+    }
+
+    // ----- FORMULA branch ---------------------------------------------------
+
+    @Test
+    void shift_formulaCell_rowShift_rewritesRelativeRowReferences() {
+        // Pin the row-shift rewrite: a same-column move down by 2 rows
+        // increments row numbers in cell references. "A1+B2" shifted from
+        // row 0 to row 2 becomes "A3+B4". The shifter MUST follow this
+        // contract because Excel autofill expects relative references to
+        // move with the cell.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("A1+B2");
+        Cell dst = sheet.createRow(2).createCell(0); // same column, 2 rows down
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals(CellType.FORMULA, dst.getCellType());
+        assertEquals("A3+B4", dst.getCellFormula());
+        // Pin: shifter notifies the formula evaluator after the rewrite so
+        // the cached evaluation is invalidated.
+        verify(formulaEvaluator).notifySetFormula(dst);
+    }
+
+    @Test
+    void shift_formulaCell_rowShift_preservesAbsoluteRowReferences() {
+        // Pin: the "$"-prefixed absolute references are left untouched on a
+        // row shift. "A$1+B2" shifted down by 1 row stays "A$1+B3" —
+        // dollar locks the row, the un-dollared B2 still advances.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("A$1+B2");
+        Cell dst = sheet.createRow(1).createCell(0);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("A$1+B3", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_columnShift_rewritesRelativeColumnReferences() {
+        // Pin column-shift rewrite: a same-row move 2 columns right
+        // increments column letters. "A1+B2" shifted to column 2 becomes
+        // "C1+D2". The matcher routes through the column-delta branch
+        // (oldCol != newCol AND oldRow == newRow).
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("A1+B2");
+        Cell dst = sheet.getRow(0).createCell(2); // same row, 2 cols right
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("C1+D2", dst.getCellFormula());
+        verify(formulaEvaluator).notifySetFormula(dst);
+    }
+
+    @Test
+    void shift_formulaCell_columnShift_preservesAbsoluteColumnReferences() {
+        // Pin: "$A1" — locked column, relative row — survives a column
+        // shift unchanged. The dollared column doesn't advance even though
+        // we moved 2 columns to the right.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("$A1+B2");
+        Cell dst = sheet.getRow(0).createCell(2);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("$A1+D2", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_noCellReferences_passesThroughUnchanged() {
+        // Pin: a formula whose body has no cell references (matches nothing
+        // under ROW_SHIFT_PATTERN) is written to the destination unchanged.
+        // The matcher loop never executes, so the StringBuilder ends up
+        // equal to the original formula. A regression that emitted "" or
+        // null when the matcher found nothing would fail this assertion.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("2+3");
+        Cell dst = sheet.createRow(1).createCell(0);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("2+3", dst.getCellFormula(),
+                "Formulas without cell references pass through unchanged");
+    }
+
+    @Test
+    void shift_formulaCell_postShiftRefIsInvalid_catchBranchRestoresOriginal() {
+        // Pin the load-bearing catch (shiftFormula lines 217-221): if the
+        // rewritten formula is invalid (POI rejects it on setCellFormula),
+        // the catch resets the destination to the source's ORIGINAL
+        // formula. We trigger this by row-shifting "A1" up to a position
+        // where the rewrite produces "A0" — POI rejects row 0 in formulas
+        // (rows are 1-based in Excel formula syntax) and throws
+        // FormulaParseException.
+        //
+        // Verifies: removing the catch (or its fallback) would propagate
+        // the exception OR leave the dst cell without the original
+        // formula — either way the assertEquals on "A1" fails.
+        Cell src = sheet.createRow(1).createCell(0); // POI row 1 = Excel 2
+        src.setCellFormula("A1");
+        Cell dst = sheet.createRow(0).createCell(0); // POI row 0 = Excel 1
+        // rowDiff = 0 - 1 = -1; rewrite makes "A0", which POI rejects.
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("A1", dst.getCellFormula(),
+                "Catch fallback MUST set dst to the original source formula");
+    }
+
+    // ----- ERROR branch -----------------------------------------------------
+
+    @Test
+    void shift_errorCell_copiesErrorCodeUnchanged_ignoringIncrement() {
+        // Pin: ERROR cells copy via setCellErrorValue with the source's
+        // error byte; the increment parameter is ignored (errors don't
+        // arithmetic-shift). Round-trip via FormulaError.DIV0 so the
+        // assertion is over a known constant.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellErrorValue(FormulaError.DIV0.getCode());
+        Cell dst = sheet.getRow(0).createCell(1);
+
+        shifter.shift(src, dst, false, 99.0);
+
+        assertEquals(CellType.ERROR, dst.getCellType());
+        assertEquals(FormulaError.DIV0.getCode(), dst.getErrorCellValue());
+        // Smoke: error code resolves to the expected text through ErrorEval.
+        assertEquals("#DIV/0!", ErrorEval.getText(dst.getErrorCellValue()));
     }
 }

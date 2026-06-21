@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -222,12 +221,12 @@ class SequenceValueExtractorTest {
     @Test
     void extractColumnString_emptySheet_returnsAllNulls() {
         // No rows created at all — first iteration hits null row, breaks
-        // immediately.
+        // immediately. Use assertArrayEquals so a regression that returns
+        // a shorter array (e.g. only the null prefix) still fails — the
+        // three-assertNull form would silently pass if length dropped to 1.
         String[] actual = SequenceValueExtractor.extractColumnString(sheet, 1,
                 1, 3);
 
-        assertNull(actual[0]);
-        assertNull(actual[1]);
-        assertNull(actual[2]);
+        assertArrayEquals(new String[] { null, null, null }, actual);
     }
 }

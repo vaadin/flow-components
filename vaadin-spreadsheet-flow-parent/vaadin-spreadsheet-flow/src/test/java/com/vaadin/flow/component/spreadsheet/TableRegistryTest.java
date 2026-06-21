@@ -92,8 +92,15 @@ class TableRegistryTest {
 
     @Test
     void getAll_returnsLiveReference() {
-        // Pin: getAll returns the underlying HashSet directly. Mutations
-        // through the returned reference affect the registry.
+        // Pin: getAll returns the underlying HashSet directly (no
+        // defensive copy). Mutations through the returned reference
+        // affect the registry — this is INTENTIONAL per the source
+        // comment in TableRegistry, kept for performance (the registry
+        // is read-heavy from SpreadsheetFactory and SheetChangeDispatcher).
+        // A future refactor that adds a defensive copy here would break
+        // existing callers that rely on the live mutation. If we ever
+        // want to harden the API, the change must come WITH a sweep of
+        // the call sites.
         registry.add(table1);
         HashSet<SpreadsheetTable> all = registry.getAll();
         all.add(table2);

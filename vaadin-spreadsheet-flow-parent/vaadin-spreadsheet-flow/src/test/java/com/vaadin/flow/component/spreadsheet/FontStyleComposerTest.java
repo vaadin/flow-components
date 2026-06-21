@@ -15,6 +15,8 @@ import static org.mockito.Mockito.when;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FontFamily;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -193,5 +195,72 @@ class FontStyleComposerTest {
 
         assertTrue(css.contains("\"Comic Sans MS\","),
                 "Multi-word font names should be quoted; got: " + css);
+    }
+
+    @Test
+    void styleFontFamily_xssfRoman_emitsRomanBeforeFallbackStack() {
+        // Pin the FULL CSS shape for ROMAN — including ordering. A
+        // regression that emitted "roman" AFTER the fallback stack
+        // ("Helvetica,arial,roman;") would still pass a loose contains()
+        // assertion. Assert on an exact expected string.
+        assertEquals(
+                "font-family: var(--default-font-family);"
+                        + "--default-font-family:Arial,roman,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.ROMAN));
+    }
+
+    @Test
+    void styleFontFamily_xssfSwiss_emitsSwissBeforeFallbackStack() {
+        assertEquals(
+                "font-family: var(--default-font-family);"
+                        + "--default-font-family:Arial,swiss,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.SWISS));
+    }
+
+    @Test
+    void styleFontFamily_xssfModern_emitsModernBeforeFallbackStack() {
+        assertEquals(
+                "font-family: var(--default-font-family);"
+                        + "--default-font-family:Arial,modern,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.MODERN));
+    }
+
+    @Test
+    void styleFontFamily_xssfScript_emitsScriptBeforeFallbackStack() {
+        assertEquals(
+                "font-family: var(--default-font-family);"
+                        + "--default-font-family:Arial,script,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.SCRIPT));
+    }
+
+    @Test
+    void styleFontFamily_xssfDecorative_emitsDecorativeBeforeFallbackStack() {
+        assertEquals("font-family: var(--default-font-family);"
+                + "--default-font-family:Arial,decorative,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.DECORATIVE));
+    }
+
+    @Test
+    void styleFontFamily_xssfNotApplicable_omitsFamilyKeyword() {
+        // Pin: NOT_APPLICABLE is the empty case — only the font name and
+        // the Helvetica/arial fallback are emitted, no generic family
+        // keyword between them.
+        assertEquals(
+                "font-family: var(--default-font-family);"
+                        + "--default-font-family:Arial,Helvetica,arial;",
+                familyCssWith("Arial", FontFamily.NOT_APPLICABLE));
+    }
+
+    /**
+     * Build an XSSF font with the given name and family and return the CSS
+     * styleFontFamily emits for it. Keeps the per-FontFamily tests above tight
+     * and identically shaped so a future contributor reading the file can spot
+     * the per-case constant at a glance.
+     */
+    private String familyCssWith(String name, FontFamily family) {
+        XSSFFont font = workbook.createFont();
+        font.setFontName(name);
+        font.setFamily(family);
+        return FontStyleComposer.styleFontFamily(font);
     }
 }

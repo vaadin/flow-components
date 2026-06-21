@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -223,6 +225,109 @@ class DirectionalShiftOperatorTest {
         op.shiftRowsUp(2);
 
         verify(valueManager).removeCells(2, 1, 2, 1, true);
+    }
+
+    @Test
+    void shiftRowsUp_singleSourceRow_fillsMultipleDestRows() {
+        // Pin the multi-row up-shift: source row 3 (1-based: 3 / POI: 2)
+        // fills both rows 2 AND 1 when newFirstRow=1. The stepping (r2-r1+1
+        // = 1 here) moves up by one each iteration.
+        selectionRange(2, 2, 0, 0); // source row 3
+        when(sheet.getRow(2)).thenReturn(sourceRow); // source row 3
+        when(sheet.getRow(1)).thenReturn(destRow); // dest row 2
+        when(sheet.getRow(0)).thenReturn(destRow); // dest row 1
+        when(sourceRow.getCell(0)).thenReturn(sourceCell);
+        when(destRow.getCell(0)).thenReturn(destCell);
+
+        op.shiftRowsUp(1); // fill rows 2 and 1
+
+        verify(cellValueShifter, times(2)).shift(eq(sourceCell), eq(destCell),
+                eq(false), any());
+    }
+
+    // ----- Sequence increment dispatch -------------------------------------
+
+    @Test
+    void shiftRowsDown_passesColumnIncrementFromRangeSequenceDetector_toShifter() {
+        // Pin the dispatch tie: shiftRowsDown MUST forward the value
+        // returned by RangeSequenceDetector.getColumnIncrement(sheet, c, r1,
+        // r2) to cellValueShifter.shift as the 4th arg. The prior matcher
+        // form (any()) would pass even if the operator hardcoded null.
+        selectionRange(0, 0, 0, 0); // r1=1, r2=1, c1=1, c2=1
+        when(sheet.getRow(0)).thenReturn(sourceRow);
+        when(sheet.getRow(1)).thenReturn(destRow);
+        when(sourceRow.getCell(0)).thenReturn(sourceCell);
+        when(destRow.getCell(0)).thenReturn(destCell);
+
+        try (MockedStatic<RangeSequenceDetector> detectorStatic = mockStatic(
+                RangeSequenceDetector.class)) {
+            detectorStatic.when(() -> RangeSequenceDetector
+                    .getColumnIncrement(sheet, 1, 1, 1)).thenReturn(7.5);
+
+            op.shiftRowsDown(2);
+
+            verify(cellValueShifter).shift(sourceCell, destCell, false, 7.5);
+        }
+    }
+
+    @Test
+    void shiftRowsUp_passesColumnIncrementFromRangeSequenceDetector_toShifter() {
+        selectionRange(2, 2, 0, 0); // r1=3, r2=3, c1=1
+        when(sheet.getRow(2)).thenReturn(sourceRow);
+        when(sheet.getRow(1)).thenReturn(destRow);
+        when(sourceRow.getCell(0)).thenReturn(sourceCell);
+        when(destRow.getCell(0)).thenReturn(destCell);
+
+        try (MockedStatic<RangeSequenceDetector> detectorStatic = mockStatic(
+                RangeSequenceDetector.class)) {
+            detectorStatic.when(() -> RangeSequenceDetector
+                    .getColumnIncrement(sheet, 1, 3, 3)).thenReturn(-2.0);
+
+            op.shiftRowsUp(2);
+
+            verify(cellValueShifter).shift(sourceCell, destCell, false, -2.0);
+        }
+    }
+
+    @Test
+    void shiftColumnsRight_passesRowIncrementFromRangeSequenceDetector_toShifter() {
+        // Pin column-shift dispatch tie: shiftColumnsRight uses
+        // getRowIncrement (NOT getColumnIncrement). Mixing the two would
+        // compute the wrong sequence delta and corrupt autofill values.
+        selectionRange(0, 0, 0, 0); // r1=1, c1=1, c2=1
+        when(sheet.getRow(0)).thenReturn(sourceRow);
+        when(sourceRow.getCell(0)).thenReturn(sourceCell);
+        when(sourceRow.getCell(1)).thenReturn(destCell);
+
+        try (MockedStatic<RangeSequenceDetector> detectorStatic = mockStatic(
+                RangeSequenceDetector.class)) {
+            detectorStatic.when(
+                    () -> RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 1))
+                    .thenReturn(3.0);
+
+            op.shiftColumnsRight(2);
+
+            verify(cellValueShifter).shift(sourceCell, destCell, false, 3.0);
+        }
+    }
+
+    @Test
+    void shiftColumnsLeft_passesRowIncrementFromRangeSequenceDetector_toShifter() {
+        selectionRange(0, 0, 1, 1); // r1=1, c1=2
+        when(sheet.getRow(0)).thenReturn(sourceRow);
+        when(sourceRow.getCell(1)).thenReturn(sourceCell);
+        when(sourceRow.getCell(0)).thenReturn(destCell);
+
+        try (MockedStatic<RangeSequenceDetector> detectorStatic = mockStatic(
+                RangeSequenceDetector.class)) {
+            detectorStatic.when(
+                    () -> RangeSequenceDetector.getRowIncrement(sheet, 1, 2, 2))
+                    .thenReturn(-1.5);
+
+            op.shiftColumnsLeft(1);
+
+            verify(cellValueShifter).shift(sourceCell, destCell, false, -1.5);
+        }
     }
 
     // ----- shiftColumnsRight ------------------------------------------------

@@ -77,18 +77,19 @@ class SheetGroupingTest {
 
     @Test
     void setRowGroupingData_writeOnly_noFieldStored() {
-        // Pin: row-grouping data is the only mirror-without-cache field.
-        // The element receives the serialized value; there's no getter
-        // to inspect. Documents the original Spreadsheet's asymmetric
-        // design.
+        // Pin the asymmetry between col-grouping (cached + mirrored) and
+        // row-grouping (mirror-only). setRowGroupingData MUST NOT
+        // populate the column cache as a side effect — calling it should
+        // leave getColGroupingData() returning null. Without this guard
+        // a refactor that consolidated the two setters into a shared
+        // helper could silently flip the asymmetry.
         List<GroupingData> data = Collections.singletonList(new GroupingData());
 
         grouping.setRowGroupingData(data);
 
         verify(element).setProperty(eq("rowGroupingData"), anyString());
-        // No getRowGroupingData on the class — sanity that the column
-        // getter wasn't accidentally invoked.
-        assertNull(grouping.getColGroupingData());
+        assertNull(grouping.getColGroupingData(),
+                "Setting row-grouping data must NOT populate the col cache");
     }
 
     @Test

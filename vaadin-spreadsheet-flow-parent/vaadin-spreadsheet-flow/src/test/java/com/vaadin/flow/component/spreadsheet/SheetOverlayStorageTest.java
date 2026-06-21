@@ -159,6 +159,12 @@ class SheetOverlayStorageTest {
         // Pin contract: the addComponent / removeComponent calls always
         // succeed (the backing set is non-null from construction, unlike
         // overlays). No NPE pre-initialize.
+        //
+        // The overlayComponents set has no getter and no clear method; it
+        // is write-only from outside this class today (SheetOverlayManager
+        // adds on attach, removes on detach, nothing reads). That
+        // observation is documented at the class-Javadoc level. A future
+        // change that adds a read API should expand this test suite.
         storage.addComponent(component1);
         storage.removeComponent(component1);
     }
@@ -171,28 +177,5 @@ class SheetOverlayStorageTest {
         storage.addComponent(component1); // does not throw
         storage.addComponent(component2);
         storage.removeComponent(component1); // does not throw
-    }
-
-    @Test
-    void overlayComponents_isWriteOnly() {
-        // Documents an observation, not a contract: SheetOverlayStorage's
-        // overlayComponents set has no getter, no clear method. From
-        // outside this class it's purely write-only — added when overlays
-        // attach (SheetOverlayManager line 102), removed when they detach
-        // (line 140). Nothing reads the set back.
-        //
-        // Pinning this as a future-cleanup marker. If a future change
-        // adds a getter, this test should be updated to assert the new
-        // behavior; if the set is genuinely dead state, the field could
-        // be removed entirely. Today the set is silently accumulating
-        // and pruning component references, with no observable effect.
-        //
-        // The test itself just exercises the write API to confirm no
-        // exceptions and stop tools from flagging the field as unused.
-        for (int i = 0; i < 5; i++) {
-            storage.addComponent(component1);
-            storage.removeComponent(component1);
-        }
-        // No assertion possible — the set is not observable.
     }
 }

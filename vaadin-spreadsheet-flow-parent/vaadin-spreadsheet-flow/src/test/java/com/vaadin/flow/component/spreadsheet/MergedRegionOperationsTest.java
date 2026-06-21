@@ -211,20 +211,43 @@ class MergedRegionOperationsTest {
         // removeMergedRegion(0) followed by addMergedRegion(candidate).
         CellRangeAddress existing = range(2, 2, 3, 3);
         CellRangeAddress candidate = range(0, 0, 5, 5);
+        MergedRegion existingCached = new MergedRegion(2, 2, 3, 3);
+        existingCached.id = 11;
         when(sheet.getNumMergedRegions()).thenReturn(1, 0, 0);
         when(sheet.getMergedRegion(0)).thenReturn(existing);
         cachedRegions.set(new ArrayList<>(
-                java.util.Collections.singletonList(new MergedRegion())));
+                java.util.Collections.singletonList(existingCached)));
 
         operations.addRegion(candidate);
 
         InOrder inOrder = Mockito.inOrder(sheet);
         inOrder.verify(sheet).removeMergedRegion(0);
         inOrder.verify(sheet).addMergedRegion(candidate);
-        // Cascade fires: afterUnmerge for the discarded one, afterMerge
-        // for the new one.
-        verify(cascade).afterUnmerge(any());
-        verify(cascade).afterMerge(any());
+        // Capture the cascade args to pin coordinates AND enforce call
+        // order via InOrder — a regression that swapped afterUnmerge and
+        // afterMerge would otherwise pass plain verify(...) because each
+        // method only fires once and Mockito does not order verifies
+        // across separate calls.
+        InOrder cascadeOrder = Mockito.inOrder(cascade);
+        ArgumentCaptor<MergedRegion> unmerged = ArgumentCaptor
+                .forClass(MergedRegion.class);
+        ArgumentCaptor<MergedRegion> merged = ArgumentCaptor
+                .forClass(MergedRegion.class);
+        cascadeOrder.verify(cascade).afterUnmerge(unmerged.capture());
+        cascadeOrder.verify(cascade).afterMerge(merged.capture());
+        // The unmerge sees the EXISTING-inside region's coordinates
+        // (cached as-is, no offset). The merge sees the CANDIDATE's
+        // coordinates +1 (the SUT uses 1-based cache, 0-based POI).
+        // Swapped wiring would fail here because the value ranges don't
+        // overlap.
+        assertEquals(2, unmerged.getValue().row1);
+        assertEquals(3, unmerged.getValue().row2);
+        assertEquals(2, unmerged.getValue().col1);
+        assertEquals(3, unmerged.getValue().col2);
+        assertEquals(1, merged.getValue().row1);
+        assertEquals(6, merged.getValue().row2);
+        assertEquals(1, merged.getValue().col1);
+        assertEquals(6, merged.getValue().col2);
     }
 
     // ----- removeRegion -----------------------------------------------------

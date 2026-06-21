@@ -88,8 +88,13 @@ class ColumnSizeOperationsTest {
         ArgumentCaptor<int[]> colCaptor = ArgumentCaptor.forClass(int[].class);
         verify(spreadsheet).setColW(colCaptor.capture());
         assertEquals(88, colCaptor.getValue()[1]);
-        // POI's setColumnWidth uses width-units, not pixels.
-        verify(sheet).setColumnWidth(eqInt(1), anyInt());
+        // Pin: POI gets the width via SpreadsheetUtil.pixel2WidthUnits.
+        // 88 px is roundtripped through pixel2WidthUnits so the assertion
+        // tracks the public conversion function. A regression that skipped
+        // the conversion (e.g. passed pixels directly) would fail here
+        // because the int value differs.
+        verify(sheet).setColumnWidth(eqInt(1),
+                eqInt(SpreadsheetUtil.pixel2WidthUnits(88)));
     }
 
     @Test

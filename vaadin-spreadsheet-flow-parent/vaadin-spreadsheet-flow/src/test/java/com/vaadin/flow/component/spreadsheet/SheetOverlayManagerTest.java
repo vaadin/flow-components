@@ -25,10 +25,12 @@ import java.util.HashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 
 /**
@@ -285,6 +287,39 @@ class SheetOverlayManagerTest {
         when(storage.all()).thenReturn(Collections.emptyList());
         manager.loadOrUpdate();
         verify(storage, times(1)).clearOverlays();
+    }
+
+    @Test
+    void loadOrUpdate_attachesOverlayChangeListener_thatRetriggersLoadOrUpdate() {
+        // Pin: addOverlayData attaches an OverlayChangeListener whose
+        // overlayChanged() callback re-invokes loadOrUpdate. This is the
+        // mechanism that propagates client-side overlay changes (drag,
+        // resize) back into the server-side overlay map. A regression that
+        // dropped the listener or wired it to the wrong callback would
+        // silently break server-side sync on overlay edits.
+        when(storage.all()).thenReturn(Arrays.asList(overlay1));
+        when(visibility.isVisible(overlay1)).thenReturn(true);
+        when(overlay1.getId()).thenReturn("img1");
+        when(infoBuilder.build(overlay1)).thenReturn(new OverlayInfo());
+
+        manager.loadOrUpdate();
+
+        ArgumentCaptor<OverlayChangeListener> listenerCaptor = ArgumentCaptor
+                .forClass(OverlayChangeListener.class);
+        verify(overlay1).setOverlayChangeListener(listenerCaptor.capture());
+        OverlayChangeListener listener = listenerCaptor.getValue();
+        org.junit.jupiter.api.Assertions.assertNotNull(listener,
+                "Listener attached to id-bearing overlay must NOT be null");
+
+        // Trigger the listener callback. It should run another full
+        // loadOrUpdate cycle — verifiable via the storage.all() recount
+        // (one initial call + one from the listener = 2 total).
+        listener.overlayChanged();
+
+        verify(storage, times(2)).all();
+        // infoBuilder should have been consulted twice: once per
+        // loadOrUpdate cycle.
+        verify(infoBuilder, times(2)).build(overlay1);
     }
 
     @Test

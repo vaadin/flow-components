@@ -74,16 +74,17 @@ class HyperlinkLoaderTest {
     @Test
     void load_noFreezePane_onlyArea4Scanned() {
         // Pin: with both splits == 0, only the main viewport scan fires.
+        // verifyNoMoreInteractions sharpens the original two-verify form —
+        // a regression that calls scan(...) with DIFFERENT args (e.g. an
+        // additional spurious area scan) would slip past the loose
+        // any()-matched count.
         when(spreadsheet.getLastFrozenRow()).thenReturn(0);
         when(spreadsheet.getLastFrozenColumn()).thenReturn(0);
 
         loader.load();
 
         verify(scanner, times(1)).scan(1, 1, 10, 10);
-        verify(scanner, times(1)).scan(org.mockito.ArgumentMatchers.anyInt(),
-                org.mockito.ArgumentMatchers.anyInt(),
-                org.mockito.ArgumentMatchers.anyInt(),
-                org.mockito.ArgumentMatchers.anyInt());
+        org.mockito.Mockito.verifyNoMoreInteractions(scanner);
     }
 
     @Test
