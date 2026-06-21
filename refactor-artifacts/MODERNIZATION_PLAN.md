@@ -162,19 +162,50 @@ effect.
 
 **Test impact**: zero (metadata-only deletion).
 
-### Step 4 — JSpecify (or similar) nullness annotations on Spreadsheet public API
+### Step 4 — JSpecify `@Nullable` on documented null sites ✓ slice 102 (scoped)
 
-The public `Spreadsheet` API has many methods accepting `null` as a
-sentinel without documentation. JSpecify's `@Nullable` /
-`@NonNull` makes the contract explicit at the type level. Modern IDEs
-+ build-time checkers (NullAway, Checker Framework) consume them.
+**Ecosystem reference**: upstream Vaadin Flow (`flow-server`,
+85 files) uses `org.jspecify.annotations` with `@NullMarked` at the
+package level + per-site `@Nullable`. JSpecify 1.0 is **already on
+the classpath** transitively (verified via `mvn dependency:tree`),
+no new dependency needed. Flow-components siblings (Grid, Button,
+TextField, etc.) haven't adopted JSpecify yet — spreadsheet is the
+first in the components monorepo, but aligned with the framework
+direction.
 
-**Sites:** start with the public API of `Spreadsheet.java` — the
-setters that mirror `null` to client property (`setOverlays`,
-`setSheetNames`, `setHyperlinksTooltips`, etc.).
+**Status**: completed in slice 102, but **scoped down** from the
+original framing.
 
-**Test impact**: zero. Annotations are metadata only. Compile-time
-warnings would surface inconsistencies; fix as they appear.
+**Original framing (rejected as too broad)**: "annotate the entire
+Spreadsheet public API". That's ~200 public methods on Spreadsheet
+alone, plus ~50 helpers — multi-session work and high risk of
+mis-annotating subtle null contracts I haven't audited.
+
+**Corrected framing (executed)**: annotate ONLY the methods where
+the javadoc already documents the null contract. Pure
+javadoc-to-type-annotation conversion. Zero risk of being wrong
+because the truth is already in the javadoc.
+
+**Sites annotated**: 6 `getCell` overloads (returns `@Nullable
+Cell`, with two also accepting `@Nullable CellReference` / `@Nullable
+String sheetName` per their javadoc), and `getCommentAuthorProvider`
+(returns `@Nullable CommentAuthorProvider`). Plus the import +
+alphabetized ordering.
+
+**Why no `@NullMarked` package-info yet**: that would be an
+unaudited contract claim for every other method/field/param in
+the package. Until someone runs a full audit pass, the
+documentary value comes from the per-site `@Nullable` markers
+only.
+
+**Test impact**: zero (annotations are metadata; not enforced
+because no NullAway/Checker is configured). Suite stayed
+1050/0/0/4 green.
+
+**Follow-up work** (deferred): full `@NullMarked` audit of the
+spreadsheet package + sweep of public APIs on Spreadsheet.java
+that aren't yet javadoc-documented. Best done after a NullAway
+config is added so inconsistencies become compile errors.
 
 ### Step 5 — Pattern matching for instanceof
 
