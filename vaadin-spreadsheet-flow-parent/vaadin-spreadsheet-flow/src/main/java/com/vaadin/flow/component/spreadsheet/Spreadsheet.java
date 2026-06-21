@@ -193,6 +193,18 @@ public class Spreadsheet extends Component
     private final MirroredProperty<Boolean> sheetProtected = MirroredProperty
             .bool(this, "sheetProtected", false);
 
+    private final MirroredProperty<Boolean> workbookProtected = MirroredProperty
+            .bool(this, "workbookProtected", false);
+
+    private final MirroredProperty<Boolean> hasActions = MirroredProperty
+            .bool(this, "hasActions", false);
+
+    private final MirroredProperty<Boolean> lockFormatColumns = MirroredProperty
+            .bool(this, "lockFormatColumns", false);
+
+    private final MirroredProperty<Boolean> lockFormatRows = MirroredProperty
+            .bool(this, "lockFormatRows", false);
+
     private final MirroredNullableMap<String, String> cellKeysToEditorIdMap = new MirroredNullableMap<>(
             this, "cellKeysToEditorIdMap");
 
@@ -495,7 +507,7 @@ public class Spreadsheet extends Component
     }
 
     private void setWorkbookProtected(boolean workbookProtected) {
-        getElement().setProperty("workbookProtected", workbookProtected);
+        this.workbookProtected.set(workbookProtected);
     }
 
     void setCellKeysToEditorIdMap(
@@ -529,7 +541,7 @@ public class Spreadsheet extends Component
     }
 
     private void setHasActions(boolean hasActions) {
-        getElement().setProperty("hasActions", hasActions);
+        this.hasActions.set(hasActions);
     }
 
     void setOverlays(HashMap<String, OverlayInfo> overlays) {
@@ -566,11 +578,11 @@ public class Spreadsheet extends Component
     }
 
     void setLockFormatColumns(boolean lockFormatColumns) {
-        getElement().setProperty("lockFormatColumns", lockFormatColumns);
+        this.lockFormatColumns.set(lockFormatColumns);
     }
 
     void setLockFormatRows(boolean lockFormatRows) {
-        getElement().setProperty("lockFormatRows", lockFormatRows);
+        this.lockFormatRows.set(lockFormatRows);
     }
 
     void setNamedRanges(List<String> namedRanges) {
