@@ -908,6 +908,9 @@ public class Spreadsheet extends Component
 
     private final ViewportBounds viewportBounds = new ViewportBounds();
 
+    private final CellRangeNormalizer cellRangeNormalizer = new CellRangeNormalizer(
+            this);
+
     private boolean chartsEnabled = true;
 
     /**
@@ -1012,7 +1015,8 @@ public class Spreadsheet extends Component
     private final SheetVisibilityOperations sheetVisibilityOperations = new SheetVisibilityOperations(
             this);
 
-    private final Map<Integer, HashSet<String>> invalidFormulas = new HashMap<Integer, HashSet<String>>();
+    private final InvalidFormulaTracker invalidFormulaTracker = new InvalidFormulaTracker(
+            this);
 
     /**
      * Container for merged regions for the currently active sheet. The
@@ -1557,26 +1561,7 @@ public class Spreadsheet extends Component
      */
     protected CellRangeAddress createCorrectCellRangeAddress(
             String addressString) {
-        final String[] split = addressString.split(":");
-        final CellReference cr1 = new CellReference(split[0]);
-        final CellReference cr2 = new CellReference(split[1]);
-        int r1 = cr1.getRow() > cr2.getRow() ? cr2.getRow() : cr1.getRow();
-        int r2 = cr1.getRow() > cr2.getRow() ? cr1.getRow() : cr2.getRow();
-        int c1 = cr1.getCol() > cr2.getCol() ? cr2.getCol() : cr1.getCol();
-        int c2 = cr1.getCol() > cr2.getCol() ? cr1.getCol() : cr2.getCol();
-        if (r1 >= getRows()) {
-            r1 = getRows() - 1;
-        }
-        if (r2 >= getRows()) {
-            r2 = getRows() - 1;
-        }
-        if (c1 >= getCols()) {
-            c1 = getCols() - 1;
-        }
-        if (c2 >= getCols()) {
-            c2 = getCols() - 1;
-        }
-        return new CellRangeAddress(r1, r2, c1, c2);
+        return cellRangeNormalizer.fromAddressString(addressString);
     }
 
     /**
@@ -1597,23 +1582,7 @@ public class Spreadsheet extends Component
      */
     protected CellRangeAddress createCorrectCellRangeAddress(int row1, int col1,
             int row2, int col2) {
-        int r1 = row1 > row2 ? row2 : row1;
-        int r2 = row1 > row2 ? row1 : row2;
-        int c1 = col1 > col2 ? col2 : col1;
-        int c2 = col1 > col2 ? col1 : col2;
-        if (r1 >= getRows()) {
-            r1 = getRows();
-        }
-        if (r2 >= getRows()) {
-            r2 = getRows();
-        }
-        if (c1 >= getCols()) {
-            c1 = getCols();
-        }
-        if (c2 >= getCols()) {
-            c2 = getCols();
-        }
-        return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
+        return cellRangeNormalizer.fromCoordinates(row1, col1, row2, col2);
     }
 
     /**
@@ -2648,35 +2617,7 @@ public class Spreadsheet extends Component
 
         popupButtonRowShifter.shift(first, last, n);
 
-        // Invalid formula indicators
-        int activeSheetIndex = workbook.getActiveSheetIndex();
-        HashSet<String> original = invalidFormulas.get(activeSheetIndex);
-        if (original != null) {
-            HashSet<String> updated = new HashSet<String>();
-            for (String key : original) {
-                int row = SpreadsheetUtil.getRowFromKey(key) - 1;
-                int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
-                if (rowWasRemoved(row, first, n)) {
-                    // do nothing -> will be removed
-                } else if (numberOfRowsAboveWasChanged(row, last, first)) {
-                    // the number of the rows above has changed -> update the
-                    // row index
-                    updated.add(SpreadsheetUtil.toKey(col + 1, row + n + 1));
-                } else {
-                    updated.add(key);
-                }
-            }
-            original.clear();
-            invalidFormulas.put(activeSheetIndex, updated);
-        }
-    }
-
-    private boolean numberOfRowsAboveWasChanged(int row, int last, int first) {
-        return first <= row && row <= last;
-    }
-
-    private boolean rowWasRemoved(int row, int first, int n) {
-        return n < 0 && first + n < row && row <= first;
+        invalidFormulaTracker.shiftActiveSheetRows(first, last, n);
     }
 
     /**
@@ -3145,7 +3086,7 @@ public class Spreadsheet extends Component
         valueManager.clearCachedContent();
         selectionManager.clear();
         historyManager.clear();
-        invalidFormulas.clear();
+        invalidFormulaTracker.clearAll();
         popupButtonRegistry.clear();
         sheetState.clear();
         sheetOverlayManager.clear();
@@ -4821,30 +4762,15 @@ public class Spreadsheet extends Component
     }
 
     void markInvalidFormula(int col, int row) {
-        int activeSheetIndex = workbook.getActiveSheetIndex();
-        if (!invalidFormulas.containsKey(activeSheetIndex)) {
-            invalidFormulas.put(activeSheetIndex, new HashSet<>());
-        }
-        invalidFormulas.get(activeSheetIndex)
-                .add(SpreadsheetUtil.toKey(col, row));
-
+        invalidFormulaTracker.mark(col, row);
     }
 
     boolean isMarkedAsInvalidFormula(int col, int row) {
-        int activeSheetIndex = workbook.getActiveSheetIndex();
-        if (invalidFormulas.containsKey(activeSheetIndex)) {
-            return invalidFormulas.get(activeSheetIndex)
-                    .contains(SpreadsheetUtil.toKey(col, row));
-        }
-        return false;
+        return invalidFormulaTracker.isMarked(col, row);
     }
 
     void removeInvalidFormulaMark(int col, int row) {
-        int activeSheetIndex = workbook.getActiveSheetIndex();
-        if (invalidFormulas.containsKey(activeSheetIndex)) {
-            invalidFormulas.get(activeSheetIndex)
-                    .remove(SpreadsheetUtil.toKey(col, row));
-        }
+        invalidFormulaTracker.removeMark(col, row);
     }
 
     public void addSheetOverlay(SheetOverlayWrapper image) {
