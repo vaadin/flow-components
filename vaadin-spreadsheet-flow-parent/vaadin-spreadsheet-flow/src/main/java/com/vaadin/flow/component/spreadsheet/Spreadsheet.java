@@ -211,6 +211,9 @@ public class Spreadsheet extends Component
     private final MirroredProperty<List<String>> namedRanges = MirroredProperty
             .serialized(this, "namedRanges", null);
 
+    private final MirroredProperty<Boolean> showCustomEditorOnFocus = MirroredProperty
+            .bool(this, "showCustomEditorOnFocus", false);
+
     private final MirroredNullableMap<String, String> cellKeysToEditorIdMap = new MirroredNullableMap<>(
             this, "cellKeysToEditorIdMap");
 
@@ -1468,8 +1471,7 @@ public class Spreadsheet extends Component
      *            visible on focus (true) or not (false)
      */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
-        getElement().setProperty("showCustomEditorOnFocus",
-                showCustomEditorOnFocus);
+        this.showCustomEditorOnFocus.set(showCustomEditorOnFocus);
     }
 
     /**
@@ -1479,7 +1481,7 @@ public class Spreadsheet extends Component
      *         focus (true) or not (false)
      */
     public boolean isShowCustomEditorOnFocus() {
-        return getElement().getProperty("showCustomEditorOnFocus", false);
+        return showCustomEditorOnFocus.get();
     }
 
     /*
