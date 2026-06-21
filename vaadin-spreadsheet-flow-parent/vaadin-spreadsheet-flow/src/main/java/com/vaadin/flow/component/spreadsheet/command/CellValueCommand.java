@@ -293,22 +293,15 @@ public class CellValueCommand extends SpreadsheetCommand
     protected Object getCellValue(Cell cell) {
         if (cell == null) {
             return null;
-        } else {
-            switch (cell.getCellType()) {
-            case BOOLEAN:
-                return cell.getBooleanCellValue();
-            case ERROR:
-                return cell.getErrorCellValue();
-            case FORMULA:
-                return "=" + cell.getCellFormula();
-            case NUMERIC:
-                return cell.getNumericCellValue();
-            case STRING:
-                return cell.getStringCellValue();
-            default:
-                return null;
-            }
         }
+        return switch (cell.getCellType()) {
+        case BOOLEAN -> cell.getBooleanCellValue();
+        case ERROR -> cell.getErrorCellValue();
+        case FORMULA -> "=" + cell.getCellFormula();
+        case NUMERIC -> cell.getNumericCellValue();
+        case STRING -> cell.getStringCellValue();
+        default -> null;
+        };
     }
 
     /**

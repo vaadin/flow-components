@@ -100,35 +100,30 @@ final class CellNumericFormatter implements Serializable {
         if (cell == null) {
             return "";
         }
-        CellType cellType = cell.getCellType();
-        switch (cellType) {
-        case FORMULA:
-            return cell.getCellFormula();
-        case NUMERIC:
-            if (DateUtil.isCellDateFormatted(cell)) {
-                Date dateCellValue = cell.getDateCellValue();
-                if (dateCellValue != null) {
-                    return new SimpleDateFormat().format(dateCellValue);
-                }
-                return "";
-            }
-            return originalValueDecimalFormat
-                    .format(cell.getNumericCellValue());
-        case STRING:
-            String stringCellValue = cell.getStringCellValue();
-            if (SpreadsheetUtil.needsLeadingQuote(cell)) {
-                return "'" + stringCellValue;
-            }
-            return stringCellValue;
-        case BOOLEAN:
-            return String.valueOf(cell.getBooleanCellValue());
-        case BLANK:
-            return "";
-        case ERROR:
-            return String.valueOf(cell.getErrorCellValue());
-        default:
-            return "";
+        return switch (cell.getCellType()) {
+        case FORMULA -> cell.getCellFormula();
+        case NUMERIC -> formatNumericCell(cell);
+        case STRING -> formatStringCell(cell);
+        case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+        case BLANK -> "";
+        case ERROR -> String.valueOf(cell.getErrorCellValue());
+        default -> "";
+        };
+    }
+
+    private String formatNumericCell(Cell cell) {
+        if (DateUtil.isCellDateFormatted(cell)) {
+            Date dateCellValue = cell.getDateCellValue();
+            return dateCellValue == null ? ""
+                    : new SimpleDateFormat().format(dateCellValue);
         }
+        return originalValueDecimalFormat.format(cell.getNumericCellValue());
+    }
+
+    private String formatStringCell(Cell cell) {
+        String stringCellValue = cell.getStringCellValue();
+        return SpreadsheetUtil.needsLeadingQuote(cell) ? "'" + stringCellValue
+                : stringCellValue;
     }
 
     /**
@@ -137,28 +132,22 @@ final class CellNumericFormatter implements Serializable {
      * between syncs.
      */
     String getCachedFormulaCellValue(Cell formulaCell) {
-        String result = null;
-        switch (formulaCell.getCachedFormulaResultType()) {
-        case BLANK:
-        case FORMULA:
-        case _NONE:
-        case STRING:
-            result = formulaCell.getStringCellValue();
-            break;
-        case BOOLEAN:
-            result = String.valueOf(formulaCell.getBooleanCellValue());
-            break;
-        case ERROR:
-            result = ErrorEval.getText(formulaCell.getErrorCellValue());
-            break;
-        case NUMERIC:
+        return switch (formulaCell.getCachedFormulaResultType()) {
+        case BLANK, FORMULA, _NONE, STRING -> formulaCell.getStringCellValue();
+        case BOOLEAN -> String.valueOf(formulaCell.getBooleanCellValue());
+        case ERROR -> ErrorEval.getText(formulaCell.getErrorCellValue());
+        case NUMERIC -> {
             CellStyle style = formulaCell.getCellStyle();
-            result = formatter.formatRawCellContents(
+            yield formatter.formatRawCellContents(
                     formulaCell.getNumericCellValue(), style.getDataFormat(),
                     style.getDataFormatString());
-            break;
         }
-        return result;
+        // Preserve the pre-modernization behavior: pre-switch-expression
+        // code initialized `result = null` and returned null when no case
+        // matched. Without `default -> null` the new form would throw
+        // MatchException if POI ever adds a new CellType.
+        default -> null;
+        };
     }
 
     boolean valueContainsOnlyNumbers(String value) {

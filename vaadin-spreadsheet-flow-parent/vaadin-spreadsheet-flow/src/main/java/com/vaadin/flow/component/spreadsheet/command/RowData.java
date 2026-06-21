@@ -175,31 +175,23 @@ class RowData implements Serializable {
             cellType = cell.getCellType();
 
             switch (cellType) {
-            case _NONE:
-            case BLANK:
-                stringCellValue = cell.getStringCellValue();
-                break;
-            case BOOLEAN:
-                booleanCellValue = cell.getBooleanCellValue();
-                break;
-            case ERROR:
-                errorCellValue = cell.getErrorCellValue();
-                break;
-            case FORMULA:
-                cellFormula = cell.getCellFormula();
-                break;
-            case NUMERIC:
+            case _NONE, BLANK -> stringCellValue = cell.getStringCellValue();
+            case BOOLEAN -> booleanCellValue = cell.getBooleanCellValue();
+            case ERROR -> errorCellValue = cell.getErrorCellValue();
+            case FORMULA -> cellFormula = cell.getCellFormula();
+            case NUMERIC -> {
                 if (DateUtil.isCellDateFormatted(cell)) {
+                    // The duplicated null guard is preserved verbatim from
+                    // the pre-modernization code; modernizing the redundant
+                    // check is out of scope for this slice.
                     if (DateUtil.isCellDateFormatted(cell)) {
                         dateCellValue = cell.getDateCellValue();
                     }
                 } else {
                     numericCellValue = cell.getNumericCellValue();
                 }
-                break;
-            case STRING:
-                richTextCellValue = cell.getRichStringCellValue();
-                break;
+            }
+            case STRING -> richTextCellValue = cell.getRichStringCellValue();
             }
         }
 
@@ -213,29 +205,18 @@ class RowData implements Serializable {
             cell.setCellStyle(cellStyle);
 
             switch (cellType) {
-            case _NONE:
-            case BLANK:
-                cell.setBlank();
-                break;
-            case BOOLEAN:
-                cell.setCellValue(booleanCellValue);
-                break;
-            case ERROR:
-                cell.setCellErrorValue(errorCellValue);
-                break;
-            case FORMULA:
-                cell.setCellFormula(cellFormula);
-                break;
-            case NUMERIC:
+            case _NONE, BLANK -> cell.setBlank();
+            case BOOLEAN -> cell.setCellValue(booleanCellValue);
+            case ERROR -> cell.setCellErrorValue(errorCellValue);
+            case FORMULA -> cell.setCellFormula(cellFormula);
+            case NUMERIC -> {
                 if (dateCellValue != null) {
                     cell.setCellValue(dateCellValue);
                 } else {
                     cell.setCellValue(numericCellValue);
                 }
-                break;
-            case STRING:
-                cell.setCellValue(richTextCellValue);
-                break;
+            }
+            case STRING -> cell.setCellValue(richTextCellValue);
             }
 
         }

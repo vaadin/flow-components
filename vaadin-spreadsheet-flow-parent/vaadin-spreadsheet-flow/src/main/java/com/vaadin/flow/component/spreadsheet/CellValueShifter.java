@@ -82,25 +82,20 @@ final class CellValueShifter implements Serializable {
         spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(newCell,
                 true);
         switch (shiftedCell.getCellType()) {
-        case FORMULA:
-            shiftFormula(shiftedCell, newCell);
-            break;
-        case BOOLEAN:
-            newCell.setCellValue(shiftedCell.getBooleanCellValue());
-            break;
-        case ERROR:
+        case FORMULA -> shiftFormula(shiftedCell, newCell);
+        case BOOLEAN -> newCell.setCellValue(shiftedCell.getBooleanCellValue());
+        case ERROR ->
             newCell.setCellErrorValue(shiftedCell.getErrorCellValue());
-            break;
-        case NUMERIC:
-            shiftNumeric(shiftedCell, newCell, sequenceIncrement);
-            break;
-        case STRING:
-            shiftString(shiftedCell, newCell, sequenceIncrement);
-            break;
-        case BLANK:
-            newCell.setBlank();
-        default:
-            break;
+        case NUMERIC -> shiftNumeric(shiftedCell, newCell, sequenceIncrement);
+        case STRING -> shiftString(shiftedCell, newCell, sequenceIncrement);
+        case BLANK -> newCell.setBlank();
+        // _NONE / future CellType values: no-op (was a default: break in the
+        // pre-modernization switch). Statement-form switch is non-exhaustive
+        // so omitting an explicit default is identical to the previous
+        // default branch.
+        default -> {
+            // intentional no-op
+        }
         }
         spreadsheet.getCellValueManager().cellUpdated(newCell);
         if (removeShifted) {

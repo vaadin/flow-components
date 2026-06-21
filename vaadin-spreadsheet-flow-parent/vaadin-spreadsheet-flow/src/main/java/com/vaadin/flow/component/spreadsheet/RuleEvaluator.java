@@ -253,19 +253,14 @@ final class RuleEvaluator implements Serializable {
     private boolean hasCoherentType(ValueEval eval, CellType cellType,
             boolean isFormulaStringType, boolean isFormulaBooleanType,
             boolean isFormulaNumericType) {
-        switch (cellType) {
-        case STRING:
-            return eval instanceof StringEval;
-        case BOOLEAN:
-            return eval instanceof BoolEval;
-        case NUMERIC:
-            return eval instanceof NumericValueEval;
-        case FORMULA:
-            return isCoherentTypeFormula(eval, isFormulaStringType,
-                    isFormulaBooleanType, isFormulaNumericType);
-        default:
-            return true;
-        }
+        return switch (cellType) {
+        case STRING -> eval instanceof StringEval;
+        case BOOLEAN -> eval instanceof BoolEval;
+        case NUMERIC -> eval instanceof NumericValueEval;
+        case FORMULA -> isCoherentTypeFormula(eval, isFormulaStringType,
+                isFormulaBooleanType, isFormulaNumericType);
+        default -> true;
+        };
     }
 
     private boolean isCoherentTypeFormula(ValueEval eval,
