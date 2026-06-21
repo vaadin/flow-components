@@ -205,6 +205,12 @@ public class Spreadsheet extends Component
     private final MirroredProperty<Boolean> lockFormatRows = MirroredProperty
             .bool(this, "lockFormatRows", false);
 
+    private final MirroredProperty<String> invalidFormulaErrorMessage = MirroredProperty
+            .string(this, "invalidFormulaErrorMessage", null);
+
+    private final MirroredProperty<List<String>> namedRanges = MirroredProperty
+            .serialized(this, "namedRanges", null);
+
     private final MirroredNullableMap<String, String> cellKeysToEditorIdMap = new MirroredNullableMap<>(
             this, "cellKeysToEditorIdMap");
 
@@ -586,8 +592,7 @@ public class Spreadsheet extends Component
     }
 
     void setNamedRanges(List<String> namedRanges) {
-        getElement().setProperty("namedRanges",
-                Serializer.serialize(namedRanges));
+        this.namedRanges.set(namedRanges);
     }
 
     void onPopupButtonClick(int row, int column) {
@@ -4536,8 +4541,7 @@ public class Spreadsheet extends Component
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        getElement().setProperty("invalidFormulaErrorMessage",
-                invalidFormulaErrorMessage);
+        this.invalidFormulaErrorMessage.set(invalidFormulaErrorMessage);
     }
 
     /**
