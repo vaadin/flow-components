@@ -131,21 +131,36 @@ byte-identical bytecode to the cast-after-check; the suite remained
   `HSSFPicture` since pattern-matching at the only callsite made the
   widen-then-cast dance redundant.
 
-### Step 3 — `serialVersionUID` audit
+### Step 3 — drop `@SuppressWarnings("serial")` sweep ✓ slice 101
 
-57 `@SuppressWarnings("serial")` annotations across the package, zero
-`serialVersionUID` declarations. Vaadin Flow session replication
-depends on the contract; the suppression should be replaced with
-an explicit ID and a one-line justification comment.
+**Original framing (rejected after deeper look):** "replace 57
+suppressions with explicit `serialVersionUID = 1L` declarations".
+That direction would diverge from the in-ecosystem reference.
 
-**Sites:** every class implementing `Serializable` in
-`vaadin-spreadsheet-flow/.../*` (use `grep -l "implements Serializable"`).
+**Ecosystem reference:** modern Vaadin Flow components in this same
+repo (Grid, Button, TextField, Combo, etc.) implement `Serializable`
+with **neither** a `serialVersionUID` **nor** a
+`@SuppressWarnings("serial")` — the annotation is silencing a
+warning that the project's compiler config doesn't even raise
+(verified: `mvn compile` produced no serial warnings).
 
-**Test impact**: zero. The change is metadata-only. The payload
-snapshot in `SpreadsheetHistoryManagerPayloadTest` is the safety net.
+**Status**: completed in slice 101. 84 `@SuppressWarnings("serial")`
+annotations deleted (83 in `src/main`, 1 in `src/test`). No
+`serialVersionUID` declarations added — matching the ecosystem
+direction. Suite stayed 1050/0/0/4 green; spotless + checkstyle
+clean. Each deletion removes one line of noise; no behavioral
+effect.
 
-**Slice shape**: mechanical sweep, single commit, no characterization
-tests needed (no behavior change).
+**Why not add UIDs**:
+- The default-computed UID is unstable across compilations anyway
+  (changes when fields/methods change), so explicit `1L` would only
+  matter for cross-version session deserialization — a contract
+  this project hasn't been honoring at all (refactor slices have
+  freely renamed fields and added methods for ~100 commits).
+- Adding 83 declarations would be 83 lines of architectural noise
+  with zero functional benefit and zero ecosystem precedent.
+
+**Test impact**: zero (metadata-only deletion).
 
 ### Step 4 — JSpecify (or similar) nullness annotations on Spreadsheet public API
 
