@@ -207,25 +207,64 @@ spreadsheet package + sweep of public APIs on Spreadsheet.java
 that aren't yet javadoc-documented. Best done after a NullAway
 config is added so inconsistencies become compile errors.
 
-### Step 5 — Pattern matching for instanceof
+### Step 5 — Pattern matching for instanceof ✓ (same as Step 2)
 
-Java 16+ allows `if (x instanceof Y y) { y.foo(); }` to bind the
-narrowed reference in one step. Eliminates the `instanceof` + cast
-double-pattern.
+Already completed in slice 100 as the replacement for the dropped
+Step 2 (sealed-Command). The original Step 5 framing was identical
+to the eventual Step 2 execution; treat this as one step.
 
-**Sites:** ~20+ occurrences across the package. Mechanical sweep.
+### Step 6 — POIReflectionTools audit against POI 5+ ✓ slice 103
 
-**Test impact**: zero.
+**POI version on the classpath**: 5.5.1 (verified via
+`mvn dependency:tree`). Audited all 4 helper methods in
+`POIReflectionTools` against POI 5.5.1's public API.
 
-### Step 6 — POIReflectionTools audit against POI 5+
+**Status**: completed in slice 103. Two of the four reflection sites
+dropped, two stay with rationale recorded.
 
-The `POIReflectionTools` class uses reflection to access POI internals.
-POI 5.x has expanded the public API for several of these operations.
-Audit whether the reflection is still necessary; replace with public
-API where possible.
+**Sites dropped — now use public POI API**:
+- `getOrderedRuleList`: priority comparator was reading
+  `(CTCfRule) getFieldVal(rule, "_cfRule").getPriority()` via
+  reflection on a private `_cfRule` field. POI 5+ exposes
+  `XSSFConditionalFormattingRule.getPriority()` directly. The
+  six-line anonymous-class comparator collapses to
+  `Comparator.comparingInt(XSSFConditionalFormattingRule::getPriority)
+  .reversed()`.
+- `stopHere`: was reading the same `_cfRule._stopIfTrue` field via
+  reflection. POI 5+ exposes
+  `XSSFConditionalFormattingRule.getStopIfTrue()` directly. The
+  five-line if-block collapses to a single
+  `rule instanceof XSSFConditionalFormattingRule xssfRule
+  && xssfRule.getStopIfTrue()` (pattern-matching binds the cast in
+  the same line — matches slice 100's idiom).
 
-**Test impact**: existing characterization tests pin behavior; the
-goal is to drop reflection while preserving the observable contract.
+**Sites kept — semantic mismatch with POI's public API**:
+- `isBorderSet`: needs per-side `isSetLeft()` / `isSetTop()` / etc.
+  on `CTBorder` to distinguish "border was explicitly set in the XML
+  (even to 'none')" from "border was never declared". POI's public
+  `XSSFBorderFormatting.getBorderLeft()` etc. return a `BorderStyle`
+  enum (with NONE as the default) — they collapse those two states
+  into one. The CF semantics ("explicitly-set NONE overrides the
+  previous rule's border") need the original distinction.
+- `hasStrikeThrough`: needs "ANY entry in `CTFont.getStrikeList()` has
+  `val=true`". POI's public `XSSFFontFormatting.isStruckout()`
+  inspects only the first entry. Real Excel files only have one
+  entry in practice, but the existing implementation is defensive;
+  changing semantics here would be a behavior change, not pure
+  modernization.
+
+**`getFieldVal` stays** — still used by the two reflection sites
+above.
+
+**Class javadoc updated** to reflect the now-narrower scope (POI 5+
+exposes priority and stopIfTrue; reflection remains for the
+border-isSet and multi-strike-entry edge cases).
+
+**Test impact**: zero. The slice-79 `POIReflectionToolsTest` pins
+observable behavior (priority-descending order; stopIfTrue read
+correctly) — those pass unchanged because the public API returns
+the same values reflection used to extract. Suite stayed
+1050/0/0/4 green.
 
 ### Step 7 — Records for SERVER-ONLY DTOs (selective, NOT the wire mirrors)
 
