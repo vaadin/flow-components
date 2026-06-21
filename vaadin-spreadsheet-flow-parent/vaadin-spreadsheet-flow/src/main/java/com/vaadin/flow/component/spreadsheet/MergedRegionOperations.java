@@ -32,7 +32,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * {@link MergedRegionCascade} owns the cell-level style + cache-marker side
  * effects; this class owns the validation, ordering, and the POI write.
  */
-@SuppressWarnings("serial")
 final class MergedRegionOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

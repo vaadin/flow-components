@@ -27,7 +27,6 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SpreadsheetHistoryManager implements Serializable {
 
     /**

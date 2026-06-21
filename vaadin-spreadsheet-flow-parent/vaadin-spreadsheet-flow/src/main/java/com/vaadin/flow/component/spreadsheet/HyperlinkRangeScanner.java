@@ -28,7 +28,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandl
  * active {@link HyperlinkCellClickHandler}). XSSF and HSSF anchors are both
  * supported.
  */
-@SuppressWarnings("serial")
 final class HyperlinkRangeScanner implements Serializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory

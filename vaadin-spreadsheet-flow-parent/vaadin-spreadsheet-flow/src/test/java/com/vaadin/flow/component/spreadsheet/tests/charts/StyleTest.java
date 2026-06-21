@@ -86,7 +86,6 @@ class StyleTest extends ChartTestBase {
         Assertions.assertEquals(0, conf.getChart().getBorderRadius());
     }
 
-    @SuppressWarnings("serial")
     private String colorToJson(final Color c) {
         return ChartSerialization.toJSON(new AbstractConfigurationObject() {
             @SuppressWarnings("unused")

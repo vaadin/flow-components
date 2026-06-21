@@ -42,7 +42,6 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartDat
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.LegendPosition;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.LegendProperties;
 
-@SuppressWarnings("serial")
 public class XSSFChartReader {
     private final XSSFChart xssfChart;
     private final Spreadsheet spreadsheet;

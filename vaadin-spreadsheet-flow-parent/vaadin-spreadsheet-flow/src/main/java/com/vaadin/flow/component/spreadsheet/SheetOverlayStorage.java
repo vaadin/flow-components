@@ -25,7 +25,6 @@ import com.vaadin.flow.component.Component;
  * before that call {@link #isInitialized} returns {@code false}, matching the
  * Spreadsheet field's pre-workbook-load state.
  */
-@SuppressWarnings("serial")
 final class SheetOverlayStorage implements Serializable {
 
     private HashSet<SheetOverlayWrapper> overlays;

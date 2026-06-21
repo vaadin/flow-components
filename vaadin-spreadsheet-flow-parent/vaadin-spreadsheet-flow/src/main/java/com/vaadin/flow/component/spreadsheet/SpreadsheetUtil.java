@@ -43,7 +43,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class SpreadsheetUtil implements Serializable {
 
     private static final Pattern keyParser = Pattern.compile("-?\\d+");

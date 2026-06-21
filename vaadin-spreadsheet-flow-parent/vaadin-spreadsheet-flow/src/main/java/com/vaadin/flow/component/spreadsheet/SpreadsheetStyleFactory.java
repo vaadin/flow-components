@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SpreadsheetStyleFactory implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory

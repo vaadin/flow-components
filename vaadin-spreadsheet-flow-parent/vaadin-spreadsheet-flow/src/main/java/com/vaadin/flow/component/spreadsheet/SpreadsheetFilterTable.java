@@ -41,7 +41,6 @@ import com.vaadin.flow.component.html.Div;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable {
     public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
 

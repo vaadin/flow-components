@@ -21,7 +21,6 @@ import java.util.Arrays;
  * {@link SheetChangeDispatcher#onNewSheetCreated} call into this class before
  * the actual sheet change.
  */
-@SuppressWarnings("serial")
 final class SheetScrollMemory implements Serializable {
 
     private final Spreadsheet spreadsheet;

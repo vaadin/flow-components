@@ -23,7 +23,6 @@ import java.util.HashSet;
  * is only re-scanned once per spreadsheet lifecycle, since frozen rows and
  * columns don't scroll out of view.
  */
-@SuppressWarnings("serial")
 final class CellCommentLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;

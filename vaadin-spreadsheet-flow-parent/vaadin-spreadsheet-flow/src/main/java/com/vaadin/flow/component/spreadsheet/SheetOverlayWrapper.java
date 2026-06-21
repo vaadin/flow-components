@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
-@SuppressWarnings("serial")
 public abstract class SheetOverlayWrapper implements Serializable {
 
     public interface OverlayChangeListener extends Serializable {

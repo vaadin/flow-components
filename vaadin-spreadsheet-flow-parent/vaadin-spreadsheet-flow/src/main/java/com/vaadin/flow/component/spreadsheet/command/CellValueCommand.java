@@ -28,7 +28,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class CellValueCommand extends SpreadsheetCommand
         implements ValueChangeCommand {
 

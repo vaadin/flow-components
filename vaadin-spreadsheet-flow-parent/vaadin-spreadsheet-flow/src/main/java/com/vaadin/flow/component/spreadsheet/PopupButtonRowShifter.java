@@ -21,7 +21,6 @@ import org.apache.poi.ss.util.CellReference;
  * drops the button (if its row was removed) or rebuilds the registry with the
  * new keys.
  */
-@SuppressWarnings("serial")
 final class PopupButtonRowShifter implements Serializable {
 
     private final Spreadsheet spreadsheet;

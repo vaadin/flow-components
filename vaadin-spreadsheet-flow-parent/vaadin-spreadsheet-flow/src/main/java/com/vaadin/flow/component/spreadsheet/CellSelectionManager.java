@@ -32,7 +32,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class CellSelectionManager implements Serializable {
 
     private final Spreadsheet spreadsheet;

@@ -18,7 +18,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 
-@SuppressWarnings("serial")
 public class SpreadsheetEventListener
         implements ComponentEventListener<Spreadsheet.SpreadsheetEvent> {
     private final SpreadsheetHandlerImpl handler;

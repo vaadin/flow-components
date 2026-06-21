@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-@SuppressWarnings("serial")
 class IteratorChain<E> implements Iterator<E>, Serializable {
 
     private static class EmptyIterator<E> implements Iterator<E>, Serializable {

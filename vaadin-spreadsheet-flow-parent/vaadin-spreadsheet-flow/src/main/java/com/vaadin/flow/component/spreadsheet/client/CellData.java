@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@SuppressWarnings("serial")
 public class CellData implements Serializable {
 
     public int row;

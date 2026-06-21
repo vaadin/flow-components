@@ -23,7 +23,6 @@ import org.apache.poi.ss.usermodel.Sheet;
  * (activation), and {@link Spreadsheet} (createNewSheet,
  * setSheetNameWithPOIIndex, fireEvent).
  */
-@SuppressWarnings("serial")
 final class SheetChangeDispatcher implements Serializable {
 
     private final Spreadsheet spreadsheet;

@@ -28,7 +28,6 @@ import com.vaadin.flow.component.Component;
  * Owns the {@code customComponents} set and the active
  * {@link SpreadsheetComponentFactory}.
  */
-@SuppressWarnings("serial")
 final class CustomComponentLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;

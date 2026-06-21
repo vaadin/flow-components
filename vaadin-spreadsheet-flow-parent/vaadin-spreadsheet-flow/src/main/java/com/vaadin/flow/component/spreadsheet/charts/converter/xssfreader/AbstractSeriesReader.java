@@ -302,7 +302,6 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         }
     }
 
-    @SuppressWarnings("serial")
     protected void handleReferencedValueUpdates(
             final List<CellReference> referencedCells,
             final SERIES_DATA_TYPE seriesData,

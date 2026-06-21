@@ -26,7 +26,6 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
  * width to zero hides the column, and explicitly hiding clears its width
  * mirror.
  */
-@SuppressWarnings("serial")
 final class ColumnSizeOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

@@ -25,7 +25,6 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
  * @since 1.0
  *
  */
-@SuppressWarnings("serial")
 public class InsertTableAction extends SpreadsheetAction {
 
     public InsertTableAction() {

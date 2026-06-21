@@ -17,7 +17,6 @@ import java.util.Set;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 
-@SuppressWarnings("serial")
 public class SpreadsheetState {
 
     // from TabIndexState

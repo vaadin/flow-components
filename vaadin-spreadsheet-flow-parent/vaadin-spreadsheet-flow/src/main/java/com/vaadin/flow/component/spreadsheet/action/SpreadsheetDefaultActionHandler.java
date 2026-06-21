@@ -25,7 +25,6 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
  * @since 1.0
  *
  */
-@SuppressWarnings("serial")
 public class SpreadsheetDefaultActionHandler implements Action.Handler {
 
     private final List<SpreadsheetAction> defaultActions;

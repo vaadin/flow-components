@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class OverlayInfo implements Serializable {
     public enum Type {
         IMAGE, COMPONENT

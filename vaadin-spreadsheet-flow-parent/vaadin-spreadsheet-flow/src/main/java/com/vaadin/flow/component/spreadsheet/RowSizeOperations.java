@@ -30,7 +30,6 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
  * here (the public surface on Spreadsheet stays the same; the logic lives
  * here).
  */
-@SuppressWarnings("serial")
 final class RowSizeOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

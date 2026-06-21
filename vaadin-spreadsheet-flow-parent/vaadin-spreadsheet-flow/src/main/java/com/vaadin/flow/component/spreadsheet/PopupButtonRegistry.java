@@ -25,7 +25,6 @@ import org.apache.poi.ss.util.CellReference;
  * relative references via {@code SpreadsheetUtil.relativeToAbsolute} before
  * calling.
  */
-@SuppressWarnings("serial")
 final class PopupButtonRegistry implements Serializable {
 
     private Map<CellReference, PopupButton> buttonsByCell = new HashMap<>();

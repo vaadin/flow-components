@@ -61,7 +61,6 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class CellValueManager implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory

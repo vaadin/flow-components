@@ -39,7 +39,6 @@ import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
  * {@code Spreadsheet} and is otherwise package-private; no public surface is
  * added to {@code Spreadsheet} for this collaboration.
  */
-@SuppressWarnings("serial")
 final class CommandReplayer implements Serializable {
 
     private final Spreadsheet spreadsheet;

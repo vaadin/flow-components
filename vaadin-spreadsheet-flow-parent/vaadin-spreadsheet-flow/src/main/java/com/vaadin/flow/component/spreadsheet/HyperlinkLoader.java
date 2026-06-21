@@ -16,7 +16,6 @@ import java.util.HashMap;
  * Resets the tooltips map, then walks each viewport pane via
  * {@link HyperlinkRangeScanner}.
  */
-@SuppressWarnings("serial")
 final class HyperlinkLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;

@@ -22,7 +22,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class UnMergeCellsAction extends SpreadsheetAction {
 
     public UnMergeCellsAction() {

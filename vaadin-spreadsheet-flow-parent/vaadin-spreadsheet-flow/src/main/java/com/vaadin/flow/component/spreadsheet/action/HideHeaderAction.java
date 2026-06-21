@@ -20,7 +20,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class HideHeaderAction extends SpreadsheetAction {
 
     public HideHeaderAction() {

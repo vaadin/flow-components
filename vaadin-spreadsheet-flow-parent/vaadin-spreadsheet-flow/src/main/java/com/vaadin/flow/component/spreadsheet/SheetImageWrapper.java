@@ -25,7 +25,6 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SheetImageWrapper extends SheetOverlayWrapper
         implements Serializable {
 

@@ -34,7 +34,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * One range per call; the orchestration of viewport panes lives in
  * {@link CustomComponentLoader}.
  */
-@SuppressWarnings("serial")
 final class CustomComponentRangeScanner implements Serializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory

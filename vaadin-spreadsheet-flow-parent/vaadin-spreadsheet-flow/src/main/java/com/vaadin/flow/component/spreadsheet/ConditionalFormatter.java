@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Mattsson / Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class ConditionalFormatter implements Serializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory

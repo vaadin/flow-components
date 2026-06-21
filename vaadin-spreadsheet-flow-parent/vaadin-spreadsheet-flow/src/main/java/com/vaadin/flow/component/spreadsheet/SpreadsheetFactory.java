@@ -79,7 +79,6 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SpreadsheetFactory implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory

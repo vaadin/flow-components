@@ -15,7 +15,6 @@ import java.io.Serializable;
  * or detaches it accordingly. Called after a sheet change or scroll, when the
  * set of visible cells may have shifted under the buttons.
  */
-@SuppressWarnings("serial")
 final class PopupButtonRefresher implements Serializable {
 
     private final Spreadsheet spreadsheet;

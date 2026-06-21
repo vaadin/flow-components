@@ -22,7 +22,6 @@ import org.apache.poi.ss.usermodel.Sheet;
  * per-call memory of which rows currently have components so the restore step
  * can identify the rows to clean up.
  */
-@SuppressWarnings("serial")
 final class CustomComponentRowSizer implements Serializable {
 
     private final Spreadsheet spreadsheet;

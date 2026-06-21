@@ -27,7 +27,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * Both {@link MergedRegionOperations} and {@link MergedRegionSynchronizer}
  * drive the same cascade through this class.
  */
-@SuppressWarnings("serial")
 final class MergedRegionCascade implements Serializable {
 
     private final Spreadsheet spreadsheet;

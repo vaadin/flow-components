@@ -19,7 +19,6 @@ import org.apache.poi.ss.usermodel.Workbook;
  * that has to happen when the currently active sheet is hidden, and the data +
  * style reload cascade.
  */
-@SuppressWarnings("serial")
 final class SheetVisibilityOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

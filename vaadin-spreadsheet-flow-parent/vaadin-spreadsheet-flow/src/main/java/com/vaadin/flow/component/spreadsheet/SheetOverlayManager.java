@@ -26,7 +26,6 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
  * The {@code reloadFromPoi} flag is set externally (after row/column resizing
  * on POI) to force a full reload on the next call to {@link #loadOrUpdate}.
  */
-@SuppressWarnings("serial")
 final class SheetOverlayManager implements Serializable {
 
     private final Spreadsheet spreadsheet;

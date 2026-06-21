@@ -20,7 +20,6 @@ import org.apache.poi.ss.usermodel.Sheet;
  * {@link Spreadsheet} and the per-sheet-change latch used to defer table-reload
  * work to a single pass.
  */
-@SuppressWarnings("serial")
 final class TableRegistry implements Serializable {
 
     private final HashSet<SpreadsheetTable> tables = new HashSet<>();

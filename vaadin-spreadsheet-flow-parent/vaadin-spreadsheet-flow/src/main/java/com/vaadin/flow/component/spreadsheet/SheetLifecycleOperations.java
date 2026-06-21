@@ -18,7 +18,6 @@ import org.apache.poi.ss.usermodel.Workbook;
  * cascade (sheet-name reservation check, active-sheet shift after delete, data
  * reload, sheet-change event firing) that has to follow.
  */
-@SuppressWarnings("serial")
 final class SheetLifecycleOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

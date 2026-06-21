@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet.shared;
 
-@SuppressWarnings("serial")
 public class PopupButtonState {
 
     /** 1-based */

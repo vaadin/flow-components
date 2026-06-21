@@ -15,7 +15,6 @@ import java.io.Serializable;
  * currently active sheet, and latches the registry so duplicate calls within
  * the same sheet-render cycle are a no-op.
  */
-@SuppressWarnings("serial")
 final class TableLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;

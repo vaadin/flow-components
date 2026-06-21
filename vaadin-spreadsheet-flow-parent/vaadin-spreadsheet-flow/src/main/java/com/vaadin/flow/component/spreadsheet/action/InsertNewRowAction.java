@@ -20,7 +20,6 @@ import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class InsertNewRowAction extends SpreadsheetAction {
 
     public InsertNewRowAction() {

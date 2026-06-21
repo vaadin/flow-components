@@ -31,7 +31,6 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  * {@code SpreadsheetHistoryManager.setHistorySize} has always behaved.</li>
  * </ul>
  */
-@SuppressWarnings("serial")
 final class CommandStack implements Serializable {
 
     private final LinkedList<Command> commands;

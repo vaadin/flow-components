@@ -35,7 +35,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * rows or columns hidden on the active sheet. One range per call; the
  * orchestration of viewport panes lives in {@link CellCommentLoader}.
  */
-@SuppressWarnings("serial")
 final class CellCommentRangeScanner implements Serializable {
 
     private final Spreadsheet spreadsheet;

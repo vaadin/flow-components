@@ -16,7 +16,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 
-@SuppressWarnings("serial")
 class MinimizableComponentContainer extends Div {
 
     private Component content;

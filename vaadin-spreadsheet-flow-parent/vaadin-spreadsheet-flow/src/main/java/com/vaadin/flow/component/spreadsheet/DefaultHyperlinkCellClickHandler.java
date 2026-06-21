@@ -30,7 +30,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandl
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class DefaultHyperlinkCellClickHandler
         implements HyperlinkCellClickHandler {
 

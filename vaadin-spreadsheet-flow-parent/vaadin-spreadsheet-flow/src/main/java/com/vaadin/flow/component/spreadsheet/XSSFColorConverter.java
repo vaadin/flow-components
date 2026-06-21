@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public class XSSFColorConverter implements ColorConverter {
 
     private static final Logger LOGGER = LoggerFactory

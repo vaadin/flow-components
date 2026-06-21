@@ -24,7 +24,6 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
  * (skip leading hidden rows and columns, compute width and height from the
  * active sheet's dimensions).
  */
-@SuppressWarnings("serial")
 final class SheetOverlayInfoBuilder implements Serializable {
 
     private final Spreadsheet spreadsheet;

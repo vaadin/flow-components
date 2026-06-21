@@ -22,7 +22,6 @@ import org.apache.poi.ss.usermodel.Workbook;
  * Throws {@link IllegalArgumentException} when an invalid index is given or
  * when an attempt is made to activate a hidden/very-hidden sheet.
  */
-@SuppressWarnings("serial")
 final class ActiveSheetSelector implements Serializable {
 
     private final Spreadsheet spreadsheet;

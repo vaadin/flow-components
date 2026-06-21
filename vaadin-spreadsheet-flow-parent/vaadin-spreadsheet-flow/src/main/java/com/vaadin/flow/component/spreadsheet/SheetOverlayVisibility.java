@@ -20,7 +20,6 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
  * considered visible) and the hidden- range case (overlay anchored entirely in
  * hidden rows or columns is invisible).
  */
-@SuppressWarnings("serial")
 final class SheetOverlayVisibility implements Serializable {
 
     private final Spreadsheet spreadsheet;

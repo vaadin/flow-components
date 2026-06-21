@@ -23,7 +23,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegio
  * Backed by a supplier of the live region list so the lookup always sees the
  * latest state without holding a stale reference. Owns no data of its own.
  */
-@SuppressWarnings("serial")
 final class MergedRegionLookup implements MergedRegionContainer, Serializable {
 
     private final Supplier<List<MergedRegion>> regionsSupplier;

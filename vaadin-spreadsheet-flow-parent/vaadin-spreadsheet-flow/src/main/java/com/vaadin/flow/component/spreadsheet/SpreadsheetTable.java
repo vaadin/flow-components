@@ -33,7 +33,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SpreadsheetTable implements Serializable {
 
     private final CellRangeAddress fullTableRegion;

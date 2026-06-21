@@ -42,7 +42,6 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 @Tag("div")
 public class PopupButton extends Component {
 

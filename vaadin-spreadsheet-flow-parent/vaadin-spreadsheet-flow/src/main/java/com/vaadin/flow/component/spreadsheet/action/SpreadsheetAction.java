@@ -22,7 +22,6 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-@SuppressWarnings("serial")
 public abstract class SpreadsheetAction extends Action {
 
     public SpreadsheetAction(String caption) {

@@ -37,7 +37,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
  * Has a check box for selecting all items (cell values), and one check box per
  * unique cell value that can be found within the cells of the table column.
  */
-@SuppressWarnings("serial")
 public class ItemFilter extends Div implements SpreadsheetFilter {
 
     private static final String ITEM_FILTER_LAYOUT_CLASSNAME = "spreadsheet-item-filter-layout";

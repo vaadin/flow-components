@@ -107,7 +107,6 @@ import tools.jackson.databind.JsonNode;
 // Need an explicit reference to Chart class, since the DefaultChartCreator
 // class that references it is only accessed through reflection
 @Uses(Chart.class)
-@SuppressWarnings("serial")
 public class Spreadsheet extends Component
         implements HasSize, HasStyle, Action.Container {
 

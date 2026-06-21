@@ -32,7 +32,6 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
  * {@link WeakHashMap} so cell references held only by the cache don't prevent
  * GC.
  */
-@SuppressWarnings("serial")
 final class ColumnAutofitter implements Serializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory

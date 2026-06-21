@@ -29,7 +29,6 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class SheetChartWrapper extends SheetOverlayWrapper
         implements Serializable {
 

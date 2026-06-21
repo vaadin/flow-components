@@ -31,7 +31,6 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class CellSelectionShifter implements Serializable {
 
     private final Spreadsheet spreadsheet;

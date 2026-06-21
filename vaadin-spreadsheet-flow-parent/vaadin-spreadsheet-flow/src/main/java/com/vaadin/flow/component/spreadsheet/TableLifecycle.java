@@ -15,7 +15,6 @@ import java.io.Serializable;
  * button it owns (when the table's sheet is currently active), clears filters
  * on filter tables, and clears the table's content.
  */
-@SuppressWarnings("serial")
 final class TableLifecycle implements Serializable {
 
     private final Spreadsheet spreadsheet;

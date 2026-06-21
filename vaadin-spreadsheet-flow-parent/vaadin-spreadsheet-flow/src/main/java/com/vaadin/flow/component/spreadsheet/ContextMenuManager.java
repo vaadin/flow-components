@@ -31,7 +31,6 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
 public class ContextMenuManager implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory

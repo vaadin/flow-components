@@ -25,7 +25,6 @@ import java.util.HashSet;
  * Tracks the set of currently attached buttons so they can all be detached on a
  * sheet change (active-sheet swap removes all popups, by design).
  */
-@SuppressWarnings("serial")
 final class PopupButtonBinding implements Serializable {
 
     private final Spreadsheet spreadsheet;

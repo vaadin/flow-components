@@ -27,7 +27,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * yet — that path re-applies the merge cascade so the new region's cells are
  * styled and marked correctly.
  */
-@SuppressWarnings("serial")
 final class MergedRegionSynchronizer implements Serializable {
 
     private final Spreadsheet spreadsheet;

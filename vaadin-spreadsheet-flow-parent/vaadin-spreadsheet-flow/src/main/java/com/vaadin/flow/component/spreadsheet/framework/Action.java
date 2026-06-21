@@ -22,7 +22,6 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  * @since 3.0
  */
-@SuppressWarnings("serial")
 public class Action implements Serializable {
 
     /**

@@ -18,7 +18,6 @@ import org.apache.poi.ss.usermodel.Workbook;
  * validation, and keeps the visible-sheet-names mirror used by the client in
  * sync.
  */
-@SuppressWarnings("serial")
 final class SheetMetadataOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;

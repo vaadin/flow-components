@@ -44,7 +44,6 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartDat
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.TitleProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.View3dData;
 
-@SuppressWarnings("serial")
 public class ChartDataToVaadinConfigWriter {
 
     private static final int DEFAULT_LEGEND_Y_OFFSET = 30;
