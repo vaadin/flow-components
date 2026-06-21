@@ -1,0 +1,115 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.spreadsheet;
+
+import java.io.Serializable;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+/**
+ * Orchestrates the cell-state update lifecycle on the active sheet. Five
+ * cohesive paths, all about "a cell changed — push the change to the client":
+ *
+ * <ul>
+ * <li>{@link #markCellAsUpdated} — flag a single cell as changed; optionally
+ * propagate the style change too.</li>
+ * <li>{@link #markCellAsDeleted} — flag a cell as deleted; optionally propagate
+ * style; trigger a refresh.</li>
+ * <li>{@link #deleteCell} — locate the cell on the active sheet, remove it from
+ * POI, propagate the delete-style + value-manager changes.</li>
+ * <li>{@link #updateMarkedCells} — session-end flush: rebuild conditional
+ * formatting rules, push value updates, refresh selection + comments, reload
+ * visible custom components / editors.</li>
+ * <li>{@link #refreshAllCellValues} — full sheet refresh: clear formula +
+ * conditional-formatting evaluators, clear value cache, reload the whole
+ * viewport range if it's been loaded once before, then re-select the active
+ * cell to refresh its formula bar.</li>
+ * </ul>
+ *
+ * <p>
+ * Pure orchestrator. Holds a {@link Spreadsheet} reference for read / dispatch
+ * only.
+ */
+final class CellMarkUpdater implements Serializable {
+
+    private final Spreadsheet spreadsheet;
+
+    CellMarkUpdater(Spreadsheet spreadsheet) {
+        this.spreadsheet = spreadsheet;
+    }
+
+    void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
+        spreadsheet.getCellValueManager().cellUpdated(cell);
+        if (cellStyleUpdated) {
+            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
+                    true);
+        }
+    }
+
+    void markCellAsDeleted(Cell cell, boolean cellStyleUpdated) {
+        spreadsheet.getCellValueManager().cellDeleted(cell);
+        if (cellStyleUpdated) {
+            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
+                    true);
+        }
+        spreadsheet.refreshCells(cell);
+    }
+
+    void deleteCell(int row, int col) {
+        Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
+        final Cell cell = activeSheet.getRow(row).getCell(col);
+        if (cell != null) {
+            // cell.setCellStyle(null); // TODO NPE on HSSF
+            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
+                    true);
+            activeSheet.getRow(row).removeCell(cell);
+            spreadsheet.getCellValueManager().cellDeleted(cell);
+            spreadsheet.refreshCells(cell);
+        }
+    }
+
+    void updateMarkedCells() {
+        // update conditional formatting in case styling has changed. New
+        // values are fetched in ValueManager (below).
+        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
+        // FIXME should be optimized, should not go through all links,
+        // comments etc. always
+        spreadsheet.getCellValueManager().updateMarkedCellValues();
+        // if the selected cell is of type formula, there is a chance that
+        // the formula has been changed.
+        spreadsheet.getCellSelectionManager().reSelectSelectedCell();
+        // Update the cell comments as well to show them instantly after
+        // adding them
+        spreadsheet.cellCommentLoader.load();
+
+        // update custom components, editors
+        spreadsheet.reloadVisibleCellContents();
+    }
+
+    void refreshAllCellValues() {
+        spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
+        spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
+        spreadsheet.getCellValueManager().clearCachedContent();
+
+        // only reload if the cells have been loaded once previously
+        if (spreadsheet.getFirstColumn() == -1) {
+            // client will request cells soon, no need for reload now
+            return;
+        }
+        spreadsheet.updateRowAndColumnRangeCellData(1, 1, spreadsheet.getRows(),
+                spreadsheet.getColumns());
+        // if the selected cell is of type formula, there is a chance that
+        // the formula has been changed.
+        spreadsheet.getCellSelectionManager().reSelectSelectedCell();
+    }
+}

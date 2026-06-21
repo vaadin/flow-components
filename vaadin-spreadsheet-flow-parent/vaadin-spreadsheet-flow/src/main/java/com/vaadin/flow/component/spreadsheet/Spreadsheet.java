@@ -911,6 +911,8 @@ public class Spreadsheet extends Component
     private final CellRangeNormalizer cellRangeNormalizer = new CellRangeNormalizer(
             this);
 
+    private final CellMarkUpdater cellMarkUpdater = new CellMarkUpdater(this);
+
     private boolean chartsEnabled = true;
 
     /**
@@ -951,8 +953,8 @@ public class Spreadsheet extends Component
     private final CellCommentRangeScanner cellCommentRangeScanner = new CellCommentRangeScanner(
             this);
 
-    private final CellCommentLoader cellCommentLoader = new CellCommentLoader(
-            this, cellCommentRangeScanner);
+    final CellCommentLoader cellCommentLoader = new CellCommentLoader(this,
+            cellCommentRangeScanner);
 
     private final HyperlinkRangeScanner hyperlinkRangeScanner = new HyperlinkRangeScanner(
             this);
@@ -2064,16 +2066,7 @@ public class Spreadsheet extends Component
      *            Column index of the cell to delete, 0-based
      */
     public void deleteCell(int row, int col) {
-        final Sheet activeSheet = workbook
-                .getSheetAt(workbook.getActiveSheetIndex());
-        final Cell cell = activeSheet.getRow(row).getCell(col);
-        if (cell != null) {
-            // cell.setCellStyle(null); // TODO NPE on HSSF
-            styler.cellStyleUpdated(cell, true);
-            activeSheet.getRow(row).removeCell(cell);
-            valueManager.cellDeleted(cell);
-            refreshCells(cell);
-        }
+        cellMarkUpdater.deleteCell(row, col);
     }
 
     /**
@@ -2127,10 +2120,7 @@ public class Spreadsheet extends Component
      *            The updated cell
      */
     void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
-        valueManager.cellUpdated(cell);
-        if (cellStyleUpdated) {
-            styler.cellStyleUpdated(cell, true);
-        }
+        cellMarkUpdater.markCellAsUpdated(cell, cellStyleUpdated);
     }
 
     /**
@@ -2143,11 +2133,7 @@ public class Spreadsheet extends Component
      *            The cell that has been deleted.
      */
     public void markCellAsDeleted(Cell cell, boolean cellStyleUpdated) {
-        valueManager.cellDeleted(cell);
-        if (cellStyleUpdated) {
-            styler.cellStyleUpdated(cell, true);
-        }
-        refreshCells(cell);
+        cellMarkUpdater.markCellAsDeleted(cell, cellStyleUpdated);
     }
 
     /**
@@ -2158,21 +2144,7 @@ public class Spreadsheet extends Component
      * cells. For that, use {@link #reloadVisibleCellContents()}
      */
     void updateMarkedCells() {
-        // update conditional formatting in case styling has changed. New values
-        // are fetched in ValueManager (below).
-        conditionalFormatter.createConditionalFormatterRules();
-        // FIXME should be optimized, should not go through all links, comments
-        // etc. always
-        valueManager.updateMarkedCellValues();
-        // if the selected cell is of type formula, there is a change that the
-        // formula has been changed.
-        selectionManager.reSelectSelectedCell();
-        // Update the cell comments as well to show them instantly after adding
-        // them
-        cellCommentLoader.load();
-
-        // update custom components, editors
-        reloadVisibleCellContents();
+        cellMarkUpdater.updateMarkedCells();
     }
 
     /**
@@ -2278,20 +2250,7 @@ public class Spreadsheet extends Component
      * cell styles change.
      */
     public void refreshAllCellValues() {
-
-        getFormulaEvaluator().clearAllCachedResultValues();
-        getConditionalFormattingEvaluator().clearAllCachedValues();
-        valueManager.clearCachedContent();
-
-        // only reload if the cells have been loaded once previously
-        if (viewportBounds.getFirstColumn() == -1) {
-            // client will request cells soon, no need for reload now
-            return;
-        }
-        updateRowAndColumnRangeCellData(1, 1, getRows(), getColumns());
-        // if the selected cell is of type formula, there is a change that the
-        // formula has been changed.
-        selectionManager.reSelectSelectedCell();
+        cellMarkUpdater.refreshAllCellValues();
     }
 
     /**
@@ -3441,8 +3400,7 @@ public class Spreadsheet extends Component
      *
      * NOTE: Does not run style updates!
      */
-    private void updateRowAndColumnRangeCellData(int r1, int c1, int r2,
-            int c2) {
+    void updateRowAndColumnRangeCellData(int r1, int c1, int r2, int c2) {
         // FIXME should be optimized, should not go through all links, comments
         // etc. always
         hyperlinkLoader.load();
