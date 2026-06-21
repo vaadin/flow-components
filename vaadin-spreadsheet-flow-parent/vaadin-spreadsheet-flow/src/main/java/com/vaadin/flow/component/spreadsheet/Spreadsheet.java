@@ -1000,7 +1000,7 @@ public class Spreadsheet extends Component
     private final PopupButtonBinding popupButtonBinding = new PopupButtonBinding(
             this);
 
-    private final PopupButtonRowShifter popupButtonRowShifter = new PopupButtonRowShifter(
+    final PopupButtonRowShifter popupButtonRowShifter = new PopupButtonRowShifter(
             this, popupButtonRegistry, popupButtonBinding);
 
     private final PopupButtonRefresher popupButtonRefresher = new PopupButtonRefresher(
@@ -1032,7 +1032,10 @@ public class Spreadsheet extends Component
     private final SheetVisibilityOperations sheetVisibilityOperations = new SheetVisibilityOperations(
             this);
 
-    private final InvalidFormulaTracker invalidFormulaTracker = new InvalidFormulaTracker(
+    final InvalidFormulaTracker invalidFormulaTracker = new InvalidFormulaTracker(
+            this);
+
+    private final RowShiftOrchestrator rowShiftOrchestrator = new RowShiftOrchestrator(
             this);
 
     /**
@@ -2443,108 +2446,8 @@ public class Spreadsheet extends Component
      */
     public void shiftRows(int startRow, int endRow, int n,
             boolean copyRowHeight, boolean resetOriginalRowHeight) {
-        Sheet sheet = getActiveSheet();
-        int lastNonBlankRow = getLastNonBlankRow(sheet);
-        sheet.shiftRows(startRow, endRow, n, copyRowHeight,
+        rowShiftOrchestrator.shift(startRow, endRow, n, copyRowHeight,
                 resetOriginalRowHeight);
-        // need to re-send the cell values to client
-        // remove all cached cell data that is now empty
-        getFormulaEvaluator().clearAllCachedResultValues();
-        getConditionalFormattingEvaluator().clearAllCachedValues();
-        int start = n < 0 ? Math.max(lastNonBlankRow, startRow) : startRow;
-        int end = n < 0 ? endRow : startRow + n - 1;
-        valueManager.updateDeletedRowsInClientCache(start + 1, end + 1);
-        int firstAffectedRow = n < 0 ? startRow + n : startRow;
-        int lastAffectedRow = n < 0 ? endRow : endRow + n;
-        if (copyRowHeight || resetOriginalRowHeight) {
-            // might need to increase the size of the row heights array
-            int oldLength = getRowH().length;
-            int neededLength = endRow + n + 1;
-            float[] _rowH = Arrays.copyOf(getRowH(), getRowH().length);
-            if (n > 0 && oldLength < neededLength) {
-                _rowH = Arrays.copyOf(_rowH, neededLength);
-            }
-            for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
-                Row row = sheet.getRow(i);
-                if (row != null) {
-                    if (row.getZeroHeight()) {
-                        _rowH[i] = 0f;
-                    } else {
-                        _rowH[i] = row.getHeightInPoints();
-                    }
-                } else {
-                    _rowH[i] = sheet.getDefaultRowHeightInPoints();
-                }
-            }
-            setRowH(_rowH);
-        }
-
-        if (sheetOverlayManager.hasOverlays()) {
-            sheetOverlayManager.markReloadFromPoi();
-        }
-        // need to shift the cell styles, clear and update
-        // need to go -1 and +1 because of shifted borders..
-        final ArrayList<Cell> cellsToUpdate = new ArrayList<Cell>();
-        for (int r = (firstAffectedRow - 1); r <= (lastAffectedRow + 1); r++) {
-            if (r < 0) {
-                r = 0;
-            }
-            Row row = sheet.getRow(r);
-            final Integer rowIndex = r + 1;
-            ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
-                    getHiddenRowIndexes());
-            if (row == null) {
-                valueManager.updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                _hiddenRowIndexes.remove(rowIndex);
-                for (int c = 0; c < getCols(); c++) {
-                    styler.clearCellStyle(r, c);
-                }
-            } else {
-                if (row.getZeroHeight()) {
-                    _hiddenRowIndexes.add(rowIndex);
-                } else {
-                    _hiddenRowIndexes.remove(rowIndex);
-                }
-                for (int c = 0; c < getCols(); c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell == null) {
-                        styler.clearCellStyle(r, c);
-                        if (r <= lastNonBlankRow + n) {
-                            // There might be a pre-shift value for this cell in
-                            // client-side and should be overwritten
-                            cell = row.createCell(c);
-                            cellsToUpdate.add(cell);
-                        }
-                    } else {
-                        cellsToUpdate.add(cell);
-                    }
-                }
-            }
-            setHiddenRowIndexes(_hiddenRowIndexes);
-        }
-        rowsMoved(firstAffectedRow, lastAffectedRow, n);
-
-        for (Cell cell : cellsToUpdate) {
-            styler.cellStyleUpdated(cell, false);
-            markCellAsUpdated(cell, false);
-        }
-        styler.loadCustomBorderStylesToState();
-
-        updateMarkedCells(); // deleted and formula cells and style selectors
-        updateRowAndColumnRangeCellData(viewportBounds.getFirstRow(),
-                viewportBounds.getFirstColumn(), viewportBounds.getLastRow(),
-                viewportBounds.getLastColumn()); // shifted area values
-        updateMergedRegions();
-
-        CellReference selectedCellReference = selectionManager
-                .getSelectedCellReference();
-        if (selectedCellReference != null) {
-            if (selectedCellReference.getRow() >= firstAffectedRow
-                    && selectedCellReference.getRow() <= lastAffectedRow) {
-                selectionManager.onSheetAddressChanged(
-                        selectedCellReference.formatAsString(), false);
-            }
-        }
     }
 
     /**
@@ -2572,27 +2475,6 @@ public class Spreadsheet extends Component
      * @param n
      *            the amount of lines that rows has been moved
      */
-    private void rowsMoved(int first, int last, int n) {
-        // Merged regions
-        if (n < 0) {
-            // Remove merged cells from deleted rows. POI will handle the other
-            // updated values.
-            for (int row = (first + n); row <= first; ++row) {
-                Sheet sheet = getActiveSheet();
-                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-                    CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
-                    if (mergedRegion.getFirstRow() == row) {
-                        removeMergedRegion(i);
-                    }
-                }
-            }
-        }
-
-        popupButtonRowShifter.shift(first, last, n);
-
-        invalidFormulaTracker.shiftActiveSheetRows(first, last, n);
-    }
-
     /**
      * @return the common {@link FormulaEvaluator} instance.
      */
@@ -2610,23 +2492,7 @@ public class Spreadsheet extends Component
         return conditionalFormattingEvaluator;
     }
 
-    private int getLastNonBlankRow(Sheet sheet) {
-        for (int r = sheet.getLastRowNum(); r >= 0; r--) {
-            Row row = sheet.getRow(r);
-            if (row != null) {
-                for (short c = row.getFirstCellNum(); c < row
-                        .getLastCellNum(); c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell != null && cell.getCellType() != CellType.BLANK) {
-                        return r;
-                    }
-                }
-            }
-        }
-        return 0;
-    }
-
-    private void updateMergedRegions() {
+    void updateMergedRegions() {
         mergedRegionSynchronizer.rebuildFromPoi();
     }
 
