@@ -92,8 +92,8 @@ slice (unless it's a non-applicable tier marked `–`).
 | Block | unit | unit-fix | golden | IT | E2E | char | Notes |
 |---|---|---|---|---|---|---|---|
 | TableRegistry | | ✓ | | ✓ | ✓ | ✓ | **Slice 67** — 12 tests; HashSet semantics + per-sheet filter + load-latch |
-| TableLoader | | | | ✓ | ✓ | | |
-| TableLifecycle | | | | ✓ | ✓ | | |
+| TableLoader | | ✓ | | ✓ | ✓ | ✓ | **Slice 82** — 8 tests; latch short-circuit + per-table sheet filter |
+| TableLifecycle | | ✓ | | ✓ | ✓ | ✓ | **Slice 83** — 8 tests; inactive-early-return + filter-table clear path |
 
 ### Slice 10 — Sheet Navigation
 
@@ -101,15 +101,15 @@ slice (unless it's a non-applicable tier marked `–`).
 |---|---|---|---|---|---|---|---|
 | ActiveSheetSelector | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 75** — 13 tests; index translation + activation validation + reload sequence |
 | SheetScrollMemory | | ✓ | | ✓ | ✓ | ✓ | **Slice 66** — 4 tests; defensive-copy semantic on both arrays |
-| SheetChangeDispatcher | | | | ✓ | ✓ | | |
+| SheetChangeDispatcher | | ✓ | | ✓ | ✓ | ✓ | **Slice 84** — 8 tests; stash-then-mutate ordering + abs() index normalization |
 
 ### Slice 11 — Sheet metadata + lifecycle
 
 | Block | unit | unit-fix | golden | IT | E2E | char | Notes |
 |---|---|---|---|---|---|---|---|
-| SheetLifecycleOperations | | | | ✓ | ✓ | | |
+| SheetLifecycleOperations | | ✓ | | ✓ | ✓ | ✓ | **Slice 85** — 14 tests; name validation + min-1-visible guard + active-shift |
 | SheetMetadataOperations | | ✓ | | ✓ | ✓ | ✓ | **Slice 74** — 12 tests; rename validation + hidden-sheet-skips-mirror |
-| SheetVisibilityOperations | | | | ✓ | ✓ | | HideIT |
+| SheetVisibilityOperations | | ✓ | | ✓ | ✓ | ✓ | **Slice 86** — 12 tests; min-1-visible + no-op short-circuit + active-shift |
 
 ### Slice 12 — Cell value shifting
 
@@ -119,7 +119,7 @@ slice (unless it's a non-applicable tier marked `–`).
 | SequenceIncrement | ✓ | – | – | – | – | ✓ | Pure-logic tests (15) |
 | CellValueShifter | ✓ | | | ✓ | ✓ | ✓ | **Slice 24** — 10 tests, Mockito + XSSFWorkbook (FORMULA branch deferred) |
 | RangeSequenceDetector | | ✓ | | ✓ | ✓ | ✓ | **Slice 22** — 13 tests, XSSFWorkbook fixture |
-| DirectionalShiftOperator | | | | ✓ | ✓ | | |
+| DirectionalShiftOperator | | ✓ | | ✓ | ✓ | ✓ | **Slice 76** — 14 tests; 4 directional methods + asymmetric clear ordering |
 
 ### Slice 13 — Cell rendering / client cache
 
@@ -127,7 +127,7 @@ slice (unless it's a non-applicable tier marked `–`).
 |---|---|---|---|---|---|---|---|
 | CellNumericFormatter | | | ✓ | ✓ | ✓ | | FormulaFormatterTest, NumberFormatIT |
 | CellFitCalculator | | ✓ | | ✓ | ✓ | ✓ | **Slice 68** — 13 tests; BigDecimal compare + 4px padding constant |
-| CellDeletionGuard | | | | ✓ | ✓ | | CellDeletionIT |
+| CellDeletionGuard | | ✓ | | ✓ | ✓ | ✓ | **Slice 77** — 17 tests; 3 deletion shapes + isInRange + handler propagation |
 | ClientCellCache | ✓ | | | ✓ | ✓ | ✓ | **Slice 21** — 13 tests, pure data structure |
 | ClientFlushQueue | ✓ | | | ✓ | ✓ | ✓ | **Slice 21** — 9 tests, pure data structure |
 | ClientCacheFlusher | | ✓ | | ✓ | ✓ | ✓ | **Slice 40** — 6 tests, Mockito + XSSFWorkbook, pays off slice-38 spec |
@@ -145,8 +145,8 @@ slice (unless it's a non-applicable tier marked `–`).
 | Block | unit | unit-fix | golden | IT | E2E | char | Notes |
 |---|---|---|---|---|---|---|---|
 | SheetDimensions | | ✓ | | ✓ | ✓ | ✓ | **Slice 69** — 11 tests; property-mirror invariant per setter |
-| SheetGrouping | | | ✓ | ✓ | ✓ | | GroupingIT |
-| SheetCssStyleMaps | | | ✓ | ✓ | ✓ | | |
+| SheetGrouping | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 87** — 10 tests; row-data write-only asymmetry pinned |
+| SheetCssStyleMaps | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 88** — 10 tests; 6 setter/mirror pairs |
 
 ### Slice 16 — Style building
 
@@ -154,15 +154,15 @@ slice (unless it's a non-applicable tier marked `–`).
 |---|---|---|---|---|---|---|---|
 | DefaultStyleBaseline | | ✓ | | ✓ | ✓ | ✓ | **Slice 36** — 6 tests, XSSFWorkbook + mocked parent |
 | FontStyleComposer | | ✓ | | ✓ | ✓ | ✓ | **Slice 39** — 9 tests, real DefaultStyleBaseline + XSSFWorkbook |
-| CellBorderStyleBuilder | | | ✓ | ✓ | ✓ | | Border styles |
+| CellBorderStyleBuilder | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 81** — 22 tests; storage + spillover maps + 5-cache lifecycle |
 
 ### Slice 17 — Conditional formatting
 
 | Block | unit | unit-fix | golden | IT | E2E | char | Notes |
 |---|---|---|---|---|---|---|---|
-| POIReflectionTools | | | ✓ | ✓ | ✓ | | Used in CF testing |
-| RuleBorderTracker | | | | ✓ | ✓ | | |
-| RuleEvaluator | | | ✓ | ✓ | ✓ | | ConditionalFormatterIT |
+| POIReflectionTools | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 79** — 16 tests; flagged setBorderLeft(NONE)-via-Java-API asymmetry |
+| RuleBorderTracker | | ✓ | | ✓ | ✓ | ✓ | **Slice 78** — 14 tests; HSSF skip + spillover maps + NONE-default-grey |
+| RuleEvaluator | | ✓ | ✓ | ✓ | ✓ | ✓ | **Slice 80** — 18 tests; CELL_VALUE_IS dispatch + formula path + type-mismatch + soft-fail |
 
 ### God-class survivors
 
