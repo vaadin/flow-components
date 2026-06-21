@@ -1,0 +1,169 @@
+/**
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
+package com.vaadin.flow.component.spreadsheet;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.vaadin.flow.dom.Element;
+
+/**
+ * Characterization tests for {@link SheetCssStyleMaps}.
+ *
+ * <p>
+ * Six getter/setter pairs, each paired with a serialized-property mirror. Pure
+ * storage + mirror — same pattern as {@code SheetDimensionsTest} and
+ * {@code SheetGroupingTest}. The intentionally-excluded
+ * {@code cellStyleToCSSStyle} field stays on the parent Spreadsheet (protected
+ * for subclass compat), as documented in the source.
+ */
+class SheetCssStyleMapsTest {
+
+    @Mock
+    private Spreadsheet spreadsheet;
+    @Mock
+    private Element element;
+
+    private SheetCssStyleMaps maps;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        maps = new SheetCssStyleMaps(spreadsheet);
+        lenient().when(spreadsheet.getElement()).thenReturn(element);
+    }
+
+    @Test
+    void freshMaps_allFieldsNull() {
+        assertNull(maps.getRowIndexToStyleIndex());
+        assertNull(maps.getColumnIndexToStyleIndex());
+        assertNull(maps.getLockedColumnIndexes());
+        assertNull(maps.getLockedRowIndexes());
+        assertNull(maps.getShiftedCellBorderStyles());
+        assertNull(maps.getConditionalFormattingStyles());
+    }
+
+    @Test
+    void setRowIndexToStyleIndex_storesAndMirrorsAsSerializedString() {
+        HashMap<Integer, Integer> data = new HashMap<>();
+        data.put(0, 5);
+        data.put(1, 7);
+
+        maps.setRowIndexToStyleIndex(data);
+
+        assertSame(data, maps.getRowIndexToStyleIndex());
+        verify(element).setProperty(eq("rowIndexToStyleIndex"), anyString());
+    }
+
+    @Test
+    void setColumnIndexToStyleIndex_storesAndMirrors() {
+        HashMap<Integer, Integer> data = new HashMap<>();
+        data.put(0, 3);
+
+        maps.setColumnIndexToStyleIndex(data);
+
+        assertSame(data, maps.getColumnIndexToStyleIndex());
+        verify(element).setProperty(eq("columnIndexToStyleIndex"), anyString());
+    }
+
+    @Test
+    void setLockedColumnIndexes_storesAndMirrors() {
+        Set<Integer> data = new HashSet<>();
+        data.add(0);
+        data.add(2);
+
+        maps.setLockedColumnIndexes(data);
+
+        assertSame(data, maps.getLockedColumnIndexes());
+        verify(element).setProperty(eq("lockedColumnIndexes"), anyString());
+    }
+
+    @Test
+    void setLockedRowIndexes_storesAndMirrors() {
+        Set<Integer> data = new HashSet<>();
+        data.add(1);
+
+        maps.setLockedRowIndexes(data);
+
+        assertSame(data, maps.getLockedRowIndexes());
+        verify(element).setProperty(eq("lockedRowIndexes"), anyString());
+    }
+
+    @Test
+    void setShiftedCellBorderStyles_storesAndMirrors() {
+        ArrayList<String> data = new ArrayList<>();
+        data.add(".col1.row1{border-right:1px;}");
+
+        maps.setShiftedCellBorderStyles(data);
+
+        assertSame(data, maps.getShiftedCellBorderStyles());
+        verify(element).setProperty(eq("shiftedCellBorderStyles"), anyString());
+    }
+
+    @Test
+    void setConditionalFormattingStyles_storesAndMirrors() {
+        HashMap<Integer, String> data = new HashMap<>();
+        data.put(1, "background:red;");
+
+        maps.setConditionalFormattingStyles(data);
+
+        assertSame(data, maps.getConditionalFormattingStyles());
+        verify(element).setProperty(eq("conditionalFormattingStyles"),
+                anyString());
+    }
+
+    @Test
+    void setters_areIndependent_noCrossEffects() {
+        HashMap<Integer, Integer> rowStyle = new HashMap<>();
+        Set<Integer> lockedCol = new HashSet<>();
+
+        maps.setRowIndexToStyleIndex(rowStyle);
+        maps.setLockedColumnIndexes(lockedCol);
+
+        assertSame(rowStyle, maps.getRowIndexToStyleIndex());
+        assertSame(lockedCol, maps.getLockedColumnIndexes());
+        assertNull(maps.getColumnIndexToStyleIndex());
+        assertNull(maps.getLockedRowIndexes());
+    }
+
+    @Test
+    void mirrorFiresOnEverySet_evenWithSameValue() {
+        // Pin: unconditional mirror, like the sibling SheetDimensions
+        // and SheetGrouping classes.
+        HashMap<Integer, Integer> data = new HashMap<>();
+        maps.setRowIndexToStyleIndex(data);
+        maps.setRowIndexToStyleIndex(data);
+
+        verify(element, times(2)).setProperty(eq("rowIndexToStyleIndex"),
+                anyString());
+    }
+
+    @Test
+    void setRowIndexToStyleIndex_null_storesNull_andMirrors() {
+        maps.setRowIndexToStyleIndex(null);
+
+        assertNull(maps.getRowIndexToStyleIndex());
+        verify(element).setProperty(eq("rowIndexToStyleIndex"), anyString());
+    }
+}
