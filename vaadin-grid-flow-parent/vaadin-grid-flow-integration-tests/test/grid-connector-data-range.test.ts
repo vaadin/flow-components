@@ -144,6 +144,21 @@ describe('grid connector - data range', () => {
     expect(grid.loading).to.be.false;
   });
 
+  it('should request uncached buffer pages while scrolling over cached rows', async () => {
+    // Simulate the state the grid maintains while a scroll is in progress
+    grid.shadowRoot!.querySelector('#scroller')!.setAttribute('scrolling', '');
+
+    // Scroll so that all rendered rows stay within the cached page 0,
+    // while the fetch range buffer extends into the uncached page 1
+    const renderedCount = grid.$connector.getRenderedRange()[1] + 1;
+    grid.scrollToIndex(PAGE_SIZE - renderedCount);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+
+    // Every rendered row already has data, so without eager fetch range
+    // loading during scrolling, no request would be made at all
+    expectRangeRequest([0, PAGE_SIZE * 2]);
+  });
+
   it('should skip duplicate range request while a request is in flight', async () => {
     // Trigger a request for the end of the grid and leave it in flight
     // (do not resolve it).

@@ -231,8 +231,8 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_singleSelectWithoutValueOptions_rejectedWithRegistrationHint() {
-        // Without a valueOptions(...) registration, the LLM has no labels
+    void convert_singleSelectWithoutFieldValueOptions_rejectedWithRegistrationHint() {
+        // Without a fieldValueOptions(...) registration, the LLM has no labels
         // to pick and the converter has no toValue function to resolve them
         // — fail loudly and point the developer at the right API.
         var field = wrap(new SingleSelectField<String>(),
@@ -241,27 +241,27 @@ class FormValueConverterTest {
         var json = json("\"any\"");
         var ex = Assertions.assertThrows(RejectedValueException.class,
                 () -> FormValueConverter.convert(field, json));
-        Assertions.assertTrue(ex.getMessage().contains("valueOptions"),
-                "Rejection reason must point at the missing valueOptions "
+        Assertions.assertTrue(ex.getMessage().contains("fieldValueOptions"),
+                "Rejection reason must point at the missing fieldValueOptions "
                         + "registration; got: " + ex.getMessage());
     }
 
     @Test
-    void convert_multiSelectWithoutValueOptions_rejectedWithRegistrationHint() {
+    void convert_multiSelectWithoutFieldValueOptions_rejectedWithRegistrationHint() {
         var field = wrap(new MultiSelectField<String>(),
                 FormFieldType.MULTI_SELECT);
 
         var json = json("[\"any\"]");
         var ex = Assertions.assertThrows(RejectedValueException.class,
                 () -> FormValueConverter.convert(field, json));
-        Assertions.assertTrue(ex.getMessage().contains("valueOptions"),
-                "Rejection reason must point at the missing valueOptions "
+        Assertions.assertTrue(ex.getMessage().contains("fieldValueOptions"),
+                "Rejection reason must point at the missing fieldValueOptions "
                         + "registration; got: " + ex.getMessage());
     }
 
     @Test
     void convert_singleSelectFromItems_nonStringJsonRejected() {
-        // Eager-items SINGLE_SELECT (no valueOptions registered, items
+        // Eager-items SINGLE_SELECT (no fieldValueOptions registered, items
         // populated via setItems) must reject a non-string JSON shape
         // before reaching renderItem-based matching — otherwise a JSON
         // boolean true coincidentally renders to "true" and could match
@@ -487,9 +487,9 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_valueOptionsOnPrimitiveTypeRoutesThroughToValue() {
+    void convert_fieldValueOptionsOnPrimitiveTypeRoutesThroughToValue() {
         // Even when a field's underlying type is not SINGLE_SELECT (e.g.
-        // an Integer-typed text field), registering valueOptions(...)
+        // an Integer-typed text field), registering fieldValueOptions(...)
         // makes the LLM speak in labels. The converter must apply toValue
         // instead of trying to parse the label as an integer.
         var field = wrap(new IntField(), FormFieldType.INTEGER,
@@ -548,13 +548,13 @@ class FormValueConverterTest {
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type) {
         return new FormFieldDescriptor("test-id", field, type, null, false,
-                false);
+                false, false);
     }
 
     private static FormFieldDescriptor wrap(HasValue<?, ?> field,
             FormFieldType type, FormFieldHints hints) {
         return new FormFieldDescriptor("test-id", field, type, hints, false,
-                false);
+                false, false);
     }
 
     private static FormFieldHints hintsWithToValue(

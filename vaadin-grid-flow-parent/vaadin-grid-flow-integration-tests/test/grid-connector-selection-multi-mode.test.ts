@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { sendKeys, sendMouse } from '@web/test-runner-commands';
 import { fixtureSync, middleOfNode, nextFrame } from '@vaadin/testing-helpers';
-import { init, setRootItems, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
+import { init, setRootItems, getBodyCellContent, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
 describe('grid connector - selection – multi mode', () => {
@@ -152,5 +152,19 @@ describe('grid connector - selection – multi mode', () => {
       grid.$connector.doDeselection([{ key: '0' }], false);
       expect(grid.$server.deselect).not.to.be.called;
     });
+
+    it('should not reapply deselected items on subsequent selections', () => {
+      grid.$connector.doSelection([{ key: '0' }], false);
+      grid.$connector.doDeselection([{ key: '0' }], false);
+      grid.$connector.doSelection([{ key: '1' }], false);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+      expect(grid.selectedItems[0].key).to.equal('1');
+    });
+  });
+
+  it('should not select item on row click', () => {
+    getBodyCellContent(grid, 0, 1)!.click();
+    expect(grid.selectedItems).to.be.empty;
+    expect(grid.$server.select.called).to.be.false;
   });
 });
