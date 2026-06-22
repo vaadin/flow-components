@@ -4,7 +4,9 @@
 > bootstrapping the first set of golden-screenshot baselines used by
 > Phase 3.2+ to verify the new TS/Lit client renders fixtures
 > visually equivalent to the GWT client.
-> **Status:** infra ready; bulk-run deferred to a follow-up slice.
+> **Status:** 9 priority baselines captured + diff IT live as of
+> slice 123 (2026-06-22). Bulk capture of the remaining ~150
+> fixtures deferred to a later slice.
 
 ## Why this exists
 
@@ -22,10 +24,12 @@ Phase 3.0 ships **two** ITs that share the same fixture list:
 | IT class | What it does | When it runs |
 | --- | --- | --- |
 | `Phase30BaselineCaptureIT` | Loads each fixture, screenshots the full viewport, writes the PNG into `src/reference-screenshots/<slug>/1280x720-dpr1-chrome.png`. Does NOT call `compareScreen`. | One-off, manually triggered via the `-Dphase3.baseline.capture=true` system property. Skipped by default. |
-| `Phase30BaselineDiffIT` (deferred) | Loads each fixture, calls `compareScreen(referenceId)` against the baselines this captured. | Every CI run after baselines are committed. |
+| `Phase30BaselineDiffIT` | Loads each fixture, reads the corresponding baseline PNG via `ImageIO`, calls `getCommandExecutor().compareScreen(BufferedImage, errorName)`. Fails the test with a fixture list if any diff exceeds the 0.01 per-pixel tolerance. | Every CI run by default. |
 
-This slice (122) ships `Phase30BaselineCaptureIT` + this workflow.
-The diff IT lands in a follow-up.
+Slice 122 shipped `Phase30BaselineCaptureIT` + this workflow.
+Slice 123 shipped `Phase30BaselineDiffIT`, the
+`pom.xml` testbench parameter config (tolerance / reference dir /
+error dir / retry), and the first 9 baselines.
 
 ## How to run the capture
 
@@ -40,8 +44,9 @@ mvn -am -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-t
     verify
 ```
 
-The IT loads each of the 10 top-priority fixtures in turn (see
-`FIXTURE_INVENTORY.md` § "Recommended Phase 3.0 capture order"),
+The IT loads each of the 9 priority fixtures in turn (the
+inventory's top-10 minus 3 that aren't reachable via the demo
+combo, plus 2 substitutes — see "Fixture inventory caveat" below),
 waits 2s for the GWT client to settle, then writes a PNG to:
 
 ```
@@ -54,8 +59,39 @@ extension dropped and non-alphanumerics collapsed to `-` (e.g.
 `100_000_rows.xlsx` → `100-000-rows`).
 
 A successful run prints one `[baseline] wrote ...` line per fixture
-to stdout. Expect ~30s/fixture with the 2s settle + Maven IT
-overhead, so ~5 min for the top-10 set.
+to stdout. Observed wall-clock on the slice 123 run (macOS,
+Chromium): ~38s total for the 9-fixture set. Expect proportional
+time for larger sets.
+
+## Fixture inventory caveat
+
+`FIXTURE_INVENTORY.md` § "Recommended Phase 3.0 capture order"
+names 10 priority fixtures. Three of them
+(`Simple Invoice.xlsx`, `Grouping.xlsx`, `Formulas.xlsx`) live
+under `src/main/resources/testsheets/` (a directory created by the
+original IT init in vaadin/spreadsheet#770) which `SpreadsheetPage`
+does NOT expose — its combo loads only from
+`src/main/resources/test_sheets/` via
+`ClassLoader.getResource("test_sheets/")` (see
+`SpreadsheetPage.java:71-82`).
+
+For slice 123, those 3 were resolved as:
+
+- `Formulas.xlsx` → substituted with `FormulaValues.xlsx` from `test_sheets/`.
+- `Grouping.xlsx` → substituted with `Groupingtest.xlsx` from `test_sheets/`.
+- `Simple Invoice.xlsx` → dropped; no clean substitute in `test_sheets/`.
+
+The captured set is therefore 9, not 10. To restore `Simple Invoice.xlsx`
+or any other `testsheets/`-only fixture as a baseline, either:
+
+- Add a second combo to `SpreadsheetPage` that exposes
+  `testsheets/`; or
+- Add a separate IT capture path that loads the fixture
+  programmatically via `Spreadsheet.read(InputStream)` (skipping
+  the demo combo entirely).
+
+Either way is its own slice. `FIXTURE_INVENTORY.md` should also be
+updated to flag the `testsheets/` vs `test_sheets/` split.
 
 ## How to regenerate a single fixture's baseline
 

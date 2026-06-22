@@ -44,21 +44,30 @@ public class Phase30BaselineCaptureIT extends AbstractSpreadsheetIT {
     private static final Dimension CAPTURE_VIEWPORT = new Dimension(1280, 720);
 
     /**
-     * Top-10 priority fixtures per
+     * Top-priority fixtures, adapted from
      * {@code refactor-artifacts/tier3-phase-3.0/FIXTURE_INVENTORY.md}
-     * § "Recommended Phase 3.0 capture order". Order matters: the
-     * earliest entries exercise the broadest subsystem coverage.
+     * § "Recommended Phase 3.0 capture order". The original list named
+     * 10 fixtures; 3 of those ({@code Simple Invoice.xlsx},
+     * {@code Grouping.xlsx}, {@code Formulas.xlsx}) live under
+     * {@code src/main/resources/testsheets/} which the demo's
+     * {@code #testSheetSelect} combo does NOT expose
+     * ({@code SpreadsheetPage} loads only from {@code test_sheets/}).
+     * Two of those have substitutes in {@code test_sheets/}:
+     * {@code Formulas.xlsx} → {@code FormulaValues.xlsx},
+     * {@code Grouping.xlsx} → {@code Groupingtest.xlsx}. Simple
+     * Invoice has no clean substitute, so it's deferred to a later
+     * slice that will either add a load path for {@code testsheets/}
+     * or pick a substitute.
      */
     private static final List<String> TOP_PRIORITY_FIXTURES = List.of(
-            "Simple Invoice.xlsx",
             "Tagetik 5.xlsx",
-            "Grouping.xlsx",
+            "Groupingtest.xlsx",
             "100_000_rows.xlsx",
             "merged_cells.xlsx",
             "scrolled_frozen.xlsx",
             "ConditionalFormatterSamples.xlsx",
             "spreadsheet_styles.xlsx",
-            "Formulas.xlsx",
+            "FormulaValues.xlsx",
             "data_filters.xlsx");
 
     @Before

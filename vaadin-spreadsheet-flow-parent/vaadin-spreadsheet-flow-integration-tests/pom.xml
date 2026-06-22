@@ -179,6 +179,16 @@
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables combine.children="append">
+                        <com.vaadin.testbench.Parameters.screenshotComparisonTolerance>0.01</com.vaadin.testbench.Parameters.screenshotComparisonTolerance>
+                        <com.vaadin.testbench.Parameters.screenshotComparisonCursorDetection>true</com.vaadin.testbench.Parameters.screenshotComparisonCursorDetection>
+                        <com.vaadin.testbench.Parameters.maxScreenshotRetries>2</com.vaadin.testbench.Parameters.maxScreenshotRetries>
+                        <com.vaadin.testbench.Parameters.screenshotRetryDelay>500</com.vaadin.testbench.Parameters.screenshotRetryDelay>
+                        <com.vaadin.testbench.Parameters.screenshotReferenceDirectory>${project.basedir}/src/reference-screenshots</com.vaadin.testbench.Parameters.screenshotReferenceDirectory>
+                        <com.vaadin.testbench.Parameters.screenshotErrorDirectory>${project.build.directory}/screenshot-diffs</com.vaadin.testbench.Parameters.screenshotErrorDirectory>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
