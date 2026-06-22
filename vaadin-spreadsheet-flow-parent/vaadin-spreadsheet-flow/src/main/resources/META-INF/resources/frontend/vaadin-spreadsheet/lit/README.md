@@ -19,7 +19,8 @@ lit/
 │   ├── FormulaRefs.ts         (formula → cell-ref list, isCellRef regex)
 │   ├── MergedRegion.ts        (MergedRegion shape + factory)
 │   ├── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
-│   └── Tsv.ts                 (clipboard tab-separated-values codec)
+│   ├── Tsv.ts                 (clipboard tab-separated-values codec)
+│   └── ViewportMath.ts        (point↔px conversion, row-height lookup, computeViewportBounds)
 ├── state/
 │   └── SelectionState.ts      (selection state + helpers — pure module)
 └── wire/
@@ -67,8 +68,10 @@ slice 118, ONLY the pure-algorithm subsystems are ported:
 - ✓ Cell-address parser + formula-ref extraction (slice 119)
 - ✓ Wire-protocol RPC types + TSV codec (slice 120)
 - ✓ Spreadsheet skeleton class + SelectionState (slice 121)
+- ✓ ViewportMath: viewport bounds + unit conversion (slice 124)
 - ◯ Cell rendering (Phase 3.2 cont.)
-- ◯ Virtual scrolling (Phase 3.2 — critical path)
+- ◯ Virtual scrolling — `computeViewportBounds` shipped (slice 124),
+  cell recycling + DOM wiring still pending
 - ◯ Selection (Phase 3.2)
 - ◯ Formula bar + editing (Phase 3.3)
 - ◯ Sheet tabs, grouping, popup buttons, etc. (Phase 3.5)
@@ -104,15 +107,22 @@ Test files live in
 and import production code via relative paths.
 
 ```sh
-# Run all client tests (from the integration tests module):
-npm test
+# One-time: install top-level dependencies (web-test-runner, chai, etc.):
+(cd ../../../../../../../../.. && npm install)
+
+# From the integration-tests module, run all Lit tests:
+cd ../../../../../../../vaadin-spreadsheet-flow-integration-tests
+../../node_modules/.bin/wtr
 
 # Run a specific test file:
-wtr test/lit-merged-region-util.test.ts
+../../node_modules/.bin/wtr test/lit-merged-region-util.test.ts
 ```
 
 The Web Test Runner config is at
 `../../../../../../../vaadin-spreadsheet-flow-integration-tests/web-test-runner.config.mjs`.
+It sets `rootDir: '..'` so the runner can serve the lit/ source from
+the sibling module via relative `../../vaadin-spreadsheet-flow/...`
+imports.
 
 ## How the team continues
 
