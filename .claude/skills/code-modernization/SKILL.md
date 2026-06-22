@@ -450,3 +450,22 @@ TS: ANY contract assertion (Protocol Buffer schemas, GraphQL
 SDLs, Avro schemas, OpenAPI specs) is only protective when it's
 complete. The audit move is the same shape — mechanically extract
 both sides, diff, surface the gap.
+
+**Audit BOTH directions when the boundary has them.** A wrapper
+that calls into the new code AND listens for events from it
+gives you two interfaces to audit, not one. Slice 126 fixed the
+server→client API direction (the wrapper's `this.api.X(...)`
+calls vs the `SpreadsheetClientApi` interface). Slice 128 then
+ran the symmetric audit on the OPPOSITE direction (events the
+wrapper dispatches via `createEvent('eventName', data)` vs the
+`SpreadsheetEventType` discriminated union) — and found a
+matching gap. The pattern: if you fix gap A, ASK whether B
+exists, and audit it before shipping.
+
+**Envelope events trip up the naive `event.type` check.** Some
+wrappers package all events into a single outer `CustomEvent`
+type (e.g. `'spreadsheet-event'`) with the discriminator inside
+`detail.type`. A test that builds `new CustomEvent('eventName',
+{detail})` won't match the narrower's `event.detail.type`
+inspection. Read the wrapper's `createEvent` definition before
+constructing test events.

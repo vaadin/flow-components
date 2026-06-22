@@ -92,7 +92,12 @@ export type SpreadsheetEventType =
     | 'clearSelectedCellsOnCut'
     // Init + protection
     | 'onConnectorInit'
-    | 'protectedCellWriteAttempted';
+    | 'protectedCellWriteAttempted'
+    // Popup buttons (slice 128 — added after audit; the original
+    // slice 120 survey scanned the wrapper's GENERAL event-dispatch
+    // section + missed these two in the popup-button section)
+    | 'popupButtonClick'
+    | 'popupClose';
 
 /**
  * Generic envelope for every event the wrapper dispatches. The data
@@ -289,7 +294,22 @@ export type SpreadsheetEvent =
     | { type: 'actionOnCurrentSelection'; data: ActionData }
     | { type: 'actionOnRowHeader'; data: ActionData }
     | { type: 'actionOnColumnHeader'; data: ActionData }
-    | { type: 'contextMenuClosed'; data: Record<string, never> };
+    | { type: 'contextMenuClosed'; data: Record<string, never> }
+    | { type: 'popupButtonClick'; data: PopupButtonEventData }
+    | { type: 'popupClose'; data: PopupButtonEventData };
+
+/**
+ * Payload for {@code popupButtonClick} and {@code popupClose}.
+ *
+ * Server-side handler shape (see
+ * `Spreadsheet.java:onPopupButtonClick` + `onPopupClose`): both
+ * read `(row, column)` via `toInt(pars, 0)` + `toInt(pars, 1)`.
+ * 1-based, matching the rest of the API.
+ */
+export interface PopupButtonEventData {
+    row: number;
+    column: number;
+}
 
 /**
  * Helper: narrow an arbitrary CustomEvent dispatched by the wrapper to
