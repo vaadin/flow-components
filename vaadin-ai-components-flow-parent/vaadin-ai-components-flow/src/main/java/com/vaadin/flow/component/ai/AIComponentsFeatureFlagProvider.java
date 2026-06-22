@@ -40,7 +40,7 @@ public class AIComponentsFeatureFlagProvider implements FeatureFlagProvider {
      */
     public static final Feature AI_COMPONENTS = new Feature("AI Components", // title
             FEATURE_FLAG_ID, // id
-            null, // moreInfoLink
+            "https://vaadin.com/docs/latest/flow/ai-support", // moreInfoLink
             false, // requiresServerRestart
             null); // componentClassName
 
