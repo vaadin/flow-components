@@ -675,6 +675,81 @@ old "byte-equivalent" style. `refactor-artifacts/QUIRKS_AUDIT.md`
 catalogs each banked quirk + classifies as KEEP / DROP / REPHRASE
 for cleanup in subsequent slices.
 
+### Every new file / class / block needs tests — pin functionality, define intent, stabilize the rewrite
+
+**The rule, in one sentence**: when a port slice adds a new TS
+file, class, exported function, or notable code block, the same
+slice MUST add tests for it. No "we'll test it later" — later
+either never happens or happens after the code drifts.
+
+Why this matters in a clean-room rewrite specifically:
+
+1. **Tests pin the BEHAVIOR contract.** In Mode A (protocol), the
+   tests document the wire format the server depends on. In Mode B
+   (algorithm), the tests document the input → output expectations
+   the next port slice composes against. Either way, the test is
+   the persistent record of "this is what the code is supposed to
+   do" — comments rot, code morphs, tests stay green or fail loud.
+
+2. **Tests define INTENT in language the rewrite doesn't have
+   built-in.** A new TS file in a clean-room rewrite has no "by
+   reference" doc trail back to the source-language original
+   (intentionally, per the licensing argument). Without tests, the
+   intent of `cellStyleToCSSStyle: Readonly<Record<number, string>>`
+   is invisible — is it keyed by index or by string? Is the value
+   a full rule or just the body? A 4-test describe block answers
+   all those questions structurally.
+
+3. **Tests stabilize subsequent slices' refactors.** When slice N+3
+   touches the same file, the test suite catches accidental
+   behavior shifts. Without tests, "small refactors" become "small
+   regressions" that surface only after Phase 3.6's import flip —
+   way past the cheap-to-fix window.
+
+4. **Tests catch the gotcha set the language has waiting.**
+   slice 132's class-field-shadowing gotcha + slice 124's `>=`
+   vs `>` off-by-one + slice 135's `Object.entries(undefined)`
+   crash were all caught by running tests (not by `tsc --noEmit`).
+   Each saved 20-30 minutes of debugging that would have come back
+   in some later session as a "why doesn't this work?" puzzle.
+
+**Per-slice expectations**:
+
+- New algorithm file (e.g. `lit/algorithms/CellKeys.ts`): a
+  `lit-cell-keys.test.ts` companion with tests for each exported
+  function + the documented edge cases. ~5-20 tests typical.
+- New LitElement (e.g. `SpreadsheetCellGrid.ts`): a `lit-cell-grid.test.ts`
+  companion with tests for element registration, default state,
+  every render branch, every prop interaction.
+- New method on an existing class (e.g. `Spreadsheet.applyRenderState`):
+  tests under a new describe block in the existing test file.
+- New exported type (e.g. `CellGridRenderState`): if the type is
+  consumed in tests anyway, smoke tests for the helper that builds
+  it (`emptyCellGridRenderState`) + tests that exercise the type
+  through its consumer count as coverage.
+- **Even RENAME slices**: at minimum, a smoke test that the new
+  name is callable + behaves identically to the old. Slice 133
+  (api → $connector) shipped without new tests because the existing
+  tests covered the underlying behavior; a defensible call, but
+  arguably one smoke test verifying `element.$connector ===
+  element.$connector` after `initLazy` would have been worth
+  the 30 seconds.
+
+**Test naming convention** (banked from slices 118-137):
+`lit-<thing>.test.ts` mirrors the source file's name. `describe`
+blocks mirror functional groupings, not source structure.
+Slice-tagged describes (`'... — selection overlays (slice 136)'`)
+help the slice-by-slice review pass; long-term naming should
+stand without the slice tag (slice 136's tag will eventually be
+trimmed).
+
+**Counting convention** (banked from slices 132-137): every slice
+log entry mentions the wtr count delta. `wtr: 217 passed, 0 failed
+(+6 vs slice 136's 211)`. This makes "did we add tests?" a
+machine-readable yes/no — if the count didn't go up + the slice
+added a new class/file/block, the slice is incomplete by the rule
+above.
+
 ### Tests must ACTUALLY RUN — `tsc --noEmit` is not a runtime check
 
 (Applies to both modes.) A TypeScript file that compiles cleanly
