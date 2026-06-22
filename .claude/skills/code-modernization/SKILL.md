@@ -472,6 +472,42 @@ In Mode B specifically, the LOCAL SOURCE is still valuable as a
 cross-reference — just don't have it open when actually writing
 the new code.
 
+### Adopting a sibling component's naming convention: do it mechanically, in one slice
+
+When a design doc (per the previous subsection) commits to renaming
+a property / method / file to match a sibling component's
+convention (e.g. `this.api` → `this.$connector` to match
+`vaadin-grid-flow`), execute the rename as ONE focused slice:
+
+1. **Count the callsites first**: `grep -c "this\.api" file.js`.
+   Confirm the count is non-trivial enough to warrant a slice +
+   small enough to land in one commit (~30-200 is the sweet spot).
+2. **`sed -i.bak` with a regex anchored to a word boundary**.
+   Important: the `\b` boundary keeps `this.api` from matching
+   `this.apiCallback` or `this.apiResult`. The `.bak` makes the
+   change easy to undo if a downstream verification surfaces a
+   missed pattern.
+3. **Re-run the count** post-sed. Should be 0 of the old + N of
+   the new. If old > 0, investigate (the regex may have over- or
+   under-matched).
+4. **Sweep for sibling patterns** the regex didn't catch. The slice
+   133 case study: `this.api` got renamed, but
+   `entry.target.api` in a ResizeObserver callback was a separate
+   pattern that needed a manual edit. Always grep for `.<oldName>\b`
+   (no `this.` anchor) after the main sed to catch these.
+5. **Verify with the test suite + a representative integration check.**
+   Mechanical renames break things in non-obvious ways when a
+   stringly-typed lookup uses the old name (e.g. someone wrote
+   `element['api'].foo()` instead of `element.api.foo()`). Test
+   suite catches the common case; a grep for `['api']` /
+   `"api"` catches the edge.
+
+The slice 133 rename of 121 callsites took ~5 minutes of actual
+work + ~20 minutes of verification. Worth doing as a standalone
+slice because mixing this mechanical change with a feature slice
+makes the feature diff unreadable — reviewers can't tell rename
+from refactor.
+
 ### Lit elements without decorators: the class-field-shadowing gotcha
 
 When the test-runner toolchain doesn't enable TS decorators

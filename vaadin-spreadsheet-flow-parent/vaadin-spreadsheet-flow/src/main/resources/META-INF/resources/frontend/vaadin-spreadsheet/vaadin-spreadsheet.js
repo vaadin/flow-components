@@ -12,8 +12,35 @@ import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
-  entries.forEach((entry) => entry.target.api.resize());
+  entries.forEach((entry) => entry.target.$connector.resize());
 });
+
+/**
+ * Connector-registration namespace, matching the convention from
+ * vaadin-grid-flow's `gridConnector.ts` (slice 131's architectural
+ * survey). The wrapper element calls `initLazy(this)` from its
+ * `connectedCallback` instead of `new Spreadsheet(...)` directly,
+ * so future code paths (e.g. dev-tools introspection,
+ * cross-component lookups via `window.Vaadin.Flow.spreadsheetConnector`)
+ * can rely on the standard hook.
+ *
+ * The `$connector` property on each element is the connector
+ * instance; matches `grid.$connector` exactly so the team's
+ * mental model stays consistent across components.
+ */
+window.Vaadin = window.Vaadin || {};
+window.Vaadin.Flow = window.Vaadin.Flow || {};
+window.Vaadin.Flow.spreadsheetConnector = window.Vaadin.Flow.spreadsheetConnector || {
+  initLazy: (element) => {
+    if (element.$connector) {
+      return;
+    }
+    element.$connector = new Spreadsheet(element, element.renderRoot);
+    element.$connector.setHeight('100%');
+    element.$connector.setWidth('100%');
+    element.createCallbacks();
+  },
+};
 
 const overlayStyles = (() => {
   const $tpl = document.createElement('template');
@@ -162,7 +189,7 @@ export class VaadinSpreadsheet extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     spreadsheetResizeObserver.observe(this);
-    if (!this.api) {
+    if (!this.$connector) {
       this._overlays = document.getElementById('spreadsheet-overlays');
       if (!this._overlays) {
         this._overlays = document.createElement('div');
@@ -170,10 +197,7 @@ export class VaadinSpreadsheet extends LitElement {
         document.body.appendChild(this._overlays);
       }
 
-      this.api = new Spreadsheet(this, this.renderRoot);
-      this.api.setHeight('100%');
-      this.api.setWidth('100%');
-      this.createCallbacks();
+      window.Vaadin.Flow.spreadsheetConnector.initLazy(this);
 
       this._firstUpdate = true;
     }
@@ -194,123 +218,123 @@ export class VaadinSpreadsheet extends LitElement {
       if ('dirty' == name) {
         dirty = true;
       } else if ('rowBufferSize' == name) {
-        this.api.setRowBufferSize(newVal);
+        this.$connector.setRowBufferSize(newVal);
       } else if ('columnBufferSize' == name) {
-        this.api.setColumnBufferSize(newVal);
+        this.$connector.setColumnBufferSize(newVal);
       } else if ('rows' == name) {
-        this.api.setRows(newVal);
+        this.$connector.setRows(newVal);
       } else if ('cols' == name) {
-        this.api.setCols(newVal);
+        this.$connector.setCols(newVal);
       } else if ('colGroupingData' == name) {
-        this.api.setColGroupingData(newVal);
+        this.$connector.setColGroupingData(newVal);
       } else if ('rowGroupingData' == name) {
-        this.api.setRowGroupingData(newVal);
+        this.$connector.setRowGroupingData(newVal);
       } else if ('colGroupingMax' == name) {
-        this.api.setColGroupingMax(newVal);
+        this.$connector.setColGroupingMax(newVal);
       } else if ('rowGroupingMax' == name) {
-        this.api.setRowGroupingMax(newVal);
+        this.$connector.setRowGroupingMax(newVal);
       } else if ('colGroupingInversed' == name) {
-        this.api.setColGroupingInversed(newVal);
+        this.$connector.setColGroupingInversed(newVal);
       } else if ('rowGroupingInversed' == name) {
-        this.api.setRowGroupingInversed(newVal);
+        this.$connector.setRowGroupingInversed(newVal);
       } else if ('defRowH' == name) {
-        this.api.setDefRowH(newVal);
+        this.$connector.setDefRowH(newVal);
       } else if ('defColW' == name) {
-        this.api.setDefColW(newVal);
+        this.$connector.setDefColW(newVal);
       } else if ('rowH' == name) {
-        this.api.setRowH(newVal);
+        this.$connector.setRowH(newVal);
       } else if ('colW' == name) {
-        this.api.setColW(newVal);
+        this.$connector.setColW(newVal);
       } else if ('reload' == name) {
-        this.api.setReload(true);
+        this.$connector.setReload(true);
       } else if ('sheetIndex' == name) {
-        this.api.setSheetIndex(newVal);
+        this.$connector.setSheetIndex(newVal);
       } else if ('sheetNames' == name) {
-        this.api.setSheetNames(newVal);
+        this.$connector.setSheetNames(newVal);
       } else if ('cellStyleToCSSStyle' == name) {
-        this.api.setCellStyleToCSSStyle(newVal);
+        this.$connector.setCellStyleToCSSStyle(newVal);
       } else if ('rowIndexToStyleIndex' == name) {
-        this.api.setRowIndexToStyleIndex(newVal);
+        this.$connector.setRowIndexToStyleIndex(newVal);
       } else if ('columnIndexToStyleIndex' == name) {
-        this.api.setColumnIndexToStyleIndex(newVal);
+        this.$connector.setColumnIndexToStyleIndex(newVal);
       } else if ('lockedColumnIndexes' == name) {
-        this.api.setLockedColumnIndexes(newVal);
+        this.$connector.setLockedColumnIndexes(newVal);
       } else if ('lockedRowIndexes' == name) {
-        this.api.setLockedRowIndexes(newVal);
+        this.$connector.setLockedRowIndexes(newVal);
       } else if ('shiftedCellBorderStyles' == name) {
-        this.api.setShiftedCellBorderStyles(newVal);
+        this.$connector.setShiftedCellBorderStyles(newVal);
       } else if ('conditionalFormattingStyles' == name) {
-        this.api.setConditionalFormattingStyles(newVal);
+        this.$connector.setConditionalFormattingStyles(newVal);
       } else if ('hiddenColumnIndexes' == name) {
-        this.api.setHiddenColumnIndexes(newVal);
+        this.$connector.setHiddenColumnIndexes(newVal);
       } else if ('hiddenRowIndexes' == name) {
-        this.api.setHiddenRowIndexes(newVal);
+        this.$connector.setHiddenRowIndexes(newVal);
       } else if ('verticalScrollPositions' == name) {
-        this.api.setVerticalScrollPositions(newVal);
+        this.$connector.setVerticalScrollPositions(newVal);
       } else if ('horizontalScrollPositions' == name) {
-        this.api.setHorizontalScrollPositions(newVal);
+        this.$connector.setHorizontalScrollPositions(newVal);
       } else if ('sheetProtected' == name) {
-        this.api.setSheetProtected(newVal);
+        this.$connector.setSheetProtected(newVal);
       } else if ('workbookProtected' == name) {
-        this.api.setWorkbookProtected(newVal);
+        this.$connector.setWorkbookProtected(newVal);
       } else if ('cellKeysToEditorIdMap' == name) {
-        this.api.setCellKeysToEditorIdMap(newVal);
+        this.$connector.setCellKeysToEditorIdMap(newVal);
       } else if ('componentIDtoCellKeysMap' == name) {
-        this.api.setComponentIDtoCellKeysMap(newVal);
+        this.$connector.setComponentIDtoCellKeysMap(newVal);
       } else if ('hyperlinksTooltips' == name) {
-        this.api.setHyperlinksTooltips(newVal);
+        this.$connector.setHyperlinksTooltips(newVal);
       } else if ('cellComments' == name) {
-        this.api.setCellComments(newVal);
+        this.$connector.setCellComments(newVal);
       } else if ('cellCommentAuthors' == name) {
-        this.api.setCellCommentAuthors(newVal);
+        this.$connector.setCellCommentAuthors(newVal);
       } else if ('visibleCellComments' == name) {
-        this.api.setVisibleCellComments(newVal);
+        this.$connector.setVisibleCellComments(newVal);
       } else if ('invalidFormulaCells' == name) {
-        this.api.setInvalidFormulaCells(newVal);
+        this.$connector.setInvalidFormulaCells(newVal);
       } else if ('hasActions' == name) {
-        this.api.setHasActions(newVal);
+        this.$connector.setHasActions(newVal);
       } else if ('overlays' == name) {
-        this.api.setOverlays(newVal);
+        this.$connector.setOverlays(newVal);
       } else if ('mergedRegions' == name) {
-        this.api.setMergedRegions(newVal);
+        this.$connector.setMergedRegions(newVal);
       } else if ('displayGridlines' == name) {
-        this.api.setDisplayGridlines(newVal);
+        this.$connector.setDisplayGridlines(newVal);
       } else if ('displayRowColHeadings' == name) {
-        this.api.setDisplayRowColHeadings(newVal);
+        this.$connector.setDisplayRowColHeadings(newVal);
       } else if ('verticalSplitPosition' == name) {
-        this.api.setVerticalSplitPosition(newVal);
+        this.$connector.setVerticalSplitPosition(newVal);
       } else if ('horizontalSplitPosition' == name) {
-        this.api.setHorizontalSplitPosition(newVal);
+        this.$connector.setHorizontalSplitPosition(newVal);
       } else if ('infoLabelValue' == name) {
-        this.api.setInfoLabelValue(newVal);
+        this.$connector.setInfoLabelValue(newVal);
       } else if ('workbookChangeToggle' == name) {
-        this.api.setWorkbookChangeToggle(newVal);
+        this.$connector.setWorkbookChangeToggle(newVal);
       } else if ('invalidFormulaErrorMessage' == name) {
-        this.api.setInvalidFormulaErrorMessage(newVal);
+        this.$connector.setInvalidFormulaErrorMessage(newVal);
       } else if ('lockFormatColumns' == name) {
-        this.api.setLockFormatColumns(newVal);
+        this.$connector.setLockFormatColumns(newVal);
       } else if ('lockFormatRows' == name) {
-        this.api.setLockFormatRows(newVal);
+        this.$connector.setLockFormatRows(newVal);
       } else if ('namedRanges' == name) {
-        this.api.setNamedRanges(newVal);
+        this.$connector.setNamedRanges(newVal);
       } else if ('id' == name) {
-        this.api.setId(newVal);
+        this.$connector.setId(newVal);
       } else if ('class' == name) {
-        this.api.setClass(newVal);
+        this.$connector.setClass(newVal);
       } else if ('resources' == name) {
-        this.api.setResources(this, newVal);
+        this.$connector.setResources(this, newVal);
       } else if ('api' == name) {
       } else if ('theme' == name) {
       } else if ('showCustomEditorOnFocus' == name) {
-        this.api.setShowCustomEditorOnFocus(newVal);
+        this.$connector.setShowCustomEditorOnFocus(newVal);
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }
       propNames.push(name);
     });
-    this.api.notifyStateChanges(propNames, this._firstUpdate);
+    this.$connector.notifyStateChanges(propNames, this._firstUpdate);
     if (this._firstUpdate) {
-      this.api.relayout();
+      this.$connector.relayout();
       this._firstUpdate = false;
     }
   }
@@ -326,42 +350,42 @@ export class VaadinSpreadsheet extends LitElement {
   /* CLIENT SIDE RPC METHODS */
   updateBottomRightCellValues(cellData) {
     this._flush();
-    this.api.updateBottomRightCellValues(cellData);
+    this.$connector.updateBottomRightCellValues(cellData);
   }
 
   updateTopLeftCellValues(cellData) {
     this._flush();
-    this.api.updateTopLeftCellValues(cellData);
+    this.$connector.updateTopLeftCellValues(cellData);
   }
 
   updateTopRightCellValues(cellData) {
     this._flush();
-    this.api.updateTopRightCellValues(cellData);
+    this.$connector.updateTopRightCellValues(cellData);
   }
 
   updateBottomLeftCellValues(cellData) {
     this._flush();
-    this.api.updateBottomLeftCellValues(cellData);
+    this.$connector.updateBottomLeftCellValues(cellData);
   }
 
   updateFormulaBar(possibleName, col, row) {
     this._flush();
-    this.api.updateFormulaBar(possibleName, col, row);
+    this.$connector.updateFormulaBar(possibleName, col, row);
   }
 
   invalidCellAddress() {
     this._flush();
-    this.api.invalidCellAddress();
+    this.$connector.invalidCellAddress();
   }
 
   showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) {
     this._flush();
-    this.api.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
+    this.$connector.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
   }
 
   showActions(actionDetails) {
     this._flush();
-    this.api.showActions(actionDetails);
+    this.$connector.showActions(actionDetails);
   }
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
@@ -373,7 +397,7 @@ export class VaadinSpreadsheet extends LitElement {
     // it's populated would throw inside `$scrollAreaIntoView`. Re-queue the
     // call until the layout state is ready; only the latest pending call is
     // kept so rapid successive calls collapse to the final selection.
-    if (!this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
+    if (!this.$connector.spreadsheetWidget.sheetWidget.definedRowHeights) {
       this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
       if (!this._pendingSelectionScheduled) {
         this._pendingSelectionScheduled = true;
@@ -383,11 +407,11 @@ export class VaadinSpreadsheet extends LitElement {
             this._pendingSelection = null;
             return;
           }
-          if (this.api.spreadsheetWidget.sheetWidget.definedRowHeights) {
+          if (this.$connector.spreadsheetWidget.sheetWidget.definedRowHeights) {
             const args = this._pendingSelection;
             this._pendingSelection = null;
             this._pendingSelectionScheduled = false;
-            this.api.setSelectedCellAndRange(...args);
+            this.$connector.setSelectedCellAndRange(...args);
             return;
           }
           setTimeout(applyPending, 10);
@@ -397,211 +421,211 @@ export class VaadinSpreadsheet extends LitElement {
       return;
     }
     this._pendingSelection = null;
-    this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
+    this.$connector.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
   cellsUpdated(updatedCellData) {
     this._flush();
-    this.api.cellsUpdated(updatedCellData);
+    this.$connector.cellsUpdated(updatedCellData);
   }
 
   refreshCellStyles() {
     this._flush();
-    this.api.refreshCellStyles();
+    this.$connector.refreshCellStyles();
   }
 
   editCellComment(col, row) {
     this._flush();
-    this.api.editCellComment(col, row);
+    this.$connector.editCellComment(col, row);
   }
 
   onPopupButtonOpen(row, column, contentId, appId) {
     this._flush();
-    this.api.onPopupButtonOpened(row, column, contentId, appId);
+    this.$connector.onPopupButtonOpened(row, column, contentId, appId);
   }
 
   closePopup(row, column) {
     this._flush();
-    this.api.closePopup(row, column);
+    this.$connector.closePopup(row, column);
   }
 
   addPopupButton(rawState) {
     this._flush();
-    this.api.addPopupButton(rawState);
+    this.$connector.addPopupButton(rawState);
   }
 
   removePopupButton(rawState) {
     this._flush();
-    this.api.removePopupButton(rawState);
+    this.$connector.removePopupButton(rawState);
   }
 
   /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
-    this.api.setGroupingCollapsedCallback((e) => {
+    this.$connector.setGroupingCollapsedCallback((e) => {
       this.dispatchEvent(this.createEvent('groupingCollapsed', e));
     });
 
-    this.api.setContextMenuClosedCallback((e) => {
+    this.$connector.setContextMenuClosedCallback((e) => {
       this.dispatchEvent(this.createEvent('contextMenuClosed', e));
     });
 
-    this.api.setLevelHeaderClickedCallback((e) => {
+    this.$connector.setLevelHeaderClickedCallback((e) => {
       this.dispatchEvent(this.createEvent('levelHeaderClicked', e));
     });
 
-    this.api.setOnSheetScrollCallback((e) => {
+    this.$connector.setOnSheetScrollCallback((e) => {
       this.dispatchEvent(this.createEvent('onSheetScroll', e));
     });
 
-    this.api.setSheetAddressChangedCallback((e) => {
+    this.$connector.setSheetAddressChangedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetAddressChanged', e));
     });
 
-    this.api.setCellSelectedCallback((e) => {
+    this.$connector.setCellSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellSelected', e));
     });
 
-    this.api.setCellRangeSelectedCallback((e) => {
+    this.$connector.setCellRangeSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellRangeSelected', e));
     });
 
-    this.api.setCellAddedToSelectionAndSelectedCallback((e) => {
+    this.$connector.setCellAddedToSelectionAndSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellAddedToSelectionAndSelected', e));
     });
 
-    this.api.setCellsAddedToRangeSelectionCallback((e) => {
+    this.$connector.setCellsAddedToRangeSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('cellsAddedToRangeSelection', e));
     });
 
-    this.api.setRowSelectedCallback((e) => {
+    this.$connector.setRowSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('rowSelected', e));
     });
 
-    this.api.setRowAddedToRangeSelectionCallback((e) => {
+    this.$connector.setRowAddedToRangeSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('rowAddedToRangeSelection', e));
     });
 
-    this.api.setColumnSelectedCallback((e) => {
+    this.$connector.setColumnSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('columnSelected', e));
     });
 
-    this.api.setColumnAddedToSelectionCallback((e) => {
+    this.$connector.setColumnAddedToSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('columnAddedToSelection', e));
     });
 
-    this.api.setSelectionIncreasePaintedCallback((e) => {
+    this.$connector.setSelectionIncreasePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('selectionIncreasePainted', e));
     });
 
-    this.api.setSelectionDecreasePaintedCallback((e) => {
+    this.$connector.setSelectionDecreasePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('selectionDecreasePainted', e));
     });
 
-    this.api.setCellValueEditedCallback((e) => {
+    this.$connector.setCellValueEditedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellValueEdited', e));
     });
 
-    this.api.setSheetSelectedCallback((e) => {
+    this.$connector.setSheetSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetSelected', e));
     });
 
-    this.api.setSheetRenamedCallback((e) => {
+    this.$connector.setSheetRenamedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetRenamed', e));
     });
 
-    this.api.setSheetCreatedCallback((e) => {
+    this.$connector.setSheetCreatedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetCreated', e));
     });
 
-    this.api.setCellRangePaintedCallback((e) => {
+    this.$connector.setCellRangePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellRangePainted', e));
     });
 
-    this.api.setDeleteSelectedCellsCallback((e) => {
+    this.$connector.setDeleteSelectedCellsCallback((e) => {
       this.dispatchEvent(this.createEvent('deleteSelectedCells', e));
     });
 
-    this.api.setLinkCellClickedCallback((e) => {
+    this.$connector.setLinkCellClickedCallback((e) => {
       this.dispatchEvent(this.createEvent('linkCellClicked', e));
     });
 
-    this.api.setRowsResizedCallback((e) => {
+    this.$connector.setRowsResizedCallback((e) => {
       this.dispatchEvent(this.createEvent('rowsResized', e));
     });
 
-    this.api.setColumnResizedCallback((e) => {
+    this.$connector.setColumnResizedCallback((e) => {
       this.dispatchEvent(this.createEvent('columnResized', e));
     });
 
-    this.api.setOnRowAutofitCallback((e) => {
+    this.$connector.setOnRowAutofitCallback((e) => {
       this.dispatchEvent(this.createEvent('onRowAutofit', e));
     });
 
-    this.api.setOnColumnAutofitCallback((e) => {
+    this.$connector.setOnColumnAutofitCallback((e) => {
       this.dispatchEvent(this.createEvent('onColumnAutofit', e));
     });
 
-    this.api.setOnUndoCallback((e) => {
+    this.$connector.setOnUndoCallback((e) => {
       this.dispatchEvent(this.createEvent('onUndo', e));
     });
 
-    this.api.setOnRedoCallback((e) => {
+    this.$connector.setOnRedoCallback((e) => {
       this.dispatchEvent(this.createEvent('onRedo', e));
     });
 
-    this.api.setSetCellStyleWidthRatiosCallback((e) => {
+    this.$connector.setSetCellStyleWidthRatiosCallback((e) => {
       this.dispatchEvent(this.createEvent('setCellStyleWidthRatios', e));
     });
 
-    this.api.setProtectedCellWriteAttemptedCallback((e) => {
+    this.$connector.setProtectedCellWriteAttemptedCallback((e) => {
       this.dispatchEvent(this.createEvent('protectedCellWriteAttempted', e));
     });
 
-    this.api.setOnPasteCallback((e) => {
+    this.$connector.setOnPasteCallback((e) => {
       this.dispatchEvent(this.createEvent('onPaste', e));
     });
 
-    this.api.setClearSelectedCellsOnCutCallback((e) => {
+    this.$connector.setClearSelectedCellsOnCutCallback((e) => {
       this.dispatchEvent(this.createEvent('clearSelectedCellsOnCut', e));
     });
 
-    this.api.setUpdateCellCommentCallback((e) => {
+    this.$connector.setUpdateCellCommentCallback((e) => {
       this.dispatchEvent(this.createEvent('updateCellComment', e));
     });
 
-    this.api.setOnConnectorInitCallback((e) => {
+    this.$connector.setOnConnectorInitCallback((e) => {
       this.dispatchEvent(this.createEvent('onConnectorInit', e));
     });
 
-    this.api.setContextMenuOpenOnSelectionCallback((e) => {
+    this.$connector.setContextMenuOpenOnSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('contextMenuOpenOnSelection', e));
     });
 
-    this.api.setActionOnCurrentSelectionCallback((e) => {
+    this.$connector.setActionOnCurrentSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnCurrentSelection', e));
     });
 
-    this.api.setRowHeaderContextMenuOpenCallback((e) => {
+    this.$connector.setRowHeaderContextMenuOpenCallback((e) => {
       this.dispatchEvent(this.createEvent('rowHeaderContextMenuOpen', e));
     });
 
-    this.api.setActionOnRowHeaderCallback((e) => {
+    this.$connector.setActionOnRowHeaderCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnRowHeader', e));
     });
 
-    this.api.setColumnHeaderContextMenuOpenCallback((e) => {
+    this.$connector.setColumnHeaderContextMenuOpenCallback((e) => {
       this.dispatchEvent(this.createEvent('columnHeaderContextMenuOpen', e));
     });
 
-    this.api.setActionOnColumnHeaderCallback((e) => {
+    this.$connector.setActionOnColumnHeaderCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
     });
 
-    this.api.setPopupButtonClickCallback((e) => {
+    this.$connector.setPopupButtonClickCallback((e) => {
       this.dispatchEvent(this.createEvent('popupButtonClick', e));
     });
 
-    this.api.setPopupCloseCallback((e) => {
+    this.$connector.setPopupCloseCallback((e) => {
       this.dispatchEvent(this.createEvent('popupClose', e));
     });
 
