@@ -202,10 +202,47 @@ only.
 because no NullAway/Checker is configured). Suite stayed
 1050/0/0/4 green.
 
-**Follow-up work** (deferred): full `@NullMarked` audit of the
-spreadsheet package + sweep of public APIs on Spreadsheet.java
-that aren't yet javadoc-documented. Best done after a NullAway
-config is added so inconsistencies become compile errors.
+**Follow-up work** (deferred — slice 115 scoping):
+
+A full `@NullMarked` rollout requires a compile-time checker to
+be useful — without one, the annotations are pure documentation.
+Slice 115's NullAway-integration audit (against upstream
+`flow-server`'s production config) found:
+
+- **Cost per module**: ~50 lines of `pom.xml` (errorprone plugin
+  config + nullaway annotation-processor dep + 12 `--add-opens` /
+  `--add-exports` JDK module flags for javac internals access).
+- **Build-time overhead**: 30–50% slower compile per ErrorProne's
+  documented baseline.
+- **Ecosystem precedent in flow-components**: ZERO. Upstream
+  Flow (`flow-server`) has it; no flow-component sibling has
+  adopted yet. Adding it ONLY to `vaadin-spreadsheet-flow` would
+  diverge from the 30+ other components in this repo.
+- **Useful-coverage prerequisite**: every `@NullMarked` package
+  needs a full audit of its public-API nullness contracts before
+  marking. The OnlyNullMarked mode means unmarked packages don't
+  benefit; marked-but-uncrafted packages produce false positives.
+
+**Recommendation**: defer until either (a) the broader
+flow-components project adopts NullAway at the parent-pom
+level, OR (b) a focused Spreadsheet-only effort accepts the
+50-line per-module pom cost + the 30-50% compile overhead and
+commits to the audit-per-package discipline.
+
+If/when adopted, the spreadsheet rollout is:
+1. Add the errorprone + nullaway plugin config (copy from
+   upstream `flow-server/pom.xml` lines 91-150).
+2. Add `@NullMarked package-info.java` to each subpackage in
+   strict dependency order (leaf packages first: `action`,
+   `framework`, `shared`, `rpc`, then `client`, then `command`,
+   then root, then `charts/*`).
+3. Per package: audit public-API methods + fields + params for
+   true null tolerance, add `@Nullable` where applicable. The
+   compile errors become the to-do list.
+4. The slice-102 `@Nullable` annotations on `Spreadsheet.java`'s
+   `getCell` overloads + `getCommentAuthorProvider` give a head
+   start on the root package — every javadoc-null site is
+   already annotated.
 
 ### Step 5 — Pattern matching for instanceof ✓ (same as Step 2)
 
