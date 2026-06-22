@@ -11,6 +11,21 @@ package com.vaadin.flow.component.spreadsheet.client;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Methods callable from the GWT-compiled client widget. Defines the complete
+ * set of client→server signals that the widget can emit; the runtime path is a
+ * single {@code @DomEvent("spreadsheet-event")} carrying a {@code type} string
+ * + {@code JsonNode} payload, with the server-side
+ * {@code SpreadsheetEventListener} dispatching to the matching method on
+ * {@link SpreadsheetHandlerImpl}.
+ *
+ * <p>
+ * The interface and the impl class are kept as a typed dispatch shape (one
+ * method per client-side action) rather than a generic
+ * {@code handle(String type, JsonNode data)} so the server-side compiler
+ * catches missing-handler mistakes when the wire's "type" vocabulary changes.
+ * NOT legacy Vaadin 8 RPC — see {@code MODERNIZATION_PLAN.md} Tier 2 Step 10.
+ */
 public interface SpreadsheetHandler extends GroupingHandler {
 
     /**

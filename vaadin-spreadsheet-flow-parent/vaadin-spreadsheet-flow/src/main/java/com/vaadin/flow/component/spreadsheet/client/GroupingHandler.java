@@ -8,6 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.client;
 
+/**
+ * Grouping-feature subset of the client→server signals from the GWT widget.
+ * Split out from {@link SpreadsheetHandler} so the widget-side grouping code
+ * can depend on the smaller interface without pulling in the full handler
+ * surface.
+ */
 public interface GroupingHandler {
     void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed);
 
