@@ -560,6 +560,18 @@ real users.
 
 4. Next major version: drop GWT module entirely; archive its code.
 
+### Phase 3.7 — GWT elimination (concrete steps)
+
+See `refactor-artifacts/GWT_ELIMINATION_ROADMAP.md` (added in slice
+127) for the inventory + ordered removal steps. Slice 127 verified
+the surface is contained (zero Java cross-imports server→client;
+JS coupling is a single `import` line in vaadin-spreadsheet.js;
+the 1.2 MB compiled blob is the only build artifact). Once Phase
+3.6 ships and verifies in production, Phase 3.7 is a multi-commit
+cleanup pass: delete the GWT module + the blob, remove the
+maven dependency, unwind the gwt profile + version property,
+delete the spreadsheetWidget escape hatch from the TS skeleton.
+
 ### Total wall-clock estimate
 
 ~5-6 months for a team of 2-3 engineers. Per-phase has buffer.

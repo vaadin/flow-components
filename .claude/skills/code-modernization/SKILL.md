@@ -403,3 +403,50 @@ already adopted. For a Vaadin GWT → TS port, the reference is
 `vaadin-grid-flow`'s `gridConnector.ts` (modern Lit + TS in the
 same repo). Cite the reference file in the port's source comments
 so future readers can audit "is this still the canonical pattern."
+
+### Audit cross-language interface boundaries with `comm`, not visual scanning
+
+When the port involves an INTERFACE that the consumer (e.g. a JS
+wrapper) calls into, the port's `implements MyInterface` clause
+is only as protective as the interface is complete. An interface
+that's a SUBSET of what the consumer actually calls is worse than
+no interface — it gives false confidence: `tsc` passes, the port
+ships, then the consumer hits the un-declared methods at runtime.
+
+The fix is mechanical and exhaustive: extract the callsite list from
+the consumer + extract the declared-method list from the interface,
+then `comm -23` to find what's called but not declared.
+
+```sh
+# Wrapper's calls
+grep -oE "this\.api\.[a-zA-Z]+" wrapper.js | sed 's/this\.api\.//' | sort -u > /tmp/calls.txt
+
+# Interface's declarations
+grep -oE "^    [a-z][A-Za-z]+\(" my-interface.ts | sed 's/    //;s/($//' | sort -u > /tmp/decls.txt
+
+# Methods called but NOT declared:
+comm -23 /tmp/calls.txt /tmp/decls.txt
+```
+
+Run this BEFORE shipping an interface that claims "compile-time
+contract enforcement". The slice 120 → slice 126 arc in the
+spreadsheet refactor lost 5 slices' worth of "this is enforced"
+confidence because the original interface survey scanned ONE
+wrapper section visually, missed a second section, and shipped a
+50-method interface against a 105-method actual surface. The
+slices that came after (121-125) cited the (broken) safety net to
+justify scope decisions.
+
+If the consumer has MULTIPLE callsite sections (a property-change
+block AND a separate initialization block AND a teardown block),
+each must be included in the grep. Visual scanning of one section
++ trusting it's "the only one" is exactly how the slice 120 gap
+happened. The `grep | sort -u | comm` pipeline is exhaustive by
+construction — every line that contains `this.api.` is captured
+regardless of where it appears.
+
+The "subset interface = false confidence" rule generalizes beyond
+TS: ANY contract assertion (Protocol Buffer schemas, GraphQL
+SDLs, Avro schemas, OpenAPI specs) is only protective when it's
+complete. The audit move is the same shape — mechanically extract
+both sides, diff, surface the gap.
