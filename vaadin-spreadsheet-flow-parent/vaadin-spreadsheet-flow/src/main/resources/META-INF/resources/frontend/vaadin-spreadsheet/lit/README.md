@@ -12,6 +12,8 @@ lit/
 ├── types/
 │   └── wire.ts        (TypeScript interfaces for the 6 wire DTOs)
 ├── algorithms/
+│   ├── CellRef.ts             (A1↔{col,row} parser, column-letter math)
+│   ├── FormulaRefs.ts         (formula → cell-ref list, isCellRef regex)
 │   ├── MergedRegion.ts        (MergedRegion shape + factory)
 │   └── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
 └── wire/
@@ -54,8 +56,9 @@ TS/Lit implementation. The Lit wrapper itself doesn't change
 The new code is being built incrementally. As of Phase 3.1
 slice 118, ONLY the pure-algorithm subsystems are ported:
 
-- ✓ MergedRegion + MergedRegionUtil (this slice)
-- ✓ Wire-format parser
+- ✓ MergedRegion + MergedRegionUtil (slice 118)
+- ✓ Wire-format parser (slice 118)
+- ✓ Cell-address parser + formula-ref extraction (slice 119)
 - ◯ Cell rendering (Phase 3.2)
 - ◯ Virtual scrolling (Phase 3.2 — critical path)
 - ◯ Selection (Phase 3.2)
