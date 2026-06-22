@@ -141,17 +141,23 @@ describe('CellKeys — parseHeaderIndex', () => {
         expect(parseHeaderIndex('rh1024')).to.equal(1024);
     });
 
-    it('returns 0 for strings with no digits', () => {
+    it('returns 0 for strings shorter than the 2-char prefix + 1 digit', () => {
         expect(parseHeaderIndex('rh')).to.equal(0);
-        expect(parseHeaderIndex('foo')).to.equal(0);
+        expect(parseHeaderIndex('r')).to.equal(0);
         expect(parseHeaderIndex('')).to.equal(0);
     });
 
-    it('accumulates ALL digit runs (QUIRK)', () => {
-        // GWT scanner accumulates digits wherever they appear:
-        // "rh1ch2" → 1*10 + 2 = 12. The upstream presumably never
-        // calls with multi-run input, but preserved verbatim.
-        expect(parseHeaderIndex('rh1ch2')).to.equal(12);
-        expect(parseHeaderIndex('ch5rh10')).to.equal(510);
+    it('returns 0 for input without digits after the prefix', () => {
+        expect(parseHeaderIndex('rhfoo')).to.equal(0);
+        expect(parseHeaderIndex('foobar')).to.equal(0);
+    });
+
+    it('stops at the first non-digit after the prefix', () => {
+        // Clean-room contract (slice 130): header keys are "rh<N>" /
+        // "ch<N>" — the index runs from char 2 until a non-digit.
+        // Anything after the digit run is ignored.
+        expect(parseHeaderIndex('rh5extra')).to.equal(5);
+        expect(parseHeaderIndex('rh1ch2')).to.equal(1);
+        expect(parseHeaderIndex('ch5rh10')).to.equal(5);
     });
 });

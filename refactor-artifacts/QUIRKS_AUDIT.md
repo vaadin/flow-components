@@ -7,8 +7,13 @@
 > GWT-era code. This document catalogs every "QUIRK" / "byte-equivalent
 > port" marker banked in slices 118-125 and classifies each as either
 > "real-world contract — keep" or "apparent GWT bug — drop".
-> **Status:** classification draft; per-quirk resolution in future
-> slices.
+>
+> **Status: RESOLVED.** Slice 130 executed all 4 DROPs + 3 REPHRASEs +
+> a sweep of the broader "ported byte-equivalent from..." javadoc
+> framing on every algorithm file. Tests stay 184/184 green. The
+> visual-regression IT (slices 122-123) is the deferred safety check
+> for the rendering-affecting DROPs (Q1 + Q5); run before Phase 3.6
+> rollout.
 
 ## Why this audit exists
 

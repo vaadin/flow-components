@@ -8,26 +8,30 @@
  */
 
 /**
- * Pure-algorithm port of the GWT client's cell-key + header-key
- * codec — the "col1 row1" wire format used as a cache-key + CSS-class
- * identifier throughout the spreadsheet client.
+ * Cell-key + header-key codec — the {@code "col1 row1"} wire format
+ * used throughout the spreadsheet client as both a cache key and a
+ * CSS-class identifier (each rendered cell carries
+ * {@code class="col1 row1"}).
  *
- * Ported from:
- *  - `SheetWidget.toKey(int, int)` / `toCssKey(int, int)` (lines 4578-4584)
- *  - `SheetJsniUtil.parseColRow(String)` (lines 20-47)
- *  - `SheetJsniUtil.isHeader(String)` (lines 58-76)
- *  - `SheetJsniUtil.parseHeaderIndex(String)` (lines 79-93)
+ * The format is a WIRE CONTRACT — the server's outgoing payloads use
+ * the same encoding (see {@code SpreadsheetUtil.toKey} on the server
+ * side), and the TestBench element classes locate cells via the
+ * {@code .col<C>.row<R>} CSS selector. Changing the format breaks
+ * compatibility with both directions; this module preserves it
+ * exactly.
  *
- * The GWT-side JSNI versions are hand-optimized character-code
- * scanners (avoiding regex allocation in hot paths). The TS ports
- * use the same approach for predictable performance and byte-
- * equivalent behavior on the same inputs.
+ * The header-key format ({@code "rh<N>"} for row headers,
+ * {@code "ch<N>"} for column headers) is a sibling contract.
+ *
+ * Implementation note: character-code scanners (rather than regex)
+ * for parse + classify operations. These run on every selection
+ * change + every paint of every visible cell, so allocation-free
+ * scanning matters.
  */
 
 /**
  * Format a 1-based (col, row) coordinate as the wire-format cell key:
- * {@code "col1 row1"}. Used as both a cache key in the GWT client and
- * as the CSS class prefix (cells render with {@code class="col1 row1"}).
+ * {@code "col1 row1"}. Used as a cache key + CSS class prefix.
  */
 export function toKey(col: number, row: number): string {
     return 'col' + col + ' row' + row;
@@ -52,21 +56,17 @@ export interface ParsedCellKey {
  * that contains a column-digit run, a space, then a row-digit run)
  * back to its (col, row) coordinates.
  *
- * Mirrors {@code SheetJsniUtil.parseColRow(String)} verbatim — a
- * character-code scanner that:
- *  1. Accumulates digit characters (code 48-57) into the column,
- *     then into the row after seeing a space (code 32).
- *  2. Stops after the SECOND space (`flags === 2`). Anything after
- *     the second space is ignored — e.g. extra CSS classes in
- *     {@code "col1 row1 something-else"}.
- *  3. Treats non-digit, non-space characters as separators that
- *     don't advance the flag count and don't accumulate into the
- *     current integer (so {@code "col1 row1"} parses to (1, 1)
- *     because the `c`, `o`, `l`, `r`, `o`, `w` are silently skipped).
+ * Cells render with a CSS class list like
+ * {@code "col5 row3 cell-range cell-selected"} — the cell-key prefix
+ * is followed by additional classes that describe selection +
+ * formatting state. The parser stops after the second space, which
+ * delimits the row-digit run from the rest. This is the contract
+ * with the CSS-class-list-as-cell-key convention: the parser
+ * decodes the prefix and ignores trailing classes.
  *
  * Returns {col: 0, row: 0} for any input where digits were never
- * accumulated for one axis — matching the GWT behavior (the parser
- * fields default to 0 and only get assigned if digits were seen).
+ * accumulated for the corresponding axis — callers treat (0, 0) as
+ * "not a cell key".
  */
 export function parseColRow(str: string): ParsedCellKey {
     let i = 0;
@@ -93,12 +93,9 @@ export function parseColRow(str: string): ParsedCellKey {
 }
 
 /**
- * Enum-like return values for {@link headerType}. Matches the GWT
- * {@code isHeader} contract: {@code 1} for a row header, {@code 2}
- * for a column header, {@code 0} for a non-header (e.g. a cell key).
- *
- * Defined as numeric constants rather than a TS enum to mirror the
- * GWT integer return type byte-equivalent.
+ * Return values for {@link headerType}. Numeric constants rather than
+ * a TS enum, because callers compare against bare numbers in a few
+ * places.
  */
 export const HEADER_NONE = 0;
 export const HEADER_ROW = 1;
@@ -107,18 +104,17 @@ export const HEADER_COL = 2;
 /**
  * Classify a key string as a row header, column header, or cell.
  *
- * Mirrors {@code SheetJsniUtil.isHeader(String)} byte-equivalent.
- * The GWT version only inspects characters [0] and [1]:
- *  - "rh..." → row header → 1
- *  - "ch..." → col header → 2
- *  - anything else → 0
+ * Naming convention:
+ *  - Row header keys: {@code "rh<N>"} (e.g. {@code "rh5"} = 5th row header)
+ *  - Column header keys: {@code "ch<N>"} (e.g. {@code "ch3"} = 3rd column header)
+ *  - Cell keys: {@code "col<C> row<R>"} (the {@link toKey} format)
  *
- * Note that "row5" returns 0 (NOT a header) because str[1] is 'o',
- * not 'h'. The naming convention differs between cell keys
- * ("col1 row1") and header keys ("ch1" / "rh1") — the leading 'c'
- * in "col1" matches but the second char 'o' breaks the predicate
- * to 0. Preserved for byte-equivalence; the upstream relies on the
- * naming separation.
+ * The classifier checks the first two characters for the "rh" /
+ * "ch" prefix. Cell keys start with "col" so they correctly classify
+ * as HEADER_NONE — the second char 'o' breaks the "rh"/"ch" match.
+ * The same logic distinguishes "row5" (which would be the "row"
+ * portion of a cell key in isolation, not a row header — row headers
+ * are always written "rh<N>") from "rh5".
  */
 export function headerType(str: string): number {
     if (!str || str.length < 2) {
@@ -135,25 +131,31 @@ export function headerType(str: string): number {
 }
 
 /**
- * Extract the trailing integer from a key string by accumulating
- * digit characters wherever they appear. Used for header keys
- * ({@code "rh5"} → 5, {@code "ch12"} → 12) and any string that
- * embeds a single index.
+ * Extract the integer index from a header key.
  *
- * Mirrors {@code SheetJsniUtil.parseHeaderIndex(String)} verbatim —
- * non-digit characters are skipped, ALL digit characters are
- * accumulated. {@code "rh1ch2"} returns 12 (NOT 1), because the
- * scanner accumulates digits across both runs. Preserved for
- * byte-equivalence even though the multi-digit-run case is
- * presumably never hit by upstream callers.
+ * Expects the form {@code "rh<N>"} or {@code "ch<N>"} — a two-char
+ * prefix followed by the index digits. Scans the digits after the
+ * prefix; non-digit characters in the middle of the run stop the
+ * scan.
+ *
+ * Defensive: returns 0 for empty / unrecognized input. Callers
+ * either know the input is a header key (via {@link headerType}) or
+ * handle the 0 return as "not a valid index".
  */
 export function parseHeaderIndex(str: string): number {
+    if (!str || str.length < 3) {
+        return 0;
+    }
     let index = 0;
-    for (let i = 0; i < str.length; i++) {
+    let i = 2; // skip the two-char prefix
+    while (i < str.length) {
         const code = str.charCodeAt(i);
         if (code > 47 && code < 58) {
             index = index * 10 + code - 48;
+        } else {
+            break;
         }
+        i++;
     }
     return index;
 }

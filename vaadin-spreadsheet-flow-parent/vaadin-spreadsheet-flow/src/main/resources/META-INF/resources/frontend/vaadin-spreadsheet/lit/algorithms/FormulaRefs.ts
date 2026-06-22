@@ -12,19 +12,20 @@
  * this to discover ranges to highlight as the user types — e.g.
  * `"=A1+SUM(B2:D5)"` produces `["A1", "B2:D5"]`.
  *
- * Pure functions on strings — no DOM, no state. Ported from the GWT
- * `FormulaBarWidget.parseCellReferences` + `isCellRef` algorithms with
- * the regex-cache logic dropped (modern JS regex is fast enough that
- * the GWT-side `cachedRegex` 2-second timer trick is unnecessary).
+ * Pure functions on strings — no DOM, no state.
  *
- * The 16-color reference highlighting (the formulaColors list) is a
- * rendering concern, not an algorithm concern — that list lives in the
- * rendering layer when it's built in Phase 3.3.
+ * Behavior contract: cell references are 1-3 letters + 1-7 digits
+ * (the Excel A1-notation limits), optionally preceded by a sheet name
+ * + `!`, optionally followed by `:` + another cell ref to form a
+ * range. References are returned in document order with duplicates
+ * preserved (the formula-bar's 16-color cycle treats each occurrence
+ * as a distinct position). The 16-color list itself is a rendering
+ * concern + lives in the rendering layer (Phase 3.3).
  */
 
 /**
  * Build the per-call regex that recognizes a cell-reference token.
- * Pattern (per the original Java):
+ * Pattern:
  *
  *     ^((sheet1|sheet2|...)!){0,1}([A-Za-z]{1,3}[0-9]{1,7})(:([A-Za-z]{1,3}[0-9]{1,7})){0,1}
  *
@@ -40,9 +41,8 @@
  *
  * @param sheetNames Names of all sheets in the active workbook. Used
  *                   to compose the optional sheet-prefix alternation.
- *                   Must be non-empty (the GWT version doesn't
- *                   defend against empty; we preserve that — caller
- *                   provides at least one).
+ *                   Must be non-empty — the caller (formula bar)
+ *                   always provides at least one (the active sheet).
  */
 function buildCellRefRegex(sheetNames: readonly string[]): RegExp {
     const escapedNames = sheetNames.map(escapeRegex).join('|');
@@ -105,14 +105,8 @@ export function isCellRef(
  * Algorithm:
  *
  * 1. Split the formula on any run of characters that aren't valid in a
- *    cell ref (`[^A-z0-9:!]+`). This isolates each potential ref token
- *    along with any sheet prefix or colon-range.
- *
- *    Note: The `[A-z]` class in the regex is intentional (matches the
- *    GWT version). It's a wider class than `[A-Za-z]` — it also
- *    includes `[`, `\`, `]`, `^`, `_`, `` ` ``. Preserving the original
- *    behavior so the new client matches the GWT widget's
- *    token-extraction byte-for-byte.
+ *    cell ref (`[^A-Za-z0-9:!]+`). This isolates each potential ref
+ *    token along with any sheet prefix or colon-range.
  *
  * 2. Each token is tested against the cell-ref regex
  *    (`isCellRef(token, sheetNames)`).
@@ -133,7 +127,7 @@ export function parseCellReferences(
         return [];
     }
     const regex = buildCellRefRegex(sheetNames);
-    const tokens = formula.split(/[^A-z0-9:!]+/);
+    const tokens = formula.split(/[^A-Za-z0-9:!]+/);
     const refs: string[] = [];
     for (const token of tokens) {
         if (regex.test(token)) {

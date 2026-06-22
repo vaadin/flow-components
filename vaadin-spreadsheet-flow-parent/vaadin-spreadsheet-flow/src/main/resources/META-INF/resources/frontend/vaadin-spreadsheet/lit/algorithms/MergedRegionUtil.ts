@@ -27,12 +27,9 @@ import {
  * All coordinates are **1-based** (matching POI's convention and the
  * server-side spreadsheet API).
  *
- * Ported byte-equivalent from
- * `com.vaadin.addon.spreadsheet.client.MergedRegionUtil.findIncreasingSelection`
- * (slice 118 of the Tier 3 rewrite). The Java version's structure is
- * preserved — same 4-edge walk, same `trouble` flag, same recursive
- * tail — so the spec pin (`MergedRegionLookup` + `MergedRegionCascade`
- * specs) applies equally to this implementation.
+ * The behavior contract is pinned by the server-side
+ * `MergedRegionLookup` + `MergedRegionCascade` Phase 3 specs +
+ * the unit tests in `lit-merged-region-util.test.ts`.
  *
  * Invariants:
  * - **Single-cell shortcut**. When the selection collapses to one

@@ -73,24 +73,17 @@ describe('ViewportMath — getDefaultRowHeightPx', () => {
 });
 
 describe('ViewportMath — getRowHeightPx', () => {
-    const definedHeights = [20, 30, 40, 25, 20]; // length 5
+    const definedHeights = [20, 30, 40, 25, 20]; // length 5: rows 1..5 covered
 
-    it('returns the defined height for rows 1..length-1, non-hidden', () => {
+    it('returns the defined height for rows 1..length, non-hidden', () => {
         expect(getRowHeightPx(1, definedHeights, new Set(), 18)).to.equal(20);
         expect(getRowHeightPx(3, definedHeights, new Set(), 18)).to.equal(40);
         expect(getRowHeightPx(4, definedHeights, new Set(), 18)).to.equal(25);
+        expect(getRowHeightPx(5, definedHeights, new Set(), 18)).to.equal(20);
     });
 
     it('returns 0 for a hidden row, ignoring the defined height', () => {
         expect(getRowHeightPx(3, definedHeights, new Set([3]), 18)).to.equal(0);
-    });
-
-    it('returns the default height when row == length (the GWT >= quirk)', () => {
-        // GWT check is `row >= definedRowHeights.length`. Row 5 with
-        // length 5 → 5 >= 5 → default, NOT array[4]. Preserved verbatim
-        // for byte-equivalence; the upstream presumably sizes the array
-        // with one extra slot to make this work. See javadoc.
-        expect(getRowHeightPx(5, definedHeights, new Set(), 18)).to.equal(18);
     });
 
     it('returns the default height for a row index beyond definedHeights', () => {

@@ -11,9 +11,9 @@ import type { MergedRegion } from '../types/wire.js';
 
 /**
  * Factory for a default-constructed `MergedRegion` (id=0, all corners at
- * 0). Mirrors the Java no-arg constructor used inside
- * `MergedRegionUtil.findIncreasingSelection` to build a transient region
- * when no POI-tracked region was found at the resolved coordinates.
+ * 0). Used inside `MergedRegionUtil.findIncreasingSelection` to build a
+ * transient region when no POI-tracked region was found at the resolved
+ * coordinates.
  *
  * The transient `id=0` is the wire-protocol signal that this region was
  * synthesized client-side rather than read from the workbook.
@@ -23,12 +23,12 @@ export function createMergedRegion(): MergedRegion {
 }
 
 /**
- * Factory mirroring the Java 4-arg constructor
- * `MergedRegion(int c1, int r1, int c2, int r2)`. Returns a transient
- * region (`id=0`) initialized from the corner coordinates.
+ * Factory taking corner coordinates. Returns a transient region
+ * (`id=0`).
  *
- * Note the argument order: `c1, r1, c2, r2` — columns-then-rows, NOT
- * top-left-then-bottom-right. Preserved from the Java side.
+ * Argument order is `c1, r1, c2, r2` — columns-then-rows. This is the
+ * same convention the rest of the codebase uses (col first, row
+ * second), distinct from the (row, col) order POI uses internally.
  */
 export function createMergedRegionFromCorners(
     c1: number,
@@ -44,10 +44,6 @@ export function createMergedRegionFromCorners(
  * merged-region cache. Used by `MergedRegionUtil.findIncreasingSelection`
  * to ask: "is there a merged region at / overlapping these
  * coordinates?".
- *
- * Mirrors the Java
- * `com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer`
- * interface 1:1.
  *
  * Implementations must be cheap (O(1) ideally) — the selection-expansion
  * algorithm calls these methods inside a loop over every cell on the

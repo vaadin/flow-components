@@ -8,15 +8,8 @@
  */
 
 /**
- * Pure-algorithm port of the GWT client's coordinate / viewport math.
- *
- * Ported from `SheetWidget.java` in `vaadin-spreadsheet-flow-client`:
- *  - `convertPointsToPixel` / `convertPixelsToPoint` (lines 4505-4518)
- *  - `getDefaultRowHeight` (lines 4486-4503)
- *  - `getRowHeight` (lines 4472-4480)
- *  - `calculateLeftValueOfScrolledColumns` (lines 2312-2318)
- *  - `calculateTopValueOfScrolledRows` (lines 2320-2326)
- *  - the pure portion of `resetScrollView` (lines 2851-2910)
+ * Pure-algorithm coordinate / viewport math for the spreadsheet
+ * client.
  *
  * "Pure" means: no DOM access, no side effects. Inputs are the sheet's
  * geometric state; outputs are derived numbers. The caller (the Lit
@@ -24,8 +17,20 @@
  * current scroll position + sheet model, and for applying the outputs
  * to the rendered cells.
  *
- * Coordinates are 1-based (matching Apache POI + the GWT client +
- * `SelectionState.ts`). Pixel offsets are 0-based.
+ * Behavior contract:
+ *
+ * - Coordinates are 1-based (matching Apache POI + Excel's A1
+ *   convention). Pixel offsets are 0-based.
+ * - Row heights are stored as points (Excel's unit, 1/72 inch) and
+ *   converted to pixels using a supplied PPI. Pixel values are
+ *   TRUNCATED, not rounded — fractional pixels render
+ *   inconsistently across browsers + DPRs.
+ * - Hidden rows / columns contribute 0 to all height / width sums.
+ * - Frozen panes shift the visible-range start by the split position
+ *   (rows 1..verticalSplitPosition stay pinned).
+ *
+ * The new Spreadsheet class composes these helpers in its render +
+ * scroll-handler paths.
  */
 
 /** Pixels-per-inch — used to convert Excel's point-based row heights to pixels. */
@@ -34,30 +39,24 @@ export const FALLBACK_PPI = 96;
 /**
  * Convert points (Excel's row-height unit, 1/72 inch) to integer pixels.
  *
- * Mirrors `SheetWidget.convertPointsToPixel(float points)`. The GWT
- * version uses `BigDecimal.intValue()` (truncation toward zero); we
- * mirror that with `Math.trunc` rather than `Math.round` to preserve
- * byte-equivalent output.
+ * Truncate toward zero rather than rounding. Fractional pixels would
+ * render inconsistently across browsers and devicePixelRatios — every
+ * spreadsheet implementation that targets visual stability uses
+ * truncation here. (Excel itself does the same.)
  */
 export function convertPointsToPixel(points: number, ppi: number): number {
     return Math.trunc((points * ppi) / 72);
 }
 
-/**
- * Inverse of {@link convertPointsToPixel}. Returns a float (no truncation).
- * Mirrors `SheetWidget.convertPixelsToPoint(int pixels)`.
- */
+/** Inverse of {@link convertPointsToPixel}. Returns a float (no truncation). */
 export function convertPixelsToPoint(pixels: number, ppi: number): number {
     return (pixels / ppi) * 72;
 }
 
 /**
  * Default per-row height in pixels, converted from POI's points-based
- * `defaultRowHeight` using the supplied PPI.
- *
- * Mirrors `SheetWidget.getDefaultRowHeight()` minus the lazy
- * DOM-measurement of PPI (the Lit caller measures PPI explicitly and
- * passes it in).
+ * `defaultRowHeight` using the supplied PPI. When the caller can't
+ * measure PPI (early in attach), pass 0 — the 96-PPI fallback applies.
  */
 export function getDefaultRowHeightPx(
     defaultRowHeightPoints: number,
@@ -71,21 +70,14 @@ export function getDefaultRowHeightPx(
  * Per-row height in pixels, accounting for hidden rows and rows whose
  * index is beyond the explicitly defined heights.
  *
- * Mirrors `SheetWidget.getRowHeight(int row)` byte-equivalent. Note
- * the GWT check is `row >= definedRowHeights.length`, NOT `>`. This
- * means a length-N array provides heights for rows 1..N-1, and row N
- * itself falls back to the default. Preserved verbatim for behavior
- * equivalence; the GWT-side array is presumably sized N+1 to make
- * this work in practice, but documenting the quirk here as an open
- * question for review.
- *
- * @param row1Based 1-based row index (POI/GWT convention)
+ * @param row1Based 1-based row index (Apache POI / A1-notation convention).
  * @param definedRowHeightsPx Pre-computed pixel heights for rows
- *   1..length-1 (0-indexed in the array). Row index equal to
- *   `length` and above uses `defaultRowHeightPx`.
+ *   1..length (0-indexed in the array — element 0 corresponds to
+ *   row 1, element length-1 to row length). Rows beyond the array
+ *   use {@code defaultRowHeightPx}.
  * @param hiddenRows Set of 1-based row indices that are hidden.
  *   Hidden rows return 0 regardless of their defined height.
- * @param defaultRowHeightPx Fallback height.
+ * @param defaultRowHeightPx Fallback height for rows beyond the array.
  */
 export function getRowHeightPx(
     row1Based: number,
@@ -96,7 +88,7 @@ export function getRowHeightPx(
     if (hiddenRows.has(row1Based)) {
         return 0;
     }
-    if (row1Based >= definedRowHeightsPx.length) {
+    if (row1Based > definedRowHeightsPx.length) {
         return defaultRowHeightPx;
     }
     return definedRowHeightsPx[row1Based - 1];
@@ -107,12 +99,8 @@ export function getRowHeightPx(
  * the first visible (non-frozen) column. Used to compute the visual
  * offset of the scrolled pane relative to the frozen pane.
  *
- * Mirrors `SheetWidget.calculateLeftValueOfScrolledColumns()`. The
- * caller provides `getColWidth` (the actionHandler analogue) and the
- * current `horizontalSplitPosition` + `firstColumnIndex`.
- *
- * `horizontalSplitPosition` is 0 when no freeze is active. In that
- * case the loop's `i = 1` start scans from column 1.
+ * `horizontalSplitPosition` is 0 when no freeze is active — the loop
+ * sums column widths starting at column 1, which is the natural origin.
  */
 export function calculateLeftValueOfScrolledColumns(
     horizontalSplitPosition: number,
@@ -126,10 +114,7 @@ export function calculateLeftValueOfScrolledColumns(
     return left;
 }
 
-/**
- * Symmetric row variant of {@link calculateLeftValueOfScrolledColumns}.
- * Mirrors `SheetWidget.calculateTopValueOfScrolledRows()`.
- */
+/** Symmetric row variant of {@link calculateLeftValueOfScrolledColumns}. */
 export function calculateTopValueOfScrolledRows(
     verticalSplitPosition: number,
     firstRowIndex: number,
@@ -171,20 +156,18 @@ export interface ViewportInput {
     /**
      * Index (1-based, exclusive) past which row heights aren't explicitly
      * defined — beyond this point, the default row height is assumed.
-     * Mirrors `actionHandler.getDefinedRows()`.
      */
     definedRows: number;
     /** Default per-row height in pixels (see {@link getDefaultRowHeightPx}). */
     defaultRowHeightPx: number;
     /**
-     * Per-column width getter. Mirrors `actionHandler.getColWidthActual`
-     * — already account for hidden columns (returning 0).
+     * Per-column width getter. Must already account for hidden
+     * columns (returning 0 for them).
      */
     getColWidthActual: (col1Based: number) => number;
     /**
-     * Per-row height getter for rows within `definedRows`. Mirrors
-     * `SheetWidget.getRowHeight(int row)` — must return 0 for hidden
-     * rows.
+     * Per-row height getter for rows within `definedRows`. Must
+     * return 0 for hidden rows.
      */
     getRowHeight: (row1Based: number) => number;
 }
@@ -211,7 +194,7 @@ export interface ViewportBounds {
  * rendered. The caller decides what to do with the range (mount cells,
  * recycle, etc.).
  *
- * Mirrors the pure portion of `SheetWidget.resetScrollView(int, int)`:
+ * Algorithm:
  *  1. Start at column/row 1 (or one past the freeze split).
  *  2. Advance the "first" index until its accumulated pixel position
  *     reaches `scroll - buffer` (so the first rendered cell is within
@@ -221,7 +204,8 @@ export interface ViewportBounds {
  *
  * The row branch has an extra wrinkle: rows beyond `definedRows` use
  * `defaultRowHeightPx` directly (skipping the `getRowHeight` hidden
- * check). This mirrors `SheetWidget` exactly.
+ * check), because the per-row hidden-set is only populated for rows
+ * within the defined range.
  */
 export function computeViewportBounds(input: ViewportInput): ViewportBounds {
     let firstRowIndex = input.verticalSplitPosition > 0

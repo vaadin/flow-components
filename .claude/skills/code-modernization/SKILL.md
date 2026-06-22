@@ -472,6 +472,45 @@ In Mode B specifically, the LOCAL SOURCE is still valuable as a
 cross-reference — just don't have it open when actually writing
 the new code.
 
+### Cleanup pattern: if you've already shipped Mode B work as Mode A, do an explicit "execute the audit" slice
+
+The verbatim-port → clean-room transition isn't free — once you've
+shipped algorithm code in the byte-equivalent style, the comments,
+variable names, and javadoc framings carry the source-language
+signal forward. The cleanup is mechanical but worth a dedicated
+slice rather than being folded into the next port:
+
+1. **Audit doc first** (one slice). Catalog every QUIRK / "preserved
+   verbatim" / "ported byte-equivalent from..." marker in the
+   existing code. Classify each as KEEP (real-world contract;
+   rewrite the comment to cite the contract), DROP (apparent
+   source-language bug; the new behavior matches the spec, not the
+   bug), or REPHRASE (behavior stays, framing changes).
+
+2. **Execution slice** (one slice). Walk the audit + apply each
+   resolution. Update test expectations for DROPs. Run the test
+   suite per file as you go, not at the end — a DROP test fix
+   on file X can pass against the original code AND the corrected
+   code if the test data doesn't actually exercise the diff. (E.g.
+   in the spreadsheet refactor, the `row >= length` quirk's test
+   used row 5 against a length-5 array — the only row that
+   triggered the quirk. Removing the quirk meant flipping
+   `.to.equal(18)` to `.to.equal(20)` on exactly that test.)
+
+3. **Visual-regression as the safety net for behavior DROPs.** When
+   the cleanup changes user-observable behavior (e.g. removing a
+   regex char class drops 6 characters from token-matching), the
+   unit tests may not catch the downstream effect. The
+   visual-regression IT (capture + diff against committed
+   baselines) is the deferred check; flag it explicitly in the
+   slice notes + run before the next user-facing release.
+
+4. **Don't try to do this incrementally during normal slices.**
+   The temptation is "I'll fix this comment while I'm here". Don't —
+   the audit framing keeps the cleanup focused + the test changes
+   reviewable in isolation. Mixing cleanup with port work makes
+   both reviews harder.
+
 ### Why clean-room (Mode B) matters: licensing + maintenance
 
 The reason the byte-equivalent + QUIRK-callout pattern is wrong-

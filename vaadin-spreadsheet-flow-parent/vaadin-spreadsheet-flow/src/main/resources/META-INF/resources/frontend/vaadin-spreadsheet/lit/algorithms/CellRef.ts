@@ -34,9 +34,7 @@ export interface CellCoord {
  * Parse a single cell reference (e.g. `"A1"`, `"BC23"`, `"a1"`) into a
  * `CellCoord`. Tolerates lower-case; the parser uppercases internally.
  *
- * Algorithm ported byte-equivalent from
- * `FormulaBarWidget.parseSingleCell` (GWT client). Behaviorally
- * identical:
+ * Behavior contract:
  *
  * - Empty / whitespace-only / non-cell-ref input → `{ col: 0, row: 0 }`
  *   (no exception). Caller is responsible for validating that the input
@@ -44,7 +42,8 @@ export interface CellCoord {
  *   permissive on shape.
  * - Multi-letter column prefixes (up to 3 letters) are accumulated in
  *   base-26 with no leading-zero handling: A=1, Z=26, AA=27, AZ=52,
- *   BA=53, ..., ZZ=702, AAA=703.
+ *   BA=53, ..., ZZ=702, AAA=703 — the standard Excel column-letter
+ *   convention.
  *
  * Pure function — no side effects.
  *
@@ -131,16 +130,15 @@ export function cellCoordToAddress(coord: CellCoord): string {
 /**
  * Parse a cell-reference token into a `MergedRegion` (single-cell,
  * range, or sheet-qualified). Returns `null` when the token refers to a
- * non-active sheet (caller's responsibility to provide the
- * active sheet name).
+ * non-active sheet (caller's responsibility to provide the active
+ * sheet name).
  *
- * Ported byte-equivalent from
- * `FormulaBarWidget.parseSingleCellRef` (GWT client). Behaviors:
+ * Behavior contract:
  *
- * - Sheet-prefixed ref (`"Sheet2!A1"`): only parsed if `sheetname`
- *   matches `activeSheetName`; otherwise returns `null`.
+ * - Sheet-prefixed ref (`"Sheet2!A1"`): only parsed if the sheet
+ *   prefix matches `activeSheetName`; otherwise returns `null`.
  * - Range ref (`"A1:B3"`): both endpoints parsed; corners populated
- *   directly without reordering.
+ *   directly without reordering (caller normalizes if needed).
  * - Single-cell ref (`"C5"`): col1/col2 collapse to the parsed col;
  *   row1/row2 collapse to the parsed row.
  *
