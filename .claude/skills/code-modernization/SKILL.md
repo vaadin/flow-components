@@ -341,54 +341,174 @@ PR.
 
 When the modernization isn't "use modern Java features" but "rewrite
 this in another language entirely" (GWT-Java → TS, ObjC → Swift,
-Python → Go), the same Tier 3 framing applies but with extra moves
-specific to porting:
+Python → Go), the same Tier 3 framing applies — with one critical
+distinction that flips the default approach. The flip is between
+two RADICALLY different port modes, and getting them confused is
+the most expensive mistake in this domain.
 
-### Local source over JAR / online docs
+### The two port modes
 
-Read the source you're porting FROM in the local repo, not via
-artifact extraction. JAR sources via `m2 unzip` work but miss surrounding
-context (sibling files, test usage patterns, recent commits that
-explain "why"). Sibling repos like `../flow`, `../docs`,
-`../web-components` are almost always cheaper to grep than chasing
-an extracted source jar. Confirm before each port chunk that the
-upstream repo isn't already gone — sometimes the "modernized"
-target's repo holds the answer for "what should this look like in
-the new lang", which JARs never do.
+**Mode A — Protocol port** (byte-equivalence required):
 
-### Byte-equivalence is the default; document deviations with QUIRK callouts
+For code that ENCODES a wire format the other side depends on —
+JSON DTOs, RPC interface method names, file-format readers/writers,
+HTTP request shapes, the discriminator strings in event unions —
+the port MUST preserve byte-equivalence with the original. The
+"other side" (the server, the storage layer, the external consumer)
+expects the bytes in the format the original emits; deviation is a
+breaking wire-format change, not a refactor.
 
-Pure-algorithm code should port byte-equivalent — same inputs
-produce same outputs, including for edge-case quirks. When you
-encounter source code that looks like an off-by-one or has
-suspicious-looking conditions:
+**Mode B — Algorithm port** (behavior contract, clean-room rewrite):
 
-- **Preserve verbatim** in the port. Don't "fix" what looks wrong;
-  the upstream may depend on the quirk in non-obvious ways.
-- **Document with a `QUIRK` callout** in javadoc / docstring.
-  Example: `// QUIRK: GWT uses 'row >= length', NOT '>', so a length-N
-  array provides heights for rows 1..N-1 only. Preserved for
-  byte-equivalence; flag for human audit.`
-- **Add a regression test that pins the quirk.** Future-you will be
-  tempted to "fix" the code; the test prevents that. Name the test
-  to explain the quirk: `getRowHeightPx_at_arrayLength_returnsDefault_NOT_lastEntry`.
+For code that IMPLEMENTS behavior — math, parsing, formatting,
+state machines, visibility calculations — the port should be a
+CLEAN-ROOM REWRITE that preserves the behavior CONTRACT (same
+documented inputs → same documented outputs) without copying the
+implementation. This is harder than verbatim porting but produces
+code that:
 
-If you're CERTAIN the quirk is a bug AND the original is unused
-elsewhere, declare it intentionally. The pattern from slice 119
-was: preserve the `[A-z]` regex character class verbatim (genuine
-upstream intent — wider character set) BUT escape regex metachars
-in sheet names (real bug not relied upon). Both moves documented
-explicitly in the source.
+- Looks like the target ecosystem's modern idiom, not translated
+  source-language code.
+- Drops upstream bugs / accidents / off-by-ones instead of
+  carrying them forward.
+- Avoids licensing/copyright signals that a verbatim port carries
+  (more on this below).
+- Is maintainable by the target-language team without reference
+  to the source-language original.
+
+### Which mode applies?
+
+| Type of code | Mode |
+| --- | --- |
+| JSON DTOs (`CellData`, `MergedRegion`) | **A — protocol** |
+| RPC interface method names (`SpreadsheetClientApi`) | **A — protocol** |
+| Event-type discriminators (`'cellSelected'`, `'popupButtonClick'`) | **A — protocol** |
+| CSS class names hardcoded by external testers | **A — protocol** |
+| File-format parsers (e.g. .xlsx reader if applicable) | **A — protocol** |
+| Pixel-math algorithms (`computeViewportBounds`) | **B — algorithm** |
+| Coordinate parsers (`parseCellRef`, `parseColRow`) | **B — algorithm** |
+| Visibility / membership predicates (`isCellSelected`) | **B — algorithm** |
+| Formatters (`convertPointsToPixel`, TSV serialize) | **B — algorithm** |
+| State helpers (`SelectionState`, `MergedRegion` factory) | **B — algorithm** |
+
+**When in doubt, ask: "does the OTHER SIDE see the bytes of this
+output?"** If yes, Mode A. If no — if the output is consumed
+internally by other code in the same module — Mode B.
+
+### Mode A — protocol port: byte-equivalence guidance
+
+For Mode A code, the original guidance from earlier versions of
+this skill applies:
+
+- **Preserve verbatim**. Field order, default values, null
+  handling, integer vs string typing.
+- **Pin with a wire-snapshot test** that asserts the exact bytes
+  produced for a known input. This is the load-bearing safety net.
+- **Document the protocol source** — "this is the wire format the
+  server emits; see XYZ.java for the producer side".
+- **Audit cross-language interface boundaries with `comm`** (see
+  next subsection — that section applies most strongly to Mode A).
+
+### Mode B — algorithm port: clean-room rewrite guidance
+
+For Mode B code, FLIP the defaults:
+
+- **Don't read the source-language file when writing the target-
+  language file.** Read it once to understand the BEHAVIOR; close
+  it. Then write the target version from the behavior description
+  + the test cases. This is the "clean-room" technique used to
+  avoid derivative-work copyright issues — and it's also how you
+  end up with code that doesn't look like translated source code.
+- **Start from the modern target-ecosystem reference.** For a TS
+  port in a Vaadin Flow codebase, the reference is
+  `vaadin-grid-flow/src/.../gridConnector.ts`. Open it BEFORE the
+  source-language file. Match its module structure, naming
+  conventions, error-handling patterns, test style.
+- **Derive behavior from tests, not from the source.** Write the
+  tests first (or extract them from the source language's test
+  suite). Implement against the tests, using the source-language
+  file only as a cross-check when a test surprises you.
+- **Treat apparent bugs as bugs.** If the source-language version
+  has an off-by-one, a typo in a regex character class, an
+  obviously-permissive parser that accepts inputs the contract
+  doesn't allow — those go AWAY in the clean-room rewrite. The
+  visual-regression / integration safety net catches the rare case
+  where downstream actually depended on the bug.
+- **Document the BEHAVIOR contract, not the implementation.**
+  Comments cite "Excel's clipboard format truncates newlines" or
+  "POI rows are 1-indexed", NOT "ported from `SheetWidget.java:4472`".
+  The latter framing reads as derivative work; the former reads as
+  re-derivation from the same source spec.
+
+### When verbatim might still be tempting in Mode B
+
+The seductive case: "this 6-LOC inner loop is so tight, the clean
+version is identical anyway". Resist. Even when the resulting code
+LOOKS identical to a translation, the framing matters:
+
+- **Source comments** should cite the behavior contract, not the
+  source file.
+- **Variable names** should follow target-ecosystem conventions
+  (e.g. `definedRowHeightsPx` instead of `definedRowHeights`
+  with a comment "always in pixels").
+- **Test names** should describe the behavior, not the source
+  method's name.
+
+If after all that the code is still character-identical to a
+translation, that's fine — the behavior is constrained enough that
+there's only one correct implementation. But the comments + tests
++ surrounding structure make clear it's a re-derivation.
+
+### Local source over JAR / online docs (applies to both modes)
+
+Read the source you're investigating in the local repo, not via
+artifact extraction. JAR sources via `m2 unzip` work but miss
+surrounding context (sibling files, test usage patterns, recent
+commits that explain "why"). Sibling repos like `../flow`,
+`../docs`, `../web-components` are almost always cheaper to grep
+than chasing an extracted source jar.
+
+In Mode B specifically, the LOCAL SOURCE is still valuable as a
+cross-reference — just don't have it open when actually writing
+the new code.
+
+### Why clean-room (Mode B) matters: licensing + maintenance
+
+The reason the byte-equivalent + QUIRK-callout pattern is wrong-
+direction for algorithms isn't aesthetic — it's two concrete
+project-level costs:
+
+1. **Legacy maintenance burden.** A verbatim port preserves every
+   accident the source-language version had: the wrong-feeling
+   off-by-ones, the over-permissive parsers, the JSNI-influenced
+   structure, the source-language idioms expressed in target-
+   language syntax. All of it becomes the new team's burden to
+   maintain. The codebase grows old AT BIRTH.
+
+2. **Licensing / copyright.** A clean-room rewrite is a recognized
+   technique for producing derivative work that doesn't infringe
+   on the original's copyright. A "ported byte-equivalent + QUIRK
+   callout" implementation effectively redistributes the source-
+   language work in another syntax — which carries the original's
+   license forward AND signals "this is the same code". For
+   relicensing scenarios, organizational changes, or just risk
+   minimization, the clean-room version is the better artifact.
+
+In the Vaadin Spreadsheet refactor (Tier 3, slices 117+), both
+drivers applied. The user clarified the direction in slice 129
+after slices 118-125 had ported ~5 algorithm subsystems in the
+old "byte-equivalent" style. `refactor-artifacts/QUIRKS_AUDIT.md`
+catalogs each banked quirk + classifies as KEEP / DROP / REPHRASE
+for cleanup in subsequent slices.
 
 ### Tests must ACTUALLY RUN — `tsc --noEmit` is not a runtime check
 
-A TypeScript file that compiles cleanly under strict mode can
-still have semantic bugs that only a runtime test catches. The
-canonical example: `if (row > definedRowHeightsPx.length)` is
-syntactically valid TS and types check perfectly — but it's a `>`
-vs `>=` off-by-one that only a unit test exposes. Compile-checks
-verify shape; tests verify behavior. Always run the tests for
-ported code.
+(Applies to both modes.) A TypeScript file that compiles cleanly
+under strict mode can still have semantic bugs that only a runtime
+test catches. The canonical example: `if (row > defs.length)` vs
+`if (row >= defs.length)` — both type-check, only the runtime
+catches the off-by-one. Compile-checks verify shape; tests verify
+behavior. Always run the tests for ported code.
 
 This implies: **verify the test runner actually executed the
 tests** before celebrating "all green". A test runner returning

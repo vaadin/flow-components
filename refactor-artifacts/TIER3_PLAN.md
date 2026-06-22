@@ -403,6 +403,45 @@ Reasons:
    libraries. None match Vaadin's commercial and feature needs
    without significant adapter work.
 
+### 5.1b Clean-room rewrite, not verbatim port (slice 129 clarification)
+
+The user clarified on 2026-06-22 that the in-house TS/Lit rewrite
+is a **clean-room rewrite**, not a verbatim port of the GWT code.
+Two drivers:
+
+1. **Maintenance burden**: a verbatim port preserves the GWT-era
+   idioms, off-by-ones, and JSNI-influenced structure. The new
+   team inherits the legacy's complexity in TypeScript syntax.
+   Eliminating GWT only matters if the NEW code looks like Vaadin's
+   modern components (vaadin-grid-flow, etc.), not like translated
+   GWT-Java.
+
+2. **Licensing / copyright**: a byte-equivalent port reads as a
+   derivative work of the original. A clean-room rewrite — derive
+   the behavior from Excel's spec, POI semantics, and the test
+   suite; use the GWT source only as a cross-reference, not as the
+   implementation template — produces a fresh artifact whose
+   licensing trail is clean.
+
+**Implications for Phase 3.2-3.5 execution:**
+
+- The `code-modernization` skill's "Porting between languages"
+  section (sharpened in slice 129) distinguishes **Mode A —
+  protocol port** (wire DTOs, RPC interface names, CSS class
+  names — byte-equivalent required) from **Mode B — algorithm
+  port** (math, parsers, formatters — clean-room rewrite). The
+  rewrite work is Mode B; only the wire-contract layer is Mode A.
+- Slices 118-125 ported 5 algorithm subsystems in the
+  byte-equivalent + QUIRK-callout style. `refactor-artifacts/
+  QUIRKS_AUDIT.md` (added in slice 129) catalogs each quirk and
+  classifies as KEEP (real Excel/POI contract), DROP (apparent
+  GWT bug), or REPHRASE (comment cites behavior contract instead
+  of GWT source).
+- The architectural target is `vaadin-grid-flow/.../gridConnector.ts`
+  — its module structure, naming, error-handling, and test style
+  is the reference. Future ports open THAT file before opening
+  the GWT source.
+
 ### 5.2 What we explicitly reject
 
 - **Option B (full OSS wrap)**: the custom-editor integration gap

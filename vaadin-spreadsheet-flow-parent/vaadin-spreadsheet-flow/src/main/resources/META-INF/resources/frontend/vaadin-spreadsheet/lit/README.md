@@ -99,6 +99,27 @@ conventions established by `vaadin-grid-flow`'s
   JSON shape; behavior lives elsewhere.
 - **Test-coverage per module.** Each ported subsystem has a
   `.test.ts` file in the IT module's `test/` directory.
+- **Clean-room rewrite, NOT verbatim port** (clarified 2026-06-22,
+  slice 129). The GWT-side code is a CROSS-REFERENCE, not an
+  implementation template:
+  - **Mode A (wire / contract code)** — DTOs, RPC interface names,
+    event-type discriminators, CSS class names — preserve
+    byte-equivalence to the server's emitted shape. The server
+    + the testbench module + the customer-facing API depend on it.
+  - **Mode B (algorithm / implementation code)** — pixel math,
+    parsers, formatters, state helpers — derive from the BEHAVIOR
+    contract (Excel spec, POI semantics, tests). Use the GWT-side
+    file only to cross-check correctness; close it before writing
+    the TS version. Drop apparent bugs (`row >= length`
+    off-by-one, `[A-z]` regex character class that includes 6
+    non-letter chars). Comments cite the behavior contract, not
+    the source-file location. See `refactor-artifacts/QUIRKS_AUDIT.md`
+    for the per-quirk classification of the slices 118-125 banked
+    quirks + cleanup direction.
+
+The legacy maintenance burden + licensing/copyright concerns are
+the explicit drivers. See `refactor-artifacts/GWT_ELIMINATION_ROADMAP.md`
+for the full elimination plan.
 
 ## Testing
 

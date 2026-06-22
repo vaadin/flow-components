@@ -18,6 +18,51 @@ longer shipping to users". Without an explicit elimination plan,
 that endpoint stays vague + the work coasts indefinitely with both
 implementations alive.
 
+## What "elimination" means (slice 129 clarification)
+
+The user clarified on 2026-06-22:
+
+> we are not just eliminating GWT code to copy it to our repo. We
+> want to modernize the way it works. We want to refactor the
+> structure to be close to our other components. ... massive legacy
+> code maintenance burden & cost and licensing & copyright issues
+
+Two drivers for the work:
+
+1. **Legacy maintenance burden + cost.** Carrying the GWT module
+   forward — even in TS-translated form — preserves the source-
+   language's idioms, off-by-ones, JSNI-influenced structure, and
+   accidental complexity. A new team has to maintain code that
+   wasn't designed in their language's idiom. Elimination is only
+   complete when the NEW code looks like the team's other modern
+   components (vaadin-grid-flow, vaadin-combo-box-flow, etc.), not
+   like translated GWT.
+
+2. **Licensing & copyright.** A verbatim byte-equivalent port is a
+   derivative work that carries the original's license forward. A
+   clean-room rewrite — where the new code derives from the
+   behavior contract (Excel spec, POI semantics, test cases) and
+   uses the GWT source only as a cross-reference rather than as
+   the implementation template — produces a fresh artifact whose
+   licensing trail is clean.
+
+Both drivers point to the same approach: **clean-room rewrite, not
+verbatim port**. See `refactor-artifacts/QUIRKS_AUDIT.md` for the
+catalog of quirks banked in slices 118-125's byte-equivalent ports
++ the cleanup direction (KEEP-real-contract, DROP-apparent-bug,
+REPHRASE-comment-to-cite-behavior-contract-not-source-file). See
+the `code-modernization` skill's "Porting between languages"
+section for the Mode A (protocol) vs Mode B (algorithm) distinction
+that operationalizes the direction.
+
+What this implies for THIS roadmap: the elimination of the GWT
+client module + the 1.2 MB blob stays planned, but the slices
+between now and Phase 3.6 should produce CLEAN-ROOM rewrites of
+the remaining subsystems, not more verbatim ports. The Quirks
+Audit's cleanup work is on the critical path because every
+remaining "ported byte-equivalent" comment reads as derivative-
+work signal that the eliminated artifact left behind.
+
 ## The full GWT-dependence inventory
 
 ### 1. GWT client source module — `vaadin-spreadsheet-flow-client/`
