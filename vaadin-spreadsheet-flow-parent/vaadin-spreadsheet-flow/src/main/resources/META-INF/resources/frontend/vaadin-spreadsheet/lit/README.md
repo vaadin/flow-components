@@ -1,0 +1,120 @@
+# Vaadin Spreadsheet — TypeScript / Lit client (in-development)
+
+> Phase 3.1+ of the Tier 3 GWT-replacement effort.
+> See `refactor-artifacts/TIER3_PLAN.md` for the full project brief.
+> **Status:** scaffolding — only pure-algorithm subsystems ported.
+
+## What's here
+
+```
+lit/
+├── README.md          (this file)
+├── types/
+│   └── wire.ts        (TypeScript interfaces for the 6 wire DTOs)
+├── algorithms/
+│   ├── MergedRegion.ts        (MergedRegion shape + factory)
+│   └── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
+└── wire/
+    └── parser.ts      (JSON wire-format parser)
+```
+
+## Where this fits in the bigger picture
+
+The existing **Lit wrapper element** at
+`../vaadin-spreadsheet.js` is the public API surface of the
+`<vaadin-spreadsheet>` web component. Today it delegates to
+`this.api` — an instance of the **GWT-compiled `Spreadsheet`
+class** in the 1.3 MB `../spreadsheet-export.js` blob.
+
+The Tier 3 plan replaces that 1.3 MB blob with a new in-house
+TS/Lit implementation. The Lit wrapper itself doesn't change
+(much). What changes is what's UNDER it.
+
+```
++---------------------------------------------+
+| <vaadin-spreadsheet> (LitElement, ~600 LOC) |  PUBLIC API SURFACE
+|   delegates to this.api                     |  (unchanged in Tier 3)
++---------------------------------------------+
+              |
+              v
++---------------------------------------------+
+| TODAY: this.api = new Spreadsheet(...)      |  Will be REPLACED in
+|        from spreadsheet-export.js (1.3 MB,  |  Phases 3.1-3.5.
+|        GWT-compiled)                        |
++---------------------------------------------+
+
+                  ⬇ replacement ⬇
+
++---------------------------------------------+
+| AFTER: this.api = new Spreadsheet(...)      |  Same public API,
+|        from this lit/ directory             |  TS/Lit underneath.
++---------------------------------------------+
+```
+
+The new code is being built incrementally. As of Phase 3.1
+slice 118, ONLY the pure-algorithm subsystems are ported:
+
+- ✓ MergedRegion + MergedRegionUtil (this slice)
+- ✓ Wire-format parser
+- ◯ Cell rendering (Phase 3.2)
+- ◯ Virtual scrolling (Phase 3.2 — critical path)
+- ◯ Selection (Phase 3.2)
+- ◯ Formula bar + editing (Phase 3.3)
+- ◯ Sheet tabs, grouping, popup buttons, etc. (Phase 3.5)
+- ◯ Custom editors + Vaadin integration (Phase 3.4)
+
+Until Phase 3.6 (rollout), this code is NOT loaded by the
+Lit wrapper. It exists as a parallel codebase under
+development. Once the new `Spreadsheet` class is feature-
+complete, the wrapper's import switches from
+`./spreadsheet-export.js` to `./lit/Spreadsheet.ts` (or its
+bundled equivalent) behind a feature flag.
+
+## Conventions
+
+The new code follows TypeScript strict mode and the
+conventions established by `vaadin-grid-flow`'s
+`gridConnector.ts` — modern ES modules, no GWT residue.
+
+- **No `@ts-nocheck`.** Every file is type-checked.
+- **Pure functions where possible.** Algorithms take inputs +
+  return outputs; side effects are in named functions.
+- **Wire DTOs are interfaces, not classes.** They're the
+  JSON shape; behavior lives elsewhere.
+- **Test-coverage per module.** Each ported subsystem has a
+  `.test.ts` file in the IT module's `test/` directory.
+
+## Testing
+
+Tests run via Web Test Runner (the existing flow-components
+convention, established in `vaadin-grid-flow-integration-tests`).
+Test files live in
+`../../../../../../../vaadin-spreadsheet-flow-integration-tests/test/`
+and import production code via relative paths.
+
+```sh
+# Run all client tests (from the integration tests module):
+npm test
+
+# Run a specific test file:
+wtr test/lit-merged-region-util.test.ts
+```
+
+The Web Test Runner config is at
+`../../../../../../../vaadin-spreadsheet-flow-integration-tests/web-test-runner.config.mjs`.
+
+## How the team continues
+
+See `refactor-artifacts/TIER3_PLAN.md` § 6 for the phased
+roadmap. The next chunks of work:
+
+1. **Phase 3.1 cont.** — port remaining pure-algorithm
+   helpers (Parser for formula references, sequence-detection
+   utilities, etc.).
+2. **Phase 3.2** — cell grid + virtual scrolling (the
+   critical path; ~6 weeks).
+3. **Phase 3.3** — editing + formula bar.
+4. **Phase 3.4** — Vaadin Flow integration (custom editors,
+   overlays).
+5. **Phase 3.5** — polish + parity.
+6. **Phase 3.6** — rollout via feature flag.
