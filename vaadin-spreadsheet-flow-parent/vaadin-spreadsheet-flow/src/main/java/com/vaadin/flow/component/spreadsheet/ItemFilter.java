@@ -215,32 +215,37 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     }
 
     /**
-     * Gets the currently NOT filtered cell values.
+     * Gets the cell values of this column that are currently visible, i.e.,
+     * excluding any hidden by this column's filter or whose rows are already
+     * hidden by other columns' filters.
      *
-     * @return All unique values currently visible (= not filtered) within this
-     *         column
+     * @return the cell values
      */
     protected Set<String> getVisibleValues() {
-        Set<String> values = new HashSet<>();
-        for (int r = filterRange.getFirstRow(); r <= filterRange
-                .getLastRow(); r++) {
-            if (!filteredRows.contains(r) && !spreadsheet.isRowHidden(r)) {
-                values.add(spreadsheet.getCellValue(
-                        spreadsheet.getCell(r, filterRange.getFirstColumn())));
-            }
+        Set<String> values = getAllValues();
+        for (int r : filteredRows) {
+            values.remove(spreadsheet.getCellValue(
+                    spreadsheet.getCell(r, filterRange.getFirstColumn())));
         }
         return values;
     }
 
     /**
-     * Gets all of the unique values for this filter column.
+     * Gets the cell values of this column, excluding those whose rows are
+     * already hidden by other columns' filters.
      *
-     * @return All unique values within this column
+     * @return the cell values
      */
     protected Set<String> getAllValues() {
+        Set<Integer> otherHidden = filterTable
+                .getRowsHiddenByOtherFilters(this);
+
         Set<String> values = new HashSet<>();
         for (int r = filterRange.getFirstRow(); r <= filterRange
                 .getLastRow(); r++) {
+            if (otherHidden.contains(r)) {
+                continue;
+            }
             values.add(spreadsheet.getCellValue(
                     spreadsheet.getCell(r, filterRange.getFirstColumn())));
         }
@@ -254,9 +259,15 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      *            the values that are NOT filtered
      */
     protected void updateFilteredItems(Collection<String> visibleValues) {
+        Set<Integer> otherHidden = filterTable
+                .getRowsHiddenByOtherFilters(this);
+
         filteredRows.clear();
         for (int r = filterRange.getFirstRow(); r <= filterRange
                 .getLastRow(); r++) {
+            if (otherHidden.contains(r)) {
+                continue;
+            }
             String cellValue = spreadsheet.getCellValue(
                     spreadsheet.getCell(r, filterRange.getFirstColumn()));
             if (!visibleValues.contains(cellValue)) {
