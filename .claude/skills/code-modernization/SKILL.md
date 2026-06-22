@@ -144,28 +144,62 @@ declared otherwise. To verify:
   of the contract.
 - **Pin the contract before the change** if no test exists. Write a
   characterization test or payload snapshot first, then modernize.
-- **Persisted-data backward compatibility is non-negotiable.** If
-  the codebase consumes files, blobs, database rows, or any other
-  durable artifact produced by an earlier version of itself OR by an
-  external tool (Excel files, CSVs, exported configs, serialized
-  caches), the modernized code MUST load and render them identically.
-  This is the strongest contract in any modernization — stronger than
-  wire format, stronger than API surface — because the artifacts are
-  out in the wild and can't be re-issued. Specifically:
-  - **Old artifacts must load.** Modernizing the parser/loader must
-    not narrow the accepted input. Existing files keep working.
-  - **Old artifacts must render identically.** Styles, formatting,
-    layout, computed values — pixel-equivalent on the existing test
-    fixtures. Visual regression / golden-snapshot tests are the only
-    reliable safety net here.
-  - **Writing remains compatible.** A file written by the modernized
-    code must be readable by the un-modernized previous version
-    (unless an explicit major-version contract change is being
-    declared).
-  - **Test fixtures for back-compat live in the repo.** If you don't
-    already have a fixtures directory with sample artifacts produced
-    by older versions, that's the gap to close first — modernization
-    without it is flying blind.
+- **Persisted-data backward compatibility is non-negotiable** —
+  but the contract has TWO levels that must be distinguished, or
+  the rule reads as "you can never rewrite a renderer," which is
+  wrong. If the codebase consumes files, blobs, database rows,
+  or any other durable artifact produced by an earlier version of
+  itself OR by an external tool (Excel files, CSVs, exported
+  configs, serialized caches), the modernized code MUST honor the
+  following:
+
+  **Level 1 — Content + styling-intent preservation
+  (truly non-negotiable):**
+  - **Old artifacts must load.** The parser / loader must accept
+    every previously-accepted input. Narrowing the accepted set
+    is a breaking change.
+  - **Data must be preserved bit-equivalently.** Cell values,
+    formulas, named ranges, sheet structure — what was in the
+    file is what comes out the other side.
+  - **Styling intent must be honored.** If the file says "bold
+    red text with a 2pt border," the rendered output must be
+    bold AND red AND have a visible border. The semantic claim
+    "this cell is styled like X" must hold across implementations.
+  - **Writing remains forward-compatible.** A file written by the
+    modernized code must be readable by the un-modernized
+    previous version (unless an explicit major-version contract
+    change is being declared).
+
+  **Level 2 — Render-pixel-equivalence (NOT promised across UI
+  tech changes):**
+  - Browser font rendering, 1px-vs-0.5px border thickness on
+    different `devicePixelRatio` displays, scrollbar appearance,
+    selection-highlight color, exact emulation of every quirk
+    the previous UI accumulated over its lifetime — these can
+    SHIFT during a renderer rewrite.
+  - The safety net here is **golden-screenshot diff testing**
+    with acceptable-tolerance thresholds (e.g., per-pixel diff
+    under N%; structural-similarity above M), NOT byte-identical
+    pixel equality.
+  - A rewrite that produces "visually equivalent but not
+    pixel-identical" output is still honoring the contract. A
+    rewrite that loses styling intent (bold becomes regular, red
+    becomes black) is breaking it.
+
+  **Test fixtures for back-compat live in the repo.** If you
+  don't already have a fixtures directory with sample artifacts
+  produced by older versions, that's the gap to close first —
+  modernization without it is flying blind. Bonus: pair each
+  artifact with a golden-screenshot of the CURRENT renderer's
+  output, so a future rewrite can diff against it.
+
+  **The two levels have different implications for ROI:**
+  - A loader / serializer change is Level 1 — high stakes, hard
+    to verify, every regression is user-visible. Move slowly.
+  - A renderer change is Level 1 ON THE SEMANTICS (you must not
+    drop bold-red-with-border) but Level 2 ON THE PIXELS (the
+    exact rendering of bold-red-with-border can shift). Move
+    with a visual safety net, not a byte-equality safety net.
 
 If the contract genuinely should change, that's a separate commit
 with its own justification — not snuck into a "modernization" diff.
