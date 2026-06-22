@@ -41,7 +41,7 @@ public class ModularUploadFeatureFlagProvider implements FeatureFlagProvider {
     public static final Feature MODULAR_UPLOAD = new Feature(
             "Modular Upload Components", // title
             FEATURE_FLAG_ID, // id
-            null, // moreInfoLink
+            "https://vaadin.com/docs/latest/components/upload/modular-upload", // moreInfoLink
             false, // requiresServerRestart
             null); // componentClassName
 

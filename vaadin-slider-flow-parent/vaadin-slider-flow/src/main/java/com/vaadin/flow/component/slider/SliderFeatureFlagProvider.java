@@ -24,7 +24,7 @@ public class SliderFeatureFlagProvider implements FeatureFlagProvider {
 
     public static final Feature SLIDER_COMPONENT = new Feature(
             "Slider component", "sliderComponent",
-            "https://github.com/vaadin/platform/issues/8397", true,
+            "https://vaadin.com/docs/latest/components/slider", true,
             "com.vaadin.flow.component.slider.Slider");
 
     @Override

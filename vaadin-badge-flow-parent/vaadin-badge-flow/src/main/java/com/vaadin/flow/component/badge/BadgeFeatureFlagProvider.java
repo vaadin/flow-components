@@ -23,8 +23,8 @@ import com.vaadin.experimental.FeatureFlagProvider;
 public class BadgeFeatureFlagProvider implements FeatureFlagProvider {
 
     public static final Feature BADGE_COMPONENT = new Feature("Badge component",
-            "badgeComponent", "github.com/vaadin/platform/issues/8530", true,
-            "com.vaadin.flow.component.badge.Badge");
+            "badgeComponent", "https://vaadin.com/docs/latest/components/badge",
+            true, "com.vaadin.flow.component.badge.Badge");
 
     @Override
     public List<Feature> getFeatures() {

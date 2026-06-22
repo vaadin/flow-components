@@ -41,7 +41,7 @@ public class MessageListAttachmentsFeatureFlagProvider
     public static final Feature MESSAGE_LIST_ATTACHMENTS = new Feature(
             "MessageList Attachments", // title
             FEATURE_FLAG_ID, // id
-            null, // moreInfoLink
+            "https://vaadin.com/docs/latest/components/message-list#attachments", // moreInfoLink
             false, // requiresServerRestart
             null); // componentClassName
 
