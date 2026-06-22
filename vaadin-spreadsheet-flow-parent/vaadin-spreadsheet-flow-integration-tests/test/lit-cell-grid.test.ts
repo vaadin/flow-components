@@ -341,6 +341,125 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
+    function build3x3State(
+        selection: CellGridRenderState['selection']
+    ): CellGridRenderState {
+        return {
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 3,
+                lastColumnPosition: 150,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 3,
+                lastRowPosition: 60,
+            },
+            cellData: new Map(),
+            colX: [0, 50, 100],
+            rowY: [0, 20, 40],
+            colWidths: [50, 50, 50],
+            rowHeights: [20, 20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions: [],
+            selection,
+        };
+    }
+
+    it('does NOT add cell-range to the active cell', async () => {
+        // Single-cell selection at (2, 2).
+        const el = await attachWithState(build3x3State({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 2, r1: 2, r2: 2 },
+            auxRanges: [],
+        }));
+
+        const cell = el.shadowRoot!.querySelector('.col2.row2');
+        expect(cell!.classList.contains('cell-range')).to.be.false;
+
+        cleanup(el);
+    });
+
+    it('adds cell-range to non-active cells inside the active range', async () => {
+        // Range (1,1)..(3,2); active at (1,1).
+        const el = await attachWithState(build3x3State({
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 3, r1: 1, r2: 2 },
+            auxRanges: [],
+        }));
+
+        // Active cell (1,1) — NO cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col1.row1')!.classList.contains('cell-range')
+        ).to.be.false;
+        // Other cells in the range (1,2..3 × 1..2) — YES cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col2.row1')!.classList.contains('cell-range')
+        ).to.be.true;
+        expect(
+            el.shadowRoot!.querySelector('.col3.row1')!.classList.contains('cell-range')
+        ).to.be.true;
+        expect(
+            el.shadowRoot!.querySelector('.col1.row2')!.classList.contains('cell-range')
+        ).to.be.true;
+        expect(
+            el.shadowRoot!.querySelector('.col3.row2')!.classList.contains('cell-range')
+        ).to.be.true;
+        // Outside the range — no cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col1.row3')!.classList.contains('cell-range')
+        ).to.be.false;
+
+        cleanup(el);
+    });
+
+    it('adds cell-range to cells in aux ranges', async () => {
+        // Active at (1,1); aux range (3,3)..(3,3).
+        const el = await attachWithState(build3x3State({
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
+            auxRanges: [{ c1: 3, c2: 3, r1: 3, r2: 3 }],
+        }));
+
+        // Active cell — no cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col1.row1')!.classList.contains('cell-range')
+        ).to.be.false;
+        // Cell in aux range — cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col3.row3')!.classList.contains('cell-range')
+        ).to.be.true;
+        // Cell outside everything — no cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col2.row2')!.classList.contains('cell-range')
+        ).to.be.false;
+
+        cleanup(el);
+    });
+
+    it('handles overlapping active + aux ranges (cell-range stays on)', async () => {
+        // Active (1,1); aux range (1,1)..(2,2) overlaps the active cell.
+        const el = await attachWithState(build3x3State({
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
+            auxRanges: [{ c1: 1, c2: 2, r1: 1, r2: 2 }],
+        }));
+
+        // (1,1) is the active cell — even though aux range covers it,
+        // the active-cell rule wins (no cell-range).
+        expect(
+            el.shadowRoot!.querySelector('.col1.row1')!.classList.contains('cell-range')
+        ).to.be.false;
+        // (2,2) is in the aux range, not the active cell → cell-range.
+        expect(
+            el.shadowRoot!.querySelector('.col2.row2')!.classList.contains('cell-range')
+        ).to.be.true;
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — render state updates', () => {
     it('re-renders when renderState is reassigned', async () => {
         const el = await attachWithState({

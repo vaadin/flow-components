@@ -11,6 +11,7 @@ import { css, html, LitElement, type TemplateResult } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
+import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
 /**
@@ -90,6 +91,7 @@ export class SpreadsheetCellGrid extends LitElement {
             colWidths,
             rowHeights,
             cellStyleToCSSStyle,
+            selection,
         } = this.renderState;
 
         if (viewport.lastColumnIndex < viewport.firstColumnIndex
@@ -120,8 +122,18 @@ export class SpreadsheetCellGrid extends LitElement {
                 const data = cellData.get(key);
                 const text = data?.value ?? '';
                 const cellStyleClass = data?.cellStyle ?? '';
-                const classList =
-                    `cell col${col} row${row}${cellStyleClass ? ` ${cellStyleClass}` : ''}`;
+                // Selection: cells in the active range (excluding the
+                // active cell) + cells in any aux range get the
+                // `cell-range` class. The active cell does NOT get
+                // `cell-range` — it's outlined by a separate overlay
+                // (slice 137). This matches the GWT convention pinned by
+                // SpreadsheetElement.isCellActiveWithinSelection.
+                const inSelection = isCellSelected(selection, col, row);
+                const isActive = isActiveCell(selection, col, row);
+                const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+                const classList = `cell col${col} row${row}`
+                    + (cellStyleClass ? ` ${cellStyleClass}` : '')
+                    + cellRangeClass;
                 const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
                 cells.push(html`
                     <div class=${classList} style=${style}>
