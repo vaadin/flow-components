@@ -12,18 +12,39 @@
 Use **Vaadin TestBench's built-in screenshot-comparison API**
 (`compareScreen(...)` + `@Screenshot` rule) for capturing and
 diffing golden screenshots, layered on the existing IT
-infrastructure. Tolerance thresholds: `0.05` per-pixel diff
-allowed (TestBench's default-ish), `0` for layout-shift
-detection. Browsers: Chromium-headless + Firefox-headless, both
-at `devicePixelRatio=1` initially; add `dpr=2` once the
-tolerance baseline is established. Golden screenshots live under
-`vaadin-spreadsheet-flow-integration-tests/src/test/resources/golden-screenshots/<fixture-name>/<viewport-key>.png`,
-checked into git via Git LFS. Regen workflow: a `-Dscreenshot.refresh`
-maven property overwrites goldens; default diff-asserts.
+infrastructure. Tolerance: **0.01** (TestBench's documented
+default); per-fixture overrides via metadata JSON for outliers.
+Browsers: Chromium-headless + Firefox-headless, both at
+`devicePixelRatio=1` initially; Safari + `dpr=2` added in Phase
+3.5 once the new client is stable. Golden screenshots live in
+`vaadin-spreadsheet-flow-integration-tests/src/reference-screenshots/`,
+**committed as plain blobs** alongside the existing IT module
+resources — matching upstream Vaadin Flow's `reference-screenshots/`
+convention (no Git LFS). CI schedule: **subset on every PR + full
+nightly** — PR runs the top-10 priority fixtures (~5 min), nightly
+runs the full 162-fixture matrix. Regen workflow: a
+`-Dscreenshot.refresh` maven property overwrites goldens; the
+**PR author proposes regenerated PNGs, the code reviewer
+counter-signs** them as part of the normal review.
 
 The rest of this document walks the considered alternatives, the
 threshold-tuning procedure, the browser matrix decision, and the
 acceptance criteria for "Phase 3.0 is complete."
+
+## 1.1 Resolved decisions (post-operator review, 2026-06-22)
+
+The 6 open decisions in § 8 were resolved by the operator. The
+following table is the canonical answer set; the rest of this
+document was updated to reflect the resolutions.
+
+| # | Decision | Resolution |
+|---|---|---|
+| 1 | Screenshot-diff tool | **TestBench `compareScreen`** — lowest-friction, already on classpath |
+| 2 | Golden storage | **`reference-screenshots/` dir in source tree, no Git LFS** — matches upstream `vaadin/flow` convention (verified at `flow-tests/test-dev-mode/`, `flow-tests/test-router-custom-context/`, `flow-tests/test-embedding/test-embedding-generic/`) |
+| 3 | Browser matrix | **Desktop evergreens (Chromium + Firefox + Safari), last 2 versions each.** Phase 3.0 captures only Chromium + Firefox headless; Safari + `dpr=2` deferred to Phase 3.5 |
+| 4 | Tolerance default | **0.01** — TestBench's documented default. (Earlier draft said 0.05; corrected.) Per-fixture metadata JSON allows widening for charts / anti-aliased lines |
+| 5 | CI schedule | **Subset on every PR (top-10 priority fixtures, ~5 min) + full 162-fixture nightly run** — balances safety and iteration speed |
+| 6 | Goldens regen ownership | **PR author proposes, code reviewer counter-signs** — matches existing code-review pattern; no central bottleneck |
 
 ## 2. Considered options for the diff tool
 
@@ -127,6 +148,16 @@ runner.
 
 ## 3. Where the screenshots live
 
+**Pattern decision (resolved post-operator review)**: match the
+upstream Vaadin Flow convention. The `flow-tests/` module
+hierarchy has `reference-screenshots/` directories committed
+directly under the test module roots (verified at
+`flow-tests/test-dev-mode/reference-screenshots/`,
+`flow-tests/test-router-custom-context/reference-screenshots/`,
+`flow-tests/test-embedding/test-embedding-generic/reference-screenshots/`).
+The PNGs are committed as plain blobs — no Git LFS in upstream
+Flow.
+
 ```
 vaadin-spreadsheet-flow-integration-tests/
 ├── src/
@@ -136,45 +167,60 @@ vaadin-spreadsheet-flow-integration-tests/
 │   │       └── test_sheets/                   # existing (157 .xlsx)
 │   ├── test/
 │   │   ├── java/.../test/                     # existing 77 ITs
-│   │   └── resources/
-│   │       └── golden-screenshots/            # NEW (Phase 3.0)
-│   │           ├── Simple Invoice.xlsx/
-│   │           │   ├── 1024x768-dpr1-chrome.png       # baseline
-│   │           │   ├── 1024x768-dpr1-chrome.metadata.json
-│   │           │   ├── 1024x768-dpr1-firefox.png
-│   │           │   └── ... per fixture × browser × viewport
-│   │           ├── Tagetik 5.xlsx/
-│   │           │   └── ...
-│   │           └── ...
-│   │           reference-screenshots/         # symlink to TestBench dir
+│   │   └── resources/                         # existing
+│   ├── reference-screenshots/                 # NEW (Phase 3.0)
+│   │   ├── Simple Invoice.xlsx/
+│   │   │   ├── 1024x768-dpr1-chrome.png       # baseline
+│   │   │   ├── 1024x768-dpr1-chrome.metadata.json
+│   │   │   ├── 1024x768-dpr1-firefox.png
+│   │   │   └── ... per fixture × browser × viewport
+│   │   ├── Tagetik 5.xlsx/
+│   │   │   └── ...
+│   │   └── ...
 └── pom.xml
 ```
 
 **Storage**: PNGs are binary blobs (typical ~50-200 KB each).
 With 162 fixtures × 2 browsers × 1 dpr = 324 PNGs in the
-initial set. At ~150 KB average that's ~50 MB. **Use Git LFS**
-to keep the main repo small.
+initial set. At ~150 KB average that's ~50 MB. **Commit as
+plain blobs** in the source tree — matches upstream Flow's
+pattern. Git LFS is a fallback option if the binary growth
+becomes a real problem; current consensus says it isn't.
 
-Git LFS pattern in `.gitattributes`:
-
-```
-vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests/src/test/resources/golden-screenshots/**/*.png filter=lfs diff=lfs merge=lfs -text
-```
+**TestBench convention** (per the official docs at
+`vaadin/docs/articles/flow/testing/end-to-end/screenshots.adoc`):
+- `screenshotReferenceDirectory` setter points TestBench at the
+  reference dir.
+- `screenshotErrorDirectory` setter points at where failure
+  captures go (already configured to `error-screenshots/`).
+- TestBench then auto-resolves screenshot names via the standard
+  filename convention `{viewport}-{browser}-{fixture}.png` (or
+  whatever convention the test author picks for the
+  `compareScreen("name")` argument).
 
 ## 4. Threshold defaults + the tuning procedure
 
 ### 4.1 Initial defaults
 
 ```java
-// per TestBench's compareScreen API
-parameters.setScreenshotErrorTolerance(0.05); // 5% per-pixel diff
+// per TestBench's documented API (see Vaadin docs:
+// articles/flow/testing/end-to-end/screenshots.adoc)
+parameters.setScreenshotComparisonTolerance(0.01);
 parameters.setMaxScreenshotRetries(2);
+parameters.setScreenshotRetryDelay(500); // ms
 parameters.setScreenshotComparisonCursorDetection(true);
 ```
 
-The `0.05` (5%) tolerance is TestBench's documented default
-for cross-browser font rendering. Adjust during tuning if false
-positives dominate.
+**Correction (post-operator review)**: TestBench's documented
+default for `screenshotComparisonTolerance` is **0.01**, not
+0.05. The earlier value cited in this proposal was wrong. The
+0.01 default is the tightest reasonable starting point; per-
+fixture overrides (via the metadata JSON in § 4.2) widen it for
+charts / anti-aliased lines / subpixel-positioned text.
+
+The tuning procedure (§ 4.3) verifies the chosen value against
+the noise floor of independent CI worker runs of the unchanged
+GWT client.
 
 ### 4.2 Per-fixture tolerance escape hatch
 
@@ -268,18 +314,70 @@ change is reviewed and approved.
 
 ### 6.2 CI integration
 
-The IT module already runs on CI. Adding screenshot tests:
+The IT module already runs on CI. Adding screenshot tests
+(resolution from § 1.1 #5):
 
-- **Per-PR**: a "visual-regression" job that captures + compares
-  goldens. Fails the PR if any diff exceeds threshold.
-- **Nightly**: a "noise-floor" job that captures fresh goldens
-  on the unchanged GWT client and compares against the
-  committed goldens. Detects environment drift.
+- **Per-PR (subset)**: a "visual-regression-pr" job runs only the
+  top-10 priority fixtures (per `FIXTURE_INVENTORY.md` "Recommended
+  Phase 3.0 capture order"). Wall-clock cost: ~5 min added to the
+  PR check pipeline. Catches the highest-leverage regressions
+  at PR time.
+- **Nightly (full)**: a "visual-regression-full" job runs the
+  full 162-fixture matrix on both browsers. Wall-clock cost:
+  ~30 min. Catches long-tail regressions within 24 hours.
+- **Noise-floor (nightly)**: a separate job that captures fresh
+  screenshots against the *unchanged* GWT client and diffs them
+  against the committed reference set. Detects CI-worker drift
+  (browser update, JDK change, font change, etc.). If this job
+  flickers, the tolerance defaults need re-tuning, not the
+  goldens.
 
-When the rewrite (Phase 3.2+) begins, the visual-regression
-job runs against BOTH clients (GWT + new). Both must pass.
-Once the new client is the default (Phase 3.6), the GWT-side
-of the matrix can be dropped.
+When the rewrite (Phase 3.2+) begins, the visual-regression jobs
+run against BOTH clients (GWT + new). Both must pass. Once the
+new client is the default (Phase 3.6), the GWT-side of the
+matrix can be dropped.
+
+**Top-10 priority fixtures for the per-PR subset** (per
+`FIXTURE_INVENTORY.md`):
+
+1. `Simple Invoice.xlsx`
+2. `Tagetik 5.xlsx`
+3. `Grouping.xlsx`
+4. `100_000_rows.xlsx`
+5. `merged_cells.xlsx`
+6. `scrolled_frozen.xlsx`
+7. `ConditionalFormatterSamples.xlsx`
+8. `spreadsheet_styles.xlsx`
+9. `Formulas.xlsx`
+10. `data_filters.xlsx`
+
+This 10-fixture set exercises every subsystem at least once
+(per the parity-bar analysis in `FEATURE_INVENTORY.md`), giving
+maximum coverage for minimum CI cost.
+
+### 6.3 Goldens regen workflow
+
+Resolution from § 1.1 #6: the **PR author proposes regenerated
+PNGs, the code reviewer counter-signs**.
+
+Workflow:
+
+1. PR author makes a UI change (intentional).
+2. Visual-regression-pr job fails on goldens that no longer
+   match.
+3. Author runs `mvn verify -Dscreenshot.refresh=true` locally
+   to regenerate the PNGs.
+4. Author commits the regenerated PNGs into the PR; the diff
+   is visible in the GitHub PR review (binary blob, no inline
+   render, but reviewer can pull-and-eyeball).
+5. PR description includes a "Why goldens changed" paragraph
+   per regenerated fixture.
+6. Reviewer pulls the branch, eyeballs the new screenshots
+   against the diff, signs off.
+7. Merge proceeds normally.
+
+This matches the existing code-review pattern: no central
+gatekeeper, every change reviewed, accountability spread.
 
 ### 6.3 Maven plugin config
 
@@ -294,9 +392,11 @@ Add a new profile to the IT module's pom:
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <com.vaadin.testbench.Parameters.screenshotErrorTolerance>0.05</com.vaadin.testbench.Parameters.screenshotErrorTolerance>
+            <com.vaadin.testbench.Parameters.screenshotComparisonTolerance>0.01</com.vaadin.testbench.Parameters.screenshotComparisonTolerance>
             <com.vaadin.testbench.Parameters.screenshotComparisonCursorDetection>true</com.vaadin.testbench.Parameters.screenshotComparisonCursorDetection>
-            <com.vaadin.testbench.Parameters.screenshotReferenceDirectory>${project.basedir}/src/test/resources/golden-screenshots</com.vaadin.testbench.Parameters.screenshotReferenceDirectory>
+            <com.vaadin.testbench.Parameters.maxScreenshotRetries>2</com.vaadin.testbench.Parameters.maxScreenshotRetries>
+            <com.vaadin.testbench.Parameters.screenshotRetryDelay>500</com.vaadin.testbench.Parameters.screenshotRetryDelay>
+            <com.vaadin.testbench.Parameters.screenshotReferenceDirectory>${project.basedir}/src/reference-screenshots</com.vaadin.testbench.Parameters.screenshotReferenceDirectory>
             <com.vaadin.testbench.Parameters.screenshotErrorDirectory>${project.build.directory}/screenshot-diffs</com.vaadin.testbench.Parameters.screenshotErrorDirectory>
           </systemPropertyVariables>
         </configuration>
@@ -343,28 +443,26 @@ Phase 3.0 is done when:
 
 When all 8 hold, Phase 3.1 (foundation) starts.
 
-## 8. Open decisions for the operator
+## 8. Decisions (resolved 2026-06-22)
 
-Before Phase 3.0 week 2 begins:
+All 6 decisions answered. Canonical resolution is in § 1.1 above.
+The brief recap:
 
-1. **Approve TestBench-based screenshot tests** (recommended)
-   vs Playwright migration (rejected here, but operator can
-   override).
-2. **Approve Git LFS** for golden storage (alternative: a
-   separate sibling repo, like Vaadin's `flow-components-screenshots`
-   pattern if one exists).
-3. **Approve the browser matrix cut** (drop IE11, pre-Chromium
-   Edge; keep last-2-versions of evergreen browsers + mobile
-   Safari + Chrome Android).
-4. **Approve the 0.05 default tolerance** as the starting point
-   (final value determined by tuning).
-5. **CI worker capacity** — adding visual-regression tests adds
-   ~30 minutes per CI run (162 fixtures × 2 browsers × ~5
-   seconds per capture). Verify the CI budget can absorb this.
-6. **Owner for goldens** — when a real UI change lands and
-   goldens shift, who approves the regenerated PNGs? Suggested:
-   the engineer who authored the change reviews the diff;
-   merge-base reviewer counter-signs.
+1. **Screenshot-diff tool**: TestBench `compareScreen`. ✓
+2. **Golden storage**: `reference-screenshots/` in source tree,
+   no Git LFS. Matches upstream `vaadin/flow` convention. ✓
+3. **Browser matrix**: Desktop evergreens (Chromium + Firefox +
+   Safari) last 2 versions. Phase 3.0 captures Chromium + Firefox
+   only; Safari + `dpr=2` deferred to Phase 3.5. ✓
+4. **Tolerance default**: **0.01** (TestBench documented default).
+   Earlier draft incorrectly cited 0.05; corrected. ✓
+5. **CI schedule**: subset (top-10 priority fixtures) on every
+   PR + full 162-fixture nightly. ✓
+6. **Goldens regen ownership**: PR author proposes, code reviewer
+   counter-signs. Matches existing code-review pattern. ✓
+
+Phase 3.0 can now proceed to its team-driven work (capture
+goldens, tune tolerance, author the 6 gap fixtures).
 
 ## 9. Risks specific to Phase 3.0
 

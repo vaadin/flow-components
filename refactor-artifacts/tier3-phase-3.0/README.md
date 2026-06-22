@@ -69,21 +69,26 @@ The team-driven work this slice intentionally does not do:
 
 ## How to start the team-driven phase 3.0 work
 
-1. **Operator review + sign-off on the three docs.** Confirm
-   feature inventory is complete, fixture categorization is
-   right, infra proposal is acceptable.
-2. **Decide the 6 open questions in INFRA_PROPOSAL § 8.**
-   Specifically: TestBench-vs-Playwright (recommended TestBench),
-   Git LFS approval, browser matrix cut, tolerance default, CI
-   budget, owner for golden regen.
-3. **Capture the top-10 goldens** (per FIXTURE_INVENTORY § "Recommended
-   Phase 3.0 capture order"). This exercises the harness +
-   surfaces tooling bugs early.
-4. **Tune the tolerance** (per INFRA_PROPOSAL § 4.3).
+**All 6 open decisions have been resolved** (see INFRA_PROPOSAL § 1.1
+for the canonical answer table). The team can proceed directly:
+
+1. **Set up the `visual-regression` Maven profile** in the IT
+   module's pom.xml per INFRA_PROPOSAL § 6.3.
+2. **Create the `src/reference-screenshots/` directory** in the
+   IT module (matching upstream Flow's convention; no Git LFS
+   setup needed).
+3. **Capture the top-10 goldens** (per FIXTURE_INVENTORY §
+   "Recommended Phase 3.0 capture order"). This exercises the
+   harness + surfaces tooling bugs early.
+4. **Tune the tolerance** (per INFRA_PROPOSAL § 4.3). The starting
+   point is 0.01 (TestBench's documented default).
 5. **Capture remaining 152 fixtures**.
 6. **Author the 6 gap fixtures** (per FIXTURE_INVENTORY § G.1-G.4).
 7. **Capture goldens for those too**.
-8. **Verify Phase 3.0 acceptance criteria** (per INFRA_PROPOSAL § 7).
+8. **Wire up the two CI jobs** (visual-regression-pr for the
+   top-10 subset, visual-regression-full nightly for the 162-
+   fixture matrix) per INFRA_PROPOSAL § 6.2.
+9. **Verify Phase 3.0 acceptance criteria** (per INFRA_PROPOSAL § 7).
 
 Total team-driven effort: ~2-3 weeks per the TIER3_PLAN.md estimate.
 
