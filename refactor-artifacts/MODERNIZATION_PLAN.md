@@ -540,7 +540,7 @@ GWT-side audit is run.
 | 8 | `Serializer.java` audit | ✓ done (audited; keep as-is) | done |
 | 9 | Per-DTO wire-format characterization tests | ✓ slice 106 (sharpened from 9a generator) | done |
 | 9b | Drop typed client mirrors → JsonObject reads | deferred to Tier 3 prep | 6 sessions |
-| 9c | Rename/collapse `*ClientRpc` / `*ServerRpc` façade interfaces | cosmetic, optional | 0.5 session |
+| 9c | Clarify `*ClientRpc` / `*ServerRpc` façade interfaces (javadoc, not rename — public API) | ✓ slice 108 | done |
 | 10 | Vaadin 8 RPC → Element API | ✓ already done | done |
 | 11a | Delete unused server-side `SpreadsheetState` | ✓ slice 105 | done |
 | 11b | Drop client-side `SpreadsheetState` (if redundant) | needs GWT audit | 1–2 sessions |
