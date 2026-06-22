@@ -460,6 +460,152 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
+    function buildOverlayState(
+        selection: CellGridRenderState['selection']
+    ): CellGridRenderState {
+        return {
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            cellData: new Map(),
+            colX: [0, 50, 100, 150],
+            rowY: [0, 20, 40, 60],
+            colWidths: [50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions: [],
+            selection,
+        };
+    }
+
+    it('renders the .sheet-selection overlay with 4 border children', async () => {
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection');
+        expect(overlay).to.not.be.null;
+
+        expect(overlay!.querySelector('.s-top')).to.not.be.null;
+        expect(overlay!.querySelector('.s-left')).to.not.be.null;
+        expect(overlay!.querySelector('.s-right')).to.not.be.null;
+        expect(overlay!.querySelector('.s-bottom')).to.not.be.null;
+
+        cleanup(el);
+    });
+
+    it('positions the overlay over the active range bounds', async () => {
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
+        // Range cols 2-3 → left = colX[1] = 50, right = colX[2] + colWidths[2] = 100 + 50 = 150
+        // Range rows 2-3 → top = rowY[1] = 20, bottom = rowY[2] + rowHeights[2] = 40 + 20 = 60
+        expect(overlay.style.left).to.equal('50px');
+        expect(overlay.style.top).to.equal('20px');
+        expect(overlay.style.width).to.equal('100px');
+        expect(overlay.style.height).to.equal('40px');
+
+        cleanup(el);
+    });
+
+    it('positions the overlay over a single-cell selection', async () => {
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
+        expect(overlay.style.left).to.equal('0px');
+        expect(overlay.style.top).to.equal('0px');
+        expect(overlay.style.width).to.equal('50px');
+        expect(overlay.style.height).to.equal('20px');
+
+        cleanup(el);
+    });
+
+    it('clamps the overlay to the visible viewport when range extends past', async () => {
+        // viewport: cols 1..4, rows 1..4
+        // range: cols 3..10, rows 3..10 — extends past viewport
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 3, row: 3 },
+            activeRange: { c1: 3, c2: 10, r1: 3, r2: 10 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
+        // Clamps to (3, 3)..(4, 4):
+        // left = colX[2] = 100, right = colX[3] + colWidths[3] = 150 + 50 = 200
+        // top = rowY[2] = 40, bottom = rowY[3] + rowHeights[3] = 60 + 20 = 80
+        expect(overlay.style.left).to.equal('100px');
+        expect(overlay.style.width).to.equal('100px');
+        expect(overlay.style.top).to.equal('40px');
+        expect(overlay.style.height).to.equal('40px');
+
+        cleanup(el);
+    });
+
+    it('does NOT render the overlay when range is entirely outside viewport', async () => {
+        // viewport: cols 1..4. range: cols 10..12 — no overlap.
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 10, row: 10 },
+            activeRange: { c1: 10, c2: 12, r1: 10, r2: 12 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection');
+        expect(overlay).to.be.null;
+
+        cleanup(el);
+    });
+
+    it('overlay updates when the selection changes', async () => {
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
+            auxRanges: [],
+        }));
+
+        // Initial: 50px wide overlay at (0, 0).
+        let overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
+        expect(overlay.style.left).to.equal('0px');
+        expect(overlay.style.width).to.equal('50px');
+
+        // Re-assign with extended range (1..3, 1..2).
+        el.renderState = {
+            ...el.renderState,
+            selection: {
+                activeCell: { col: 1, row: 1 },
+                activeRange: { c1: 1, c2: 3, r1: 1, r2: 2 },
+                auxRanges: [],
+            },
+        };
+        await el.updateComplete;
+
+        overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
+        // left = 0, right = colX[2] + colWidths[2] = 100 + 50 = 150
+        // top = 0, bottom = rowY[1] + rowHeights[1] = 20 + 20 = 40
+        expect(overlay.style.width).to.equal('150px');
+        expect(overlay.style.height).to.equal('40px');
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — render state updates', () => {
     it('re-renders when renderState is reassigned', async () => {
         const el = await attachWithState({

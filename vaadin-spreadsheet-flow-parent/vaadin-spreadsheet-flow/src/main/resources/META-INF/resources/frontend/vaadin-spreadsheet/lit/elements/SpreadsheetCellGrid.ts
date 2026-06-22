@@ -144,8 +144,70 @@ export class SpreadsheetCellGrid extends LitElement {
         }
 
         const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
-        return html`${styleBlock}${cells}`;
+        const selectionOverlay = buildSelectionOverlay(this.renderState);
+        return html`${styleBlock}${cells}${selectionOverlay}`;
     }
+}
+
+/**
+ * Build the {@code .sheet-selection} overlay div positioned over the
+ * active range. The div contains 4 child elements
+ * ({@code .s-top}, {@code .s-left}, {@code .s-right}, {@code .s-bottom})
+ * which TestBench's {@code SpreadsheetElement.findSelectionOutline}
+ * locates by class name.
+ *
+ * Returns an empty string when the active range doesn't overlap the
+ * visible viewport (selection scrolled off-screen) — TestBench's
+ * waitUntil lookup will then poll until the user scrolls back.
+ *
+ * Wire contract: class names match the GWT-side
+ * {@code SelectionWidget.java:116-126}. The overlay is positioned
+ * absolutely within the cell-grid's shadow DOM. CSS styling for the
+ * border-line children is deferred to the consumer (theme + a future
+ * slice) — slice 137's scope is the structural DOM that TestBench
+ * locates.
+ */
+function buildSelectionOverlay(
+    state: CellGridRenderState
+): TemplateResult | string {
+    const { viewport, selection, colX, rowY, colWidths, rowHeights } = state;
+    const range = selection.activeRange;
+
+    // Clamp the range to the visible viewport.
+    const leftCol = Math.max(range.c1, viewport.firstColumnIndex);
+    const rightCol = Math.min(range.c2, viewport.lastColumnIndex);
+    const topRow = Math.max(range.r1, viewport.firstRowIndex);
+    const bottomRow = Math.min(range.r2, viewport.lastRowIndex);
+
+    if (leftCol > rightCol || topRow > bottomRow) {
+        // Active range outside the visible viewport.
+        return '';
+    }
+
+    const leftIndex = leftCol - viewport.firstColumnIndex;
+    const rightIndex = rightCol - viewport.firstColumnIndex;
+    const topIndex = topRow - viewport.firstRowIndex;
+    const bottomIndex = bottomRow - viewport.firstRowIndex;
+
+    const left = colX[leftIndex] ?? 0;
+    const top = rowY[topIndex] ?? 0;
+    const right = (colX[rightIndex] ?? 0) + (colWidths[rightIndex] ?? 0);
+    const bottom = (rowY[bottomIndex] ?? 0) + (rowHeights[bottomIndex] ?? 0);
+
+    const width = Math.max(0, right - left);
+    const height = Math.max(0, bottom - top);
+    const overlayStyle =
+        `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`
+        + 'position:absolute;pointer-events:none;';
+
+    return html`
+        <div class="sheet-selection" style=${overlayStyle}>
+            <div class="s-top"></div>
+            <div class="s-left"></div>
+            <div class="s-right"></div>
+            <div class="s-bottom"></div>
+        </div>
+    `;
 }
 
 /**
