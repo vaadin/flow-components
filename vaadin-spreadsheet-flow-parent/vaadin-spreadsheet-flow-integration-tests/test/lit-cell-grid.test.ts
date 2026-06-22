@@ -48,6 +48,56 @@ function cleanup(el: HTMLElement) {
     el.remove();
 }
 
+describe('emptyCellGridRenderState — helper for tests + connector initial state', () => {
+    it('returns a state with an empty viewport (no cells render from it)', () => {
+        const state = emptyCellGridRenderState();
+
+        // The "empty" sentinel: lastColumnIndex < firstColumnIndex
+        // makes the cell-grid's render() return without emitting any
+        // cells. Pinned here because external code (the connector's
+        // initial-measurement render, attachWithState in tests) reads
+        // this contract.
+        expect(state.viewport.lastColumnIndex).to.be.lessThan(
+            state.viewport.firstColumnIndex
+        );
+        expect(state.viewport.lastRowIndex).to.be.lessThan(
+            state.viewport.firstRowIndex
+        );
+    });
+
+    it('returns a state with an empty cellData map + empty arrays', () => {
+        const state = emptyCellGridRenderState();
+
+        expect(state.cellData.size).to.equal(0);
+        expect(state.colX).to.deep.equal([]);
+        expect(state.rowY).to.deep.equal([]);
+        expect(state.colWidths).to.deep.equal([]);
+        expect(state.rowHeights).to.deep.equal([]);
+        expect(state.cellStyleToCSSStyle).to.deep.equal({});
+        expect(state.mergedRegions).to.deep.equal([]);
+    });
+
+    it('returns a state with single-cell A1 selection by default', () => {
+        const state = emptyCellGridRenderState();
+
+        expect(state.selection.activeCell).to.deep.equal({ col: 1, row: 1 });
+        expect(state.selection.activeRange).to.deep.equal({
+            c1: 1,
+            c2: 1,
+            r1: 1,
+            r2: 1,
+        });
+        expect(state.selection.auxRanges).to.deep.equal([]);
+    });
+
+    it('returns a fresh object on each call (not a shared singleton)', () => {
+        const a = emptyCellGridRenderState();
+        const b = emptyCellGridRenderState();
+
+        expect(a).to.not.equal(b);
+    });
+});
+
 describe('SpreadsheetCellGrid — element registration', () => {
     it('is a registered custom element', () => {
         expect(customElements.get('vaadin-spreadsheet-internal-cell-grid'))
@@ -283,10 +333,8 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             })
         );
 
-        const styleEl = el.shadowRoot!.querySelector('style:not([data-style-source])');
-        // The Lit-injected <style> for component styles is one element;
-        // the cell-style block is a sibling. Lit's static styles use a
-        // <style> too, so we look for ours by content match.
+        // Lit's static styles produce their own <style>; we identify
+        // ours by content match (rules containing ".cell.cs").
         const allStyles = el.shadowRoot!.querySelectorAll('style');
         const ourStyles = Array.from(allStyles).filter((s) =>
             (s.textContent ?? '').includes('.cell.cs')

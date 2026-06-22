@@ -392,6 +392,83 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         expect(after.viewport.lastColumnIndex).to.be.greaterThan(0);
     });
 
+    it('all four quadrant update methods populate cellData consistently', () => {
+        // Each of the 4 update*CellValues methods should make its
+        // payload reachable via buildRenderState. (Today they all
+        // route through a single shared map; if a future slice
+        // splits them by quadrant, this test still verifies the
+        // pipeline works end-to-end for each.)
+        const sheet = makeSheet();
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.updateTopLeftCellValues([
+            {
+                col: 1, row: 1, value: 'TL',
+                cellStyle: 'cs0', locked: false,
+                needsMeasure: false, isPercentage: false,
+            },
+        ]);
+        sheet.updateTopRightCellValues([
+            {
+                col: 4, row: 1, value: 'TR',
+                cellStyle: 'cs0', locked: false,
+                needsMeasure: false, isPercentage: false,
+            },
+        ]);
+        sheet.updateBottomLeftCellValues([
+            {
+                col: 1, row: 4, value: 'BL',
+                cellStyle: 'cs0', locked: false,
+                needsMeasure: false, isPercentage: false,
+            },
+        ]);
+        sheet.updateBottomRightCellValues([
+            {
+                col: 4, row: 4, value: 'BR',
+                cellStyle: 'cs0', locked: false,
+                needsMeasure: false, isPercentage: false,
+            },
+        ]);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 250,
+            viewportHeight: 100,
+        });
+
+        expect(state.cellData.get('col1 row1')?.value).to.equal('TL');
+        expect(state.cellData.get('col4 row1')?.value).to.equal('TR');
+        expect(state.cellData.get('col1 row4')?.value).to.equal('BL');
+        expect(state.cellData.get('col4 row4')?.value).to.equal('BR');
+    });
+
+    it('buildRenderState honors a non-default ppi for row-height conversion', () => {
+        // At ppi 192 (2x retina-like), the default 15-point row
+        // height converts to 40 pixels instead of the 20 pixels at
+        // 96 ppi. The connector passes opts.ppi all the way through
+        // getDefaultRowHeightPx + convertPointsToPixel.
+        const sheet = makeSheet();
+        sheet.setRows(3);
+        sheet.setCols(1);
+        sheet.setColW([50]);
+        sheet.setRowH([15, 15, 15]);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 50,
+            viewportHeight: 200,
+            ppi: 192,
+        });
+
+        // 15pt * 192/72 = 40px per row
+        expect(state.rowHeights[0]).to.equal(40);
+    });
+
     it('buildRenderState honors hiddenRowIndexes (height 0)', () => {
         const sheet = makeSheet();
         sheet.setRows(5);

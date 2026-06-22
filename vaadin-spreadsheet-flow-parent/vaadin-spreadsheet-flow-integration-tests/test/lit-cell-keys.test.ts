@@ -29,9 +29,12 @@ describe('CellKeys — toKey', () => {
         expect(toKey(1000, 99999)).to.equal('col1000 row99999');
     });
 
-    it('preserves byte-equivalence with GWT SheetWidget.toKey', () => {
-        // Confirms the wire-format string is verbatim what the server
-        // emits via SpreadsheetUtil.toKey(col, row).
+    it('matches the wire-format string the server emits via SpreadsheetUtil.toKey', () => {
+        // The server side emits exactly this string for cell keys
+        // (col + " row" + row, with the single space between them).
+        // External code — the testbench module's CSS selectors, the
+        // server's MirroredProperty serializers — depends on the
+        // format.
         expect(toKey(5, 3)).to.equal('col5 row3');
     });
 });
@@ -91,28 +94,38 @@ describe('CellKeys — parseColRow', () => {
     });
 });
 
-describe('CellKeys — headerType', () => {
-    it('classifies "rh5" as a row header (HEADER_ROW = 1)', () => {
-        expect(headerType('rh5')).to.equal(HEADER_ROW);
+describe('CellKeys — HEADER_* constants pin the wire-contract numeric values', () => {
+    // The classifier's numeric return type is part of the wire contract
+    // (the server side reads these values as ints). Pinning the
+    // constant values here keeps the contract from drifting.
+    it('HEADER_NONE = 0, HEADER_ROW = 1, HEADER_COL = 2', () => {
+        expect(HEADER_NONE).to.equal(0);
         expect(HEADER_ROW).to.equal(1);
+        expect(HEADER_COL).to.equal(2);
+    });
+});
+
+describe('CellKeys — headerType', () => {
+    it('classifies "rh5" as a row header', () => {
+        expect(headerType('rh5')).to.equal(HEADER_ROW);
     });
 
-    it('classifies "ch3" as a column header (HEADER_COL = 2)', () => {
+    it('classifies "ch3" as a column header', () => {
         expect(headerType('ch3')).to.equal(HEADER_COL);
-        expect(HEADER_COL).to.equal(2);
     });
 
     it('classifies cell keys ("col1 row1") as HEADER_NONE', () => {
-        // GWT version: only str[0..1] matter. "col..." → first='c' but
-        // second='o' (NOT 'h') → returns 0.
+        // Cell keys start with "col" not "rh"/"ch"; the second
+        // character is 'o', not 'h', so they correctly classify as
+        // not-a-header.
         expect(headerType('col1 row1')).to.equal(HEADER_NONE);
-        expect(HEADER_NONE).to.equal(0);
     });
 
     it('classifies "row5" as HEADER_NONE (row keys must start "rh", not "row")', () => {
-        // QUIRK from GWT: "row5" returns 0 because str[1] is 'o', not 'h'.
-        // Header keys are "rh..."; cell keys are "col... row...". Preserved
-        // verbatim for byte-equivalence.
+        // The naming convention separates cell keys ("col<C> row<R>")
+        // from row-header keys ("rh<N>"). A bare "row5" string isn't
+        // a row header — it's the row portion of a cell-key prefix
+        // in isolation.
         expect(headerType('row5')).to.equal(HEADER_NONE);
     });
 

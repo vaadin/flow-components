@@ -11,6 +11,7 @@ import { expect } from 'chai';
 import type { MergedRegion } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/types/wire.js';
 import {
     createMergedRegion,
+    createMergedRegionFromCorners,
     type MergedRegionContainer,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegion.js';
 import { findIncreasingSelection } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegionUtil.js';
@@ -189,6 +190,47 @@ describe('MergedRegionUtil — findIncreasingSelection', () => {
             a.col1 = 99;
 
             expect(b.col1).to.equal(0);
+        });
+    });
+
+    describe('createMergedRegionFromCorners helper', () => {
+        it('takes corners in (c1, r1, c2, r2) order — columns first, then rows', () => {
+            const region = createMergedRegionFromCorners(2, 3, 7, 9);
+
+            expect(region.col1).to.equal(2);
+            expect(region.row1).to.equal(3);
+            expect(region.col2).to.equal(7);
+            expect(region.row2).to.equal(9);
+        });
+
+        it('returns a transient region (id = 0)', () => {
+            const region = createMergedRegionFromCorners(1, 1, 1, 1);
+
+            // The `id = 0` is the wire-protocol signal that this
+            // region was synthesized client-side rather than read
+            // from the workbook.
+            expect(region.id).to.equal(0);
+        });
+
+        it('returns a fresh object on each call (not a shared singleton)', () => {
+            const a = createMergedRegionFromCorners(1, 1, 2, 2);
+            const b = createMergedRegionFromCorners(1, 1, 2, 2);
+
+            a.col1 = 99;
+
+            expect(b.col1).to.equal(1);
+        });
+
+        it('accepts a single-cell region (corners at the same coord)', () => {
+            const region = createMergedRegionFromCorners(5, 5, 5, 5);
+
+            expect(region).to.deep.equal({
+                id: 0,
+                col1: 5,
+                col2: 5,
+                row1: 5,
+                row2: 5,
+            });
         });
     });
 });
