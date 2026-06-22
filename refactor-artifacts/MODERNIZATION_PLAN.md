@@ -266,22 +266,39 @@ correctly) — those pass unchanged because the public API returns
 the same values reflection used to extract. Suite stayed
 1050/0/0/4 green.
 
-### Step 7 — Records for SERVER-ONLY DTOs (selective, NOT the wire mirrors)
+### Step 7 — Records for SERVER-ONLY value objects ✓ slice 107 (audit + 1 migration)
 
-The 7 wire-mirror DTOs cannot become records — they have parallel GWT
-copies AND in some cases hand-written `equals` semantics
-(`CellData.equals` is by-position-only as a dedup contract). But the
-PURE server-side DTOs that don't cross the wire CAN become records.
-Audit per-class.
+**Original framing**: "audit per-class, candidates include
+`CellValueChangeEvent`, `SheetChangeEvent`, and smaller value
+objects." That assumed many records-suitable classes exist; the audit
+disproved that assumption.
 
-**Sites to evaluate:**
-- `Spreadsheet.CellValueChangeEvent` — server-only event, candidate
-- `Spreadsheet.SheetChangeEvent` — same
-- Smaller value objects discovered during the audit
+**Audit findings** (slice 107): the framework-event candidates were
+all blocked by `extends ComponentEvent` / `extends ValueChangeEvent`
+— records can't extend classes. Of the remaining candidates:
 
-**Test impact**: per-class. Records change `equals`/`hashCode`. Where
-the existing implementation diverges (e.g. by-position equality), the
-migration is a behavior change and needs justification.
+- Mutable-shape blockers (post-construction field assignment OR setter
+  patterns with side effects): `ViewportBounds`, `ViewportBufferConfig`,
+  `SeriesPoint`, `BackgroundProperties`, `GradientProperties`,
+  `AxisProperties`, `View3dData`, `TextProperties`, `TitleProperties`,
+  `LegendProperties`, `ColorParameters`, `RowData.CellData`,
+  `RowData.CommentData`.
+- Anonymous-subclass usage blocker: `BorderStyle`.
+- Orchestrator-not-value-object: all 101 Phase 1 extracted helpers.
+- One clean winner: `ChartData.ColorProperties` (4 fields, 1 reader,
+  no mutation, no subclassing).
+
+**Migration**: `ColorProperties` converted to a `public record` with
+a secondary constructor preserving the `(int[] rgb, double alpha)`
+call shape. The one reader (`ChartDataToVaadinConfigWriter:244-245`)
+updated to use accessor methods.
+
+**Skill update**: the `code-modernization` skill's
+"records-over-DTOs reflex" pitfall now lists 6 blocker patterns to
+grep for before recommending a record migration — drawn from this
+audit's full inventory.
+
+**Test impact**: zero. Suite stayed 1058/0/0/4 green.
 
 ## Tier 2 — Wire-protocol modernization
 

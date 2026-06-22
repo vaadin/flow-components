@@ -232,6 +232,34 @@ more investigation before proposing.
   `equals`/`hashCode`/`toString` semantics. Pre-existing DTOs often
   override these for valid reasons. Check the existing methods before
   proposing a record migration; the divergence is usually load-bearing.
+  Additional record-blocker patterns to check before recommending a
+  migration:
+  - **Extends a non-record class** (e.g. `extends ComponentEvent`,
+    `extends BaseEntity`, `extends AbstractFoo`). Records can only
+    implement interfaces and extend `Record` — they cannot extend any
+    other class. The most common modernization-plan mistake is naming
+    framework-event classes as record candidates; they're all blocked.
+  - **Post-construction field mutation.** A class can LOOK
+    record-shaped (public fields + ctor that sets them) but if any
+    caller writes to a field after construction, records are blocked.
+    Grep `\.fieldName\s*=` to verify before proposing.
+  - **Builder-style population.** Classes whose fields are set
+    incrementally (typically by a reader/parser that doesn't know all
+    field values up front) cannot become records without restructuring
+    the producer to gather all values before construction.
+  - **Anonymous-subclass usage.** `new MyClass() { ... }` is blocked
+    because records are implicitly final.
+  - **Mutators with side effects.** A setter that's "just" updating
+    state but ALSO calls `element.setProperty(...)` or fires an event
+    is doing work the record's accessor methods can't replicate.
+  - **Read-into-mutate pattern.** Classes with a `read(Cell)` or
+    `populate(Foo)` method that sets multiple fields are doing
+    builder-style mutation. Records require all values at construction.
+  Real audit experience: a typical mid-size codebase has many
+  record-LOOKING classes (public fields, no equals overrides) but
+  ALMOST NONE actually meet all the criteria. Expect "audit found one"
+  outcomes; don't promise large-scale record migrations until you've
+  greppped for the blockers above on every candidate.
 - **Sealing hierarchies you don't fully own.** A `sealed` interface
   closes the implementor set. If external consumers might subclass,
   you've made a breaking change. Verify zero external implementations
