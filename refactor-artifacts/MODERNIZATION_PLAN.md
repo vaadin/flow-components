@@ -594,25 +594,44 @@ acceptance gate.
 
 ## Tier 3 — TS/Lit client rewrite
 
-**Scope**: Replace the GWT-compiled spreadsheet widget with a
-TypeScript-based Lit web component. Drop the GWT client module
-entirely.
+**Detailed plan**: see [`TIER3_PLAN.md`](TIER3_PLAN.md).
 
-**Why last**: requires Tier 2 to be complete (clean JSON wire protocol
-without parallel DTOs). Frame as a separate project, not a refactor.
+**One-paragraph summary**: replace the GWT-compiled spreadsheet
+widget with an in-house TypeScript/Lit implementation that drops
+in under the existing `<vaadin-spreadsheet>` Lit wrapper. The seam
+between Lit-wrapper and underlying renderer already exists; this
+slice swaps what's beneath. Slice 116's GWT survey mapped 13
+subsystems (~22.6 K LOC, 2 of them at 4/5 difficulty); the
+recommended path is a phased rewrite (~5-6 months, team of 2-3).
+OSS alternatives (Handsontable, Univer, AG Grid, x-spreadsheet,
+Luckysheet, Glide Data Grid) were evaluated and rejected because
+their custom-editor / Vaadin-component-in-cell integration is
+the killer gap. The sharpened back-compat rule applies: styling
+intent must be preserved (Level 1), pixel-render-identity is not
+promised (Level 2; mitigated by golden-screenshot diff thresholds).
 
-**Effort estimate** (per the deep investigation): 6–12 weeks for a
-focused team of 2–3 people. ~80% of the logic transfers conceptually
-(grid virtualization, scrolling, selection, formula bar, copy/paste
-shape); ~20% needs careful reimplementation (custom cell editors,
-formula-aware paste, merged-cell rendering nuance).
+**Effort estimate** (revised in slice 116): **~5-6 months
+wall-clock for a team of 2-3 engineers**, broken into 6 phases:
+3.0 safety net (2-3 wk), 3.1 foundation (4 wk), 3.2 cell grid
++ scrolling (6 wk — critical path), 3.3 editing + formula bar
+(4 wk), 3.4 Vaadin integration (4 wk — custom editors are the
+high-risk piece), 3.5 polish + parity (3 wk), 3.6 rollout
+(3 wk with beta + feature flag).
 
-**Pre-conditions** (must be true before starting):
-1. Tier 2 step 9 done (DTOs consolidated, clean JSON wire protocol).
-2. The Spreadsheet component has a comprehensive integration-test
-   suite (golden screenshots, keyboard navigation tests, etc.) — the
-   ITs are the only safety net for a UI rewrite.
-3. Vaadin's stable Lit + TypeScript tooling targets are documented.
+**Pre-conditions** (must be true before Phase 3.0 starts):
+1. ✓ Tier 2 done — wire format pinned by `DtoWireFormatTest`
+   (slice 106). Server side stays unchanged.
+2. Golden-screenshot corpus + acceptable-diff thresholds need
+   to be built in Phase 3.0 itself; not a pre-condition.
+3. Team allocation decision: 2-3 engineers full-time, OR slower
+   with partial allocation.
+4. Browser-coverage decision: which browsers + minimum versions
+   the new client must support.
+
+**Tier 3 is correctly framed as a separate project, not a
+refactor** — the cost, risk, and timeline are all categorically
+larger than any slice in this pipeline. The `TIER3_PLAN.md`
+document is the project brief.
 
 ## Dependencies and ordering
 
