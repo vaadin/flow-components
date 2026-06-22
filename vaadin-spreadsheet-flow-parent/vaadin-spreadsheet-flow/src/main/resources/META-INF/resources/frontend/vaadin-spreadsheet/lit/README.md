@@ -9,6 +9,7 @@
 ```
 lit/
 ├── README.md          (this file)
+├── Spreadsheet.ts     (the class the wrapper will use as this.api — skeleton)
 ├── types/
 │   ├── wire.ts                    (TS interfaces for the 6 wire DTOs)
 │   ├── rpc-server-to-client.ts    (SpreadsheetClientApi interface — 50 methods)
@@ -19,6 +20,8 @@ lit/
 │   ├── MergedRegion.ts        (MergedRegion shape + factory)
 │   ├── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
 │   └── Tsv.ts                 (clipboard tab-separated-values codec)
+├── state/
+│   └── SelectionState.ts      (selection state + helpers — pure module)
 └── wire/
     └── parser.ts      (JSON wire-format parser)
 ```
@@ -63,7 +66,8 @@ slice 118, ONLY the pure-algorithm subsystems are ported:
 - ✓ Wire-format parser (slice 118)
 - ✓ Cell-address parser + formula-ref extraction (slice 119)
 - ✓ Wire-protocol RPC types + TSV codec (slice 120)
-- ◯ Cell rendering (Phase 3.2)
+- ✓ Spreadsheet skeleton class + SelectionState (slice 121)
+- ◯ Cell rendering (Phase 3.2 cont.)
 - ◯ Virtual scrolling (Phase 3.2 — critical path)
 - ◯ Selection (Phase 3.2)
 - ◯ Formula bar + editing (Phase 3.3)
