@@ -111,6 +111,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     /** Misc. */
     private sheetProtected = false;
+    private workbookProtected = false;
     private showCustomEditorOnFocus = false;
     private invalidFormulaErrorMessage: string | null = null;
     private namedRanges: string[] = [];
@@ -121,6 +122,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private overlays: Record<string, OverlayInfo> = {};
     private cellKeysToEditorIdMap: Record<string, string> = {};
     private componentIDtoCellKeysMap: Record<string, string> = {};
+    private hyperlinksTooltips: Record<string, string> = {};
+
+    /** Freeze pane split positions. */
+    private verticalSplitPosition = 0;
+    private horizontalSplitPosition = 0;
+
+    /** Display flags. */
+    private displayGridlines = true;
+    private displayRowColHeadings = true;
+    private lockFormatColumns = false;
+    private lockFormatRows = false;
+    private hasActions = false;
+    private workbookChangeToggle = false;
+
+    /** Display content. */
+    private infoLabelValue = '';
+    private elementId = '';
+    private elementClass = '';
+
+    /**
+     * Event-callback registry. Keyed by callback name (e.g.
+     * "GroupingCollapsed"). All callback setters write into this map;
+     * the Phase 3.3+ event-dispatch code will read from it.
+     */
+    private callbacks: Record<string, (event: unknown) => void> = {};
 
     constructor(host: HTMLElement) {
         this.host = host;
@@ -339,6 +365,223 @@ export class Spreadsheet implements SpreadsheetClientApi {
     setPopupButtons(_popupButtons: PopupButtonState[]): void {
         // TODO Phase 3.5 — register popup-button anchors.
     }
+
+    setWorkbookProtected(isProtected: boolean): void {
+        this.workbookProtected = isProtected;
+    }
+
+    // Freeze pane split positions
+    setVerticalSplitPosition(value: number): void {
+        this.verticalSplitPosition = value;
+    }
+    setHorizontalSplitPosition(value: number): void {
+        this.horizontalSplitPosition = value;
+    }
+
+    // Display flags
+    setDisplayGridlines(visible: boolean): void {
+        this.displayGridlines = visible;
+    }
+    setDisplayRowColHeadings(visible: boolean): void {
+        this.displayRowColHeadings = visible;
+    }
+    setLockFormatColumns(locked: boolean): void {
+        this.lockFormatColumns = locked;
+    }
+    setLockFormatRows(locked: boolean): void {
+        this.lockFormatRows = locked;
+    }
+    setHasActions(hasActions: boolean): void {
+        this.hasActions = hasActions;
+    }
+    setWorkbookChangeToggle(toggle: boolean): void {
+        this.workbookChangeToggle = toggle;
+    }
+
+    // Display content
+    setInfoLabelValue(label: string): void {
+        this.infoLabelValue = label;
+    }
+    setHyperlinksTooltips(tooltips: Record<string, string>): void {
+        this.hyperlinksTooltips = tooltips;
+    }
+    setId(id: string): void {
+        this.elementId = id;
+    }
+    setClass(className: string): void {
+        this.elementClass = className;
+    }
+
+    // ====================================================================
+    // Event-callback registration (Phase 3.3+ dispatch)
+    //
+    // Each setter stores the callback in `this.callbacks` keyed by its
+    // event name. Future phases (cell-input, scroll, selection) read
+    // from this map to dispatch user events back to the server. The
+    // wrapper element subscribes by passing a function that
+    // re-dispatches each callback's argument as a CustomEvent.
+    // ====================================================================
+
+    setGroupingCollapsedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.GroupingCollapsed = callback;
+    }
+    setContextMenuClosedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.ContextMenuClosed = callback;
+    }
+    setLevelHeaderClickedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.LevelHeaderClicked = callback;
+    }
+    setOnSheetScrollCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnSheetScroll = callback;
+    }
+    setSheetAddressChangedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.SheetAddressChanged = callback;
+    }
+    setCellSelectedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.CellSelected = callback;
+    }
+    setCellRangeSelectedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.CellRangeSelected = callback;
+    }
+    setCellAddedToSelectionAndSelectedCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.CellAddedToSelectionAndSelected = callback;
+    }
+    setCellsAddedToRangeSelectionCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.CellsAddedToRangeSelection = callback;
+    }
+    setRowSelectedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.RowSelected = callback;
+    }
+    setRowAddedToRangeSelectionCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.RowAddedToRangeSelection = callback;
+    }
+    setColumnSelectedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.ColumnSelected = callback;
+    }
+    setColumnAddedToSelectionCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ColumnAddedToSelection = callback;
+    }
+    setSelectionIncreasePaintedCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.SelectionIncreasePainted = callback;
+    }
+    setSelectionDecreasePaintedCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.SelectionDecreasePainted = callback;
+    }
+    setCellValueEditedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.CellValueEdited = callback;
+    }
+    setSheetSelectedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.SheetSelected = callback;
+    }
+    setSheetRenamedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.SheetRenamed = callback;
+    }
+    setSheetCreatedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.SheetCreated = callback;
+    }
+    setCellRangePaintedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.CellRangePainted = callback;
+    }
+    setDeleteSelectedCellsCallback(callback: (event: unknown) => void): void {
+        this.callbacks.DeleteSelectedCells = callback;
+    }
+    setLinkCellClickedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.LinkCellClicked = callback;
+    }
+    setRowsResizedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.RowsResized = callback;
+    }
+    setColumnResizedCallback(callback: (event: unknown) => void): void {
+        this.callbacks.ColumnResized = callback;
+    }
+    setOnRowAutofitCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnRowAutofit = callback;
+    }
+    setOnColumnAutofitCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnColumnAutofit = callback;
+    }
+    setOnUndoCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnUndo = callback;
+    }
+    setOnRedoCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnRedo = callback;
+    }
+    setSetCellStyleWidthRatiosCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.SetCellStyleWidthRatios = callback;
+    }
+    setProtectedCellWriteAttemptedCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ProtectedCellWriteAttempted = callback;
+    }
+    setOnPasteCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnPaste = callback;
+    }
+    setClearSelectedCellsOnCutCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ClearSelectedCellsOnCut = callback;
+    }
+    setUpdateCellCommentCallback(callback: (event: unknown) => void): void {
+        this.callbacks.UpdateCellComment = callback;
+    }
+    setOnConnectorInitCallback(callback: (event: unknown) => void): void {
+        this.callbacks.OnConnectorInit = callback;
+    }
+    setContextMenuOpenOnSelectionCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ContextMenuOpenOnSelection = callback;
+    }
+    setActionOnCurrentSelectionCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ActionOnCurrentSelection = callback;
+    }
+    setRowHeaderContextMenuOpenCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.RowHeaderContextMenuOpen = callback;
+    }
+    setActionOnRowHeaderCallback(callback: (event: unknown) => void): void {
+        this.callbacks.ActionOnRowHeader = callback;
+    }
+    setColumnHeaderContextMenuOpenCallback(
+        callback: (event: unknown) => void
+    ): void {
+        this.callbacks.ColumnHeaderContextMenuOpen = callback;
+    }
+    setActionOnColumnHeaderCallback(callback: (event: unknown) => void): void {
+        this.callbacks.ActionOnColumnHeader = callback;
+    }
+    setPopupButtonClickCallback(callback: (event: unknown) => void): void {
+        this.callbacks.PopupButtonClick = callback;
+    }
+    setPopupCloseCallback(callback: (event: unknown) => void): void {
+        this.callbacks.PopupClose = callback;
+    }
+
+    /**
+     * Legacy escape hatch — see interface javadoc. The GWT-era wrapper
+     * reaches into this property to read `definedRowHeights` directly.
+     * The new TS implementation MUST NOT rely on this; we expose it
+     * as `undefined` for runtime safety.
+     */
+    readonly spreadsheetWidget = undefined;
 
     // ====================================================================
     // Popup-button lifecycle (Phase 3.5)

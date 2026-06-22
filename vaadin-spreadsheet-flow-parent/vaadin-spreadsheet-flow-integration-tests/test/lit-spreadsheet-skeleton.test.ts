@@ -142,3 +142,124 @@ describe('Spreadsheet skeleton — initial selection state', () => {
         expect(sel.auxRanges).to.deep.equal([]);
     });
 });
+
+describe('Spreadsheet skeleton — freeze + display state (slice 126)', () => {
+    let sheet: Spreadsheet;
+
+    beforeEach(() => {
+        sheet = new Spreadsheet(document.createElement('div'));
+    });
+
+    it('freeze split positions are all callable + storable', () => {
+        expect(() => sheet.setVerticalSplitPosition(3)).to.not.throw();
+        expect(() => sheet.setHorizontalSplitPosition(2)).to.not.throw();
+    });
+
+    it('display flags are all callable', () => {
+        expect(() => sheet.setDisplayGridlines(false)).to.not.throw();
+        expect(() => sheet.setDisplayRowColHeadings(false)).to.not.throw();
+        expect(() => sheet.setLockFormatColumns(true)).to.not.throw();
+        expect(() => sheet.setLockFormatRows(true)).to.not.throw();
+        expect(() => sheet.setHasActions(true)).to.not.throw();
+        expect(() => sheet.setWorkbookChangeToggle(true)).to.not.throw();
+        expect(() => sheet.setWorkbookProtected(true)).to.not.throw();
+    });
+
+    it('display content setters are all callable', () => {
+        expect(() => sheet.setInfoLabelValue('Sheet1: A1')).to.not.throw();
+        expect(() => sheet.setHyperlinksTooltips({ 'col1 row1': 'see http://...' }))
+            .to.not.throw();
+        expect(() => sheet.setId('spreadsheet-1')).to.not.throw();
+        expect(() => sheet.setClass('spreadsheet themed')).to.not.throw();
+    });
+});
+
+describe('Spreadsheet skeleton — callback registry (slice 126)', () => {
+    let sheet: Spreadsheet;
+
+    beforeEach(() => {
+        sheet = new Spreadsheet(document.createElement('div'));
+    });
+
+    it('representative selection-event callbacks are all callable', () => {
+        const noop = () => {};
+        expect(() => sheet.setCellSelectedCallback(noop)).to.not.throw();
+        expect(() => sheet.setCellRangeSelectedCallback(noop)).to.not.throw();
+        expect(() => sheet.setRowSelectedCallback(noop)).to.not.throw();
+        expect(() => sheet.setColumnSelectedCallback(noop)).to.not.throw();
+        expect(() => sheet.setSelectionIncreasePaintedCallback(noop)).to.not.throw();
+        expect(() => sheet.setSelectionDecreasePaintedCallback(noop)).to.not.throw();
+        expect(() =>
+            sheet.setCellAddedToSelectionAndSelectedCallback(noop)
+        ).to.not.throw();
+        expect(() =>
+            sheet.setCellsAddedToRangeSelectionCallback(noop)
+        ).to.not.throw();
+        expect(() =>
+            sheet.setRowAddedToRangeSelectionCallback(noop)
+        ).to.not.throw();
+        expect(() =>
+            sheet.setColumnAddedToSelectionCallback(noop)
+        ).to.not.throw();
+    });
+
+    it('sheet-lifecycle + edit + scroll callbacks are all callable', () => {
+        const noop = () => {};
+        expect(() => sheet.setSheetSelectedCallback(noop)).to.not.throw();
+        expect(() => sheet.setSheetRenamedCallback(noop)).to.not.throw();
+        expect(() => sheet.setSheetCreatedCallback(noop)).to.not.throw();
+        expect(() => sheet.setCellValueEditedCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnSheetScrollCallback(noop)).to.not.throw();
+        expect(() => sheet.setSheetAddressChangedCallback(noop)).to.not.throw();
+        expect(() => sheet.setCellRangePaintedCallback(noop)).to.not.throw();
+        expect(() => sheet.setDeleteSelectedCellsCallback(noop)).to.not.throw();
+    });
+
+    it('action + context-menu callbacks are all callable', () => {
+        const noop = () => {};
+        expect(() => sheet.setContextMenuClosedCallback(noop)).to.not.throw();
+        expect(() => sheet.setContextMenuOpenOnSelectionCallback(noop)).to.not.throw();
+        expect(() => sheet.setRowHeaderContextMenuOpenCallback(noop)).to.not.throw();
+        expect(() =>
+            sheet.setColumnHeaderContextMenuOpenCallback(noop)
+        ).to.not.throw();
+        expect(() => sheet.setActionOnCurrentSelectionCallback(noop)).to.not.throw();
+        expect(() => sheet.setActionOnRowHeaderCallback(noop)).to.not.throw();
+        expect(() => sheet.setActionOnColumnHeaderCallback(noop)).to.not.throw();
+    });
+
+    it('resize + autofit + undo/redo + grouping callbacks are all callable', () => {
+        const noop = () => {};
+        expect(() => sheet.setRowsResizedCallback(noop)).to.not.throw();
+        expect(() => sheet.setColumnResizedCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnRowAutofitCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnColumnAutofitCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnUndoCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnRedoCallback(noop)).to.not.throw();
+        expect(() => sheet.setGroupingCollapsedCallback(noop)).to.not.throw();
+        expect(() => sheet.setLevelHeaderClickedCallback(noop)).to.not.throw();
+    });
+
+    it('cut/paste + protected-write + comment + connector callbacks are all callable', () => {
+        const noop = () => {};
+        expect(() => sheet.setOnPasteCallback(noop)).to.not.throw();
+        expect(() => sheet.setClearSelectedCellsOnCutCallback(noop)).to.not.throw();
+        expect(() => sheet.setProtectedCellWriteAttemptedCallback(noop)).to.not.throw();
+        expect(() => sheet.setUpdateCellCommentCallback(noop)).to.not.throw();
+        expect(() => sheet.setOnConnectorInitCallback(noop)).to.not.throw();
+        expect(() => sheet.setLinkCellClickedCallback(noop)).to.not.throw();
+        expect(() => sheet.setSetCellStyleWidthRatiosCallback(noop)).to.not.throw();
+        expect(() => sheet.setPopupButtonClickCallback(noop)).to.not.throw();
+        expect(() => sheet.setPopupCloseCallback(noop)).to.not.throw();
+    });
+});
+
+describe('Spreadsheet skeleton — legacy spreadsheetWidget escape hatch (slice 126)', () => {
+    it('exposes spreadsheetWidget as undefined (not throw on read)', () => {
+        const sheet = new Spreadsheet(document.createElement('div'));
+        // The GWT-era wrapper reads `api.spreadsheetWidget.sheetWidget.
+        // definedRowHeights` to time first render. The new impl returns
+        // undefined; the wrapper's existence check handles this safely.
+        expect(sheet.spreadsheetWidget).to.be.undefined;
+    });
+});
