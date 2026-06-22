@@ -472,6 +472,57 @@ In Mode B specifically, the LOCAL SOURCE is still valuable as a
 cross-reference — just don't have it open when actually writing
 the new code.
 
+### Lit elements without decorators: the class-field-shadowing gotcha
+
+When the test-runner toolchain doesn't enable TS decorators
+(esbuild via `@web/dev-server-esbuild` with default settings
+doesn't), Lit's `@property` / `@customElement` decorators can't
+be used + the `static properties = {...}` API is the fallback.
+But that fallback has a subtle gotcha: a class field with an
+initializer:
+
+```ts
+export class MyEl extends LitElement {
+    static properties = { foo: {} };
+    foo: string = 'default';  // ⚠️ shadows Lit's reactive accessor
+}
+```
+
+… creates a native class field that OVERWRITES Lit's installed
+accessor at construction time. Lit detects this and throws at
+runtime: "The following properties on element X will not trigger
+updates as expected because they are set using class fields".
+
+The fix: use `declare` (no initializer) + initialize in the
+constructor instead:
+
+```ts
+export class MyEl extends LitElement {
+    static properties = { foo: {} };
+    declare foo: string;
+    constructor() {
+        super();
+        this.foo = 'default';
+    }
+}
+```
+
+The `declare` tells TS the field exists for type-checking but
+emits no runtime code, so Lit's accessor stays intact. The
+constructor's `this.foo = ...` assignment goes through the
+accessor (since the prototype already has the setter installed
+by Lit at class-evaluation time), which is the desired path.
+
+This is a one-time gotcha but burns ~10-30 minutes when first
+encountered (the failure mode is a runtime warning that obscures
+the actual rendering issue — the element loads fine, the property
+just doesn't trigger re-renders). Bank the pattern in your project
+when first introducing Lit elements + reference it on the next
+addition.
+
+Reference: <https://lit.dev/msg/class-field-shadowing> + slice 132
+of the spreadsheet refactor (the case study).
+
 ### Design slice before implementation slice, when ecosystem-alignment matters
 
 When the rewrite target is "match the ecosystem's modern style" + the

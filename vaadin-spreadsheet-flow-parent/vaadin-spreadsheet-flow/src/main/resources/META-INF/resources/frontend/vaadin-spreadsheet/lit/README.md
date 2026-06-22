@@ -22,6 +22,9 @@ lit/
 │   ├── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
 │   ├── Tsv.ts                 (clipboard tab-separated-values codec)
 │   └── ViewportMath.ts        (point↔px conversion, row-height lookup, computeViewportBounds)
+├── elements/
+│   ├── SpreadsheetCellGrid.ts (the cell-grid LitElement — absolute-positioned cells)
+│   └── types.ts               (CellGridRenderState + sibling input shapes)
 ├── state/
 │   └── SelectionState.ts      (selection state + helpers — pure module)
 └── wire/
@@ -71,6 +74,9 @@ slice 118, ONLY the pure-algorithm subsystems are ported:
 - ✓ Spreadsheet skeleton class + SelectionState (slice 121)
 - ✓ ViewportMath: viewport bounds + unit conversion (slice 124)
 - ✓ CellKeys: wire-format codec (toKey, parseColRow, header classifier) (slice 125)
+- ✓ SpreadsheetCellGrid LitElement scaffolded (slice 132) — minimal
+  positioning + cell-content render; styling / selection / merged
+  cells / frozen panes follow in slices 135-137
 - ◯ Cell rendering (Phase 3.2 cont.)
 - ◯ Virtual scrolling — `computeViewportBounds` shipped (slice 124),
   cell recycling + DOM wiring still pending
