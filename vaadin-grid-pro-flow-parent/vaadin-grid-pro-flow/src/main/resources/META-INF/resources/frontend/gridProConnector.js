@@ -72,7 +72,7 @@ window.Vaadin.Flow.gridProConnector = {
       // change event when an input loses focus.
       component.addEventListener('focusout', (e) => {
         if (e.target instanceof HTMLInputElement) {
-          e.target.dispatchEvent(new Event('change'));
+          e.target.dispatchEvent(new Event('change', { bubbles: true }));
         }
       });
       component.__firefoxChangeWorkaroundInstalled = true;
