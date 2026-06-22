@@ -472,6 +472,54 @@ In Mode B specifically, the LOCAL SOURCE is still valuable as a
 cross-reference — just don't have it open when actually writing
 the new code.
 
+### Design slice before implementation slice, when ecosystem-alignment matters
+
+When the rewrite target is "match the ecosystem's modern style" + the
+ecosystem has an existing reference (vaadin-grid-flow for Vaadin
+Flow components), DON'T start implementing the new code without
+first studying the reference's architecture + writing a design doc
+that locks in the deviations + alignments.
+
+The pattern:
+
+1. **Survey the reference** with an Explore agent or focused
+   reads. Answer: file layout, naming, state propagation,
+   initialization lifecycle, server↔client interaction.
+2. **Write a design doc** that:
+   - Lists what the new code adopts from the reference (with
+     concrete file/line citations).
+   - Lists what's necessarily different (with the architectural
+     constraint that forces the deviation explicitly named).
+   - Maps the implementation to 5-10 follow-up slices in order.
+3. **Implement in subsequent slices** with the design doc as the
+   authority — when an implementation choice surprises you, the
+   doc is the place that explains the why.
+
+Why this is leverage:
+
+- An implementation slice that starts cold may produce code that's
+  90% right but architecturally divergent. Five follow-up slices
+  re-align it.
+- The design doc is a public artifact that future contributors
+  read instead of re-discovering the rationale from git archeology.
+- The "what's necessarily different" section forestalls the
+  recurring "why don't we just do it like X?" question by naming
+  the constraint upfront.
+
+The trap to avoid: design slices that produce abstract diagrams
+without naming concrete files. The design doc must reference real
+file paths and real line numbers in the reference, OR it's just
+opinion dressed as plan.
+
+The slice 131 → 132 boundary in the spreadsheet Tier 3 refactor is
+the case study. Slice 131 surveyed vaadin-grid-flow's `gridConnector.ts`
++ wrote `refactor-artifacts/CELL_GRID_DESIGN.md` cataloging which
+of grid's patterns the spreadsheet's cell-grid adopts (`$connector`
+naming, `initLazy` lifecycle, batched state application) vs what's
+forced different (the wrapper element is structurally required —
+spreadsheet has no published web component to patch like grid does).
+Slice 132 implements against that doc.
+
 ### Cleanup pattern: if you've already shipped Mode B work as Mode A, do an explicit "execute the audit" slice
 
 The verbatim-port → clean-room transition isn't free — once you've
