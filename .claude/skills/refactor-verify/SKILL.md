@@ -116,6 +116,27 @@ pytest
 
 Report: `Tests: {N} passed, {F} failed, {E} errored, {S} skipped` plus delta vs the count recorded at the last slice boundary.
 
+**Verify the count matches expectation**, not just the exit code.
+A test runner can report `0 passed, 0 failed` and exit 0 — that's
+"nothing ran", not "everything passed". Symptoms:
+
+- `wtr` reporting `8 test files | 0 passed, 0 failed`: the files
+  matched the glob but couldn't be loaded (e.g. cross-module
+  imports 404'd due to rootDir not spanning the source tree).
+- `pytest` reporting `0 tests collected`: file pattern didn't
+  match anything.
+- Maven `Tests run: 0`: includes-pattern miss.
+
+If the slice added N test cases and the runner reports <N total
+afterward, the gate FAILS even though exit code is 0. The
+canonical example: slices 118-121 added 107 tests but `wtr` ran
+none of them because rootDir defaulted to the IT module (not the
+parent dir containing the production module being tested). The
+gap went undetected for four slices.
+
+Always: count the `it(` / `@Test` declarations in the new files
+manually, and verify the runner's total matches.
+
 ### Gate 5 — LOC delta
 
 ```sh

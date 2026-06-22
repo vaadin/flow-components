@@ -336,3 +336,70 @@ PR.
 - For Tier 2 work, a wire-format snapshot test that must pass before
   and after the change.
 - For Tier 3 work, a project brief, not a slice plan.
+
+## Porting between languages (a Tier 3 sub-pattern)
+
+When the modernization isn't "use modern Java features" but "rewrite
+this in another language entirely" (GWT-Java → TS, ObjC → Swift,
+Python → Go), the same Tier 3 framing applies but with extra moves
+specific to porting:
+
+### Local source over JAR / online docs
+
+Read the source you're porting FROM in the local repo, not via
+artifact extraction. JAR sources via `m2 unzip` work but miss surrounding
+context (sibling files, test usage patterns, recent commits that
+explain "why"). Sibling repos like `../flow`, `../docs`,
+`../web-components` are almost always cheaper to grep than chasing
+an extracted source jar. Confirm before each port chunk that the
+upstream repo isn't already gone — sometimes the "modernized"
+target's repo holds the answer for "what should this look like in
+the new lang", which JARs never do.
+
+### Byte-equivalence is the default; document deviations with QUIRK callouts
+
+Pure-algorithm code should port byte-equivalent — same inputs
+produce same outputs, including for edge-case quirks. When you
+encounter source code that looks like an off-by-one or has
+suspicious-looking conditions:
+
+- **Preserve verbatim** in the port. Don't "fix" what looks wrong;
+  the upstream may depend on the quirk in non-obvious ways.
+- **Document with a `QUIRK` callout** in javadoc / docstring.
+  Example: `// QUIRK: GWT uses 'row >= length', NOT '>', so a length-N
+  array provides heights for rows 1..N-1 only. Preserved for
+  byte-equivalence; flag for human audit.`
+- **Add a regression test that pins the quirk.** Future-you will be
+  tempted to "fix" the code; the test prevents that. Name the test
+  to explain the quirk: `getRowHeightPx_at_arrayLength_returnsDefault_NOT_lastEntry`.
+
+If you're CERTAIN the quirk is a bug AND the original is unused
+elsewhere, declare it intentionally. The pattern from slice 119
+was: preserve the `[A-z]` regex character class verbatim (genuine
+upstream intent — wider character set) BUT escape regex metachars
+in sheet names (real bug not relied upon). Both moves documented
+explicitly in the source.
+
+### Tests must ACTUALLY RUN — `tsc --noEmit` is not a runtime check
+
+A TypeScript file that compiles cleanly under strict mode can
+still have semantic bugs that only a runtime test catches. The
+canonical example: `if (row > definedRowHeightsPx.length)` is
+syntactically valid TS and types check perfectly — but it's a `>`
+vs `>=` off-by-one that only a unit test exposes. Compile-checks
+verify shape; tests verify behavior. Always run the tests for
+ported code.
+
+This implies: **verify the test runner actually executed the
+tests** before celebrating "all green". A test runner returning
+"8 test files | 0 passed, 0 failed" exits with code 0 but ran
+nothing. Verify the test count matches what you wrote (~N tests
+expected → N reported, ±1 for hooks). See `refactor-verify` Gate 4.
+
+### Use the same in-ecosystem reference as for code modernization
+
+The same Step 5 applies — port toward what the ecosystem has
+already adopted. For a Vaadin GWT → TS port, the reference is
+`vaadin-grid-flow`'s `gridConnector.ts` (modern Lit + TS in the
+same repo). Cite the reference file in the port's source comments
+so future readers can audit "is this still the canonical pattern."

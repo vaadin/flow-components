@@ -15,6 +15,7 @@ lit/
 │   ├── rpc-server-to-client.ts    (SpreadsheetClientApi interface — 50 methods)
 │   └── rpc-client-to-server.ts    (SpreadsheetEvent discriminated union — 39 types)
 ├── algorithms/
+│   ├── CellKeys.ts            ("col1 row1" wire codec + header-key classifier)
 │   ├── CellRef.ts             (A1↔{col,row} parser, column-letter math)
 │   ├── FormulaRefs.ts         (formula → cell-ref list, isCellRef regex)
 │   ├── MergedRegion.ts        (MergedRegion shape + factory)
@@ -69,6 +70,7 @@ slice 118, ONLY the pure-algorithm subsystems are ported:
 - ✓ Wire-protocol RPC types + TSV codec (slice 120)
 - ✓ Spreadsheet skeleton class + SelectionState (slice 121)
 - ✓ ViewportMath: viewport bounds + unit conversion (slice 124)
+- ✓ CellKeys: wire-format codec (toKey, parseColRow, header classifier) (slice 125)
 - ◯ Cell rendering (Phase 3.2 cont.)
 - ◯ Virtual scrolling — `computeViewportBounds` shipped (slice 124),
   cell recycling + DOM wiring still pending
