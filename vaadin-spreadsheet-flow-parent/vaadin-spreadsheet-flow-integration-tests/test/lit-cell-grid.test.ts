@@ -654,6 +654,171 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
+    function buildMergedState(
+        mergedRegions: CellGridRenderState['mergedRegions'],
+        cellData: Map<string, CellData> = new Map()
+    ): CellGridRenderState {
+        // viewport: cols 1..4, rows 1..4, uniform 50×20.
+        return {
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            cellData,
+            colX: [0, 50, 100, 150],
+            rowY: [0, 20, 40, 60],
+            colWidths: [50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions,
+            selection: emptyCellGridRenderState().selection,
+        };
+    }
+
+    it('renders one .merged-cell div per merged region at the top-left', async () => {
+        const el = await attachWithState(buildMergedState([
+            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+        ]));
+
+        // Single merged region → 1 merged-cell div.
+        const merged = el.shadowRoot!.querySelectorAll('.merged-cell');
+        expect(merged).to.have.length(1);
+        // CSS classes match the TestBench selector: div.col2.row2.merged-cell
+        const cell = merged[0] as HTMLElement;
+        expect(cell.classList.contains('cell')).to.be.true;
+        expect(cell.classList.contains('col2')).to.be.true;
+        expect(cell.classList.contains('row2')).to.be.true;
+
+        cleanup(el);
+    });
+
+    it('sizes the merged-cell div to span the full region', async () => {
+        const el = await attachWithState(buildMergedState([
+            // cols 2..3, rows 2..3 → 100×40 area
+            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+        ]));
+
+        const cell = el.shadowRoot!.querySelector('.merged-cell') as HTMLElement;
+        expect(cell.style.left).to.equal('50px');
+        expect(cell.style.top).to.equal('20px');
+        expect(cell.style.width).to.equal('100px');
+        expect(cell.style.height).to.equal('40px');
+
+        cleanup(el);
+    });
+
+    it('renders the merged-cell value from the top-left cellData entry', async () => {
+        const cellData = new Map<string, CellData>([
+            ['col2 row2', { ...makeCellData(2, 2, 'Merged!'), cellStyle: 'cs0' }],
+        ]);
+        const el = await attachWithState(buildMergedState(
+            [{ id: 1, col1: 2, col2: 3, row1: 2, row2: 3 }],
+            cellData,
+        ));
+
+        const cell = el.shadowRoot!.querySelector('.merged-cell');
+        expect(cell!.textContent?.trim()).to.equal('Merged!');
+
+        cleanup(el);
+    });
+
+    it('skips rendering the underlying single-cell divs covered by the merge', async () => {
+        const el = await attachWithState(buildMergedState([
+            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+        ]));
+
+        // (2,2) is the top-left — replaced by the merged-cell overlay,
+        // no plain single-cell at that coord.
+        const cellsAt22 = el.shadowRoot!.querySelectorAll('.col2.row2');
+        // Exactly one element with both classes: the merged-cell.
+        expect(cellsAt22).to.have.length(1);
+        expect(cellsAt22[0].classList.contains('merged-cell')).to.be.true;
+
+        // Underlying single cells (2,3), (3,2), (3,3) should NOT be
+        // rendered — they're covered by the merge.
+        expect(el.shadowRoot!.querySelector('.col2.row3')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.col3.row2')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.col3.row3')).to.be.null;
+
+        // Cells OUTSIDE the merge still render normally.
+        expect(el.shadowRoot!.querySelector('.col1.row1')).to.not.be.null;
+        expect(el.shadowRoot!.querySelector('.col4.row4')).to.not.be.null;
+
+        cleanup(el);
+    });
+
+    it('does NOT render an overlay when the merge top-left is outside the viewport', async () => {
+        // viewport: cols 1..4, rows 1..4. Merge at (10..11, 10..11).
+        const el = await attachWithState(buildMergedState([
+            { id: 1, col1: 10, col2: 11, row1: 10, row2: 11 },
+        ]));
+
+        expect(el.shadowRoot!.querySelector('.merged-cell')).to.be.null;
+
+        cleanup(el);
+    });
+
+    it('clamps the overlay size when the merge extends past the viewport', async () => {
+        // viewport: cols 1..4. Merge at cols 3..6 (extends past) rows 3..6.
+        const el = await attachWithState(buildMergedState([
+            { id: 1, col1: 3, col2: 6, row1: 3, row2: 6 },
+        ]));
+
+        const cell = el.shadowRoot!.querySelector('.merged-cell') as HTMLElement;
+        // top-left at (3, 3) → left = 100, top = 40
+        expect(cell.style.left).to.equal('100px');
+        expect(cell.style.top).to.equal('40px');
+        // Visible cols 3..4 → width = 50 + 50 = 100
+        // Visible rows 3..4 → height = 20 + 20 = 40
+        expect(cell.style.width).to.equal('100px');
+        expect(cell.style.height).to.equal('40px');
+
+        cleanup(el);
+    });
+
+    it('renders multiple merged-cell overlays for multiple regions', async () => {
+        const el = await attachWithState(buildMergedState([
+            { id: 1, col1: 1, col2: 2, row1: 1, row2: 1 },
+            { id: 2, col1: 3, col2: 4, row1: 3, row2: 4 },
+        ]));
+
+        const merged = el.shadowRoot!.querySelectorAll('.merged-cell');
+        expect(merged).to.have.length(2);
+
+        // First overlay at (1, 1).
+        expect(el.shadowRoot!.querySelector('.col1.row1.merged-cell')).to.not.be.null;
+        // Second overlay at (3, 3).
+        expect(el.shadowRoot!.querySelector('.col3.row3.merged-cell')).to.not.be.null;
+
+        cleanup(el);
+    });
+
+    it('applies cell-range to the merged overlay when its top-left is in the selection range', async () => {
+        const state = buildMergedState([
+            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+        ]);
+        // Active cell elsewhere; selection range covers the merge's top-left.
+        state.selection = {
+            activeCell: { col: 1, row: 1 },
+            activeRange: { c1: 1, c2: 4, r1: 1, r2: 4 },
+            auxRanges: [],
+        };
+        const el = await attachWithState(state);
+
+        const cell = el.shadowRoot!.querySelector('.merged-cell') as HTMLElement;
+        expect(cell.classList.contains('cell-range')).to.be.true;
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — render state updates', () => {
     it('re-renders when renderState is reassigned', async () => {
         const el = await attachWithState({

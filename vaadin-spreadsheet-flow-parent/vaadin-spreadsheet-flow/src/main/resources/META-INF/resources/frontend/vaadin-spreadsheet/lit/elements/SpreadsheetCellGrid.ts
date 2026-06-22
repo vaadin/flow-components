@@ -91,6 +91,7 @@ export class SpreadsheetCellGrid extends LitElement {
             colWidths,
             rowHeights,
             cellStyleToCSSStyle,
+            mergedRegions,
             selection,
         } = this.renderState;
 
@@ -100,6 +101,11 @@ export class SpreadsheetCellGrid extends LitElement {
             // may push an empty state during initial measurement.)
             return html``;
         }
+
+        // Coordinates covered by a merged region (excluding each
+        // region's top-left). The render loop skips these — the
+        // merged-cell overlay div will cover the same area.
+        const coveredByMerge = computeCoveredCoords(mergedRegions);
 
         const cells: TemplateResult[] = [];
         for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
@@ -116,6 +122,11 @@ export class SpreadsheetCellGrid extends LitElement {
                 const width = colWidths[colOffset] ?? 0;
                 if (width === 0) {
                     // Hidden column — skip.
+                    continue;
+                }
+                if (coveredByMerge.has(toKey(col, row))) {
+                    // Inside a merged region but not the top-left — the
+                    // merged-cell overlay covers this position.
                     continue;
                 }
                 const key = toKey(col, row);
@@ -144,9 +155,128 @@ export class SpreadsheetCellGrid extends LitElement {
         }
 
         const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
+        const mergedOverlays = buildMergedCellOverlays(this.renderState);
         const selectionOverlay = buildSelectionOverlay(this.renderState);
-        return html`${styleBlock}${cells}${selectionOverlay}`;
+        return html`${styleBlock}${cells}${mergedOverlays}${selectionOverlay}`;
     }
+}
+
+/**
+ * Build the set of cell-keys that are INSIDE a merged region. The
+ * per-cell render loop skips ALL of them — the merged-cell overlay
+ * div is the sole rendering at the top-left, and the other
+ * positions are covered (not rendered separately).
+ *
+ * Returned set holds keys in the {@link toKey} format
+ * ({@code "col<C> row<R>"}) for O(1) lookup during the per-cell
+ * render loop.
+ */
+function computeCoveredCoords(
+    mergedRegions: ReadonlyArray<{
+        col1: number;
+        col2: number;
+        row1: number;
+        row2: number;
+    }>
+): Set<string> {
+    const covered = new Set<string>();
+    for (const region of mergedRegions) {
+        for (let row = region.row1; row <= region.row2; row++) {
+            for (let col = region.col1; col <= region.col2; col++) {
+                covered.add(toKey(col, row));
+            }
+        }
+    }
+    return covered;
+}
+
+/**
+ * Build merged-cell overlay divs for every {@link MergedRegion}
+ * whose top-left coordinate falls inside the visible viewport. Each
+ * overlay is a single div positioned at the merge's top-left cell,
+ * sized to span the full region (sum of column widths × sum of row
+ * heights).
+ *
+ * The CSS class list includes {@code cell col<C1> row<R1> merged-cell}
+ * — the {@code merged-cell} class is the TestBench-side contract
+ * (see {@code AbstractSpreadsheetIT.mergedCell:567-575}).
+ *
+ * Skips merges whose top-left is outside the visible viewport — the
+ * connector / scroll handler is responsible for keeping the viewport
+ * aligned. Per-cell styling, selection state, and cellData lookup
+ * use the top-left cell's data; the merged overlay is treated as a
+ * single rendered cell.
+ */
+function buildMergedCellOverlays(
+    state: CellGridRenderState
+): TemplateResult[] {
+    const {
+        viewport,
+        cellData,
+        colX,
+        rowY,
+        colWidths,
+        rowHeights,
+        cellStyleToCSSStyle,
+        mergedRegions,
+        selection,
+    } = state;
+    void cellStyleToCSSStyle; // styling slice 135 emits rules globally; we just attach the class
+
+    const overlays: TemplateResult[] = [];
+    for (const region of mergedRegions) {
+        // Only render overlays whose top-left is in the viewport.
+        if (region.col1 < viewport.firstColumnIndex
+                || region.col1 > viewport.lastColumnIndex
+                || region.row1 < viewport.firstRowIndex
+                || region.row1 > viewport.lastRowIndex) {
+            continue;
+        }
+
+        const colStartIdx = region.col1 - viewport.firstColumnIndex;
+        const rowStartIdx = region.row1 - viewport.firstRowIndex;
+        const left = colX[colStartIdx] ?? 0;
+        const top = rowY[rowStartIdx] ?? 0;
+
+        // Sum widths from col1 to min(col2, lastColumnIndex).
+        let width = 0;
+        const colEnd = Math.min(region.col2, viewport.lastColumnIndex);
+        for (let col = region.col1; col <= colEnd; col++) {
+            width += colWidths[col - viewport.firstColumnIndex] ?? 0;
+        }
+        // Sum heights from row1 to min(row2, lastRowIndex).
+        let height = 0;
+        const rowEnd = Math.min(region.row2, viewport.lastRowIndex);
+        for (let row = region.row1; row <= rowEnd; row++) {
+            height += rowHeights[row - viewport.firstRowIndex] ?? 0;
+        }
+
+        const key = toKey(region.col1, region.row1);
+        const data = cellData.get(key);
+        const text = data?.value ?? '';
+        const cellStyleClass = data?.cellStyle ?? '';
+
+        // Selection: a merged cell carries cell-range if its top-left
+        // is in the selected range (excluding active cell). Matches
+        // single-cell selection behavior.
+        const inSelection = isCellSelected(selection, region.col1, region.row1);
+        const isActive = isActiveCell(selection, region.col1, region.row1);
+        const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+
+        const classList =
+            `cell col${region.col1} row${region.row1} merged-cell`
+            + (cellStyleClass ? ` ${cellStyleClass}` : '')
+            + cellRangeClass;
+        const style =
+            `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+
+        overlays.push(html`
+            <div class=${classList} style=${style}>
+                ${text}
+            </div>
+        `);
+    }
+    return overlays;
 }
 
 /**
