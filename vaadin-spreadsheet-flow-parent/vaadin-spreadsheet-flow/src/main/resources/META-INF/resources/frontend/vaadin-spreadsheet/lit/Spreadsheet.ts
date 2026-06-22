@@ -297,6 +297,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             rowY,
             colWidths,
             rowHeights,
+            cellStyleToCSSStyle: this.cellStyleToCSSStyle,
             mergedRegions: this.mergedRegions,
             selection: this.selection,
         };

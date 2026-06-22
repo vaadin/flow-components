@@ -65,6 +65,20 @@ export interface CellGridRenderState {
     rowHeights: ReadonlyArray<number>;
 
     /**
+     * Style-index → CSS-rule-body lookup. Each rendered cell carries
+     * its style class (e.g. {@code "cs0"}) on its element; the
+     * cell-grid emits a {@code <style>} block in its shadow DOM with
+     * rules of the form {@code .cell.cs<N> { <body> }}. The body is
+     * everything between the braces — declarations like
+     * {@code "font-weight:bold;color:red;"}.
+     *
+     * Keys are integer style indices (Excel's per-cell-style table is
+     * indexed). The {@code cellStyle} field on {@link CellData} stores
+     * the corresponding {@code "cs<N>"} string.
+     */
+    cellStyleToCSSStyle: Readonly<Record<number, string>>;
+
+    /**
      * Merged regions that overlap the visible viewport. Slice 137 will
      * render these as larger cells overlaying the underlying single-
      * cell grid; slice 132's minimal render ignores them.
@@ -100,6 +114,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         rowY: [],
         colWidths: [],
         rowHeights: [],
+        cellStyleToCSSStyle: {},
         mergedRegions: [],
         selection: {
             activeCell: { col: 1, row: 1 },

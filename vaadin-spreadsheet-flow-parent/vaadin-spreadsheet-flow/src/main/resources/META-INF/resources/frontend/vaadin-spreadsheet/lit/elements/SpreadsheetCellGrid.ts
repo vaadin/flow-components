@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
@@ -81,8 +82,15 @@ export class SpreadsheetCellGrid extends LitElement {
     }
 
     render(): TemplateResult {
-        const { viewport, cellData, colX, rowY, colWidths, rowHeights } =
-            this.renderState;
+        const {
+            viewport,
+            cellData,
+            colX,
+            rowY,
+            colWidths,
+            rowHeights,
+            cellStyleToCSSStyle,
+        } = this.renderState;
 
         if (viewport.lastColumnIndex < viewport.firstColumnIndex
                 || viewport.lastRowIndex < viewport.firstRowIndex) {
@@ -111,16 +119,49 @@ export class SpreadsheetCellGrid extends LitElement {
                 const key = toKey(col, row);
                 const data = cellData.get(key);
                 const text = data?.value ?? '';
+                const cellStyleClass = data?.cellStyle ?? '';
+                const classList =
+                    `cell col${col} row${row}${cellStyleClass ? ` ${cellStyleClass}` : ''}`;
                 const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
                 cells.push(html`
-                    <div class="cell ${`col${col}`} ${`row${row}`}" style=${style}>
+                    <div class=${classList} style=${style}>
                         ${text}
                     </div>
                 `);
             }
         }
-        return html`${cells}`;
+
+        const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
+        return html`${styleBlock}${cells}`;
     }
+}
+
+/**
+ * Build a {@code <style>} TemplateResult containing one rule per
+ * entry in {@code cellStyleToCSSStyle}. Each rule has the form
+ * {@code .cell.cs<N> { <body> }}. The body is taken verbatim from
+ * the map (the server side composes the CSS declarations; we just
+ * place them inside braces).
+ *
+ * Returns an empty fragment when the map is empty.
+ */
+function buildCellStyleBlock(
+    cellStyleToCSSStyle: Readonly<Record<number, string>>
+): TemplateResult | string {
+    const entries = Object.entries(cellStyleToCSSStyle);
+    if (entries.length === 0) {
+        return '';
+    }
+    // Compose the rules as plain text + use unsafeHTML — Lit's
+    // template literal doesn't substitute into <style> children
+    // safely otherwise. The content is server-controlled CSS, so
+    // this is the same trust boundary the wrapper already exposes
+    // (the GWT path emitted these rules via document.createElement
+    // ('style') + appendChild).
+    const rules = entries
+        .map(([index, body]) => `.cell.cs${index} { ${body} }`)
+        .join('\n');
+    return html`<style>${unsafeHTML(rules)}</style>`;
 }
 
 customElements.define('vaadin-spreadsheet-internal-cell-grid', SpreadsheetCellGrid);

@@ -98,6 +98,7 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
             rowY: [0, 20],
             colWidths: [50, 50, 50],
             rowHeights: [20, 20],
+            cellStyleToCSSStyle: {},
             mergedRegions: [],
             selection: {
                 activeCell: { col: 1, row: 1 },
@@ -200,6 +201,7 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             rowY: [0, 0, 20],
             colWidths: [50, 50],
             rowHeights: [20, 0, 20], // row 2 hidden
+            cellStyleToCSSStyle: {},
             mergedRegions: [],
             selection: emptyCellGridRenderState().selection,
         };
@@ -232,6 +234,7 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             rowY: [0],
             colWidths: [50, 0, 50], // col 2 hidden
             rowHeights: [20],
+            cellStyleToCSSStyle: {},
             mergedRegions: [],
             selection: emptyCellGridRenderState().selection,
         };
@@ -240,6 +243,99 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
         const cells = el.shadowRoot!.querySelectorAll('.cell');
         expect(cells).to.have.length(2); // col 1 + col 3
         expect(el.shadowRoot!.querySelector('.col2')).to.be.null;
+
+        cleanup(el);
+    });
+});
+
+describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
+    function build1x1State(
+        cellData: Map<string, CellData>,
+        cellStyleToCSSStyle: Record<number, string>
+    ): CellGridRenderState {
+        return {
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 50,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 20,
+            },
+            cellData,
+            colX: [0],
+            rowY: [0],
+            colWidths: [50],
+            rowHeights: [20],
+            cellStyleToCSSStyle,
+            mergedRegions: [],
+            selection: emptyCellGridRenderState().selection,
+        };
+    }
+
+    it('emits a <style> block with the cellStyleToCSSStyle rules', async () => {
+        const el = await attachWithState(
+            build1x1State(new Map(), {
+                0: 'font-weight: bold;',
+                3: 'color: red;',
+            })
+        );
+
+        const styleEl = el.shadowRoot!.querySelector('style:not([data-style-source])');
+        // The Lit-injected <style> for component styles is one element;
+        // the cell-style block is a sibling. Lit's static styles use a
+        // <style> too, so we look for ours by content match.
+        const allStyles = el.shadowRoot!.querySelectorAll('style');
+        const ourStyles = Array.from(allStyles).filter((s) =>
+            (s.textContent ?? '').includes('.cell.cs')
+        );
+        expect(ourStyles).to.have.length.greaterThanOrEqual(1);
+        const cssText = ourStyles.map((s) => s.textContent ?? '').join('\n');
+        expect(cssText).to.include('.cell.cs0 { font-weight: bold; }');
+        expect(cssText).to.include('.cell.cs3 { color: red; }');
+
+        cleanup(el);
+    });
+
+    it('does not emit a <style> block when cellStyleToCSSStyle is empty', async () => {
+        const el = await attachWithState(build1x1State(new Map(), {}));
+
+        const allStyles = el.shadowRoot!.querySelectorAll('style');
+        const ourStyles = Array.from(allStyles).filter((s) =>
+            (s.textContent ?? '').includes('.cell.cs')
+        );
+        expect(ourStyles).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('applies the cellStyle class from cellData to the rendered cell', async () => {
+        const cellData = new Map<string, CellData>([
+            ['col1 row1', { ...makeCellData(1, 1, 'X'), cellStyle: 'cs7' }],
+        ]);
+        const el = await attachWithState(
+            build1x1State(cellData, { 7: 'background: yellow;' })
+        );
+
+        const cell = el.shadowRoot!.querySelector('.col1.row1');
+        expect(cell!.classList.contains('cs7')).to.be.true;
+        expect(cell!.classList.contains('cell')).to.be.true;
+
+        cleanup(el);
+    });
+
+    it('omits the cellStyle class when cellData has none', async () => {
+        // Cell at (1,1) has no cellData entry.
+        const el = await attachWithState(
+            build1x1State(new Map(), { 0: 'font-weight: bold;' })
+        );
+
+        const cell = el.shadowRoot!.querySelector('.col1.row1') as HTMLElement;
+        // Should have "cell col1 row1" but NOT any "cs<N>" class.
+        const csClasses = Array.from(cell.classList).filter((c) => c.startsWith('cs'));
+        expect(csClasses).to.have.length(0);
 
         cleanup(el);
     });
@@ -263,6 +359,7 @@ describe('SpreadsheetCellGrid — render state updates', () => {
             rowY: [0],
             colWidths: [50],
             rowHeights: [20],
+            cellStyleToCSSStyle: {},
             mergedRegions: [],
             selection: emptyCellGridRenderState().selection,
         });
