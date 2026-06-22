@@ -10,12 +10,15 @@
 lit/
 ├── README.md          (this file)
 ├── types/
-│   └── wire.ts        (TypeScript interfaces for the 6 wire DTOs)
+│   ├── wire.ts                    (TS interfaces for the 6 wire DTOs)
+│   ├── rpc-server-to-client.ts    (SpreadsheetClientApi interface — 50 methods)
+│   └── rpc-client-to-server.ts    (SpreadsheetEvent discriminated union — 39 types)
 ├── algorithms/
 │   ├── CellRef.ts             (A1↔{col,row} parser, column-letter math)
 │   ├── FormulaRefs.ts         (formula → cell-ref list, isCellRef regex)
 │   ├── MergedRegion.ts        (MergedRegion shape + factory)
-│   └── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
+│   ├── MergedRegionUtil.ts    (findIncreasingSelection algorithm)
+│   └── Tsv.ts                 (clipboard tab-separated-values codec)
 └── wire/
     └── parser.ts      (JSON wire-format parser)
 ```
@@ -59,6 +62,7 @@ slice 118, ONLY the pure-algorithm subsystems are ported:
 - ✓ MergedRegion + MergedRegionUtil (slice 118)
 - ✓ Wire-format parser (slice 118)
 - ✓ Cell-address parser + formula-ref extraction (slice 119)
+- ✓ Wire-protocol RPC types + TSV codec (slice 120)
 - ◯ Cell rendering (Phase 3.2)
 - ◯ Virtual scrolling (Phase 3.2 — critical path)
 - ◯ Selection (Phase 3.2)
