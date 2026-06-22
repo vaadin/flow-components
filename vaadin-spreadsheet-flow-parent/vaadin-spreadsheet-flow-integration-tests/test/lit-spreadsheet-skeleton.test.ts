@@ -263,3 +263,158 @@ describe('Spreadsheet skeleton — legacy spreadsheetWidget escape hatch (slice 
         expect(sheet.spreadsheetWidget).to.be.undefined;
     });
 });
+
+describe('Spreadsheet — render pipeline (slice 134)', () => {
+    function makeSheet(): Spreadsheet {
+        const host = document.createElement('div');
+        return new Spreadsheet(host);
+    }
+
+    it('creates + owns a SpreadsheetCellGrid sub-element on construction', () => {
+        const sheet = makeSheet();
+
+        const cellGrid = sheet.getCellGrid();
+        expect(cellGrid).to.not.be.undefined;
+        expect(cellGrid.tagName.toLowerCase()).to.equal(
+            'vaadin-spreadsheet-internal-cell-grid'
+        );
+    });
+
+    it('appends the cell-grid to the host element', () => {
+        const host = document.createElement('div');
+        const sheet = new Spreadsheet(host);
+
+        expect(host.children).to.have.length(1);
+        expect(host.firstElementChild).to.equal(sheet.getCellGrid());
+    });
+
+    it('buildRenderState returns a viewport that covers the visible range', () => {
+        const sheet = makeSheet();
+        // Configure a small sheet: 10x10 with uniform sizes.
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        // Row heights are in POINTS; 15pt × 96/72 = 20px.
+        sheet.setRowH(new Array(10).fill(15));
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 80,
+        });
+
+        // 200px / 50px = 4 columns. Loop fills lastColumnPosition until
+        // it crosses the threshold; at scrollLeft=0 + viewport 200, this
+        // means lastColumnIndex satisfies lastColumnPosition >= 200.
+        expect(state.viewport.firstColumnIndex).to.equal(1);
+        expect(state.viewport.lastColumnIndex).to.be.greaterThanOrEqual(4);
+        expect(state.viewport.firstRowIndex).to.equal(1);
+        expect(state.viewport.lastRowIndex).to.be.greaterThanOrEqual(4);
+    });
+
+    it('buildRenderState populates colX, rowY, widths, heights arrays for visible range', () => {
+        const sheet = makeSheet();
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]); // 20px each at 96 ppi
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 100,
+            viewportHeight: 40,
+        });
+
+        // colX[0] should be 0 (firstColumnPosition with no freeze + no scroll).
+        expect(state.colX[0]).to.equal(0);
+        // Each colWidth should be 50.
+        expect(state.colWidths[0]).to.equal(50);
+        // rowY[0] = 0; rowHeights[0] = 20 (15pt → 20px at 96 ppi).
+        expect(state.rowY[0]).to.equal(0);
+        expect(state.rowHeights[0]).to.equal(20);
+        // colX[1] = 50 (cumulative).
+        if (state.colX.length > 1) {
+            expect(state.colX[1]).to.equal(50);
+        }
+    });
+
+    it('buildRenderState passes through stored cellData', () => {
+        const sheet = makeSheet();
+        sheet.setRows(3);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15]);
+
+        sheet.updateBottomRightCellValues([
+            {
+                col: 1,
+                row: 1,
+                value: 'A1',
+                cellStyle: 'cs0',
+                locked: false,
+                needsMeasure: false,
+                isPercentage: false,
+            },
+        ]);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 80,
+        });
+
+        expect(state.cellData.get('col1 row1')?.value).to.equal('A1');
+    });
+
+    it('applyRenderState pushes a fresh renderState to the cell-grid', () => {
+        const sheet = makeSheet();
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        const before = sheet.getCellGrid().renderState;
+        sheet.applyRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 100,
+            viewportHeight: 40,
+        });
+        const after = sheet.getCellGrid().renderState;
+
+        // A fresh object should have been assigned (not the empty default).
+        expect(after).to.not.equal(before);
+        expect(after.viewport.lastColumnIndex).to.be.greaterThan(0);
+    });
+
+    it('buildRenderState honors hiddenRowIndexes (height 0)', () => {
+        const sheet = makeSheet();
+        sheet.setRows(5);
+        sheet.setCols(2);
+        sheet.setColW([50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHiddenRowIndexes([2]); // row 2 hidden
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 100,
+            viewportHeight: 100,
+        });
+
+        // rowHeights array, indexed by (row - firstRowIndex):
+        // row 1 → index 0 → 20px
+        // row 2 → index 1 → 0 (hidden)
+        // row 3 → index 2 → 20px
+        expect(state.rowHeights[0]).to.equal(20);
+        expect(state.rowHeights[1]).to.equal(0);
+        if (state.rowHeights.length > 2) {
+            expect(state.rowHeights[2]).to.equal(20);
+        }
+    });
+});

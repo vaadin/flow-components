@@ -17,6 +17,15 @@ import type {
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import { selectSingleCell, type SelectionState } from './state/SelectionState.js';
+import {
+    computeViewportBounds,
+    FALLBACK_PPI,
+    getDefaultRowHeightPx,
+    convertPointsToPixel,
+} from './algorithms/ViewportMath.js';
+import { toKey } from './algorithms/CellKeys.js';
+import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
+import type { CellGridRenderState } from './elements/types.js';
 
 /**
  * The new Spreadsheet client class — the replacement for the
@@ -148,8 +157,154 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private callbacks: Record<string, (event: unknown) => void> = {};
 
+    /**
+     * Cells currently known to the client, keyed by
+     * {@code toKey(col, row)}. Populated by the
+     * {@code update*CellValues} RPC methods (slice 134 wires the
+     * accessors; the methods themselves stay TODO until later in
+     * Phase 3.2 — the connector still needs to dispatch per-quadrant).
+     */
+    private cellDataByKey: Map<string, CellData> = new Map();
+
+    /** The cell-grid sub-element. Created in the constructor + appended to the host. */
+    private readonly cellGrid: SpreadsheetCellGrid;
+
     constructor(host: HTMLElement) {
         this.host = host;
+        this.cellGrid = new SpreadsheetCellGrid();
+        this.host.appendChild(this.cellGrid);
+    }
+
+    // ====================================================================
+    // Render pipeline (slice 134) — compose `CellGridRenderState` from
+    // current state + push to the cell-grid sub-element. The full
+    // event-driven trigger flow (scroll handler → applyRenderState)
+    // wires up when the wrapper flips imports in Phase 3.6.
+    // ====================================================================
+
+    /**
+     * Recompute the visible viewport + push a fresh
+     * {@code CellGridRenderState} to the cell-grid sub-element.
+     *
+     * The connector calls this in response to scroll events, viewport
+     * resize, or any state change that affects rendering (data updates,
+     * style changes, selection moves). Slice 134 ships the composition
+     * + push; slice 135+ extend each branch (styling, selection,
+     * merged-cell overlays, frozen panes).
+     *
+     * @param opts.scrollLeft Horizontal scroll offset in pixels.
+     * @param opts.scrollTop Vertical scroll offset in pixels.
+     * @param opts.viewportWidth Viewport pixel width.
+     * @param opts.viewportHeight Viewport pixel height.
+     * @param opts.ppi Pixels-per-inch for point→pixel row-height
+     *                 conversion. Defaults to 96 (Excel's standard).
+     *                 Callers that have measured the host's actual PPI
+     *                 should pass it for visual stability across
+     *                 high-DPR displays.
+     */
+    applyRenderState(opts: {
+        scrollLeft: number;
+        scrollTop: number;
+        viewportWidth: number;
+        viewportHeight: number;
+        ppi?: number;
+    }): void {
+        this.cellGrid.renderState = this.buildRenderState(opts);
+    }
+
+    /**
+     * Pure: build a {@code CellGridRenderState} from the current
+     * internal state + the given scroll / viewport / PPI. Exposed for
+     * tests to call without going through the DOM (the public
+     * {@link applyRenderState} writes the result to the cell-grid;
+     * this lets tests inspect it directly).
+     */
+    buildRenderState(opts: {
+        scrollLeft: number;
+        scrollTop: number;
+        viewportWidth: number;
+        viewportHeight: number;
+        ppi?: number;
+    }): CellGridRenderState {
+        const ppi = opts.ppi ?? FALLBACK_PPI;
+        const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
+        const hiddenRowSet = new Set(this.hiddenRowIndexes);
+
+        const definedRowsLength = this.rowHeights.length;
+        const rowHeightForIndex = (row: number): number => {
+            if (hiddenRowSet.has(row)) {
+                return 0;
+            }
+            if (row > definedRowsLength) {
+                return defaultRowHeightPx;
+            }
+            return convertPointsToPixel(this.rowHeights[row - 1], ppi);
+        };
+
+        const hiddenColSet = new Set(this.hiddenColumnIndexes);
+        const colWidthForIndex = (col: number): number => {
+            if (hiddenColSet.has(col)) {
+                return 0;
+            }
+            if (col > this.colWidths.length) {
+                return this.defColWidth;
+            }
+            return this.colWidths[col - 1];
+        };
+
+        const viewport = computeViewportBounds({
+            scrollLeft: opts.scrollLeft,
+            scrollTop: opts.scrollTop,
+            scrollViewWidth: opts.viewportWidth,
+            scrollViewHeight: opts.viewportHeight,
+            horizontalSplitPosition: this.horizontalSplitPosition,
+            verticalSplitPosition: this.verticalSplitPosition,
+            columnBufferSize: this.columnBufferSize,
+            rowBufferSize: this.rowBufferSize,
+            maxColumns: this.cols,
+            maxRows: this.rows,
+            definedRows: definedRowsLength,
+            defaultRowHeightPx,
+            getColWidthActual: colWidthForIndex,
+            getRowHeight: rowHeightForIndex,
+        });
+
+        // Build per-visible-index arrays for colX, rowY, widths, heights.
+        const colX: number[] = [];
+        const colWidths: number[] = [];
+        let cumulativeX = viewport.firstColumnPosition;
+        for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+            const w = colWidthForIndex(col);
+            colX.push(cumulativeX);
+            colWidths.push(w);
+            cumulativeX += w;
+        }
+
+        const rowY: number[] = [];
+        const rowHeights: number[] = [];
+        let cumulativeY = viewport.firstRowPosition;
+        for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+            const h = rowHeightForIndex(row);
+            rowY.push(cumulativeY);
+            rowHeights.push(h);
+            cumulativeY += h;
+        }
+
+        return {
+            viewport,
+            cellData: this.cellDataByKey,
+            colX,
+            rowY,
+            colWidths,
+            rowHeights,
+            mergedRegions: this.mergedRegions,
+            selection: this.selection,
+        };
+    }
+
+    /** Test-only accessor: the cell-grid sub-element this connector owns. */
+    getCellGrid(): SpreadsheetCellGrid {
+        return this.cellGrid;
     }
 
     // ====================================================================
@@ -180,17 +335,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // 12 explicit RPC methods (server→client action messages)
     // ====================================================================
 
-    updateBottomRightCellValues(_cellData: CellData[]): void {
-        // TODO Phase 3.2 — update the main viewport's cell DOM.
+    updateBottomRightCellValues(cellData: CellData[]): void {
+        this.storeCellData(cellData);
     }
-    updateTopLeftCellValues(_cellData: CellData[]): void {
-        // TODO Phase 3.2 — update the top-left frozen quadrant.
+    updateTopLeftCellValues(cellData: CellData[]): void {
+        this.storeCellData(cellData);
     }
-    updateTopRightCellValues(_cellData: CellData[]): void {
-        // TODO Phase 3.2 — update the top-right frozen quadrant.
+    updateTopRightCellValues(cellData: CellData[]): void {
+        this.storeCellData(cellData);
     }
-    updateBottomLeftCellValues(_cellData: CellData[]): void {
-        // TODO Phase 3.2 — update the bottom-left frozen quadrant.
+    updateBottomLeftCellValues(cellData: CellData[]): void {
+        this.storeCellData(cellData);
+    }
+
+    /**
+     * Stash each cell's data into {@link cellDataByKey} keyed by
+     * its wire-format key. The Phase 3.2-cont. quadrant-aware rendering
+     * (top-left / top-right / bottom-left / bottom-right cell-grid
+     * sub-trees) can iterate the map at render time; until then, all
+     * four quadrants share one map (the cell-grid's renderState picks
+     * out the visible subset).
+     */
+    private storeCellData(cellData: CellData[]): void {
+        for (const cell of cellData) {
+            this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
+        }
     }
     updateFormulaBar(_possibleName: string, _col: number, _row: number): void {
         // TODO Phase 3.3 — update formula bar display + named-range dropdown.
