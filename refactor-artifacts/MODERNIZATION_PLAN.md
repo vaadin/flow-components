@@ -394,57 +394,64 @@ with try/catch would *expand* duplication, not reduce it.
 
 **Test impact**: zero, no change recommended.
 
-### Step 9 — DTO consolidation (the real Tier 2 work)
+### Step 9 — DTO wire-format characterization tests ✓ slice 106 (sharpened)
 
-The 6 parallel-DTO pairs are the central target. Two paths, recorded
-during the original plan; the scoping investigation sharpens them:
+**Original framing (rejected after deeper look)**: "Generate
+client-side `@JsType` copies from the server-side originals via an
+annotation processor — 9a". The premise was that the DTO pairs are
+mirror copies of each other and only their build mechanism needs to
+change.
 
-- **9a — generate one side from the other (lower risk, ship-ready)**.
-  The server-side classes are the source of truth. Add a build step
-  that emits the client-side `@JsType` versions from them.
-  Concretely:
-  - 6 DTOs × ~10 fields each = 60 fields to keep in lockstep.
-  - The fields are public, the equality semantics differ in some
-    cases (e.g. `CellData.equals` is by-position). The generator
-    must preserve method bodies, not just field declarations.
-  - Implementation option A: an annotation processor that scans
-    server-side classes annotated `@WireMirror` and emits the
-    client-side `@JsType` copy at build time. Pros: type-safe,
-    fails at compile time. Cons: new annotation processor to
-    maintain.
-  - Implementation option B: a Maven plugin or Maven exec step
-    that copies server-side files into the client module with a
-    package-rewrite + `@JsType` annotation injection. Pros:
-    simpler, no Java tooling. Cons: text-based, brittle to
-    formatting.
-  - Suggested choice: **option A**, an `@WireMirror` annotation
-    processor that emits the client-side file at every server-side
-    edit. Bias toward `option B` only if the annotation processor
-    proves unwieldy in the GWT build pipeline.
+**Reality found by the slice-106 investigation**: the 6 DTO pairs are
+NOT mirror copies. They have intentional structural differences:
 
-- **9b — drop typed client-side copies, switch GWT widget to consume
-  `JsonObject` directly (higher risk, higher payoff)**. The wire
-  bytes don't change because JSON is JSON. The GWT widget would read
-  `obj.getString("value")` instead of `obj.value`. Pros: drops 6 copy
-  files and the JsInterop dependency. Cons: every site in the GWT
-  client that reads a DTO field changes. The audit must enumerate
-  read sites before estimating cost.
+| DTO | Server side | Client side |
+|---|---|---|
+| `CellData` | Jackson `@JsonInclude` on `value` | `@JsType`, `@SuppressWarnings("serial")` |
+| `MergedRegion` | plain POJO | `@JsIgnore` on 2 methods, `@JsType` |
+| `OverlayInfo` | `Type` **enum** (IMAGE, COMPONENT) | `String` constants `"IMAGE"` / `"COMPONENT"` |
+| `SpreadsheetActionDetails` | `int iconNodeId`, `int type` | `String iconNodeId`, `int type` |
+| `PopupButtonState` | plain POJO | extends **`AbstractComponentState`** (Vaadin 8 base) |
+| `GroupingData` | plain POJO | `@JsType`, `@JsIgnore` on constructors |
 
-**Slice shape for 9a**: single PR. New `@WireMirror` annotation +
-processor + generated-sources directory in the client module. The
-6 existing client copies are deleted; the regenerated files are
-byte-identical so the wire is unchanged. The acceptance gate is the
-existing `SpreadsheetHistoryManagerPayloadTest` snapshot — must pass
-unchanged before and after.
+The wire format works because Jackson is tolerant: enums serialize as
+their `name()` strings (which match the client's String constants);
+`int` serializes as JSON numbers (which the GWT client coerces to
+String where needed). A naive "generate client from server" pass
+would force the POJO shape on both sides and break the cross-type
+serialization the wire currently relies on.
 
-**Slice shape for 9b**: 6 sub-slices, one DTO at a time. Each
-sub-slice converts the corresponding GWT-side reads from
-`obj.fieldName` to `obj.getString("fieldName")` etc. (and removes
-the typed mirror class). Each sub-slice must keep the snapshot test
-green. Total scope ~6 sessions; significantly higher than 9a.
+**Executed instead**: 8 per-DTO Jackson wire-format characterization
+tests in `DtoWireFormatTest` pinning the exact JSON bytes
+`Serializer.serialize(...)` produces for each DTO. Any future
+field-rename, default-value change, or `@JsonInclude` edit on the
+server side fails the test at PR time — before it would silently
+drift the wire and break the GWT client.
 
-**Recommend 9a now; 9b deferred to Tier 3 prep** (since dropping
-typed mirrors is partial overlap with the GWT-widget rewrite).
+**Coverage**: `cellData_allNonDefaultFields`, `cellData_freshInstance`
+(pins NON_DEFAULT + `@JsonInclude` interactions), `mergedRegion`,
+`overlayInfo_freshInstance_emitsTypeIMAGE` (pins enum-not-omitted
+behavior despite field-initializer), `overlayInfo_componentVariant`,
+`spreadsheetActionDetails` (pins int-on-server vs String-on-client
+wire compatibility), `popupButtonState_serializesOnlyServerSideFields`
+(pins that the server's POJO doesn't accidentally adopt the client's
+AbstractComponentState shape), `groupingData`.
+
+**Two Jackson behaviors load-bearing for the test class** — pinned
+implicitly by every assertion: (1) fields serialize in **alphabetical
+order**, not declaration order; (2) global `NON_DEFAULT` inclusion
+compares to the **type default** (null / 0 / false), NOT to the
+field-initializer value. A `cellStyle = "cs0"` initializer still
+appears on the wire because `"cs0" != null`.
+
+**Test impact**: +8 tests (1050 → 1058). Wire bytes unchanged.
+
+### Step 9b — drop typed client-side copies, switch GWT widget to `JsonObject` (deferred)
+
+The original 9b framing remains: drop the GWT-side typed mirrors
+entirely and have the GWT widget read `obj.getString("value")`
+directly. Defers to Tier 3 because it partially overlaps with the
+GWT-widget rewrite.
 
 ### Step 10 — ~~Vaadin 8 RPC → Element API~~ ✓ (already done)
 
@@ -463,6 +470,17 @@ RPC. They could be collapsed/renamed as a cosmetic cleanup (slice
 9c) but no migration is needed.
 
 **No work in Tier 2.** Optional cosmetic cleanup deferred.
+
+### Step 11a — Delete unused server-side `SpreadsheetState.java` ✓ slice 105
+
+Done. The class was defined in `shared/SpreadsheetState.java` (66
+public fields) but never instantiated anywhere on the server side
+(verified via grep across `src/main` + `src/test`). Pure dead code.
+Deletion: suite 1050/0/0/4 unchanged.
+
+The client-side `vaadin-spreadsheet-flow-client/.../shared/SpreadsheetState.java`
+stays — it's still load-bearing for the GWT connector. That side is
+handled by Step 11b.
 
 ### Step 11 — `SpreadsheetState` cleanup (replaces "complete MirroredProperty rollout")
 
@@ -503,20 +521,22 @@ GWT-side audit is run.
 | # | Step | State | Estimate |
 |---|------|-------|----------|
 | 8 | `Serializer.java` audit | ✓ done (audited; keep as-is) | done |
-| 9a | DTO consolidation: `@WireMirror` annotation processor | open | 1 session |
+| 9 | Per-DTO wire-format characterization tests | ✓ slice 106 (sharpened from 9a generator) | done |
 | 9b | Drop typed client mirrors → JsonObject reads | deferred to Tier 3 prep | 6 sessions |
 | 9c | Rename/collapse `*ClientRpc` / `*ServerRpc` façade interfaces | cosmetic, optional | 0.5 session |
 | 10 | Vaadin 8 RPC → Element API | ✓ already done | done |
-| 11a | Delete unused server-side `SpreadsheetState` | open | 0.5 session |
+| 11a | Delete unused server-side `SpreadsheetState` | ✓ slice 105 | done |
 | 11b | Drop client-side `SpreadsheetState` (if redundant) | needs GWT audit | 1–2 sessions |
 
-**Total open Tier 2 work**: roughly 2 focused sessions for the safe
-slices (9a + 11a), plus 1–2 more if 11b's audit shows redundancy.
-9b is correctly held back as a Tier 3 prerequisite.
+**Tier 2 status after slices 104–106**: the safe-in-isolation work is
+done (audit + dead-code deletion + wire-format snapshots). Remaining
+items (9b, 9c, 11b) all touch the GWT client module and are
+correctly deferred to Tier 3 prep.
 
-**The wire format stays byte-identical** across all of these — the
-existing `SpreadsheetHistoryManagerPayloadTest` snapshot is the
-acceptance gate for each slice.
+**The wire format stays byte-identical** across all completed Tier 2
+slices — `SpreadsheetHistoryManagerPayloadTest` (component-snapshot)
+and `DtoWireFormatTest` (per-DTO snapshots) jointly form the
+acceptance gate.
 
 ## Tier 3 — TS/Lit client rewrite
 
