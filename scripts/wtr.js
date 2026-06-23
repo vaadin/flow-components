@@ -79,8 +79,16 @@ async function runTests() {
         fs.writeFileSync(packageJson, '{}');
       }
 
+      // Build the frontend with pnpm and let @vaadin/* web component bumps
+      // bypass the frontend package age check. Avoids failures when running
+      // checks for just-released @vaadin packages.
+      fs.writeFileSync(
+        `${itFolder}/pnpm-workspace.yaml`,
+        "minimumReleaseAgeExclude:\n  - '@vaadin/*'\n"
+      );
+
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
+      execSync(`mvn -DskipTests -Dvaadin.pnpm.enable flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
