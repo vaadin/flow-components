@@ -24,7 +24,6 @@ public enum ProgressBarVariant implements ThemeVariant {
     LUMO_CONTRAST("contrast"),
     LUMO_ERROR("error"),
     LUMO_SUCCESS("success"),
-    AURA_WARNING("warning"),
     ERROR("error"),
     SUCCESS("success");
 
