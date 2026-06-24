@@ -96,7 +96,7 @@
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
         <failIfNoTests>false</failIfNoTests>
-        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
+        <vaadin.pnpm.enable>true</vaadin.pnpm.enable>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName/>
