@@ -15,10 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import org.junit.Assert;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -35,7 +39,10 @@ public class LazyComboBoxFilterIT extends AbstractComponentIT {
         comboBox.openPopup();
 
         WebElement query = findElement(By.id("query"));
-        Assert.assertTrue(query.getText().contains("Filter: 1"));
-        Assert.assertTrue(query.getText().contains("Count: 10"));
+
+        WebDriverWait wait = new WebDriverWait(driver,
+                Duration.of(2, ChronoUnit.SECONDS));
+        wait.until(ExpectedConditions.textToBePresentInElement(query,
+                "Filter: 1 Count: 10"));
     }
 }
