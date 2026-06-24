@@ -70,7 +70,6 @@ describe('grid connector - row details', () => {
   describe('updateFlatData', () => {
     it('should open details for updated items', async () => {
       grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
-      await nextFrame();
       expect(getDetailsCell(grid, 0)!.hidden).to.be.false;
     });
 
