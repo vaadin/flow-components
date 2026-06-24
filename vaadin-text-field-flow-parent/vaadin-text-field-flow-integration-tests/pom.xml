@@ -149,6 +149,7 @@
                         <artifactId>flow-maven-plugin</artifactId>
                         <configuration>
                             <frontendDirectory>./frontend</frontendDirectory>
+                            <generateBundle>false</generateBundle>
                         </configuration>
                     </plugin>
                 </plugins>
