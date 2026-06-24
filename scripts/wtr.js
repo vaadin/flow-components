@@ -80,7 +80,7 @@ async function runTests() {
       );
 
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests -Dvaadin.pnpm.enable flow:prepare-frontend flow:build-frontend`, {
+      execSync(`mvn flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
         stdio: 'inherit'
       });

@@ -291,7 +291,7 @@ jobs:
         if: matrix.type == 'war'
         run: |
           mvn package -pl integration-tests \
-            -Dvaadin.pnpm.enable -Drun-it -Drelease \
+            -Drun-it -Drelease \
             -Dvaadin.productionMode -Dvaadin.force.production.build=true \
             -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 
