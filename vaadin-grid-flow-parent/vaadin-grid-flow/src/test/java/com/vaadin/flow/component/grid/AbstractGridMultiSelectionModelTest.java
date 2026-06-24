@@ -39,71 +39,67 @@ class AbstractGridMultiSelectionModelTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
-    private Set<String> selected;
-    private Set<String> deselected;
+    private Set<String> refreshed;
     private Grid<String> grid;
 
     @BeforeEach
     void setup() {
-        selected = new HashSet<>();
-        deselected = new HashSet<>();
-        grid = new Grid<String>() {
-            @Override
-            void doClientSideSelection(Set items) {
-                selected.addAll(items);
-            }
-
-            @Override
-            void doClientSideDeselection(Set<String> items) {
-                deselected.addAll(items);
-            }
-
-            @Override
-            boolean isInActiveRange(String item) {
-                // Updates are sent only for items loaded by client
-                return true;
-            }
-        };
-
+        refreshed = new HashSet<>();
+        grid = new Grid<>();
         ui.add(grid);
     }
 
-    @Test
-    void select_singleItemSignature_sendToClientSide() {
+    /**
+     * Sets up a multi-select grid with two loaded items and starts capturing
+     * the items that get refreshed (re-sent to the client) afterwards.
+     */
+    private void setupLoadedMultiSelectGrid() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
-        grid.select("foo");
-        Assertions.assertEquals(1, selected.size());
-        Assertions.assertEquals("foo", selected.iterator().next());
+        // Load the items so they are in the active range and thus eligible to
+        // be refreshed
+        grid.scrollToIndex(0);
+        ui.fakeClientCommunication();
+
+        grid.getDataProvider().addDataProviderListener(event -> {
+            if (event instanceof DataChangeEvent.DataRefreshEvent<String> refreshEvent) {
+                refreshed.add(refreshEvent.getItem());
+            }
+        });
     }
 
     @Test
-    void select_singleItemSignature_selectFormClient_dontSendToClientSide() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
+    void select_refreshesItemOnClient() {
+        setupLoadedMultiSelectGrid();
+        grid.select("foo");
+        Assertions.assertEquals(Set.of("foo"), refreshed);
+    }
+
+    @Test
+    void selectFromClient_doesNotRefreshOnClient() {
+        setupLoadedMultiSelectGrid();
         grid.getSelectionModel().selectFromClient("foo");
-        Assertions.assertEquals(0, selected.size());
+        Assertions.assertTrue(refreshed.isEmpty());
     }
 
     @Test
-    void deselect_singleItemSignature_sendToClientSide() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
+    void deselect_refreshesItemOnClient() {
+        setupLoadedMultiSelectGrid();
         grid.select("foo");
+        refreshed.clear();
 
         grid.deselect("foo");
-        Assertions.assertEquals(1, deselected.size());
-        Assertions.assertEquals("foo", deselected.iterator().next());
+        Assertions.assertEquals(Set.of("foo"), refreshed);
     }
 
     @Test
-    void singleItemSignature_deselectFormClient_dontSendToClientSide() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.setItems("foo", "bar");
+    void deselectFromClient_doesNotRefreshOnClient() {
+        setupLoadedMultiSelectGrid();
         grid.select("foo");
+        refreshed.clear();
 
         grid.getSelectionModel().deselectFromClient("foo");
-        Assertions.assertEquals(0, deselected.size());
+        Assertions.assertTrue(refreshed.isEmpty());
     }
 
     @Test

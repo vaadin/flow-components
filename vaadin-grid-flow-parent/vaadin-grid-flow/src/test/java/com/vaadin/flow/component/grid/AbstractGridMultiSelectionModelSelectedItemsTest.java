@@ -54,13 +54,7 @@ class AbstractGridMultiSelectionModelSelectedItemsTest {
             }
         };
 
-        grid = new Grid<>() {
-            @Override
-            boolean isInActiveRange(String item) {
-                // Updates are sent only for items loaded by client
-                return true;
-            }
-        };
+        grid = new Grid<>();
         grid.setItems(dataProvider);
         grid.setSelectionMode(SelectionMode.MULTI);
 

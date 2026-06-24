@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -77,9 +76,15 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (isSelected(item)) {
             return;
         }
+        T oldItem = selectedItem;
         doSelect(item, false);
 
-        getGrid().doClientSideSelection(Collections.singleton(item));
+        if (oldItem != null) {
+            getGrid().getDataProvider().refreshItem(oldItem);
+        }
+        if (item != null) {
+            getGrid().getDataProvider().refreshItem(item);
+        }
     }
 
     @Override

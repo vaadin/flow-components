@@ -117,6 +117,18 @@ describe('grid connector - selection', () => {
       expect(grid.selectedItems).to.be.empty;
     });
 
+    it('should apply selection from a refreshed item', async () => {
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo', selected: true }]);
+      expect(grid.selectedItems.length).to.equal(1);
+      expect(grid.selectedItems[0].key).to.equal('0');
+    });
+
+    it('should apply deselection from a refreshed item', async () => {
+      getBodyCellContent(grid, 0, 0)!.click();
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo' }]);
+      expect(grid.selectedItems).to.be.empty;
+    });
+
     it('should avoid another re-render on items update', async () => {
       const items = [{ key: '0', name: 'foo', selected: true }];
       setRootItems(grid.$connector, items);

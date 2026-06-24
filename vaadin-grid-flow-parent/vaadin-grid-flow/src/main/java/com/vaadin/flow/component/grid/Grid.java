@@ -3268,46 +3268,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
-    void doClientSideSelection(Set<T> items) {
-        callSelectionFunctionForItems("doSelection", items);
-    }
-
-    void doClientSideDeselection(Set<T> items) {
-        callSelectionFunctionForItems("doDeselection", items);
-    }
-
-    boolean isInActiveRange(T item) {
-        return getDataCommunicator().getKeyMapper().has(item);
-    }
-
-    private void callSelectionFunctionForItems(String function, Set<T> items) {
-        if (items.isEmpty()) {
-            return;
-        }
-        ArrayNode jsonArray = JacksonUtils.createArrayNode();
-        for (T item : items) {
-            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
-                    : null;
-            jsonArray.add(jsonObject);
-        }
-
-        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
-                false);
-    }
-
-    private JsonNode generateJsonForSelection(T item) {
-        ObjectNode json = JacksonUtils.createObjectNode();
-        json.put("key", getDataCommunicator().getKeyMapper().key(item));
-        return json;
-    }
-
-    private void callJsFunctionBeforeClientResponse(String functionName,
-            Serializable... arguments) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> getElement()
-                        .callJsFunction(functionName, arguments)));
-    }
-
     /**
      * Schedules a scroll-related action to be executed before the next client
      * response. Cancels any previously scheduled scroll action, ensuring that

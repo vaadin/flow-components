@@ -355,6 +355,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
+      preventRowUpdates(() => {
+        if (item.selected) {
+          grid.$connector.doSelection([item]);
+        } else if (selectedKeys[item.key]) {
+          grid.$connector.doDeselection([item]);
+        }
+      });
+
       grid.__updateVisibleRows(index, index);
     });
   };

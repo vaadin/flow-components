@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 
 class AbstractGridSingleSelectionModelTest {
@@ -197,6 +199,45 @@ class AbstractGridSingleSelectionModelTest {
         selectionModel.select(entity2);
         Assertions.assertEquals(Set.of(entity2),
                 selectionModel.getSelectedItems());
+    }
+
+    @Test
+    void select_refreshesOldAndNewItem() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        Set<TestEntity> refreshed = captureRefreshedItems();
+
+        // First selection only refreshes the newly selected item
+        selectionModel.select(entity1);
+        Assertions.assertEquals(Set.of(entity1), refreshed);
+
+        // Selecting another item refreshes both the previously and the newly
+        // selected item
+        refreshed.clear();
+        selectionModel.select(entity2);
+        Assertions.assertEquals(Set.of(entity1, entity2), refreshed);
+    }
+
+    @Test
+    void selectFromClient_doesNotRefresh() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        Set<TestEntity> refreshed = captureRefreshedItems();
+
+        selectionModel.selectFromClient(entity1);
+        Assertions.assertTrue(refreshed.isEmpty());
+    }
+
+    private Set<TestEntity> captureRefreshedItems() {
+        Set<TestEntity> refreshed = new HashSet<>();
+        grid.getDataProvider().addDataProviderListener(event -> {
+            if (event instanceof DataChangeEvent.DataRefreshEvent<TestEntity> refreshEvent) {
+                refreshed.add(refreshEvent.getItem());
+            }
+        });
+        return refreshed;
     }
 
     public static class TestEntity {

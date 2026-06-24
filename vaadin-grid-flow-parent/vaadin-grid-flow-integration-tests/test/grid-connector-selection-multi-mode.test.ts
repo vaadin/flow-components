@@ -126,6 +126,18 @@ describe('grid connector - selection – multi mode', () => {
       expect(grid.selectedItems[1].key).to.equal('1');
     });
 
+    it('should apply selection from a refreshed item', () => {
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo', selected: true }]);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+      expect(grid.selectedItems[0].key).to.equal('0');
+    });
+
+    it('should apply deselection from a refreshed item', () => {
+      grid.$connector.doSelection([{ key: '0' }], false);
+      grid.$connector.updateFlatData([{ key: '0', name: 'foo' }]);
+      expect(grid.selectedItems).to.be.empty;
+    });
+
     it('should not have duplicates in selectedItems after same item selection', () => {
       grid.$connector.doSelection([{ key: '0' }], false);
       grid.$connector.doSelection([{ key: '0' }], false);

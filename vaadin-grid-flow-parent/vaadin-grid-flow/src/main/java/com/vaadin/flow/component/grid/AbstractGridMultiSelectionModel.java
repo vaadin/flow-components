@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -519,10 +519,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         removedItems.keySet().forEach(selected::remove);
         selected.putAll(addedItems);
 
-        sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
-                getGrid()::doClientSideSelection);
-        sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
-                getGrid()::doClientSideDeselection);
+        refreshActiveItems(addedItems.values());
+        refreshActiveItems(removedItems.values());
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
@@ -541,21 +539,20 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 Map::putAll);
     }
 
-    private void sendSelectionUpdate(Set<T> updatedItems,
-            Consumer<Set<T>> clientSideUpdater) {
-        // Avoid sending updates for the items that the client doesn't have.
-        // This is important for the performance of e.g. selectAll.
-        Set<T> activeItems = updatedItems.stream()
-                .filter(getGrid()::isInActiveRange).collect(Collectors.toSet());
-        if (activeItems.isEmpty()) {
-            return;
-        }
-
-        clientSideUpdater.accept(activeItems);
-    }
-
     private Object getItemId(T item) {
         return getGrid().getDataCommunicator().getDataProvider().getId(item);
+    }
+
+    private void refreshActiveItems(Collection<T> items) {
+        DataCommunicator<T> dataCommunicator = getGrid().getDataCommunicator();
+
+        for (T item : items) {
+            // Only refresh items the client has loaded. This is important for
+            // the performance of e.g. selectAll.
+            if (dataCommunicator.getKeyMapper().has(item)) {
+                getGrid().getDataProvider().refreshItem(item);
+            }
+        }
     }
 
     private long getDataProviderSize() {
