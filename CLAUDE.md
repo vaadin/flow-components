@@ -76,7 +76,7 @@ mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integr
 mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests -Dit.test='{file-pattern}' -DskipUnitTests
 
 # Start integration test server for a component
-mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
+mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
 ```
 
 **Notes on test commands**:
