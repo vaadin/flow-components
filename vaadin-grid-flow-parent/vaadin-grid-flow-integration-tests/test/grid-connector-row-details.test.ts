@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import { getBodyCellContent, setRootItems } from './shared.js';
+import { getDetailsCell, getBodyCellContent, setRootItems } from './shared.js';
 import { init } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
@@ -15,6 +15,10 @@ describe('grid connector - row details', () => {
     `);
 
     init(grid);
+
+    grid.rowDetailsRenderer = (root) => {
+      root.textContent = 'details';
+    };
 
     setRootItems(grid.$connector, [
       { key: '0', name: 'foo' },
@@ -46,8 +50,10 @@ describe('grid connector - row details', () => {
       { key: '0', name: 'foo', detailsOpened: true },
       { key: '1', name: 'bar' }
     ]);
-    expect(grid.detailsOpenedItems).to.have.lengthOf(1);
-    expect(grid.detailsOpenedItems[0].key).to.equal('0');
+    await nextFrame();
+
+    expect(getDetailsCell(grid, 0)!.hidden).to.be.false;
+    expect(getDetailsCell(grid, 1)!.hidden).to.be.true;
   });
 
   it('should close details for items closed from data', async () => {
@@ -57,30 +63,21 @@ describe('grid connector - row details', () => {
     ]);
 
     grid.$connector.set(0, [{ key: '0', name: 'foo' }]);
-    expect(grid.detailsOpenedItems).to.be.empty;
-  });
-
-  it('should close details for cleared items', async () => {
-    setRootItems(grid.$connector, [
-      { key: '0', name: 'foo', detailsOpened: true },
-      { key: '1', name: 'bar' }
-    ]);
-
-    grid.$connector.clear(0, 2);
-    expect(grid.detailsOpenedItems).to.be.empty;
+    expect(getDetailsCell(grid, 0)!.hidden).to.be.true;
+    expect(getDetailsCell(grid, 1)!.hidden).to.be.true;
   });
 
   describe('updateFlatData', () => {
-    it('should open details for updated items', () => {
+    it('should open details for updated items', async () => {
       grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
-      expect(grid.detailsOpenedItems).to.have.lengthOf(1);
-      expect(grid.detailsOpenedItems[0].key).to.equal('0');
+      await nextFrame();
+      expect(getDetailsCell(grid, 0)!.hidden).to.be.false;
     });
 
     it('should close details for updated items', () => {
       grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
       grid.$connector.updateFlatData([{ key: '0', name: 'foo' }]);
-      expect(grid.detailsOpenedItems).to.be.empty;
+      expect(getDetailsCell(grid, 0)!.hidden).to.be.true;
     });
   });
 
