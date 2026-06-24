@@ -316,14 +316,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
-  function updateItemDetails(item) {
-    if (item.detailsOpened) {
-      grid.openItemDetails(item);
-    } else {
-      grid.closeItemDetails(item);
-    }
-  }
-
   grid.__updateRow = function (row, ...args) {
     if (preventRowUpdatesActive !== 0) {
       return;
@@ -341,8 +333,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     preventRowUpdates(() => {
       grid.$connector.doSelection(items.filter((item) => item.selected));
       grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
-
-      items.forEach(updateItemDetails);
     });
 
     grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
@@ -365,8 +355,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
-      preventRowUpdates(() => updateItemDetails(item));
-
       grid.__updateVisibleRows(index, index);
     });
   };
@@ -385,7 +373,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     preventRowUpdates(() => {
       grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
-      items.forEach((item) => grid.closeItemDetails(item));
     });
 
     rootCache.items.fill(undefined, index, index + length);
@@ -683,6 +670,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.isItemSelectable = (item) => {
     // If there is no selectable data, assume the item is selectable
     return item?.selectable === undefined || item.selectable;
+  };
+
+  grid._isDetailsOpened = function (item) {
+    return item?.detailsOpened ?? false;
   };
 
   function isRowFullyInViewport(row) {

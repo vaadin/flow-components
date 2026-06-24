@@ -153,12 +153,18 @@ export function getFooterCellContent(column: GridColumn): HTMLElement {
 }
 
 /**
- * Returns a cell in the grid body.
+ * Returns a row in the grid body.
+ */
+export function getBodyRow(grid: Grid, rowIndex: number): HTMLElement | null {
+  const row = [...grid.shadowRoot!.querySelectorAll('.row')].find((row) => (row as any).index === rowIndex);
+  return row as HTMLElement ?? null;
+}
+
+/**
+ * Returns a cell in a grid body row.
  */
 export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
-  const items = grid.shadowRoot!.querySelector(`#items`)!;
-
-  const row = [...items.children].find((row) => (row as any).index === rowIndex);
+  const row = getBodyRow(grid, rowIndex);
   if (!row) {
     return null;
   }
@@ -170,6 +176,13 @@ export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): 
   }).map(cell => cell as HTMLElement);
 
   return cellsInVisualOrder[columnIndex];
+}
+
+/**
+ * Returns the details cell in a grid body row.
+ */
+export function getDetailsCell(grid: Grid, rowIndex: number): HTMLElement | null {
+  return getBodyRow(grid, rowIndex)?.querySelector('.details-cell') ?? null;
 }
 
 /**
