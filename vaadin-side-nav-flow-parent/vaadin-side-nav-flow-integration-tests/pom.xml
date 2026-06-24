@@ -116,7 +116,7 @@
     </build>
     <profiles>
         <profile>
-            <id>build-frontend</id>
+            <id>frontend</id>
             <activation>
                 <property>
                     <name>!skipFrontend</name>
@@ -135,7 +135,7 @@
             </build>
         </profile>
         <profile>
-            <id>run-jetty</id>
+            <id>jetty</id>
             <activation>
                 <property>
                     <name>!skipJetty</name>
