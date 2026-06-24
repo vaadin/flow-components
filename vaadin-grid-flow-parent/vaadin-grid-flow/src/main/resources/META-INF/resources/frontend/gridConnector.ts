@@ -674,7 +674,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid._isDetailsOpened = function (item) {
     return item?.detailsOpened ?? false;
-  }
+  };
 
   function isRowFullyInViewport(row) {
     const rowRect = row.getBoundingClientRect();
