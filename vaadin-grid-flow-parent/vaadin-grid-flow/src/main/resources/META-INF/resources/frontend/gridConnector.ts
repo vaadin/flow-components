@@ -38,7 +38,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   let requestDebouncer;
   let requestedRange = null;
 
-  const validSelectionModes = ['SINGLE', 'NONE', 'MULTI'];
   let selectedKeys = {};
   let selectionMode = 'SINGLE';
 
@@ -331,14 +330,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
 
     Object.getPrototypeOf(this).__updateRow.call(this, row, ...args);
-
-    // since no row can be selected when selection mode is NONE
-    // if selectionMode is set to NONE, remove aria-selected attribute from the row
-    if (selectionMode === validSelectionModes[1]) {
-      // selectionMode === NONE
-      row.removeAttribute('aria-selected');
-      Array.from(row.children).forEach((cell) => cell.removeAttribute('aria-selected'));
-    }
   };
 
   grid.$connector.set = function (startIndex, items) {
@@ -423,41 +414,43 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.setSelectionMode = function (mode) {
-    if ((typeof mode === 'string' || mode instanceof String) && validSelectionModes.indexOf(mode) >= 0) {
-      selectionMode = mode;
-      selectedKeys = {};
-      grid.selectedItems = [];
-      grid.$connector.updateMultiSelectable();
-    } else {
-      throw 'Attempted to set an invalid selection mode';
+    selectionMode = mode;
+    selectedKeys = {};
+    grid.selectedItems = [];
+    grid.__a11yUpdateMutiSelectable();
+  };
+
+  grid.__a11yUpdateRowSelected = function (row, selected) {
+    if (selectionMode === 'NONE') {
+      [row, ...row.children].forEach((el) => el.removeAttribute('aria-selected'));
+      return;
     }
+
+    Object.getPrototypeOf(this).__a11yUpdateRowSelected.call(this, row, selected);
   };
 
   /*
    * Manage aria-multiselectable attribute depending on the selection mode.
    * see more: https://github.com/vaadin/web-components/issues/1536
    * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
-   * For selection mode SINGLE, set the aria-multiselectable attribute to false
    */
-  grid.$connector.updateMultiSelectable = function () {
+  grid.__a11yUpdateMutiSelectable = function () {
     if (!grid.$) {
       return;
     }
 
-    if (selectionMode === validSelectionModes[0]) {
-      grid.$.table.setAttribute('aria-multiselectable', false);
-      // For selection mode NONE, remove the aria-multiselectable attribute
-    } else if (selectionMode === validSelectionModes[1]) {
-      grid.$.table.removeAttribute('aria-multiselectable');
-      // For selection mode MULTI, set aria-multiselectable to true
-    } else {
-      grid.$.table.setAttribute('aria-multiselectable', true);
+    switch (selectionMode) {
+      case 'SINGLE':
+        grid.$.table.setAttribute('aria-multiselectable', 'false');
+        break;
+      case 'MULTI':
+        grid.$.table.setAttribute('aria-multiselectable', 'true');
+        break;
+      default:
+        grid.$.table.removeAttribute('aria-multiselectable');
     }
   };
-
-  // Have the multi-selectable state updated on attach
-  grid.__updateMultiSelectable = () => grid.$connector.updateMultiSelectable();
-  grid._createPropertyObserver('isAttached', '__updateMultiSelectable');
+  grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
 
   grid.$connector.setHeaderRenderer = function (column, options) {
     const { content, showSorter, sorterPath } = options;
