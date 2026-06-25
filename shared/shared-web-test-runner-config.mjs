@@ -5,7 +5,7 @@ import { defaultReporter, summaryReporter } from '@web/test-runner';
 import { junitReporter } from '@web/test-runner-junit-reporter';
 
 /**
- * A plugin that serves connector files imported from `frontend/generated/jar-resources`
+ * A plugin that serves frontend files imported from `frontend/generated/jar-resources`
  * from their original source in a component module's `META-INF/frontend` when it exists,
  * instead of the stale build-time copy. The request URL stays in the flat `jar-resources`
  * namespace, so cross-module sibling imports (e.g. `./contextMenuConnector.js`) continue
@@ -14,7 +14,7 @@ import { junitReporter } from '@web/test-runner-junit-reporter';
  * @param {string[]} sourceDirs Absolute paths to `META-INF/frontend` directories to look up
  * sources in, checked in order. Falls back to the build-time copy when no source matches.
  */
-export function connectorSourcePlugin(sourceDirs) {
+export function frontendSourcePlugin(sourceDirs) {
   function resolveSourcePath(requestPath) {
     const match = requestPath.match(/\/frontend\/generated\/jar-resources\/(.+)$/);
     if (!match) {
@@ -29,7 +29,7 @@ export function connectorSourcePlugin(sourceDirs) {
   }
 
   return {
-    name: 'connector-source',
+    name: 'frontend-source',
     serverStart({ fileWatcher }) {
       sourceDirs.forEach((dir) => fileWatcher.add(dir));
     },
@@ -42,7 +42,7 @@ export function connectorSourcePlugin(sourceDirs) {
     transform(context) {
       const sourcePath = resolveSourcePath(context.path);
       if (sourcePath) {
-        // Don't cache connector sources, so a rerun picks up the latest source
+        // Don't cache frontend sources, so a rerun picks up the latest source
         // instead of a transform cached from a previous run.
         return { transformCache: false };
       }
