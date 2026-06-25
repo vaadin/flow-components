@@ -87,16 +87,16 @@ describe('grid connector - row details', () => {
   });
 
   it('should set details hidden on selected item click', () => {
-    getBodyCellContent(grid, 0, 0)!.click();
+    grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
     getBodyCellContent(grid, 0, 0)!.click();
     expect(grid.$server.setDetailsVisible).to.be.calledWith(null);
   });
 
-  it('should not set details hidden on selected item click when deselect is disallowed', () => {
+  it('should set details hidden on selected item click when deselect is disallowed', () => {
     grid.__deselectDisallowed = true;
+    grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
     getBodyCellContent(grid, 0, 0)!.click();
-    getBodyCellContent(grid, 0, 0)!.click();
-    expect(grid.$server.setDetailsVisible).not.to.be.calledWith(null);
+    expect(grid.$server.setDetailsVisible).to.be.calledWith(null);
   });
 
   it('should not set details visible on click when details on click is disallowed', () => {
@@ -105,8 +105,8 @@ describe('grid connector - row details', () => {
     expect(grid.$server.setDetailsVisible).not.to.be.called;
   });
 
-  it('should set details visible for item selected from data', async () => {
+  it('should not set details visible for item selected from data', async () => {
     setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
-    expect(grid.$server.setDetailsVisible).to.be.calledWith('0');
+    expect(grid.$server.setDetailsVisible).not.to.be.calledWith('0');
   });
 });
