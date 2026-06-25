@@ -486,8 +486,8 @@ public class GridElement extends TestBenchElement {
             if (!checkbox.isChecked()) {
                 checkbox.getWrappedElement().click();
             }
-        } else {
-            setActiveItem(row);
+        } else if (!row.isSelected()) {
+            row.click();
         }
     }
 
@@ -516,19 +516,9 @@ public class GridElement extends TestBenchElement {
             if (checkbox.isChecked()) {
                 checkbox.getWrappedElement().click();
             }
-        } else {
-            removeActiveItem(row);
+        } else if (row.isSelected()) {
+            row.click();
         }
-    }
-
-    private void setActiveItem(GridTRElement row) {
-        executeScript("arguments[0].activeItem=arguments[1]._item", this, row);
-    }
-
-    private void removeActiveItem(GridTRElement row) {
-        final String JS_DEACTIVATE_IF_ACTIVE = "if(arguments[0]._itemsEqual(arguments[0].activeItem, "
-                + "arguments[1]._item)) { arguments[0].activeItem=null;}";
-        executeScript(JS_DEACTIVATE_IF_ACTIVE, this, row);
     }
 
     /**
