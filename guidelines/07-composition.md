@@ -40,7 +40,7 @@ When children are computed at runtime, expose `setItems(...)` instead — see
 
 Add a connector only when bridging `DataCommunicator`, renderers, or dynamic DOM
 needs custom JS. Place it at
-`src/main/resources/META-INF/resources/frontend/{name}Connector.js` and load it
+`src/main/resources/META-INF/frontend/{name}Connector.js` and load it
 with `@JsModule("./{name}Connector.js")`.
 
 Use the `initLazy` + `$connector`-guard pattern, and initialise it in the attach
