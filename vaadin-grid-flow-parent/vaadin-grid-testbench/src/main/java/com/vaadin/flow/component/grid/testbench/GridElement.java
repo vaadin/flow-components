@@ -531,10 +531,11 @@ public class GridElement extends TestBenchElement {
      *            the row to activate
      */
     private void activateRow(GridTRElement row) {
-        executeScript(
-                "arguments[0].dispatchEvent(new CustomEvent('row-activate', "
-                        + "{ detail: { model: { item: arguments[1]._item } } }))",
-                this, row);
+        executeScript("""
+                arguments[0].dispatchEvent(new CustomEvent('row-activate', {
+                    detail: { model: { item: arguments[1]._item } }
+                }))
+                """, this, row);
     }
 
     /**
