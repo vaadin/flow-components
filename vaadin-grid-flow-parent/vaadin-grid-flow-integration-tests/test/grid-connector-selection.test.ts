@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import { init, getBodyCellContent, setRootItems } from './shared.js';
+import { sendKeys } from '@web/test-runner-commands';
+import { init, getBodyCell, getBodyCellContent, setRootItems } from './shared.js';
 import type { FlowGrid, Item } from './shared.js';
 import sinon from 'sinon';
 
@@ -37,6 +38,26 @@ describe('grid connector - selection', () => {
     it('should mark the item selected', () => {
       getBodyCellContent(grid, 0, 0)!.click();
       expect(grid.selectedItems[0].selected).to.be.true;
+    });
+
+    it('should select item on row Space key', async () => {
+      getBodyCell(grid, 0, 0)!.focus();
+      // Move from cell focus mode to row focus mode
+      await sendKeys({ press: 'ArrowLeft' });
+      // Activate the focused row, which fires `row-activate`
+      await sendKeys({ press: 'Space' });
+      expect(grid.selectedItems.length).to.equal(1);
+      expect(grid.selectedItems[0].key).to.equal('0');
+    });
+
+    it('should deselect item on row Space key', async () => {
+      getBodyCell(grid, 0, 0)!.focus();
+      // Move from cell focus mode to row focus mode
+      await sendKeys({ press: 'ArrowLeft' });
+      // Select, then deselect the focused row, which fires `row-activate`
+      await sendKeys({ press: 'Space' });
+      await sendKeys({ press: 'Space' });
+      expect(grid.selectedItems).to.be.empty;
     });
 
     it('should deselect old selection on another item click', () => {

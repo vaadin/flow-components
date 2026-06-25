@@ -487,7 +487,7 @@ public class GridElement extends TestBenchElement {
                 checkbox.getWrappedElement().click();
             }
         } else if (!row.isSelected()) {
-            row.getCell(getVisibleColumns().get(0)).click();
+            activateRow(row);
         }
     }
 
@@ -517,8 +517,24 @@ public class GridElement extends TestBenchElement {
                 checkbox.getWrappedElement().click();
             }
         } else if (row.isSelected()) {
-            row.getCell(getVisibleColumns().get(0)).click();
+            activateRow(row);
         }
+    }
+
+    /**
+     * Activates the row by dispatching a {@code row-activate} event, the same
+     * event the grid fires when a row is activated with the keyboard. This
+     * drives single-selection (and row details) through the connector without a
+     * real click, so it doesn't trigger item-click listeners as a side effect.
+     *
+     * @param row
+     *            the row to activate
+     */
+    private void activateRow(GridTRElement row) {
+        executeScript(
+                "arguments[0].dispatchEvent(new CustomEvent('row-activate', "
+                        + "{ detail: { model: { item: arguments[1]._item } } }))",
+                this, row);
     }
 
     /**
