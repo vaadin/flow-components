@@ -53,7 +53,7 @@ public class AvatarGroupPage extends Div {
                     StreamResource resource = new StreamResource(
                             "avatar-group-img",
                             () -> getClass().getResourceAsStream(
-                                    "/META-INF/resources/frontend/images/user.png"));
+                                    "/META-INF/resources/images/user.png"));
                     AvatarGroupItem newItem = new AvatarGroupItem();
                     newItem.setImageResource(resource);
 
@@ -65,7 +65,7 @@ public class AvatarGroupPage extends Div {
                 "Set new item with download resource image", e -> {
                     DownloadHandler download = DownloadHandler.forClassResource(
                             getClass(),
-                            "/META-INF/resources/frontend/images/user.png",
+                            "/META-INF/resources/images/user.png",
                             "avatar-group-img");
                     AvatarGroupItem newItem = new AvatarGroupItem();
                     newItem.setImageHandler(download);

@@ -62,7 +62,7 @@ public class AvatarPage extends Div {
                         StreamResource avatarResource = new StreamResource(
                                 "user+.png",
                                 () -> getClass().getResourceAsStream(
-                                        "/META-INF/resources/frontend/images/user.png"));
+                                        "/META-INF/resources/images/user.png"));
                         avatar.setImageResource(avatarResource);
                     } else {
                         avatar.setImageResource(null);
@@ -75,7 +75,7 @@ public class AvatarPage extends Div {
                     if (avatar.getImageResource() == null) {
                         DownloadHandler download = DownloadHandler
                                 .forClassResource(getClass(),
-                                        "/META-INF/resources/frontend/images/user.png",
+                                        "/META-INF/resources/images/user.png",
                                         "user+.png");
                         avatar.setImageHandler(download);
                     } else {
