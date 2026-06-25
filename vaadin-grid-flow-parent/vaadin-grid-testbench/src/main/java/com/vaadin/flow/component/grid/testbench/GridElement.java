@@ -487,7 +487,7 @@ public class GridElement extends TestBenchElement {
                 checkbox.getWrappedElement().click();
             }
         } else if (!row.isSelected()) {
-            row.click();
+            row.getCell(getVisibleColumns().get(0)).click();
         }
     }
 
@@ -517,7 +517,7 @@ public class GridElement extends TestBenchElement {
                 checkbox.getWrappedElement().click();
             }
         } else if (row.isSelected()) {
-            row.click();
+            row.getCell(getVisibleColumns().get(0)).click();
         }
     }
 
