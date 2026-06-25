@@ -45,8 +45,8 @@ import com.vaadin.flow.component.map.configuration.layer.Layer;
  * <li>Implement {@link #getType()} to return a unique type name. This type name
  * is used by the client-side synchronization to determine which OpenLayers
  * class to instantiate for objects of this type. See
- * {@code META-INF/resources/frontend/vaadin-map/synchronization/index.js} for
- * how the synchronization resolves type names.</li>
+ * {@code META-INF/frontend/vaadin-map/synchronization/index.js} for how the
+ * synchronization resolves type names.</li>
  * <li>Every setter must call {@link #markAsDirty()} in order to mark this
  * object as changed, and to trigger a change event to schedule a sync. of this
  * change. See {@link View#setCenter(Coordinate)} for an example.</li>
