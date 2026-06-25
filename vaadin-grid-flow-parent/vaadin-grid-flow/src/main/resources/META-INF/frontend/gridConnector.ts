@@ -72,13 +72,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
           grid.$server.select(item.key);
         }
       }
-
-      // FYI: In single selection mode, the server can send items = [null]
-      // which means a "Deselect All" command.
-      const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key !== grid.activeItem.key;
-      if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
-        grid.activeItem = item;
-      }
     });
 
     if (selectedItemsChanged) {
@@ -129,14 +122,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     if (selectionMode === 'SINGLE') {
       if (item && item.selected && grid.__deselectDisallowed) {
-        grid.activeItem = grid.selectedItems[0];
         return;
       }
 
       if (item && !item.selected) {
         grid.$connector.doSelection([item], true);
       } else {
-        grid.$connector.doDeselection([grid.selectedItems[0]], true);
+        grid.$connector.doDeselection([...grid.selectedItems], true);
       }
     }
   }

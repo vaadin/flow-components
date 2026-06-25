@@ -149,21 +149,10 @@ describe('grid connector - selection', () => {
         expect(grid.selectedItems).to.be.empty;
       });
 
-      it('should update activeItem when selecting an item', () => {
-        grid.$connector.doSelection([{ key: '0' }], false);
-        expect(grid.activeItem).to.deep.equal({ key: '0', selected: true });
-      });
-
       it('should deselect the item when selecting null', () => {
         grid.$connector.doSelection([{ key: '0' }], false);
         grid.$connector.doSelection([null], false);
         expect(grid.selectedItems).to.be.empty;
-      });
-
-      it('should reset activeItem when selecting null', () => {
-        grid.$connector.doSelection([{ key: '0' }], false);
-        grid.$connector.doSelection([null], false);
-        expect(grid.activeItem).not.to.exist;
       });
 
       it('should not request server to select already selected items', () => {
@@ -226,9 +215,6 @@ describe('grid connector - selection', () => {
         const updatedItems = items.map((item) => ({ ...item, selectable: false }));
         setRootItems(grid.$connector, updatedItems);
 
-        // active item still references the original item with selectable: true
-        expect(grid.activeItem!.selectable).to.be.true;
-
         // however clicking the row should not deselect the item
         getBodyCellContent(grid, 2, 0)!.click();
         expect(grid.selectedItems).to.deep.equal([updatedItems[2]]);
@@ -246,12 +232,10 @@ describe('grid connector - selection', () => {
         // non-selectable item
         grid.$connector.doSelection([items[0]], false);
         expect(grid.selectedItems).to.deep.equal([items[0]]);
-        expect(grid.activeItem).to.deep.equal(items[0]);
 
         // selectable item
         grid.$connector.doSelection([items[2]], false);
         expect(grid.selectedItems).to.deep.equal([items[2]]);
-        expect(grid.activeItem).to.deep.equal(items[2]);
       })
 
       it('should always allow deselection from server', () => {
