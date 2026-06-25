@@ -112,14 +112,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   function onItemActivate(event) {
     const item = event.detail.model?.item;
 
-    if (!grid.__disallowDetailsOnClick) {
-      if (item && !item.detailsOpened) {
-        grid.$server.setDetailsVisible(item.key);
-      } else {
-        grid.$server.setDetailsVisible(null);
-      }
-    }
-
     if (selectionMode === 'SINGLE') {
       if (item && item.selected && grid.__deselectDisallowed) {
         return;
@@ -129,6 +121,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         grid.$connector.doSelection([item], true);
       } else {
         grid.$connector.doDeselection([...grid.selectedItems], true);
+      }
+    }
+
+    if (!grid.__disallowDetailsOnClick) {
+      if (item && !item.detailsOpened) {
+        grid.$server.setDetailsVisible(item.key);
+      } else {
+        grid.$server.setDetailsVisible(null);
       }
     }
   }
