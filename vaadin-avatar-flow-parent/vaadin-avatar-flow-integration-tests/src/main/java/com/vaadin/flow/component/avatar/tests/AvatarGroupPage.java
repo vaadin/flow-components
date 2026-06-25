@@ -64,8 +64,7 @@ public class AvatarGroupPage extends Div {
         NativeButton setItemsWithDownloadHandler = new NativeButton(
                 "Set new item with download resource image", e -> {
                     DownloadHandler download = DownloadHandler.forClassResource(
-                            getClass(),
-                            "/META-INF/resources/images/user.png",
+                            getClass(), "/META-INF/resources/images/user.png",
                             "avatar-group-img");
                     AvatarGroupItem newItem = new AvatarGroupItem();
                     newItem.setImageHandler(download);

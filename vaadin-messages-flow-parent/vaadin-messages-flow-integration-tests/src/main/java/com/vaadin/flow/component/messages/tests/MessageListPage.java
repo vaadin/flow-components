@@ -86,8 +86,7 @@ public class MessageListPage extends Div {
 
         addButton("setImageAsDownloadHandler", () -> {
             DownloadHandler resource = DownloadHandler.forClassResource(
-                    getClass(),
-                    "/META-INF/resources/images/avatar.png",
+                    getClass(), "/META-INF/resources/images/avatar.png",
                     "message-list-img");
             foo.setUserImageHandler(resource);
         });
