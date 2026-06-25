@@ -33,7 +33,10 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class AbstractGridMultiSelectionModelTest {
     @RegisterExtension
@@ -467,6 +470,71 @@ class AbstractGridMultiSelectionModelTest {
         ((GridMultiSelectionModel<String>) grid.getSelectionModel())
                 .setDragSelect(false);
         Assertions.assertFalse(columnElement.getProperty("dragSelect", false));
+    }
+
+    @Test
+    void setSelectRowCheckboxAriaLabel_updatesColumnProperty() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setSelectRowCheckboxAriaLabel("Markera rad");
+        Assertions.assertEquals("Markera rad",
+                columnElement.getProperty("accessibleNameSelectRow"));
+    }
+
+    @Test
+    void setSelectAllCheckboxAriaLabel_updatesColumnProperty() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setSelectAllCheckboxAriaLabel("Markera alla");
+        Assertions.assertEquals("Markera alla",
+                columnElement.getProperty("accessibleNameSelectAll"));
+    }
+
+    @Test
+    void selectRowCheckboxAriaLabelGenerator_unset_omitsLabelInGeneratedData() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        ObjectNode json = JacksonUtils.createObjectNode();
+        selectionModel.generateData("foo", json);
+        Assertions.assertFalse(json.has("selectionAriaLabel"));
+    }
+
+    @Test
+    void selectRowCheckboxAriaLabelGenerator_set_writesLabelInGeneratedData() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel
+                .setSelectRowCheckboxAriaLabelGenerator(item -> "Row " + item);
+
+        ObjectNode json = JacksonUtils.createObjectNode();
+        selectionModel.generateData("foo", json);
+        Assertions.assertEquals("Row foo",
+                json.get("selectionAriaLabel").asString());
+    }
+
+    @Test
+    void selectRowCheckboxAriaLabelGenerator_returnsNull_omitsLabelInGeneratedData() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItems("foo", "bar");
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.setSelectRowCheckboxAriaLabelGenerator(item -> null);
+
+        ObjectNode json = JacksonUtils.createObjectNode();
+        selectionModel.generateData("foo", json);
+        Assertions.assertFalse(json.has("selectionAriaLabel"));
     }
 
     @Test

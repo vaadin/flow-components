@@ -28,6 +28,14 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     };
   }
 
+  /** @protected */
+  ready() {
+    super.ready();
+    // Use the per-row aria-label generated on the server, if any. Falls back
+    // to `accessibleNameSelectRow` when the item has no generated label.
+    this.selectRowAccessibleNameGenerator = (item) => item?.selectionAriaLabel ?? null;
+  }
+
   /**
    * Override method from `GridSelectionColumnBaseMixin` to add ID to select all
    * checkbox

@@ -21,6 +21,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -187,4 +188,43 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
+
+    /**
+     * Sets the default aria-label for the select row checkbox in each body
+     * cell.
+     * <p>
+     * This label is used when no generator is set via
+     * {@link #setSelectRowCheckboxAriaLabelGenerator(SerializableFunction)}, or
+     * when the generator returns {@code null} for a row.
+     *
+     * @param ariaLabel
+     *            the default aria-label for the select row checkbox
+     */
+    void setSelectRowCheckboxAriaLabel(String ariaLabel);
+
+    /**
+     * Sets the aria-label for the select all checkbox in the header cell.
+     *
+     * @param ariaLabel
+     *            the aria-label for the select all checkbox
+     */
+    void setSelectAllCheckboxAriaLabel(String ariaLabel);
+
+    /**
+     * Sets a generator that computes the per-row aria-label for the select row
+     * checkbox. The generator receives an item and returns the full aria-label
+     * for that row's checkbox, or {@code null} to use the default.
+     * <p>
+     * When the generator is unset or returns {@code null} for a row, the
+     * checkbox aria-label falls back to the value set via
+     * {@link #setSelectRowCheckboxAriaLabel(String)}.
+     * <p>
+     * Setting the generator triggers a refresh of all rows.
+     *
+     * @param generator
+     *            the generator for the per-row aria-label text, or {@code null}
+     *            to remove the generator
+     */
+    void setSelectRowCheckboxAriaLabelGenerator(
+            SerializableFunction<T, String> generator);
 }
