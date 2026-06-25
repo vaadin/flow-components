@@ -105,8 +105,7 @@ final class FormTestFields {
 
     /**
      * Integer-valued field used to exercise {@code fieldValueOptions} with a
-     * non-{@link String} value type, where {@code toValue} must convert the
-     * chosen label into the field's actual value type.
+     * non-{@link String} value type.
      */
     @Tag("int-field")
     static class IntField extends StubField<IntField, Integer> {

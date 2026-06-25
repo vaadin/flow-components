@@ -334,13 +334,9 @@ class QueryFieldOptionsToolTest {
         var combo = new SingleSelectField<Project>();
         combo.setItemLabelGenerator(Project::name);
         var controller = new FormAIController(new Div(combo));
-        controller
-                .fieldValueOptions(
-                        ValueOptions.forField(combo)
-                                .options(
-                                        (filter, limit) -> List.of(alpha, beta))
-                                .itemLabelGenerator(Project::code),
-                        label -> alpha);
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of(alpha, beta))
+                .itemLabelGenerator(Project::code));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, combo, "", 10);
@@ -360,7 +356,7 @@ class QueryFieldOptionsToolTest {
         combo.setItemLabelGenerator(Project::name);
         var controller = new FormAIController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
-                .options((filter, limit) -> List.of(alpha)), label -> alpha);
+                .options((filter, limit) -> List.of(alpha)));
         controller.onRequest();
 
         var result = executeQueryFieldOptions(controller, combo, "", 10);

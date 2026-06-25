@@ -684,10 +684,8 @@ class FormStateToolTest {
         combo.setItemLabelGenerator(p -> p.code() + " " + p.name());
         combo.setValue(beta);
         var controller = new FormAIController(new Div(combo));
-        controller.fieldValueOptions(
-                ValueOptions.forField(combo)
-                        .options((filter, limit) -> List.of(alpha, beta)),
-                label -> null);
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of(alpha, beta)));
 
         var f = formStateFields(controller).get(0);
 
@@ -892,8 +890,7 @@ class FormStateToolTest {
         var controller = new FormAIController(new Div(combo));
         controller.fieldValueOptions(
                 ValueOptions.forField(combo).options(List.of(alpha, beta))
-                        .itemLabelGenerator(Project::code),
-                label -> alpha);
+                        .itemLabelGenerator(Project::code));
 
         var f = formStateFields(controller).get(0);
         var labels = new ArrayList<String>();
@@ -917,8 +914,7 @@ class FormStateToolTest {
         combo.setItemLabelGenerator(Project::name);
         var controller = new FormAIController(new Div(combo));
         controller.fieldValueOptions(
-                ValueOptions.forField(combo).options(List.of(alpha, beta)),
-                label -> alpha);
+                ValueOptions.forField(combo).options(List.of(alpha, beta)));
 
         var f = formStateFields(controller).get(0);
         var labels = new ArrayList<String>();
@@ -936,8 +932,7 @@ class FormStateToolTest {
         var field = new IntField();
         var controller = new FormAIController(new Div(field));
         controller.fieldValueOptions(
-                ValueOptions.forField(field).options(List.of(1, 2, 3)),
-                Integer::parseInt);
+                ValueOptions.forField(field).options(List.of(1, 2, 3)));
 
         var f = formStateFields(controller).get(0);
         var labels = new ArrayList<String>();
@@ -958,11 +953,8 @@ class FormStateToolTest {
         combo.setItemLabelGenerator(Project::name);
         combo.setValue(alpha);
         var controller = new FormAIController(new Div(combo));
-        controller
-                .fieldValueOptions(
-                        ValueOptions.forField(combo).options(List.of(alpha))
-                                .itemLabelGenerator(Project::code),
-                        label -> alpha);
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options(List.of(alpha)).itemLabelGenerator(Project::code));
 
         var f = formStateFields(controller).get(0);
 
@@ -984,7 +976,7 @@ class FormStateToolTest {
         controller.fieldValueOptions(ValueOptions.forField(combo)
                 .options(List.of(alpha)).itemLabelGenerator(p -> {
                     throw new RuntimeException("boom");
-                }), label -> alpha);
+                }));
 
         var f = formStateFields(controller).get(0);
         var labels = new ArrayList<String>();
@@ -1004,8 +996,7 @@ class FormStateToolTest {
         var combo = new SingleSelectField<Project>();
         var controller = new FormAIController(new Div(combo));
         controller.fieldValueOptions(ValueOptions.forField(combo)
-                .options(List.of(alpha)).itemLabelGenerator(p -> null),
-                label -> alpha);
+                .options(List.of(alpha)).itemLabelGenerator(p -> null));
 
         var f = formStateFields(controller).get(0);
         var labels = new ArrayList<String>();
@@ -1029,8 +1020,7 @@ class FormStateToolTest {
         var controller = new FormAIController(new Div(multi));
         controller.fieldValueOptions(
                 ValueOptions.forField(multi).options(List.of(apollo, vega))
-                        .itemLabelGenerator(Project::code),
-                label -> apollo);
+                        .itemLabelGenerator(Project::code));
 
         var f = formStateFields(controller).get(0);
         var enumLabels = new ArrayList<String>();
@@ -1194,8 +1184,7 @@ class FormStateToolTest {
         field.setValue(2);
         var controller = new FormAIController(new Div(field));
         controller.fieldValueOptions(
-                ValueOptions.forField(field).options(List.of(1, 2, 3)),
-                Integer::parseInt);
+                ValueOptions.forField(field).options(List.of(1, 2, 3)));
 
         var f = formStateFields(controller).get(0);
 

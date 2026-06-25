@@ -21,45 +21,50 @@ import java.util.function.Function;
 
 /**
  * Mutable per-field hint state held by {@link FormAIController}, keyed by the
- * field's opaque id.
- * <p>
- * Set by {@link FormAIController#fieldValueOptions(ValueOptions)
- * controller.fieldValueOptions(...)}: {@link #valueOptionsQuery} returns the
- * labels the LLM sees for a given filter (the controller wraps the
- * {@link ValueOptions}' item source + label generator into this single
- * label-producing callback at registration time), {@link #fixedOptions} flags
- * whether the schema should render the options as {@code enum} or
- * {@code queryable}, {@link #valueOptionsToValue} resolves one label back to
- * one element, and {@link #itemLabelGenerator} renders the field's current
- * value through the same labeler so the value string matches the labels the LLM
- * was offered. For multi-select fields the controller wraps the resolved
- * elements into a {@link java.util.LinkedHashSet} before {@code setValue}; the
- * hint state is the same shape in both cases.
+ * field's opaque id. Populated by {@code describeField}, {@code ignoreField},
+ * and {@code fieldValueOptions}; consumed by {@link FormFieldSchema} when
+ * building the {@code get_form_state} payload and by {@link FormValueConverter}
+ * when applying {@code fill_form} values.
  *
  * @author Vaadin Ltd
  */
 final class FormFieldHints {
 
     String description;
-    BiFunction<String, Integer, List<String>> valueOptionsQuery;
-    Function<String, ?> valueOptionsToValue;
     /**
-     * Item-to-label function used to render the current value when
-     * value-options is registered. Resolved at registration to the explicit
+     * Label-producing callback the {@code query_field_options} tool drives.
+     * Wraps the {@link ValueOptions} item source plus
+     * {@link #itemLabelGenerator} into a single (filter, limit) → labels
+     * function. Non-{@code null} whenever {@code fieldValueOptions} has been
+     * called for this field.
+     */
+    BiFunction<String, Integer, List<String>> valueOptionsQuery;
+    /**
+     * Items the controller has seen for this registration: the fixed list for
+     * {@link ValueOptions#options(java.util.Collection)}, or items accumulated
+     * from {@link ValueOptions#options(java.util.function.BiFunction)} batches.
+     * {@link FormValueConverter} walks this list at fill time, applies
+     * {@link #itemLabelGenerator} per item, and returns the first whose label
+     * matches the LLM-supplied one (insertion order — first-wins on
+     * duplicates). Non-{@code null} whenever {@link #valueOptionsQuery} is set;
+     * empty until the query callback runs for query-mode registrations.
+     */
+    List<Object> valueOptionsItems;
+    /**
+     * Item-to-label function used to render the field's current value and to
+     * resolve LLM-supplied labels back to items via {@link #valueOptionsItems}.
+     * Resolved at registration to the explicit
      * {@link ValueOptions#itemLabelGenerator(com.vaadin.flow.component.ItemLabelGenerator)}
      * or to a delegate that defers to {@link FormValueConverter#renderItem}
      * (field's own {@code getItemLabelGenerator()}, then
      * {@link String#valueOf(Object)}). Non-{@code null} whenever
-     * {@link #valueOptionsQuery} is set, so the schema's value string agrees
-     * with the labels emitted in the {@code enum} / {@code query_field_options}
-     * payloads.
+     * {@link #valueOptionsQuery} is set.
      */
     Function<Object, String> itemLabelGenerator;
     /**
-     * {@code true} when the field was registered with the fixed-options
-     * variant; {@code false} when registered with a query callback or with no
-     * value-options hint at all. Used by {@link FormFieldSchema} to choose
-     * {@code enum} vs {@code queryable} in the {@code get_form_state} JSON.
+     * {@code true} for fixed-options registrations, {@code false} for
+     * query-callback or no-value-options registrations. Drives the {@code enum}
+     * vs {@code queryable} choice in {@link FormFieldSchema}.
      */
     boolean fixedOptions;
     boolean ignored;

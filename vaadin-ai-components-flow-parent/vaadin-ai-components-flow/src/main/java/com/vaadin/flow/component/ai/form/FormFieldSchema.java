@@ -100,9 +100,9 @@ final class FormFieldSchema {
             return;
         }
         // fieldValueOptions turns any field into a constrained-choice field
-        // from the LLM's perspective: the LLM picks a label,
-        // valueOptionsToValue converts back. Emit type=string + enum/queryable
-        // so the LLM sees the signal regardless of the underlying value type.
+        // from the LLM's perspective: the LLM picks a label, the controller
+        // resolves it to an item. Emit type=string + enum/queryable so the
+        // LLM sees the signal regardless of the underlying value type.
         if (type == FormFieldType.SINGLE_SELECT || hasValueOptions(hints)) {
             node.put(FIELD_TYPE, TYPE_STRING);
             applySelectionOptions(node, field, hints);

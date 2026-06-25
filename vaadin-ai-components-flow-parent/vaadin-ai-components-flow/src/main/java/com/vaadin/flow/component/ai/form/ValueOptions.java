@@ -20,7 +20,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -28,28 +27,22 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.data.selection.MultiSelect;
 
 /**
- * Per-field registration of the items the LLM may pick from for a given field.
+ * Per-field registration of the items the LLM may pick from. Items carry the
+ * field's value type — a {@code ComboBox<Project>} registration passes
+ * {@code Project} items, not pre-rendered strings. Pass the configured
+ * registration to {@link FormAIController#fieldValueOptions(ValueOptions)
+ * controller.fieldValueOptions(...)} to apply it.
+ * <p>
  * The item set is either fixed ({@link #options(Collection)}) or supplied on
- * demand by a callback ({@link #options(BiFunction)}); exactly one of the two
- * must be set, with the last call winning. Pass the configured registration to
- * {@link FormAIController#fieldValueOptions(ValueOptions)
- * controller.fieldValueOptions(...)} to apply it; the items are then rendered
- * to labels and presented to the LLM as the field's choices.
- * <p>
- * Items carry the field's value type, so a {@code ComboBox<Project>}
- * registration passes {@code Project} items, not pre-rendered label strings.
- * The controller derives the LLM-facing label for each item through this chain:
- * an explicit {@link #itemLabelGenerator(ItemLabelGenerator)} if set, otherwise
- * the field's own {@code setItemLabelGenerator(...)} (read reflectively),
- * otherwise {@link String#valueOf(Object)} as a last resort. The label produced
- * by this chain is what the LLM sees, picks from, and sends back to the
- * {@code toValue} converter — so the field's UI label generator drives the AI
- * labels automatically when set.
- * <p>
- * For a non-{@link String} field, supply a label-to-value converter through
- * {@link FormAIController#fieldValueOptions(ValueOptions, Function)
- * fieldValueOptions(config, toValue)} — the converter resolves a chosen label
- * back to the field's value type before the controller writes it.
+ * demand by a callback ({@link #options(BiFunction)}); exactly one must be set,
+ * with the last call winning. Each item is rendered to an LLM-facing label
+ * through this chain: the explicit
+ * {@link #itemLabelGenerator(ItemLabelGenerator)} if set, otherwise the field's
+ * own {@code setItemLabelGenerator(...)} (read reflectively), otherwise
+ * {@link String#valueOf(Object)}. The controller resolves a chosen label back
+ * to an item by applying the same chain to each registered item and returning
+ * the first whose label matches, so the field's UI label generator drives the
+ * AI labels automatically.
  *
  * @param <V>
  *            the item type — the field's value type for single-value fields,
@@ -72,11 +65,7 @@ public final class ValueOptions<V> {
 
     /**
      * Starts an options registration for a single-value field. The field's
-     * value type {@code V} flows through; for any {@code V} other than
-     * {@link String}, the controller's two-argument
-     * {@link FormAIController#fieldValueOptions(ValueOptions, Function)}
-     * overload must be used to supply a label-to-value converter (a
-     * compile-time requirement, not a runtime check).
+     * value type {@code V} flows through unchanged.
      *
      * @param field
      *            the single-value field whose options the LLM may pick from,
@@ -95,11 +84,8 @@ public final class ValueOptions<V> {
      * Starts an options registration for a multi-select field. Picked by the
      * compiler over {@link #forField(HasValue)} whenever the reference is
      * statically typed as {@link MultiSelect}. The per-element type {@code T}
-     * flows through; for any {@code T} other than {@link String}, the
-     * controller's two-argument
-     * {@link FormAIController#fieldValueOptions(ValueOptions, Function)}
-     * overload must be used. The controller aggregates resolved per-label items
-     * into a {@link LinkedHashSet} before {@link HasValue#setValue}.
+     * flows through unchanged; resolved items are aggregated into a
+     * {@link LinkedHashSet} before {@link HasValue#setValue}.
      *
      * @param field
      *            the multi-select field whose options the LLM may pick from,
@@ -176,10 +162,10 @@ public final class ValueOptions<V> {
      * needs a different label from the UI (for example a code rather than a
      * display name). Calling this multiple times overwrites the previous value.
      * <p>
-     * Two items rendering to the same label are not an error: the duplicate
-     * appears verbatim in the LLM's option list, and when the LLM picks the
-     * shared label the supplied {@code toValue} converter decides which item is
-     * written. Emit unique labels per item if disambiguation matters.
+     * Two items rendering to the same label are resolvable but ambiguous:
+     * resolution picks the first matching item in registration order, and the
+     * controller logs a warning at registration when this happens. Emit unique
+     * labels per item if disambiguation matters.
      *
      * @param generator
      *            the per-item label generator, not {@code null}
