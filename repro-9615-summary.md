@@ -10,7 +10,9 @@
 - **Reproduced on:** flow-components @ `25.3-SNAPSHOT` (pulls published `@vaadin/dialog` 25.2.x web components)
 - **Present on main?:** yes (still broken on the 25.3 line)
 - **Theme / Browser:** Lumo / Chromium (Playwright), viewport 390×844 (mobile)
-- **Screenshot** (static bug): __IMAGE__
+- **Screenshot** (static bug):
+
+![TabSheet inside a Dialog bleeding past the right edge of a 390px mobile viewport](https://raw.githubusercontent.com/vaadin/flow-components/6e60d499d126e8c167ebd8a61c84187b1549bcb1/repro-9615.png)
 
 ## Observed behavior
 
