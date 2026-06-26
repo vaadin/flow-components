@@ -280,25 +280,26 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid + headers to the host element via a CSS-grid scroll container', () => {
+    it('appends the cell-grid + headers + corner to the host element via a CSS-grid scroll container', () => {
         // Slice 140: scroll container wraps the cell-grid. Slice 143
         // added the column-header sibling. Slice 144 added the
         // row-header + restructured the scroll container as a CSS
-        // grid with header strips on the top + left edges.
+        // grid. Slice 145 added the corner box at (col 1, row 1).
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
         expect(host.children).to.have.length(1);
         expect(host.firstElementChild === sheet.getScrollContainer()).to.be.true;
         const scroller = sheet.getScrollContainer();
-        // Three children: column-header, row-header, cell-grid.
-        // (Identity checks via `===` to avoid chai serializing the
-        // LitElement for diff output — renderState contains cycles.)
-        expect(scroller.children).to.have.length(3);
+        // Four children: header-corner, column-header, row-header,
+        // cell-grid. (Identity checks via `===` to avoid chai
+        // serializing LitElements with cyclic renderState.)
+        expect(scroller.children).to.have.length(4);
         const kids = Array.from(scroller.children);
         expect(kids.includes(sheet.getColumnHeader())).to.be.true;
         expect(kids.includes(sheet.getRowHeader())).to.be.true;
         expect(kids.includes(sheet.getCellGrid())).to.be.true;
+        expect(kids.includes(sheet.getHeaderCorner())).to.be.true;
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -539,23 +540,18 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         };
     }
 
-    it('wraps the cell-grid + headers in a CSS-grid scroll container with overflow:auto', () => {
+    it('wraps the cell-grid + headers + corner in a CSS-grid scroll container with overflow:auto', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
 
         const scroller = sheet.getScrollContainer();
         expect(scroller).to.be.instanceOf(HTMLElement);
         expect(scroller.className).to.equal('sheet-scroll');
         expect(scroller.style.overflow).to.equal('auto');
-        // CSS-grid layout (slice 144) with 2x2 cells: column-header
-        // top, row-header left, cell-grid main, corner empty.
         const computed = getComputedStyle(scroller);
         expect(computed.display).to.equal('grid');
-        // Three children: column-header + row-header + cell-grid.
-        expect(scroller.children).to.have.length(3);
-        const kids = Array.from(scroller.children);
-        expect(kids.includes(sheet.getCellGrid())).to.be.true;
-        expect(kids.includes(sheet.getColumnHeader())).to.be.true;
-        expect(kids.includes(sheet.getRowHeader())).to.be.true;
+        // Four children: header-corner + column-header + row-header
+        // + cell-grid (CSS-grid layout, slice 144+145).
+        expect(scroller.children).to.have.length(4);
 
         cleanup();
     });
@@ -845,6 +841,67 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(after).to.equal(before);
 
         host.remove();
+    });
+
+    it('header corner box sits in CSS-grid (col 1, row 1) with sticky positioning (slice 145)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        const corner = sheet.getHeaderCorner();
+        expect(corner).to.be.instanceOf(HTMLElement);
+        expect(corner.className).to.equal('sheet-header-corner');
+        expect(corner.style.gridColumn).to.equal('1');
+        expect(corner.style.gridRow).to.equal('1');
+        const computed = getComputedStyle(corner);
+        expect(computed.position).to.equal('sticky');
+        cleanup();
+    });
+
+    it('header corner sizes to (headerColumnWidth, headerRowHeight) when BOTH are set (slice 145)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(24);
+        sheet.setHeaderColumnWidth(40);
+
+        sheet.recomputeViewport();
+
+        const corner = sheet.getHeaderCorner();
+        expect(corner.style.width).to.equal('40px');
+        expect(corner.style.height).to.equal('24px');
+
+        cleanup();
+    });
+
+    it('header corner collapses to 0x0 when EITHER header dimension is 0 (slice 145)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Only column header set, row header at 0 → corner = 0x0.
+        sheet.setHeaderRowHeight(24);
+        sheet.setHeaderColumnWidth(0);
+        sheet.recomputeViewport();
+        expect(sheet.getHeaderCorner().style.width).to.equal('0px');
+        expect(sheet.getHeaderCorner().style.height).to.equal('0px');
+
+        // Only row header set → still 0x0.
+        sheet.setHeaderRowHeight(0);
+        sheet.setHeaderColumnWidth(40);
+        sheet.recomputeViewport();
+        expect(sheet.getHeaderCorner().style.width).to.equal('0px');
+        expect(sheet.getHeaderCorner().style.height).to.equal('0px');
+
+        // Both set → real dimensions.
+        sheet.setHeaderRowHeight(24);
+        sheet.setHeaderColumnWidth(40);
+        sheet.recomputeViewport();
+        expect(sheet.getHeaderCorner().style.width).to.equal('40px');
+        expect(sheet.getHeaderCorner().style.height).to.equal('24px');
+
+        cleanup();
     });
 
     it('setHeaderColumnWidth + applyRenderState push state to the row-header sub-element (slice 144)', () => {

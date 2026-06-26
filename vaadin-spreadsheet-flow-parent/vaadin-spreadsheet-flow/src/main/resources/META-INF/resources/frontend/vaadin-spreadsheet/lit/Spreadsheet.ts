@@ -190,6 +190,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly rowHeader: SpreadsheetRowHeader;
 
     /**
+     * The header corner box — small gray square where the column
+     * + row headers meet at the top-left. Plain {@code <div>}
+     * since it has no content; sticky-positioned at (0, 0) of
+     * the scroll container so it overlays both header strips at
+     * their intersection. Sized to
+     * {@code headerColumnWidth × headerRowHeight} on every
+     * {@link applyRenderState}; hidden when either dimension is
+     * 0. Slice 145.
+     */
+    private readonly headerCorner: HTMLElement;
+
+    /**
      * Height of the column-header strip in pixels. {@code 0}
      * (default) means no header strip is rendered. The host opts
      * in by calling {@link setHeaderRowHeight}; matches Excel's
@@ -233,6 +245,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellGrid = new SpreadsheetCellGrid();
         this.columnHeader = new SpreadsheetColumnHeader();
         this.rowHeader = new SpreadsheetRowHeader();
+        this.headerCorner = document.createElement('div');
         this.scrollContainer = document.createElement('div');
         this.scrollContainer.className = 'sheet-scroll';
         // CSS Grid layout: 2 columns × 2 rows so each header sits in
@@ -245,6 +258,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'position:relative;overflow:auto;width:100%;height:100%;'
             + 'display:grid;grid-template-columns:auto auto;'
             + 'grid-template-rows:auto auto;';
+        // Header corner at (col 1, row 1) — sticky on both axes
+        // so it overlays both header strips at their intersection.
+        // Slice 145. Hidden when either header dimension is 0.
+        this.headerCorner.className = 'sheet-header-corner';
+        this.headerCorner.style.cssText =
+            'grid-column:1;grid-row:1;'
+            + 'position:sticky;top:0;left:0;z-index:6;'
+            + 'background:var(--vaadin-spreadsheet-header-bg, #f4f4f4);'
+            + 'border-right:1px solid'
+            + ' var(--vaadin-spreadsheet-header-border, #c0c0c0);'
+            + 'border-bottom:1px solid'
+            + ' var(--vaadin-spreadsheet-header-border, #c0c0c0);'
+            + 'box-sizing:border-box;'
+            + 'width:0;height:0;';
         // Column-header at (col 2, row 1) — top strip above cells.
         this.columnHeader.style.gridColumn = '2';
         this.columnHeader.style.gridRow = '1';
@@ -254,6 +281,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // Cell-grid at (col 2, row 2).
         this.cellGrid.style.gridColumn = '2';
         this.cellGrid.style.gridRow = '2';
+        this.scrollContainer.appendChild(this.headerCorner);
         this.scrollContainer.appendChild(this.columnHeader);
         this.scrollContainer.appendChild(this.rowHeader);
         this.scrollContainer.appendChild(this.cellGrid);
@@ -376,6 +404,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
                 headerWidth: this.headerColumnWidth,
                 totalGridHeightPx: state.totalGridHeightPx,
             };
+        }
+        // Header corner (slice 145). Sized only when BOTH header
+        // dimensions are > 0 so it occupies its grid cell with
+        // matching width + height. When either is 0, the corner
+        // collapses to a 0×0 box and isn't visible.
+        if (this.headerRowHeight > 0 && this.headerColumnWidth > 0) {
+            this.headerCorner.style.width = `${this.headerColumnWidth}px`;
+            this.headerCorner.style.height = `${this.headerRowHeight}px`;
+        } else {
+            this.headerCorner.style.width = '0px';
+            this.headerCorner.style.height = '0px';
         }
     }
 
@@ -535,6 +574,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /** Test-only accessor: the row-header sub-element (slice 144). */
     getRowHeader(): SpreadsheetRowHeader {
         return this.rowHeader;
+    }
+
+    /** Test-only accessor: the header-corner box (slice 145). */
+    getHeaderCorner(): HTMLElement {
+        return this.headerCorner;
     }
 
     /**
