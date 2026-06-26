@@ -48,8 +48,6 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
      * <p>
      * Files will be created using {@link File#createTempFile(String, String)}
      * and have that build 'upload_tmpfile_{FILENAME}_{currentTimeMillis}'
-     * 
-     * @since 22.0
      */
     public FileBuffer() {
         super();
