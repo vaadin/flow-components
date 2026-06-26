@@ -17,6 +17,7 @@ import type {
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
+    normalizedRange,
     selectRange,
     selectSingleCell,
     type SelectionState,
@@ -88,6 +89,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     /** Selection state. */
     private selection: SelectionState = selectSingleCell(1, 1);
+
+    /**
+     * The "current extend position" for shift+arrow navigation
+     * (slice 147). Starts equal to the active cell. Shift+arrow
+     * moves this corner ±1; the resulting range is normalized
+     * across (activeCell, extendCol/Row). Plain arrow / click
+     * resets extendCol/Row to the new active cell so the next
+     * shift+arrow starts fresh.
+     */
+    private extendCol = 1;
+    private extendRow = 1;
 
     /** Row / column geometry. */
     private rowHeights: Float32Array | number[] = [];
@@ -261,7 +273,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.style.cssText =
             'position:relative;overflow:auto;width:100%;height:100%;'
             + 'display:grid;grid-template-columns:auto auto;'
-            + 'grid-template-rows:auto auto;';
+            + 'grid-template-rows:auto auto;'
+            // outline:none so the browser-default focus ring doesn't
+            // render around the spreadsheet; we get focus via
+            // tabindex=0 (slice 147) but draw selection feedback via
+            // the .sheet-selection overlay instead.
+            + 'outline:none;';
+        // tabindex=0 makes the scroll container focusable so it can
+        // receive keydown events for keyboard navigation (slice 147).
+        this.scrollContainer.tabIndex = 0;
         // Header corner at (col 1, row 1) — sticky on both axes
         // so it overlays both header strips at their intersection.
         // Slice 145. Hidden when either header dimension is 0.
@@ -300,6 +320,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'cell-click',
             this.handleCellClick as EventListener
         );
+        // Keyboard navigation (slice 147). Listen on the scroll
+        // container so arrow keys + shift+arrow work whenever the
+        // spreadsheet has focus. preventDefault() in the handler
+        // stops the browser from scrolling the viewport via the
+        // arrow keys.
+        this.scrollContainer.addEventListener(
+            'keydown',
+            this.handleKeyDown as EventListener
+        );
         this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
         this.resizeObserver.observe(this.scrollContainer);
     }
@@ -328,8 +357,91 @@ export class Spreadsheet implements SpreadsheetClientApi {
             // (= the anchor) to the clicked coordinate.
             const anchor = this.selection.activeCell;
             this.selection = selectRange(anchor.col, anchor.row, col, row);
+            this.extendCol = col;
+            this.extendRow = row;
         } else {
             this.selection = selectSingleCell(col, row);
+            this.extendCol = col;
+            this.extendRow = row;
+        }
+        this.recomputeViewport();
+    };
+
+    /**
+     * Keyboard navigation handler (slice 147). Plain arrow keys
+     * move the active cell ±1 in the requested direction, clamped
+     * to {@code [1, rows]} / {@code [1, cols]}. Shift+arrow moves
+     * the "extend position" (separate from active cell) and
+     * recomputes the range as
+     * {@code normalizedRange(activeCell, extendCol/Row)} — matches
+     * Excel's behavior where the active cell stays fixed across a
+     * sequence of shift+arrow presses.
+     *
+     * Other keys (Tab, Enter, Home, End, etc.) are deferred to
+     * future slices.
+     */
+    private readonly handleKeyDown = (e: KeyboardEvent): void => {
+        const key = e.key;
+        if (key !== 'ArrowUp' && key !== 'ArrowDown'
+                && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+            return;
+        }
+        if (this.rows <= 0 || this.cols <= 0) {
+            // No grid populated yet — nothing to navigate.
+            return;
+        }
+        e.preventDefault();
+        if (e.shiftKey) {
+            // Move the extend position; the active cell (anchor)
+            // stays put. The range is normalized across the two.
+            let extendCol = this.extendCol;
+            let extendRow = this.extendRow;
+            switch (key) {
+                case 'ArrowUp':
+                    extendRow = Math.max(1, extendRow - 1);
+                    break;
+                case 'ArrowDown':
+                    extendRow = Math.min(this.rows, extendRow + 1);
+                    break;
+                case 'ArrowLeft':
+                    extendCol = Math.max(1, extendCol - 1);
+                    break;
+                case 'ArrowRight':
+                    extendCol = Math.min(this.cols, extendCol + 1);
+                    break;
+            }
+            this.extendCol = extendCol;
+            this.extendRow = extendRow;
+            const anchor = this.selection.activeCell;
+            this.selection = {
+                activeCell: anchor,
+                activeRange: normalizedRange(
+                    anchor.col, anchor.row, extendCol, extendRow
+                ),
+                auxRanges: [],
+            };
+        } else {
+            // Move the active cell; collapse the range to it.
+            const active = this.selection.activeCell;
+            let col = active.col;
+            let row = active.row;
+            switch (key) {
+                case 'ArrowUp':
+                    row = Math.max(1, row - 1);
+                    break;
+                case 'ArrowDown':
+                    row = Math.min(this.rows, row + 1);
+                    break;
+                case 'ArrowLeft':
+                    col = Math.max(1, col - 1);
+                    break;
+                case 'ArrowRight':
+                    col = Math.min(this.cols, col + 1);
+                    break;
+            }
+            this.selection = selectSingleCell(col, row);
+            this.extendCol = col;
+            this.extendRow = row;
         }
         this.recomputeViewport();
     };
@@ -370,6 +482,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     dispose(): void {
         this.scrollContainer.removeEventListener('scroll', this.handleScroll);
+        this.scrollContainer.removeEventListener(
+            'keydown',
+            this.handleKeyDown as EventListener
+        );
         this.cellGrid.removeEventListener(
             'cell-click',
             this.handleCellClick as EventListener

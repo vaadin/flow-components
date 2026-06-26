@@ -1055,6 +1055,201 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    function dispatchKey(
+        target: HTMLElement,
+        key: string,
+        opts: { shiftKey?: boolean } = {}
+    ): void {
+        target.dispatchEvent(new KeyboardEvent('keydown', {
+            key,
+            shiftKey: opts.shiftKey ?? false,
+            bubbles: true,
+            cancelable: true,
+        }));
+    }
+
+    it('scroll container is focusable via tabindex=0 (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        expect(sheet.getScrollContainer().tabIndex).to.equal(0);
+        cleanup();
+    });
+
+    it('ArrowRight moves the active cell one column right (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Default selection: A1.
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+
+        dispatchKey(sheet.getScrollContainer(), 'ArrowRight');
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 1 });
+        // Range collapses to the new active cell.
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 2, r1: 1, r2: 1,
+        });
+        cleanup();
+    });
+
+    it('ArrowDown / ArrowLeft / ArrowUp all move the active cell one cell (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        const scroller = sheet.getScrollContainer();
+        // Start at (3, 3) via a cell-click.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        dispatchKey(scroller, 'ArrowDown');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 4 });
+        dispatchKey(scroller, 'ArrowLeft');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 4 });
+        dispatchKey(scroller, 'ArrowUp');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 3 });
+
+        cleanup();
+    });
+
+    it('Arrow keys clamp at the grid edges (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(3);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15]);
+
+        const scroller = sheet.getScrollContainer();
+        // At A1 — ArrowUp should stay at A1, ArrowLeft should stay at A1.
+        dispatchKey(scroller, 'ArrowUp');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+        dispatchKey(scroller, 'ArrowLeft');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+
+        // Move to (3, 3) — ArrowDown stays at row 3 (last), ArrowRight stays at col 3 (last).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        dispatchKey(scroller, 'ArrowDown');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        dispatchKey(scroller, 'ArrowRight');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+
+        cleanup();
+    });
+
+    it('Shift+ArrowDown extends the range without moving the active cell (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Move to (2, 2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        const scroller = sheet.getScrollContainer();
+        // Shift+Down twice → range = (2,2)-(2,4); active cell stays at (2,2).
+        dispatchKey(scroller, 'ArrowDown', { shiftKey: true });
+        dispatchKey(scroller, 'ArrowDown', { shiftKey: true });
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 2, r1: 2, r2: 4,
+        });
+
+        cleanup();
+    });
+
+    it('Shift+arrow contracts the range when extending back toward the anchor (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Anchor at (2,2), extend to (2,5).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        for (let i = 0; i < 3; i++) {
+            dispatchKey(scroller, 'ArrowDown', { shiftKey: true });
+        }
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 2, r1: 2, r2: 5,
+        });
+
+        // Shift+Up should now contract to (2,2)-(2,4).
+        dispatchKey(scroller, 'ArrowUp', { shiftKey: true });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 2, r1: 2, r2: 4,
+        });
+
+        cleanup();
+    });
+
+    it('plain arrow after a shift-extended range resets the extend position (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Build a range (2,2)-(2,5).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        for (let i = 0; i < 3; i++) {
+            dispatchKey(scroller, 'ArrowDown', { shiftKey: true });
+        }
+
+        // Plain ArrowRight → active cell moves to (3, 2), range collapses.
+        dispatchKey(scroller, 'ArrowRight');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 2 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 3, c2: 3, r1: 2, r2: 2,
+        });
+
+        cleanup();
+    });
+
+    it('keyboard navigation is a no-op when rows or cols is 0 (slice 147)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        // No setRows/setCols — rows=cols=0.
+        const before = sheet.getSelection();
+
+        dispatchKey(sheet.getScrollContainer(), 'ArrowDown');
+
+        // Selection unchanged.
+        expect(sheet.getSelection() === before).to.be.true;
+
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render
