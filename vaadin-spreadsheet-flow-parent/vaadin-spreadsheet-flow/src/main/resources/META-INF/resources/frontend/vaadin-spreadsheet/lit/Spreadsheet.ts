@@ -2217,22 +2217,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.defColWidth = widthInPixels;
     }
     setRowH(rowHeightsInPoints: number[] | Float32Array): void {
-        this.rowHeights = rowHeightsInPoints;
+        this.rowHeights = coerceNumberArray(rowHeightsInPoints);
     }
     setColW(colWidthsInPixels: number[] | Int32Array): void {
-        this.colWidths = colWidthsInPixels;
+        this.colWidths = coerceNumberArray(colWidthsInPixels);
     }
     setHiddenColumnIndexes(indexes: number[]): void {
-        this.hiddenColumnIndexes = indexes;
+        this.hiddenColumnIndexes = coerceArray(indexes);
     }
     setHiddenRowIndexes(indexes: number[]): void {
-        this.hiddenRowIndexes = indexes;
+        this.hiddenRowIndexes = coerceArray(indexes);
     }
     setLockedColumnIndexes(indexes: number[]): void {
-        this.lockedColumnIndexes = indexes;
+        this.lockedColumnIndexes = coerceArray(indexes);
     }
     setLockedRowIndexes(indexes: number[]): void {
-        this.lockedRowIndexes = indexes;
+        this.lockedRowIndexes = coerceArray(indexes);
     }
     setSheetIndex(index: number): void {
         this.sheetIndex = index;
@@ -2241,37 +2241,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.syncSheetTabs();
     }
     setSheetNames(names: string[]): void {
-        this.sheetNames = names;
+        this.sheetNames = coerceArray(names);
         // Re-render the sheet-tabs strip with the new names list
         // (slice 154).
         this.syncSheetTabs();
     }
     setVerticalScrollPositions(positions: number[]): void {
-        this.verticalScrollPositions = positions;
+        this.verticalScrollPositions = coerceArray(positions);
     }
     setHorizontalScrollPositions(positions: number[]): void {
-        this.horizontalScrollPositions = positions;
+        this.horizontalScrollPositions = coerceArray(positions);
     }
     setCellStyleToCSSStyle(map: Record<number, string>): void {
-        this.cellStyleToCSSStyle = map;
+        this.cellStyleToCSSStyle = coerceObject(map);
     }
     setRowIndexToStyleIndex(map: Record<number, number>): void {
-        this.rowIndexToStyleIndex = map;
+        this.rowIndexToStyleIndex = coerceObject(map);
     }
     setColumnIndexToStyleIndex(map: Record<number, number>): void {
-        this.columnIndexToStyleIndex = map;
+        this.columnIndexToStyleIndex = coerceObject(map);
     }
     setShiftedCellBorderStyles(cssRules: string[]): void {
-        this.shiftedCellBorderStyles = cssRules;
+        this.shiftedCellBorderStyles = coerceArray(cssRules);
     }
     setConditionalFormattingStyles(map: Record<number, string>): void {
-        this.conditionalFormattingStyles = map;
+        this.conditionalFormattingStyles = coerceObject(map);
     }
     setColGroupingData(groups: GroupingData[]): void {
-        this.colGroupingData = groups;
+        this.colGroupingData = coerceArray(groups);
     }
     setRowGroupingData(groups: GroupingData[]): void {
-        this.rowGroupingData = groups;
+        this.rowGroupingData = coerceArray(groups);
     }
     setColGroupingMax(level: number): void {
         this.colGroupingMax = level;
@@ -2292,28 +2292,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.sheetProtected = isProtected;
     }
     setMergedRegions(regions: MergedRegion[]): void {
-        this.mergedRegions = regions;
+        this.mergedRegions = coerceArray(regions);
     }
     setCellKeysToEditorIdMap(map: Record<string, string>): void {
-        this.cellKeysToEditorIdMap = map;
+        this.cellKeysToEditorIdMap = coerceObject(map);
     }
     setComponentIDtoCellKeysMap(map: Record<string, string>): void {
-        this.componentIDtoCellKeysMap = map;
+        this.componentIDtoCellKeysMap = coerceObject(map);
     }
     setCellComments(map: Record<string, string>): void {
-        this.cellComments = map;
+        this.cellComments = coerceObject(map);
     }
     setCellCommentAuthors(map: Record<string, string>): void {
-        this.cellCommentAuthors = map;
+        this.cellCommentAuthors = coerceObject(map);
     }
     setVisibleCellComments(keys: string[]): void {
-        this.visibleCellComments = keys;
+        this.visibleCellComments = coerceArray(keys);
     }
-    setInvalidFormulaCells(keys: Set<string>): void {
-        this.invalidFormulaCells = keys;
+    setInvalidFormulaCells(keys: Set<string> | string[] | string): void {
+        // Server may push as a JSON-encoded array; tolerate both.
+        const arr = coerceArray(
+            keys as unknown as string[] | string | null | undefined);
+        this.invalidFormulaCells = new Set(arr);
     }
     setOverlays(map: Record<string, OverlayInfo>): void {
-        this.overlays = map;
+        this.overlays = coerceObject(map);
     }
     setShowCustomEditorOnFocus(show: boolean): void {
         this.showCustomEditorOnFocus = show;
@@ -2322,7 +2325,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.invalidFormulaErrorMessage = message;
     }
     setNamedRanges(names: string[]): void {
-        this.namedRanges = names;
+        this.namedRanges = coerceArray(names);
     }
     setResources(_host: HTMLElement, jsonString: string): void {
         // Parse the JSON-serialized resource map (id → URL) so
@@ -2346,7 +2349,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // Store the raw popup-button list. The connector computes
         // positions at render time via `buildRenderState`. Slice
         // 161.
-        this.popupButtonStates = popupButtons;
+        this.popupButtonStates = coerceArray(popupButtons);
     }
 
     setWorkbookProtected(isProtected: boolean): void {
@@ -2386,7 +2389,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.infoLabelValue = label;
     }
     setHyperlinksTooltips(tooltips: Record<string, string>): void {
-        this.hyperlinksTooltips = tooltips;
+        this.hyperlinksTooltips = coerceObject(tooltips);
     }
     setId(id: string): void {
         this.elementId = id;
@@ -2702,6 +2705,86 @@ export function computePositionedOverlays(
  *
  * Slice 150.
  */
+/**
+ * Coerce a value that may be either an array or a JSON-encoded
+ * string into an array. The Flow runtime serializes server-side
+ * property values to JSON strings when they reach the
+ * {@code <vaadin-spreadsheet>} element's attribute lane, and they
+ * arrive at the connector's setters as strings; the GWT-side
+ * client used to JSON-parse them on the way in. Slice 179.
+ */
+export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
+    if (value == null) {
+        return [];
+    }
+    if (Array.isArray(value)) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    // Typed arrays (Int32Array, Float32Array) — already array-like;
+    // convert to a real array for downstream `.map` etc. compatibility.
+    if (typeof (value as any).length === 'number') {
+        return Array.from(value as any);
+    }
+    return [];
+}
+
+/**
+ * Object-shaped variant of {@link coerceArray}. The same JSON-string-
+ * coming-from-Flow-attribute path applies to record/map setters.
+ * Slice 179.
+ */
+export function coerceObject<V>(
+    value: Record<string, V> | string | null | undefined
+): Record<string, V> {
+    if (value == null) {
+        return {};
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+    return value;
+}
+
+/**
+ * Numeric-array variant. Typed arrays (Int32Array, Float32Array)
+ * arrive intact when pushed via Flow's typed-array support; JSON
+ * strings get parsed. Slice 179.
+ */
+export function coerceNumberArray(
+    value: number[] | Int32Array | Float32Array | string | null | undefined
+): number[] | Int32Array | Float32Array {
+    if (value == null) {
+        return [];
+    }
+    if (Array.isArray(value)
+            || value instanceof Int32Array
+            || value instanceof Float32Array) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+    return [];
+}
+
 /**
  * Pure helper: return the set of column indices that intersect
  * the active range of the selection. Slice 173 — fed to the
