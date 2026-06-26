@@ -19,6 +19,30 @@ describe('combo-box connector', () => {
     expect(comboBox.$connector).to.equal(connector);
   });
 
+  describe('initialization while opened', () => {
+    // Flow defers the connector initialization for an initially hidden combo
+    // box until it becomes visible. When the server makes it visible and opens
+    // it in the same round-trip, initLazy runs while the combo box is already
+    // opened. Assigning the data provider then synchronously triggers a
+    // first-page load that calls back into the connector, so all $connector
+    // functions must already be defined by that point (see issue #9622).
+    beforeEach(() => {
+      comboBox = fixtureSync('<vaadin-combo-box opened></vaadin-combo-box>');
+      init(comboBox);
+    });
+
+    it('should request the first page of data', () => {
+      expect(comboBox.$server.setViewportRange).to.be.calledOnce;
+    });
+
+    it('should load items into the dropdown', () => {
+      comboBox.$connector.set(0, [{ key: '1', label: 'one' }], '');
+      comboBox.$connector.confirm(1, '');
+
+      expect(comboBox.filteredItems).to.eql([{ key: '1', label: 'one' }]);
+    });
+  });
+
   describe('pending requests', () => {
     let dataProviderController: FlowComboBox['__dataProviderController'];
 
