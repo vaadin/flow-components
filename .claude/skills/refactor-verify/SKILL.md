@@ -182,6 +182,35 @@ mvn -pl $0 test -Dtest='*PayloadTest' -B
 **Pass criterion:** all payload tests pass.
 **Fail action:** the slice changed an externally-observable contract. **This is not a refactor anymore — it's an API change.** Stop and surface.
 
+### Gate 8b — Public surface inventory (only for client-side rewrites / flips)
+
+When a slice touches a frontend component's DOM, default stylesheet, or any element-facing surface, verify that the **documented** public contract is preserved. The contract for Vaadin Flow components is specifically:
+
+1. `::part(...)` attributes from `../docs/articles/components/<name>/styling.adoc`
+2. `--vaadin-<name>-*` CSS custom properties documented there
+3. `public static final String <NAME>_STYLE = "..."` constants in the main Java class
+
+```sh
+# 1. List documented parts.
+grep -oE '::part\([a-z-]+\)' ../docs/articles/components/<name>/styling.adoc | sort -u
+
+# 2. Confirm every documented part still appears in the new DOM
+#    (the rendered Lit element must emit part="..." matching each).
+grep -oE 'part=\"[a-z\\s-]+\"' <component-frontend-source> | sort -u
+
+# 3. List documented custom properties.
+grep -oE '--vaadin-[a-z-]+' ../docs/articles/components/<name>/styling.adoc | sort -u
+
+# 4. List public Java constants of the form *_STYLE.
+grep -nE 'public static final String [A-Z_]+_STYLE' <component-java-source>
+```
+
+**Pass criterion:** every documented part / property / Java constant still has a working implementation in the new DOM/CSS. Default-stylesheet internal selectors and TestBench element selectors are NOT part of this gate — they're internal implementation details that update alongside the component.
+
+**Fail action:** missing documented surface = the slice has a contract gap. Add the missing `part="..."`, custom property fallback, or class-honoring behavior in the same slice. Don't flip the implementation until this gate is green.
+
+**Why this gate exists:** the Spreadsheet GWT→Lit rewrite (slices 168-170 attempt 2026-06-26) was reverted after the IT suite went 5→350 failures. Root cause was a missed contract sweep: the legacy stylesheet + TestBench element queried internal class names that the audit (slice 172) later confirmed were NOT documented. Running this gate before the flip would have surfaced the gap up front.
+
 ### Gate 9 — Full integration suite (end of batch, optional per slice)
 
 Run the project's IT / E2E suite. Slow but high-coverage.
