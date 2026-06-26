@@ -134,6 +134,28 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private dragging = false;
 
     /**
+     * Column-resize drag state (slice 164). Set on
+     * {@code column-resize-start}, cleared on mouseup. While
+     * non-null, document-level mousemove updates the column
+     * width live.
+     */
+    private columnResize: {
+        col: number;
+        startWidth: number;
+        startClientX: number;
+    } | null = null;
+
+    /**
+     * Row-resize drag state (slice 164). Symmetric to
+     * {@link columnResize}.
+     */
+    private rowResize: {
+        row: number;
+        startHeight: number;
+        startClientY: number;
+    } | null = null;
+
+    /**
      * The "current extend position" for shift+arrow navigation
      * (slice 147). Starts equal to the active cell. Shift+arrow
      * moves this corner ±1; the resulting range is normalized
@@ -455,6 +477,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'popup-button-click',
             this.handlePopupButtonClick as EventListener
         );
+        // Header-drag resize (slice 164). The header elements
+        // emit `column-resize-start` / `row-resize-start` from
+        // their right-edge / bottom-edge mousedown handles; the
+        // connector tracks the drag via document mousemove +
+        // mouseup. Live-updates colWidths/rowHeights for the
+        // current drag column/row.
+        this.columnHeader.addEventListener(
+            'column-resize-start',
+            this.handleColumnResizeStart as EventListener
+        );
+        this.rowHeader.addEventListener(
+            'row-resize-start',
+            this.handleRowResizeStart as EventListener
+        );
+        document.addEventListener('mousemove', this.handleDocumentMouseMove);
         // Header click delegation (slice 148). Each header element
         // emits its own custom event with the col / row coordinate;
         // the connector translates them into whole-column / whole-
@@ -513,6 +550,74 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }
         this.recomputeViewport();
         this.dispatchSelectionEvent();
+    };
+
+    /**
+     * Column resize drag — start. Captures the dragged column's
+     * current width + mouse position so {@link handleDocumentMouseMove}
+     * can apply deltas. Slice 164.
+     */
+    private readonly handleColumnResizeStart = (
+        e: CustomEvent<{ col: number; clientX: number }>
+    ): void => {
+        const { col, clientX } = e.detail;
+        const idx = col - 1;
+        const startWidth = idx < this.colWidths.length
+            ? this.colWidths[idx]
+            : this.defColWidth;
+        this.columnResize = { col, startWidth, startClientX: clientX };
+    };
+
+    /**
+     * Row resize drag — start. Mirror of column variant.
+     */
+    private readonly handleRowResizeStart = (
+        e: CustomEvent<{ row: number; clientY: number }>
+    ): void => {
+        const { row, clientY } = e.detail;
+        const idx = row - 1;
+        // Note: rowHeights is in POINTS, not pixels. We convert
+        // on render, but the resize delta is in pixels; convert
+        // back when writing.
+        const startHeight = idx < this.rowHeights.length
+            ? this.rowHeights[idx]
+            : this.defRowHeight;
+        this.rowResize = { row, startHeight, startClientY: clientY };
+    };
+
+    /**
+     * Document mousemove during a header-drag resize (slice 164).
+     * Updates the dragged column's pixel width (or row's point
+     * height) from the mouse delta + triggers a re-render. Fires
+     * many times per second during drag; the per-update cost is
+     * one array element write + one recomputeViewport.
+     */
+    private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
+        if (this.columnResize !== null) {
+            const delta = e.clientX - this.columnResize.startClientX;
+            const newWidth = Math.max(0, this.columnResize.startWidth + delta);
+            const idx = this.columnResize.col - 1;
+            // Convert colWidths to a mutable array if it's an Int32Array
+            // (server-pushed shape) — the resize-drag writes into it.
+            if (!Array.isArray(this.colWidths)) {
+                this.colWidths = Array.from(this.colWidths);
+            }
+            (this.colWidths as number[])[idx] = newWidth;
+            this.recomputeViewport();
+            return;
+        }
+        if (this.rowResize !== null) {
+            const deltaPx = e.clientY - this.rowResize.startClientY;
+            // Convert pixel delta → point delta (1 pt = 96/72 px at default ppi).
+            const deltaPt = deltaPx * 72 / FALLBACK_PPI;
+            const newHeight = Math.max(0, this.rowResize.startHeight + deltaPt);
+            const idx = this.rowResize.row - 1;
+            if (!Array.isArray(this.rowHeights)) {
+                this.rowHeights = Array.from(this.rowHeights);
+            }
+            (this.rowHeights as number[])[idx] = newHeight;
+            this.recomputeViewport();
+        }
     };
 
     /**
@@ -603,6 +708,46 @@ export class Spreadsheet implements SpreadsheetClientApi {
      * dispatched `cellSelected`).
      */
     private readonly handleDocumentMouseUp = (): void => {
+        if (this.columnResize !== null) {
+            // End of column-resize drag (slice 164). Dispatch
+            // the columnResized event with the new pixel width
+            // for the server's persistence + downstream rows
+            // dependencies.
+            const { col } = this.columnResize;
+            const idx = col - 1;
+            const newWidth = idx < this.colWidths.length
+                ? this.colWidths[idx]
+                : this.defColWidth;
+            this.columnResize = null;
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: {
+                    type: 'columnResized',
+                    data: { colIndexes: [col], newWidths: [newWidth] },
+                },
+                bubbles: true,
+                composed: true,
+            }));
+            return;
+        }
+        if (this.rowResize !== null) {
+            // End of row-resize drag (slice 164). rowHeights is
+            // in points; the event payload also uses points.
+            const { row } = this.rowResize;
+            const idx = row - 1;
+            const newHeight = idx < this.rowHeights.length
+                ? this.rowHeights[idx]
+                : this.defRowHeight;
+            this.rowResize = null;
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: {
+                    type: 'rowsResized',
+                    data: { rowIndexes: [row], newHeights: [newHeight] },
+                },
+                bubbles: true,
+                composed: true,
+            }));
+            return;
+        }
         if (!this.dragging) {
             return;
         }
@@ -1233,6 +1378,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.handlePopupButtonClick as EventListener
         );
         document.removeEventListener('mouseup', this.handleDocumentMouseUp);
+        document.removeEventListener('mousemove', this.handleDocumentMouseMove);
+        this.columnHeader.removeEventListener(
+            'column-resize-start',
+            this.handleColumnResizeStart as EventListener
+        );
+        this.rowHeader.removeEventListener(
+            'row-resize-start',
+            this.handleRowResizeStart as EventListener
+        );
         this.resizeObserver.disconnect();
     }
 

@@ -106,6 +106,16 @@ export class SpreadsheetRowHeader extends LitElement {
             border-bottom: 1px solid
                 var(--vaadin-spreadsheet-header-border, #c0c0c0);
         }
+
+        /* Resize handle on the bottom edge of each row header
+           (slice 164). 5px tall, full-width, cursor:row-resize. */
+        .row-resize-handle {
+            position: absolute;
+            left: 0;
+            height: 5px;
+            cursor: row-resize;
+            z-index: 1;
+        }
     `;
 
     declare renderState: RowHeaderRenderState;
@@ -122,7 +132,34 @@ export class SpreadsheetRowHeader extends LitElement {
      */
     firstUpdated(): void {
         this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+        // Slice 164: row-resize drag mousedown.
+        this.shadowRoot!.addEventListener(
+            'mousedown',
+            this.handleShadowMouseDown as EventListener
+        );
     }
+
+    private readonly handleShadowMouseDown = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const handle = target.closest<HTMLElement>('.row-resize-handle');
+        if (!handle) {
+            return;
+        }
+        const row = Number(handle.dataset.row);
+        if (!Number.isFinite(row) || row < 1) {
+            return;
+        }
+        e.preventDefault();
+        const ev = e as MouseEvent;
+        this.dispatchEvent(new CustomEvent('row-resize-start', {
+            detail: { row, clientY: ev.clientY },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     private readonly handleShadowClick = (e: Event): void => {
         const ev = e as MouseEvent;
@@ -160,6 +197,7 @@ export class SpreadsheetRowHeader extends LitElement {
         }
 
         const cells: TemplateResult[] = [];
+        const handles: TemplateResult[] = [];
         for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
             const top = rowY[row - viewport.firstRowIndex] ?? 0;
             const height = rowHeights[row - viewport.firstRowIndex] ?? 0;
@@ -177,8 +215,15 @@ export class SpreadsheetRowHeader extends LitElement {
                     ${row}
                 </div>
             `);
+            // Resize handle on the row's bottom edge (slice 164).
+            const handleStyle =
+                `top:${top + height - 3}px;width:${headerWidth}px;`;
+            handles.push(html`
+                <div class="row-resize-handle" style=${handleStyle}
+                     data-row=${row}></div>
+            `);
         }
-        return html`${cells}`;
+        return html`${cells}${handles}`;
     }
 }
 

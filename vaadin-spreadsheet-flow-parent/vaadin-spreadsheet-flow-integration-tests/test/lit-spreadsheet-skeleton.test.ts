@@ -2384,6 +2384,136 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('column resize: mousedown on handle + drag + mouseup dispatches columnResized (slice 164)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'columnResized') {
+                received = detail;
+            }
+        });
+
+        // Start drag at col 2's right-edge handle, clientX=100.
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-resize-start', {
+            detail: { col: 2, clientX: 100 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Drag 20px right → new width = 50 + 20 = 70.
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, bubbles: true }));
+
+        // Release.
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        expect(received).to.exist;
+        expect(received!.data).to.deep.equal({
+            colIndexes: [2],
+            newWidths: [70],
+        });
+        cleanup();
+    });
+
+    it('row resize: mousedown on handle + drag + mouseup dispatches rowsResized (slice 164)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15)); // 15 pt each
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'rowsResized') {
+                received = detail;
+            }
+        });
+
+        // Start drag at row 3's bottom-edge handle, clientY=60.
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-resize-start', {
+            detail: { row: 3, clientY: 60 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Drag 24px down. 24px * 72/96 = 18 points. New height = 15 + 18 = 33 pt.
+        document.dispatchEvent(new MouseEvent('mousemove', { clientY: 84, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        expect(received).to.exist;
+        expect(received!.data).to.deep.equal({
+            rowIndexes: [3],
+            newHeights: [33],
+        });
+        cleanup();
+    });
+
+    it('column resize live-updates the colWidths during drag (slice 164)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-resize-start', {
+            detail: { col: 1, clientX: 100 },
+            bubbles: true,
+            composed: true,
+        }));
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, bubbles: true }));
+
+        // The cell-grid's render state reflects the new width
+        // (50 + 30 = 80) — visible feedback during drag.
+        const state = sheet.getCellGrid().renderState;
+        expect(state.colWidths[0]).to.equal(80);
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        cleanup();
+    });
+
+    it('column resize clamps at 0 width (no negative columns) (slice 164)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-resize-start', {
+            detail: { col: 1, clientX: 100 },
+            bubbles: true,
+            composed: true,
+        }));
+        // Drag 200px LEFT → would be -150 but clamps at 0.
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: -100, bubbles: true }));
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        const state = sheet.getCellGrid().renderState;
+        expect(state.colWidths[0]).to.equal(0);
+        cleanup();
+    });
+
+    it('column-header renders a resize handle for each column (slice 164)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(24);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const handles = sheet.getColumnHeader().shadowRoot!.querySelectorAll(
+            '.col-resize-handle'
+        );
+        expect(handles).to.have.length(3);
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

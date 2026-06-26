@@ -112,6 +112,17 @@ export class SpreadsheetColumnHeader extends LitElement {
             border-right: 1px solid
                 var(--vaadin-spreadsheet-header-border, #c0c0c0);
         }
+
+        /* Resize handle on the right edge of each column header
+           (slice 164). 4px wide, full-height, cursor:col-resize.
+           Mousedown begins a column-resize drag. */
+        .col-resize-handle {
+            position: absolute;
+            top: 0;
+            width: 5px;
+            cursor: col-resize;
+            z-index: 1;
+        }
     `;
 
     declare renderState: ColumnHeaderRenderState;
@@ -130,7 +141,37 @@ export class SpreadsheetColumnHeader extends LitElement {
      */
     firstUpdated(): void {
         this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+        // Slice 164: column-resize drag. mousedown on a
+        // `.col-resize-handle` dispatches `column-resize-start`
+        // with the col + the original clientX so the connector
+        // can track the drag.
+        this.shadowRoot!.addEventListener(
+            'mousedown',
+            this.handleShadowMouseDown as EventListener
+        );
     }
+
+    private readonly handleShadowMouseDown = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const handle = target.closest<HTMLElement>('.col-resize-handle');
+        if (!handle) {
+            return;
+        }
+        const col = Number(handle.dataset.col);
+        if (!Number.isFinite(col) || col < 1) {
+            return;
+        }
+        e.preventDefault();
+        const ev = e as MouseEvent;
+        this.dispatchEvent(new CustomEvent('column-resize-start', {
+            detail: { col, clientX: ev.clientX },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     private readonly handleShadowClick = (e: Event): void => {
         const ev = e as MouseEvent;
@@ -168,6 +209,7 @@ export class SpreadsheetColumnHeader extends LitElement {
         }
 
         const cells: TemplateResult[] = [];
+        const handles: TemplateResult[] = [];
         for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
             const left = colX[col - viewport.firstColumnIndex] ?? 0;
             const width = colWidths[col - viewport.firstColumnIndex] ?? 0;
@@ -187,8 +229,17 @@ export class SpreadsheetColumnHeader extends LitElement {
                     ${letter}
                 </div>
             `);
+            // Resize handle on the right edge of this column
+            // (slice 164). Anchored at the column's right edge so
+            // mousedown begins a resize-drag for THIS column.
+            const handleStyle =
+                `left:${left + width - 3}px;height:${headerHeight}px;`;
+            handles.push(html`
+                <div class="col-resize-handle" style=${handleStyle}
+                     data-col=${col}></div>
+            `);
         }
-        return html`${cells}`;
+        return html`${cells}${handles}`;
     }
 }
 
