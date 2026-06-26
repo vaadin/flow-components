@@ -2217,6 +2217,45 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('constructor accepts an optional renderTarget arg for shadow-DOM hosts (slice 162)', () => {
+        // The Lit wrapper passes (element, element.renderRoot) so
+        // DOM goes into the shadow root, not the light DOM. Verify
+        // the second arg controls where children are appended.
+        const host = document.createElement('div');
+        const shadow = host.attachShadow({ mode: 'open' });
+        document.body.appendChild(host);
+
+        const sheet = new Spreadsheet(host, shadow);
+
+        // Scroll container is inside the shadow root, not the light DOM.
+        expect(shadow.children.length).to.equal(2);
+        expect(host.children.length).to.equal(0);
+        // Host is still the event target / style host.
+        expect(host.style.display).to.equal('flex');
+
+        sheet.dispose();
+        host.remove();
+    });
+
+    it('resize() + relayout() call recomputeViewport (slice 162)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        const before = sheet.getCellGrid().renderState;
+        sheet.resize();
+        const afterResize = sheet.getCellGrid().renderState;
+        expect(afterResize === before).to.be.false;
+
+        sheet.relayout();
+        const afterRelayout = sheet.getCellGrid().renderState;
+        expect(afterRelayout === afterResize).to.be.false;
+
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

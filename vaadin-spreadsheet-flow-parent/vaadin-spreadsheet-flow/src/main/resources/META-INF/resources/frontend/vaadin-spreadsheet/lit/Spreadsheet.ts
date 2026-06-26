@@ -89,8 +89,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // virtual scroller, selection state, etc.).
     // ====================================================================
 
-    /** The host element the spreadsheet renders into. */
+    /**
+     * The HTMLElement we dispatch server-bound events on (the
+     * wrapper `<vaadin-spreadsheet>` from the Flow side, or a
+     * plain test div). DOM is appended to {@link renderTarget}
+     * — usually the same element, but a ShadowRoot when the
+     * wrapper passes its `renderRoot`. Slice 162.
+     */
     private readonly host: HTMLElement;
+
+    /**
+     * Where DOM gets appended. When the wrapper is a LitElement,
+     * this is its shadow root (passed as the second constructor
+     * arg). Otherwise it's the host element itself. Slice 162.
+     */
+    private readonly renderTarget: HTMLElement | ShadowRoot;
 
     /** Total grid dimensions. */
     private rows = 0;
@@ -303,8 +316,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly resizeObserver: ResizeObserver;
 
-    constructor(host: HTMLElement) {
+    constructor(host: HTMLElement, renderTarget?: HTMLElement | ShadowRoot) {
         this.host = host;
+        // The wrapper (vaadin-spreadsheet.js) calls
+        // `new Spreadsheet(element, element.renderRoot)` so DOM
+        // goes into the shadow root, not the light DOM. Tests
+        // and direct callers can omit the second arg and let
+        // DOM go into the host directly. Slice 162.
+        this.renderTarget = renderTarget ?? host;
         this.cellGrid = new SpreadsheetCellGrid();
         this.columnHeader = new SpreadsheetColumnHeader();
         this.rowHeader = new SpreadsheetRowHeader();
@@ -314,6 +333,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // the available space + the sheet tabs sit below at their
         // intrinsic height. Slice 154. Existing host width/height
         // (set via setWidth/setHeight) are honored by flex.
+        // When renderTarget is a ShadowRoot, flex still applies
+        // on the HOST element (CSS reaches it via the host
+        // selector); skip the style writes when host is a
+        // ShadowRoot itself (e.g. test setups that pass a
+        // ShadowRoot as the first arg — uncommon).
         this.host.style.display = 'flex';
         this.host.style.flexDirection = 'column';
         this.scrollContainer = document.createElement('div');
@@ -366,12 +390,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.appendChild(this.columnHeader);
         this.scrollContainer.appendChild(this.rowHeader);
         this.scrollContainer.appendChild(this.cellGrid);
-        this.host.appendChild(this.scrollContainer);
+        this.renderTarget.appendChild(this.scrollContainer);
         // Sheet tabs sit below the scroll container in the flex
         // column. flex:0 so they take their intrinsic height,
         // never grow / shrink based on content.
         this.sheetTabs.style.flex = '0 0 auto';
-        this.host.appendChild(this.sheetTabs);
+        this.renderTarget.appendChild(this.sheetTabs);
         // Sheet tab click → switch active sheet via spreadsheet-event
         // (slice 154).
         this.sheetTabs.addEventListener(
@@ -1500,11 +1524,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     relayout(): void {
-        // TODO Phase 3.2 — re-measure viewport, repopulate visible cells.
+        // The wrapper calls this after batched state changes
+        // (setRowH / setColW / setRows / setCols / ...) settle.
+        // Recompute viewport bounds + push fresh render state.
+        // Slice 162.
+        this.recomputeViewport();
     }
 
     resize(): void {
-        // TODO Phase 3.2 — recompute viewport bounds on container resize.
+        // The wrapper's `spreadsheetResizeObserver` calls this
+        // on container size changes. We also have our own
+        // ResizeObserver (slice 142) on the scroll container —
+        // calling recomputeViewport here is idempotent + cheap.
+        // Slice 162.
+        this.recomputeViewport();
     }
 
     notifyStateChanges(_changedPropertyNames: string[], _firstUpdate: boolean): void {
