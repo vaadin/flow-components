@@ -1359,6 +1359,101 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('Tab moves active cell right + Shift+Tab moves left (slice 149)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Move to (3, 3) via cell-click.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        dispatchKey(scroller, 'Tab');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 4, row: 3 });
+        dispatchKey(scroller, 'Tab', { shiftKey: true });
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        cleanup();
+    });
+
+    it('Enter moves active cell down + Shift+Enter moves up (slice 149)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        dispatchKey(scroller, 'Enter');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 4 });
+        dispatchKey(scroller, 'Enter', { shiftKey: true });
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        cleanup();
+    });
+
+    it('Home / End jump to first / last column in current row (slice 149)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        dispatchKey(scroller, 'Home');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 3 });
+        dispatchKey(scroller, 'End');
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 5, row: 3 });
+        cleanup();
+    });
+
+    it('Ctrl+Home and Ctrl+End jump to A1 / last cell (slice 149)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        const scroller = sheet.getScrollContainer();
+        scroller.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'End',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 5, row: 5 });
+        scroller.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Home',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

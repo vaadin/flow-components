@@ -464,66 +464,46 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly handleKeyDown = (e: KeyboardEvent): void => {
         const key = e.key;
-        if (key !== 'ArrowUp' && key !== 'ArrowDown'
-                && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+        // Map each navigation key to a (deltaCol, deltaRow) OR an
+        // absolute coord. Modifier-key semantics:
+        //   - shift+arrow : move "extend" corner (slice 147)
+        //   - plain arrow : move active cell ±1
+        //   - Tab / Enter : same as ArrowRight / ArrowDown
+        //   - Home / End  : absolute col edge, same row
+        //   - Ctrl+Home   : (1, 1)
+        //   - Ctrl+End    : (cols, rows)
+        // The handler resolves the next active-cell (or extend-cell)
+        // through a single code path so the clamping + selection-
+        // write is shared. Slice 149.
+        const target = computeNavigationTarget(key, e, {
+            activeCell: this.selection.activeCell,
+            extendCol: this.extendCol,
+            extendRow: this.extendRow,
+            cols: this.cols,
+            rows: this.rows,
+        });
+        if (!target) {
             return;
         }
         if (this.rows <= 0 || this.cols <= 0) {
-            // No grid populated yet — nothing to navigate.
             return;
         }
         e.preventDefault();
-        if (e.shiftKey) {
-            // Move the extend position; the active cell (anchor)
-            // stays put. The range is normalized across the two.
-            let extendCol = this.extendCol;
-            let extendRow = this.extendRow;
-            switch (key) {
-                case 'ArrowUp':
-                    extendRow = Math.max(1, extendRow - 1);
-                    break;
-                case 'ArrowDown':
-                    extendRow = Math.min(this.rows, extendRow + 1);
-                    break;
-                case 'ArrowLeft':
-                    extendCol = Math.max(1, extendCol - 1);
-                    break;
-                case 'ArrowRight':
-                    extendCol = Math.min(this.cols, extendCol + 1);
-                    break;
-            }
-            this.extendCol = extendCol;
-            this.extendRow = extendRow;
+        if (target.kind === 'extend') {
+            this.extendCol = target.col;
+            this.extendRow = target.row;
             const anchor = this.selection.activeCell;
             this.selection = {
                 activeCell: anchor,
                 activeRange: normalizedRange(
-                    anchor.col, anchor.row, extendCol, extendRow
+                    anchor.col, anchor.row, target.col, target.row
                 ),
                 auxRanges: [],
             };
         } else {
-            // Move the active cell; collapse the range to it.
-            const active = this.selection.activeCell;
-            let col = active.col;
-            let row = active.row;
-            switch (key) {
-                case 'ArrowUp':
-                    row = Math.max(1, row - 1);
-                    break;
-                case 'ArrowDown':
-                    row = Math.min(this.rows, row + 1);
-                    break;
-                case 'ArrowLeft':
-                    col = Math.max(1, col - 1);
-                    break;
-                case 'ArrowRight':
-                    col = Math.min(this.cols, col + 1);
-                    break;
-            }
-            this.selection = selectSingleCell(col, row);
-            this.extendCol = col;
-            this.extendRow = row;
+            this.selection = selectSingleCell(target.col, target.row);
+            this.extendCol = target.col;
+            this.extendRow = target.row;
         }
         this.recomputeViewport();
     };
@@ -1357,4 +1337,104 @@ export class Spreadsheet implements SpreadsheetClientApi {
     isSheetProtected(): boolean {
         return this.sheetProtected;
     }
+}
+
+/**
+ * Pure helper: given the pressed key + modifier state + current
+ * selection + grid bounds, compute the next active cell (or the
+ * next extend-cell when shift is held).
+ *
+ * Returns {@code null} when the key isn't a recognized navigation
+ * key — the connector returns early without consuming the event.
+ *
+ * Slice 147 introduced the arrow keys; slice 149 extends with
+ * Tab / Enter / Home / End / Ctrl+Home / Ctrl+End. Each navigation
+ * key has the same modifier semantics:
+ *   - plain  : move active cell, collapse range
+ *   - shift  : move extend cell, keep active as anchor
+ *   - ctrl   : absolute jumps (Ctrl+Home/End)
+ *
+ * Pure (no DOM, no instance state) so it's straightforward to
+ * unit-test in isolation.
+ */
+export interface NavigationTarget {
+    kind: 'move' | 'extend';
+    col: number;
+    row: number;
+}
+
+export function computeNavigationTarget(
+    key: string,
+    modifiers: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean },
+    state: {
+        activeCell: { col: number; row: number };
+        extendCol: number;
+        extendRow: number;
+        cols: number;
+        rows: number;
+    }
+): NavigationTarget | null {
+    const { activeCell, extendCol, extendRow, cols, rows } = state;
+    const ctrlOrMeta = modifiers.ctrlKey || modifiers.metaKey;
+    // Arrow keys participate in extend (shift+arrow grows the
+    // range, base = extendCell). Tab/Enter/Home/End always MOVE
+    // the active cell, ignoring shift's "extend" meaning — they
+    // use shift as a direction flag (shift+Tab = back, shift+
+    // Enter = up) and base from activeCell.
+    const isArrow = key === 'ArrowUp' || key === 'ArrowDown'
+        || key === 'ArrowLeft' || key === 'ArrowRight';
+    const isExtend = isArrow && modifiers.shiftKey;
+    const baseCol = isExtend ? extendCol : activeCell.col;
+    const baseRow = isExtend ? extendRow : activeCell.row;
+    let nextCol: number | null = null;
+    let nextRow: number | null = null;
+
+    switch (key) {
+        case 'ArrowUp':
+            nextCol = baseCol;
+            nextRow = baseRow - 1;
+            break;
+        case 'ArrowDown':
+            nextCol = baseCol;
+            nextRow = baseRow + 1;
+            break;
+        case 'ArrowLeft':
+            nextCol = baseCol - 1;
+            nextRow = baseRow;
+            break;
+        case 'ArrowRight':
+            nextCol = baseCol + 1;
+            nextRow = baseRow;
+            break;
+        case 'Enter':
+            // Shift+Enter goes up, plain Enter goes down — both
+            // move the active cell from its current position.
+            nextCol = baseCol;
+            nextRow = modifiers.shiftKey ? baseRow - 1 : baseRow + 1;
+            break;
+        case 'Tab':
+            // Shift+Tab goes left, plain Tab goes right.
+            nextCol = modifiers.shiftKey ? baseCol - 1 : baseCol + 1;
+            nextRow = baseRow;
+            break;
+        case 'Home':
+            // Ctrl+Home jumps to A1; plain Home goes to col 1 in
+            // the current row.
+            nextCol = 1;
+            nextRow = ctrlOrMeta ? 1 : baseRow;
+            break;
+        case 'End':
+            // Ctrl+End jumps to the last cell; plain End goes to
+            // the last column in the current row.
+            nextCol = cols;
+            nextRow = ctrlOrMeta ? rows : baseRow;
+            break;
+        default:
+            return null;
+    }
+    return {
+        kind: isExtend ? 'extend' : 'move',
+        col: Math.max(1, Math.min(cols, nextCol!)),
+        row: Math.max(1, Math.min(rows, nextRow!)),
+    };
 }
