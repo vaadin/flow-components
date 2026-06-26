@@ -2043,6 +2043,180 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('Ctrl+A selects the entire sheet (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(20);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'cellRangeSelected') {
+                received = detail;
+            }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'a',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 1, c2: 10, r1: 1, r2: 20,
+        });
+        expect(received!.data).to.deep.equal({
+            row1: 1, col1: 1, row2: 20, col2: 10,
+        });
+        cleanup();
+    });
+
+    it('Cmd+A (Mac convention) also selects the entire sheet (slice 159)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'a',
+            metaKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 1, c2: 5, r1: 1, r2: 5,
+        });
+        cleanup();
+    });
+
+    it('Ctrl+Z dispatches onUndo (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let received: { type: string } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onUndo') {
+                received = detail;
+            }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'z',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.exist;
+        cleanup();
+    });
+
+    it('Ctrl+Y dispatches onRedo (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let received: { type: string } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onRedo') {
+                received = detail;
+            }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'y',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.exist;
+        cleanup();
+    });
+
+    it('Cmd+Shift+Z (Mac convention) also dispatches onRedo (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let received: { type: string } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onRedo') {
+                received = detail;
+            }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'z',
+            metaKey: true,
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.exist;
+        cleanup();
+    });
+
+    it('Ctrl+Shift+Z dispatches onRedo (Windows convention) (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let received = false;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            if ((e as CustomEvent).detail.type === 'onRedo') {
+                received = true;
+            }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'z',
+            ctrlKey: true,
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.be.true;
+        cleanup();
+    });
+
+    it('plain Ctrl+Z without shift does NOT dispatch onRedo (slice 159)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let undoReceived = false;
+        let redoReceived = false;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onUndo') { undoReceived = true; }
+            if (detail.type === 'onRedo') { redoReceived = true; }
+        });
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'z',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(undoReceived).to.be.true;
+        expect(redoReceived).to.be.false;
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

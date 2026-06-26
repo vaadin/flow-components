@@ -721,6 +721,54 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly handleKeyDown = (e: KeyboardEvent): void => {
         const key = e.key;
+        const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+        // Ctrl+A / Cmd+A — select the entire sheet (slice 159).
+        if (ctrlOrMeta && (key === 'a' || key === 'A')) {
+            if (this.rows <= 0 || this.cols <= 0) {
+                return;
+            }
+            e.preventDefault();
+            this.selection = {
+                activeCell: { col: 1, row: 1 },
+                activeRange: normalizedRange(1, 1, this.cols, this.rows),
+                auxRanges: [],
+            };
+            this.extendCol = this.cols;
+            this.extendRow = this.rows;
+            this.recomputeViewport();
+            this.dispatchSelectionEvent();
+            return;
+        }
+
+        // Ctrl+Z / Cmd+Z — undo. Pure pass-through to the server;
+        // the server owns the undo stack + replies with the
+        // resulting cell updates. Slice 159.
+        if (ctrlOrMeta && (key === 'z' || key === 'Z') && !e.shiftKey) {
+            e.preventDefault();
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: { type: 'onUndo', data: {} },
+                bubbles: true,
+                composed: true,
+            }));
+            return;
+        }
+
+        // Ctrl+Y / Cmd+Shift+Z — redo. Cmd+Y is reserved on Mac
+        // for "history menu" by some apps, so we also accept
+        // Cmd+Shift+Z (the Mac convention) + Ctrl+Y (Windows).
+        // Slice 159.
+        if (ctrlOrMeta
+                && ((key === 'y' || key === 'Y')
+                    || ((key === 'z' || key === 'Z') && e.shiftKey))) {
+            e.preventDefault();
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: { type: 'onRedo', data: {} },
+                bubbles: true,
+                composed: true,
+            }));
+            return;
+        }
 
         // F2 opens the cell editor at the active cell, loaded with
         // the cell's existing value (Excel convention). Slice 153.
