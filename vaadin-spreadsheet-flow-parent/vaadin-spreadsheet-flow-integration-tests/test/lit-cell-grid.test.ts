@@ -1059,6 +1059,147 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — cell-click event delegation (slice 146)', () => {
+    function build3x3State(): CellGridRenderState {
+        return {
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 3,
+                lastColumnPosition: 150,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 3,
+                lastRowPosition: 60,
+            },
+            cellData: new Map(),
+            colX: [0, 50, 100],
+            rowY: [0, 20, 40],
+            colWidths: [50, 50, 50],
+            rowHeights: [20, 20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
+            totalGridWidthPx: 150,
+            totalGridHeightPx: 60,
+            scrollLeft: 0,
+            scrollTop: 0,
+            selection: emptyCellGridRenderState().selection,
+        };
+    }
+
+    it('puts data-col + data-row on each rendered cell', async () => {
+        const el = await attachWithState(build3x3State());
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col2.row3'
+        ) as HTMLElement;
+        expect(cell.dataset.col).to.equal('2');
+        expect(cell.dataset.row).to.equal('3');
+
+        cleanup(el);
+    });
+
+    it('dispatches a cell-click CustomEvent with the cell coord on click', async () => {
+        const el = await attachWithState(build3x3State());
+
+        let received: { col: number; row: number } | undefined;
+        el.addEventListener('cell-click', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            received = { col: detail.col, row: detail.row };
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col2.row3'
+        ) as HTMLElement;
+        cell.click();
+
+        expect(received).to.deep.equal({ col: 2, row: 3 });
+
+        cleanup(el);
+    });
+
+    it('cell-click detail includes shiftKey + ctrlKey + metaKey + altKey', async () => {
+        const el = await attachWithState(build3x3State());
+
+        let received: {
+            col: number; row: number;
+            shiftKey: boolean; ctrlKey: boolean;
+            metaKey: boolean; altKey: boolean;
+        } | undefined;
+        el.addEventListener('cell-click', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col2.row2'
+        ) as HTMLElement;
+        // Dispatch a MouseEvent with modifier flags so the handler
+        // reads them off the event.
+        cell.dispatchEvent(new MouseEvent('click', {
+            bubbles: true,
+            composed: true,
+            shiftKey: true,
+            ctrlKey: false,
+            metaKey: true,
+            altKey: false,
+        }));
+
+        expect(received).to.exist;
+        expect(received!.shiftKey).to.be.true;
+        expect(received!.ctrlKey).to.be.false;
+        expect(received!.metaKey).to.be.true;
+        expect(received!.altKey).to.be.false;
+
+        cleanup(el);
+    });
+
+    it('cell-click event bubbles + crosses the shadow DOM boundary', async () => {
+        const el = await attachWithState(build3x3State());
+
+        // Listening on the host element (outside the shadow root)
+        // should still receive the event because it's
+        // composed: true.
+        let received = false;
+        el.addEventListener('cell-click', () => {
+            received = true;
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col1.row1'
+        ) as HTMLElement;
+        cell.click();
+
+        expect(received).to.be.true;
+
+        cleanup(el);
+    });
+
+    it('does NOT dispatch cell-click for clicks outside any cell', async () => {
+        const el = await attachWithState(build3x3State());
+
+        let received = false;
+        el.addEventListener('cell-click', () => {
+            received = true;
+        });
+
+        // Click the shadow root itself (no .cell ancestor) — should
+        // not trigger the event.
+        el.shadowRoot!.dispatchEvent(new MouseEvent('click', {
+            bubbles: true,
+        }));
+
+        expect(received).to.be.false;
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — frozen-pane transform wrappers (slice 141)', () => {
     function buildScrolledFreezeState(opts: {
         verticalSplitPosition: number;

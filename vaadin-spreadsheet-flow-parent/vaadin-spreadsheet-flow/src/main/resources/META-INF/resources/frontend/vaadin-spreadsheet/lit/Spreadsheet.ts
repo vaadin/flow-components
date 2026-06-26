@@ -16,7 +16,11 @@ import type {
     SpreadsheetActionDetails,
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
-import { selectSingleCell, type SelectionState } from './state/SelectionState.js';
+import {
+    selectRange,
+    selectSingleCell,
+    type SelectionState,
+} from './state/SelectionState.js';
 import {
     computeTotalGridSize,
     computeViewportBounds,
@@ -287,9 +291,48 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.appendChild(this.cellGrid);
         this.host.appendChild(this.scrollContainer);
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
+        // Cell-click delegation (slice 146): the cell-grid dispatches
+        // a `cell-click` custom event with detail = { col, row,
+        // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
+        // its selection + re-renders. Bubble + composed = true so the
+        // event crosses the cell-grid's shadow DOM boundary.
+        this.cellGrid.addEventListener(
+            'cell-click',
+            this.handleCellClick as EventListener
+        );
         this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
         this.resizeObserver.observe(this.scrollContainer);
     }
+
+    /**
+     * Cell-click handler. Single click = move active cell + collapse
+     * selection to that cell. Shift-click = extend the active range
+     * to include the new anchor while keeping the existing active
+     * cell as the range origin (Excel convention). Ctrl/Meta click
+     * is reserved for non-coherent selection (auxRanges) — deferred
+     * to a future slice. Slice 146.
+     */
+    private readonly handleCellClick = (
+        e: CustomEvent<{
+            col: number;
+            row: number;
+            shiftKey: boolean;
+            ctrlKey: boolean;
+            metaKey: boolean;
+            altKey: boolean;
+        }>
+    ): void => {
+        const { col, row, shiftKey } = e.detail;
+        if (shiftKey) {
+            // Extend the active range from the existing active cell
+            // (= the anchor) to the clicked coordinate.
+            const anchor = this.selection.activeCell;
+            this.selection = selectRange(anchor.col, anchor.row, col, row);
+        } else {
+            this.selection = selectSingleCell(col, row);
+        }
+        this.recomputeViewport();
+    };
 
     /**
      * Scroll-event handler: recompute the visible viewport from the
@@ -327,6 +370,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     dispose(): void {
         this.scrollContainer.removeEventListener('scroll', this.handleScroll);
+        this.cellGrid.removeEventListener(
+            'cell-click',
+            this.handleCellClick as EventListener
+        );
         this.resizeObserver.disconnect();
     }
 

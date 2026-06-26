@@ -967,6 +967,94 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('cell-click event from the cell-grid updates the active cell selection (slice 146)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Default selection: A1.
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+
+        // Dispatch a cell-click event manually (simulates what the
+        // shadow-root handler does after a real click).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 2 });
+        // Range collapses to the active cell on plain click.
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 3, c2: 3, r1: 2, r2: 2,
+        });
+
+        cleanup();
+    });
+
+    it('shift-click extends the active range from the previous active cell (slice 146)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // First click sets the active cell to (2, 2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+
+        // Shift-click on (4, 4) extends the range from the anchor.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 4, row: 4, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Active cell stays at the anchor (Excel convention).
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        // Range covers (2,2) to (4,4).
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 4, r1: 2, r2: 4,
+        });
+
+        cleanup();
+    });
+
+    it('cell-click triggers a re-render with the new selection (slice 146)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+
+        const beforeState = sheet.getCellGrid().renderState;
+        expect(beforeState.selection.activeCell).to.deep.equal({ col: 1, row: 1 });
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 4, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        const afterState = sheet.getCellGrid().renderState;
+        // Fresh state object pushed (not the same reference).
+        expect(afterState === beforeState).to.be.false;
+        expect(afterState.selection.activeCell).to.deep.equal({ col: 4, row: 3 });
+
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

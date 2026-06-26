@@ -106,6 +106,52 @@ export class SpreadsheetCellGrid extends LitElement {
         this.renderState = emptyCellGridRenderState();
     }
 
+    /**
+     * Wire up click delegation on first render — the shadow root
+     * doesn't exist until Lit has produced its first render. A
+     * single listener at the shadow-root level finds the clicked
+     * `.cell` ancestor and dispatches a {@code cell-click} custom
+     * event with the cell's coordinate + modifier-key state. The
+     * connector listens for this event to update its selection
+     * state + push a fresh render. Slice 146.
+     */
+    firstUpdated(): void {
+        this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+    }
+
+    private readonly handleShadowClick = (e: Event): void => {
+        const ev = e as MouseEvent;
+        const target = ev.target;
+        // The event target may be the ShadowRoot when the listener
+        // catches synthetic events that don't originate from a node
+        // inside the tree. ShadowRoot doesn't implement `closest`,
+        // so we narrow to Element first.
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('cell-click', {
+            detail: {
+                col,
+                row,
+                shiftKey: ev.shiftKey,
+                ctrlKey: ev.ctrlKey,
+                metaKey: ev.metaKey,
+                altKey: ev.altKey,
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
     render(): TemplateResult {
         const {
             viewport,
@@ -310,8 +356,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
                 + cellRangeClass;
             const style =
                 `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+            // data-col + data-row drive the click-delegation handler
+            // in firstUpdated() (slice 146) — single source of truth
+            // for the cell's coordinate when the event bubbles.
             cells.push(html`
-                <div class=${classList} style=${style}>
+                <div class=${classList} style=${style}
+                     data-col=${col} data-row=${row}>
                     ${text}
                 </div>
             `);
