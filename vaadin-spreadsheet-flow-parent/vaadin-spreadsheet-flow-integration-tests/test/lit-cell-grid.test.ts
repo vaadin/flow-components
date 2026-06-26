@@ -160,6 +160,7 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: {
                 activeCell: { col: 1, row: 1 },
                 activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
@@ -273,6 +274,7 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -316,6 +318,7 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -361,6 +364,7 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -461,6 +465,7 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection,
         };
     }
@@ -590,6 +595,7 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection,
         };
     }
@@ -916,6 +922,7 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -1089,6 +1096,7 @@ describe('SpreadsheetCellGrid — cell-click event delegation (slice 146)', () =
             totalGridHeightPx: 60,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -1280,6 +1288,7 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers (slice 141)', (
             horizontalSplitPosition: 2,
             scrollLeft: 200,
             scrollTop: 0,
+            editor: null,
         }));
 
         const wrapper = el.shadowRoot!.querySelector(
@@ -1336,6 +1345,7 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers (slice 141)', (
             horizontalSplitPosition: 2,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
         }));
 
         let corner = el.shadowRoot!.querySelector(
@@ -1433,6 +1443,7 @@ describe('SpreadsheetCellGrid — render state updates', () => {
             totalGridHeightPx: 0,
             scrollLeft: 0,
             scrollTop: 0,
+            editor: null,
             selection: emptyCellGridRenderState().selection,
         });
 

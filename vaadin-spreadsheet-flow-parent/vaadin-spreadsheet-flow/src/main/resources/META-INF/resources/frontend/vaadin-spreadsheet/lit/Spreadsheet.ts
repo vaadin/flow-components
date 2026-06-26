@@ -26,10 +26,12 @@ import {
 import type {
     CellRangeSelectedData,
     CellSelectedData,
+    CellValueEditedData,
     ColumnSelectedData,
     RowSelectedData,
     SpreadsheetEvent,
 } from './types/rpc-client-to-server.js';
+import type { CellEditorState } from './elements/types.js';
 import {
     computeTotalGridSize,
     computeViewportBounds,
@@ -97,6 +99,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     /** Selection state. */
     private selection: SelectionState = selectSingleCell(1, 1);
+
+    /**
+     * Cell-editor state (slice 152). Null when no editor is
+     * active. When set, the cell-grid renders an editable
+     * {@code <input>} at the cell's coordinates; the user types,
+     * then Enter/Tab commits (slice 153) and Escape cancels.
+     */
+    private editor: CellEditorState | null = null;
 
     /**
      * The "current extend position" for shift+arrow navigation
@@ -328,6 +338,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'cell-click',
             this.handleCellClick as EventListener
         );
+        // Cell editor lifecycle events (slice 152). The cell-grid
+        // emits these from its shadow DOM; the connector tracks
+        // editor state + dispatches cellValueEdited on commit.
+        this.cellGrid.addEventListener(
+            'cell-doubleclick',
+            this.handleCellDoubleClick as EventListener
+        );
+        this.cellGrid.addEventListener(
+            'cell-editor-commit',
+            this.handleCellEditorCommit as EventListener
+        );
+        this.cellGrid.addEventListener(
+            'cell-editor-cancel',
+            this.handleCellEditorCancel as EventListener
+        );
         // Header click delegation (slice 148). Each header element
         // emits its own custom event with the col / row coordinate;
         // the connector translates them into whole-column / whole-
@@ -386,6 +411,59 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }
         this.recomputeViewport();
         this.dispatchSelectionEvent();
+    };
+
+    /**
+     * Double-click on a cell opens the in-place editor at that
+     * cell (slice 152). The connector loads the cell's existing
+     * value (or empty string when there's no data) into the
+     * editor state, then pushes a fresh render. The cell-grid's
+     * `updated()` lifecycle focuses the input + places the caret
+     * at the end.
+     */
+    private readonly handleCellDoubleClick = (
+        e: CustomEvent<{ col: number; row: number }>
+    ): void => {
+        const { col, row } = e.detail;
+        const key = toKey(col, row);
+        const cellData = this.cellDataByKey.get(key);
+        const initialValue = cellData?.value ?? '';
+        this.editor = { col, row, initialValue };
+        this.recomputeViewport();
+    };
+
+    /**
+     * Cell-editor commit (slice 152 scaffolding, slice 153 wires
+     * the server dispatch). Called when the user presses Enter,
+     * Tab, or blurs the input. Reads the typed value out of the
+     * event detail, dispatches `cellValueEdited` to the server,
+     * and closes the editor.
+     */
+    private readonly handleCellEditorCommit = (
+        e: CustomEvent<{ col: number; row: number; value: string }>
+    ): void => {
+        const { col, row, value } = e.detail;
+        // Close the editor first so the re-render removes the
+        // input — important to do BEFORE dispatching the server
+        // event so the editor doesn't briefly flash on top of the
+        // server's response.
+        this.editor = null;
+        this.recomputeViewport();
+        const data: CellValueEditedData = { row, col, value };
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: { type: 'cellValueEdited', data },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Cell-editor cancel (slice 152). User pressed Escape. Close
+     * the editor without dispatching anything.
+     */
+    private readonly handleCellEditorCancel = (): void => {
+        this.editor = null;
+        this.recomputeViewport();
     };
 
     /**
@@ -582,6 +660,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellGrid.removeEventListener(
             'cell-click',
             this.handleCellClick as EventListener
+        );
+        this.cellGrid.removeEventListener(
+            'cell-doubleclick',
+            this.handleCellDoubleClick as EventListener
+        );
+        this.cellGrid.removeEventListener(
+            'cell-editor-commit',
+            this.handleCellEditorCommit as EventListener
+        );
+        this.cellGrid.removeEventListener(
+            'cell-editor-cancel',
+            this.handleCellEditorCancel as EventListener
         );
         this.columnHeader.removeEventListener(
             'column-header-click',
@@ -853,6 +943,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             totalGridHeightPx: totalHeightPx,
             scrollLeft: opts.scrollLeft,
             scrollTop: opts.scrollTop,
+            editor: this.editor,
         };
     }
 

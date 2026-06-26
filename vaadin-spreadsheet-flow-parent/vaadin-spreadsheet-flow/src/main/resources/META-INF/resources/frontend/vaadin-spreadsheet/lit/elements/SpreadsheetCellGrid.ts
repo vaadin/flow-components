@@ -87,6 +87,22 @@ export class SpreadsheetCellGrid extends LitElement {
            so the cell-level rule below only takes effect for main
            cells. */
         .cell.quadrant-main { z-index: 1; }
+
+        /* Cell editor input — absolutely positioned over the cell
+           being edited, sized to match. z-index above all cells +
+           overlays so the input + caret are always on top. Slice
+           152. */
+        .cell-editor {
+            position: absolute;
+            box-sizing: border-box;
+            z-index: 10;
+            border: 2px solid
+                var(--vaadin-spreadsheet-editor-border, #1976d2);
+            outline: none;
+            font-family: var(--vaadin-spreadsheet-cell-font, inherit);
+            font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
+            padding: 0 2px;
+        }
     `;
 
     /**
@@ -117,7 +133,61 @@ export class SpreadsheetCellGrid extends LitElement {
      */
     firstUpdated(): void {
         this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+        // Double-click delegation for cell-editor activation
+        // (slice 152). Same pattern as the single-click handler;
+        // dispatches `cell-doubleclick` so the connector can open
+        // its editor at the dbl-clicked cell.
+        this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick);
     }
+
+    /**
+     * After every render, focus the editor input if one is now
+     * active. The browser auto-focus attribute only works once on
+     * insertion; this hook focuses on every transition into edit
+     * mode so re-activating an editor at a new cell still places
+     * the caret inside.
+     */
+    updated(changedProps: Map<string, unknown>): void {
+        if (this.renderState.editor && changedProps.has('renderState')) {
+            const input = this.shadowRoot!.querySelector(
+                '.cell-editor'
+            ) as HTMLInputElement | null;
+            if (input && document.activeElement !== input) {
+                input.focus();
+                // Place caret at end so typing extends the existing
+                // value (Excel convention).
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        }
+    }
+
+    /**
+     * Double-click handler — opens the cell editor at the clicked
+     * coordinate. Same shape as {@link handleShadowClick} but
+     * dispatches {@code cell-doubleclick} (no modifier-key
+     * metadata since the editor doesn't react to those). Slice
+     * 152.
+     */
+    private readonly handleShadowDoubleClick = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col, row },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     private readonly handleShadowClick = (e: Event): void => {
         const ev = e as MouseEvent;
@@ -286,7 +356,8 @@ export class SpreadsheetCellGrid extends LitElement {
         const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
         const mergedOverlays = buildMergedCellOverlays(this.renderState);
         const selectionOverlay = buildSelectionOverlay(this.renderState);
-        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}`;
+        const editor = buildCellEditorOverlay(this.renderState);
+        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${editor}`;
     }
 }
 
@@ -575,6 +646,121 @@ function buildCellStyleBlock(
         .map(([index, body]) => `.cell.cs${index} { ${body} }`)
         .join('\n');
     return html`<style>${unsafeHTML(rules)}</style>`;
+}
+
+/**
+ * Build the cell-editor overlay {@code <input>} when {@code state
+ * .editor} is non-null (slice 152). The input is sized to match
+ * the cell's pixel box using the appropriate quadrant arrays:
+ *
+ *  - col within frozen cols: use {@code frozenColX} / {@code
+ *    frozenColWidths}
+ *  - col within viewport: use {@code colX} / {@code colWidths}
+ *  - row within frozen rows: use {@code frozenRowY} / {@code
+ *    frozenRowHeights}
+ *  - row within viewport: use {@code rowY} / {@code rowHeights}
+ *
+ * When the editor's coordinate falls outside both the viewport
+ * and the frozen ranges, returns empty (defensive — the
+ * connector should never push an editor at an off-screen cell;
+ * this keeps the render safe regardless).
+ *
+ * On keydown:
+ *   Enter / Tab → dispatch {@code cell-editor-commit} with the
+ *     current input value; the connector dispatches
+ *     `cellValueEdited` (slice 153) + clears editor state.
+ *   Escape       → dispatch {@code cell-editor-cancel};
+ *                  connector clears editor state without
+ *                  dispatching cellValueEdited.
+ *   Blur          → same as commit (Excel convention; slice 153).
+ *
+ * The detail event payload is {@code { col, row, value }} so the
+ * connector can route the value to the correct cell without
+ * re-querying its state.
+ */
+function buildCellEditorOverlay(
+    state: CellGridRenderState
+): TemplateResult | string {
+    const editor = state.editor;
+    if (!editor) {
+        return '';
+    }
+    const { col, row, initialValue } = editor;
+    const { viewport, colX, colWidths, rowY, rowHeights } = state;
+    const { frozenColX, frozenColWidths, frozenRowY, frozenRowHeights } = state;
+
+    let left = 0;
+    let width = 0;
+    if (col >= viewport.firstColumnIndex && col <= viewport.lastColumnIndex) {
+        const i = col - viewport.firstColumnIndex;
+        left = colX[i] ?? 0;
+        width = colWidths[i] ?? 0;
+    } else if (col >= 1 && col <= frozenColX.length) {
+        left = frozenColX[col - 1] ?? 0;
+        width = frozenColWidths[col - 1] ?? 0;
+    } else {
+        return '';
+    }
+
+    let top = 0;
+    let height = 0;
+    if (row >= viewport.firstRowIndex && row <= viewport.lastRowIndex) {
+        const i = row - viewport.firstRowIndex;
+        top = rowY[i] ?? 0;
+        height = rowHeights[i] ?? 0;
+    } else if (row >= 1 && row <= frozenRowY.length) {
+        top = frozenRowY[row - 1] ?? 0;
+        height = frozenRowHeights[row - 1] ?? 0;
+    } else {
+        return '';
+    }
+
+    if (width === 0 || height === 0) {
+        return '';
+    }
+
+    const style =
+        `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+
+    const dispatchEditorEvent = (
+        target: EventTarget,
+        type: 'cell-editor-commit' | 'cell-editor-cancel',
+        value: string
+    ): void => {
+        target.dispatchEvent(new CustomEvent(type, {
+            detail: { col, row, value },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    const onKeyDown = (e: KeyboardEvent): void => {
+        const input = e.currentTarget as HTMLInputElement;
+        if (e.key === 'Enter' || e.key === 'Tab') {
+            e.preventDefault();
+            dispatchEditorEvent(input, 'cell-editor-commit', input.value);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
+        }
+        // Other keys (typing) are NOT stopped so the input receives
+        // them. Arrow keys etc. move the caret inside the input
+        // rather than navigating the spreadsheet — Excel convention.
+        e.stopPropagation();
+    };
+
+    const onBlur = (e: FocusEvent): void => {
+        const input = e.currentTarget as HTMLInputElement;
+        dispatchEditorEvent(input, 'cell-editor-commit', input.value);
+    };
+
+    return html`
+        <input class="cell-editor"
+               .value=${initialValue}
+               style=${style}
+               @keydown=${onKeyDown}
+               @blur=${onBlur} />
+    `;
 }
 
 customElements.define('vaadin-spreadsheet-internal-cell-grid', SpreadsheetCellGrid);

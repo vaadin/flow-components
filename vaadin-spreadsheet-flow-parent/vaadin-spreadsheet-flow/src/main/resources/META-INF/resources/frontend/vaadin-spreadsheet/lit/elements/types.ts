@@ -148,6 +148,35 @@ export interface CellGridRenderState {
 
     /** Symmetric vertical variant of {@link scrollLeft}. */
     scrollTop: number;
+
+    /**
+     * Cell-editor state (slice 152). When non-null, the cell-grid
+     * renders an editable {@code <input>} positioned over the
+     * editor's target cell so the user can type a new value. When
+     * null, no editor is rendered. The connector sets this on
+     * double-click and clears it on commit / cancel.
+     */
+    editor: CellEditorState | null;
+}
+
+/**
+ * State for the in-place cell editor (slice 152). The cell-grid
+ * uses col/row to look up the cell's pixel position from its
+ * existing {@code colX} / {@code rowY} / {@code colWidths} /
+ * {@code rowHeights} arrays — no separate position computation.
+ */
+export interface CellEditorState {
+    /** 1-based column of the cell being edited. */
+    col: number;
+    /** 1-based row of the cell being edited. */
+    row: number;
+    /**
+     * The initial value placed in the input when the editor
+     * opens. The user's typing happens in the input's local
+     * state — the connector reads it back from the input when
+     * the user commits.
+     */
+    initialValue: string;
 }
 
 /**
@@ -184,6 +213,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         totalGridHeightPx: 0,
         scrollLeft: 0,
         scrollTop: 0,
+        editor: null,
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
