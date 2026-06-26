@@ -133,6 +133,21 @@ export interface CellGridRenderState {
 
     /** Symmetric vertical variant of {@link totalGridWidthPx}. */
     totalGridHeightPx: number;
+
+    /**
+     * Current horizontal scroll offset in pixels — copied through
+     * from the {@code applyRenderState} call so the cell-grid can
+     * keep frozen quadrants visually pinned. The frozen-row and
+     * frozen-corner quadrant wrappers apply
+     * {@code transform:translateY(scrollTop)} to counter the scroll
+     * container's vertical shift; the frozen-column and corner
+     * wrappers apply {@code transform:translateX(scrollLeft)} to
+     * counter the horizontal shift. Slice 141.
+     */
+    scrollLeft: number;
+
+    /** Symmetric vertical variant of {@link scrollLeft}. */
+    scrollTop: number;
 }
 
 /**
@@ -167,6 +182,8 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         frozenRowHeights: [],
         totalGridWidthPx: 0,
         totalGridHeightPx: 0,
+        scrollLeft: 0,
+        scrollTop: 0,
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },

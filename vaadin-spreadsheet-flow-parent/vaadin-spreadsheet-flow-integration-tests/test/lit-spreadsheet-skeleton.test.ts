@@ -697,4 +697,26 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
 
         cleanup();
     });
+
+    it('buildRenderState carries scrollLeft + scrollTop into the render state (slice 141)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 175,
+            scrollTop: 80,
+            viewportWidth: 200,
+            viewportHeight: 100,
+        });
+
+        // The state mirrors the scroll inputs so the cell-grid can
+        // emit transform wrappers for frozen quadrants.
+        expect(state.scrollLeft).to.equal(175);
+        expect(state.scrollTop).to.equal(80);
+
+        cleanup();
+    });
 });

@@ -64,13 +64,29 @@ export class SpreadsheetCellGrid extends LitElement {
             font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
         }
 
-        /* Frozen-pane z-index stacking. Higher = visually on top.
-           Corner stays on top of frozen-row + frozen-col; frozen rows
-           + cols stay above the scrolling main quadrant. */
+        /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
+           in its own wrapper div that's transform-translated by the
+           current scroll offset, so the cells inside stay visually
+           pinned to their viewport edge as the scroll container
+           scrolls. The transform property creates a containing block,
+           so the cells' absolute positions remain relative to the
+           wrapper's top-left — which is itself anchored at the
+           cell-grid's origin. */
+        .quadrant-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .quadrant-wrapper-top { z-index: 2; }
+        .quadrant-wrapper-left { z-index: 2; }
+        .quadrant-wrapper-corner { z-index: 3; }
+
+        /* Per-cell z-index for the unwrapped main quadrant. Frozen
+           quadrants inherit z-index from their wrapper (each wrapper
+           is its own stacking context via the transform property),
+           so the cell-level rule below only takes effect for main
+           cells. */
         .cell.quadrant-main { z-index: 1; }
-        .cell.quadrant-left { z-index: 2; }
-        .cell.quadrant-top { z-index: 2; }
-        .cell.quadrant-corner { z-index: 3; }
     `;
 
     /**
@@ -97,6 +113,8 @@ export class SpreadsheetCellGrid extends LitElement {
             mergedRegions,
             verticalSplitPosition,
             horizontalSplitPosition,
+            scrollLeft,
+            scrollTop,
         } = this.renderState;
 
         if (viewport.lastColumnIndex < viewport.firstColumnIndex
@@ -112,6 +130,9 @@ export class SpreadsheetCellGrid extends LitElement {
         const coveredByMerge = computeCoveredCoords(mergedRegions);
 
         // Main (bottom-right) quadrant: scrolling rows + cols.
+        // Emitted as direct children of the cell-grid so cells sit at
+        // their virtual coordinates and scroll naturally with the
+        // scroll container.
         const mainCells = renderQuadrant({
             state: this.renderState,
             coveredByMerge,
@@ -130,9 +151,15 @@ export class SpreadsheetCellGrid extends LitElement {
                 this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0,
         });
 
-        const quadrantCells: TemplateResult[] = [...mainCells];
+        // Frozen quadrants live inside transform-translated wrappers
+        // so their cells visually stay pinned as the user scrolls
+        // (slice 141). The wrapper transform counters the scroll
+        // container's shift; cells inside use coordinates relative
+        // to the wrapper, which is itself anchored at the cell-grid
+        // origin. CSS z-index on the wrappers stacks corner > top +
+        // left > main.
 
-        // Top-right quadrant: frozen rows × scrolling columns.
+        let topQuadrant: TemplateResult | string = '';
         if (verticalSplitPosition > 0) {
             const topCells = renderQuadrant({
                 state: this.renderState,
@@ -150,10 +177,15 @@ export class SpreadsheetCellGrid extends LitElement {
                 getRowHeight: (row) =>
                     this.renderState.frozenRowHeights[row - 1] ?? 0,
             });
-            quadrantCells.push(...topCells);
+            const transform = `transform:translateY(${scrollTop}px);`;
+            topQuadrant = html`
+                <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>
+                    ${topCells}
+                </div>
+            `;
         }
 
-        // Bottom-left quadrant: scrolling rows × frozen columns.
+        let leftQuadrant: TemplateResult | string = '';
         if (horizontalSplitPosition > 0) {
             const leftCells = renderQuadrant({
                 state: this.renderState,
@@ -171,10 +203,15 @@ export class SpreadsheetCellGrid extends LitElement {
                 getRowHeight: (row) =>
                     this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0,
             });
-            quadrantCells.push(...leftCells);
+            const transform = `transform:translateX(${scrollLeft}px);`;
+            leftQuadrant = html`
+                <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>
+                    ${leftCells}
+                </div>
+            `;
         }
 
-        // Top-left quadrant: frozen rows × frozen columns (corner).
+        let cornerQuadrant: TemplateResult | string = '';
         if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
             const cornerCells = renderQuadrant({
                 state: this.renderState,
@@ -191,13 +228,19 @@ export class SpreadsheetCellGrid extends LitElement {
                 getRowHeight: (row) =>
                     this.renderState.frozenRowHeights[row - 1] ?? 0,
             });
-            quadrantCells.push(...cornerCells);
+            const transform =
+                `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
+            cornerQuadrant = html`
+                <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>
+                    ${cornerCells}
+                </div>
+            `;
         }
 
         const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
         const mergedOverlays = buildMergedCellOverlays(this.renderState);
         const selectionOverlay = buildSelectionOverlay(this.renderState);
-        return html`${styleBlock}${quadrantCells}${mergedOverlays}${selectionOverlay}`;
+        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}`;
     }
 }
 

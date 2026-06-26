@@ -158,6 +158,8 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: {
                 activeCell: { col: 1, row: 1 },
                 activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
@@ -269,6 +271,8 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -310,6 +314,8 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -353,6 +359,8 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -451,6 +459,8 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection,
         };
     }
@@ -578,6 +588,8 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection,
         };
     }
@@ -902,6 +914,8 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
             frozenRowHeights: opts.verticalSplitPosition > 0 ? [20, 20] : [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -1045,6 +1059,209 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — frozen-pane transform wrappers (slice 141)', () => {
+    function buildScrolledFreezeState(opts: {
+        verticalSplitPosition: number;
+        horizontalSplitPosition: number;
+        scrollLeft: number;
+        scrollTop: number;
+    }): CellGridRenderState {
+        // Same shape as slice 139's buildFreezeState — adding
+        // scrollLeft + scrollTop so the wrappers' transforms are
+        // observable.
+        return {
+            viewport: {
+                firstColumnIndex: 3,
+                firstColumnPosition: 100,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 3,
+                firstRowPosition: 40,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            cellData: new Map(),
+            colX: [100, 150],
+            rowY: [40, 60],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions: [],
+            verticalSplitPosition: opts.verticalSplitPosition,
+            horizontalSplitPosition: opts.horizontalSplitPosition,
+            frozenColX: opts.horizontalSplitPosition > 0 ? [0, 50] : [],
+            frozenColWidths: opts.horizontalSplitPosition > 0 ? [50, 50] : [],
+            frozenRowY: opts.verticalSplitPosition > 0 ? [0, 20] : [],
+            frozenRowHeights: opts.verticalSplitPosition > 0 ? [20, 20] : [],
+            totalGridWidthPx: 1000,
+            totalGridHeightPx: 500,
+            scrollLeft: opts.scrollLeft,
+            scrollTop: opts.scrollTop,
+            selection: emptyCellGridRenderState().selection,
+        };
+    }
+
+    it('renders NO wrappers when freeze is inactive', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            scrollLeft: 200,
+            scrollTop: 100,
+        }));
+
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-wrapper')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('renders a top wrapper with translateY(scrollTop) when row-freeze is active', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 0,
+            scrollLeft: 0,
+            scrollTop: 100,
+        }));
+
+        const wrapper = el.shadowRoot!.querySelector(
+            '.quadrant-wrapper-top'
+        ) as HTMLElement;
+        expect(wrapper).to.not.be.null;
+        expect(wrapper.style.transform).to.equal('translateY(100px)');
+        // Cells inside the wrapper still carry their quadrant-top class.
+        expect(wrapper.querySelectorAll('.quadrant-top')).to.have.length(4);
+
+        cleanup(el);
+    });
+
+    it('renders a left wrapper with translateX(scrollLeft) when col-freeze is active', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 2,
+            scrollLeft: 200,
+            scrollTop: 0,
+        }));
+
+        const wrapper = el.shadowRoot!.querySelector(
+            '.quadrant-wrapper-left'
+        ) as HTMLElement;
+        expect(wrapper).to.not.be.null;
+        expect(wrapper.style.transform).to.equal('translateX(200px)');
+        expect(wrapper.querySelectorAll('.quadrant-left')).to.have.length(4);
+
+        cleanup(el);
+    });
+
+    it('renders a corner wrapper with translate(scrollLeft, scrollTop) when both freezes are active', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            scrollLeft: 200,
+            scrollTop: 100,
+        }));
+
+        const wrapper = el.shadowRoot!.querySelector(
+            '.quadrant-wrapper-corner'
+        ) as HTMLElement;
+        expect(wrapper).to.not.be.null;
+        expect(wrapper.style.transform).to.equal('translate(200px, 100px)');
+        expect(wrapper.querySelectorAll('.quadrant-corner')).to.have.length(4);
+
+        cleanup(el);
+    });
+
+    it('main quadrant cells are NOT inside any wrapper', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            scrollLeft: 200,
+            scrollTop: 100,
+        }));
+
+        // Main cells stay direct descendants of the shadow root, NOT
+        // wrapped — they need to scroll naturally with the scroll
+        // container. closest('.quadrant-wrapper') walks up the tree
+        // and returns null if the cell isn't inside any wrapper.
+        const mainCells = el.shadowRoot!.querySelectorAll('.quadrant-main');
+        for (const cell of Array.from(mainCells)) {
+            expect(cell.closest('.quadrant-wrapper')).to.be.null;
+        }
+
+        cleanup(el);
+    });
+
+    it('wrapper transforms update when scroll position changes', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            scrollLeft: 0,
+            scrollTop: 0,
+        }));
+
+        let corner = el.shadowRoot!.querySelector(
+            '.quadrant-wrapper-corner'
+        ) as HTMLElement;
+        expect(corner.style.transform).to.equal('translate(0px, 0px)');
+
+        el.renderState = buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            scrollLeft: 300,
+            scrollTop: 150,
+        });
+        await el.updateComplete;
+
+        corner = el.shadowRoot!.querySelector(
+            '.quadrant-wrapper-corner'
+        ) as HTMLElement;
+        expect(corner.style.transform).to.equal('translate(300px, 150px)');
+
+        cleanup(el);
+    });
+
+    it('frozen wrappers are positioned absolutely at top:0 left:0 so cells anchor to grid origin', async () => {
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            scrollLeft: 100,
+            scrollTop: 50,
+        }));
+
+        const wrappers = el.shadowRoot!.querySelectorAll('.quadrant-wrapper');
+        // 3 wrappers: top, left, corner. (Main is not wrapped.)
+        expect(wrappers).to.have.length(3);
+        for (const w of Array.from(wrappers)) {
+            const computed = getComputedStyle(w);
+            // Wrappers must be position:absolute (set via static CSS rule).
+            expect(computed.position).to.equal('absolute');
+        }
+
+        cleanup(el);
+    });
+
+    it('frozen cell positions inside wrappers stay anchored at grid coords (not subtracted)', async () => {
+        // Verify the wrapper-transform approach: cells inside the
+        // wrapper still report virtual positions, the wrapper's
+        // transform does the visual offset.
+        const el = await attachWithState(buildScrolledFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 0,
+            scrollLeft: 0,
+            scrollTop: 100,
+        }));
+
+        // A top-quadrant cell at row 1: top should still be 0
+        // (frozenRowY[0]), NOT 0 - 100 or anything subtracted. The
+        // wrapper's translateY does the visual shift; the cell's
+        // inline style stays at its grid coord.
+        const cell = el.shadowRoot!.querySelector(
+            '.quadrant-top.row1'
+        ) as HTMLElement;
+        expect(cell.style.top).to.equal('0px');
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — render state updates', () => {
     it('re-renders when renderState is reassigned', async () => {
         const el = await attachWithState({
@@ -1073,6 +1290,8 @@ describe('SpreadsheetCellGrid — render state updates', () => {
             frozenRowHeights: [],
             totalGridWidthPx: 0,
             totalGridHeightPx: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
             selection: emptyCellGridRenderState().selection,
         });
 

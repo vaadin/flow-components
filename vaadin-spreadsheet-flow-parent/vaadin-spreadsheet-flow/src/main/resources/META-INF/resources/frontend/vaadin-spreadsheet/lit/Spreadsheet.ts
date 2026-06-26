@@ -406,6 +406,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
             frozenRowHeights,
             totalGridWidthPx: totalWidthPx,
             totalGridHeightPx: totalHeightPx,
+            scrollLeft: opts.scrollLeft,
+            scrollTop: opts.scrollTop,
         };
     }
 
