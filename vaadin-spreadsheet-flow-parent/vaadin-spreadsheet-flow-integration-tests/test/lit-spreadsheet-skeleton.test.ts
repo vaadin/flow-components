@@ -1976,6 +1976,73 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('scrolling dispatches onSheetScroll with the new viewport bounds (slice 157)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(50);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50)); // 1000 total
+        sheet.setRowH(new Array(50).fill(15)); // 20*50 = 1000 total
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+        sheet.applyRenderState({
+            scrollLeft: 0, scrollTop: 0,
+            viewportWidth: 200, viewportHeight: 100,
+        });
+
+        let received: { type: string; data: Record<string, number> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onSheetScroll') {
+                received = detail;
+            }
+        });
+
+        const scroller = sheet.getScrollContainer();
+        scroller.scrollLeft = 100;
+        scroller.dispatchEvent(new Event('scroll'));
+
+        expect(received).to.exist;
+        expect(received!.type).to.equal('onSheetScroll');
+        // After scrolling 100px right (col width 50), firstColumnIndex
+        // should be at least 3.
+        expect(received!.data.firstColumn).to.be.greaterThanOrEqual(3);
+        // The dispatched data has firstRow/firstColumn/lastRow/lastColumn.
+        expect(received!.data).to.have.all.keys(
+            'firstRow', 'firstColumn', 'lastRow', 'lastColumn'
+        );
+        cleanup();
+    });
+
+    it('vertical scroll dispatches onSheetScroll with updated row range (slice 157)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(50);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(50).fill(15));
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+        sheet.applyRenderState({
+            scrollLeft: 0, scrollTop: 0,
+            viewportWidth: 200, viewportHeight: 100,
+        });
+
+        let received: { data: Record<string, number> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onSheetScroll') {
+                received = detail;
+            }
+        });
+
+        const scroller = sheet.getScrollContainer();
+        scroller.scrollTop = 200; // 10 rows down (20px each)
+        scroller.dispatchEvent(new Event('scroll'));
+
+        expect(received).to.exist;
+        expect(received!.data.firstRow).to.be.greaterThanOrEqual(11);
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

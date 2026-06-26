@@ -871,12 +871,44 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /**
      * Scroll-event handler: recompute the visible viewport from the
      * scroll container's current state + push a fresh render state
-     * to the cell-grid. Bound as an arrow function so the listener
-     * binding survives without explicit {@code .bind(this)}.
+     * to the cell-grid. Also dispatches `onSheetScroll` to the
+     * server so it can prefetch cell values for the newly-visible
+     * range (slice 157). Bound as an arrow function so the
+     * listener binding survives without explicit
+     * {@code .bind(this)}.
      */
     private readonly handleScroll = (): void => {
         this.recomputeViewport();
+        this.dispatchSheetScrollEvent();
     };
+
+    /**
+     * Dispatch `onSheetScroll` carrying the current viewport
+     * bounds (firstRow/firstColumn/lastRow/lastColumn). The
+     * server's `SpreadsheetHandler.onSheetScroll` uses these to
+     * decide which cell values to push. Slice 157.
+     *
+     * No debouncing — scroll events naturally throttle via the
+     * browser's scroll-tick coalescing (usually one per
+     * requestAnimationFrame). If profiling reveals server-side
+     * pressure, add a debounce here.
+     */
+    private dispatchSheetScrollEvent(): void {
+        const viewport = this.cellGrid.renderState.viewport;
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'onSheetScroll',
+                data: {
+                    firstRow: viewport.firstRowIndex,
+                    firstColumn: viewport.firstColumnIndex,
+                    lastRow: viewport.lastRowIndex,
+                    lastColumn: viewport.lastColumnIndex,
+                },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    }
 
     /**
      * Recompute the visible viewport from the scroll container's
