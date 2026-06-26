@@ -1604,6 +1604,159 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_singleSelect_duplicateLabelsResolveToFirstItem() {
+        // When two items render to the same label, the converter resolves
+        // to the first item in registration order — pins the contract the
+        // duplicate-label warning advertises.
+        var first = new Project("P-1", "Apollo");
+        var dup = new Project("P-2", "Apollo");
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(
+                ValueOptions.forField(field).options(List.of(first, dup)));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertSame(first, field.getValue(),
+                "First item per label must win on resolution");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_singleSelect_labelerChangeBetweenTurnsIsReflected() {
+        // The controller captures the field's labeler at each onRequest, so
+        // a swap between turns is reflected in both the labels the LLM is
+        // offered and the inverse lookup at fill time.
+        var apollo = new Project("APL", "Apollo");
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(
+                ValueOptions.forField(field).options(List.of(apollo)));
+        controller.onRequest();
+        fillFormResult(controller, payload(field, "\"Apollo\""));
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Turn 1 must resolve via Project::name");
+
+        field.setValue(null);
+        field.setItemLabelGenerator(Project::code);
+        controller.onRequest();
+        var result = fillFormResult(controller, payload(field, "\"APL\""));
+
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Turn 2 must resolve via the newly-installed Project::code");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_singleSelect_queryModeFillBeforeQueryIsRejected() {
+        // A query-mode field that has not been queried yet has an empty
+        // cache. The fill must reject with a reason that names
+        // query_field_options so the LLM knows the missing step.
+        var apollo = new Project("APL", "Apollo");
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of(apollo)));
+        controller.onRequest();
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertNull(field.getValue());
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("query_field_options"),
+                "Empty-cache rejection must direct the LLM at "
+                        + "query_field_options; got: " + reason);
+    }
+
+    @Test
+    void fillForm_singleSelect_queryModeCachePersistsWithinTurn() {
+        // Within one turn the cache accumulates across query batches so
+        // the LLM can fill against a label seen in an earlier batch of the
+        // same turn.
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        var catalog = List.of(apollo, vega);
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> catalog.stream()
+                        .filter(p -> p.name().toLowerCase()
+                                .contains(filter.toLowerCase()))
+                        .limit(limit).toList()));
+        controller.onRequest();
+        executeQueryFieldOptions(controller, field, "Apo", 10);
+        executeQueryFieldOptions(controller, field, "Veg", 10);
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Items from earlier queries in the same turn must remain "
+                        + "resolvable");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
+    void fillForm_singleSelect_queryModeCacheResetsBetweenTurns() {
+        // The cache is bound to the turn: a fresh onRequest clears it so a
+        // second turn that skips query_field_options is rejected even if
+        // the first turn populated the cache for the same label.
+        var apollo = new Project("APL", "Apollo");
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of(apollo)));
+        controller.onRequest();
+        executeQueryFieldOptions(controller, field, "", 10);
+        fillFormResult(controller, payload(field, "\"Apollo\""));
+        Assertions.assertEquals(apollo, field.getValue(),
+                "Turn 1 must fill after the query populates the cache");
+
+        field.setValue(null);
+        controller.onRequest();
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertNull(field.getValue(),
+                "Turn 2 must reject because the cache reset at onRequest");
+        var reason = rejectionReason(result, idOf(field));
+        Assertions.assertTrue(reason.contains("query_field_options"),
+                "Reason must direct the LLM at query_field_options; got: "
+                        + reason);
+    }
+
+    @Test
+    void fillForm_singleSelect_queryModeRepeatedOverlappingQueriesDoNotDuplicate() {
+        // Repeated queries returning overlapping items must not corrupt
+        // resolution. With first-per-label dedup in the cache, the LLM
+        // resolves to the original item regardless of how many times the
+        // application's BiFunction returned it.
+        var first = new Project("APL", "Apollo");
+        var second = new Project("APL-NEW", "Apollo");
+        var versions = new java.util.concurrent.atomic.AtomicReference<>(first);
+        var field = new SingleSelectField<Project>();
+        field.setItemLabelGenerator(Project::name);
+        var controller = newController(field);
+        controller.fieldValueOptions(ValueOptions.forField(field)
+                .options((filter, limit) -> List.of(versions.get())));
+        controller.onRequest();
+        executeQueryFieldOptions(controller, field, "", 10);
+        versions.set(second);
+        executeQueryFieldOptions(controller, field, "", 10);
+
+        var result = fillFormResult(controller, payload(field, "\"Apollo\""));
+
+        Assertions.assertSame(first, field.getValue(),
+                "Overlapping queries within a turn keep the first item "
+                        + "per label; the later instance must not replace it");
+        Assertions.assertTrue(success(result));
+    }
+
+    @Test
     void fillForm_fieldValueOptionsOnPrimitiveTypeSkipsTypeDrivenParsing() {
         // Registering fieldValueOptions(...) on a non-SELECT field still makes
         // the LLM speak in labels (the schema advertises an enum/queryable

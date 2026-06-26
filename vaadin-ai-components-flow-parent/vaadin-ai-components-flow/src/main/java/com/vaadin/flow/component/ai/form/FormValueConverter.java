@@ -300,18 +300,17 @@ final class FormValueConverter {
     }
 
     /**
-     * Walks {@link FormFieldHints#valueOptionsItems} and returns the first item
-     * whose label (via {@link FormFieldHints#itemLabelGenerator}) matches the
-     * LLM-supplied one. An empty list is called out with a hint at
+     * Returns the item that was indexed under the LLM-supplied label in
+     * {@link FormFieldHints#valueOptionsItems}. An empty map is the query-mode
+     * "not queried yet this turn" case and is called out with a hint at
      * {@code query_field_options}, since that's the only way the LLM could have
      * reached this point without seeing options.
      */
     private static Object resolveLabelAgainstObservedItems(String label,
             FormFieldHints hints) {
-        for (var item : hints.valueOptionsItems) {
-            if (label.equals(hints.itemLabelGenerator.apply(item))) {
-                return item;
-            }
+        var item = hints.valueOptionsItems.get(label);
+        if (item != null) {
+            return item;
         }
         if (hints.valueOptionsItems.isEmpty()) {
             throw new RejectedValueException("No matching option for label: "

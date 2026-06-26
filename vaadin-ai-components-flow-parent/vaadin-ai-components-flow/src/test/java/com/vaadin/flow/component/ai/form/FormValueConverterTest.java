@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -565,7 +566,11 @@ class FormValueConverterTest {
     private static <T> FormFieldHints hintsWithItems(List<T> items,
             Function<T, String> labeler) {
         var hints = new FormFieldHints();
-        hints.valueOptionsItems = new ArrayList<>(items);
+        var map = new LinkedHashMap<String, Object>();
+        for (var item : items) {
+            map.putIfAbsent(labeler.apply(item), item);
+        }
+        hints.valueOptionsItems = map;
         @SuppressWarnings({ "unchecked", "rawtypes" })
         Function<Object, String> typed = (Function) labeler;
         hints.itemLabelGenerator = typed;

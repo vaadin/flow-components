@@ -391,7 +391,8 @@ public class FormAIController implements AIController {
         // forField(HasValue) accepts MultiSelect fields whose static reference
         // is upcast. Reject so the typed MultiSelect overload is the only
         // entry for multi-select registrations.
-        var isMultiSelect = config.field() instanceof MultiSelect;
+        var field = config.field();
+        var isMultiSelect = field instanceof MultiSelect;
         if (!config.isMulti() && isMultiSelect) {
             throw new IllegalArgumentException(
                     "Field implements MultiSelect — declare the reference as "
@@ -400,49 +401,89 @@ public class FormAIController implements AIController {
         }
         // Collection-valued fields must implement MultiSelect — otherwise
         // there is no defined aggregation for the resolved items.
-        if (!isMultiSelect
-                && config.field().getEmptyValue() instanceof Collection) {
+        if (!isMultiSelect && field.getEmptyValue() instanceof Collection) {
             throw new IllegalArgumentException(
                     "Field's value type is a Collection but the field does "
                             + "not implement MultiSelect. Collection-valued "
                             + "fields must implement MultiSelect to be "
                             + "registered via fieldValueOptions(...).");
         }
-        var labeler = resolveItemLabeler(config.field(),
-                config.itemLabelGenerator());
-        var hints = hintsFor(config.field());
-        hints.itemLabelGenerator = labeler;
-        // Items the converter resolves chosen labels against. Pre-populated
-        // with the fixed list, or appended on each query-callback invocation.
-        var observedItems = new ArrayList<>();
-        hints.valueOptionsItems = observedItems;
+        var hints = hintsFor(field);
+        var explicit = config.itemLabelGenerator();
         if (fixed != null) {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             List<Object> items = (List) fixed;
-            observedItems.addAll(items);
-            warnOnDuplicateLabels(items, labeler);
-            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(items,
-                    filter, limit, labeler);
             hints.fixedOptions = true;
+            hints.valueOptionsTurnSetup = () -> rebindFixedOptions(hints, field,
+                    explicit, items);
+            hints.valueOptionsTurnSetup.run();
+            warnOnDuplicateLabels(items, hints.itemLabelGenerator);
         } else {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             BiFunction<String, Integer, List<Object>> rawQuery = (BiFunction) query;
-            hints.valueOptionsQuery = (filter, limit) -> {
-                var batch = rawQuery.apply(filter, limit);
-                observedItems.addAll(batch);
-                return batch.stream().map(labeler).toList();
-            };
             hints.fixedOptions = false;
+            hints.valueOptionsTurnSetup = () -> rebindQueryOptions(hints, field,
+                    explicit, rawQuery);
+            hints.valueOptionsTurnSetup.run();
         }
         return this;
     }
 
     /**
+     * Rebuilds the fixed-options bindings on {@code hints} from the original
+     * item list and the current state of {@code field} / {@code explicit}.
+     * Invoked at registration and again on every {@link #onRequest()} so the
+     * labeler captured in {@link FormFieldHints#itemLabelGenerator} reflects
+     * the field's current {@code setItemLabelGenerator(...)}.
+     */
+    private static void rebindFixedOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            List<Object> items) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>(items.size());
+        for (var item : items) {
+            map.putIfAbsent(labeler.apply(item), item);
+        }
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> filterLabels(map.keySet(),
+                filter, limit);
+    }
+
+    /**
+     * Rebuilds the query-options bindings on {@code hints} and resets the
+     * observed-items map. The wrapped query callback dedupes by label as
+     * batches arrive (first item per label wins) so repeated overlapping
+     * queries within the same turn don't inflate the map.
+     */
+    private static void rebindQueryOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            BiFunction<String, Integer, List<Object>> rawQuery) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>();
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> {
+            var batch = rawQuery.apply(filter, limit);
+            var labels = new ArrayList<String>(batch.size());
+            for (var item : batch) {
+                var label = labeler.apply(item);
+                labels.add(label);
+                map.putIfAbsent(label, item);
+            }
+            return labels;
+        };
+    }
+
+    /**
      * Logs a warning when two or more items in a fixed-options registration
-     * render to the same label. Resolution falls back to first-in-list
-     * ordering, so duplicates are recoverable but ambiguous — a unique
+     * render to the same label. Resolution under
+     * {@link FormFieldHints#valueOptionsItems} keeps only the first-per-label
+     * (the Map's {@code putIfAbsent} semantic), so duplicates are recoverable
+     * but ambiguous — a unique
      * {@link ValueOptions#itemLabelGenerator(ItemLabelGenerator)} is the
-     * unambiguous fix.
+     * unambiguous fix. Fires once at registration; a labeler swap between turns
+     * that introduces new duplicates does not re-warn.
      */
     private static void warnOnDuplicateLabels(List<Object> items,
             Function<Object, String> labeler) {
@@ -469,7 +510,8 @@ public class FormAIController implements AIController {
      * Priority: an explicit {@link ItemLabelGenerator} on the registration,
      * otherwise the field's own {@code getItemLabelGenerator()} (via
      * {@link FormValueConverter#renderItem}, which also covers the
-     * {@link String#valueOf} fallback).
+     * {@link String#valueOf} fallback). Called once per turn at
+     * {@link #onRequest()} so a swap on the field between turns is picked up.
      */
     private static Function<Object, String> resolveItemLabeler(
             HasValue<?, ?> field, ItemLabelGenerator<?> explicit) {
@@ -729,8 +771,21 @@ public class FormAIController implements AIController {
         // are picked up.
         attachIds();
         seedDescriptionsFromBinder();
+        refreshValueOptionsBindings();
         lockFields();
         snapshotPreTurnValues();
+    }
+
+    /**
+     * Re-runs each value-options registration's setup at the start of a turn.
+     * Captures the current item-label generator from the field so a swap
+     * between turns is reflected, repopulates the fixed-options map from its
+     * immutable list, and clears the query-options map so each turn starts with
+     * a fresh cache.
+     */
+    private void refreshValueOptionsBindings() {
+        hintsById.values().stream().map(hints -> hints.valueOptionsTurnSetup)
+                .filter(Objects::nonNull).forEach(Runnable::run);
     }
 
     @Override
@@ -978,13 +1033,13 @@ public class FormAIController implements AIController {
         return id;
     }
 
-    private static List<String> filterAndLimit(List<Object> source,
-            String filter, int limit, Function<Object, String> labeler) {
-        var stream = source.stream().map(labeler);
+    private static List<String> filterLabels(Collection<String> labels,
+            String filter, int limit) {
+        var stream = labels.stream();
         if (filter != null && !filter.isEmpty()) {
             var needle = filter.toLowerCase(Locale.ROOT);
-            stream = stream
-                    .filter(o -> o.toLowerCase(Locale.ROOT).contains(needle));
+            stream = stream.filter(
+                    label -> label.toLowerCase(Locale.ROOT).contains(needle));
         }
         return stream.limit(limit).toList();
     }
