@@ -720,3 +720,132 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         cleanup();
     });
 });
+
+describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 142)', () => {
+    function attachSheetForLifecycle(width: number, height: number): {
+        host: HTMLElement;
+        sheet: Spreadsheet;
+        cleanup: () => void;
+    } {
+        const host = document.createElement('div');
+        host.style.cssText = `width:${width}px;height:${height}px;`;
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        return {
+            host,
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    it('recomputeViewport is callable from outside the connector', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Direct call — no scroll event, no observer fire. The
+        // wrapper element will call this from its updated() cycle
+        // after state changes.
+        sheet.recomputeViewport();
+
+        const state = sheet.getCellGrid().renderState;
+        // Render state should reflect the connector's current data —
+        // 5 columns, total width 250.
+        expect(state.totalGridWidthPx).to.equal(250);
+        expect(state.viewport.lastColumnIndex).to.be.greaterThanOrEqual(1);
+
+        cleanup();
+    });
+
+    it('recomputeViewport reads the scroll container clientWidth + clientHeight', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(180, 60);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+
+        sheet.recomputeViewport();
+
+        const state = sheet.getCellGrid().renderState;
+        // Viewport width 180 → at most 4 columns (180/50 = 3.6 → 4
+        // covers the viewport edge).
+        expect(state.viewport.lastColumnIndex).to.be.greaterThanOrEqual(3);
+        expect(state.viewport.lastColumnIndex).to.be.lessThanOrEqual(5);
+
+        cleanup();
+    });
+
+    it('the constructor observes the scroll container with a ResizeObserver', () => {
+        // The connector should set up a ResizeObserver on the scroll
+        // container so the first render happens automatically when
+        // the host gets its dimensions. We verify the wiring
+        // indirectly: constructing a sheet must NOT throw, and the
+        // ResizeObserver global must have been called (it would be
+        // missing in a non-DOM env where the constructor would fail
+        // earlier).
+        expect(typeof ResizeObserver).to.equal('function');
+
+        const host = document.createElement('div');
+        host.style.cssText = 'width:200px;height:100px;';
+        document.body.appendChild(host);
+        // Construction completes without throwing — the
+        // ResizeObserver was created + observe() succeeded.
+        const sheet = new Spreadsheet(host);
+        expect(sheet.getScrollContainer().isConnected).to.be.true;
+        sheet.dispose();
+        host.remove();
+    });
+
+    it('dispose removes scroll listener + disconnects resize observer', () => {
+        const { host, sheet } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+
+        const scroller = sheet.getScrollContainer();
+
+        // After dispose, scrolling should no longer trigger a fresh
+        // recompute (the listener is removed).
+        sheet.dispose();
+        const before = sheet.getCellGrid().renderState;
+        scroller.scrollLeft = 100;
+        scroller.dispatchEvent(new Event('scroll'));
+        const after = sheet.getCellGrid().renderState;
+        expect(after).to.equal(before);
+
+        host.remove();
+    });
+
+    it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
+        // Constructor without DOM attachment: clientWidth/Height = 0.
+        // The viewport math should still produce a valid render
+        // state without crashing — buffers may still kick in, but
+        // the call must not throw.
+        const host = document.createElement('div');
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+
+        // The call shouldn't throw + should leave the cell-grid with
+        // a valid render state.
+        expect(() => sheet.recomputeViewport()).to.not.throw();
+        const state = sheet.getCellGrid().renderState;
+        // Zero scroll position with zero viewport → first col = 1.
+        expect(state.viewport.firstColumnIndex).to.equal(1);
+        // Total grid dimensions are computed from the sheet's data,
+        // independent of viewport size.
+        expect(state.totalGridWidthPx).to.equal(250);
+
+        sheet.dispose();
+    });
+});

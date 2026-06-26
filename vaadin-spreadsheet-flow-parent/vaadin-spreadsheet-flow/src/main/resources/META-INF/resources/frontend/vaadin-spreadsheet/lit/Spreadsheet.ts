@@ -180,6 +180,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly scrollContainer: HTMLElement;
 
+    /**
+     * Resize observer on the scroll container. Fires when the host's
+     * box size changes — either initially when the host is attached
+     * + given dimensions, or later when the parent layout changes
+     * (window resize, container reflow). Each fire triggers
+     * {@link recomputeViewport}, which pushes a fresh render state
+     * with the new {@code clientWidth} / {@code clientHeight}. The
+     * initial fire also serves as the first render, replacing the
+     * empty default state assigned in the constructor (slice 142).
+     */
+    private readonly resizeObserver: ResizeObserver;
+
     constructor(host: HTMLElement) {
         this.host = host;
         this.cellGrid = new SpreadsheetCellGrid();
@@ -190,6 +202,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.appendChild(this.cellGrid);
         this.host.appendChild(this.scrollContainer);
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
+        this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
+        this.resizeObserver.observe(this.scrollContainer);
     }
 
     /**
@@ -205,18 +219,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /**
      * Recompute the visible viewport from the scroll container's
      * current scroll position + client dimensions, then push the
-     * resulting render state to the cell-grid. Exposed via the
-     * private listener {@link handleScroll}; tests call it through
-     * the public {@link applyRenderState} surface or by dispatching a
-     * scroll event on the scroll container.
+     * resulting render state to the cell-grid. Called by the scroll
+     * listener {@link handleScroll}, the {@link resizeObserver}, and
+     * the wrapper element on data changes. Public so callers (the
+     * Lit wrapper's {@code updated} cycle, integration tests) can
+     * force a re-render without going through the scroll surface.
      */
-    private recomputeViewport(): void {
+    recomputeViewport(): void {
         this.applyRenderState({
             scrollLeft: this.scrollContainer.scrollLeft,
             scrollTop: this.scrollContainer.scrollTop,
             viewportWidth: this.scrollContainer.clientWidth,
             viewportHeight: this.scrollContainer.clientHeight,
         });
+    }
+
+    /**
+     * Release the scroll + resize listeners. Call this when the host
+     * element is being detached + destroyed so the
+     * {@link resizeObserver} doesn't keep a reference to the
+     * scroll container after teardown.
+     */
+    dispose(): void {
+        this.scrollContainer.removeEventListener('scroll', this.handleScroll);
+        this.resizeObserver.disconnect();
     }
 
     /** Test-only accessor: the scroll container element. */
