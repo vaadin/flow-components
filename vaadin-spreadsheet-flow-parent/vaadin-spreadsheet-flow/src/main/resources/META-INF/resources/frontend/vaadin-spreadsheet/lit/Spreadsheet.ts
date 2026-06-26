@@ -331,7 +331,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
      * in by calling {@link setHeaderRowHeight}; matches Excel's
      * 18-22px range. Slice 143.
      */
-    private headerRowHeight = 0;
+    /**
+     * Slice 180: defaults to 20 (matching the GWT-era visual)
+     * because {@link displayRowColHeadings} defaults to true.
+     * Setting {@code displayRowColHeadings = false} collapses to 0.
+     */
+    private headerRowHeight = 20;
 
     /**
      * Width of the row-header strip in pixels. {@code 0} (default)
@@ -340,7 +345,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
      * accommodates the largest row numbers without truncation).
      * Slice 144.
      */
-    private headerColumnWidth = 0;
+    /** Slice 180: defaults to 40, symmetric with {@link headerRowHeight}. */
+    private headerColumnWidth = 40;
 
     /**
      * The scroll surface — wraps the cell-grid and provides the
@@ -2370,6 +2376,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     setDisplayRowColHeadings(visible: boolean): void {
         this.displayRowColHeadings = visible;
+        // Slice 180: the server doesn't push explicit
+        // headerRowHeight / headerColumnWidth — only this boolean.
+        // When headings should be visible, give the header strips
+        // sensible defaults so they actually render. When hidden,
+        // collapse them. These match the GWT-era defaults
+        // (~20 px tall, ~40 px wide) and can be customized via
+        // the CSS custom properties on the host.
+        if (visible) {
+            if (this.headerRowHeight === 0) {
+                this.headerRowHeight = 20;
+            }
+            if (this.headerColumnWidth === 0) {
+                this.headerColumnWidth = 40;
+            }
+        } else {
+            this.headerRowHeight = 0;
+            this.headerColumnWidth = 0;
+        }
+        this.recomputeViewport();
     }
     setLockFormatColumns(locked: boolean): void {
         this.lockFormatColumns = locked;
