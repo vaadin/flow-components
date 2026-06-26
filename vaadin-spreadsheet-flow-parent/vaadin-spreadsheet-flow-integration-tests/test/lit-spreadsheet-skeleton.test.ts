@@ -280,20 +280,22 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid + headers + corner + sheet tabs to the host element', () => {
+    it('appends the cell-grid + headers + corner + sheet tabs + formula bar to the host element', () => {
         // Slice 140: scroll container wraps the cell-grid. Slice 143
         // added the column-header sibling. Slice 144 added the
         // row-header + restructured the scroll container as a CSS
         // grid. Slice 145 added the corner box at (col 1, row 1).
         // Slice 154 added the sheet-tabs strip below the scroll
         // container; the host is now a flex column.
+        // Slice 175 added the formula bar above the scroll container.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
-        // Host has 2 children: scroll container + sheet tabs.
-        expect(host.children).to.have.length(2);
-        expect(host.firstElementChild === sheet.getScrollContainer()).to.be.true;
+        // Host has 3 children: formula bar + scroll container + sheet tabs.
+        expect(host.children).to.have.length(3);
         const hostKids = Array.from(host.children);
+        expect(hostKids.includes(sheet.getFormulaBar())).to.be.true;
+        expect(hostKids.includes(sheet.getScrollContainer())).to.be.true;
         expect(hostKids.includes(sheet.getSheetTabs())).to.be.true;
 
         const scroller = sheet.getScrollContainer();
@@ -2227,8 +2229,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
 
         const sheet = new Spreadsheet(host, shadow);
 
-        // Scroll container is inside the shadow root, not the light DOM.
-        expect(shadow.children.length).to.equal(2);
+        // Scroll container + formula bar + sheet tabs go inside the
+        // shadow root, not the light DOM.
+        expect(shadow.children.length).to.equal(3);
         expect(host.children.length).to.equal(0);
         // Host is still the event target / style host.
         expect(host.style.display).to.equal('flex');
@@ -3206,6 +3209,83 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(sheet.getSheetTabs().style.display).to.equal('none');
         sheet.dispose();
         document.body.removeChild(host);
+    });
+
+    // ===================================================================
+    // Slice 175 — formula bar implementation
+    // ===================================================================
+    it('formula bar renders two inputs with documented parts (slice 175)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        await sheet.getFormulaBar().updateComplete;
+        const fb = sheet.getFormulaBar().shadowRoot!;
+        const addr = fb.querySelector('input.address') as HTMLInputElement;
+        const formula = fb.querySelector('input.formula') as HTMLInputElement;
+        expect(addr).to.not.be.null;
+        expect(formula).to.not.be.null;
+        expect(addr.getAttribute('part')).to.equal('address-field');
+        expect(formula.getAttribute('part')).to.equal('formula-field');
+        cleanup();
+    });
+
+    it('updateFormulaBar sets the address-field value (slice 175)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.updateFormulaBar('B7', 2, 7);
+        await sheet.getFormulaBar().updateComplete;
+        const addr = sheet.getFormulaBar().shadowRoot!.querySelector(
+            'input.address'
+        ) as HTMLInputElement;
+        expect(addr.value).to.equal('B7');
+        cleanup();
+    });
+
+    it('showSelectedCell sets both address + formula fields (slice 175)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.showSelectedCell('C3', 3, 3, '=A1+B2', true, false, false);
+        await sheet.getFormulaBar().updateComplete;
+        const fb = sheet.getFormulaBar().shadowRoot!;
+        const addr = fb.querySelector('input.address') as HTMLInputElement;
+        const formula = fb.querySelector('input.formula') as HTMLInputElement;
+        expect(addr.value).to.equal('C3');
+        expect(formula.value).to.equal('=A1+B2');
+        cleanup();
+    });
+
+    it('pressing Enter in the address field dispatches sheetAddressChanged (slice 175)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.updateFormulaBar('A1', 1, 1);
+        await sheet.getFormulaBar().updateComplete;
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        const addr = sheet.getFormulaBar().shadowRoot!.querySelector(
+            'input.address'
+        ) as HTMLInputElement;
+        addr.value = 'D9';
+        const ev = new KeyboardEvent('keydown', {
+            key: 'Enter', bubbles: true, composed: true, cancelable: true,
+        });
+        addr.dispatchEvent(ev);
+
+        const addrEvents = events.filter(e => e.type === 'sheetAddressChanged');
+        expect(addrEvents).to.have.length(1);
+        expect(addrEvents[0].data).to.deep.equal({ value: 'D9' });
+        cleanup();
+    });
+
+    it('formula bar hides when host gets the hidefunctionbar class (slice 175)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        await sheet.getFormulaBar().updateComplete;
+        expect(sheet.getFormulaBar().style.display).to.not.equal('none');
+        host.classList.add('hidefunctionbar');
+        await Promise.resolve();
+        expect(sheet.getFormulaBar().style.display).to.equal('none');
+        host.classList.remove('hidefunctionbar');
+        await Promise.resolve();
+        expect(sheet.getFormulaBar().style.display).to.not.equal('none');
+        cleanup();
     });
 
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {

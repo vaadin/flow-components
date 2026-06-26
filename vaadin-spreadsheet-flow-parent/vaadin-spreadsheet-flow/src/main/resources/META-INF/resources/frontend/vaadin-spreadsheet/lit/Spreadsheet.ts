@@ -51,6 +51,7 @@ import {
 } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
+import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -305,6 +306,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly sheetTabs: SpreadsheetSheetTabs;
 
     /**
+     * Formula bar at the top of the spreadsheet — two text inputs
+     * for the active cell's address + formula. Slice 175. Wired
+     * by {@link updateFormulaBar} + {@link showSelectedCell}. The
+     * documented parts {@code address-field} + {@code formula-field}
+     * live on the input elements (see {@link SpreadsheetFormulaBar}).
+     */
+    private readonly formulaBar: SpreadsheetFormulaBar;
+
+    /**
      * MutationObserver watching the spreadsheet host for class
      * changes. Slice 174 honors {@code Spreadsheet.HIDE_TABSHEET_STYLE}
      * ("hidetabsheet") + {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
@@ -367,6 +377,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.rowHeader = new SpreadsheetRowHeader();
         this.headerCorner = document.createElement('div');
         this.sheetTabs = new SpreadsheetSheetTabs();
+        this.formulaBar = new SpreadsheetFormulaBar();
         // Host becomes a flex column so the scroll container takes
         // the available space + the sheet tabs sit below at their
         // intrinsic height. Slice 154. Existing host width/height
@@ -428,6 +439,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.appendChild(this.columnHeader);
         this.scrollContainer.appendChild(this.rowHeader);
         this.scrollContainer.appendChild(this.cellGrid);
+        // Slice 175: formula bar sits ABOVE the scroll container
+        // in the flex column. flex:0 so it takes its intrinsic
+        // height. Appended to renderTarget first so it ends up
+        // ahead of the scroll container in DOM order.
+        this.formulaBar.style.flex = '0 0 auto';
+        this.renderTarget.appendChild(this.formulaBar);
+        this.formulaBar.addEventListener(
+            'sheet-address-changed',
+            this.handleSheetAddressChanged as EventListener
+        );
         this.renderTarget.appendChild(this.scrollContainer);
         // Sheet tabs sit below the scroll container in the flex
         // column. flex:0 so they take their intrinsic height,
@@ -1588,6 +1609,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.hostClassObserver.disconnect();
             this.hostClassObserver = null;
         }
+        this.formulaBar.removeEventListener(
+            'sheet-address-changed',
+            this.handleSheetAddressChanged as EventListener
+        );
     }
 
     /**
@@ -1606,9 +1631,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
      * element exists.
      */
     private applyHostHideClasses(): void {
-        const hidden = this.host.classList.contains('hidetabsheet');
-        this.sheetTabs.style.display = hidden ? 'none' : '';
+        const tabsHidden = this.host.classList.contains('hidetabsheet');
+        this.sheetTabs.style.display = tabsHidden ? 'none' : '';
+        const barHidden = this.host.classList.contains('hidefunctionbar');
+        this.formulaBar.style.display = barHidden ? 'none' : '';
     }
+
+    /**
+     * Slice 175: dispatched when the user presses Enter in the
+     * formula-bar address input. Forwards as the documented
+     * {@code sheetAddressChanged} server-bound event.
+     */
+    private readonly handleSheetAddressChanged = (
+        e: CustomEvent<{ value: string }>
+    ): void => {
+        const { value } = e.detail;
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'sheetAddressChanged',
+                data: { value },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     /** Test-only accessor: the scroll container element. */
     getScrollContainer(): HTMLElement {
@@ -1951,6 +1997,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return this.sheetTabs;
     }
 
+    /** Test-only accessor: the formula-bar sub-element (slice 175). */
+    getFormulaBar(): SpreadsheetFormulaBar {
+        return this.formulaBar;
+    }
+
     /**
      * Push fresh state to the sheet tabs from the current
      * {@code sheetNames} + {@code sheetIndex} fields. Called from
@@ -2088,22 +2139,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
         }
     }
-    updateFormulaBar(_possibleName: string, _col: number, _row: number): void {
-        // TODO Phase 3.3 — update formula bar display + named-range dropdown.
+    updateFormulaBar(possibleName: string, _col: number, _row: number): void {
+        // Slice 175: update the address field with the server-supplied
+        // name (cell address or named range). The formula field is
+        // updated separately by {@link showSelectedCell}.
+        this.formulaBar.renderState = {
+            address: possibleName,
+            formula: this.formulaBar.renderState.formula,
+        };
     }
     invalidCellAddress(): void {
         // TODO Phase 3.3 — flash the address bar to indicate invalid input.
     }
     showSelectedCell(
-        _name: string,
+        name: string,
         _col: number,
         _row: number,
-        _cellValue: string,
+        cellValue: string,
         _formula: boolean,
         _locked: boolean,
         _initialSelection: boolean
     ): void {
-        // TODO Phase 3.3 — display the selected cell in the formula bar.
+        // Slice 175: server-pushed update of both formula-bar fields
+        // — happens after the user clicks a cell or navigates with
+        // arrow keys server-side.
+        this.formulaBar.renderState = {
+            address: name,
+            formula: cellValue,
+        };
     }
     showActions(_actionDetails: SpreadsheetActionDetails[]): void {
         // TODO Phase 3.5 — show context menu / actions popup.
