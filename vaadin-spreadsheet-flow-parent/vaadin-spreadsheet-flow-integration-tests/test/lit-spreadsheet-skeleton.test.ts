@@ -2256,6 +2256,134 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('copy writes selected cells as TSV to the clipboard (slice 163)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.updateBottomRightCellValues([
+            { col: 1, row: 1, value: 'A1', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+            { col: 2, row: 1, value: 'B1', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+            { col: 1, row: 2, value: 'A2', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+            { col: 2, row: 2, value: 'B2', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+
+        // Select (1,1) to (2,2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 1, row: 1, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        // Dispatch synthetic copy event with a ClipboardEvent.
+        const clipboard = new DataTransfer();
+        const ev = new ClipboardEvent('copy', {
+            clipboardData: clipboard,
+            bubbles: true,
+            cancelable: true,
+        });
+        sheet.getScrollContainer().dispatchEvent(ev);
+
+        // TSV should be in the clipboard.
+        const text = clipboard.getData('text/plain');
+        expect(text).to.equal('A1\tB1\nA2\tB2');
+        cleanup();
+    });
+
+    it('cut dispatches clearSelectedCellsOnCut AND writes to clipboard (slice 163)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.updateBottomRightCellValues([
+            { col: 1, row: 1, value: 'x', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+
+        let received = false;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            if ((e as CustomEvent).detail.type === 'clearSelectedCellsOnCut') {
+                received = true;
+            }
+        });
+
+        const clipboard = new DataTransfer();
+        sheet.getScrollContainer().dispatchEvent(new ClipboardEvent('cut', {
+            clipboardData: clipboard,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.be.true;
+        expect(clipboard.getData('text/plain')).to.equal('x');
+        cleanup();
+    });
+
+    it('paste dispatches onPaste with the clipboard text (slice 163)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onPaste') {
+                received = detail;
+            }
+        });
+
+        const clipboard = new DataTransfer();
+        clipboard.setData('text/plain', 'pasted\tdata\nrow2\tval2');
+        sheet.getScrollContainer().dispatchEvent(new ClipboardEvent('paste', {
+            clipboardData: clipboard,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        expect(received).to.exist;
+        expect(received!.data.text).to.equal('pasted\tdata\nrow2\tval2');
+        cleanup();
+    });
+
+    it('copy is a no-op when the cell editor is open (slice 163)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.updateBottomRightCellValues([
+            { col: 1, row: 1, value: 'x', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+        // Open the editor.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 1, row: 1 },
+            bubbles: true, composed: true,
+        }));
+
+        const clipboard = new DataTransfer();
+        sheet.getScrollContainer().dispatchEvent(new ClipboardEvent('copy', {
+            clipboardData: clipboard,
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        // Editor's own copy handler runs; the sheet's copy did NOT.
+        expect(clipboard.getData('text/plain')).to.equal('');
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

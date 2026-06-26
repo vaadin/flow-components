@@ -42,6 +42,7 @@ import {
     convertPointsToPixel,
 } from './algorithms/ViewportMath.js';
 import { toKey } from './algorithms/CellKeys.js';
+import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
@@ -403,6 +404,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.handleSheetTabClick as EventListener
         );
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
+        // Clipboard integration (slice 163). The browser routes
+        // copy/cut/paste events to the focused element when the
+        // user presses Ctrl+C / Ctrl+X / Ctrl+V. The scroll
+        // container is the focus host (tabindex=0 from slice 147).
+        this.scrollContainer.addEventListener('copy', this.handleCopy as EventListener);
+        this.scrollContainer.addEventListener('cut', this.handleCut as EventListener);
+        this.scrollContainer.addEventListener('paste', this.handlePaste as EventListener);
         // Cell-click delegation (slice 146): the cell-grid dispatches
         // a `cell-click` custom event with detail = { col, row,
         // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
@@ -1013,6 +1021,97 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     /**
+     * Copy handler (slice 163). Serializes the current selection
+     * range to TSV via {@code serializeToTsv} + writes to the
+     * browser's clipboard via {@code event.clipboardData}. No
+     * server-bound event — the server doesn't track the
+     * clipboard. Returns early when the editor is open (the
+     * input's own copy handler takes over).
+     */
+    private readonly handleCopy = (e: ClipboardEvent): void => {
+        if (this.editor !== null) {
+            return;
+        }
+        const tsv = this.selectionToTsv();
+        if (tsv === null) {
+            return;
+        }
+        e.preventDefault();
+        e.clipboardData?.setData('text/plain', tsv);
+    };
+
+    /**
+     * Cut handler (slice 163). Same as copy + dispatches
+     * {@code clearSelectedCellsOnCut} to the server so it can
+     * clear the cells (the visual update comes back via
+     * {@code update*CellValues}).
+     */
+    private readonly handleCut = (e: ClipboardEvent): void => {
+        if (this.editor !== null) {
+            return;
+        }
+        const tsv = this.selectionToTsv();
+        if (tsv === null) {
+            return;
+        }
+        e.preventDefault();
+        e.clipboardData?.setData('text/plain', tsv);
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: { type: 'clearSelectedCellsOnCut', data: {} },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Paste handler (slice 163). Reads the clipboard's text/plain
+     * payload + forwards to the server via {@code onPaste}.
+     * The server parses the TSV and writes cells starting at the
+     * active cell.
+     */
+    private readonly handlePaste = (e: ClipboardEvent): void => {
+        if (this.editor !== null) {
+            return;
+        }
+        const text = e.clipboardData?.getData('text/plain') ?? '';
+        if (text === '') {
+            return;
+        }
+        e.preventDefault();
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: { type: 'onPaste', data: { text } },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Serialize the active range's cell values to TSV (tab-
+     * separated values). Returns null when the selection's range
+     * is invalid or no cells exist. Uses
+     * {@link cellDataByKey} as the source of truth — cells
+     * without data are emitted as empty strings.
+     *
+     * Slice 163.
+     */
+    private selectionToTsv(): string | null {
+        const range = this.selection.activeRange;
+        if (range.c1 > range.c2 || range.r1 > range.r2) {
+            return null;
+        }
+        const rows: (string | null)[][] = [];
+        for (let r = range.r1; r <= range.r2; r++) {
+            const row: (string | null)[] = [];
+            for (let c = range.c1; c <= range.c2; c++) {
+                const data = this.cellDataByKey.get(toKey(c, r));
+                row.push(data?.value ?? '');
+            }
+            rows.push(row);
+        }
+        return serializeToTsv(rows);
+    }
+
+    /**
      * Scroll-event handler: recompute the visible viewport from the
      * scroll container's current state + push a fresh render state
      * to the cell-grid. Also dispatches `onSheetScroll` to the
@@ -1083,6 +1182,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.removeEventListener(
             'keydown',
             this.handleKeyDown as EventListener
+        );
+        this.scrollContainer.removeEventListener(
+            'copy', this.handleCopy as EventListener
+        );
+        this.scrollContainer.removeEventListener(
+            'cut', this.handleCut as EventListener
+        );
+        this.scrollContainer.removeEventListener(
+            'paste', this.handlePaste as EventListener
         );
         this.cellGrid.removeEventListener(
             'cell-click',
