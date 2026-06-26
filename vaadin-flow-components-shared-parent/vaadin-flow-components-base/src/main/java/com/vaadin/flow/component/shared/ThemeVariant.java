@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * Base definition for a typed theme variant enum of a component
+ * 
+ * @since 23.2
  */
 public interface ThemeVariant extends Serializable {
     /**

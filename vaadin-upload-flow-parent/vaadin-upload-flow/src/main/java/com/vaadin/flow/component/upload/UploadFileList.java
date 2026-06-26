@@ -44,6 +44,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  *
  * @author Vaadin Ltd.
  * @see UploadManager
+ * @since 25.1
  */
 @Tag("vaadin-upload-file-list")
 @NpmPackage(value = "@vaadin/upload", version = "25.2.0")

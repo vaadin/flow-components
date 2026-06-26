@@ -28,6 +28,7 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
  * state, position and size.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SheetChartWrapper extends SheetOverlayWrapper

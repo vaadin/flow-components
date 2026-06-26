@@ -32,6 +32,7 @@ import com.vaadin.flow.function.SerializableFunction;
  *            the type of the input object that can be used by the rendered
  *            component
  *
+ * @since 22.0
  */
 public class IconRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
 

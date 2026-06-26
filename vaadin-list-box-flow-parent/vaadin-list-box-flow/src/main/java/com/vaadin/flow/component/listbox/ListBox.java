@@ -47,6 +47,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
  * @param <T>
  *            the type of the items contained by this component
  * @see MultiSelectListBox
+ * @since 1.0
  */
 public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
         implements SingleSelect<ListBox<T>, T> {
@@ -97,6 +98,7 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
      *            the second instance
      * @return <code>true</code> if the instances are equal; otherwise
      *         <code>false</code>
+     * @since 18.0
      */
     @Override
     protected boolean valueEquals(T value1, T value2) {

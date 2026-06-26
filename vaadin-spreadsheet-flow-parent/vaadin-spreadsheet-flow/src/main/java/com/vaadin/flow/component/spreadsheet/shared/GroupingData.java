@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 /**
  * Shared state for the grouping feature
+ * 
+ * @since 23.1
  */
 public class GroupingData implements Serializable {
     public int startIndex;

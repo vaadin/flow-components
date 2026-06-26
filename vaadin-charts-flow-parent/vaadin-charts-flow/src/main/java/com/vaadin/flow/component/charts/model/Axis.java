@@ -15,6 +15,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class Axis extends AbstractConfigurationObject {
 
     private static final long serialVersionUID = 1L;
@@ -61,6 +64,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *
      * @param min
      * @see #setMin(Number)
+     * @since 24.7
      */
     public void setMin(Instant min) {
         this.min = Util.toHighchartsTS(min);
@@ -91,6 +95,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *
      * @param max
      * @see #setMax(Number)
+     * @since 24.7
      */
     public void setMax(Instant max) {
         this.max = Util.toHighchartsTS(max);
@@ -120,6 +125,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            Maximum value as Instant.
      *
      * @see #setExtremes(Number, Number)
+     * @since 25.0
      */
     public void setExtremes(Instant min, Instant max) {
         this.setExtremes(min, max, true, true);
@@ -160,6 +166,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            Whether or not to redraw the chart.
      *
      * @see #setExtremes(Number, Number, boolean)
+     * @since 25.0
      */
     public void setExtremes(Instant min, Instant max, boolean redraw) {
         this.setExtremes(min, max, redraw, true);
@@ -210,6 +217,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            Whether or not to animate the rescaling.
      *
      * @see #setExtremes(Number, Number, boolean, boolean)
+     * @since 25.0
      */
     public void setExtremes(Instant minimum, Instant maximum, boolean redraw,
             boolean animate) {
@@ -276,6 +284,8 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * When using an alternate grid color, a band is painted across the plot
      * area between every other grid line.
+     * 
+     * @since 18.0
      */
     public abstract void setAlternateGridColor(Color alternateGridColor);
 
@@ -430,21 +440,27 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public abstract Color getLineColor();
 
     /**
      * The color of the line marking the axis itself.
+     * 
+     * @since 18.0
      */
     public abstract void setLineColor(Color lineColor);
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public abstract Number getLineWidth();
 
     /**
      * The width of the line marking the axis itself.
+     * 
+     * @since 18.0
      */
     public abstract void setLineWidth(Number lineWidth);
 
@@ -777,11 +793,14 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * @see #setTickColor(Color)
+     * @since 18.0
      */
     public abstract Color getTickColor();
 
     /**
      * Color for the main tick marks.
+     * 
+     * @since 18.0
      */
     public abstract void setTickColor(Color tickColor);
 

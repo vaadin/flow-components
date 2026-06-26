@@ -47,6 +47,7 @@ import com.vaadin.flow.shared.Registration;
  * inaccessible by keyboard or screen reader.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-accordion")
 @NpmPackage(value = "@vaadin/accordion", version = "25.2.0")
@@ -58,6 +59,8 @@ public class Accordion extends Component implements HasSize, HasStyle {
 
     /**
      * Initializes a new Accordion component.
+     * 
+     * @since 25.1.7
      */
     public Accordion() {
         if (getElement().getPropertyRaw(OPENED_PROPERTY) == null) {

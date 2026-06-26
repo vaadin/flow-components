@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
  * @author Vaadin Ltd.
  * @see DashboardItemRemoveHandler
  * @see Dashboard#setItemRemoveHandler(DashboardItemRemoveHandler)
+ * @since 25.1
  */
 public class DashboardItemRemoveEvent implements Serializable {
 

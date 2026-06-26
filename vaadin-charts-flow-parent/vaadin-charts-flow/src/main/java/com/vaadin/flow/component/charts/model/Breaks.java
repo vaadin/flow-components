@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.util.Util;
 /**
  * An array defining breaks in the axis, the sections defined will be left out
  * and all the points shifted closer to each other.
+ * 
+ * @since 6.0.1
  */
 public class Breaks extends AbstractConfigurationObject {
 

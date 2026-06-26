@@ -24,6 +24,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * subclasses of the FinishedEvent.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class FinishedEvent extends ComponentEvent<Upload> {
 

@@ -42,6 +42,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *            the sub menu type
  *
  * @author Vaadin Ltd.
+ * @since 2.0
  */
 public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S extends SubMenuBase<?, I, S>>
         implements Serializable {
@@ -154,6 +155,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param tooltipText
      *            the tooltip text for the menu item
      * @return a new menu item
+     * @since 25.2
      */
     public I addItem(String text, String tooltipText) {
         I menuItem = addItem(text);
@@ -169,6 +171,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param tooltipText
      *            the tooltip text for the menu item
      * @return a new menu item
+     * @since 25.2
      */
     public I addItem(Component component, String tooltipText) {
         I menuItem = addItem(component);
@@ -186,6 +189,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param clickListener
      *            a click listener
      * @return a new menu item
+     * @since 25.2
      */
     public I addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<I>> clickListener) {
@@ -204,6 +208,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param clickListener
      *            a click listener
      * @return a new menu item
+     * @since 25.2
      */
     public I addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<I>> clickListener) {
@@ -222,6 +227,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
+     * @since 24.8
      */
     public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
@@ -335,6 +341,8 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
 
     /**
      * Adds a separator between items.
+     * 
+     * @since 24.8
      */
     public void addSeparator() {
         addComponent(new Hr());

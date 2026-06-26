@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Provides the option to draw a frame around the charts by defining a bottom,
  * front and back panel.
+ * 
+ * @since 6.0.1
  */
 public class Frame extends AbstractConfigurationObject {
 

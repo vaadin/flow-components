@@ -82,6 +82,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-text-area")
 @NpmPackage(value = "@vaadin/text-area", version = "25.2.0")
@@ -275,6 +276,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
 
     /**
      * Scrolls the textarea to the start if it has a vertical scrollbar.
+     * 
+     * @since 24.4
      */
     public void scrollToStart() {
         getElement().callJsFunction("scrollToStart");
@@ -282,6 +285,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
 
     /**
      * Scrolls the textarea to the end if it has a vertical scrollbar.
+     * 
+     * @since 24.4
      */
     public void scrollToEnd() {
         getElement().callJsFunction("scrollToEnd");
@@ -295,6 +300,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -382,6 +389,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     * @since 23.0
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
@@ -392,6 +400,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      *
      * @return the pattern or {@code null} if not set
      * @see #setPattern(String)
+     * @since 23.0
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
@@ -401,6 +410,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * The minimum number of rows to show.
      *
      * @return the minimum number of rows
+     * @since 24.6
      */
     public int getMinRows() {
         return getElement().getProperty("minRows", 2);
@@ -411,6 +421,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      *
      * @param minRows
      *            the minimum number of rows to show
+     * @since 24.6
      */
     public void setMinRows(int minRows) {
         getElement().setProperty("minRows", minRows);
@@ -422,6 +433,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      *
      * @return the maximum number of rows, or {@code null} if the maximum has
      *         not been set
+     * @since 24.6
      */
     public Integer getMaxRows() {
         String maxRows = getElement().getProperty("maxRows");
@@ -441,6 +453,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * @param maxRows
      *            the maximum number of rows, or {@code null} to remove the
      *            maximum
+     * @since 24.6
      */
     public void setMaxRows(Integer maxRows) {
         if (maxRows != null) {
@@ -465,6 +478,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      *
      * @param value
      *            the new value, not {@code null}
+     * @since 1.0.4
      */
     @Override
     public void setValue(String value) {
@@ -476,6 +490,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * area will return an empty string.
      *
      * @return the current value.
+     * @since 1.0.4
      */
     @Override
     public String getValue() {
@@ -500,6 +515,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 2.0.8
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -513,6 +530,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * {@link #setI18n(TextAreaI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public TextAreaI18n getI18n() {
         return i18n;
@@ -523,6 +541,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(TextAreaI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -535,6 +554,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
 
     /**
      * The internationalization properties for {@link TextArea}.
+     * 
+     * @since 24.5
      */
     public static class TextAreaI18n implements Serializable {
 

@@ -43,6 +43,7 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  *
  * @author Vaadin Ltd.
+ * @since 25.1
  */
 public interface LLMProvider {
 

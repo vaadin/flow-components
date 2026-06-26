@@ -29,6 +29,8 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * Utility methods for Upload and UploadManager components.
  * <p>
  * Intended only for internal use and can be removed or changed in the future.
+ * 
+ * @since 25.1
  */
 public class UploadHelper implements Serializable {
 

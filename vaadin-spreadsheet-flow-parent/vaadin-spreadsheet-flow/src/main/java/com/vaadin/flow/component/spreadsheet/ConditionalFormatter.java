@@ -70,6 +70,7 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory.BorderStyle
  * For now, only XSSF formatting rules are supported because of bugs in POI.
  *
  * @author Thomas Mattsson / Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class ConditionalFormatter implements Serializable {

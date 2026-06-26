@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * The appearance of the point marker when selected. In order to allow a point
  * to be selected, set the <code>series.allowPointSelect</code> option to true.
+ * 
+ * @since 6.0.1
  */
 public class Select extends AbstractConfigurationObject {
 
@@ -47,6 +49,7 @@ public class Select extends AbstractConfigurationObject {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -54,6 +57,8 @@ public class Select extends AbstractConfigurationObject {
 
     /**
      * The fill color of the point marker.
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
@@ -61,6 +66,7 @@ public class Select extends AbstractConfigurationObject {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -71,6 +77,8 @@ public class Select extends AbstractConfigurationObject {
      * series' or point's color is used.
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -78,6 +86,7 @@ public class Select extends AbstractConfigurationObject {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -87,6 +96,8 @@ public class Select extends AbstractConfigurationObject {
      * The width of the point marker's outline.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;

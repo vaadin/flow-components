@@ -45,6 +45,7 @@ import com.vaadin.flow.data.renderer.NumberRenderer;
  *
  * @author Vaadin Ltd
  * @see GridAIController
+ * @since 25.2
  */
 public final class GridRenderer implements Serializable {
 

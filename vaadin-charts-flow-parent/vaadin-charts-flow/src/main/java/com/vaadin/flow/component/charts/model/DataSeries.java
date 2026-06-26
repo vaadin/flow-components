@@ -27,6 +27,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * @see ListSeries
  * @see RangeSeries
  * @see HeatSeries
+ * @since 6.0.1
  */
 public class DataSeries extends AbstractSeries {
 
@@ -134,6 +135,7 @@ public class DataSeries extends AbstractSeries {
      *            parameter.
      * @param colors
      *            An array of colors for each category name, value pair.
+     * @since 18.0
      */
     public void setData(String[] categoryNames, Number[] values,
             Color[] colors) {

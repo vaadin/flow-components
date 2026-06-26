@@ -15,6 +15,9 @@ import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public class PlotOptionsLine extends PointOptions {
 
     private Boolean allowPointSelect;
@@ -151,6 +154,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -161,6 +165,8 @@ public class PlotOptionsLine extends PointOptions {
      * Note that lipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>false</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -168,6 +174,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -192,6 +199,8 @@ public class PlotOptionsLine extends PointOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -217,6 +226,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -229,6 +239,8 @@ public class PlotOptionsLine extends PointOptions {
      * set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -236,6 +248,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -250,6 +263,8 @@ public class PlotOptionsLine extends PointOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -329,6 +344,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -354,6 +370,8 @@ public class PlotOptionsLine extends PointOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -543,6 +561,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -552,6 +571,8 @@ public class PlotOptionsLine extends PointOptions {
      * Pixel with of the graph line.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -623,6 +644,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -633,6 +655,8 @@ public class PlotOptionsLine extends PointOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -640,6 +664,7 @@ public class PlotOptionsLine extends PointOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -649,6 +674,8 @@ public class PlotOptionsLine extends PointOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

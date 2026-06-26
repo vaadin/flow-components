@@ -26,6 +26,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>.highcharts-scrollbar-rifles</code> and
  * <code>.highcharts-scrollbar-track</code>.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Scrollbar extends AbstractConfigurationObject {
 
@@ -57,6 +59,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setBarBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBarBackgroundColor() {
         return barBackgroundColor;
@@ -66,6 +69,8 @@ public class Scrollbar extends AbstractConfigurationObject {
      * The background color of the scrollbar itself.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setBarBackgroundColor(Color barBackgroundColor) {
         this.barBackgroundColor = barBackgroundColor;
@@ -73,6 +78,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setBarBorderColor(Color)
+     * @since 18.0
      */
     public Color getBarBorderColor() {
         return barBorderColor;
@@ -82,6 +88,8 @@ public class Scrollbar extends AbstractConfigurationObject {
      * The color of the scrollbar's border.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setBarBorderColor(Color barBorderColor) {
         this.barBorderColor = barBorderColor;
@@ -121,6 +129,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setButtonArrowColor(Color)
+     * @since 18.0
      */
     public Color getButtonArrowColor() {
         return buttonArrowColor;
@@ -130,6 +139,8 @@ public class Scrollbar extends AbstractConfigurationObject {
      * The color of the small arrow inside the scrollbar buttons.
      * <p>
      * Defaults to: #333333
+     * 
+     * @since 18.0
      */
     public void setButtonArrowColor(Color buttonArrowColor) {
         this.buttonArrowColor = buttonArrowColor;
@@ -137,6 +148,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setButtonBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getButtonBackgroundColor() {
         return buttonBackgroundColor;
@@ -146,6 +158,8 @@ public class Scrollbar extends AbstractConfigurationObject {
      * The color of scrollbar buttons.
      * <p>
      * Defaults to: #e6e6e6
+     * 
+     * @since 18.0
      */
     public void setButtonBackgroundColor(Color buttonBackgroundColor) {
         this.buttonBackgroundColor = buttonBackgroundColor;
@@ -153,6 +167,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setButtonBorderColor(Color)
+     * @since 18.0
      */
     public Color getButtonBorderColor() {
         return buttonBorderColor;
@@ -162,6 +177,8 @@ public class Scrollbar extends AbstractConfigurationObject {
      * The color of the border of the scrollbar buttons.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setButtonBorderColor(Color buttonBorderColor) {
         this.buttonBorderColor = buttonBorderColor;
@@ -400,6 +417,7 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * @see #setTrackBorderWidth(Number)
+     * @since 24.7
      */
     public Number getTrackBorderWidth() {
         return trackBorderWidth;
@@ -407,6 +425,8 @@ public class Scrollbar extends AbstractConfigurationObject {
 
     /**
      * The width of the border of the scrollbar track. Defaults to 1.
+     * 
+     * @since 24.7
      */
     public void setTrackBorderWidth(Number trackBorderWidth) {
         this.trackBorderWidth = trackBorderWidth;

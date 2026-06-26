@@ -60,6 +60,7 @@ import tools.jackson.databind.node.BaseJsonNode;
  * that can in turn cancel a potential redirect issued by the form submission.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 public abstract class AbstractLogin extends Component implements HasEnabled {
 
@@ -145,6 +146,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @param action
      *            the action URL, or {@code null} to remove the action and
      *            restore the default login listener handling
+     * @since 25.2
      */
     public void setUnsafeAction(String action) {
         doSetAction(action);
@@ -275,6 +277,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -292,6 +295,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @param message
      *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
      *            may be null.
+     * @since 24.4
      */
     public void showErrorMessage(String title, String message) {
         var loginI18n = getI18n();

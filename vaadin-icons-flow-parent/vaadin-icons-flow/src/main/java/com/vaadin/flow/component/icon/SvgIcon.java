@@ -28,6 +28,7 @@ import com.vaadin.flow.signals.Signal;
  * Component for displaying an icon from a SVG file.
  *
  * @author Vaadin Ltd
+ * @since 24.2
  */
 public class SvgIcon extends AbstractIcon<SvgIcon> {
     private static final String STYLE_FILL = "fill";
@@ -105,6 +106,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @param src
      *            the download handler resource
      * @see #setSrc(AbstractStreamResource)
+     * @since 24.8
      */
     public SvgIcon(DownloadHandler src) {
         setSrc(src);
@@ -124,6 +126,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the symbol reference of the icon
      * @see #setSrc(AbstractStreamResource)
      * @see #setSymbol(String)
+     * @since 24.8
      */
     public SvgIcon(DownloadHandler src, String symbol) {
         this(src);
@@ -259,6 +262,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *
      * @param src
      *            the source value, not null
+     * @since 24.8
      */
     public void setSrc(DownloadHandler src) {
         if (src instanceof AbstractDownloadHandler<?> handler) {
@@ -285,6 +289,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the symbol reference of the icon
      * @see #setSrc(AbstractStreamResource)
      * @see #setSymbol(String)
+     * @since 24.8
      */
     public void setSrc(DownloadHandler src, String symbol) {
         setSrc(src);

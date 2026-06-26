@@ -25,6 +25,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/css/series-datalabels"
  * >see example</a>).
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class DataLabels extends AbstractDataLabels {
 
@@ -105,6 +107,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -113,6 +116,8 @@ public class DataLabels extends AbstractDataLabels {
     /**
      * The background color or gradient for the data label. Defaults to
      * <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -120,6 +125,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -127,6 +133,8 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * The border color for the data label. Defaults to <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -134,6 +142,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setBorderRadius(Number)
+     * @since 18.0
      */
     public Number getBorderRadius() {
         return borderRadius;
@@ -143,6 +152,8 @@ public class DataLabels extends AbstractDataLabels {
      * The border radius in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderRadius(Number borderRadius) {
         this.borderRadius = borderRadius;
@@ -150,6 +161,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -159,6 +171,8 @@ public class DataLabels extends AbstractDataLabels {
      * The border width in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -186,6 +200,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -193,6 +208,8 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * The text color for the data labels. Defaults to <code>null</code>.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -388,6 +405,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -410,6 +428,8 @@ public class DataLabels extends AbstractDataLabels {
      * <p>
      * Defaults to: {"color": "contrast", "fontSize": "11px", "fontWeight":
      * "bold", "textOutline": "1px contrast" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;
@@ -501,6 +521,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setConnectorColor(Color)
+     * @since 18.0
      */
     public Color getConnectorColor() {
         return connectorColor;
@@ -520,6 +541,8 @@ public class DataLabels extends AbstractDataLabels {
      * </p>
      * <p>
      * Defaults to: {point.color}
+     * 
+     * @since 18.0
      */
     public void setConnectorColor(Color connectorColor) {
         this.connectorColor = connectorColor;
@@ -543,6 +566,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setConnectorWidth(Number)
+     * @since 18.0
      */
     public Number getConnectorWidth() {
         return connectorWidth;
@@ -561,6 +585,8 @@ public class DataLabels extends AbstractDataLabels {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setConnectorWidth(Number connectorWidth) {
         this.connectorWidth = connectorWidth;
@@ -602,6 +628,7 @@ public class DataLabels extends AbstractDataLabels {
 
     /**
      * @see #setPosition(HorizontalAlign)
+     * @since 24.7
      */
     public HorizontalAlign getPosition() {
         return position;
@@ -612,6 +639,7 @@ public class DataLabels extends AbstractDataLabels {
      * possible, it defaults to right. Defaults to "center".
      *
      * @param position
+     * @since 24.7
      */
     public void setPosition(HorizontalAlign position) {
         this.position = position;

@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
 
+/**
+ * @since 24.0
+ */
 public enum Stacking {
     NONE, NORMAL, PERCENT;
 }

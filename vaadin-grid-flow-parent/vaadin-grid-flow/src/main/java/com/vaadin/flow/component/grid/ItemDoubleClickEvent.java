@@ -29,6 +29,7 @@ import com.vaadin.flow.component.EventData;
  *
  * @author Vaadin Ltd
  *
+ * @since 2.1
  */
 @DomEvent("item-double-click")
 public class ItemDoubleClickEvent<T> extends ItemClickEvent<T> {
@@ -75,6 +76,7 @@ public class ItemDoubleClickEvent<T> extends ItemClickEvent<T> {
      *            <code>true</code> if the meta key was down when the event was
      *            fired, <code>false</code> otherwise
      *
+     * @since 4.1
      */
     public ItemDoubleClickEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail.itemKey") String itemKey,

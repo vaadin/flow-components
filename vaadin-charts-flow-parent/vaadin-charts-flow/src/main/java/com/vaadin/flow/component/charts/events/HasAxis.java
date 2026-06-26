@@ -12,6 +12,9 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.charts.Chart;
 
+/**
+ * @since 6.0.1
+ */
 public interface HasAxis<T> extends Serializable {
     Chart getSource();
 

@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * A configuration object to configure style of connectors (dependencies)
  * between two points in a Gantt chart.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class ChartConnectors extends ConnectorStyle {

@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
 
+/**
+ * @since 23.1
+ */
 @SuppressWarnings("serial")
 public class MergedRegion implements Serializable {
     public int id;

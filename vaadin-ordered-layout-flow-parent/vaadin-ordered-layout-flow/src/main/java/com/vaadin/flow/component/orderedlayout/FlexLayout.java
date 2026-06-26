@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Tag;
  * @see <a href=
  *      "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Using_CSS_flexible_boxes">Using
  *      CSS Flexible boxes on MDN</a>
+ * @since 1.0
  */
 @Tag(Tag.DIV)
 public class FlexLayout extends Component
@@ -39,6 +40,8 @@ public class FlexLayout extends Component
     /**
      * Enum with the possible values for the component alignment inside the
      * layout. It correlates to the <code>align-items</code> CSS property.
+     * 
+     * @since 3.1
      */
     public enum ContentAlignment {
 
@@ -95,6 +98,8 @@ public class FlexLayout extends Component
     /**
      * Possible values for the {@code flex-direction} CSS property, which
      * determines how the elements are placed inside the layout.
+     * 
+     * @since 3.1
      */
     public enum FlexDirection {
 
@@ -141,6 +146,8 @@ public class FlexLayout extends Component
      * Possible values for the {@code flex-wrap} CSS property, which determines
      * how the elements inside the layout should behave when they don't fit
      * inside the layout.
+     * 
+     * @since 3.1
      */
     public enum FlexWrap {
 
@@ -208,6 +215,7 @@ public class FlexLayout extends Component
      *
      * @param flexWrap
      *            the flex wrap of the layout, never <code>null</code>
+     * @since 3.1
      */
     public void setFlexWrap(FlexWrap flexWrap) {
         if (flexWrap == null) {
@@ -224,6 +232,7 @@ public class FlexLayout extends Component
      * The default flex wrap is {@link FlexWrap#NOWRAP}.
      *
      * @return the flex wrap used by the layout, never <code>null</code>
+     * @since 3.1
      */
     public FlexWrap getFlexWrap() {
         return FlexWrap.toFlexWrap(getElement().getStyle()
@@ -241,6 +250,7 @@ public class FlexLayout extends Component
      * @param alignment
      *            the alignment to apply to the components. Setting
      *            <code>null</code> will reset the alignment to its default
+     * @since 3.1
      */
     public void setAlignContent(ContentAlignment alignment) {
         if (alignment == null) {
@@ -256,6 +266,7 @@ public class FlexLayout extends Component
      *
      * @return the align content property, or {@link ContentAlignment#STRETCH}
      *         if none was set
+     * @since 3.1
      */
     public ContentAlignment getAlignContent() {
         return ContentAlignment.toAlignment(
@@ -273,6 +284,7 @@ public class FlexLayout extends Component
      *            remove the flex basis property
      * @param components
      *            the components to apply the flex basis property
+     * @since 3.1
      */
     public void setFlexBasis(String width, HasElement... components) {
         if (width == null) {
@@ -294,6 +306,7 @@ public class FlexLayout extends Component
      * @param component
      *            the component to read the flex basis property from
      * @return the flex grow property
+     * @since 3.1
      */
     public String getFlexBasis(HasElement component) {
         return component.getElement().getStyle()
@@ -310,6 +323,7 @@ public class FlexLayout extends Component
      * @param flexDirection
      *            the direction for the components. Setting <code>null</code>
      *            will remove the flex direction property
+     * @since 3.1
      */
     public void setFlexDirection(FlexDirection flexDirection) {
         if (flexDirection == null) {
@@ -327,6 +341,7 @@ public class FlexLayout extends Component
      *
      * @return the flex direction property, or {@link FlexDirection#ROW} if none
      *         was set
+     * @since 23.3
      */
     public FlexDirection getFlexDirection() {
         return FlexDirection.toFlexDirection(
@@ -347,6 +362,7 @@ public class FlexLayout extends Component
      *            the order for the component
      * @param component
      *            the component to apply the order property
+     * @since 3.1
      */
     public void setOrder(int order, HasElement component) {
         if (order == 0) {
@@ -363,6 +379,7 @@ public class FlexLayout extends Component
      * @param component
      *            the component to read the order property from
      * @return the order property, or 0 if none was set
+     * @since 3.1
      */
     public int getOrder(HasElement component) {
         String order = component.getElement().getStyle()

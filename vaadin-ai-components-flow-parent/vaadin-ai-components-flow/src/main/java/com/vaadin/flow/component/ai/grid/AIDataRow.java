@@ -31,6 +31,7 @@ import java.util.Set;
  * @author Vaadin Ltd
  * @see GridAIController
  * @see GridRenderer
+ * @since 25.2
  */
 public final class AIDataRow implements Serializable {
 

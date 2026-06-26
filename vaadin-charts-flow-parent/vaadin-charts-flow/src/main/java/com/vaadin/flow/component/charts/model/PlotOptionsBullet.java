@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  * Plot options for {@link ChartType#BULLET} charts.
+ * 
+ * @since 18.0
  */
 public class PlotOptionsBullet extends AbstractPlotOptions {
 

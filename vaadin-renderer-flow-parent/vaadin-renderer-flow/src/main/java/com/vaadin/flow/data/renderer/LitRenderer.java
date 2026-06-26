@@ -174,6 +174,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * Returns the Lit template expression used to render items.
      *
      * @return the template expression
+     * @since 24.0
      */
     protected String getTemplateExpression() {
         return templateExpression;
@@ -397,6 +398,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * returned map is immutable.
      *
      * @return the mapped properties, never <code>null</code>
+     * @since 23.0.10
      */
     public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
         return Collections.unmodifiableMap(valueProviders);

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-badge} component.
+ * 
+ * @since 25.1
  */
 public enum BadgeVariant implements ThemeVariant {
     CONTRAST("contrast"),

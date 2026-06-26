@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
     @Override
@@ -58,12 +61,15 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
      * Note that clipping should be always enabled when chart.zoomType is set
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
@@ -81,6 +87,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public abstract String getColorKey();
 
@@ -89,17 +96,22 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <code>colorAxis</code> is used. Requires to set <code>min</code> and
      * <code>max</code> if some custom point property is used or if
      * approximation for data grouping is set to <code>'sum'</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract Color[] getColors();
 
     /**
      * A series specific or series type specific color set to use instead of the
      * theme colors.
+     * 
+     * @since 18.0
      */
     public abstract void setColors(Color... colors);
 
@@ -109,6 +121,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void addColor(Color color);
 
@@ -118,11 +131,13 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void removeColor(Color color);
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getCrisp();
 
@@ -133,6 +148,8 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * or distance between columns. In these cases, setting crisp to
      * <code>falase</code> may look better, even though each column is rendered
      * blurry.
+     * 
+     * @since 18.0
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -257,12 +274,15 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * @see #setIgnoreHiddenPoint(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getIgnoreHiddenPoint();
 
     /**
      * This option tells whether the series shall be redrawn as if the hidden
      * point were null.
+     * 
+     * @since 18.0
      */
     public abstract void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint);
 
@@ -323,11 +343,14 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 

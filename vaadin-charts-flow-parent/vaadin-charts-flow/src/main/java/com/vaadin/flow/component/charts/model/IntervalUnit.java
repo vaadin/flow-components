@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Irregular time unit used to define point interval unit.
+ * 
+ * @since 6.0.1
  */
 public enum IntervalUnit implements ChartEnum {
 

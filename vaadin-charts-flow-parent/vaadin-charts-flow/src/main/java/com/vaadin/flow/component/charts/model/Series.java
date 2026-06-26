@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 /**
  * Series interface for all kinds of Series
+ * 
+ * @since 6.0.1
  */
 public interface Series extends Serializable {
 

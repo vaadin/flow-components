@@ -20,6 +20,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * chart. It provides buttons to select preconfigured ranges in the chart, like
  * 1 day, 1 week, 1 month etc. It also provides input boxes where min and max
  * dates can be manually input.
+ * 
+ * @since 6.0.1
  */
 public class RangeSelector extends AbstractConfigurationObject {
 
@@ -100,6 +102,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * @see #setButtonTheme(ButtonTheme)
+     * @since 18.0
      */
     public ButtonTheme getButtonTheme() {
         if (buttonTheme == null) {
@@ -133,6 +136,8 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <code>.highcharts-range-selector-buttons .highcharts-button</code> rule
      * with its different states.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setButtonTheme(ButtonTheme buttonTheme) {
         this.buttonTheme = buttonTheme;
@@ -252,6 +257,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * @see #setInputBoxBorderColor(Color)
+     * @since 18.0
      */
     public Color getInputBoxBorderColor() {
         return inputBoxBorderColor;
@@ -261,6 +267,8 @@ public class RangeSelector extends AbstractConfigurationObject {
      * The border color of the date input boxes.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setInputBoxBorderColor(Color inputBoxBorderColor) {
         this.inputBoxBorderColor = inputBoxBorderColor;
@@ -378,6 +386,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * @see #setInputStyle(Style)
+     * @since 18.0
      */
     public Style getInputStyle() {
         if (inputStyle == null) {
@@ -398,6 +407,8 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <code>.highcharts-range-input text</code> rule in SVG mode, and
      * <code>input.highcharts-range-selector</code> when active.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setInputStyle(Style inputStyle) {
         this.inputStyle = inputStyle;
@@ -405,6 +416,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * @see #setLabelStyle(Style)
+     * @since 18.0
      */
     public Style getLabelStyle() {
         if (labelStyle == null) {
@@ -424,6 +436,8 @@ public class RangeSelector extends AbstractConfigurationObject {
      * >styled mode</a>, the labels are styled by the
      * <code>.highcharts-range-label</code> class.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setLabelStyle(Style labelStyle) {
         this.labelStyle = labelStyle;

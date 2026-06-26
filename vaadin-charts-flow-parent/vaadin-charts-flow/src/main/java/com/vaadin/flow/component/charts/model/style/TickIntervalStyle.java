@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model.style;
 
 import com.vaadin.flow.component.charts.model.ChartEnum;
 
+/**
+ * @since 18.0
+ */
 public enum TickIntervalStyle implements ChartEnum {
 
     AUTO("auto"), NONE("");

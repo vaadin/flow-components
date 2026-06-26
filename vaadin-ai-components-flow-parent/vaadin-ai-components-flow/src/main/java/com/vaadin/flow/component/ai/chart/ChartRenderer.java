@@ -43,6 +43,7 @@ import com.vaadin.flow.component.charts.model.Series;
  * (standalone chart, dashboard) share the same rendering logic.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ChartRenderer implements Serializable {
 

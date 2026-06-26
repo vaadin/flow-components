@@ -63,6 +63,7 @@ import com.vaadin.flow.shared.Registration;
  * unexpectedly.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
@@ -133,6 +134,7 @@ public class Tabs extends Component
      *            {@code false} to leave tabs unselected
      * @param tabs
      *            the tabs to enclose
+     * @since 2.0
      */
     public Tabs(boolean autoselect, Tab... tabs) {
         this();
@@ -152,6 +154,7 @@ public class Tabs extends Component
      * @param components
      *            the tabs to enclose
      * @deprecated since 24.0, use {@link #add(Tab...)} instead.
+     * @since 1.0.4
      */
     @Deprecated
     public void add(Component... components) {
@@ -211,6 +214,7 @@ public class Tabs extends Component
      *             next available tab if autoselect is true, otherwise no tab
      *             will be selected.
      * @deprecated since 24.0, use {@link #remove(Tab...)} instead.
+     * @since 1.0.4
      */
     @Deprecated
     public void remove(Component... components) {
@@ -240,6 +244,7 @@ public class Tabs extends Component
      *             the selected tab. Removing the selected tab will select the
      *             next available tab if autoselect is true, otherwise no tab
      *             will be selected.
+     * @since 24.0
      */
     public void remove(Tab... tabs) {
         int selectedIndex = getSelectedIndex();
@@ -297,6 +302,8 @@ public class Tabs extends Component
      * were added only at the client-side.
      * <p>
      * This will reset the {@link #getSelectedIndex() selected index} to zero.
+     * 
+     * @since 1.0.4
      */
     public void removeAll() {
         getElement().removeAllChildren();
@@ -323,6 +330,7 @@ public class Tabs extends Component
      *            the {@link #getSelectedIndex() selected index} to avoid
      *            changing the selected tab.
      * @deprecated since 24.0, use {@link #addTabAtIndex(int, Tab)} instead.
+     * @since 1.1
      */
     @Deprecated
     public void addComponentAtIndex(int index, Component component) {
@@ -349,6 +357,7 @@ public class Tabs extends Component
      *            Adding a tab before the currently selected tab will increment
      *            the {@link #getSelectedIndex() selected index} to avoid
      *            changing the selected tab.
+     * @since 24.0
      */
     public void addTabAtIndex(int index, Tab tab) {
         Objects.requireNonNull(tab, "Tab should not be null");
@@ -389,6 +398,7 @@ public class Tabs extends Component
      *            Replacing the currently selected tab will make the new tab
      *            selected.
      * @deprecated since 24.0, use {@link #replace(Tab, Tab)} instead.
+     * @since 1.0.4
      */
     @Deprecated
     public void replace(Component oldComponent, Component newComponent) {
@@ -423,6 +433,7 @@ public class Tabs extends Component
      *            <p>
      *            Replacing the currently selected tab will make the new tab
      *            selected.
+     * @since 24.0
      */
     public void replace(Tab oldTab, Tab newTab) {
         if (oldTab == null && newTab == null) {
@@ -469,6 +480,7 @@ public class Tabs extends Component
          * @param fromClient
          *            <code>true</code> for client-side events,
          *            <code>false</code> otherwise.
+         * @since 2.0
          */
         public SelectedChangeEvent(Tabs source, Tab previousTab,
                 boolean fromClient) {
@@ -484,6 +496,7 @@ public class Tabs extends Component
          * is set to false.
          *
          * @return the selected tab for this event
+         * @since 2.0
          */
         public Tab getSelectedTab() {
             return this.selectedTab;
@@ -494,6 +507,7 @@ public class Tabs extends Component
          * autoselect is set to false.
          *
          * @return the selected tab for this event
+         * @since 2.0
          */
         public Tab getPreviousTab() {
             return this.previousTab;
@@ -504,6 +518,7 @@ public class Tabs extends Component
          *
          * @return <code>true</code> if the event is initial tabs selection,
          *         <code>false</code> otherwise
+         * @since 2.0
          */
         public boolean isInitialSelection() {
             return this.initialSelection;
@@ -648,6 +663,7 @@ public class Tabs extends Component
      *
      * @param autoselect
      *            {@code true} to autoselect tab, {@code false} to not.
+     * @since 2.0
      */
     public void setAutoselect(boolean autoselect) {
         this.autoselect = autoselect;
@@ -660,6 +676,7 @@ public class Tabs extends Component
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
      * @see #setAutoselect(boolean)
+     * @since 2.0
      */
     public boolean isAutoselect() {
         return this.autoselect;
@@ -703,6 +720,7 @@ public class Tabs extends Component
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not a child
      * @deprecated since 24.0, use {@link #indexOf(Tab)} instead.
+     * @since 24.0
      */
     @Deprecated
     public int indexOf(Component component) {
@@ -720,6 +738,7 @@ public class Tabs extends Component
      * @param tab
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not a child
+     * @since 24.0
      */
     public int indexOf(Tab tab) {
         if (tab == null) {
@@ -743,6 +762,7 @@ public class Tabs extends Component
      *
      * @return the number of tabs
      * @deprecated since 24.5, use {@link #getTabCount} instead.
+     * @since 24.0
      */
     @Deprecated
     public int getComponentCount() {
@@ -753,6 +773,7 @@ public class Tabs extends Component
      * Gets the number of tabs.
      *
      * @return the number of tabs
+     * @since 24.5
      */
     public int getTabCount() {
         return (int) getChildren().count();
@@ -769,6 +790,7 @@ public class Tabs extends Component
      *             if the index is less than 0 or greater than or equals to the
      *             number of children tabs
      * @deprecated since 24.0, use {@link #getTabAt(int)} instead.
+     * @since 24.0
      */
     @Deprecated
     public Component getComponentAt(int index) {
@@ -785,6 +807,7 @@ public class Tabs extends Component
      * @throws IllegalArgumentException
      *             if the index is less than 0 or greater than or equals to the
      *             number of children tabs
+     * @since 24.0
      */
     public Tab getTabAt(int index) {
         if (index < 0) {
@@ -807,6 +830,7 @@ public class Tabs extends Component
      * @param component
      *            the tab to add, value should not be null
      * @deprecated since 24.0, use {@link #addTabAsFirst(Tab)} instead.
+     * @since 24.0
      */
     @Deprecated
     public void addComponentAsFirst(Component component) {
@@ -826,6 +850,7 @@ public class Tabs extends Component
      *
      * @param tab
      *            the tab to add, value should not be null
+     * @since 24.0
      */
     public void addTabAsFirst(Tab tab) {
         addTabAtIndex(0, tab);

@@ -12,6 +12,9 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ScatterSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class ScatterSeriesDataWriter extends AbstractSeriesDataWriter {
 
     private static final int SCATTER_LINE_WIDTH = 2;

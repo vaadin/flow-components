@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
 
 import com.vaadin.flow.component.charts.model.DataSeries;
 
+/**
+ * @since 24.0
+ */
 @SuppressWarnings("serial")
 public class SelectListeningDataSeries extends DataSeries {
     public static interface SelectListener {

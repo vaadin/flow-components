@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * SeriesCheckboxClickEvent triggered when a checkbox in a legend is clicked
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-checkbox-click")
 public class SeriesCheckboxClickEvent extends ComponentEvent<Chart>

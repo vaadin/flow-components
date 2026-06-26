@@ -70,6 +70,7 @@ import com.vaadin.flow.shared.Registration;
  * </pre>
  *
  * @author Vaadin Ltd.
+ * @since 25.1
  */
 public class UploadManager implements Serializable {
 

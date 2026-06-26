@@ -21,6 +21,8 @@ import com.vaadin.flow.data.binder.ValidationResult;
 
 /**
  * Util methods for component validation
+ * 
+ * @since 23.2
  */
 public class ValidationUtil {
 
@@ -69,6 +71,7 @@ public class ValidationUtil {
      *            the value considered to be empty
      * @return {@code ValidationResult.ok()} if the value does not equal to the
      *         empty value, {@code ValidationResult.error()} otherwise
+     * @since 24.5
      */
     public static <V> ValidationResult validateRequiredConstraint(
             String errorMessage, boolean required, V value, V emptyValue) {
@@ -115,6 +118,7 @@ public class ValidationUtil {
      *            the maximum allowed value
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
      *         the maximum value, {@code ValidationResult.error()} otherwise
+     * @since 24.5
      */
     public static <V extends Comparable<V>> ValidationResult validateMaxConstraint(
             String errorMessage, V value, V maxValue) {
@@ -162,6 +166,7 @@ public class ValidationUtil {
      *            the minimum allowed value
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
      *         the minimum value, {@code ValidationResult.error()} otherwise
+     * @since 24.5
      */
     public static <V extends Comparable<V>> ValidationResult validateMinConstraint(
             String errorMessage, V value, V minValue) {
@@ -185,6 +190,7 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is longer than or
      *         equal to the minimum length, {@code ValidationResult.error()}
      *         otherwise
+     * @since 24.5
      */
     public static ValidationResult validateMinLengthConstraint(
             String errorMessage, String value, Integer minLength) {
@@ -208,6 +214,7 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is shorter than or
      *         equal to the maximum length, {@code ValidationResult.error()}
      *         otherwise
+     * @since 24.5
      */
     public static ValidationResult validateMaxLengthConstraint(
             String errorMessage, String value, Integer maxLength) {
@@ -230,6 +237,7 @@ public class ValidationUtil {
      *            the pattern to match
      * @return {@code ValidationResult.ok()} if the value matches the pattern,
      *         {@code ValidationResult.error()} otherwise
+     * @since 24.5
      */
     public static ValidationResult validatePatternConstraint(
             String errorMessage, String value, String pattern) {

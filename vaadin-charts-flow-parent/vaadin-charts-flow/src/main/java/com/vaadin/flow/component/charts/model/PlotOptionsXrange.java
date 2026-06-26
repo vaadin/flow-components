@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the xrange series type.
+ * 
+ * @since 18.0
  */
 public class PlotOptionsXrange extends AbstractPlotOptions {
 

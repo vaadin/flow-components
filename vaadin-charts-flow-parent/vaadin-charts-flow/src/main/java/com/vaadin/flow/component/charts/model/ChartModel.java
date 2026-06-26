@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * Options regarding the chart area and plot area as well as general chart
  * options.
+ * 
+ * @since 6.0.1
  */
 public class ChartModel extends AbstractConfigurationObject {
 
@@ -133,6 +135,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -142,6 +145,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * The background color or gradient for the outer chart area.
      * <p>
      * Defaults to: #FFFFFF
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -149,6 +154,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -158,6 +164,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * The color of the outer chart border.
      * <p>
      * Defaults to: #335cad
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -181,6 +189,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -190,6 +199,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * The pixel width of the outer chart border.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -494,6 +505,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getPlotBackgroundColor() {
         return plotBackgroundColor;
@@ -501,6 +513,8 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * The background color or gradient for the plot area.
+     * 
+     * @since 18.0
      */
     public void setPlotBackgroundColor(Color plotBackgroundColor) {
         this.plotBackgroundColor = plotBackgroundColor;
@@ -508,6 +522,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotBackgroundImage(String)
+     * @since 18.0
      */
     public String getPlotBackgroundImage() {
         return plotBackgroundImage;
@@ -518,6 +533,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * the background for the entire chart, set a CSS background image to the
      * container element. Note that for the image to be applied to exported
      * charts, its URL needs to be accessible by the export server.
+     * 
+     * @since 18.0
      */
     public void setPlotBackgroundImage(String plotBackgroundImage) {
         this.plotBackgroundImage = plotBackgroundImage;
@@ -525,6 +542,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotBorderColor(Color)
+     * @since 18.0
      */
     public Color getPlotBorderColor() {
         return plotBorderColor;
@@ -534,6 +552,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * The color of the inner chart or plot area border.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setPlotBorderColor(Color plotBorderColor) {
         this.plotBorderColor = plotBorderColor;
@@ -541,6 +561,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotBorderWidth(Number)
+     * @since 18.0
      */
     public Number getPlotBorderWidth() {
         return plotBorderWidth;
@@ -550,6 +571,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * The pixel width of the plot area border.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setPlotBorderWidth(Number plotBorderWidth) {
         this.plotBorderWidth = plotBorderWidth;
@@ -557,6 +580,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotShadow(Boolean)
+     * @since 18.0
      */
     public Boolean getPlotShadow() {
         return plotShadow;
@@ -569,6 +593,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * , <code>opacity</code> and <code>width</code>.
      * <p>
      * Defaults to: false
+     * 
+     * @since 18.0
      */
     public void setPlotShadow(Boolean plotShadow) {
         this.plotShadow = plotShadow;
@@ -629,6 +655,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setSelectionMarkerFill(Color)
+     * @since 18.0
      */
     public Color getSelectionMarkerFill() {
         return selectionMarkerFill;
@@ -639,6 +666,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * an area of the chart.
      * <p>
      * Defaults to: rgba(51,92,173,0.25)
+     * 
+     * @since 18.0
      */
     public void setSelectionMarkerFill(Color selectionMarkerFill) {
         this.selectionMarkerFill = selectionMarkerFill;
@@ -646,6 +675,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setShadow(Boolean)
+     * @since 18.0
      */
     public Boolean getShadow() {
         return shadow;
@@ -658,6 +688,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * , <code>opacity</code> and <code>width</code>.
      * <p>
      * Defaults to: false
+     * 
+     * @since 18.0
      */
     public void setShadow(Boolean shadow) {
         this.shadow = shadow;
@@ -779,6 +811,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -794,6 +827,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * <p>
      * Defaults to: {"fontFamily": "\"Lucida Grande\", \"Lucida Sans Unicode\",
      * Verdana, Arial, Helvetica, sans-serif" ,"fontSize":"12px"}
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;
@@ -885,6 +920,7 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setZooming(Zooming)
+     * @since 25.0
      */
     public Zooming getZooming() {
         if (zooming == null) {
@@ -899,6 +935,7 @@ public class ChartModel extends AbstractConfigurationObject {
      * support.
      *
      * @param zooming
+     * @since 25.0
      */
     public void setZooming(Zooming zooming) {
         this.zooming = zooming;
@@ -936,6 +973,8 @@ public class ChartModel extends AbstractConfigurationObject {
      * attributes or CSS are applied to the chart SVG. Instead, CSS rules are
      * required to style the chart. The default style sheet is available from
      * https://code.highcharts.com/css/highcharts.css.
+     * 
+     * @since 18.0
      */
     public void setStyledMode(Boolean styledMode) {
         this.styledMode = styledMode;

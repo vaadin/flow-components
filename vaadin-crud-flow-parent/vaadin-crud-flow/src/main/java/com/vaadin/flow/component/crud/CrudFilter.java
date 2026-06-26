@@ -17,6 +17,8 @@ import com.vaadin.flow.data.provider.SortDirection;
 /**
  * The filter type for use with {@link CrudGrid}. This provides information
  * about the filter constraints and sort orders applied to the grid by the user.
+ * 
+ * @since 1.0
  */
 public class CrudFilter implements Serializable {
 

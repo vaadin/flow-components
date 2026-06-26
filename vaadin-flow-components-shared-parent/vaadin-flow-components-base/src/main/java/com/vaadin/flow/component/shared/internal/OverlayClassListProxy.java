@@ -28,6 +28,8 @@ import com.vaadin.flow.signals.Signal;
  * Internal class that provides shared functionality for setting CSS class names
  * to overlay only components that support {@link HasStyle}, such as
  * {@code Dialog}. Not intended to be used publicly.
+ * 
+ * @since 24.0
  */
 public class OverlayClassListProxy extends AbstractSet<String>
         implements ClassList {

@@ -24,6 +24,9 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
+/**
+ * @since 24.0
+ */
 public class Utils {
     private static final Logger LOGGER = Logger
             .getLogger(Utils.class.getName());

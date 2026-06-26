@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * The internationalization properties for {@link ComboBoxBase}.
+ * 
+ * @since 24.5
  */
 public interface ComboBoxBaseI18n extends Serializable {
     /**

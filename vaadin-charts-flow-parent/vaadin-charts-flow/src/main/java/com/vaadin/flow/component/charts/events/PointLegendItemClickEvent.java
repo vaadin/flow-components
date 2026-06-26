@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointLegendItemClickEvent class stores information on click events on the
  * charts's legend items that correspond to a chart point.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-legend-item-click")
 public class PointLegendItemClickEvent extends ComponentEvent<Chart>
@@ -32,6 +34,7 @@ public class PointLegendItemClickEvent extends ComponentEvent<Chart>
      *
      * @param source
      * @param fromClient
+     * @since 22.0.1
      */
     public PointLegendItemClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.browserEvent.pageX") int pageX,

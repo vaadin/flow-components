@@ -33,6 +33,7 @@ import com.vaadin.flow.function.ValueProvider;
  * @see ValueProvider
  * @see ComponentRenderer
  * @see LitRenderer
+ * @since 22.0
  */
 public abstract class Renderer<SOURCE> implements Serializable {
 
@@ -71,6 +72,7 @@ public abstract class Renderer<SOURCE> implements Serializable {
      *            name of the renderer function the container element accepts
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
+     * @since 24.0
      */
     public abstract Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName);

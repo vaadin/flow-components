@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Marker style
+ * 
+ * @since 18.0
  */
 public class MarkerStyle extends AbstractConfigurationObject {
     private Color lineColor;

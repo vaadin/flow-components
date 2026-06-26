@@ -17,6 +17,8 @@ package com.vaadin.flow.component.textfield;
 
 /**
  * Values for the {@code autocomplete} attribute.
+ * 
+ * @since 1.0
  */
 public enum Autocomplete {
 

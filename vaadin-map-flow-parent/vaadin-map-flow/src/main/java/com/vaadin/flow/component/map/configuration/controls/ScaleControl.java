@@ -18,6 +18,7 @@ import com.vaadin.flow.component.map.configuration.Constants;
  * segments.
  *
  * @see DisplayMode
+ * @since 25.1
  */
 public class ScaleControl extends Control {
     private int minWidth = 64;

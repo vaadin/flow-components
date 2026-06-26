@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Indicates that an event has an associated series
+ * 
+ * @since 6.0.1
  */
 public interface HasSeries extends Serializable {
 

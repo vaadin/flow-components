@@ -43,6 +43,8 @@ import tools.jackson.databind.node.BaseJsonNode;
  * used directly, instead use {@link Map}, which also provides some
  * out-of-the-box conveniences such as a pre-configured background layer, and a
  * feature layer.
+ * 
+ * @since 23.0
  */
 public abstract class MapBase extends Component
         implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
@@ -189,6 +191,7 @@ public abstract class MapBase extends Component
      * @param listener
      *            the listener to add
      * @return a registration object for removing the added listener
+     * @since 25.0
      */
     public Registration addViewMoveEndListener(
             ComponentEventListener<MapViewMoveEndEvent> listener) {
@@ -223,6 +226,7 @@ public abstract class MapBase extends Component
      * @param listener
      *            the listener to add
      * @return a registration object for removing the added listener
+     * @since 25.0
      */
     public Registration addClickListener(
             ComponentEventListener<MapClickEvent> listener) {
@@ -287,6 +291,7 @@ public abstract class MapBase extends Component
      * @param listener
      *            the listener to trigger
      * @return registration for the listener
+     * @since 25.0
      */
     public Registration addClusterClickListener(
             ComponentEventListener<MapClusterClickEvent> listener) {
@@ -302,6 +307,7 @@ public abstract class MapBase extends Component
      *            the listener to trigger
      * @return registration for the listener
      * @see Feature
+     * @since 24.1
      */
     public Registration addFeatureDropListener(
             ComponentEventListener<MapFeatureDropEvent> listener) {

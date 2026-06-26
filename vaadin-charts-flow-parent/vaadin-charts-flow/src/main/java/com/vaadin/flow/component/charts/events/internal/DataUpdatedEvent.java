@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Event for updating existing data series.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public class DataUpdatedEvent extends AbstractSeriesItemEvent {

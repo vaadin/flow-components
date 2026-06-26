@@ -15,6 +15,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * Source for WMS servers providing single, untiled images
+ * 
+ * @since 23.0
  */
 public class ImageWMSSource extends ImageSource {
 
@@ -157,6 +159,7 @@ public class ImageWMSSource extends ImageSource {
 
         /**
          * @see ImageWMSSource#getRatio()
+         * @since 24.0
          */
         public void setRatio(double ratio) {
             this.ratio = ratio;

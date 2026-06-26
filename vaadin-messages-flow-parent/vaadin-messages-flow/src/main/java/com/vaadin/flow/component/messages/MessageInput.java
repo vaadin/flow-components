@@ -45,6 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * Use the {@link MessageList} component to show messages that users have sent.
  *
  * @author Vaadin Ltd.
+ * @since 14.7
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")

@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * requires the file <code>no-data-to-display.js</code> to be loaded in the
  * page. The actual text to display is set in the
  * <a href="#lang.noData">lang.noData</a> option.
+ * 
+ * @since 6.0.1
  */
 public class NoData extends AbstractConfigurationObject {
 
@@ -47,6 +49,7 @@ public class NoData extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -60,6 +63,8 @@ public class NoData extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "fontSize": "12px", "fontWeight": "bold", "color":
      * "#666666" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

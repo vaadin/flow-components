@@ -20,6 +20,7 @@ package com.vaadin.flow.component.ai;
  * features without activating the associated feature flag first.
  *
  * @author Vaadin Ltd
+ * @since 25.1
  */
 public class AIComponentsExperimentalFeatureException extends RuntimeException {
 

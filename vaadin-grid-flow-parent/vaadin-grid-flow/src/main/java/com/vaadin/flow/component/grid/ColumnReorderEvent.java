@@ -35,6 +35,7 @@ import tools.jackson.databind.node.ArrayNode;
  *
  * @see Grid#addColumnReorderListener(com.vaadin.flow.component.ComponentEventListener)
  *
+ * @since 4.1
  */
 @DomEvent("column-reorder-all-columns")
 public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
@@ -57,6 +58,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *            the internal column IDs; automatically translated to proper
      *            Grid Column instances.
      *
+     * @since 25.0
      */
     public ColumnReorderEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail.columns") ArrayNode columnIDs) {

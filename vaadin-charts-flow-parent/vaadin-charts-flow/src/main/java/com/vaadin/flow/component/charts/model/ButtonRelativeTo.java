@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * What box to align the button to.
+ * 
+ * @since 25.0
  */
 public enum ButtonRelativeTo implements ChartEnum {
 

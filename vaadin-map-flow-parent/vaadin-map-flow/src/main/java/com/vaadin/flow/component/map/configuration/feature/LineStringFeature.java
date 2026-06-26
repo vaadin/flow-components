@@ -28,6 +28,8 @@ import com.vaadin.flow.component.map.configuration.style.Style;
  * <p>
  * Technically this is a {@link Feature} that uses a {@link LineString} geometry
  * for representation.
+ * 
+ * @since 25.1
  */
 public class LineStringFeature extends Feature {
     /**

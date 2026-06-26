@@ -15,6 +15,7 @@ package com.vaadin.flow.component.charts.model;
  *
  * @see PlotOptionsBoxplot
  *
+ * @since 6.0.1
  */
 public class BoxPlotItem extends DataSeriesItem {
     // high/low already defined in DataSeriesItem

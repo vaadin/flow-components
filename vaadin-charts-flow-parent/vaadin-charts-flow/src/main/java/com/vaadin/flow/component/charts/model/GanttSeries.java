@@ -18,6 +18,8 @@ import java.util.List;
 /**
  * A series of tasks to be used in the Gantt chart. Each task (represented by
  * {@link GanttSeriesItem}) has a start and an end date.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class GanttSeries extends AbstractSeries {

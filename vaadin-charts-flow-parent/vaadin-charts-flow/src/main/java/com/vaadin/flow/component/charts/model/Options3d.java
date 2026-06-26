@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * <code>highcharts-3d.js</code>, found in the download package or online at
  * <a href="http://code.highcharts.com/highcharts-3d.js">code.highcharts.com/
  * highcharts-3d.js</a>.
+ * 
+ * @since 6.0.1
  */
 public class Options3d extends AbstractConfigurationObject {
 

@@ -27,6 +27,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ColumnNames implements Serializable {
 

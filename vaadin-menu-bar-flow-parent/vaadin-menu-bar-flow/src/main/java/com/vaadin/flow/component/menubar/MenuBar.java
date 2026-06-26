@@ -48,6 +48,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * items can either trigger an action, open a menu, or work as a toggle.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-menu-bar")
 @JsModule("./menubarConnector.js")
@@ -198,6 +199,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @param tooltipText
      *            the tooltip text for the new item
      * @return the added {@link MenuItem} component
+     * @since 23.3
      */
     public MenuItem addItem(String text, String tooltipText) {
         return menuManager.addItem(text, tooltipText);
@@ -221,6 +223,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @param tooltipText
      *            the tooltip text for the new item
      * @return the added {@link MenuItem} component
+     * @since 23.3
      */
     public MenuItem addItem(Component component, String tooltipText) {
         return menuManager.addItem(component, tooltipText);
@@ -247,6 +250,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
      * @return the added {@link MenuItem} component
+     * @since 23.3
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
@@ -274,6 +278,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
      * @return the added {@link MenuItem} component
+     * @since 23.3
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
@@ -289,6 +294,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *            the tooltip text to set for the item
      * @deprecated Use {@link MenuItem#setTooltipText(String)} instead. This
      *             method is scheduled for removal in Vaadin 26.
+     * @since 24.1.5
      */
     @Deprecated
     public void setTooltipText(MenuItem item, String tooltipText) {
@@ -371,6 +377,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *            If {@code true}, the buttons will be collapsed into the
      *            overflow menu starting from the "start" end of the bar instead
      *            of the "end".
+     * @since 24.4
      */
     public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
         getElement().setProperty("reverseCollapse", reverseCollapseOrder);
@@ -383,6 +390,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *         menu starting from the "start" end of the bar instead of the
      *         "end".
      *
+     * @since 24.4
      */
     public boolean isReverseCollapseOrder() {
         return getElement().getProperty("reverseCollapse", false);
@@ -394,6 +402,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @param tabNavigation
      *            If {@code true}, the top-level menu items is traversable by
      *            tab instead of arrow keys (i.e. disabling roving tabindex)
+     * @since 24.5
      */
     public void setTabNavigation(boolean tabNavigation) {
         getElement().setProperty("tabNavigation", tabNavigation);
@@ -405,6 +414,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * @return {@code true} if the top-level menu items is traversable by tab
      *         instead of arrow keys (i.e. disabling roving tabindex)
      *
+     * @since 24.5
      */
     public boolean isTabNavigation() {
         return getElement().getProperty("tabNavigation", false);
@@ -417,6 +427,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      * update the component if not set again using {@link #setI18n(MenuBarI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 22.0
      */
     public MenuBarI18n getI18n() {
         return i18n;
@@ -427,6 +438,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 22.0
      */
     public void setI18n(MenuBarI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -467,6 +479,8 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     /**
      * The internationalization properties for {@link MenuBar}
+     * 
+     * @since 22.0
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MenuBarI18n implements Serializable {
@@ -498,6 +512,8 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     /**
      * Closes the current submenu.
+     * 
+     * @since 24.4
      */
     public void close() {
         getElement().callJsFunction("close");

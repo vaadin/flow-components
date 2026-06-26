@@ -23,6 +23,8 @@ import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Representing OpenLayers' @code{click} event
+ * 
+ * @since 23.0
  */
 @DomEvent("map-click")
 public class MapClickEvent extends ComponentEvent<MapBase> {

@@ -21,6 +21,8 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by
  * using it as the feature's {@link Style#setImage(ImageStyle)}
+ * 
+ * @since 23.0
  */
 public class Icon extends ImageStyle {
 
@@ -141,6 +143,7 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the stream resource containing the icon's image
+     * @since 24.8
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("img")
@@ -238,6 +241,7 @@ public class Icon extends ImageStyle {
 
         /**
          * @see Icon#getImgHandler()
+         * @since 24.8
          */
         public void setImg(DownloadHandler imgHandler) {
             if (imgHandler instanceof AbstractDownloadHandler<?> handler) {

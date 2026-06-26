@@ -12,6 +12,9 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
@@ -44,11 +47,14 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public abstract Color getBorderColor();
 
     /**
      * The color of the border of each waterfall column.
+     * 
+     * @since 18.0
      */
     public abstract void setBorderColor(Color borderColor);
 
@@ -64,21 +70,27 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public abstract Number getBorderWidth();
 
     /**
      * The width of the border surrounding each column or bar.
+     * 
+     * @since 18.0
      */
     public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
@@ -96,6 +108,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public abstract String getColorKey();
 
@@ -104,17 +117,22 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * colorAxis is used. Requires to set <code>min</code> and <code>max</code>
      * if some custom point property is used or if approximation for data
      * grouping is set to <code>'sum'</code>'.
+     * 
+     * @since 18.0
      */
     public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract Color[] getColors();
 
     /**
      * A series specific or series type specific color set to apply instead of
      * the theme colors when {@link #setColorByPoint(Boolean)} is true.
+     * 
+     * @since 18.0
      */
     public abstract void setColors(Color... colors);
 
@@ -124,6 +142,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void addColor(Color color);
 
@@ -133,11 +152,13 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void removeColor(Color color);
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getCrisp();
 
@@ -147,6 +168,8 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
      * densely packed columns, this leads to visible difference in column widths
      * or distance between columns. In these cases, setting crisp to false may
      * look better, even though each column is rendered blurry.
+     * 
+     * @since 18.0
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -174,11 +197,14 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setEdgeColor(Color)
+     * @since 18.0
      */
     public abstract Color getEdgeColor();
 
     /**
      * 3D columns only. The color of the edges.
+     * 
+     * @since 18.0
      */
     public abstract void setEdgeColor(Color edgeColor);
 
@@ -293,11 +319,14 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 
@@ -566,6 +595,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * @see #setPointStart(Number)
+     * @since 24.9
      */
     public abstract void setPointStart(Instant instant);
 }

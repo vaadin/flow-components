@@ -27,6 +27,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <SOURCE>
  *            the type of the item received in the click listeners
+ * @since 22.0
  */
 public interface ClickableRenderer<SOURCE> extends Serializable {
 

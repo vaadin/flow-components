@@ -47,6 +47,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
  *            multi-select fields
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ValueOptions<I> {
 

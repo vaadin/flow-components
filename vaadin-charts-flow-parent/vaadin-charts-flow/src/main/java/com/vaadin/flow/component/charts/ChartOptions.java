@@ -27,6 +27,8 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * Use {@link ChartOptions#get()} or {@link ChartOptions#get(UI)} to get an
  * instance for the current or specified {@link UI}.
+ * 
+ * @since 18.0
  */
 public class ChartOptions extends AbstractConfigurationObject {
 

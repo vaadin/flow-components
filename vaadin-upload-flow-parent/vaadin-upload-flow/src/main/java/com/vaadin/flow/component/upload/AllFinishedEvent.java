@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * not.
  *
  * @author Vaadin Ltd.
+ * @since 2.1
  */
 public class AllFinishedEvent extends ComponentEvent<Upload> {
 

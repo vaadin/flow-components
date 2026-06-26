@@ -19,6 +19,8 @@ import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Indicates that an event has an associated item
+ * 
+ * @since 6.0.1
  */
 public interface HasItem extends HasSeries {
 
@@ -70,6 +72,7 @@ public interface HasItem extends HasSeries {
      *
      * @see #getItem()
      * @see #getItemIndex()
+     * @since 22.0.1
      */
     String getItemId();
 

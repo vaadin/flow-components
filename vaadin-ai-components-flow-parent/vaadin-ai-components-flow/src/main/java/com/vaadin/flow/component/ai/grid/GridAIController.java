@@ -103,6 +103,7 @@ import tools.jackson.databind.JsonNode;
  * @see GridRenderer
  * @see GridState
  * @see DatabaseProviderAITools
+ * @since 25.2
  */
 public class GridAIController implements AIController {
 

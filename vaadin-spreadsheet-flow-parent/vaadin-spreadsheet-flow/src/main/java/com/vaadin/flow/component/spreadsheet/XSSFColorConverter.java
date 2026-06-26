@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * in POI terms).
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class XSSFColorConverter implements ColorConverter {

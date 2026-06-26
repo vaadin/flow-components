@@ -11,6 +11,9 @@ package com.vaadin.flow.component.spreadsheet.client;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @since 23.1
+ */
 public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
