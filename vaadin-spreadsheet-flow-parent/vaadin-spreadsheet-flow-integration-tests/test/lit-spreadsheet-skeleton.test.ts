@@ -1900,6 +1900,82 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('keyboard nav past the right edge scrolls the active cell into view (slice 156)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(100, 100);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        // Viewport width is 100 → 2 cols visible. Active starts at A1.
+        // ArrowRight 3 times → active = col 4. col 4's right edge =
+        // 4*50 = 200 > 100; expect scrollLeft to advance.
+
+        const scroller = sheet.getScrollContainer();
+        expect(scroller.scrollLeft).to.equal(0);
+
+        for (let i = 0; i < 3; i++) {
+            dispatchKey(scroller, 'ArrowRight');
+        }
+        // After 3 right-arrows: active = col 4. Cell at left=150,
+        // width=50, right=200. To make it visible in a 100-wide
+        // viewport: scrollLeft = max(0, 200 - 100) = 100.
+        expect(scroller.scrollLeft).to.be.greaterThan(0);
+        cleanup();
+    });
+
+    it('keyboard nav past the bottom edge scrolls the active cell into view (slice 156)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 60);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        // Viewport height = 60 → 3 rows visible (each 20px). Move
+        // active to row 5: top=80, bottom=100, needs scrollTop=40.
+        const scroller = sheet.getScrollContainer();
+        for (let i = 0; i < 4; i++) {
+            dispatchKey(scroller, 'ArrowDown');
+        }
+        expect(scroller.scrollTop).to.be.greaterThan(0);
+        cleanup();
+    });
+
+    it('keyboard nav within visible viewport does NOT scroll (slice 156)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        // 400px / 50 = 8 cols. ArrowRight 3 times stays within.
+        const scroller = sheet.getScrollContainer();
+        for (let i = 0; i < 3; i++) {
+            dispatchKey(scroller, 'ArrowRight');
+        }
+        expect(scroller.scrollLeft).to.equal(0);
+        expect(scroller.scrollTop).to.equal(0);
+        cleanup();
+    });
+
+    it('ArrowLeft past the left edge scrolls back to bring active into view (slice 156)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(100, 100);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+
+        // Set up a scrolled-right state via several ArrowRight presses.
+        const scroller = sheet.getScrollContainer();
+        for (let i = 0; i < 8; i++) {
+            dispatchKey(scroller, 'ArrowRight');
+        }
+        expect(scroller.scrollLeft).to.be.greaterThan(0);
+
+        // Now move active back to col 1 via Home — scrollLeft should
+        // drop back so col 1 is visible.
+        dispatchKey(scroller, 'Home');
+        expect(scroller.scrollLeft).to.equal(0);
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

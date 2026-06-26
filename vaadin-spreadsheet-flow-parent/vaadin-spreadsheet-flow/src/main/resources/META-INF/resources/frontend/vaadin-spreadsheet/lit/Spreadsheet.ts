@@ -786,9 +786,87 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.extendCol = target.col;
             this.extendRow = target.row;
         }
+        // Auto-scroll the new active cell (or extend cell) into
+        // view BEFORE the render (slice 156). Excel scrolls the
+        // viewport whenever keyboard nav moves the cursor off-
+        // screen so the user can keep typing without losing
+        // visual context. Sets scrollLeft/scrollTop directly; the
+        // scroll listener triggers an additional recomputeViewport
+        // automatically.
+        this.scrollActiveOrExtendIntoView(target);
         this.recomputeViewport();
         this.dispatchSelectionEvent();
     };
+
+    /**
+     * Adjust {@code scrollContainer.scrollLeft / scrollTop} so the
+     * given cell (either the new active cell or the extend cell
+     * after shift+arrow) is visible. Sets scrollLeft/Top in-place;
+     * the existing `scroll` listener triggers a fresh
+     * recomputeViewport. Slice 156.
+     *
+     * Pure-ish: reads `this.colWidths / rowHeights / defRowHeight /
+     * hiddenRowIndexes / hiddenColumnIndexes`. Side effect = scroll
+     * adjustment.
+     */
+    private scrollActiveOrExtendIntoView(target: NavigationTarget): void {
+        if (this.rows <= 0 || this.cols <= 0) {
+            return;
+        }
+        const ppi = FALLBACK_PPI;
+        const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
+        const hiddenColSet = new Set(this.hiddenColumnIndexes);
+        const hiddenRowSet = new Set(this.hiddenRowIndexes);
+        const colWidth = (c: number): number => {
+            if (hiddenColSet.has(c)) return 0;
+            return c > this.colWidths.length
+                ? this.defColWidth
+                : this.colWidths[c - 1];
+        };
+        const rowHeight = (r: number): number => {
+            if (hiddenRowSet.has(r)) return 0;
+            return r > this.rowHeights.length
+                ? defaultRowHeightPx
+                : convertPointsToPixel(this.rowHeights[r - 1], ppi);
+        };
+
+        let left = 0;
+        for (let c = 1; c < target.col; c++) {
+            left += colWidth(c);
+        }
+        const width = colWidth(target.col);
+        let top = 0;
+        for (let r = 1; r < target.row; r++) {
+            top += rowHeight(r);
+        }
+        const height = rowHeight(target.row);
+
+        const viewWidth = this.scrollContainer.clientWidth;
+        const viewHeight = this.scrollContainer.clientHeight;
+        const curLeft = this.scrollContainer.scrollLeft;
+        const curTop = this.scrollContainer.scrollTop;
+
+        let newLeft = curLeft;
+        if (left < curLeft) {
+            newLeft = left;
+        } else if (left + width > curLeft + viewWidth) {
+            newLeft = Math.max(0, left + width - viewWidth);
+        }
+
+        let newTop = curTop;
+        if (top < curTop) {
+            newTop = top;
+        } else if (top + height > curTop + viewHeight) {
+            newTop = Math.max(0, top + height - viewHeight);
+        }
+
+        if (newLeft !== curLeft) {
+            this.scrollContainer.scrollLeft = newLeft;
+        }
+        if (newTop !== curTop) {
+            this.scrollContainer.scrollTop = newTop;
+        }
+    }
 
     /**
      * Scroll-event handler: recompute the visible viewport from the
