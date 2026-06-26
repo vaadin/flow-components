@@ -43,6 +43,13 @@ export interface RowHeaderRenderState {
      * extent as the cell-grid.
      */
     totalGridHeightPx: number;
+    /**
+     * Rows intersecting the active selection. Each cell whose row
+     * is in this set gets the {@code header-selected} part in
+     * addition to {@code row-header}, mirroring the documented
+     * public styling API. Slice 173.
+     */
+    selectedRows: ReadonlySet<number>;
 }
 
 /** Helper: build an empty row-header render state. */
@@ -62,6 +69,7 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
         rowHeights: [],
         headerWidth: 0,
         totalGridHeightPx: 0,
+        selectedRows: new Set(),
     };
 }
 
@@ -218,7 +226,10 @@ export class SpreadsheetRowHeader extends LitElement {
     };
 
     render(): TemplateResult {
-        const { viewport, rowY, rowHeights, headerWidth } = this.renderState;
+        const {
+            viewport, rowY, rowHeights, headerWidth,
+            selectedRows = new Set<number>(),
+        } = this.renderState;
 
         if (headerWidth === 0
                 || viewport.lastRowIndex < viewport.firstRowIndex) {
@@ -236,11 +247,18 @@ export class SpreadsheetRowHeader extends LitElement {
             const style =
                 `left:0;top:${top}px;width:${headerWidth}px;height:${height}px;`
                 + `line-height:${height}px;`;
+            // Slice 173: `part="row-header"` (+ `header-selected`
+            // when the row intersects the active selection) mirrors
+            // the documented public styling API.
+            const isSelected = selectedRows.has(row);
+            const cellPart = isSelected
+                ? 'row-header header-selected'
+                : 'row-header';
             // data-row drives the click-delegation handler in
             // firstUpdated() (slice 148).
             cells.push(html`
-                <div class="row-header-cell row${row}" style=${style}
-                     data-row=${row}>
+                <div class="row-header-cell row${row}" part=${cellPart}
+                     style=${style} data-row=${row}>
                     ${row}
                 </div>
             `);

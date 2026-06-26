@@ -69,6 +69,13 @@ export interface ColumnHeaderRenderState {
      * above/below" toggle.
      */
     colGroupingInversed: boolean;
+    /**
+     * Columns intersecting the active selection. Each cell whose
+     * column is in this set gets the {@code header-selected} part
+     * in addition to {@code column-header}, mirroring the
+     * documented public styling API. Slice 173.
+     */
+    selectedColumns: ReadonlySet<number>;
 }
 
 /**
@@ -117,6 +124,7 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
         colGroupings: [],
         colGroupingMax: 0,
         colGroupingInversed: false,
+        selectedColumns: new Set(),
     };
 }
 
@@ -345,6 +353,7 @@ export class SpreadsheetColumnHeader extends LitElement {
             viewport, colX, colWidths, headerHeight,
             colGroupings = [], colGroupingMax = 0,
             colGroupingInversed = false,
+            selectedColumns = new Set<number>(),
         } = this.renderState;
 
         if (headerHeight === 0
@@ -374,9 +383,16 @@ export class SpreadsheetColumnHeader extends LitElement {
             // data-col drives the click delegation handler in
             // firstUpdated() (slice 148) — same pattern as the
             // cell-grid (slice 146).
+            // Slice 173: `part="column-header"` (+ `header-selected`
+            // when the column intersects the active selection)
+            // mirrors the documented public styling API.
+            const isSelected = selectedColumns.has(col);
+            const cellPart = isSelected
+                ? 'column-header header-selected'
+                : 'column-header';
             cells.push(html`
-                <div class="col-header-cell col${col}" style=${style}
-                     data-col=${col}>
+                <div class="col-header-cell col${col}" part=${cellPart}
+                     style=${style} data-col=${col}>
                     ${letter}
                 </div>
             `);

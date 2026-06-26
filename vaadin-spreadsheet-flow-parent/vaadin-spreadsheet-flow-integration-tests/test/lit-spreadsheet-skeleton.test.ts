@@ -2946,6 +2946,229 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    // ===================================================================
+    // Slice 173 — `part` attribute scaffolding for documented styling API
+    // ===================================================================
+    it('cells render with part="cell" (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const cells = sheet.getCellGrid().shadowRoot!.querySelectorAll(
+            '[part~="cell"]'
+        );
+        expect(cells.length).to.be.greaterThan(0);
+        // Active cell A1: part="cell" (no cell-range — it's the active
+        // cell itself).
+        const a1 = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.cell.col1.row1'
+        ) as HTMLElement;
+        expect(a1.getAttribute('part')).to.equal('cell');
+        cleanup();
+    });
+
+    it('cells in active range get part="cell cell-range" except the active cell (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        // Select B2:C3 (active B2 + range to C3).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        // Active cell (B2) — no cell-range.
+        const b2 = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.cell.col2.row2'
+        ) as HTMLElement;
+        expect(b2.getAttribute('part')).to.equal('cell');
+        // C3 inside the range, not active.
+        const c3 = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.cell.col3.row3'
+        ) as HTMLElement;
+        expect(c3.getAttribute('part')).to.equal('cell cell-range');
+        cleanup();
+    });
+
+    it('column headers render with part="column-header"; cells in selected range get header-selected (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        // Select B2:C3 — columns 2-3 selected, columns 1, 4, 5 not.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const b = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-header-cell.col2'
+        ) as HTMLElement;
+        const c = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-header-cell.col3'
+        ) as HTMLElement;
+        const a = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-header-cell.col1'
+        ) as HTMLElement;
+        expect(b.getAttribute('part')).to.equal('column-header header-selected');
+        expect(c.getAttribute('part')).to.equal('column-header header-selected');
+        expect(a.getAttribute('part')).to.equal('column-header');
+        cleanup();
+    });
+
+    it('row headers render with part="row-header"; rows in selected range get header-selected (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderColumnWidth(40);
+        // Select B2:C3 — rows 2-3 selected, 1/4/5 not.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.recomputeViewport();
+        await sheet.getRowHeader().updateComplete;
+
+        const r2 = sheet.getRowHeader().shadowRoot!.querySelector(
+            '.row-header-cell.row2'
+        ) as HTMLElement;
+        const r3 = sheet.getRowHeader().shadowRoot!.querySelector(
+            '.row-header-cell.row3'
+        ) as HTMLElement;
+        const r1 = sheet.getRowHeader().shadowRoot!.querySelector(
+            '.row-header-cell.row1'
+        ) as HTMLElement;
+        expect(r2.getAttribute('part')).to.equal('row-header header-selected');
+        expect(r3.getAttribute('part')).to.equal('row-header header-selected');
+        expect(r1.getAttribute('part')).to.equal('row-header');
+        cleanup();
+    });
+
+    it('sheet tabs render with part="tab"; active tab gets tab-selected (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setSheetNames(['One', 'Two', 'Three']);
+        sheet.setSheetIndex(2);
+        await sheet.getSheetTabs().updateComplete;
+
+        const tabs = sheet.getSheetTabs().shadowRoot!.querySelectorAll('.sheet-tab');
+        expect(tabs).to.have.length(3);
+        expect(tabs[0].getAttribute('part')).to.equal('tab');
+        expect(tabs[1].getAttribute('part')).to.equal('tab tab-selected');
+        expect(tabs[2].getAttribute('part')).to.equal('tab');
+        cleanup();
+    });
+
+    it('comment indicators render with part="comment-triangle" (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setCellComments({ 'col2 row2': 'note' });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const indicator = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.comment-indicator'
+        ) as HTMLElement;
+        expect(indicator).to.not.be.null;
+        expect(indicator.getAttribute('part')).to.equal('comment-triangle');
+        cleanup();
+    });
+
+    it('cell editor input renders with part="cell-input" (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        // Open editor via double-click.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true, composed: true,
+        }));
+        await sheet.getCellGrid().updateComplete;
+
+        const input = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.cell-editor'
+        ) as HTMLInputElement;
+        expect(input).to.not.be.null;
+        expect(input.getAttribute('part')).to.equal('cell-input');
+        cleanup();
+    });
+
+    it('selection overlay renders with part="cell-range" + selection-corner child has part="selection-corner" (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const selection = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.sheet-selection'
+        ) as HTMLElement;
+        expect(selection).to.not.be.null;
+        expect(selection.getAttribute('part')).to.equal('cell-range');
+        const corner = selection.querySelector('.selection-corner') as HTMLElement;
+        expect(corner).to.not.be.null;
+        expect(corner.getAttribute('part')).to.equal('selection-corner');
+        cleanup();
+    });
+
+    it('popup buttons render with part="popup-button" (slice 173)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setPopupButtons([
+            { col: 2, row: 2, active: false } as any,
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const btn = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.popup-button'
+        ) as HTMLElement;
+        expect(btn).to.not.be.null;
+        expect(btn.getAttribute('part')).to.equal('popup-button');
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

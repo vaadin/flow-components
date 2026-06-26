@@ -611,14 +611,23 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
             // anchored at the cell's top-right when the cell has
             // a comment. Slice 165.
             const commentIndicator = commentCells.has(key)
-                ? html`<div class="comment-indicator"
+                ? html`<div class="comment-indicator" part="comment-triangle"
                             style="left:${left + width}px;top:${top}px;"></div>`
                 : '';
+            // Slice 173: `part` attribute mirrors the documented
+            // public styling API at
+            // ../docs/articles/components/spreadsheet/styling.adoc.
+            // Cells inside the active range (but not the active
+            // cell itself) carry the `cell-range` part so
+            // `vaadin-spreadsheet::part(cell-range)` works.
+            const cellPart = inSelection && !isActive
+                ? 'cell cell-range'
+                : 'cell';
             // data-col + data-row drive the click-delegation handler
             // in firstUpdated() (slice 146) — single source of truth
             // for the cell's coordinate when the event bubbles.
             cells.push(html`
-                <div class=${classList} style=${style}
+                <div class=${classList} part=${cellPart} style=${style}
                      data-col=${col} data-row=${row}>
                     ${text}
                 </div>
@@ -798,12 +807,20 @@ function buildSelectionOverlay(
         `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`
         + 'position:absolute;pointer-events:none;';
 
+    // Slice 173: the selection overlay carries `part="cell-range"`
+    // so the documented selector
+    // `vaadin-spreadsheet::part(cell-range)` can target it. The
+    // selection corner handle (drag affordance in the bottom-right)
+    // carries `part="selection-corner"`. Border divs are internal
+    // (s-* names are GWT-era; here we keep them only as internal
+    // class names — no part attribute since they aren't documented).
     return html`
-        <div class="sheet-selection" style=${overlayStyle}>
+        <div class="sheet-selection" part="cell-range" style=${overlayStyle}>
             <div class="s-top"></div>
             <div class="s-left"></div>
             <div class="s-right"></div>
             <div class="s-bottom"></div>
+            <div class="selection-corner" part="selection-corner"></div>
         </div>
     `;
 }
@@ -954,7 +971,7 @@ function buildCellEditorOverlay(
     };
 
     return html`
-        <input class="cell-editor"
+        <input class="cell-editor" part="cell-input"
                .value=${initialValue}
                style=${style}
                @keydown=${onKeyDown}
@@ -1024,7 +1041,7 @@ function buildPopupButtons(state: CellGridRenderState): TemplateResult[] {
             ));
         };
         return html`
-            <div class=${className} style=${style}
+            <div class=${className} part="popup-button" style=${style}
                  data-col=${b.col} data-row=${b.row}
                  @click=${onClick}>▼</div>
         `;

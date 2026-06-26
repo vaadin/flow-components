@@ -140,8 +140,14 @@ export class SpreadsheetSheetTabs extends LitElement {
             const oneBasedIndex = i + 1;
             const isActive = oneBasedIndex === activeIndex;
             const className = isActive ? 'sheet-tab active' : 'sheet-tab';
+            // Slice 173: `part="tab"` is the documented public
+            // styling part for sheet tabs; the active tab also
+            // carries `tab-selected` so
+            // `vaadin-spreadsheet::part(tab-selected)` works.
+            const part = isActive ? 'tab tab-selected' : 'tab';
             return html`
-                <div class=${className} data-index=${oneBasedIndex}>
+                <div class=${className} part=${part}
+                     data-index=${oneBasedIndex}>
                     ${name}
                 </div>
             `;

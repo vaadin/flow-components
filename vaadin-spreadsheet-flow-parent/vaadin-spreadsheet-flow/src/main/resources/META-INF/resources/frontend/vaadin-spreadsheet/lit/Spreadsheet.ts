@@ -1668,6 +1668,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
                 colGroupings,
                 colGroupingMax: this.colGroupingMax,
                 colGroupingInversed: this.colGroupingInversed,
+                // Slice 173: feed the selected-columns set so the
+                // header can emit `part="column-header
+                // header-selected"` on cells inside the active
+                // range. Pure derivation from
+                // {@code selection.activeRange}.
+                selectedColumns: selectedColumnSet(this.selection),
             };
         }
         // Row-header strip (slice 144). Same opt-in gate as column
@@ -1681,6 +1687,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
                 rowHeights: state.rowHeights,
                 headerWidth: this.headerColumnWidth,
                 totalGridHeightPx: state.totalGridHeightPx,
+                // Slice 173: feed the selected-rows set so the
+                // header can emit `part="row-header
+                // header-selected"` on rows inside the active
+                // range.
+                selectedRows: selectedRowSet(this.selection),
             };
         }
         // Header corner (slice 145). Sized only when BOTH header
@@ -2580,6 +2591,42 @@ export function computePositionedOverlays(
  *
  * Slice 150.
  */
+/**
+ * Pure helper: return the set of column indices that intersect
+ * the active range of the selection. Slice 173 — fed to the
+ * column-header element so each cell whose column is inside the
+ * active range emits {@code part="column-header header-selected"}.
+ */
+export function selectedColumnSet(
+    selection: SelectionState
+): Set<number> {
+    const range = selection.activeRange;
+    const min = Math.min(range.c1, range.c2);
+    const max = Math.max(range.c1, range.c2);
+    const set = new Set<number>();
+    for (let c = min; c <= max; c++) {
+        set.add(c);
+    }
+    return set;
+}
+
+/**
+ * Pure helper: symmetric row variant of {@link selectedColumnSet}.
+ * Slice 173.
+ */
+export function selectedRowSet(
+    selection: SelectionState
+): Set<number> {
+    const range = selection.activeRange;
+    const min = Math.min(range.r1, range.r2);
+    const max = Math.max(range.r1, range.r2);
+    const set = new Set<number>();
+    for (let r = min; r <= max; r++) {
+        set.add(r);
+    }
+    return set;
+}
+
 /**
  * Pure helper: is the given (col, row) inside the active range OR
  * any aux range of the current selection? Slice 166 uses this for
