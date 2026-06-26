@@ -290,6 +290,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
             cumulativeY += h;
         }
 
+        // Frozen columns: cols 1..horizontalSplitPosition (1-based,
+        // inclusive). Empty when no freeze is active.
+        const frozenColX: number[] = [];
+        const frozenColWidths: number[] = [];
+        let frozenCumX = 0;
+        for (let col = 1; col <= this.horizontalSplitPosition; col++) {
+            const w = colWidthForIndex(col);
+            frozenColX.push(frozenCumX);
+            frozenColWidths.push(w);
+            frozenCumX += w;
+        }
+
+        // Frozen rows: rows 1..verticalSplitPosition.
+        const frozenRowY: number[] = [];
+        const frozenRowHeights: number[] = [];
+        let frozenCumY = 0;
+        for (let row = 1; row <= this.verticalSplitPosition; row++) {
+            const h = rowHeightForIndex(row);
+            frozenRowY.push(frozenCumY);
+            frozenRowHeights.push(h);
+            frozenCumY += h;
+        }
+
         return {
             viewport,
             cellData: this.cellDataByKey,
@@ -300,6 +323,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
             cellStyleToCSSStyle: this.cellStyleToCSSStyle,
             mergedRegions: this.mergedRegions,
             selection: this.selection,
+            verticalSplitPosition: this.verticalSplitPosition,
+            horizontalSplitPosition: this.horizontalSplitPosition,
+            frozenColX,
+            frozenColWidths,
+            frozenRowY,
+            frozenRowHeights,
         };
     }
 

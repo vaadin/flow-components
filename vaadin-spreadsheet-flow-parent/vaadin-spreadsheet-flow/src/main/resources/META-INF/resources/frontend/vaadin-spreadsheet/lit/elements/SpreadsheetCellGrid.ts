@@ -63,6 +63,14 @@ export class SpreadsheetCellGrid extends LitElement {
             font-family: var(--vaadin-spreadsheet-cell-font, inherit);
             font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
         }
+
+        /* Frozen-pane z-index stacking. Higher = visually on top.
+           Corner stays on top of frozen-row + frozen-col; frozen rows
+           + cols stay above the scrolling main quadrant. */
+        .cell.quadrant-main { z-index: 1; }
+        .cell.quadrant-left { z-index: 2; }
+        .cell.quadrant-top { z-index: 2; }
+        .cell.quadrant-corner { z-index: 3; }
     `;
 
     /**
@@ -85,14 +93,10 @@ export class SpreadsheetCellGrid extends LitElement {
     render(): TemplateResult {
         const {
             viewport,
-            cellData,
-            colX,
-            rowY,
-            colWidths,
-            rowHeights,
             cellStyleToCSSStyle,
             mergedRegions,
-            selection,
+            verticalSplitPosition,
+            horizontalSplitPosition,
         } = this.renderState;
 
         if (viewport.lastColumnIndex < viewport.firstColumnIndex
@@ -102,63 +106,175 @@ export class SpreadsheetCellGrid extends LitElement {
             return html``;
         }
 
-        // Coordinates covered by a merged region (excluding each
-        // region's top-left). The render loop skips these — the
-        // merged-cell overlay div will cover the same area.
+        // Coordinates covered by a merged region. The render loop
+        // skips ALL of them — the merged-cell overlay div is the
+        // sole rendering at the top-left.
         const coveredByMerge = computeCoveredCoords(mergedRegions);
 
-        const cells: TemplateResult[] = [];
-        for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-            const rowOffset = row - viewport.firstRowIndex;
-            const top = rowY[rowOffset] ?? 0;
-            const height = rowHeights[rowOffset] ?? 0;
-            if (height === 0) {
-                // Hidden row — skip rendering its cells.
-                continue;
-            }
-            for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-                const colOffset = col - viewport.firstColumnIndex;
-                const left = colX[colOffset] ?? 0;
-                const width = colWidths[colOffset] ?? 0;
-                if (width === 0) {
-                    // Hidden column — skip.
-                    continue;
-                }
-                if (coveredByMerge.has(toKey(col, row))) {
-                    // Inside a merged region but not the top-left — the
-                    // merged-cell overlay covers this position.
-                    continue;
-                }
-                const key = toKey(col, row);
-                const data = cellData.get(key);
-                const text = data?.value ?? '';
-                const cellStyleClass = data?.cellStyle ?? '';
-                // Selection: cells in the active range (excluding the
-                // active cell) + cells in any aux range get the
-                // `cell-range` class. The active cell does NOT get
-                // `cell-range` — it's outlined by a separate overlay
-                // (slice 137). This matches the GWT convention pinned by
-                // SpreadsheetElement.isCellActiveWithinSelection.
-                const inSelection = isCellSelected(selection, col, row);
-                const isActive = isActiveCell(selection, col, row);
-                const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
-                const classList = `cell col${col} row${row}`
-                    + (cellStyleClass ? ` ${cellStyleClass}` : '')
-                    + cellRangeClass;
-                const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
-                cells.push(html`
-                    <div class=${classList} style=${style}>
-                        ${text}
-                    </div>
-                `);
-            }
+        // Main (bottom-right) quadrant: scrolling rows + cols.
+        const mainCells = renderQuadrant({
+            state: this.renderState,
+            coveredByMerge,
+            quadrantName: 'main',
+            colStart: viewport.firstColumnIndex,
+            colEnd: viewport.lastColumnIndex,
+            rowStart: viewport.firstRowIndex,
+            rowEnd: viewport.lastRowIndex,
+            getColLeft: (col) =>
+                this.renderState.colX[col - viewport.firstColumnIndex] ?? 0,
+            getColWidth: (col) =>
+                this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
+            getRowTop: (row) =>
+                this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
+            getRowHeight: (row) =>
+                this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0,
+        });
+
+        const quadrantCells: TemplateResult[] = [...mainCells];
+
+        // Top-right quadrant: frozen rows × scrolling columns.
+        if (verticalSplitPosition > 0) {
+            const topCells = renderQuadrant({
+                state: this.renderState,
+                coveredByMerge,
+                quadrantName: 'top',
+                colStart: viewport.firstColumnIndex,
+                colEnd: viewport.lastColumnIndex,
+                rowStart: 1,
+                rowEnd: verticalSplitPosition,
+                getColLeft: (col) =>
+                    this.renderState.colX[col - viewport.firstColumnIndex] ?? 0,
+                getColWidth: (col) =>
+                    this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
+                getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
+                getRowHeight: (row) =>
+                    this.renderState.frozenRowHeights[row - 1] ?? 0,
+            });
+            quadrantCells.push(...topCells);
+        }
+
+        // Bottom-left quadrant: scrolling rows × frozen columns.
+        if (horizontalSplitPosition > 0) {
+            const leftCells = renderQuadrant({
+                state: this.renderState,
+                coveredByMerge,
+                quadrantName: 'left',
+                colStart: 1,
+                colEnd: horizontalSplitPosition,
+                rowStart: viewport.firstRowIndex,
+                rowEnd: viewport.lastRowIndex,
+                getColLeft: (col) => this.renderState.frozenColX[col - 1] ?? 0,
+                getColWidth: (col) =>
+                    this.renderState.frozenColWidths[col - 1] ?? 0,
+                getRowTop: (row) =>
+                    this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
+                getRowHeight: (row) =>
+                    this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0,
+            });
+            quadrantCells.push(...leftCells);
+        }
+
+        // Top-left quadrant: frozen rows × frozen columns (corner).
+        if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
+            const cornerCells = renderQuadrant({
+                state: this.renderState,
+                coveredByMerge,
+                quadrantName: 'corner',
+                colStart: 1,
+                colEnd: horizontalSplitPosition,
+                rowStart: 1,
+                rowEnd: verticalSplitPosition,
+                getColLeft: (col) => this.renderState.frozenColX[col - 1] ?? 0,
+                getColWidth: (col) =>
+                    this.renderState.frozenColWidths[col - 1] ?? 0,
+                getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
+                getRowHeight: (row) =>
+                    this.renderState.frozenRowHeights[row - 1] ?? 0,
+            });
+            quadrantCells.push(...cornerCells);
         }
 
         const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
         const mergedOverlays = buildMergedCellOverlays(this.renderState);
         const selectionOverlay = buildSelectionOverlay(this.renderState);
-        return html`${styleBlock}${cells}${mergedOverlays}${selectionOverlay}`;
+        return html`${styleBlock}${quadrantCells}${mergedOverlays}${selectionOverlay}`;
     }
+}
+
+interface QuadrantRenderOpts {
+    state: CellGridRenderState;
+    coveredByMerge: ReadonlySet<string>;
+    quadrantName: 'main' | 'top' | 'left' | 'corner';
+    colStart: number;
+    colEnd: number;
+    rowStart: number;
+    rowEnd: number;
+    getColLeft: (col: number) => number;
+    getColWidth: (col: number) => number;
+    getRowTop: (row: number) => number;
+    getRowHeight: (row: number) => number;
+}
+
+/**
+ * Render the cells of a single quadrant. Each cell carries a
+ * {@code quadrant-<name>} class so CSS can apply z-index stacking
+ * (corner > top, left > main). The per-cell position comes from the
+ * caller's {@code getColLeft/getRowTop/getColWidth/getRowHeight}
+ * closures — different quadrants use different position arrays
+ * (frozen arrays vs main arrays).
+ */
+function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
+    const {
+        state,
+        coveredByMerge,
+        quadrantName,
+        colStart,
+        colEnd,
+        rowStart,
+        rowEnd,
+        getColLeft,
+        getColWidth,
+        getRowTop,
+        getRowHeight,
+    } = opts;
+    const { cellData, selection } = state;
+
+    const cells: TemplateResult[] = [];
+    for (let row = rowStart; row <= rowEnd; row++) {
+        const top = getRowTop(row);
+        const height = getRowHeight(row);
+        if (height === 0) {
+            continue;
+        }
+        for (let col = colStart; col <= colEnd; col++) {
+            const left = getColLeft(col);
+            const width = getColWidth(col);
+            if (width === 0) {
+                continue;
+            }
+            const key = toKey(col, row);
+            if (coveredByMerge.has(key)) {
+                continue;
+            }
+            const data = cellData.get(key);
+            const text = data?.value ?? '';
+            const cellStyleClass = data?.cellStyle ?? '';
+            const inSelection = isCellSelected(selection, col, row);
+            const isActive = isActiveCell(selection, col, row);
+            const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+            const classList = `cell col${col} row${row} quadrant-${quadrantName}`
+                + (cellStyleClass ? ` ${cellStyleClass}` : '')
+                + cellRangeClass;
+            const style =
+                `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+            cells.push(html`
+                <div class=${classList} style=${style}>
+                    ${text}
+                </div>
+            `);
+        }
+    }
+    return cells;
 }
 
 /**

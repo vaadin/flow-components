@@ -90,6 +90,38 @@ export interface CellGridRenderState {
      * overlays; slice 132's minimal render ignores it.
      */
     selection: SelectionState;
+
+    /**
+     * Number of frozen rows at the top of the sheet (1-based count;
+     * 0 = no row freeze). Rows {@code 1..verticalSplitPosition} render
+     * in the top-row + corner quadrants and don't scroll vertically;
+     * the main viewport's {@code firstRowIndex} starts above this
+     * count.
+     */
+    verticalSplitPosition: number;
+
+    /**
+     * Symmetric column variant of {@link verticalSplitPosition}.
+     * {@code 0} = no column freeze.
+     */
+    horizontalSplitPosition: number;
+
+    /**
+     * Pixel x-offsets for the frozen columns (cols
+     * {@code 1..horizontalSplitPosition}). Indexed by
+     * {@code col - 1} (col 1 → index 0). Empty when no column
+     * freeze is active.
+     */
+    frozenColX: ReadonlyArray<number>;
+
+    /** Pixel widths for the frozen columns, same indexing as {@link frozenColX}. */
+    frozenColWidths: ReadonlyArray<number>;
+
+    /** Pixel y-offsets for the frozen rows ({@code 1..verticalSplitPosition}). */
+    frozenRowY: ReadonlyArray<number>;
+
+    /** Pixel heights for the frozen rows, same indexing as {@link frozenRowY}. */
+    frozenRowHeights: ReadonlyArray<number>;
 }
 
 /**
@@ -116,6 +148,12 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         rowHeights: [],
         cellStyleToCSSStyle: {},
         mergedRegions: [],
+        verticalSplitPosition: 0,
+        horizontalSplitPosition: 0,
+        frozenColX: [],
+        frozenColWidths: [],
+        frozenRowY: [],
+        frozenRowHeights: [],
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },

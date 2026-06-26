@@ -150,6 +150,12 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
             rowHeights: [20, 20],
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection: {
                 activeCell: { col: 1, row: 1 },
                 activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
@@ -253,6 +259,12 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             rowHeights: [20, 0, 20], // row 2 hidden
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -286,6 +298,12 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             rowHeights: [20],
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -321,6 +339,12 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             rowHeights: [20],
             cellStyleToCSSStyle,
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -411,6 +435,12 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
             rowHeights: [20, 20, 20],
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection,
         };
     }
@@ -530,6 +560,12 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
             rowHeights: [20, 20, 20, 20],
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection,
         };
     }
@@ -819,6 +855,182 @@ describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
+    function buildFreezeState(opts: {
+        verticalSplitPosition: number;
+        horizontalSplitPosition: number;
+    }): CellGridRenderState {
+        // Visible (main) viewport: cols 3..4, rows 3..4 with the
+        // freeze ending at col 2 / row 2. Main coords + frozen coords
+        // are populated; mainTotal width = 100 (50×2 cols), frozen
+        // width = 100 too. Same for rows.
+        return {
+            viewport: {
+                firstColumnIndex: 3,
+                firstColumnPosition: 100,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 3,
+                firstRowPosition: 40,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            cellData: new Map(),
+            colX: [100, 150],
+            rowY: [40, 60],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            cellStyleToCSSStyle: {},
+            mergedRegions: [],
+            verticalSplitPosition: opts.verticalSplitPosition,
+            horizontalSplitPosition: opts.horizontalSplitPosition,
+            frozenColX: opts.horizontalSplitPosition > 0 ? [0, 50] : [],
+            frozenColWidths: opts.horizontalSplitPosition > 0 ? [50, 50] : [],
+            frozenRowY: opts.verticalSplitPosition > 0 ? [0, 20] : [],
+            frozenRowHeights: opts.verticalSplitPosition > 0 ? [20, 20] : [],
+            selection: emptyCellGridRenderState().selection,
+        };
+    }
+
+    it('renders only main-quadrant cells when no freeze is active', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+        }));
+
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-main')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-top')).to.have.length(0);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-left')).to.have.length(0);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-corner')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('renders frozen-row (top) cells when verticalSplitPosition > 0', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 0,
+        }));
+
+        // Top quadrant: scrolling cols (3, 4) × frozen rows (1, 2) = 4 cells.
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-top')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-main')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-left')).to.have.length(0);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-corner')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('renders frozen-column (left) cells when horizontalSplitPosition > 0', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 2,
+        }));
+
+        // Left quadrant: frozen cols (1, 2) × scrolling rows (3, 4) = 4 cells.
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-left')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-main')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-top')).to.have.length(0);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-corner')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('renders all 4 quadrants when both freezes are active', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+        }));
+
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-corner')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-top')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-left')).to.have.length(4);
+        expect(el.shadowRoot!.querySelectorAll('.quadrant-main')).to.have.length(4);
+
+        cleanup(el);
+    });
+
+    it('positions frozen-row cells using frozenRowY (independent of scroll)', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 0,
+        }));
+
+        // Top quadrant cell at (col 3, row 1) uses:
+        //   left = colX[col - firstColumnIndex] = colX[0] = 100
+        //   top  = frozenRowY[row - 1] = frozenRowY[0] = 0
+        const cell = el.shadowRoot!.querySelector('.col3.row1') as HTMLElement;
+        expect(cell.classList.contains('quadrant-top')).to.be.true;
+        expect(cell.style.left).to.equal('100px');
+        expect(cell.style.top).to.equal('0px');
+
+        cleanup(el);
+    });
+
+    it('positions frozen-column cells using frozenColX (independent of scroll)', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 2,
+        }));
+
+        // Left quadrant cell at (col 1, row 3) uses:
+        //   left = frozenColX[col - 1] = frozenColX[0] = 0
+        //   top  = rowY[row - firstRowIndex] = rowY[0] = 40
+        const cell = el.shadowRoot!.querySelector('.col1.row3') as HTMLElement;
+        expect(cell.classList.contains('quadrant-left')).to.be.true;
+        expect(cell.style.left).to.equal('0px');
+        expect(cell.style.top).to.equal('40px');
+
+        cleanup(el);
+    });
+
+    it('positions corner cells using frozenColX + frozenRowY (both fixed)', async () => {
+        const el = await attachWithState(buildFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+        }));
+
+        // Corner cell at (col 2, row 2) uses:
+        //   left = frozenColX[1] = 50
+        //   top  = frozenRowY[1] = 20
+        const cell = el.shadowRoot!.querySelector('.col2.row2') as HTMLElement;
+        expect(cell.classList.contains('quadrant-corner')).to.be.true;
+        expect(cell.style.left).to.equal('50px');
+        expect(cell.style.top).to.equal('20px');
+
+        cleanup(el);
+    });
+
+    it('renders cellData values for cells across all 4 quadrants', async () => {
+        const state = buildFreezeState({
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+        });
+        const cellData = new Map<string, CellData>([
+            ['col1 row1', makeCellData(1, 1, 'CORNER')],
+            ['col3 row1', makeCellData(3, 1, 'TOP')],
+            ['col1 row3', makeCellData(1, 3, 'LEFT')],
+            ['col3 row3', makeCellData(3, 3, 'MAIN')],
+        ]);
+        const el = await attachWithState({ ...state, cellData });
+
+        expect(
+            el.shadowRoot!.querySelector('.col1.row1')!.textContent?.trim()
+        ).to.equal('CORNER');
+        expect(
+            el.shadowRoot!.querySelector('.col3.row1')!.textContent?.trim()
+        ).to.equal('TOP');
+        expect(
+            el.shadowRoot!.querySelector('.col1.row3')!.textContent?.trim()
+        ).to.equal('LEFT');
+        expect(
+            el.shadowRoot!.querySelector('.col3.row3')!.textContent?.trim()
+        ).to.equal('MAIN');
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — render state updates', () => {
     it('re-renders when renderState is reassigned', async () => {
         const el = await attachWithState({
@@ -839,6 +1051,12 @@ describe('SpreadsheetCellGrid — render state updates', () => {
             rowHeights: [20],
             cellStyleToCSSStyle: {},
             mergedRegions: [],
+            verticalSplitPosition: 0,
+            horizontalSplitPosition: 0,
+            frozenColX: [],
+            frozenColWidths: [],
+            frozenRowY: [],
+            frozenRowHeights: [],
             selection: emptyCellGridRenderState().selection,
         });
 
