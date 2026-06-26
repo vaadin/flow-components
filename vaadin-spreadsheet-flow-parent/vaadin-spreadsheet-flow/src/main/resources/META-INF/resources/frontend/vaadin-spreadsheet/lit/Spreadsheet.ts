@@ -983,12 +983,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
         e: CustomEvent<{ col: number; row: number }>
     ): void => {
         const { col, row } = e.detail;
+        if (this.isCellLockedForEdit(col, row)) {
+            return;
+        }
         const key = toKey(col, row);
         const cellData = this.cellDataByKey.get(key);
         const initialValue = cellData?.value ?? '';
         this.editor = { col, row, initialValue };
         this.recomputeViewport();
     };
+
+    /**
+     * Excel-style lock check: a cell is uneditable only when the
+     * sheet is protected AND the cell's locked flag is true. POI
+     * defaults every cell's locked flag to true, so a freshly
+     * loaded workbook with sheet protection enabled blocks all
+     * cells; unlocking a region in POI flips the per-cell flag.
+     * When the sheet is unprotected, the flag is meaningless.
+     * Cells without CellData entries default to locked because
+     * that matches POI's behavior for empty cells in a protected
+     * sheet.
+     */
+    private isCellLockedForEdit(col: number, row: number): boolean {
+        if (!this.sheetProtected) {
+            return false;
+        }
+        const cellData = this.cellDataByKey.get(toKey(col, row));
+        return cellData?.locked ?? true;
+    }
 
     /**
      * Cell-editor commit. Called when the user presses Enter,
@@ -1227,8 +1249,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
             if (this.rows <= 0 || this.cols <= 0) {
                 return;
             }
-            e.preventDefault();
             const { col, row } = this.selection.activeCell;
+            if (this.isCellLockedForEdit(col, row)) {
+                return;
+            }
+            e.preventDefault();
             const cellData = this.cellDataByKey.get(toKey(col, row));
             this.editor = {
                 col, row,
@@ -1251,8 +1276,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
             if (this.rows <= 0 || this.cols <= 0) {
                 return;
             }
-            e.preventDefault();
             const { col, row } = this.selection.activeCell;
+            if (this.isCellLockedForEdit(col, row)) {
+                return;
+            }
+            e.preventDefault();
             this.editor = { col, row, initialValue: key };
             this.recomputeViewport();
             return;

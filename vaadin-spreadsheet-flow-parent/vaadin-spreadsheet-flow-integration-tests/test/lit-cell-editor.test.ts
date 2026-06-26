@@ -724,6 +724,110 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
+    it('double-click does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setSheetProtected(true);
+        sheet.updateBottomRightCellValues([
+            { col: 2, row: 2, value: 'x', cellStyle: 'cs0',
+              locked: true, needsMeasure: false, isPercentage: false },
+        ]);
+        sheet.recomputeViewport();
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getCellGrid().renderState.editor).to.be.null;
+        cleanup();
+    });
+
+    it('double-click opens editor on a locked cell when sheet is NOT protected (slice 183)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setSheetProtected(false);
+        sheet.updateBottomRightCellValues([
+            { col: 2, row: 2, value: 'x', cellStyle: 'cs0',
+              locked: true, needsMeasure: false, isPercentage: false },
+        ]);
+        sheet.recomputeViewport();
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
+        cleanup();
+    });
+
+    it('double-click opens editor on an unlocked cell when sheet IS protected (slice 183)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setSheetProtected(true);
+        sheet.updateBottomRightCellValues([
+            { col: 2, row: 2, value: 'x', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+        sheet.recomputeViewport();
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
+        cleanup();
+    });
+
+    it('F2 does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+        const { host, sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setSheetProtected(true);
+        // Default-locked: no CellData entry at the active cell.
+        sheet.recomputeViewport();
+
+        host.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'F2', bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getCellGrid().renderState.editor).to.be.null;
+        cleanup();
+    });
+
+    it('type-to-edit does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+        const { host, sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setSheetProtected(true);
+        sheet.recomputeViewport();
+
+        host.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'a', bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getCellGrid().renderState.editor).to.be.null;
+        cleanup();
+    });
+
     it('cell-editor-cancel clears the editor WITHOUT dispatching cellValueEdited', () => {
         const { host, sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
