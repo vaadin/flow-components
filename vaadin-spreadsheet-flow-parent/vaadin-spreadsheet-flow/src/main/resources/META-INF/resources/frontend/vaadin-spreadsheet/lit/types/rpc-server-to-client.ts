@@ -22,11 +22,10 @@ import type {
  * keeps a reference to an instance of this type as {@code this.api} and
  * dispatches every property change + RPC call through it.
  *
- * This interface IS the contract the Phase 3.6 swap turns on: today
- * {@code this.api} is an instance of the GWT-compiled
- * {@code Spreadsheet} class (from {@code spreadsheet-export.js}); when
- * the new client ships, {@code this.api} becomes an instance of a TS
- * class that implements this interface.
+ * This interface IS the contract that the Phase 3.6 swap turned on.
+ * Slice 169 flipped {@code this.api} to a TS class instance that
+ * implements this interface; slice 170 deleted the legacy GWT-compiled
+ * implementation entirely.
  *
  * Method shapes derived from the existing wrapper's call sites
  * (lines 174-749 of {@code vaadin-spreadsheet.js} as of slice 118).
