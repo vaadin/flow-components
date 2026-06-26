@@ -43,6 +43,7 @@ import { toKey } from './algorithms/CellKeys.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
+import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -236,6 +237,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly headerCorner: HTMLElement;
 
     /**
+     * The sheet-tab strip below the scroll container — renders
+     * one tab per sheet name with the active tab highlighted.
+     * Clicking a tab dispatches `sheetSelected` to the server
+     * (slice 154).
+     */
+    private readonly sheetTabs: SpreadsheetSheetTabs;
+
+    /**
      * Height of the column-header strip in pixels. {@code 0}
      * (default) means no header strip is rendered. The host opts
      * in by calling {@link setHeaderRowHeight}; matches Excel's
@@ -280,16 +289,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.columnHeader = new SpreadsheetColumnHeader();
         this.rowHeader = new SpreadsheetRowHeader();
         this.headerCorner = document.createElement('div');
+        this.sheetTabs = new SpreadsheetSheetTabs();
+        // Host becomes a flex column so the scroll container takes
+        // the available space + the sheet tabs sit below at their
+        // intrinsic height. Slice 154. Existing host width/height
+        // (set via setWidth/setHeight) are honored by flex.
+        this.host.style.display = 'flex';
+        this.host.style.flexDirection = 'column';
         this.scrollContainer = document.createElement('div');
         this.scrollContainer.className = 'sheet-scroll';
-        // CSS Grid layout: 2 columns × 2 rows so each header sits in
-        // its own cell. Column 1 = row-header (auto-sized to its
-        // intrinsic width); column 2 = cell-grid (auto-sized to its
-        // intrinsic width). Same for rows. Sticky positioning on
-        // each header pins it to its viewport edge during scroll.
-        // Slice 144.
+        // CSS Grid layout inside the scroll container: 2 columns ×
+        // 2 rows so each header sits in its own cell. Column 1 =
+        // row-header (auto-sized to its intrinsic width); column
+        // 2 = cell-grid (auto-sized to its intrinsic width). Same
+        // for rows. Sticky positioning on each header pins it to
+        // its viewport edge during scroll. Slice 144.
+        // `flex:1` so the container takes the remaining vertical
+        // space inside the flex-column host, leaving room for the
+        // sheet tabs below. Slice 154.
         this.scrollContainer.style.cssText =
-            'position:relative;overflow:auto;width:100%;height:100%;'
+            'position:relative;overflow:auto;width:100%;flex:1;min-height:0;'
             + 'display:grid;grid-template-columns:auto auto;'
             + 'grid-template-rows:auto auto;'
             // outline:none so the browser-default focus ring doesn't
@@ -328,6 +347,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.appendChild(this.rowHeader);
         this.scrollContainer.appendChild(this.cellGrid);
         this.host.appendChild(this.scrollContainer);
+        // Sheet tabs sit below the scroll container in the flex
+        // column. flex:0 so they take their intrinsic height,
+        // never grow / shrink based on content.
+        this.sheetTabs.style.flex = '0 0 auto';
+        this.host.appendChild(this.sheetTabs);
+        // Sheet tab click → switch active sheet via spreadsheet-event
+        // (slice 154).
+        this.sheetTabs.addEventListener(
+            'sheet-tab-click',
+            this.handleSheetTabClick as EventListener
+        );
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
         // Cell-click delegation (slice 146): the cell-grid dispatches
         // a `cell-click` custom event with detail = { col, row,
@@ -719,6 +749,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'row-header-click',
             this.handleRowHeaderClick as EventListener
         );
+        this.sheetTabs.removeEventListener(
+            'sheet-tab-click',
+            this.handleSheetTabClick as EventListener
+        );
         this.resizeObserver.disconnect();
     }
 
@@ -1005,6 +1039,55 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return this.headerCorner;
     }
 
+    /** Test-only accessor: the sheet-tabs sub-element (slice 154). */
+    getSheetTabs(): SpreadsheetSheetTabs {
+        return this.sheetTabs;
+    }
+
+    /**
+     * Push fresh state to the sheet tabs from the current
+     * {@code sheetNames} + {@code sheetIndex} fields. Called from
+     * the public setters when those change, AND from any caller
+     * that wants to force a re-render. Slice 154.
+     */
+    private syncSheetTabs(): void {
+        this.sheetTabs.renderState = {
+            sheetNames: this.sheetNames,
+            activeIndex: this.sheetIndex,
+        };
+    }
+
+    /**
+     * Sheet-tab click handler — translates to a `sheetSelected`
+     * spreadsheet-event for the server. The server is expected
+     * to call back into {@code setSheetIndex} + push fresh data
+     * via the cell value APIs, which the next render picks up.
+     * Slice 154.
+     */
+    private readonly handleSheetTabClick = (
+        e: CustomEvent<{ index: number }>
+    ): void => {
+        const { index } = e.detail;
+        // Optimistically reflect the click in the tab strip so the
+        // active tab visually moves immediately, without waiting
+        // for the server's response. The server's setSheetIndex
+        // will overwrite this when it lands.
+        this.sheetIndex = index;
+        this.syncSheetTabs();
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'sheetSelected',
+                data: {
+                    sheetName: this.sheetNames[index - 1] ?? '',
+                    scrollLeft: this.scrollContainer.scrollLeft,
+                    scrollTop: this.scrollContainer.scrollTop,
+                },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
     /**
      * Set the column-header strip's height in pixels. {@code 0}
      * (default) means no header is rendered — useful for headless
@@ -1174,9 +1257,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     setSheetIndex(index: number): void {
         this.sheetIndex = index;
+        // Update the sheet-tabs strip so the active tab moves to
+        // the server's chosen sheet (slice 154).
+        this.syncSheetTabs();
     }
     setSheetNames(names: string[]): void {
         this.sheetNames = names;
+        // Re-render the sheet-tabs strip with the new names list
+        // (slice 154).
+        this.syncSheetTabs();
     }
     setVerticalScrollPositions(positions: number[]): void {
         this.verticalScrollPositions = positions;

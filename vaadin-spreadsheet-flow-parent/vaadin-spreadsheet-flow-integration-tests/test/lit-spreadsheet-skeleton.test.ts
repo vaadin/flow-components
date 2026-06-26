@@ -280,20 +280,26 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid + headers + corner to the host element via a CSS-grid scroll container', () => {
+    it('appends the cell-grid + headers + corner + sheet tabs to the host element', () => {
         // Slice 140: scroll container wraps the cell-grid. Slice 143
         // added the column-header sibling. Slice 144 added the
         // row-header + restructured the scroll container as a CSS
         // grid. Slice 145 added the corner box at (col 1, row 1).
+        // Slice 154 added the sheet-tabs strip below the scroll
+        // container; the host is now a flex column.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
-        expect(host.children).to.have.length(1);
+        // Host has 2 children: scroll container + sheet tabs.
+        expect(host.children).to.have.length(2);
         expect(host.firstElementChild === sheet.getScrollContainer()).to.be.true;
+        const hostKids = Array.from(host.children);
+        expect(hostKids.includes(sheet.getSheetTabs())).to.be.true;
+
         const scroller = sheet.getScrollContainer();
-        // Four children: header-corner, column-header, row-header,
-        // cell-grid. (Identity checks via `===` to avoid chai
-        // serializing LitElements with cyclic renderState.)
+        // Four scroll-container children: header-corner, column-header,
+        // row-header, cell-grid. (Identity checks via `===` to avoid
+        // chai serializing LitElements with cyclic renderState.)
         expect(scroller.children).to.have.length(4);
         const kids = Array.from(scroller.children);
         expect(kids.includes(sheet.getColumnHeader())).to.be.true;
