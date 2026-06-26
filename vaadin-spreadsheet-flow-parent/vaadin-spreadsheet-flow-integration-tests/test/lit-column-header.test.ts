@@ -282,6 +282,85 @@ describe('SpreadsheetColumnHeader — render with header active', () => {
     });
 });
 
+describe('SpreadsheetColumnHeader — click delegation (slice 148)', () => {
+    it('puts data-col on each rendered header cell', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 3,
+                firstColumnPosition: 0,
+                colX: [0, 50, 100],
+                colWidths: [50, 50, 50],
+                headerHeight: 24,
+            })
+        );
+
+        const cells = el.shadowRoot!.querySelectorAll(
+            '.col-header-cell'
+        ) as NodeListOf<HTMLElement>;
+        expect(cells[0].dataset.col).to.equal('1');
+        expect(cells[1].dataset.col).to.equal('2');
+        expect(cells[2].dataset.col).to.equal('3');
+
+        cleanup(el);
+    });
+
+    it('dispatches column-header-click on click with the column coord', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 3,
+                firstColumnPosition: 0,
+                colX: [0, 50, 100],
+                colWidths: [50, 50, 50],
+                headerHeight: 24,
+            })
+        );
+
+        let received: { col: number; shiftKey: boolean } | undefined;
+        el.addEventListener('column-header-click', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            received = { col: detail.col, shiftKey: detail.shiftKey };
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col-header-cell.col2'
+        ) as HTMLElement;
+        cell.click();
+
+        expect(received).to.deep.equal({ col: 2, shiftKey: false });
+        cleanup(el);
+    });
+
+    it('column-header-click detail includes the shiftKey modifier', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 1,
+                firstColumnPosition: 0,
+                colX: [0],
+                colWidths: [50],
+                headerHeight: 24,
+            })
+        );
+
+        let shiftKey = false;
+        el.addEventListener('column-header-click', (e: Event) => {
+            shiftKey = (e as CustomEvent).detail.shiftKey;
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.col-header-cell'
+        ) as HTMLElement;
+        cell.dispatchEvent(new MouseEvent('click', {
+            bubbles: true, composed: true, shiftKey: true,
+        }));
+
+        expect(shiftKey).to.be.true;
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetColumnHeader — re-renders on renderState reassignment', () => {
     it('updates cells when renderState changes', async () => {
         const el = await attachWithState(

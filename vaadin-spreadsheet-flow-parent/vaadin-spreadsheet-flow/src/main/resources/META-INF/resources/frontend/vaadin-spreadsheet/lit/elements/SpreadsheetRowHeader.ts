@@ -115,6 +115,42 @@ export class SpreadsheetRowHeader extends LitElement {
         this.renderState = emptyRowHeaderRenderState();
     }
 
+    /**
+     * Shadow-root click delegation — same pattern as the column
+     * header (slice 148). Dispatches {@code row-header-click}
+     * with the row coordinate + modifier-key state.
+     */
+    firstUpdated(): void {
+        this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+    }
+
+    private readonly handleShadowClick = (e: Event): void => {
+        const ev = e as MouseEvent;
+        const target = ev.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.row-header-cell');
+        if (!cell) {
+            return;
+        }
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(row) || row < 1) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('row-header-click', {
+            detail: {
+                row,
+                shiftKey: ev.shiftKey,
+                ctrlKey: ev.ctrlKey,
+                metaKey: ev.metaKey,
+                altKey: ev.altKey,
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
     render(): TemplateResult {
         const { viewport, rowY, rowHeights, headerWidth } = this.renderState;
 
@@ -133,8 +169,11 @@ export class SpreadsheetRowHeader extends LitElement {
             const style =
                 `left:0;top:${top}px;width:${headerWidth}px;height:${height}px;`
                 + `line-height:${height}px;`;
+            // data-row drives the click-delegation handler in
+            // firstUpdated() (slice 148).
             cells.push(html`
-                <div class="row-header-cell row${row}" style=${style}>
+                <div class="row-header-cell row${row}" style=${style}
+                     data-row=${row}>
                     ${row}
                 </div>
             `);

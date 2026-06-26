@@ -121,6 +121,44 @@ export class SpreadsheetColumnHeader extends LitElement {
         this.renderState = emptyColumnHeaderRenderState();
     }
 
+    /**
+     * Wire shadow-root click delegation on first render — same
+     * pattern as {@link SpreadsheetCellGrid}. Each click that
+     * lands on a {@code .col-header-cell} dispatches a
+     * {@code column-header-click} custom event with the column
+     * coordinate + modifier-key state. Slice 148.
+     */
+    firstUpdated(): void {
+        this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+    }
+
+    private readonly handleShadowClick = (e: Event): void => {
+        const ev = e as MouseEvent;
+        const target = ev.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.col-header-cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        if (!Number.isFinite(col) || col < 1) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('column-header-click', {
+            detail: {
+                col,
+                shiftKey: ev.shiftKey,
+                ctrlKey: ev.ctrlKey,
+                metaKey: ev.metaKey,
+                altKey: ev.altKey,
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
     render(): TemplateResult {
         const { viewport, colX, colWidths, headerHeight } = this.renderState;
 
@@ -140,8 +178,12 @@ export class SpreadsheetColumnHeader extends LitElement {
             const style =
                 `left:${left}px;top:0;width:${width}px;height:${headerHeight}px;`
                 + `line-height:${headerHeight}px;`;
+            // data-col drives the click delegation handler in
+            // firstUpdated() (slice 148) — same pattern as the
+            // cell-grid (slice 146).
             cells.push(html`
-                <div class="col-header-cell col${col}" style=${style}>
+                <div class="col-header-cell col${col}" style=${style}
+                     data-col=${col}>
                     ${letter}
                 </div>
             `);

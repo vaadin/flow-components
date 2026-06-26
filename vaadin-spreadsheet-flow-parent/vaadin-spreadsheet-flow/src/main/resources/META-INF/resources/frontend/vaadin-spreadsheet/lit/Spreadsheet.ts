@@ -320,6 +320,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'cell-click',
             this.handleCellClick as EventListener
         );
+        // Header click delegation (slice 148). Each header element
+        // emits its own custom event with the col / row coordinate;
+        // the connector translates them into whole-column / whole-
+        // row range selections.
+        this.columnHeader.addEventListener(
+            'column-header-click',
+            this.handleColumnHeaderClick as EventListener
+        );
+        this.rowHeader.addEventListener(
+            'row-header-click',
+            this.handleRowHeaderClick as EventListener
+        );
         // Keyboard navigation (slice 147). Listen on the scroll
         // container so arrow keys + shift+arrow work whenever the
         // spreadsheet has focus. preventDefault() in the handler
@@ -362,6 +374,76 @@ export class Spreadsheet implements SpreadsheetClientApi {
         } else {
             this.selection = selectSingleCell(col, row);
             this.extendCol = col;
+            this.extendRow = row;
+        }
+        this.recomputeViewport();
+    };
+
+    /**
+     * Column-header click handler (slice 148). Selects the entire
+     * column (rows 1..this.rows). The active cell becomes the
+     * column's row 1. Shift-click extends from the existing anchor
+     * column to the clicked column, selecting a whole-column
+     * range. Updates {@code extendCol/Row} so subsequent
+     * shift+arrow continues naturally.
+     */
+    private readonly handleColumnHeaderClick = (
+        e: CustomEvent<{
+            col: number; shiftKey: boolean; ctrlKey: boolean;
+            metaKey: boolean; altKey: boolean;
+        }>
+    ): void => {
+        const { col, shiftKey } = e.detail;
+        const rows = this.rows > 0 ? this.rows : 1;
+        if (shiftKey) {
+            const anchor = this.selection.activeCell;
+            this.selection = {
+                activeCell: anchor,
+                activeRange: normalizedRange(anchor.col, 1, col, rows),
+                auxRanges: [],
+            };
+            this.extendCol = col;
+            this.extendRow = rows;
+        } else {
+            this.selection = {
+                activeCell: { col, row: 1 },
+                activeRange: normalizedRange(col, 1, col, rows),
+                auxRanges: [],
+            };
+            this.extendCol = col;
+            this.extendRow = rows;
+        }
+        this.recomputeViewport();
+    };
+
+    /**
+     * Row-header click handler (slice 148). Mirror of the column
+     * variant — selects an entire row (cols 1..this.cols).
+     */
+    private readonly handleRowHeaderClick = (
+        e: CustomEvent<{
+            row: number; shiftKey: boolean; ctrlKey: boolean;
+            metaKey: boolean; altKey: boolean;
+        }>
+    ): void => {
+        const { row, shiftKey } = e.detail;
+        const cols = this.cols > 0 ? this.cols : 1;
+        if (shiftKey) {
+            const anchor = this.selection.activeCell;
+            this.selection = {
+                activeCell: anchor,
+                activeRange: normalizedRange(1, anchor.row, cols, row),
+                auxRanges: [],
+            };
+            this.extendCol = cols;
+            this.extendRow = row;
+        } else {
+            this.selection = {
+                activeCell: { col: 1, row },
+                activeRange: normalizedRange(1, row, cols, row),
+                auxRanges: [],
+            };
+            this.extendCol = cols;
             this.extendRow = row;
         }
         this.recomputeViewport();
@@ -489,6 +571,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellGrid.removeEventListener(
             'cell-click',
             this.handleCellClick as EventListener
+        );
+        this.columnHeader.removeEventListener(
+            'column-header-click',
+            this.handleColumnHeaderClick as EventListener
+        );
+        this.rowHeader.removeEventListener(
+            'row-header-click',
+            this.handleRowHeaderClick as EventListener
         );
         this.resizeObserver.disconnect();
     }

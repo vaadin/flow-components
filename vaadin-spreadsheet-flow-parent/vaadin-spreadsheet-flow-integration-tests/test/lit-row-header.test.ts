@@ -271,6 +271,57 @@ describe('SpreadsheetRowHeader — render with header active', () => {
     });
 });
 
+describe('SpreadsheetRowHeader — click delegation (slice 148)', () => {
+    it('puts data-row on each rendered header cell', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstRowIndex: 5,
+                lastRowIndex: 7,
+                firstRowPosition: 80,
+                rowY: [80, 100, 120],
+                rowHeights: [20, 20, 20],
+                headerWidth: 40,
+            })
+        );
+
+        const cells = el.shadowRoot!.querySelectorAll(
+            '.row-header-cell'
+        ) as NodeListOf<HTMLElement>;
+        expect(cells[0].dataset.row).to.equal('5');
+        expect(cells[1].dataset.row).to.equal('6');
+        expect(cells[2].dataset.row).to.equal('7');
+
+        cleanup(el);
+    });
+
+    it('dispatches row-header-click on click with the row coord', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstRowIndex: 1,
+                lastRowIndex: 3,
+                firstRowPosition: 0,
+                rowY: [0, 20, 40],
+                rowHeights: [20, 20, 20],
+                headerWidth: 40,
+            })
+        );
+
+        let received: { row: number; shiftKey: boolean } | undefined;
+        el.addEventListener('row-header-click', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            received = { row: detail.row, shiftKey: detail.shiftKey };
+        });
+
+        const cell = el.shadowRoot!.querySelector(
+            '.row-header-cell.row2'
+        ) as HTMLElement;
+        cell.click();
+
+        expect(received).to.deep.equal({ row: 2, shiftKey: false });
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetRowHeader — re-renders on renderState reassignment', () => {
     it('updates cells when renderState changes', async () => {
         const el = await attachWithState(

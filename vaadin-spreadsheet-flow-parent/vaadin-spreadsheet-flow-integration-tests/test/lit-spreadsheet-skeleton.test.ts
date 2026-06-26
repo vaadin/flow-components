@@ -1250,6 +1250,115 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('column-header-click selects the entire column (slice 148)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-header-click', {
+            detail: { col: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Active cell at the top of the column.
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 1 });
+        // Range covers col 3, rows 1..10.
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 3, c2: 3, r1: 1, r2: 10,
+        });
+
+        cleanup();
+    });
+
+    it('shift-click on column header extends from anchor column to clicked column (slice 148)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Click col 2 first to set anchor at (2, 1) via whole-column.
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-header-click', {
+            detail: { col: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Shift-click col 4 → range covers cols 2..4, rows 1..10.
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-header-click', {
+            detail: { col: 4, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Active cell stays at the anchor.
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 1 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 4, r1: 1, r2: 10,
+        });
+
+        cleanup();
+    });
+
+    it('row-header-click selects the entire row (slice 148)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-header-click', {
+            detail: { row: 4, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 4 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 1, c2: 5, r1: 4, r2: 4,
+        });
+
+        cleanup();
+    });
+
+    it('shift-click on row header extends from anchor row to clicked row (slice 148)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        // Click row 2 first.
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-header-click', {
+            detail: { row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Shift-click row 5.
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-header-click', {
+            detail: { row: 5, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 2 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 1, c2: 5, r1: 2, r2: 5,
+        });
+
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render
