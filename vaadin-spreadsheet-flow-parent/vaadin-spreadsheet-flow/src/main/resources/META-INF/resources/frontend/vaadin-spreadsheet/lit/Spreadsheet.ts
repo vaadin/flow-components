@@ -26,6 +26,7 @@ import {
 } from './algorithms/ViewportMath.js';
 import { toKey } from './algorithms/CellKeys.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
+import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -171,6 +172,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly cellGrid: SpreadsheetCellGrid;
 
     /**
+     * The column-header sub-element. Sibling of the cell-grid
+     * inside the scroll container; renders the column letters
+     * (A, B, ..., AA) above the cells. Hidden when
+     * {@link headerRowHeight} is 0 (the default until a host
+     * calls {@code setHeaderRowHeight}). Slice 143.
+     */
+    private readonly columnHeader: SpreadsheetColumnHeader;
+
+    /**
+     * Height of the column-header strip in pixels. {@code 0}
+     * (default) means no header strip is rendered. The host opts
+     * in by calling {@link setHeaderRowHeight}; matches Excel's
+     * 18-22px range. Slice 143.
+     */
+    private headerRowHeight = 0;
+
+    /**
      * The scroll surface — wraps the cell-grid and provides the
      * scrollbars + viewport bounds. The user scrolls THIS element;
      * the connector listens for {@code scroll} events and recomputes
@@ -195,10 +213,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     constructor(host: HTMLElement) {
         this.host = host;
         this.cellGrid = new SpreadsheetCellGrid();
+        this.columnHeader = new SpreadsheetColumnHeader();
         this.scrollContainer = document.createElement('div');
         this.scrollContainer.className = 'sheet-scroll';
         this.scrollContainer.style.cssText =
             'position:relative;overflow:auto;width:100%;height:100%;';
+        // Column-header strip first so it sits above the cell-grid
+        // in document flow; position:sticky keeps it pinned to the
+        // top of the scroll container during vertical scroll.
+        this.scrollContainer.appendChild(this.columnHeader);
         this.scrollContainer.appendChild(this.cellGrid);
         this.host.appendChild(this.scrollContainer);
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
@@ -292,6 +315,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellGrid.style.width = `${state.totalGridWidthPx}px`;
         this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
         this.cellGrid.renderState = state;
+        // Column-header strip (slice 143). Sized + state-pushed only
+        // when headerRowHeight > 0 so the default opt-out path stays
+        // a no-op — important to avoid feedback loops with the
+        // ResizeObserver under wtr parallel.
+        if (this.headerRowHeight > 0) {
+            this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
+            this.columnHeader.style.height = `${this.headerRowHeight}px`;
+            this.columnHeader.renderState = {
+                viewport: state.viewport,
+                colX: state.colX,
+                colWidths: state.colWidths,
+                headerHeight: this.headerRowHeight,
+                totalGridWidthPx: state.totalGridWidthPx,
+            };
+        }
     }
 
     /**
@@ -440,6 +478,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /** Test-only accessor: the cell-grid sub-element this connector owns. */
     getCellGrid(): SpreadsheetCellGrid {
         return this.cellGrid;
+    }
+
+    /** Test-only accessor: the column-header sub-element (slice 143). */
+    getColumnHeader(): SpreadsheetColumnHeader {
+        return this.columnHeader;
+    }
+
+    /**
+     * Set the column-header strip's height in pixels. {@code 0}
+     * (default) means no header is rendered — useful for headless
+     * use cases and as a clean default. Excel's typical header is
+     * 18-22 px. Slice 143.
+     */
+    setHeaderRowHeight(pixels: number): void {
+        this.headerRowHeight = pixels;
+    }
+
+    /** Current column-header strip height in pixels. Slice 143. */
+    getHeaderRowHeight(): number {
+        return this.headerRowHeight;
     }
 
     // ====================================================================

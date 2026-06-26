@@ -280,18 +280,25 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid to the host element (via the scroll container)', () => {
+    it('appends the cell-grid + column-header to the host element (via the scroll container)', () => {
         // Slice 140: a scroll container now wraps the cell-grid so the
         // host's scrollbar tracks reflect the full virtual-grid extent.
-        // The cell-grid is the scroll container's sole child.
+        // Slice 143: a column-header sub-element sits in the scroll
+        // container above the cell-grid (header strip; rendered only
+        // when headerRowHeight > 0).
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
         expect(host.children).to.have.length(1);
-        expect(host.firstElementChild).to.equal(sheet.getScrollContainer());
-        expect(sheet.getScrollContainer().firstElementChild).to.equal(
-            sheet.getCellGrid()
-        );
+        expect(host.firstElementChild === sheet.getScrollContainer()).to.be.true;
+        const scroller = sheet.getScrollContainer();
+        // Column-header first so it sits above the cell-grid in flow,
+        // cell-grid second. (Identity checks via `===` to avoid chai
+        // serializing the LitElement for diff output — its render-
+        // pipeline state contains cycles.)
+        expect(scroller.children).to.have.length(2);
+        expect(scroller.children[0] === sheet.getColumnHeader()).to.be.true;
+        expect(scroller.children[1] === sheet.getCellGrid()).to.be.true;
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -520,20 +527,32 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         return {
             host,
             sheet,
-            cleanup: () => host.remove(),
+            // Dispose the sheet on cleanup so the ResizeObserver
+            // (slice 142) + scroll listener (slice 140) don't leak
+            // across tests. Without this, many test files in the
+            // same wtr session accumulate dangling observers and
+            // exceed the test-finish timeout.
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
         };
     }
 
-    it('wraps the cell-grid in a scroll container with overflow:auto', () => {
+    it('wraps the cell-grid + column-header in a scroll container with overflow:auto', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
 
         const scroller = sheet.getScrollContainer();
         expect(scroller).to.be.instanceOf(HTMLElement);
         expect(scroller.className).to.equal('sheet-scroll');
         expect(scroller.style.overflow).to.equal('auto');
-        // The cell-grid is the scroll container's only child.
-        expect(scroller.children).to.have.length(1);
-        expect(scroller.firstElementChild).to.equal(sheet.getCellGrid());
+        // Two children: column-header (slice 143) + cell-grid.
+        // Identity checks via `===` to avoid chai serializing the
+        // LitElement for diff output (cycles in renderState).
+        expect(scroller.children).to.have.length(2);
+        const kids = Array.from(scroller.children);
+        expect(kids.includes(sheet.getCellGrid())).to.be.true;
+        expect(kids.includes(sheet.getColumnHeader())).to.be.true;
 
         cleanup();
     });
@@ -823,6 +842,37 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(after).to.equal(before);
 
         host.remove();
+    });
+
+    it('setHeaderRowHeight + applyRenderState push header state to the column-header sub-element (slice 143)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(3);
+        sheet.setColW([50, 60, 40]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Default: no header.
+        expect(sheet.getHeaderRowHeight()).to.equal(0);
+
+        sheet.setHeaderRowHeight(24);
+        expect(sheet.getHeaderRowHeight()).to.equal(24);
+
+        sheet.recomputeViewport();
+
+        const headerState = sheet.getColumnHeader().renderState;
+        expect(headerState.headerHeight).to.equal(24);
+        // Use plain-array comparison, not chai .deep.equal, to avoid
+        // chai walking into the LitElement's cyclic renderState on
+        // assertion failure.
+        expect(Array.from(headerState.colWidths)).to.deep.equal([50, 60, 40]);
+        expect(headerState.colX[0]).to.equal(0);
+        // Total grid width matches the cell-grid's total: 50+60+40=150.
+        expect(headerState.totalGridWidthPx).to.equal(150);
+
+        // The column header's inline height matches.
+        expect(sheet.getColumnHeader().style.height).to.equal('24px');
+
+        cleanup();
     });
 
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
