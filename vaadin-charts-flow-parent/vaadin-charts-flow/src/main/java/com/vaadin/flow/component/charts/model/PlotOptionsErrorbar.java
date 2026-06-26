@@ -19,6 +19,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * Error bars are a graphical representation of the variability of data and are
  * used on graphs to indicate the error, or uncertainty in a reported
  * measurement.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
@@ -132,6 +134,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
     /**
      * @see #setClip(Boolean)
      * @return
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -142,6 +145,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -149,6 +154,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -161,6 +167,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * individually.
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -204,6 +212,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -216,6 +225,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * approximation for data grouping is set to <code>`sum'</code>.
      * <p>
      * Defaults to <code>high</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -223,6 +234,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -237,6 +249,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -248,6 +262,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -262,6 +277,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -345,6 +361,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setEdgeColor(Color)
+     * @since 18.0
      */
     public Color getEdgeColor() {
         return edgeColor;
@@ -354,6 +371,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * 3D columns only. The color of the edges. Similar to
      * <code>borderColor</code>, except it defaults to the same color as the
      * column.
+     * 
+     * @since 18.0
      */
     public void setEdgeColor(Color edgeColor) {
         this.edgeColor = edgeColor;
@@ -525,6 +544,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -538,6 +558,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * <code>null</code>, the lineWidth also applies to these lines.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -580,6 +602,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -590,6 +613,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -597,6 +622,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -605,6 +631,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -840,6 +868,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setStemDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getStemDashStyle() {
         return stemDashStyle;
@@ -850,6 +879,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * the whiskers.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setStemDashStyle(DashStyle stemDashStyle) {
         this.stemDashStyle = stemDashStyle;
@@ -857,6 +888,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 
     /**
      * @see #setStemWidth(Number)
+     * @since 18.0
      */
     public Number getStemWidth() {
         return stemWidth;
@@ -868,6 +900,8 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
      * <a href="#plotOptions.boxplot.lineWidth">lineWidth</a> option.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setStemWidth(Number stemWidth) {
         this.stemWidth = stemWidth;

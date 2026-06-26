@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Progress indicator, how much of the task completed
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class Completed extends AbstractConfigurationObject {

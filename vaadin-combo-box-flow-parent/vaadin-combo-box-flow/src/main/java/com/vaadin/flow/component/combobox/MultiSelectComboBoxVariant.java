@@ -20,6 +20,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 /**
  * Set of theme variants applicable for {@code vaadin-multi-select-combo-box}
  * component.
+ * 
+ * @since 23.2
  */
 public enum MultiSelectComboBoxVariant implements ThemeVariant {
     LUMO_SMALL("small"),

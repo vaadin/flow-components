@@ -28,6 +28,7 @@ import com.vaadin.flow.signals.Signal;
  * the application's theme.
  *
  * @author Vaadin Ltd
+ * @since 24.2
  */
 public class FontIcon extends AbstractIcon<FontIcon> {
 

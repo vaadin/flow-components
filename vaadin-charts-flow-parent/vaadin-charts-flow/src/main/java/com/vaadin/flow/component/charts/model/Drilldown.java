@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * Options for drill down, the concept of inspecting increasingly high
  * resolution data through clicking on chart items like columns or pie slices.
+ * 
+ * @since 6.0.1
  */
 public class Drilldown extends AbstractConfigurationObject {
 
@@ -63,6 +65,7 @@ public class Drilldown extends AbstractConfigurationObject {
     /**
      * @see #setActiveAxisLabelStyle(Style)
      * @return
+     * @since 18.0
      */
     public Style getActiveAxisLabelStyle() {
         return activeAxisLabelStyle;
@@ -73,6 +76,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * drilldown data.
      *
      * @param activeAxisLabelStyle
+     * @since 18.0
      */
     public void setActiveAxisLabelStyle(Style activeAxisLabelStyle) {
         this.activeAxisLabelStyle = activeAxisLabelStyle;
@@ -81,6 +85,7 @@ public class Drilldown extends AbstractConfigurationObject {
     /**
      * @see #setActiveDataLabelStyle(Style)
      * @return
+     * @since 18.0
      */
     public Style getActiveDataLabelStyle() {
         return activeDataLabelStyle;
@@ -91,6 +96,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * drilldown data.
      *
      * @param activeDataLabelStyle
+     * @since 18.0
      */
     public void setActiveDataLabelStyle(Style activeDataLabelStyle) {
         this.activeDataLabelStyle = activeDataLabelStyle;
@@ -119,6 +125,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * Returns the breadcrumbs navigation options for drilldown levels.
      *
      * @return Breadcrumbs navigation options
+     * @since 25.0
      */
     public Breadcrumbs getBreadcrumbs() {
         if (breadcrumbs == null) {
@@ -133,6 +140,7 @@ public class Drilldown extends AbstractConfigurationObject {
      *
      * @param breadcrumbs
      *            the Breadcrumbs configuration
+     * @since 25.0
      */
     public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
         this.breadcrumbs = breadcrumbs;

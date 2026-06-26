@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Options for zooming configuration. This enables zooming in on plots and
  * provides options for controlling zoom behavior including mouse wheel support.
+ * 
+ * @since 25.0
  */
 public class Zooming extends AbstractConfigurationObject {
 

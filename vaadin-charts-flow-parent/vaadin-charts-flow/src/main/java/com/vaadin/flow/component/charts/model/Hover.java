@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the hovered series
+ * 
+ * @since 6.0.1
  */
 public class Hover extends AbstractConfigurationObject {
 
@@ -103,6 +105,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -112,6 +115,8 @@ public class Hover extends AbstractConfigurationObject {
      * Pixel with of the graph line.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -119,6 +124,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setLineWidthPlus(Number)
+     * @since 18.0
      */
     public Number getLineWidthPlus() {
         return lineWidthPlus;
@@ -128,6 +134,8 @@ public class Hover extends AbstractConfigurationObject {
      * The additional line width for the graph of a hovered series.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidthPlus(Number lineWidthPlus) {
         this.lineWidthPlus = lineWidthPlus;
@@ -135,6 +143,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -142,6 +151,8 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * The fill color of the marker in hover state.
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
@@ -149,6 +160,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -159,6 +171,8 @@ public class Hover extends AbstractConfigurationObject {
      * series' or point's color is used.
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -199,6 +213,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -207,6 +222,8 @@ public class Hover extends AbstractConfigurationObject {
     /**
      * A specific border color for the hovered point. Defaults to inherit the
      * normal state border color.
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -214,6 +231,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setBrightness(Number)
+     * @since 18.0
      */
     public Number getBrightness() {
         return brightness;
@@ -233,6 +251,8 @@ public class Hover extends AbstractConfigurationObject {
      * </p>
      * <p>
      * Defaults to: 0.1
+     * 
+     * @since 18.0
      */
     public void setBrightness(Number brightness) {
         this.brightness = brightness;
@@ -240,6 +260,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -249,6 +270,8 @@ public class Hover extends AbstractConfigurationObject {
      * A specific color for the hovered point.
      * <p>
      * Defaults to: undefined
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -256,6 +279,7 @@ public class Hover extends AbstractConfigurationObject {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -266,6 +290,8 @@ public class Hover extends AbstractConfigurationObject {
      * visibility of the children is determined by the opacity.
      * <p>
      * Defaults to: 0.75
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

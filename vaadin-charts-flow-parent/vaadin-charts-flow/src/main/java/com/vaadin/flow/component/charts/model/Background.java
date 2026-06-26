@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <p>
  * <b>These configuration options apply only to polar and angular gauges trough
  * the Pane-configuration object.</b>
+ * 
+ * @since 6.0.1
  */
 public class Background extends AbstractConfigurationObject {
     private Color backgroundColor;
@@ -30,6 +32,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -39,6 +42,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the background color
      *
      * @param backgroundColor
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -46,6 +50,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -55,6 +60,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the border color
      *
      * @param borderColor
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -65,6 +71,7 @@ public class Background extends AbstractConfigurationObject {
      *
      * @see #setBorderRadius(String)
      * @return The border radius of the background.
+     * @since 25.0
      */
     public String getBorderRadius() {
         return borderRadius;
@@ -76,6 +83,7 @@ public class Background extends AbstractConfigurationObject {
      * string.
      *
      * @param borderRadius
+     * @since 25.0
      */
     public void setBorderRadius(String borderRadius) {
         this.borderRadius = borderRadius;
@@ -83,6 +91,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -92,6 +101,7 @@ public class Background extends AbstractConfigurationObject {
      * Sets the width of the border
      *
      * @param borderWidth
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -102,6 +112,7 @@ public class Background extends AbstractConfigurationObject {
      *
      * @see #setClassName(String)
      * @return The class name of the background
+     * @since 18.0
      */
     public String getClassName() {
         return className;
@@ -112,6 +123,7 @@ public class Background extends AbstractConfigurationObject {
      *
      * @param className
      *            new class name of the background
+     * @since 18.0
      */
     public void setClassName(String className) {
         this.className = className;

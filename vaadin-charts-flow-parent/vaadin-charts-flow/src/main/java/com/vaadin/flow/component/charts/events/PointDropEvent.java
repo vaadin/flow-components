@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  * Fired when the point is dropped.
+ * 
+ * @since 24.7
  */
 @DomEvent("point-drop")
 public class PointDropEvent extends ComponentEvent<Chart> implements HasItem {

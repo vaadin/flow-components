@@ -19,6 +19,7 @@ package com.vaadin.flow.component.upload;
  * SucceededEvent event is sent when the upload is received successfully.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class SucceededEvent extends FinishedEvent {
 

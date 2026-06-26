@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Abstract base class for series
+ * 
+ * @since 6.0.1
  */
 public abstract class AbstractSeries extends AbstractConfigurationObject
         implements Series {
@@ -214,6 +216,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * @see #setColorAxis(Integer)
      * @return The index of the color-axis that this data series is bound to.
      *         Returns null if undefined.
+     * @since 18.0
      */
     public Integer getColorAxis() {
         return colorAxis;
@@ -227,6 +230,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      *
      * @param colorAxis
      *            The index of the color-axis to bind this data series to.
+     * @since 18.0
      */
     public void setColorAxis(Integer colorAxis) {
         this.colorAxis = colorAxis;

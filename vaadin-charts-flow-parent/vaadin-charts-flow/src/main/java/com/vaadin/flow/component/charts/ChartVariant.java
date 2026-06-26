@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts;
 
 /**
  * Set of theme variants applicable for {@code vaadin-chart} component.
+ * 
+ * @since 23.1
  */
 public enum ChartVariant {
     LUMO_GRADIENT("gradient"),

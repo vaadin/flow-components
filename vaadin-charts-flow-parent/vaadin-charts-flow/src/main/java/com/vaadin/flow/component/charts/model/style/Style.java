@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Style options for CSS styling
+ * 
+ * @since 18.0
  */
 @SuppressWarnings("serial")
 public class Style extends AbstractConfigurationObject {

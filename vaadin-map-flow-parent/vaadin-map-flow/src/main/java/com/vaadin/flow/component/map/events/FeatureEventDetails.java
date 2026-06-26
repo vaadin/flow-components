@@ -16,6 +16,8 @@ import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
 /**
  * Stores information about a {@link Feature} that is part of an event
+ * 
+ * @since 23.0
  */
 public class FeatureEventDetails implements Serializable {
     private final Feature feature;

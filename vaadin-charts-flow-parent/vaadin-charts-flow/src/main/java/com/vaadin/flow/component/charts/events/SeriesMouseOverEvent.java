@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired when the mouse moves within the neighborhood of a series
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-mouse-over")
 public class SeriesMouseOverEvent extends ComponentEvent<Chart>

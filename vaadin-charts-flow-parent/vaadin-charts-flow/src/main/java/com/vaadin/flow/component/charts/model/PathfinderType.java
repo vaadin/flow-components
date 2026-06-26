@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Pathfinder algorithm to use for chart that can connect two points (e.g.
  * series items).
+ * 
+ * @since 24.7
  */
 public enum PathfinderType implements ChartEnum {
 

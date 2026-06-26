@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * DataSeriesItem that can hold also "from", "to" and "weight". Used in sankey
  * series.
+ * 
+ * @since 24.3
  */
 public class DataSeriesItemSankey extends DataSeriesItem {
 

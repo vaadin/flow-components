@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Animation of Gantt series connector
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class SeriesConnectorAnimation extends AbstractConfigurationObject {

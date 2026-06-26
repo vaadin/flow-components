@@ -19,6 +19,8 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
  * Command to insert or delete a row
+ * 
+ * @since 23.1
  */
 public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
 

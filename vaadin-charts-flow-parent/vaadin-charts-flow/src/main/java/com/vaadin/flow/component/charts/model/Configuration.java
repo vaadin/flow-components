@@ -32,6 +32,8 @@ import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
 /**
  * Chart's configuration root object containing all the child objects that are
  * used to configure chart, axes, legend, titles etc.
+ * 
+ * @since 6.0.1
  */
 public class Configuration extends AbstractConfigurationObject
         implements ChartConfiguration {
@@ -68,6 +70,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * @see #setAccessibility(Accessibility)
+     * @since 7.0
      */
     public Accessibility getAccessibility() {
         if (accessibility == null) {
@@ -80,6 +83,7 @@ public class Configuration extends AbstractConfigurationObject
      * Sets options for configuring accessibility for the chart.
      *
      * @param accessibility
+     * @since 7.0
      */
     public void setAccessibility(Accessibility accessibility) {
         this.accessibility = accessibility;
@@ -809,6 +813,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * @see #setTime(Time)
+     * @since 18.0
      */
     public Time getTime() {
         if (time == null) {
@@ -821,6 +826,7 @@ public class Configuration extends AbstractConfigurationObject
      * Set configuration for time options
      *
      * @param time
+     * @since 18.0
      */
     public void setTime(Time time) {
         this.time = time;
@@ -1161,6 +1167,7 @@ public class Configuration extends AbstractConfigurationObject
      *
      * @param labels
      *            The labels to set
+     * @since 24.0
      */
     public void setLabels(AnnotationItemLabel... labels) {
         getLabelsAnnotation().setLabels(labels);
@@ -1172,6 +1179,7 @@ public class Configuration extends AbstractConfigurationObject
      * @param label
      *            The label to add
      * @see #setLabels(AnnotationItemLabel...)
+     * @since 24.0
      */
     public void addLabel(AnnotationItemLabel label) {
         getLabels().add(label);
@@ -1186,6 +1194,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * @see #setConnectors(ChartConnectors)
+     * @since 24.7
      */
     public ChartConnectors getConnectors() {
         return connectors;
@@ -1203,6 +1212,7 @@ public class Configuration extends AbstractConfigurationObject
      * dependency (see {@link GanttSeriesItemDependency}).
      *
      * @param connectors
+     * @since 24.7
      */
     public void setConnectors(ChartConnectors connectors) {
         this.connectors = connectors;

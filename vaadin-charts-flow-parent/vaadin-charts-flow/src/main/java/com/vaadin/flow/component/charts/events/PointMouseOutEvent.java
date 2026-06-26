@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired when the mouse exits the neighborhood of a point
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-mouse-out")
 public class PointMouseOutEvent extends ComponentEvent<Chart>

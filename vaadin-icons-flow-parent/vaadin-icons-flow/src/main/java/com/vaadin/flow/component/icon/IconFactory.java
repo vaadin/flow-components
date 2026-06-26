@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * Factory for icons.
+ * 
+ * @since 2.0
  */
 @FunctionalInterface
 public interface IconFactory extends Serializable {

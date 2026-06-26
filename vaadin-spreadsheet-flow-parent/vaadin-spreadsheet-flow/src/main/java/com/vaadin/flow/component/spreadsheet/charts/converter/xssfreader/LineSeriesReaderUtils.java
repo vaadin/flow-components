@@ -18,6 +18,9 @@ import org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal;
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.LineSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class LineSeriesReaderUtils {
     public static void setDashStyleForData(LineSeriesData seriesData,
             CTShapeProperties ctShapeProperties) {

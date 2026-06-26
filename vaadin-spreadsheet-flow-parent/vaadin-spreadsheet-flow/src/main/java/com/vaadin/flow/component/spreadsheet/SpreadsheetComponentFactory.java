@@ -47,6 +47,7 @@ import com.vaadin.flow.component.Component;
  * WARN level. A failing cell will not prevent other cells from loading.
  *
  * @author Vaadin Ltd.
+ * @since 24.0
  */
 public interface SpreadsheetComponentFactory extends Serializable {
 

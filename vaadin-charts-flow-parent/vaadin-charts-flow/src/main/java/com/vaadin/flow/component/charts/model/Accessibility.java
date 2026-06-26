@@ -17,6 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * "http://www.highcharts.com/docs/chart-concepts/accessibility">Highcharts
  * Accessibility</a>.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Accessibility extends AbstractConfigurationObject {
 

@@ -27,6 +27,7 @@ import com.vaadin.flow.data.provider.DataProvider;
  *
  * @see SelectionPreservationHandler
  * @author Vaadin Ltd.
+ * @since 24.4
  */
 public enum SelectionPreservationMode {
 

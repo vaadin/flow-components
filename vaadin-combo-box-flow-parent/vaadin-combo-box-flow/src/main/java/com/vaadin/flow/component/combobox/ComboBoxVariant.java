@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-combo-box} component.
+ * 
+ * @since 22.0
  */
 public enum ComboBoxVariant implements ThemeVariant {
     LUMO_SMALL("small"),

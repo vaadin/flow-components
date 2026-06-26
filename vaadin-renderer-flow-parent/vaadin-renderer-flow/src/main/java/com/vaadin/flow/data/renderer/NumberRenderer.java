@@ -29,6 +29,7 @@ import com.vaadin.flow.function.ValueProvider;
  * @param <SOURCE>
  *            the type of the input item, from which the number is extracted
  *
+ * @since 22.0
  */
 public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
 

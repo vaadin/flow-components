@@ -24,6 +24,7 @@ package com.vaadin.flow.component.icon;
  *
  * @author Vaadin Ltd
  *
+ * @since 1.0
  */
 public enum VaadinIcon implements IconFactory {
 

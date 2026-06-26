@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * retrieving new data via an XHR connection. The "Loading..." text itself is
  * not part of this configuration object, but part of the <code>lang</code>
  * object.
+ * 
+ * @since 6.0.1
  */
 public class Loading extends AbstractConfigurationObject {
 
@@ -47,6 +49,7 @@ public class Loading extends AbstractConfigurationObject {
 
     /**
      * @see #setLabelStyle(Style)
+     * @since 18.0
      */
     public Style getLabelStyle() {
         if (labelStyle == null) {
@@ -60,6 +63,8 @@ public class Loading extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "fontWeight": "bold", "position": "relative", "top": "45%"
      * }
+     * 
+     * @since 18.0
      */
     public void setLabelStyle(Style labelStyle) {
         this.labelStyle = labelStyle;
@@ -83,6 +88,7 @@ public class Loading extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -96,6 +102,8 @@ public class Loading extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "position": "absolute", "backgroundColor": "#ffffff",
      * "opacity": 0.5, "textAlign": "center" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

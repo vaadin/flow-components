@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasValidation;
  * state and error message string to show when invalid.
  *
  * @author Vaadin Ltd
+ * @since 24.0
  */
 public interface HasValidationProperties extends HasElement, HasValidation {
 

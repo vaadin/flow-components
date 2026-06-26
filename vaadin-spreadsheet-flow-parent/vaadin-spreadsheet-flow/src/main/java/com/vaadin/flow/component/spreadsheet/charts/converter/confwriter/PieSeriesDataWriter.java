@@ -15,6 +15,9 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.PieSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class PieSeriesDataWriter extends AbstractSeriesDataWriter {
 
     public PieSeriesDataWriter(PieSeriesData series) {

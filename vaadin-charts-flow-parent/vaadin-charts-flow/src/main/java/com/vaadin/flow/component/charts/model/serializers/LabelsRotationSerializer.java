@@ -18,6 +18,8 @@ import tools.jackson.databind.ValueSerializer;
  * Serializer for {@link Labels#getRotation()}. Attempts to serialize the
  * rotation value as a number, otherwise falls back to writing it as a string to
  * support values like "auto".
+ * 
+ * @since 24.7.7
  */
 public class LabelsRotationSerializer extends ValueSerializer<String> {
     @Override

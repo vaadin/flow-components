@@ -22,6 +22,7 @@ package com.vaadin.flow.component.upload;
  * Informs the upload component that multi file upload is supported.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @FunctionalInterface
 public interface MultiFileReceiver extends Receiver {

@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * verticalAlign, x and y. Defaults to
  *
  * position: { align: 'right', x: -10, verticalAlign: 'bottom', y: -5 }
+ * 
+ * @since 6.0.1
  */
 public class Position extends AbstractConfigurationObject {
     private VerticalAlign verticalAlign;

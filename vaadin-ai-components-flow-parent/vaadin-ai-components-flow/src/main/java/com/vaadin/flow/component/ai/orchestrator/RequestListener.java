@@ -33,6 +33,8 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  * <b>Threading:</b> the listener is called on the UI thread under the session
  * lock. Long-running work should be offloaded to a worker; UI updates do not
  * need an extra {@code ui.access(...)} hop.
+ * 
+ * @since 25.2
  */
 @FunctionalInterface
 public interface RequestListener extends Serializable {

@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasElement;
  * control whether the overlay should open on input click or not.
  *
  * @author Vaadin Ltd
+ * @since 24.0
  */
 public interface HasAutoOpen extends HasElement {
 

@@ -20,6 +20,7 @@ import com.vaadin.flow.data.binder.ValidationException;
  * @param <E>
  *            the bean type
  * @see Binder
+ * @since 1.0
  */
 public class BinderCrudEditor<E> implements CrudEditor<E> {
 

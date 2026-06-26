@@ -15,6 +15,9 @@ import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public class PlotOptionsBar extends ColumnOptions {
 
     private Boolean allowPointSelect;
@@ -137,6 +140,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -155,6 +159,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * </p>
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -178,6 +184,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -196,6 +203,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -203,6 +212,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -213,6 +223,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -234,6 +246,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -258,6 +271,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -283,6 +298,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -295,6 +311,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -320,6 +338,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -334,6 +353,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -345,6 +366,7 @@ public class PlotOptionsBar extends ColumnOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -359,6 +381,7 @@ public class PlotOptionsBar extends ColumnOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -479,6 +502,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setEdgeColor(Color)
+     * @since 18.0
      */
     public Color getEdgeColor() {
         return edgeColor;
@@ -488,6 +512,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * 3D columns only. The color of the edges. Similar to
      * <code>borderColor</code>, except it defaults to the same color as the
      * column.
+     * 
+     * @since 18.0
      */
     public void setEdgeColor(Color edgeColor) {
         this.edgeColor = edgeColor;
@@ -710,6 +736,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -719,6 +746,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -763,6 +792,7 @@ public class PlotOptionsBar extends ColumnOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -773,6 +803,8 @@ public class PlotOptionsBar extends ColumnOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;

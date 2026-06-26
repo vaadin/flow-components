@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired after a chart series is animated
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-after-animate")
 public class SeriesAfterAnimateEvent extends ComponentEvent<Chart>

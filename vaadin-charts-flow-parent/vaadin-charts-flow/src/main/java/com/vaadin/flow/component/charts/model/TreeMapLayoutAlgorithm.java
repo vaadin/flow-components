@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * The layout algorithm used by {@link ChartType#TREEMAP} charts.
+ * 
+ * @since 6.0.1
  */
 public enum TreeMapLayoutAlgorithm implements ChartEnum {
 

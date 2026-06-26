@@ -17,6 +17,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
  * Source for loading tile data from WMS (Web Map Service) servers
  * <p>
  * See https://www.ogc.org/standards/wms
+ * 
+ * @since 23.0
  */
 public class TileWMSSource extends TileImageSource {
 

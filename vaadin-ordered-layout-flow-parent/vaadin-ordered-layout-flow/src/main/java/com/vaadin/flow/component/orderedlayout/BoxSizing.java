@@ -24,6 +24,7 @@ package com.vaadin.flow.component.orderedlayout;
  *      "https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing">MDN page
  *      about box-sizing</a>
  *
+ * @since 1.0
  */
 public enum BoxSizing {
 

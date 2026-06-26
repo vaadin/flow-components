@@ -11,6 +11,9 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.AbstractSeriesDataWriter;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.PieSeriesDataWriter;
 
+/**
+ * @since 24.0
+ */
 public class PieSeriesData extends AbstractSeriesData {
 
     public boolean isExploded;

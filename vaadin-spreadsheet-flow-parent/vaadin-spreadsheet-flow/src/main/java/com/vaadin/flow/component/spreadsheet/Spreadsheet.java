@@ -116,6 +116,7 @@ import tools.jackson.databind.JsonNode;
  * web browsers.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
@@ -1247,6 +1248,7 @@ public class Spreadsheet extends Component
      * the default / previously set spreadsheet handler.
      *
      * @param spreadsheetHandler
+     * @since 24.9.2
      */
     public void setSpreadsheetHandler(
             SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1261,6 +1263,7 @@ public class Spreadsheet extends Component
      * Create the default Spreadsheet handler.
      *
      * @return SpreadsheetHandlerImpl
+     * @since 24.9.2
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {
         return new SpreadsheetHandlerImpl(this);
@@ -1528,6 +1531,7 @@ public class Spreadsheet extends Component
      *
      * @see #setChartsEnabled(boolean)
      * @return
+     * @since 24.0
      */
     public boolean isChartsEnabled() {
         return chartsEnabled;
@@ -1538,6 +1542,7 @@ public class Spreadsheet extends Component
      * the spreadsheet or not.
      *
      * @param chartsEnabled
+     * @since 24.0
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
@@ -1564,6 +1569,7 @@ public class Spreadsheet extends Component
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
+     * @since 24.8
      */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
         getElement().setProperty("showCustomEditorOnFocus",
@@ -1575,6 +1581,7 @@ public class Spreadsheet extends Component
      *
      * @return a boolean indicating whether the custom editor is visible on
      *         focus (true) or not (false)
+     * @since 24.8
      */
     public boolean isShowCustomEditorOnFocus() {
         return getElement().getProperty("showCustomEditorOnFocus", false);
@@ -3928,6 +3935,7 @@ public class Spreadsheet extends Component
      * @param cellAddress
      *            The address of the cell to check
      * @return true if the cell is locked, false otherwise
+     * @since 24.8.8
      */
     public boolean isCellLocked(CellAddress cellAddress) {
         // Locking cells only works if the sheet is protected
@@ -4926,6 +4934,7 @@ public class Spreadsheet extends Component
      *
      * @param customComponentFactory
      *            The new component factory to use.
+     * @since 24.0
      */
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
@@ -6270,6 +6279,7 @@ public class Spreadsheet extends Component
      *
      * @param theme
      *            SpreadsheetTheme
+     * @since 24.5
      */
     public void setTheme(SpreadsheetTheme theme) {
         getElement().setAttribute("theme", theme.getThemeName());
@@ -6277,6 +6287,8 @@ public class Spreadsheet extends Component
 
     /**
      * Themes for the Spreadsheet.
+     * 
+     * @since 24.5
      */
     public enum SpreadsheetTheme {
         LUMO("lumo"), VALO("");

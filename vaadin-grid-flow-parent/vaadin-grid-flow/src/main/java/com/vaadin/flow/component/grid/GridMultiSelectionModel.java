@@ -31,6 +31,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of items in grid
+ * @since 1.0
  */
 public interface GridMultiSelectionModel<T>
         extends GridSelectionModel<T>, SelectionModel.Multi<Grid<T>, T> {
@@ -104,6 +105,7 @@ public interface GridMultiSelectionModel<T>
      * @param listener
      *            the client item toggle listener, not {@code null}
      * @return a registration for the listener
+     * @since 24.7
      */
     Registration addClientItemToggleListener(
             ComponentEventListener<ClientItemToggleEvent<T>> listener);
@@ -177,6 +179,7 @@ public interface GridMultiSelectionModel<T>
      * @param dragSelect
      *            <code>true</code> to enable drag select feature,
      *            <code>false</code> for disabling it
+     * @since 24.2
      */
     void setDragSelect(boolean dragSelect);
 
@@ -185,6 +188,7 @@ public interface GridMultiSelectionModel<T>
      *
      * @return <code>true</code> if drag select feature is enabled,
      *         <code>false</code> otherwise
+     * @since 24.2
      */
     boolean isDragSelect();
 }

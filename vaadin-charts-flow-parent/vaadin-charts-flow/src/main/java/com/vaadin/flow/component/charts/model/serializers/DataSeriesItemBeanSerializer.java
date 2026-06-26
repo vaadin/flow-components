@@ -19,6 +19,7 @@ import tools.jackson.databind.node.ArrayNode;
 /**
  * Custom bean serializer for {@link DataSeriesItem}
  *
+ * @since 6.0.1
  */
 public class DataSeriesItemBeanSerializer
         extends BeanSerializationDelegate<DataSeriesItem> {

@@ -21,6 +21,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializes all {@link java.time.Instant} objects as UTC long.
  *
+ * @since 6.0.1
  */
 public class InstantSerializer extends ValueSerializer<Instant> {
 

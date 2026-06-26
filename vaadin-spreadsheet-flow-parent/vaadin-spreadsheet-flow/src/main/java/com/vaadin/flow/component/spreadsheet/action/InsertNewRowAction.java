@@ -18,7 +18,7 @@ import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
  * Spreadsheet action for inserting a new row to the sheet.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class InsertNewRowAction extends SpreadsheetAction {

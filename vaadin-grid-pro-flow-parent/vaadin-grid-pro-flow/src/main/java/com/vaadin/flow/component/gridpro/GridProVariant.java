@@ -10,6 +10,8 @@ package com.vaadin.flow.component.gridpro;
 
 /**
  * Set of theme variants applicable for {@code vaadin-grid-pro} component.
+ * 
+ * @since 23.1
  */
 public enum GridProVariant {
     LUMO_NO_BORDER("no-border"),

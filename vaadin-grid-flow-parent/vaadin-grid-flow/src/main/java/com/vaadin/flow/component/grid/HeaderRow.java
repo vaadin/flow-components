@@ -30,6 +30,7 @@ import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
  * One row of {@link HeaderCell}s in a Grid.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class HeaderRow extends AbstractRow<HeaderCell> {
 

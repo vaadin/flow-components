@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Set options related with look and position of targets.
+ * 
+ * @since 18.0
  */
 public class TargetOptions extends AbstractConfigurationObject {
 

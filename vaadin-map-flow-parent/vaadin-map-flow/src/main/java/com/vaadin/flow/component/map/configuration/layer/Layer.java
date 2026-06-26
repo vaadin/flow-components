@@ -13,6 +13,8 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
  * Abstract base class for all map layers
+ * 
+ * @since 23.0
  */
 public abstract class Layer extends AbstractConfigurationObject {
     private double opacity = 1;
@@ -35,6 +37,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      *
      * @param opacity
      *            new opacity of the layer
+     * @since 24.0
      */
     public void setOpacity(double opacity) {
         this.opacity = opacity;
@@ -95,6 +98,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      *
      * @param minZoom
      *            the new minimum zoom level, or null to remove it
+     * @since 24.0
      */
     public void setMinZoom(Double minZoom) {
         this.minZoom = minZoom;
@@ -114,6 +118,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      *
      * @param maxZoom
      *            the new maximum zoom level, or null to remove it
+     * @since 24.0
      */
     public void setMaxZoom(Double maxZoom) {
         this.maxZoom = maxZoom;

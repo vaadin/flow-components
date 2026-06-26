@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * Defines the Axis on which the zones are applied.
  *
  * Defaults to y.
+ * 
+ * @since 6.0.1
  */
 public enum ZoneAxis implements ChartEnum {
 

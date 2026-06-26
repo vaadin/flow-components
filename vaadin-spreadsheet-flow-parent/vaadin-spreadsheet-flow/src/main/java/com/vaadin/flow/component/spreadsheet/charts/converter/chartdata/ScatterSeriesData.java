@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.ScatterSeriesDataWriter;
 
+/**
+ * @since 24.0
+ */
 public class ScatterSeriesData extends LineSeriesData {
 
     @Override

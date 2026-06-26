@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Link styling options for Organization charts.
+ * 
+ * @since 25.0
  */
 public class Link extends AbstractConfigurationObject {
     private Color color;

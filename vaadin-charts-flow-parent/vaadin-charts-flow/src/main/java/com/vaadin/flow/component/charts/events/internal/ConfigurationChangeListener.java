@@ -14,7 +14,7 @@ import java.io.Serializable;
  * Listener interface for events triggered in Configuration. E.g. in DataSeries,
  * events like data add/remove/update.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public interface ConfigurationChangeListener extends Serializable {

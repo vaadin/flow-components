@@ -37,6 +37,7 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  * determined from the existing values.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class CellSelectionShifter implements Serializable {

@@ -17,6 +17,7 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  *
+ * @since 6.0.1
  */
 public class PlotOptionsOhlc extends OhlcOptions {
 
@@ -153,6 +154,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -163,6 +165,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -170,6 +174,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -194,6 +199,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -237,6 +244,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -249,6 +257,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>close</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -256,6 +266,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -270,6 +281,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -281,6 +294,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -295,6 +309,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -615,6 +630,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -624,6 +640,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * The pixel width of the line/border. Defaults to <code>1</code>.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -713,6 +731,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -722,6 +741,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -729,6 +750,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -739,6 +761,8 @@ public class PlotOptionsOhlc extends OhlcOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;

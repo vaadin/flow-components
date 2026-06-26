@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * A pyramid chart consists of a single pyramid with item heights corresponding
  * to each point value. Technically it is the same as a reversed funnel chart
  * without a neck.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsPyramid extends PyramidOptions {
 
@@ -105,6 +107,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -126,6 +129,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * </p>
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -133,6 +138,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -158,6 +164,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -189,6 +197,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -199,6 +208,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>false</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -224,6 +235,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -236,6 +248,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -243,6 +257,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -256,6 +271,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
     /**
      * A series specific or series type specific color set to use instead of the
      * global <a href="#colors">colors</a>.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -267,6 +284,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -281,6 +299,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -288,6 +307,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -302,6 +322,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -478,6 +500,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setIgnoreHiddenPoint(Boolean)
+     * @since 18.0
      */
     public Boolean getIgnoreHiddenPoint() {
         return ignoreHiddenPoint;
@@ -488,6 +511,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * point were null.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint) {
         this.ignoreHiddenPoint = ignoreHiddenPoint;
@@ -576,6 +601,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -585,6 +611,8 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

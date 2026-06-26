@@ -27,6 +27,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the grid bean type
+ * @since 1.0
  */
 public class GridNoneSelectionModel<T> implements GridSelectionModel<T> {
 

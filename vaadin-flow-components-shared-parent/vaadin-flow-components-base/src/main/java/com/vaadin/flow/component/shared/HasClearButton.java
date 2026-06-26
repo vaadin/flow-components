@@ -27,6 +27,7 @@ import com.vaadin.flow.signals.Signal;
  * Used to toggle the visibility of the clear button.
  *
  * @author Vaadin Ltd
+ * @since 23.1
  */
 public interface HasClearButton extends HasElement {
 

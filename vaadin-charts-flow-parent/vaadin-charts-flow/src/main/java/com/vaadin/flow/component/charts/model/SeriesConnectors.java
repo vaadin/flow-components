@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * A configuration object to override Pathfinder connector options for a series.
  * Requires Highcharts Gantt.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class SeriesConnectors extends ConnectorStyle {

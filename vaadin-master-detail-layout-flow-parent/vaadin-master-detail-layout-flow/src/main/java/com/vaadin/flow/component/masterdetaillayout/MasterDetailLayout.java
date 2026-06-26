@@ -45,6 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * on top of, the master area, depending on configuration and viewport size.
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 @Tag("vaadin-master-detail-layout")
 @NpmPackage(value = "@vaadin/master-detail-layout", version = "25.2.0")
@@ -68,6 +69,8 @@ public class MasterDetailLayout extends Component
 
     /**
      * Supported overlay containment values for {@link MasterDetailLayout}.
+     * 
+     * @since 25.2
      */
     public enum OverlayContainment {
         LAYOUT, PAGE
@@ -86,6 +89,7 @@ public class MasterDetailLayout extends Component
      *            the size of the master area in CSS length units
      * @param detailSize
      *            the size of the detail area in CSS length units
+     * @since 25.2
      */
     public MasterDetailLayout(String masterSize, String detailSize) {
         setMasterSize(masterSize);
@@ -103,6 +107,7 @@ public class MasterDetailLayout extends Component
      *            the size of the detail area
      * @param detailUnit
      *            the unit for the detail size
+     * @since 25.2
      */
     public MasterDetailLayout(float masterSize, Unit masterUnit,
             float detailSize, Unit detailUnit) {
@@ -163,6 +168,7 @@ public class MasterDetailLayout extends Component
      *
      * @return the component in the detail placeholder area, or {@code null} if
      *         there is no component in the detail placeholder area
+     * @since 25.2
      */
     public Component getDetailPlaceholder() {
         return SlotUtils.getElementsInSlot(this, DETAIL_PLACEHOLDER_SLOT)
@@ -178,6 +184,7 @@ public class MasterDetailLayout extends Component
      * @param component
      *            the component to display in the detail placeholder area, or
      *            {@code null} to clear the detail placeholder area
+     * @since 25.2
      */
     public void setDetailPlaceholder(Component component) {
         SlotUtils.clearSlot(this, DETAIL_PLACEHOLDER_SLOT);
@@ -275,6 +282,7 @@ public class MasterDetailLayout extends Component
      *            otherwise
      * @see #setMasterSize(String)
      * @see #setExpandMaster(boolean)
+     * @since 25.2
      */
     public void setMasterSize(String size, boolean expand) {
         setMasterSize(size);
@@ -294,6 +302,7 @@ public class MasterDetailLayout extends Component
      *            otherwise
      * @see #setMasterSize(float, Unit)
      * @see #setExpandMaster(boolean)
+     * @since 25.2
      */
     public void setMasterSize(float size, Unit unit, boolean expand) {
         setMasterSize(size, unit);
@@ -358,6 +367,7 @@ public class MasterDetailLayout extends Component
      *            otherwise
      * @see #setDetailSize(String)
      * @see #setExpandDetail(boolean)
+     * @since 25.2
      */
     public void setDetailSize(String size, boolean expand) {
         setDetailSize(size);
@@ -377,6 +387,7 @@ public class MasterDetailLayout extends Component
      *            otherwise
      * @see #setDetailSize(float, Unit)
      * @see #setExpandDetail(boolean)
+     * @since 25.2
      */
     public void setDetailSize(float size, Unit unit, boolean expand) {
         setDetailSize(size, unit);
@@ -393,6 +404,7 @@ public class MasterDetailLayout extends Component
      *            the overlay size in CSS length units
      * @see #setDetailSize(String)
      * @see #setOverlaySize(String)
+     * @since 25.2
      */
     public void setDetailSize(String size, String overlaySize) {
         setDetailSize(size);
@@ -413,6 +425,7 @@ public class MasterDetailLayout extends Component
      *            the unit for the overlay size
      * @see #setDetailSize(float, Unit)
      * @see #setOverlaySize(float, Unit)
+     * @since 25.2
      */
     public void setDetailSize(float size, Unit unit, float overlaySize,
             Unit overlayUnit) {
@@ -435,6 +448,7 @@ public class MasterDetailLayout extends Component
      * @see #setDetailSize(String)
      * @see #setExpandDetail(boolean)
      * @see #setOverlaySize(String)
+     * @since 25.2
      */
     public void setDetailSize(String size, boolean expand, String overlaySize) {
         setDetailSize(size);
@@ -461,6 +475,7 @@ public class MasterDetailLayout extends Component
      * @see #setDetailSize(float, Unit)
      * @see #setExpandDetail(boolean)
      * @see #setOverlaySize(float, Unit)
+     * @since 25.2
      */
     public void setDetailSize(float size, Unit unit, boolean expand,
             float overlaySize, Unit overlayUnit) {
@@ -502,6 +517,7 @@ public class MasterDetailLayout extends Component
      * {@link OverlayContainment#LAYOUT}.
      *
      * @return the overlay containment
+     * @since 25.2
      */
     public OverlayContainment getOverlayContainment() {
         String overlayContainment = getElement()
@@ -521,6 +537,7 @@ public class MasterDetailLayout extends Component
      *
      * @param overlayContainment
      *            the overlay containment
+     * @since 25.2
      */
     public void setOverlayContainment(OverlayContainment overlayContainment) {
         Objects.requireNonNull(overlayContainment,
@@ -534,6 +551,7 @@ public class MasterDetailLayout extends Component
      *
      * @return the overlay size in CSS length units, or {@code null} if the
      *         overlay size is not set
+     * @since 25.2
      */
     public String getOverlaySize() {
         return getElement().getProperty("overlaySize");
@@ -546,6 +564,7 @@ public class MasterDetailLayout extends Component
      *
      * @param size
      *            the overlay size in CSS length units
+     * @since 25.2
      */
     public void setOverlaySize(String size) {
         getElement().setProperty("overlaySize", size);
@@ -560,6 +579,7 @@ public class MasterDetailLayout extends Component
      *            the overlay size
      * @param unit
      *            the unit
+     * @since 25.2
      */
     public void setOverlaySize(float size, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -571,6 +591,7 @@ public class MasterDetailLayout extends Component
      * {@code false}.
      *
      * @return {@code true} if the master area expands, {@code false} otherwise
+     * @since 25.2
      */
     public boolean isExpandMaster() {
         return getElement().getProperty("expandMaster", false);
@@ -585,6 +606,7 @@ public class MasterDetailLayout extends Component
      * @param expandMaster
      *            {@code true} to expand the master area, {@code false}
      *            otherwise
+     * @since 25.2
      */
     public void setExpandMaster(boolean expandMaster) {
         getElement().setProperty("expandMaster", expandMaster);
@@ -595,6 +617,7 @@ public class MasterDetailLayout extends Component
      * {@code false}.
      *
      * @return {@code true} if the detail area expands, {@code false} otherwise
+     * @since 25.2
      */
     public boolean isExpandDetail() {
         return getElement().getProperty("expandDetail", false);
@@ -609,6 +632,7 @@ public class MasterDetailLayout extends Component
      * @param expandDetail
      *            {@code true} to expand the detail area, {@code false}
      *            otherwise
+     * @since 25.2
      */
     public void setExpandDetail(boolean expandDetail) {
         getElement().setProperty("expandDetail", expandDetail);

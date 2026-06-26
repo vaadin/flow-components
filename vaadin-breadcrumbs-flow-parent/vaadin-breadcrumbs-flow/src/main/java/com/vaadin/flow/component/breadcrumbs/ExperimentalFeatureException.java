@@ -21,6 +21,7 @@ package com.vaadin.flow.component.breadcrumbs;
  * first.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class ExperimentalFeatureException extends RuntimeException {
     /**

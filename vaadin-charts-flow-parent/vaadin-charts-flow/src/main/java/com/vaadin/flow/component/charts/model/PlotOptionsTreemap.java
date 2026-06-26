@@ -19,6 +19,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * functionality such as the
  * <a href="http://api.highcharts.com/highmaps#colorAxis">colorAxis</a> is to be
  * used.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsTreemap extends AbstractPlotOptions {
 
@@ -119,6 +121,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * {@see #setAllowTraversingTree(Boolean)}
+     * 
+     * @since 25.0
      */
     public Boolean getAllowTraversingTree() {
 
@@ -130,6 +134,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * on its children.
      * <p>
      * Defaults to: false
+     * 
+     * @since 25.0
      */
     public void setAllowTraversingTree(Boolean allowTraversingTree) {
         this.allowTraversingTree = allowTraversingTree;
@@ -191,6 +197,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -200,6 +207,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * The color of the border surrounding each tree map item.
      * <p>
      * Defaults to: #e6e6e6
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -207,6 +216,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -225,6 +235,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -232,6 +244,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * {@see #setBreadcrumbs(Breadcrumbs)}
+     * 
+     * @since 25.0
      */
     public Breadcrumbs getBreadcrumbs() {
         if (breadcrumbs == null) {
@@ -245,6 +259,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * through the traversed levels.
      *
      * @param breadcrumbs
+     * @since 25.0
      */
     public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
         this.breadcrumbs = breadcrumbs;
@@ -266,6 +281,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -278,6 +294,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * pulled from the <a href="#colors">options.colors</a> array.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -321,6 +339,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -335,6 +354,8 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -346,6 +367,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -360,6 +382,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);

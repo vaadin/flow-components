@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  * Data for the {@link GanttSeries}. Represents one task in the Gantt chart.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class GanttSeriesItem extends AbstractConfigurationObject {

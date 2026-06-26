@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-avatar-group} component.
+ * 
+ * @since 1.0
  */
 public enum AvatarGroupVariant implements ThemeVariant {
     LUMO_XLARGE("xlarge"),

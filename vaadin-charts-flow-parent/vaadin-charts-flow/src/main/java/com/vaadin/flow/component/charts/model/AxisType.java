@@ -18,6 +18,8 @@ import java.time.Instant;
  * LINEAR. CATEGORY is a convenience mode for where the point names of the first
  * series are used for categories - avoiding the need to call
  * {@link Axis#setCategories(String...)}.
+ * 
+ * @since 6.0.1
  */
 public enum AxisType implements ChartEnum {
     LINEAR("linear"),

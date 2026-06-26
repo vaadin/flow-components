@@ -24,6 +24,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * state, position and size.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SheetImageWrapper extends SheetOverlayWrapper
@@ -45,6 +46,7 @@ public class SheetImageWrapper extends SheetOverlayWrapper
      * Gets the resource containing this image
      *
      * @return Image resource
+     * @since 24.8
      */
     @Override
     public DownloadHandler getResourceHandler() {

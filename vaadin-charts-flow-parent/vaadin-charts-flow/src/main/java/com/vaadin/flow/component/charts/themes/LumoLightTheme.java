@@ -20,6 +20,8 @@ import com.vaadin.flow.component.charts.model.style.TickIntervalStyle;
 /**
  * The default theme for Vaadin Charts. Suitable for use with the Lumo theme for
  * Vaadin.
+ * 
+ * @since 18.0
  */
 @SuppressWarnings("serial")
 public class LumoLightTheme extends Theme {

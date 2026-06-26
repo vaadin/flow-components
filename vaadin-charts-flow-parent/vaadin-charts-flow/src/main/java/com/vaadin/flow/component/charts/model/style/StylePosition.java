@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.ChartEnum;
 
 /**
  * CSS position attribute, ABSOLUTE or RELATIVE
+ * 
+ * @since 6.0.1
  */
 public enum StylePosition implements ChartEnum {
     ABSOLUTE("absolute"), RELATIVE("relative");

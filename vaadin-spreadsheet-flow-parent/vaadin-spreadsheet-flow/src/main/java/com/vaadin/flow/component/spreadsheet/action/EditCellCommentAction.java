@@ -20,7 +20,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
  * Spreadsheet action for inserting or deleting a comment to a cell.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class EditCellCommentAction extends SpreadsheetAction {

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-button} component.
+ * 
+ * @since 1.1
  */
 public enum ButtonVariant implements ThemeVariant {
     LUMO_SMALL("small"),

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-tabsheet} component.
+ * 
+ * @since 23.3
  */
 public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_CENTERED("centered"),
