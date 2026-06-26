@@ -2770,6 +2770,182 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    // ===================================================================
+    // Slice 167 — column grouping outline (+/- buttons)
+    // ===================================================================
+    it('column grouping: setColGroupingData + setColGroupingMax renders toggle buttons (slice 167)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(8);
+        sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setHeaderColumnWidth(40);
+        sheet.setColGroupingMax(2);
+        sheet.setColGroupingData([
+            { uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 3, collapsed: false },
+            { uniqueIndex: 2, level: 2, startIndex: 4, endIndex: 5, collapsed: true },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const toggles = sheet.getColumnHeader().shadowRoot!.querySelectorAll(
+            '.col-grouping-toggle'
+        );
+        expect(toggles).to.have.length(2);
+        // First grouping is expanded → minus glyph; second is collapsed → plus.
+        const glyphs = Array.from(toggles).map(t => t.textContent!.trim());
+        expect(glyphs).to.include('+');
+        expect(glyphs).to.include('−');
+        cleanup();
+    });
+
+    it('column grouping: clicking a toggle dispatches groupingCollapsed with flipped state (slice 167)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(8);
+        sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingData([
+            { uniqueIndex: 7, level: 1, startIndex: 2, endIndex: 4, collapsed: false },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        const toggle = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-grouping-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle).to.not.be.null;
+        toggle.click();
+
+        const groupingEvents = events.filter(e => e.type === 'groupingCollapsed');
+        expect(groupingEvents).to.have.length(1);
+        // Was expanded (collapsed:false) → click requests COLLAPSED (true).
+        expect(groupingEvents[0].data).to.deep.equal({
+            cols: true,
+            colIndex: 7,
+            collapsed: true,
+        });
+        cleanup();
+    });
+
+    it('column grouping: clicking a collapsed toggle requests EXPAND (slice 167)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(8);
+        sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingData([
+            { uniqueIndex: 9, level: 1, startIndex: 1, endIndex: 2, collapsed: true },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        const toggle = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-grouping-toggle'
+        ) as HTMLButtonElement;
+        toggle.click();
+
+        const groupingEvents = events.filter(e => e.type === 'groupingCollapsed');
+        expect(groupingEvents).to.have.length(1);
+        // Was collapsed → request expanded.
+        expect(groupingEvents[0].data).to.include({ collapsed: false });
+        cleanup();
+    });
+
+    it('column grouping: toggle click does NOT also fire column-header-click (slice 167)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(8);
+        sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingData([
+            { uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 2, collapsed: false },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        const toggle = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-grouping-toggle'
+        ) as HTMLButtonElement;
+        toggle.click();
+
+        // Only the grouping event. NO selection event (columnSelected/etc).
+        expect(events.filter(e => e.type === 'columnSelected')).to.have.length(0);
+        expect(events.filter(e => e.type === 'groupingCollapsed')).to.have.length(1);
+        cleanup();
+    });
+
+    it('column grouping: gutter rows above letters move the letter row down by colGroupingMax * 16 px (slice 167)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setColGroupingMax(2);
+        sheet.setColGroupingData([]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const firstLetter = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-header-cell'
+        ) as HTMLElement;
+        expect(firstLetter).to.not.be.null;
+        // Default (non-inversed): gutter on top → letter row at colGroupingMax * 16 = 32px.
+        expect(firstLetter.style.top).to.equal('32px');
+        cleanup();
+    });
+
+    it('column grouping: inversed mode puts gutter BELOW letters and button at END (slice 167)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHeaderRowHeight(20);
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingInversed(true);
+        sheet.setColGroupingData([
+            { uniqueIndex: 3, level: 1, startIndex: 1, endIndex: 3, collapsed: false },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const firstLetter = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-header-cell'
+        ) as HTMLElement;
+        // Inversed: letter row stays at top (0).
+        expect(firstLetter.style.top).to.equal('0px');
+        // Button is at endPx (end of column 4 = 4 * 50 = 200).
+        const toggle = sheet.getColumnHeader().shadowRoot!.querySelector(
+            '.col-grouping-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle.style.left).to.equal('200px');
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

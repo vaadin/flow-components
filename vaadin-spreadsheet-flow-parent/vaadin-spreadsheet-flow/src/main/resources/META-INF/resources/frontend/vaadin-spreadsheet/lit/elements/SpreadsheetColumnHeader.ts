@@ -45,6 +45,56 @@ export interface ColumnHeaderRenderState {
      * extent the same way the cell-grid does.
      */
     totalGridWidthPx: number;
+    /**
+     * Column groupings (outline) with pre-computed pixel positions
+     * (slice 167). Pushed by the connector after computing the
+     * absolute startPx/endPx from {@code colWidths}. The header
+     * renders one row per level above (or below, if inversed) the
+     * letter cells; each grouping shows a clickable +/- button at
+     * one end of its range.
+     */
+    colGroupings: ReadonlyArray<PositionedGrouping>;
+    /**
+     * Number of grouping levels (rows in the gutter). {@code 0}
+     * means no grouping data — the gutter renders nothing and
+     * doesn't add to the element's height.
+     */
+    colGroupingMax: number;
+    /**
+     * When {@code true}, the grouping gutter renders BELOW the
+     * letter cells (and the +/- button is at the END of each
+     * grouping range — the column just after the data). When
+     * {@code false} (default), the gutter is ABOVE and the
+     * button is at the START. Matches Excel's "summary rows
+     * above/below" toggle.
+     */
+    colGroupingInversed: boolean;
+}
+
+/**
+ * A grouping outline entry with pre-computed pixel positions.
+ * Slice 167. The connector pre-computes {@code startPx} +
+ * {@code endPx} + {@code buttonPx} from {@code colWidths} /
+ * {@code rowHeights} so the header doesn't need access to the
+ * full width array.
+ */
+export interface PositionedGrouping {
+    /** Unique-within-the-grouping-list identifier (matches server). */
+    uniqueIndex: number;
+    /** Grouping level (1-based; level-1 is the outermost). */
+    level: number;
+    /** Pixel start of the range (start of column/row at startIndex). */
+    startPx: number;
+    /** Pixel end of the range (start of column/row AFTER endIndex). */
+    endPx: number;
+    /**
+     * Pixel position of the +/- button. {@code startPx - btnSize}
+     * when {@code !inversed} (button BEFORE the range), or
+     * {@code endPx} when {@code inversed} (button AFTER).
+     */
+    buttonPx: number;
+    /** Current collapse state — drives the +/- glyph. */
+    collapsed: boolean;
 }
 
 /** Helper: build an empty header render state for tests + initial render. */
@@ -64,8 +114,16 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
         colWidths: [],
         headerHeight: 0,
         totalGridWidthPx: 0,
+        colGroupings: [],
+        colGroupingMax: 0,
+        colGroupingInversed: false,
     };
 }
+
+/** Slice 167: pixel height per grouping level row in the gutter. */
+export const GROUPING_LEVEL_HEIGHT_PX = 16;
+/** Slice 167: pixel width of a +/- collapse button. */
+export const GROUPING_BUTTON_SIZE_PX = 14;
 
 /**
  * Internal column-header Lit element. Renders one
@@ -122,6 +180,40 @@ export class SpreadsheetColumnHeader extends LitElement {
             width: 5px;
             cursor: col-resize;
             z-index: 1;
+        }
+
+        /* Slice 167 — grouping outline gutter. Sits above (or below
+           if inversed) the column-letter row. Each grouping renders
+           one .col-grouping-line spanning startPx..endPx + one
+           .col-grouping-toggle button at the start (or end). */
+        .col-grouping-line {
+            position: absolute;
+            height: 1px;
+            background: var(--vaadin-spreadsheet-header-border, #c0c0c0);
+            pointer-events: none;
+        }
+
+        .col-grouping-toggle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            border: 1px solid
+                var(--vaadin-spreadsheet-header-border, #888);
+            background: var(--vaadin-spreadsheet-header-bg, #fff);
+            color: inherit;
+            font: inherit;
+            line-height: 1;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .col-grouping-toggle:hover {
+            background: #e8e8e8;
         }
     `;
 
@@ -209,6 +301,24 @@ export class SpreadsheetColumnHeader extends LitElement {
         if (!(target instanceof Element)) {
             return;
         }
+        // Slice 167: grouping toggle click — dispatch
+        // `column-grouping-toggle` so the connector can forward
+        // `groupingCollapsed` to the server. Stop here so the
+        // click doesn't also bubble as a column-header click.
+        const toggle = target.closest<HTMLElement>('.col-grouping-toggle');
+        if (toggle) {
+            const uniqueIndex = Number(toggle.dataset.uniqueIndex);
+            const collapsed = toggle.dataset.collapsed === 'true';
+            if (Number.isFinite(uniqueIndex)) {
+                this.dispatchEvent(new CustomEvent('column-grouping-toggle', {
+                    detail: { uniqueIndex, collapsed: !collapsed },
+                    bubbles: true,
+                    composed: true,
+                }));
+            }
+            ev.stopPropagation();
+            return;
+        }
         const cell = target.closest<HTMLElement>('.col-header-cell');
         if (!cell) {
             return;
@@ -231,12 +341,23 @@ export class SpreadsheetColumnHeader extends LitElement {
     };
 
     render(): TemplateResult {
-        const { viewport, colX, colWidths, headerHeight } = this.renderState;
+        const {
+            viewport, colX, colWidths, headerHeight,
+            colGroupings = [], colGroupingMax = 0,
+            colGroupingInversed = false,
+        } = this.renderState;
 
         if (headerHeight === 0
                 || viewport.lastColumnIndex < viewport.firstColumnIndex) {
             return html``;
         }
+
+        // Slice 167: grouping gutter occupies `colGroupingMax`
+        // rows of `GROUPING_LEVEL_HEIGHT_PX` pixels each, either
+        // ABOVE the letter row (default) or BELOW it (inversed).
+        const gutterHeight = colGroupingMax * GROUPING_LEVEL_HEIGHT_PX;
+        const letterTop = colGroupingInversed ? 0 : gutterHeight;
+        const gutterTop = colGroupingInversed ? headerHeight : 0;
 
         const cells: TemplateResult[] = [];
         const handles: TemplateResult[] = [];
@@ -248,8 +369,8 @@ export class SpreadsheetColumnHeader extends LitElement {
             }
             const letter = columnIndexToLetters(col);
             const style =
-                `left:${left}px;top:0;width:${width}px;height:${headerHeight}px;`
-                + `line-height:${headerHeight}px;`;
+                `left:${left}px;top:${letterTop}px;width:${width}px;`
+                + `height:${headerHeight}px;line-height:${headerHeight}px;`;
             // data-col drives the click delegation handler in
             // firstUpdated() (slice 148) — same pattern as the
             // cell-grid (slice 146).
@@ -263,13 +384,38 @@ export class SpreadsheetColumnHeader extends LitElement {
             // (slice 164). Anchored at the column's right edge so
             // mousedown begins a resize-drag for THIS column.
             const handleStyle =
-                `left:${left + width - 3}px;height:${headerHeight}px;`;
+                `left:${left + width - 3}px;top:${letterTop}px;`
+                + `height:${headerHeight}px;`;
             handles.push(html`
                 <div class="col-resize-handle" style=${handleStyle}
                      data-col=${col}></div>
             `);
         }
-        return html`${cells}${handles}`;
+        const groupingEls: TemplateResult[] = [];
+        for (const g of colGroupings) {
+            const levelRow = (g.level - 1) * GROUPING_LEVEL_HEIGHT_PX;
+            const lineTop = gutterTop + levelRow
+                + Math.floor(GROUPING_LEVEL_HEIGHT_PX / 2);
+            const lineLeft = g.startPx;
+            const lineWidth = Math.max(0, g.endPx - g.startPx);
+            const lineStyle =
+                `left:${lineLeft}px;top:${lineTop}px;width:${lineWidth}px;`;
+            groupingEls.push(html`
+                <div class="col-grouping-line" style=${lineStyle}></div>
+            `);
+            const btnLeft = g.buttonPx;
+            const btnTop = gutterTop + levelRow
+                + Math.floor((GROUPING_LEVEL_HEIGHT_PX - GROUPING_BUTTON_SIZE_PX) / 2);
+            const btnStyle = `left:${btnLeft}px;top:${btnTop}px;`;
+            groupingEls.push(html`
+                <button class="col-grouping-toggle" style=${btnStyle}
+                        data-unique-index=${g.uniqueIndex}
+                        data-collapsed=${g.collapsed ? 'true' : 'false'}>
+                    ${g.collapsed ? '+' : '−'}
+                </button>
+            `);
+        }
+        return html`${groupingEls}${cells}${handles}`;
     }
 }
 

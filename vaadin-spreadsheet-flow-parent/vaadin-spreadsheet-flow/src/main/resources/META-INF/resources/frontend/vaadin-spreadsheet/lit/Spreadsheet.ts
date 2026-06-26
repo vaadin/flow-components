@@ -44,7 +44,11 @@ import {
 import { toKey } from './algorithms/CellKeys.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
-import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
+import {
+    SpreadsheetColumnHeader,
+    GROUPING_BUTTON_SIZE_PX,
+    type PositionedGrouping,
+} from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import type { CellGridRenderState } from './elements/types.js';
@@ -493,6 +497,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'column-header-contextmenu',
             this.handleColumnHeaderContextMenu as EventListener
         );
+        // Grouping outline (slice 167). The column header emits
+        // `column-grouping-toggle` when the user clicks a +/-
+        // button in the grouping gutter; the connector forwards
+        // it as `groupingCollapsed` to the server.
+        this.columnHeader.addEventListener(
+            'column-grouping-toggle',
+            this.handleColumnGroupingToggle as EventListener
+        );
         this.rowHeader.addEventListener(
             'row-header-contextmenu',
             this.handleRowHeaderContextMenu as EventListener
@@ -755,6 +767,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
             detail: {
                 type: 'rowHeaderContextMenuOpen',
                 data: { rowIndex: row },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Column-grouping toggle (slice 167). Forwards the user's
+     * +/- click in the grouping outline gutter as
+     * {@code groupingCollapsed} for the server. Wire payload:
+     * {@code cols: true}, {@code colIndex} carries the
+     * grouping's {@code uniqueIndex} (its identity in the
+     * grouping list), {@code collapsed} is the NEW state the
+     * user is requesting.
+     */
+    private readonly handleColumnGroupingToggle = (
+        e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>
+    ): void => {
+        const { uniqueIndex, collapsed } = e.detail;
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'groupingCollapsed',
+                data: { cols: true, colIndex: uniqueIndex, collapsed },
             },
             bubbles: true,
             composed: true,
@@ -1506,6 +1541,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'column-header-contextmenu',
             this.handleColumnHeaderContextMenu as EventListener
         );
+        this.columnHeader.removeEventListener(
+            'column-grouping-toggle',
+            this.handleColumnGroupingToggle as EventListener
+        );
         this.rowHeader.removeEventListener(
             'row-header-contextmenu',
             this.handleRowHeaderContextMenu as EventListener
@@ -1606,14 +1645,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // a no-op — important to avoid feedback loops with the
         // ResizeObserver under wtr parallel.
         if (this.headerRowHeight > 0) {
+            // Slice 167: compute positioned column-groupings so the
+            // header can render the outline gutter. Pre-resolving
+            // pixel positions in the connector keeps the header
+            // element independent of the full colWidths array.
+            const colGroupings = computePositionedColGroupings(
+                this.colGroupingData,
+                this.colWidths,
+                this.colGroupingInversed,
+                this.defColWidth
+            );
+            const gutterPx = this.colGroupingMax * 16;
             this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
-            this.columnHeader.style.height = `${this.headerRowHeight}px`;
+            this.columnHeader.style.height =
+                `${this.headerRowHeight + gutterPx}px`;
             this.columnHeader.renderState = {
                 viewport: state.viewport,
                 colX: state.colX,
                 colWidths: state.colWidths,
                 headerHeight: this.headerRowHeight,
                 totalGridWidthPx: state.totalGridWidthPx,
+                colGroupings,
+                colGroupingMax: this.colGroupingMax,
+                colGroupingInversed: this.colGroupingInversed,
             };
         }
         // Row-header strip (slice 144). Same opt-in gate as column
@@ -2553,6 +2607,54 @@ export function isCellInSelection(
         }
     }
     return false;
+}
+
+/**
+ * Pure helper: convert {@link GroupingData} entries into
+ * {@link PositionedGrouping} entries with pre-computed pixel
+ * positions. Slice 167.
+ *
+ * - {@code startPx}: pixel x-position of column {@code startIndex}
+ *   (sum of widths of columns 1..startIndex-1).
+ * - {@code endPx}: pixel x-position of the column AFTER
+ *   {@code endIndex} (so the line spans the full data range).
+ * - {@code buttonPx}: when {@code !inversed}, button is at
+ *   {@code startPx - GROUPING_BUTTON_SIZE_PX}; when {@code inversed},
+ *   button is at {@code endPx}.
+ *
+ * Both indices are 0-based in the wire format (server-side
+ * `GroupingData.startIndex`/`endIndex` use POI's 0-based row/col
+ * indices). The connector's `colWidths` array is 0-indexed too.
+ */
+export function computePositionedColGroupings(
+    groupings: ReadonlyArray<GroupingData>,
+    colWidths: ReadonlyArray<number>,
+    inversed: boolean,
+    defColWidthPx: number
+): PositionedGrouping[] {
+    const widthAt = (col0: number): number =>
+        col0 < colWidths.length ? colWidths[col0] : defColWidthPx;
+    const positions: PositionedGrouping[] = [];
+    for (const g of groupings) {
+        let startPx = 0;
+        for (let i = 0; i < g.startIndex; i++) {
+            startPx += widthAt(i);
+        }
+        let endPx = startPx;
+        for (let i = g.startIndex; i <= g.endIndex; i++) {
+            endPx += widthAt(i);
+        }
+        const buttonPx = inversed ? endPx : startPx - GROUPING_BUTTON_SIZE_PX;
+        positions.push({
+            uniqueIndex: g.uniqueIndex,
+            level: g.level,
+            startPx,
+            endPx,
+            buttonPx,
+            collapsed: g.collapsed,
+        });
+    }
+    return positions;
 }
 
 export function buildSelectionEvent(
