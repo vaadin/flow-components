@@ -1,6 +1,6 @@
 # Tier 3 Wrapper Flip — Readiness Assessment
 
-**Last updated:** slice 162.
+**Last updated:** slice 168.
 
 ## What slice 162 did
 
@@ -24,93 +24,78 @@ The TS class constructor now accepts the `(element, element.renderRoot)` calling
 
 **Default behavior is unchanged**: every existing app + IT uses the GWT bundle. Opt-in is per-instance via `use-lit` attribute or globally via `window.VAADIN_SPREADSHEET_USE_LIT`.
 
+The wrapper-level feature flag exists ONLY through slice 168. Slice 169 removes the flag entirely — the Lit path becomes the only implementation. Slice 170 deletes `spreadsheet-export.js` + the `vaadin-spreadsheet-flow-client/` module.
+
 ## What works in the TS path
 
-All slices 132-161 are functional through the wrapper:
+Slices 132-167 are functional through the wrapper:
 
-| Surface | Status |
-| --- | --- |
-| Cell rendering (4 quadrants + freeze) | ✅ |
-| Column header (A/B/.../AA) | ✅ |
-| Row header (1/2/3) | ✅ |
-| Header corner | ✅ |
-| Sheet tabs (bottom strip) | ✅ |
-| Cell selection (click, shift-click) | ✅ |
-| Header click → whole column/row select | ✅ |
-| Keyboard nav (arrows, Tab, Enter, Home, End, Ctrl-Home/End, shift+arrow) | ✅ |
-| Mouse drag → range selection | ✅ |
-| Cell editor (double-click, F2, type-to-edit, Enter/Tab/Esc/blur, post-commit nav) | ✅ |
-| Auto-scroll active cell into view | ✅ |
-| ResizeObserver-driven initial render | ✅ |
-| Server dispatch: cellSelected, cellRangeSelected, rowSelected, columnSelected, cellValueEdited, deleteSelectedCells, sheetSelected, onSheetScroll, onUndo, onRedo, popupButtonClick | ✅ |
-| Sheet overlays (image rendering via setOverlays + setResources) | ✅ |
-| Popup buttons (rendering + click dispatch) | ✅ |
-
-## What's degraded if you flip now
-
-The following work in the GWT bundle but are degraded (or missing) in the TS path:
-
-| Feature | Status | Server-side impact |
+| Surface | Status | Slice |
 | --- | --- | --- |
-| Cell comments (yellow triangle + popup) | ❌ Not rendered | Server still pushes comment data; just no visual indicator. |
-| Hyperlinks (clickable link cells) | ❌ Not interactive | Cells render with their text; `linkCellClicked` doesn't dispatch on click. |
-| Context menu (right-click on cells/headers) | ❌ Not handled | `contextMenuOpenOnSelection` / row/column variants don't dispatch. |
-| Copy / paste / cut (Ctrl+C/V/X) | ❌ Not handled | Browser default applies; `onPaste`/`clearSelectedCellsOnCut` don't dispatch. |
-| Column / row resize via header drag | ❌ Not interactive | `columnResized` / `rowsResized` don't dispatch. |
-| Grouping outline (+/- buttons on sides) | ❌ Not rendered | `groupingCollapsed` doesn't dispatch. |
-| Custom-component overlay slotting | ⚠️ Placeholder rendered, but Flow component injection (slot) isn't wired | Components show as empty boxes. |
-| Cell value formatting (numbers, dates, currency) | ⚠️ Display value used as-is | The server sends pre-formatted `value` strings, so simple cases work; on-the-fly format changes won't reformat client-side. |
-| Visual styling fidelity (fonts, borders) | ⚠️ Best-effort | The TS path uses CSS variables + CSS classes that match the GWT-side conventions, but pixel-perfect match isn't guaranteed without visual-regression testing. The slice 122-123 golden screenshots are vs. the GWT path. |
+| Cell rendering (4 quadrants + freeze) | ✅ | 132-141 |
+| Column header (A/B/.../AA) | ✅ | 143 |
+| Row header (1/2/3) | ✅ | 144 |
+| Header corner | ✅ | 145 |
+| Sheet tabs (bottom strip) | ✅ | 154 |
+| Cell selection (click, shift-click) | ✅ | 146 |
+| Header click → whole column/row select | ✅ | 148 |
+| Keyboard nav (arrows, Tab, Enter, Home, End, Ctrl-Home/End, shift+arrow) | ✅ | 147 + 149 |
+| Mouse drag → range selection | ✅ | 155 |
+| Cell editor (double-click, F2, type-to-edit, Enter/Tab/Esc/blur, post-commit nav) | ✅ | 152 + 153 + 158 |
+| Auto-scroll active cell into view | ✅ | 156 |
+| ResizeObserver-driven initial render | ✅ | 142 |
+| Server dispatch: cellSelected, cellRangeSelected, rowSelected, columnSelected, cellValueEdited, deleteSelectedCells, sheetSelected, onSheetScroll, onUndo, onRedo, popupButtonClick | ✅ | 150-159 |
+| Sheet overlays (image rendering via setOverlays + setResources) | ✅ | 160 |
+| Popup buttons (rendering + click dispatch) | ✅ | 161 |
+| Copy / cut / paste keyboard shortcuts (TSV codec) | ✅ | 163 |
+| Column / row resize via header drag (columnResized / rowsResized dispatch) | ✅ | 164 |
+| Cell comments indicator (red corner triangle) | ✅ | 165 |
+| Hyperlink cells (visual + linkCellClicked dispatch) | ✅ | 165 |
+| Context menu (right-click → contextMenuOpenOnSelection / row+column variants) | ✅ | 166 |
+| Column grouping outline (+/- buttons in gutter, groupingCollapsed dispatch) | ✅ | 167 |
+| Component-overlay slot scaffolding (cell-grid emits `<slot name="overlay-${id}">`) | ⚠️ Scaffolding shipped, wrapper-side child move pending | 168 |
 
-## Recommended next steps
+## What's still deferred (documented for the flip)
 
-### Path A (incremental flip)
+| Feature | Status | Server-side impact | Notes |
+| --- | --- | --- | --- |
+| Row grouping outline | ❌ Not rendered | `groupingCollapsed { cols: false }` doesn't dispatch from the row gutter. Server-pushed `setRowGroupingData` is plumbed but the row-header doesn't render the gutter. | Mirror of slice 167's column variant — same `PositionedGrouping` shape + same click pattern. Rare in business spreadsheets. |
+| Level header buttons (1/2/3 numbered group-collapse-by-level) | ❌ Not rendered | `levelHeaderClicked { cols, level }` doesn't dispatch. | UI-only follow-up; the wire format is already plumbed. |
+| Custom-component overlay slotting (Vaadin components inside cells) | ⚠️ Partial | Components show as empty positioned boxes if the wrapper hasn't moved them into the cell-grid's light DOM. Most spreadsheets don't embed Vaadin components in cells — common case is empty. | Slice 168 added the `<slot name="overlay-${id}">` rendering in the cell-grid's shadow DOM. To actually project a component, the wrapper must reparent the Flow-pushed child element from the spreadsheet host into the cell-grid + assign the matching `slot` attribute. Tracked as a wrapper-side follow-up. |
+| Cell-comment hover popup | ❌ Indicator only | Comment text + author isn't shown on hover. Server-pushed `cellComments` / `cellCommentAuthors` are stored but never rendered. | Cosmetic — power-users will see the indicator triangle but won't see the comment body. |
+| `setVisibleCellComments` (always-visible comment popups) | ❌ Not handled | Server flag is plumbed but the connector doesn't keep popups open. | Cosmetic. |
+| `updateCellComment` dispatch (typing a new comment) | ❌ Not handled | No UI for editing comments. | Requires significant UI work; defer to follow-up. |
+| `contextMenuClosed` dispatch | ❌ Not handled | The server-side `ContextMenu` component doesn't get notified when its menu closes through the Lit path. | Server-side hook, not client-side — usually not load-bearing. |
+| Cell value formatting (numbers, dates, currency) | ⚠️ Display value used as-is | The server sends pre-formatted `value` strings, so simple cases work; on-the-fly format changes won't reformat client-side. | Mode A wire contract: server is authoritative for formatting. |
+| Visual styling fidelity (fonts, borders) | ⚠️ Best-effort | The TS path uses CSS variables + CSS classes that match the GWT-side conventions, but pixel-perfect match isn't guaranteed without visual-regression testing. The slice 122-123 golden screenshots are vs. the GWT path. | Acceptance: best-effort visual match per slice 129. |
 
-1. Slice 163+: implement deferred features one-by-one (cell comments, hyperlinks, context menu, copy/paste, resize, grouping).
-2. After each, run the IT suite with `window.VAADIN_SPREADSHEET_USE_LIT = true` injected via setup script.
-3. Once all degraded features are addressed, flip the default in `initLazy` (or delete the GWT branch).
+## Path forward (slices 169-171)
 
-Estimated: 8-12 slices.
+### Slice 169 — flip default to Lit
 
-### Path B (flip with documented degradations)
+Remove the `use-lit` feature-flag logic from `vaadin-spreadsheet.js`. The wrapper now always uses `LitSpreadsheet`. The `import { Spreadsheet as GwtSpreadsheet } from './spreadsheet-export.js'` line is deleted.
 
-1. Update the IT suite to set `VAADIN_SPREADSHEET_USE_LIT = true` by default.
-2. Run the suite; document failures + screenshot diffs.
-3. For each broken test, decide: fix the TS path, accept the change, or revert to GWT default for that test.
-4. Ship "Tier 3 Phase 1" as the MVP, ship remaining features as Tier 3 Phase 2.
+The GWT bundle (`spreadsheet-export.js`) and the `vaadin-spreadsheet-flow-client/` Maven module remain in the repo at this point — slice 170 deletes them.
 
-Estimated: 2-3 slices to assess + ship the partial flip + a doc of remaining work.
+### Slice 170 — delete GWT bundle + client module
 
-### Path C (full feature parity then flip)
+- Delete `spreadsheet-export.js` (the 1.3MB / 25,965 LOC GWT artifact)
+- Delete the `vaadin-spreadsheet-flow-client/` Maven module
+- Remove the pom dependency from `vaadin-spreadsheet-flow` on the client module
+- Clean up any remaining references (frontend resources, etc.)
 
-Wait until cell comments, hyperlinks, context menu, copy/paste, column/row resize, grouping, and custom-component slotting are all implemented before flipping any default.
+### Slice 171 — port GWT client tests against the new Lit code
 
-Estimated: 15-20 slices.
-
-## Recommended
-
-**Path B** for fastest real-world feedback. The TS client is functional enough for ~80% of use cases; the missing 20% (comments, links, context menu, copy/paste, resize, grouping, custom components) is well-known and bounded. Flipping forces actual user-flow validation, which catches issues that no amount of synthetic testing would.
+The GWT client (`vaadin-spreadsheet-flow-client/src/test/java/.../SpreadsheetJsApiTest.java`) has ~750 lines of behavior tests that pin the GWT wire surface. The Lit code has ~470 wtr tests pinning its own behavior. Port the wire-contract subset from the GWT tests to wtr to inherit decades of pinned behavior as a regression net before the GWT module disappears.
 
 ## Risk register
 
 - **R1: Visual diff against golden screenshots** — the slice 122-123 baselines were captured against GWT. The TS path will produce visually similar but not identical screenshots. Acceptance criteria from slice 129 explicitly allow "best-effort visual match" (Mode A wire contract preserved, Mode B implementation clean-room). Set a tolerance in the diff IT.
 
-- **R2: Event-shape mismatches** — slice 128's audit verified the symmetric event surface, but the dispatch SHAPE (detail field names) is wire contract. If the server's `SpreadsheetHandler` strict-matches field names that diverge from the TS dispatch, the server would silently drop events. Mitigation: add server-side IT that exercises each `SpreadsheetEvent` type.
+- **R2: Event-shape mismatches** — slice 128's audit verified the symmetric event surface, but the dispatch SHAPE (detail field names) is wire contract. If the server's `SpreadsheetHandler` strict-matches field names that diverge from the TS dispatch, the server would silently drop events. Mitigation: add server-side IT that exercises each `SpreadsheetEvent` type. Slice 171 (porting GWT tests) materially de-risks this.
 
 - **R3: ResizeObserver double-fire** — the wrapper has its own `spreadsheetResizeObserver` (calls `$connector.resize()`); the TS connector has its own ResizeObserver inside the scroll container. Both call `recomputeViewport()`. Idempotent — but emits double `onSheetScroll` events on resize. Acceptable; server dedupes.
 
-- **R4: Untested setter no-ops** — many setters are still stubs in the TS class (e.g. `setCellCommentAuthors`). With opt-in flip these are exercised by real apps for the first time. Stub no-ops are safe but features that the wrapper expects to use those setters' results may misbehave silently.
+- **R4: Untested setter no-ops** — many setters are still stubs in the TS class (e.g. `setCellCommentAuthors`). With the flip these are exercised by real apps for the first time. Stub no-ops are safe but features that the wrapper expects to use those setters' results may misbehave silently. Slice 171's GWT-test port will exercise each setter's dispatch shape.
 
-## Concrete next-slice candidates
-
-After this slice (162), the most-impactful sequence is:
-
-- **Slice 163** — feature flag for IT: a Maven property that sets `VAADIN_SPREADSHEET_USE_LIT=true` before TestBench starts, so the existing IT suite can be re-run against the TS path. Document which existing tests fail.
-- **Slice 164** — cell-comments overlay (yellow triangle + popup on hover).
-- **Slice 165** — hyperlink cells + `linkCellClicked` dispatch.
-- **Slice 166** — copy/paste/cut keyboard shortcuts.
-- **Slice 167** — column/row resize via header drag.
-- **Slice 168** — flip default (remove GWT branch).
-- **Slice 169** — delete `spreadsheet-export.js` + the GWT build pipeline; ship as a single replaced module.
-
-That sequence ends with the GWT bundle deleted: Tier 3 done.
+- **R5: Custom-component slot mismatch** — the cell-grid emits `<slot name="overlay-${id}">` but the wrapper currently appends component children to the spreadsheet host's light DOM, not the cell-grid's. Until the wrapper-side re-parenting lands, COMPONENT overlays render as empty positioned boxes. The same was true before slice 168 (placeholder div); slice 168 just turned the placeholder into a `<slot>` so a future wrapper change is one-line. Acceptable for the flip; common spreadsheets don't use COMPONENT overlays.

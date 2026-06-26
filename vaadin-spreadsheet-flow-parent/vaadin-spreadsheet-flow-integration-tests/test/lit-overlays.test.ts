@@ -246,6 +246,30 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
+    it('COMPONENT overlay contains a named <slot> for wrapper-side component injection (slice 168)', async () => {
+        const { sheet, cleanup } = attachSheet(300, 200);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+        sheet.setOverlays({
+            comp42: { type: 'COMPONENT', col: 1, row: 1, width: 80, height: 80, dx: 0, dy: 0 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const overlay = sheet.getCellGrid().shadowRoot!.querySelector(
+            'div.sheet-overlay-component'
+        ) as HTMLElement;
+        expect(overlay).to.not.be.null;
+        const slot = overlay.querySelector('slot');
+        expect(slot).to.not.be.null;
+        // Slot name encodes the overlay id so the wrapper can
+        // assign the matching component via slot="overlay-comp42".
+        expect(slot!.getAttribute('name')).to.equal('overlay-comp42');
+        cleanup();
+    });
+
     it('overlay element is positioned at the computed pixel coordinates', async () => {
         const { sheet, cleanup } = attachSheet(400, 200);
         sheet.setRows(10);
