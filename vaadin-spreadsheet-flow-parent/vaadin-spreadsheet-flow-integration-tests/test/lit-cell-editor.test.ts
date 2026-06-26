@@ -74,6 +74,7 @@ function buildEditorState(opts: {
         scrollLeft: 0,
         scrollTop: 0,
         editor: { col: opts.col, row: opts.row, initialValue: opts.initialValue },
+        overlays: [],
         selection: emptyCellGridRenderState().selection,
     };
 }

@@ -157,6 +157,15 @@ export interface CellGridRenderState {
      * double-click and clears it on commit / cancel.
      */
     editor: CellEditorState | null;
+
+    /**
+     * Positioned sheet overlays (images, charts, components)
+     * computed by the connector from {@code setOverlays} +
+     * {@code setResources}. The cell-grid renders an absolutely-
+     * positioned element per overlay. Empty when no overlays
+     * are active. Slice 160.
+     */
+    overlays: ReadonlyArray<PositionedOverlay>;
 }
 
 /**
@@ -177,6 +186,34 @@ export interface CellEditorState {
      * the user commits.
      */
     initialValue: string;
+}
+
+/**
+ * A sheet overlay (image, chart, embedded component) with its
+ * pixel position pre-computed by the connector. The cell-grid
+ * just absolutely-positions each overlay at the supplied
+ * coordinates — it doesn't know about anchor cells or offsets.
+ * Slice 160.
+ */
+export interface PositionedOverlay {
+    /** Identifier from the server's `setOverlays` map. */
+    id: string;
+    /** Overlay kind — image or embedded component. */
+    type: 'IMAGE' | 'COMPONENT';
+    /**
+     * For IMAGE: the image URL resolved from {@code setResources}.
+     * For COMPONENT: undefined (rendered as a placeholder div
+     * pending slice 161+ slot integration).
+     */
+    src: string | undefined;
+    /** Pixel left of the overlay, relative to the cell-grid's origin. */
+    leftPx: number;
+    /** Pixel top of the overlay. */
+    topPx: number;
+    /** Pixel width. */
+    widthPx: number;
+    /** Pixel height. */
+    heightPx: number;
 }
 
 /**
@@ -214,6 +251,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         scrollLeft: 0,
         scrollTop: 0,
         editor: null,
+        overlays: [],
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },

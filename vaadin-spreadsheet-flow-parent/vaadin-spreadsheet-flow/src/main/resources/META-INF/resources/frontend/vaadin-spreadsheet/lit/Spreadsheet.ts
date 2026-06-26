@@ -31,7 +31,7 @@ import type {
     RowSelectedData,
     SpreadsheetEvent,
 } from './types/rpc-client-to-server.js';
-import type { CellEditorState } from './elements/types.js';
+import type { CellEditorState, PositionedOverlay } from './elements/types.js';
 import {
     computeTotalGridSize,
     computeViewportBounds,
@@ -175,6 +175,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private visibleCellComments: string[] = [];
     private invalidFormulaCells: Set<string> = new Set();
     private overlays: Record<string, OverlayInfo> = {};
+    /**
+     * Resource map decoded from {@link setResources} — overlay ID
+     * → image URL. Used at render time to resolve IMAGE-type
+     * overlay sources. Slice 160.
+     */
+    private resources: Record<string, string> = {};
     private cellKeysToEditorIdMap: Record<string, string> = {};
     private componentIDtoCellKeysMap: Record<string, string> = {};
     private hyperlinksTooltips: Record<string, string> = {};
@@ -1300,6 +1306,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
             defaultColWidthPx: this.defColWidth,
         });
 
+        // Compute positioned overlays (slice 160) from the current
+        // overlay map + resource map. Each overlay's pixel
+        // position is anchor cell's left/top (cumulative col/row
+        // widths/heights) + the overlay's dx/dy offset.
+        const positionedOverlays = computePositionedOverlays(
+            this.overlays,
+            this.resources,
+            colWidthForIndex,
+            rowHeightForIndex
+        );
+
         return {
             viewport,
             cellData: this.cellDataByKey,
@@ -1321,6 +1338,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             scrollLeft: opts.scrollLeft,
             scrollTop: opts.scrollTop,
             editor: this.editor,
+            overlays: positionedOverlays,
         };
     }
 
@@ -1650,8 +1668,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
     setNamedRanges(names: string[]): void {
         this.namedRanges = names;
     }
-    setResources(_host: HTMLElement, _jsonString: string): void {
-        // TODO Phase 3.4 — register image/resource map for overlays.
+    setResources(_host: HTMLElement, jsonString: string): void {
+        // Parse the JSON-serialized resource map (id → URL) so
+        // overlay rendering can resolve image sources. The host
+        // argument is unused — kept for signature compatibility
+        // with the GWT API. Slice 160.
+        if (!jsonString) {
+            this.resources = {};
+            return;
+        }
+        try {
+            const parsed = JSON.parse(jsonString) as Record<string, string>;
+            this.resources = parsed ?? {};
+        } catch {
+            // Malformed JSON — keep the previous map; the server
+            // will retry on next push. Don't crash the connector.
+            this.resources = {};
+        }
     }
     setPopupButtons(_popupButtons: PopupButtonState[]): void {
         // TODO Phase 3.5 — register popup-button anchors.
@@ -1922,6 +1955,45 @@ export class Spreadsheet implements SpreadsheetClientApi {
     isSheetProtected(): boolean {
         return this.sheetProtected;
     }
+}
+
+/**
+ * Pure helper: build the positioned-overlay list from the server-
+ * pushed `OverlayInfo` map + resource map. Each overlay's pixel
+ * position is `anchor cell's left/top` (cumulative sums of col/
+ * row sizes 1..anchor-1) + the overlay's `dx`/`dy` offset.
+ *
+ * Pure (no DOM, no instance state) so it's straightforward to
+ * unit-test in isolation. Slice 160.
+ */
+export function computePositionedOverlays(
+    overlays: Record<string, OverlayInfo>,
+    resources: Record<string, string>,
+    colWidth: (col: number) => number,
+    rowHeight: (row: number) => number
+): PositionedOverlay[] {
+    const result: PositionedOverlay[] = [];
+    for (const [id, info] of Object.entries(overlays)) {
+        let left = 0;
+        for (let c = 1; c < info.col; c++) {
+            left += colWidth(c);
+        }
+        let top = 0;
+        for (let r = 1; r < info.row; r++) {
+            top += rowHeight(r);
+        }
+        const positioned: PositionedOverlay = {
+            id,
+            type: info.type,
+            src: info.type === 'IMAGE' ? resources[id] : undefined,
+            leftPx: left + info.dx,
+            topPx: top + info.dy,
+            widthPx: info.width,
+            heightPx: info.height,
+        };
+        result.push(positioned);
+    }
+    return result;
 }
 
 /**

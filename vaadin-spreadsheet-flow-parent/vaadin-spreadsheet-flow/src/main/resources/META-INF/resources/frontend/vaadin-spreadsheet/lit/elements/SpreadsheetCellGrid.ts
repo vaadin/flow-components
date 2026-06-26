@@ -88,6 +88,20 @@ export class SpreadsheetCellGrid extends LitElement {
            cells. */
         .cell.quadrant-main { z-index: 1; }
 
+        /* Sheet overlays — images, charts, and embedded
+           components positioned at absolute pixel coordinates on
+           the sheet. Slice 160. z-index above cells but below
+           the cell editor (which is 10). */
+        .sheet-overlay {
+            position: absolute;
+            z-index: 4;
+            box-sizing: border-box;
+            pointer-events: auto;
+        }
+        .sheet-overlay-image {
+            display: block;
+        }
+
         /* Cell editor input — absolutely positioned over the cell
            being edited, sized to match. z-index above all cells +
            overlays so the input + caret are always on top. Slice
@@ -428,7 +442,8 @@ export class SpreadsheetCellGrid extends LitElement {
         const mergedOverlays = buildMergedCellOverlays(this.renderState);
         const selectionOverlay = buildSelectionOverlay(this.renderState);
         const editor = buildCellEditorOverlay(this.renderState);
-        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${editor}`;
+        const sheetOverlays = buildSheetOverlays(this.renderState);
+        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${sheetOverlays}${editor}`;
     }
 }
 
@@ -843,6 +858,44 @@ function buildCellEditorOverlay(
                @keydown=${onKeyDown}
                @blur=${onBlur} />
     `;
+}
+
+/**
+ * Build the sheet-overlay rendering — one element per positioned
+ * overlay. IMAGE overlays render as {@code <img class="sheet-
+ * overlay sheet-overlay-image" src="...">}. COMPONENT overlays
+ * render as a placeholder {@code <div class="sheet-overlay
+ * sheet-overlay-component" data-overlay-id="...">} pending
+ * Vaadin-component slotting in a later slice. Slice 160.
+ */
+function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
+    // Defensive default — some older test fixtures may not
+    // declare the overlays array yet (slice 160 introduced it).
+    // Real connector pushes always populate the field.
+    const overlays = state.overlays ?? [];
+    return overlays.map((overlay) => {
+        const style =
+            `left:${overlay.leftPx}px;top:${overlay.topPx}px;`
+            + `width:${overlay.widthPx}px;height:${overlay.heightPx}px;`;
+        if (overlay.type === 'IMAGE') {
+            const src = overlay.src ?? '';
+            return html`
+                <img class="sheet-overlay sheet-overlay-image"
+                     data-overlay-id=${overlay.id}
+                     src=${src}
+                     style=${style} />
+            `;
+        }
+        // COMPONENT overlay: render a placeholder that a future
+        // slice will replace with the actual Vaadin component
+        // (via slot or appended-child injection from the Flow
+        // wrapper).
+        return html`
+            <div class="sheet-overlay sheet-overlay-component"
+                 data-overlay-id=${overlay.id}
+                 style=${style}></div>
+        `;
+    });
 }
 
 customElements.define('vaadin-spreadsheet-internal-cell-grid', SpreadsheetCellGrid);
