@@ -305,6 +305,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly sheetTabs: SpreadsheetSheetTabs;
 
     /**
+     * MutationObserver watching the spreadsheet host for class
+     * changes. Slice 174 honors {@code Spreadsheet.HIDE_TABSHEET_STYLE}
+     * ("hidetabsheet") + {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
+     * ("hidefunctionbar") by toggling display on the internal
+     * elements. The wrapper element is light DOM, so we can't use
+     * a {@code :host-context()} CSS selector — class observation
+     * is the portable path.
+     */
+    private hostClassObserver: MutationObserver | null = null;
+
+    /**
      * Height of the column-header strip in pixels. {@code 0}
      * (default) means no header strip is rendered. The host opts
      * in by calling {@link setHeaderRowHeight}; matches Excel's
@@ -423,6 +434,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // never grow / shrink based on content.
         this.sheetTabs.style.flex = '0 0 auto';
         this.renderTarget.appendChild(this.sheetTabs);
+        // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
+        // on the wrapper host. When the host has that class, the sheet
+        // tabs strip hides. Observe the host's class attribute via
+        // MutationObserver — the wrapper element is light DOM, so
+        // CSS in our shadow root can't `:host-context()` it.
+        this.applyHostHideClasses();
+        this.hostClassObserver = new MutationObserver(
+            () => this.applyHostHideClasses()
+        );
+        this.hostClassObserver.observe(this.host, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
         // Sheet tab click → switch active sheet via spreadsheet-event
         // (slice 154).
         this.sheetTabs.addEventListener(
@@ -1560,6 +1584,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.handleRowResizeStart as EventListener
         );
         this.resizeObserver.disconnect();
+        if (this.hostClassObserver) {
+            this.hostClassObserver.disconnect();
+            this.hostClassObserver = null;
+        }
+    }
+
+    /**
+     * Slice 174: read the spreadsheet host's class list + apply
+     * the two public "hide bar" classes by toggling display on
+     * the matching internal elements. The constants
+     * {@link Spreadsheet#HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
+     * and {@link Spreadsheet#HIDE_TABSHEET_STYLE} ("hidetabsheet")
+     * are public JavaDoc-documented API; consumers call
+     * {@code addClassName(HIDE_TABSHEET_STYLE)} on the host
+     * (or use {@code setSheetSelectionBarVisible(false)} which
+     * does the same) to suppress the corresponding strip.
+     *
+     * The function bar isn't built yet (deferred to slice 175);
+     * the function-bar branch becomes meaningful when that
+     * element exists.
+     */
+    private applyHostHideClasses(): void {
+        const hidden = this.host.classList.contains('hidetabsheet');
+        this.sheetTabs.style.display = hidden ? 'none' : '';
     }
 
     /** Test-only accessor: the scroll container element. */

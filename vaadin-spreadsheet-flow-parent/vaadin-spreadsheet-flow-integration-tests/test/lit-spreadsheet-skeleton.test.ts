@@ -3169,6 +3169,45 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    // ===================================================================
+    // Slice 174 — honor HIDE_TABSHEET_STYLE on host
+    // ===================================================================
+    it('sheet tabs hide when host gets the hidetabsheet class (slice 174)', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setSheetNames(['Sheet1', 'Sheet2']);
+        sheet.setSheetIndex(1);
+        await sheet.getSheetTabs().updateComplete;
+
+        const tabs = sheet.getSheetTabs();
+        // Initially visible.
+        expect(tabs.style.display).to.not.equal('none');
+
+        // Add hidetabsheet → tabs hidden.
+        host.classList.add('hidetabsheet');
+        // MutationObserver is async — wait a microtask.
+        await Promise.resolve();
+        expect(tabs.style.display).to.equal('none');
+
+        // Remove → tabs visible again.
+        host.classList.remove('hidetabsheet');
+        await Promise.resolve();
+        expect(tabs.style.display).to.not.equal('none');
+        cleanup();
+    });
+
+    it('initial hidetabsheet class on the host is honored at attach time (slice 174)', async () => {
+        const host = document.createElement('div');
+        host.classList.add('hidetabsheet');
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setSheetNames(['One']);
+        sheet.setSheetIndex(1);
+        await sheet.getSheetTabs().updateComplete;
+        expect(sheet.getSheetTabs().style.display).to.equal('none');
+        sheet.dispose();
+        document.body.removeChild(host);
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render
