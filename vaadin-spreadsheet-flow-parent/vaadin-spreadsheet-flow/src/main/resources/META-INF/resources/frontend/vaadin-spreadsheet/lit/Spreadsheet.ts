@@ -20,8 +20,16 @@ import {
     normalizedRange,
     selectRange,
     selectSingleCell,
+    type CellRange,
     type SelectionState,
 } from './state/SelectionState.js';
+import type {
+    CellRangeSelectedData,
+    CellSelectedData,
+    ColumnSelectedData,
+    RowSelectedData,
+    SpreadsheetEvent,
+} from './types/rpc-client-to-server.js';
 import {
     computeTotalGridSize,
     computeViewportBounds,
@@ -377,6 +385,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.extendRow = row;
         }
         this.recomputeViewport();
+        this.dispatchSelectionEvent();
     };
 
     /**
@@ -414,6 +423,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.extendRow = rows;
         }
         this.recomputeViewport();
+        this.dispatchSelectionEvent();
     };
 
     /**
@@ -447,6 +457,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.extendRow = row;
         }
         this.recomputeViewport();
+        this.dispatchSelectionEvent();
     };
 
     /**
@@ -506,6 +517,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.extendRow = target.row;
         }
         this.recomputeViewport();
+        this.dispatchSelectionEvent();
     };
 
     /**
@@ -566,6 +578,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /** Test-only accessor: the scroll container element. */
     getScrollContainer(): HTMLElement {
         return this.scrollContainer;
+    }
+
+    /**
+     * Dispatch a {@code spreadsheet-event} on the host carrying
+     * the appropriate server-bound event for the current selection
+     * (slice 150). Picks one of {@code cellSelected /
+     * cellRangeSelected / columnSelected / rowSelected} based on
+     * the shape of {@code this.selection.activeRange}:
+     *
+     *  - whole column (r1=1, r2=rows, single col) → columnSelected
+     *  - whole row    (c1=1, c2=cols, single row) → rowSelected
+     *  - single cell  (c1=c2, r1=r2)              → cellSelected
+     *  - otherwise                                → cellRangeSelected
+     *
+     * The wrapper subscribes to {@code spreadsheet-event} with a
+     * {@code @DomEvent} listener on the server side; the detail's
+     * {@code type} + {@code data} mirror the existing
+     * SpreadsheetHandler dispatch signatures (preserved verbatim
+     * from the GWT side as a wire contract).
+     */
+    private dispatchSelectionEvent(): void {
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: buildSelectionEvent(
+                this.selection.activeCell,
+                this.selection.activeRange,
+                this.rows,
+                this.cols
+            ),
+            bubbles: true,
+            composed: true,
+        }));
     }
 
     // ====================================================================
@@ -1337,6 +1380,76 @@ export class Spreadsheet implements SpreadsheetClientApi {
     isSheetProtected(): boolean {
         return this.sheetProtected;
     }
+}
+
+/**
+ * Pure helper: classify a selection shape and build the matching
+ * server-bound {@link SpreadsheetEvent}.
+ *
+ * Detection order (specific → general):
+ *   1. whole column: r1=1, r2=rows, c1=c2 → {@code columnSelected}
+ *   2. whole row:    c1=1, c2=cols, r1=r2 → {@code rowSelected}
+ *   3. single cell:  c1=c2, r1=r2         → {@code cellSelected}
+ *   4. otherwise:                          → {@code cellRangeSelected}
+ *
+ * Note: when `rows`/`cols` is 0 (uninitialized grid) the "whole
+ * column / row" branches collapse to cellSelected since the
+ * full-axis match can't succeed against a zero-width axis.
+ *
+ * Slice 150.
+ */
+export function buildSelectionEvent(
+    activeCell: { col: number; row: number },
+    range: CellRange,
+    rows: number,
+    cols: number
+): SpreadsheetEvent {
+    const isSingleCol = range.c1 === range.c2;
+    const isSingleRow = range.r1 === range.r2;
+    const isWholeCol =
+        cols > 0 && rows > 0
+        && isSingleCol
+        && range.r1 === 1
+        && range.r2 === rows;
+    const isWholeRow =
+        cols > 0 && rows > 0
+        && isSingleRow
+        && range.c1 === 1
+        && range.c2 === cols;
+
+    if (isWholeCol) {
+        const data: ColumnSelectedData = {
+            column: range.c1,
+            firstRowIndex: range.r1,
+        };
+        return { type: 'columnSelected', data };
+    }
+    if (isWholeRow) {
+        const data: RowSelectedData = {
+            row: range.r1,
+            firstColumnIndex: range.c1,
+        };
+        return { type: 'rowSelected', data };
+    }
+    if (isSingleCol && isSingleRow) {
+        const data: CellSelectedData = {
+            row: activeCell.row,
+            column: activeCell.col,
+            // Every TS-side selection write replaces the prior
+            // range (we don't yet support non-coherent / Ctrl-
+            // click auxRanges, slice 146 deferred). The wrapper
+            // can still ignore this when re-applying state.
+            oldSelectionRangeDiscarded: true,
+        };
+        return { type: 'cellSelected', data };
+    }
+    const data: CellRangeSelectedData = {
+        row1: range.r1,
+        col1: range.c1,
+        row2: range.r2,
+        col2: range.c2,
+    };
+    return { type: 'cellRangeSelected', data };
 }
 
 /**

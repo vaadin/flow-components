@@ -1454,6 +1454,178 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('cell-click dispatches spreadsheet-event with cellSelected (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 4, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(received).to.exist;
+        expect(received!.type).to.equal('cellSelected');
+        expect(received!.data).to.deep.equal({
+            row: 3,
+            column: 4,
+            oldSelectionRangeDiscarded: true,
+        });
+
+        cleanup();
+    });
+
+    it('shift-click dispatches cellRangeSelected with the new range (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Set anchor to (2,2) first.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        const received: { type: string; data: Record<string, unknown> }[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received.push((e as CustomEvent).detail);
+        });
+
+        // Shift-click to extend.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 5, row: 4, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(received).to.have.length(1);
+        expect(received[0].type).to.equal('cellRangeSelected');
+        expect(received[0].data).to.deep.equal({
+            row1: 2, col1: 2, row2: 4, col2: 5,
+        });
+        cleanup();
+    });
+
+    it('column-header click dispatches columnSelected (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-header-click', {
+            detail: { col: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(received!.type).to.equal('columnSelected');
+        expect(received!.data).to.deep.equal({
+            column: 3,
+            firstRowIndex: 1,
+        });
+        cleanup();
+    });
+
+    it('row-header click dispatches rowSelected (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-header-click', {
+            detail: { row: 4, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(received!.type).to.equal('rowSelected');
+        expect(received!.data).to.deep.equal({
+            row: 4,
+            firstColumnIndex: 1,
+        });
+        cleanup();
+    });
+
+    it('keyboard arrow dispatches cellSelected (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        dispatchKey(sheet.getScrollContainer(), 'ArrowRight');
+
+        expect(received!.type).to.equal('cellSelected');
+        expect(received!.data).to.deep.equal({
+            row: 1,
+            column: 2,
+            oldSelectionRangeDiscarded: true,
+        });
+        cleanup();
+    });
+
+    it('shift+arrow dispatches cellRangeSelected (slice 150)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Move active to (3, 3) first via plain ArrowRight x 2 + Down x 2.
+        const scroller = sheet.getScrollContainer();
+        dispatchKey(scroller, 'ArrowRight');
+        dispatchKey(scroller, 'ArrowRight');
+        dispatchKey(scroller, 'ArrowDown');
+        dispatchKey(scroller, 'ArrowDown');
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received = (e as CustomEvent).detail;
+        });
+
+        // Now shift+ArrowDown — should extend to a 1×2 range and dispatch range.
+        dispatchKey(scroller, 'ArrowDown', { shiftKey: true });
+
+        expect(received!.type).to.equal('cellRangeSelected');
+        expect(received!.data).to.deep.equal({
+            row1: 3, col1: 3, row2: 4, col2: 3,
+        });
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render
