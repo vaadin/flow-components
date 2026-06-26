@@ -988,33 +988,14 @@ function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
                      style=${style} />
             `;
         }
-        // COMPONENT overlay (slice 168): render a positioned
-        // wrapper containing a named slot. Vaadin Flow assigns
-        // the embedded component to the spreadsheet host's light
-        // DOM with `slot="overlay-${id}"`. The cell-grid's shadow
-        // DOM picks it up via the matching `<slot>` here. When
-        // no component has been assigned (e.g. before the server
-        // pushes the component tree), the slot is empty + the
-        // box renders blank — matching the GWT path's "empty
-        // cell" fallback.
-        //
-        // Note: this only renders the component when the wrapper
-        // forwards the component as a child of the cell-grid
-        // element (NOT of the spreadsheet host). The current
-        // wrapper appends component children directly to the
-        // host; for the slot to find them, the wrapper needs an
-        // additional move into the cell-grid's light DOM. This
-        // is tracked as deferred follow-up in
-        // TIER3_FLIP_READINESS.md — for the flip, a missing-slot
-        // overlay shows as an empty positioned box, which is the
-        // same visual behavior the GWT path has before the
-        // component finishes loading.
+        // COMPONENT overlay: render a placeholder that a future
+        // slice will replace with the actual Vaadin component
+        // (via slot or appended-child injection from the Flow
+        // wrapper).
         return html`
             <div class="sheet-overlay sheet-overlay-component"
                  data-overlay-id=${overlay.id}
-                 style=${style}>
-                <slot name=${`overlay-${overlay.id}`}></slot>
-            </div>
+                 style=${style}></div>
         `;
     });
 }
