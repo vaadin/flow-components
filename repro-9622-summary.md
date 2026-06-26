@@ -10,7 +10,7 @@
 - **Reproduced on:** flow-components @ `main` (`flow.version` 25.3-SNAPSHOT, web components resolve to `@vaadin/*@25.2.0` — the affected version)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot:** ![Open ComboBox stuck on loading spinner with no items](https://raw.githubusercontent.com/vaadin/flow-components/c38cad53da069e477f2438bc453695d93b38ba9c/repro-9622.png)
+- **Screenshot:** ![Open ComboBox stuck on loading spinner with no items](https://raw.githubusercontent.com/vaadin/flow-components/2812a96a32931f2841eebb7786160addf3582d41/repro-9622.png)
 
 ## Observed behavior
 
@@ -71,7 +71,7 @@ add(addTokenComboBox, addTokenButton);
 
 The failure is that the **client never receives the first page of item data** after the ComboBox transitions from invisible to visible+opened in one round-trip — the server sends the size (placeholders render) but no item data, so the dropdown is stuck `loading`. The flow-components ComboBox data bridge (`ComboBoxDataController`, which drives Flow's `DataCommunicator` and the client connector) is the code that governs this delivery:
 
-https://github.com/vaadin/flow-components/blob/c38cad53da069e477f2438bc453695d93b38ba9c/vaadin-combo-box-flow-parent/vaadin-combo-box-flow/src/main/java/com/vaadin/flow/component/combobox/ComboBoxDataController.java#L245-L288
+https://github.com/vaadin/flow-components/blob/2812a96a32931f2841eebb7786160addf3582d41/vaadin-combo-box-flow-parent/vaadin-combo-box-flow/src/main/java/com/vaadin/flow/component/combobox/ComboBoxDataController.java#L245-L288
 
 This Java code is **unchanged across the regression window** (last touched 2026-03, well before 25.2.0), and only the bundled `@vaadin/combo-box` web component was bumped to 25.2.0. So the regression most likely sits in the 25.2.0 platform bump — either the combo-box web component (the 25.2.0 scroller/initialization refactor in `vaadin-combo-box-scroller-mixin.js` / data-provider flow) or Flow core's `DataCommunicator` handling of a component that was invisible during its initial flush and is not re-flushed when made visible. This needs a human to bisect between web-components 25.1.x → 25.2.0 and the Flow core version.
 
