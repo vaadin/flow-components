@@ -1,0 +1,155 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
+
+import { css, html, LitElement, type TemplateResult } from 'lit';
+
+import type { ViewportBounds } from '../algorithms/ViewportMath.js';
+
+/**
+ * Input state for the {@link SpreadsheetRowHeader} element. The
+ * connector builds + pushes this alongside the cell-grid's render
+ * state on every render cycle (slice 144).
+ *
+ * Mirror of {@link ColumnHeaderRenderState}: same shape, swapped
+ * column axis → row axis.
+ */
+export interface RowHeaderRenderState {
+    /** Currently visible rows — same shape as the cell-grid's viewport. */
+    viewport: ViewportBounds;
+    /**
+     * Pixel y-offsets for visible rows, indexed by
+     * {@code row - viewport.firstRowIndex} — copied through from
+     * the cell-grid render state.
+     */
+    rowY: ReadonlyArray<number>;
+    /** Pixel height of each visible row, same indexing as {@code rowY}. */
+    rowHeights: ReadonlyArray<number>;
+    /**
+     * Width of the header strip in pixels. {@code 0} disables the
+     * header (render emits an empty fragment). Excel's typical row-
+     * header width is 30-40 px (wider for large row counts so 1M+
+     * fits without truncation).
+     */
+    headerWidth: number;
+    /**
+     * Total grid pixel height — used to size the row-header strip's
+     * intrinsic height so it occupies the same vertical scroll
+     * extent as the cell-grid.
+     */
+    totalGridHeightPx: number;
+}
+
+/** Helper: build an empty row-header render state. */
+export function emptyRowHeaderRenderState(): RowHeaderRenderState {
+    return {
+        viewport: {
+            firstColumnIndex: 1,
+            firstColumnPosition: 0,
+            lastColumnIndex: 0,
+            lastColumnPosition: 0,
+            firstRowIndex: 1,
+            firstRowPosition: 0,
+            lastRowIndex: 0,
+            lastRowPosition: 0,
+        },
+        rowY: [],
+        rowHeights: [],
+        headerWidth: 0,
+        totalGridHeightPx: 0,
+    };
+}
+
+/**
+ * Internal row-header Lit element. Renders one
+ * {@code .row-header-cell} per visible row with the row's 1-based
+ * number inside.
+ *
+ * The element is sticky-positioned (via host CSS, {@code left:0})
+ * so it stays pinned at the left edge of the scroll container as
+ * the user scrolls right. Vertical scroll moves the strip
+ * naturally with the cells, keeping row numbers aligned with
+ * their rows.
+ *
+ * Same render-state-driven contract + same no-decorator pattern as
+ * the cell-grid + column-header. Slice 144.
+ */
+export class SpreadsheetRowHeader extends LitElement {
+    static properties = {
+        renderState: { attribute: false },
+    };
+
+    static styles = css`
+        :host {
+            display: block;
+            position: sticky;
+            left: 0;
+            z-index: 4;
+            box-sizing: border-box;
+            background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
+            border-right: 1px solid
+                var(--vaadin-spreadsheet-header-border, #c0c0c0);
+            font-family: var(--vaadin-spreadsheet-header-font, inherit);
+            font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
+        }
+
+        .row-header-cell {
+            position: absolute;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-align: center;
+            border-bottom: 1px solid
+                var(--vaadin-spreadsheet-header-border, #c0c0c0);
+        }
+    `;
+
+    declare renderState: RowHeaderRenderState;
+
+    constructor() {
+        super();
+        this.renderState = emptyRowHeaderRenderState();
+    }
+
+    render(): TemplateResult {
+        const { viewport, rowY, rowHeights, headerWidth } = this.renderState;
+
+        if (headerWidth === 0
+                || viewport.lastRowIndex < viewport.firstRowIndex) {
+            return html``;
+        }
+
+        const cells: TemplateResult[] = [];
+        for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+            const top = rowY[row - viewport.firstRowIndex] ?? 0;
+            const height = rowHeights[row - viewport.firstRowIndex] ?? 0;
+            if (height === 0) {
+                continue;
+            }
+            const style =
+                `left:0;top:${top}px;width:${headerWidth}px;height:${height}px;`
+                + `line-height:${height}px;`;
+            cells.push(html`
+                <div class="row-header-cell row${row}" style=${style}>
+                    ${row}
+                </div>
+            `);
+        }
+        return html`${cells}`;
+    }
+}
+
+customElements.define(
+    'vaadin-spreadsheet-internal-row-header',
+    SpreadsheetRowHeader
+);
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'vaadin-spreadsheet-internal-row-header': SpreadsheetRowHeader;
+    }
+}

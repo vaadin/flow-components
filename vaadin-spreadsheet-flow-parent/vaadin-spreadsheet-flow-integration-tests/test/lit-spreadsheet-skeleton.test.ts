@@ -280,25 +280,25 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid + column-header to the host element (via the scroll container)', () => {
-        // Slice 140: a scroll container now wraps the cell-grid so the
-        // host's scrollbar tracks reflect the full virtual-grid extent.
-        // Slice 143: a column-header sub-element sits in the scroll
-        // container above the cell-grid (header strip; rendered only
-        // when headerRowHeight > 0).
+    it('appends the cell-grid + headers to the host element via a CSS-grid scroll container', () => {
+        // Slice 140: scroll container wraps the cell-grid. Slice 143
+        // added the column-header sibling. Slice 144 added the
+        // row-header + restructured the scroll container as a CSS
+        // grid with header strips on the top + left edges.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
         expect(host.children).to.have.length(1);
         expect(host.firstElementChild === sheet.getScrollContainer()).to.be.true;
         const scroller = sheet.getScrollContainer();
-        // Column-header first so it sits above the cell-grid in flow,
-        // cell-grid second. (Identity checks via `===` to avoid chai
-        // serializing the LitElement for diff output — its render-
-        // pipeline state contains cycles.)
-        expect(scroller.children).to.have.length(2);
-        expect(scroller.children[0] === sheet.getColumnHeader()).to.be.true;
-        expect(scroller.children[1] === sheet.getCellGrid()).to.be.true;
+        // Three children: column-header, row-header, cell-grid.
+        // (Identity checks via `===` to avoid chai serializing the
+        // LitElement for diff output — renderState contains cycles.)
+        expect(scroller.children).to.have.length(3);
+        const kids = Array.from(scroller.children);
+        expect(kids.includes(sheet.getColumnHeader())).to.be.true;
+        expect(kids.includes(sheet.getRowHeader())).to.be.true;
+        expect(kids.includes(sheet.getCellGrid())).to.be.true;
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -539,20 +539,23 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         };
     }
 
-    it('wraps the cell-grid + column-header in a scroll container with overflow:auto', () => {
+    it('wraps the cell-grid + headers in a CSS-grid scroll container with overflow:auto', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
 
         const scroller = sheet.getScrollContainer();
         expect(scroller).to.be.instanceOf(HTMLElement);
         expect(scroller.className).to.equal('sheet-scroll');
         expect(scroller.style.overflow).to.equal('auto');
-        // Two children: column-header (slice 143) + cell-grid.
-        // Identity checks via `===` to avoid chai serializing the
-        // LitElement for diff output (cycles in renderState).
-        expect(scroller.children).to.have.length(2);
+        // CSS-grid layout (slice 144) with 2x2 cells: column-header
+        // top, row-header left, cell-grid main, corner empty.
+        const computed = getComputedStyle(scroller);
+        expect(computed.display).to.equal('grid');
+        // Three children: column-header + row-header + cell-grid.
+        expect(scroller.children).to.have.length(3);
         const kids = Array.from(scroller.children);
         expect(kids.includes(sheet.getCellGrid())).to.be.true;
         expect(kids.includes(sheet.getColumnHeader())).to.be.true;
+        expect(kids.includes(sheet.getRowHeader())).to.be.true;
 
         cleanup();
     });
@@ -842,6 +845,38 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(after).to.equal(before);
 
         host.remove();
+    });
+
+    it('setHeaderColumnWidth + applyRenderState push state to the row-header sub-element (slice 144)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 18, 15, 12, 15]); // varying row heights
+
+        // Default: no row-header.
+        expect(sheet.getHeaderColumnWidth()).to.equal(0);
+
+        sheet.setHeaderColumnWidth(40);
+        expect(sheet.getHeaderColumnWidth()).to.equal(40);
+
+        sheet.recomputeViewport();
+
+        const rowState = sheet.getRowHeader().renderState;
+        expect(rowState.headerWidth).to.equal(40);
+        // rowHeights are in points → pixels at 96 ppi (15pt→20, 18pt→24,
+        // 12pt→16). Use Array.from to avoid chai serializing the
+        // ReadonlyArray + LitElement cycle on assertion failure.
+        expect(Array.from(rowState.rowHeights)).to.deep.equal([
+            20, 24, 20, 16, 20,
+        ]);
+        // Total grid height matches what the cell-grid uses.
+        expect(rowState.totalGridHeightPx).to.equal(20 + 24 + 20 + 16 + 20);
+
+        // The row header's inline width matches.
+        expect(sheet.getRowHeader().style.width).to.equal('40px');
+
+        cleanup();
     });
 
     it('setHeaderRowHeight + applyRenderState push header state to the column-header sub-element (slice 143)', () => {

@@ -27,6 +27,7 @@ import {
 import { toKey } from './algorithms/CellKeys.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
+import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -181,12 +182,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private readonly columnHeader: SpreadsheetColumnHeader;
 
     /**
+     * The row-header sub-element. Sibling of the cell-grid
+     * inside the scroll container; renders the row numbers
+     * (1, 2, 3, ...) at the left of the cells. Hidden when
+     * {@link headerColumnWidth} is 0. Slice 144.
+     */
+    private readonly rowHeader: SpreadsheetRowHeader;
+
+    /**
      * Height of the column-header strip in pixels. {@code 0}
      * (default) means no header strip is rendered. The host opts
      * in by calling {@link setHeaderRowHeight}; matches Excel's
      * 18-22px range. Slice 143.
      */
     private headerRowHeight = 0;
+
+    /**
+     * Width of the row-header strip in pixels. {@code 0} (default)
+     * means no row-header is rendered. The host opts in via
+     * {@link setHeaderColumnWidth}; Excel uses 30-40px (wider
+     * accommodates the largest row numbers without truncation).
+     * Slice 144.
+     */
+    private headerColumnWidth = 0;
 
     /**
      * The scroll surface — wraps the cell-grid and provides the
@@ -214,14 +232,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.host = host;
         this.cellGrid = new SpreadsheetCellGrid();
         this.columnHeader = new SpreadsheetColumnHeader();
+        this.rowHeader = new SpreadsheetRowHeader();
         this.scrollContainer = document.createElement('div');
         this.scrollContainer.className = 'sheet-scroll';
+        // CSS Grid layout: 2 columns × 2 rows so each header sits in
+        // its own cell. Column 1 = row-header (auto-sized to its
+        // intrinsic width); column 2 = cell-grid (auto-sized to its
+        // intrinsic width). Same for rows. Sticky positioning on
+        // each header pins it to its viewport edge during scroll.
+        // Slice 144.
         this.scrollContainer.style.cssText =
-            'position:relative;overflow:auto;width:100%;height:100%;';
-        // Column-header strip first so it sits above the cell-grid
-        // in document flow; position:sticky keeps it pinned to the
-        // top of the scroll container during vertical scroll.
+            'position:relative;overflow:auto;width:100%;height:100%;'
+            + 'display:grid;grid-template-columns:auto auto;'
+            + 'grid-template-rows:auto auto;';
+        // Column-header at (col 2, row 1) — top strip above cells.
+        this.columnHeader.style.gridColumn = '2';
+        this.columnHeader.style.gridRow = '1';
+        // Row-header at (col 1, row 2) — left strip alongside cells.
+        this.rowHeader.style.gridColumn = '1';
+        this.rowHeader.style.gridRow = '2';
+        // Cell-grid at (col 2, row 2).
+        this.cellGrid.style.gridColumn = '2';
+        this.cellGrid.style.gridRow = '2';
         this.scrollContainer.appendChild(this.columnHeader);
+        this.scrollContainer.appendChild(this.rowHeader);
         this.scrollContainer.appendChild(this.cellGrid);
         this.host.appendChild(this.scrollContainer);
         this.scrollContainer.addEventListener('scroll', this.handleScroll);
@@ -328,6 +362,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
                 colWidths: state.colWidths,
                 headerHeight: this.headerRowHeight,
                 totalGridWidthPx: state.totalGridWidthPx,
+            };
+        }
+        // Row-header strip (slice 144). Same opt-in gate as column
+        // header — headerColumnWidth must be > 0 to render.
+        if (this.headerColumnWidth > 0) {
+            this.rowHeader.style.width = `${this.headerColumnWidth}px`;
+            this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
+            this.rowHeader.renderState = {
+                viewport: state.viewport,
+                rowY: state.rowY,
+                rowHeights: state.rowHeights,
+                headerWidth: this.headerColumnWidth,
+                totalGridHeightPx: state.totalGridHeightPx,
             };
         }
     }
@@ -485,6 +532,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return this.columnHeader;
     }
 
+    /** Test-only accessor: the row-header sub-element (slice 144). */
+    getRowHeader(): SpreadsheetRowHeader {
+        return this.rowHeader;
+    }
+
     /**
      * Set the column-header strip's height in pixels. {@code 0}
      * (default) means no header is rendered — useful for headless
@@ -498,6 +550,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /** Current column-header strip height in pixels. Slice 143. */
     getHeaderRowHeight(): number {
         return this.headerRowHeight;
+    }
+
+    /**
+     * Set the row-header strip's width in pixels. {@code 0}
+     * (default) disables the strip. Excel uses 30-40px; wider
+     * accommodates the largest row numbers without truncation.
+     * Slice 144.
+     */
+    setHeaderColumnWidth(pixels: number): void {
+        this.headerColumnWidth = pixels;
+    }
+
+    /** Current row-header strip width in pixels. Slice 144. */
+    getHeaderColumnWidth(): number {
+        return this.headerColumnWidth;
     }
 
     // ====================================================================
