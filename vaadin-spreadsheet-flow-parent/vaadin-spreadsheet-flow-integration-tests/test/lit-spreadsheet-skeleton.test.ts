@@ -2616,6 +2616,160 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    // ===================================================================
+    // Slice 166 — right-click context menu
+    // ===================================================================
+    it('right-click on a cell inside the selection dispatches contextMenuOpenOnSelection (slice 166)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        // Place an explicit range selection covering B2:D4.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 4, row: 4, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        // Right-click on C3 — inside the B2:D4 selection.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-contextmenu', {
+            detail: { col: 3, row: 3 },
+            bubbles: true, composed: true,
+        }));
+
+        const ctxEvents = events.filter(e => e.type === 'contextMenuOpenOnSelection');
+        expect(ctxEvents).to.have.length(1);
+        expect(ctxEvents[0].data).to.deep.equal({ row: 3, column: 3 });
+        // No new selection event since the click was inside the
+        // existing selection.
+        const selEvents = events.filter(e =>
+            e.type === 'cellSelected' || e.type === 'cellRangeSelected'
+        );
+        expect(selEvents).to.have.length(0);
+        cleanup();
+    });
+
+    it('right-click on a cell outside the selection moves selection and then dispatches contextMenuOpenOnSelection (slice 166)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        // Select B2 only.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        // Right-click on D4 (outside the selection).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-contextmenu', {
+            detail: { col: 4, row: 4 },
+            bubbles: true, composed: true,
+        }));
+
+        const selEvents = events.filter(e => e.type === 'cellSelected');
+        expect(selEvents).to.have.length(1);
+        expect(selEvents[0].data).to.include({ row: 4, column: 4 });
+        const ctxEvents = events.filter(e => e.type === 'contextMenuOpenOnSelection');
+        expect(ctxEvents).to.have.length(1);
+        expect(ctxEvents[0].data).to.deep.equal({ row: 4, column: 4 });
+        // Selection event should be dispatched BEFORE the context-menu
+        // event so the server sees the selection update first.
+        const selIdx = events.findIndex(e => e.type === 'cellSelected');
+        const ctxIdx = events.findIndex(e => e.type === 'contextMenuOpenOnSelection');
+        expect(selIdx).to.be.lessThan(ctxIdx);
+        cleanup();
+    });
+
+    it('right-click on a column header selects whole column and dispatches columnHeaderContextMenuOpen (slice 166)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        sheet.getColumnHeader().dispatchEvent(new CustomEvent('column-header-contextmenu', {
+            detail: { col: 3 },
+            bubbles: true, composed: true,
+        }));
+
+        const colSelEvents = events.filter(e => e.type === 'columnSelected');
+        expect(colSelEvents).to.have.length(1);
+        expect(colSelEvents[0].data).to.include({ column: 3 });
+        const ctxEvents = events.filter(e => e.type === 'columnHeaderContextMenuOpen');
+        expect(ctxEvents).to.have.length(1);
+        expect(ctxEvents[0].data).to.deep.equal({ columnIndex: 3 });
+        cleanup();
+    });
+
+    it('right-click on a row header selects whole row and dispatches rowHeaderContextMenuOpen (slice 166)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        const events: Array<{ type: string; data: Record<string, unknown> }> = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            events.push((e as CustomEvent).detail);
+        });
+
+        sheet.getRowHeader().dispatchEvent(new CustomEvent('row-header-contextmenu', {
+            detail: { row: 4 },
+            bubbles: true, composed: true,
+        }));
+
+        const rowSelEvents = events.filter(e => e.type === 'rowSelected');
+        expect(rowSelEvents).to.have.length(1);
+        expect(rowSelEvents[0].data).to.include({ row: 4 });
+        const ctxEvents = events.filter(e => e.type === 'rowHeaderContextMenuOpen');
+        expect(ctxEvents).to.have.length(1);
+        expect(ctxEvents[0].data).to.deep.equal({ rowIndex: 4 });
+        cleanup();
+    });
+
+    it('right-click contextmenu listener calls preventDefault to suppress the browser menu (slice 166)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const cell = sheet.getCellGrid().shadowRoot!.querySelector('.cell');
+        expect(cell).to.not.be.null;
+
+        const event = new MouseEvent('contextmenu', {
+            bubbles: true, composed: true, cancelable: true,
+        });
+        cell!.dispatchEvent(event);
+        expect(event.defaultPrevented).to.be.true;
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

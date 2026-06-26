@@ -137,7 +137,36 @@ export class SpreadsheetRowHeader extends LitElement {
             'mousedown',
             this.handleShadowMouseDown as EventListener
         );
+        // Slice 166: right-click on a row header dispatches
+        // `row-header-contextmenu`. preventDefault suppresses the
+        // browser's native menu so only the server-supplied
+        // ContextMenu is shown.
+        this.shadowRoot!.addEventListener(
+            'contextmenu',
+            this.handleShadowContextMenu
+        );
     }
+
+    private readonly handleShadowContextMenu = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.row-header-cell');
+        if (!cell) {
+            return;
+        }
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(row) || row < 1) {
+            return;
+        }
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('row-header-contextmenu', {
+            detail: { row },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     private readonly handleShadowMouseDown = (e: Event): void => {
         const target = e.target;

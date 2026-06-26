@@ -207,6 +207,13 @@ export class SpreadsheetCellGrid extends LitElement {
         // outside the spreadsheet still terminates cleanly.
         this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown);
         this.shadowRoot!.addEventListener('mouseover', this.handleShadowMouseOver);
+        // Right-click delegation (slice 166). preventDefault stops
+        // the browser's native context menu so the server-supplied
+        // ContextMenu component is the only one shown. Dispatches
+        // `cell-contextmenu` with the cell coordinate; the connector
+        // selects the cell (if outside selection) and forwards as
+        // contextMenuOpenOnSelection.
+        this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
     }
 
     /**
@@ -315,6 +322,34 @@ export class SpreadsheetCellGrid extends LitElement {
             return;
         }
         this.dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col, row },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Right-click handler — emits {@code cell-contextmenu} with the
+     * cell coordinate. preventDefault stops the browser's native
+     * context menu so the server-side {@code ContextMenu} is the
+     * only menu shown. Slice 166.
+     */
+    private readonly handleShadowContextMenu = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
+            return;
+        }
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('cell-contextmenu', {
             detail: { col, row },
             bubbles: true,
             composed: true,

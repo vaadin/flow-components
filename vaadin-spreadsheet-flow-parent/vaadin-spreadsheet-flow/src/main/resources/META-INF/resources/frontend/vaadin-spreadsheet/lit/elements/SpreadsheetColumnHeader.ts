@@ -149,7 +149,37 @@ export class SpreadsheetColumnHeader extends LitElement {
             'mousedown',
             this.handleShadowMouseDown as EventListener
         );
+        // Slice 166: right-click on a column header dispatches
+        // `column-header-contextmenu` so the connector can
+        // forward it as `columnHeaderContextMenuOpen` to the
+        // server. preventDefault suppresses the browser's native
+        // menu.
+        this.shadowRoot!.addEventListener(
+            'contextmenu',
+            this.handleShadowContextMenu
+        );
     }
+
+    private readonly handleShadowContextMenu = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.col-header-cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        if (!Number.isFinite(col) || col < 1) {
+            return;
+        }
+        e.preventDefault();
+        this.dispatchEvent(new CustomEvent('column-header-contextmenu', {
+            detail: { col },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     private readonly handleShadowMouseDown = (e: Event): void => {
         const target = e.target;

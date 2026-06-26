@@ -477,6 +477,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'popup-button-click',
             this.handlePopupButtonClick as EventListener
         );
+        // Context-menu wiring (slice 166). Right-click on a cell
+        // / column-header / row-header dispatches the matching
+        // local event from the element; the connector forwards it
+        // to the server as `contextMenuOpenOnSelection` /
+        // `columnHeaderContextMenuOpen` / `rowHeaderContextMenuOpen`
+        // after first updating the selection (Excel: right-click
+        // on a cell outside the current selection selects that
+        // cell, then opens the menu).
+        this.cellGrid.addEventListener(
+            'cell-contextmenu',
+            this.handleCellContextMenu as EventListener
+        );
+        this.columnHeader.addEventListener(
+            'column-header-contextmenu',
+            this.handleColumnHeaderContextMenu as EventListener
+        );
+        this.rowHeader.addEventListener(
+            'row-header-contextmenu',
+            this.handleRowHeaderContextMenu as EventListener
+        );
         // Header-drag resize (slice 164). The header elements
         // emit `column-resize-start` / `row-resize-start` from
         // their right-edge / bottom-edge mousedown handles; the
@@ -648,6 +668,93 @@ export class Spreadsheet implements SpreadsheetClientApi {
             detail: {
                 type: 'popupButtonClick',
                 data: { row, column: col },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Right-click on a cell (slice 166). Excel behavior: if the
+     * clicked cell is outside the current selection, move selection
+     * to it first (firing a selection event), then dispatch
+     * {@code contextMenuOpenOnSelection}. If inside the existing
+     * selection, leave the selection alone and dispatch the event
+     * with the clicked cell's coordinates.
+     */
+    private readonly handleCellContextMenu = (
+        e: CustomEvent<{ col: number; row: number }>
+    ): void => {
+        const { col, row } = e.detail;
+        if (!isCellInSelection(col, row, this.selection)) {
+            this.selection = selectSingleCell(col, row);
+            this.extendCol = col;
+            this.extendRow = row;
+            this.recomputeViewport();
+            this.dispatchSelectionEvent();
+        }
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'contextMenuOpenOnSelection',
+                data: { row, column: col },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Right-click on a column header (slice 166). Selects the
+     * whole column (Excel behavior) then dispatches
+     * {@code columnHeaderContextMenuOpen}.
+     */
+    private readonly handleColumnHeaderContextMenu = (
+        e: CustomEvent<{ col: number }>
+    ): void => {
+        const { col } = e.detail;
+        const rows = this.rows > 0 ? this.rows : 1;
+        this.selection = {
+            activeCell: { col, row: 1 },
+            activeRange: normalizedRange(col, 1, col, rows),
+            auxRanges: [],
+        };
+        this.extendCol = col;
+        this.extendRow = rows;
+        this.recomputeViewport();
+        this.dispatchSelectionEvent();
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'columnHeaderContextMenuOpen',
+                data: { columnIndex: col },
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Right-click on a row header (slice 166). Mirror of the column
+     * variant — selects the whole row then dispatches
+     * {@code rowHeaderContextMenuOpen}.
+     */
+    private readonly handleRowHeaderContextMenu = (
+        e: CustomEvent<{ row: number }>
+    ): void => {
+        const { row } = e.detail;
+        const cols = this.cols > 0 ? this.cols : 1;
+        this.selection = {
+            activeCell: { col: 1, row },
+            activeRange: normalizedRange(1, row, cols, row),
+            auxRanges: [],
+        };
+        this.extendCol = cols;
+        this.extendRow = row;
+        this.recomputeViewport();
+        this.dispatchSelectionEvent();
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'rowHeaderContextMenuOpen',
+                data: { rowIndex: row },
             },
             bubbles: true,
             composed: true,
@@ -1390,6 +1497,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellGrid.removeEventListener(
             'popup-button-click',
             this.handlePopupButtonClick as EventListener
+        );
+        this.cellGrid.removeEventListener(
+            'cell-contextmenu',
+            this.handleCellContextMenu as EventListener
+        );
+        this.columnHeader.removeEventListener(
+            'column-header-contextmenu',
+            this.handleColumnHeaderContextMenu as EventListener
+        );
+        this.rowHeader.removeEventListener(
+            'row-header-contextmenu',
+            this.handleRowHeaderContextMenu as EventListener
         );
         document.removeEventListener('mouseup', this.handleDocumentMouseUp);
         document.removeEventListener('mousemove', this.handleDocumentMouseMove);
@@ -2407,6 +2526,35 @@ export function computePositionedOverlays(
  *
  * Slice 150.
  */
+/**
+ * Pure helper: is the given (col, row) inside the active range OR
+ * any aux range of the current selection? Slice 166 uses this for
+ * "right-click outside selection → move selection to clicked cell"
+ * Excel behavior.
+ */
+export function isCellInSelection(
+    col: number,
+    row: number,
+    selection: SelectionState
+): boolean {
+    const inRange = (range: CellRange): boolean => {
+        const cMin = Math.min(range.c1, range.c2);
+        const cMax = Math.max(range.c1, range.c2);
+        const rMin = Math.min(range.r1, range.r2);
+        const rMax = Math.max(range.r1, range.r2);
+        return col >= cMin && col <= cMax && row >= rMin && row <= rMax;
+    };
+    if (inRange(selection.activeRange)) {
+        return true;
+    }
+    for (const aux of selection.auxRanges) {
+        if (inRange(aux)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function buildSelectionEvent(
     activeCell: { col: number; row: number },
     range: CellRange,
