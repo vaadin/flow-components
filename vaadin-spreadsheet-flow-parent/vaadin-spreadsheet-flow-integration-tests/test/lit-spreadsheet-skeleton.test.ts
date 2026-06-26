@@ -1626,6 +1626,96 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('Delete key dispatches deleteSelectedCells spreadsheet-event (slice 151)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'deleteSelectedCells') {
+                received = detail;
+            }
+        });
+
+        dispatchKey(sheet.getScrollContainer(), 'Delete');
+
+        expect(received).to.exist;
+        expect(received!.type).to.equal('deleteSelectedCells');
+        expect(received!.data).to.deep.equal({});
+        cleanup();
+    });
+
+    it('Backspace also dispatches deleteSelectedCells (slice 151)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        let received: { type: string } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'deleteSelectedCells') {
+                received = detail;
+            }
+        });
+
+        dispatchKey(sheet.getScrollContainer(), 'Backspace');
+
+        expect(received).to.exist;
+        cleanup();
+    });
+
+    it('Delete does NOT dispatch deleteSelectedCells on an empty grid (slice 151)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        // No setRows/setCols.
+
+        let received = false;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'deleteSelectedCells') {
+                received = true;
+            }
+        });
+
+        dispatchKey(sheet.getScrollContainer(), 'Delete');
+
+        expect(received).to.be.false;
+        cleanup();
+    });
+
+    it('Delete does NOT modify the client-side selection (slice 151)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Set selection to (3, 3) and a range to (3,3)-(5,5).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 5, row: 5, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        const beforeRange = sheet.getSelection().activeRange;
+
+        dispatchKey(sheet.getScrollContainer(), 'Delete');
+
+        // Selection unchanged — server's response (when integrated)
+        // will push back updateCellValues for the cleared cells.
+        expect(sheet.getSelection().activeRange).to.deep.equal(beforeRange);
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

@@ -475,6 +475,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly handleKeyDown = (e: KeyboardEvent): void => {
         const key = e.key;
+        // Delete + Backspace clear the cell contents in the current
+        // selection. Pure pass-through to the server — the connector
+        // dispatches `deleteSelectedCells` and the server replies
+        // with `update*CellValues` carrying the cleared cells. The
+        // client doesn't optimistically clear locally so the
+        // server's response is the single source of truth. Slice
+        // 151.
+        if (key === 'Delete' || key === 'Backspace') {
+            if (this.rows <= 0 || this.cols <= 0) {
+                return;
+            }
+            e.preventDefault();
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: { type: 'deleteSelectedCells', data: {} },
+                bubbles: true,
+                composed: true,
+            }));
+            return;
+        }
         // Map each navigation key to a (deltaCol, deltaRow) OR an
         // absolute coord. Modifier-key semantics:
         //   - shift+arrow : move "extend" corner (slice 147)
