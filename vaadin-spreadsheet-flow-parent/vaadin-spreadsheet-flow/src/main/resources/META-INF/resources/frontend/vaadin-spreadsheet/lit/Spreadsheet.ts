@@ -1009,6 +1009,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }>
     ): void => {
         const { col, row, value, key, shiftKey } = e.detail;
+        // Slice 181: optimistically update the client-side cell
+        // data so the typed value is visible immediately. The
+        // server's `cellsUpdated` callback may arrive much later
+        // (or not at all in offline / TestBench scenarios); the
+        // GWT-era code updated the cell display before the
+        // round-trip — Excel users expect what they typed to
+        // show up at once. Preserves the existing CellData
+        // metadata when present (style index, locked flag).
+        const cellKey = toKey(col, row);
+        const previous = this.cellDataByKey.get(cellKey);
+        this.cellDataByKey.set(cellKey, {
+            col,
+            row,
+            value,
+            cellStyle: previous?.cellStyle ?? 'cs0',
+            locked: previous?.locked ?? false,
+            needsMeasure: previous?.needsMeasure ?? false,
+            isPercentage: previous?.isPercentage ?? false,
+            ...(previous?.formulaValue !== undefined
+                ? { formulaValue: previous.formulaValue }
+                : {}),
+            ...(previous?.originalValue !== undefined
+                ? { originalValue: previous.originalValue }
+                : {}),
+            ...(previous?.textColor !== undefined
+                ? { textColor: previous.textColor }
+                : {}),
+        });
         // Close the editor first so the re-render removes the
         // input — important to do BEFORE dispatching the server
         // event so the editor doesn't briefly flash on top of the

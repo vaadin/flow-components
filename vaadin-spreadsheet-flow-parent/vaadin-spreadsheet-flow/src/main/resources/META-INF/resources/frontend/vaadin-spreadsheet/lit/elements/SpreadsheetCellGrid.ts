@@ -60,8 +60,80 @@ export class SpreadsheetCellGrid extends LitElement {
             box-sizing: border-box;
             overflow: hidden;
             white-space: nowrap;
+            border-right: 1px solid var(
+                --vaadin-spreadsheet-cell-border-color, #c7c7c7);
+            border-bottom: 1px solid var(
+                --vaadin-spreadsheet-cell-border-color, #c7c7c7);
             font-family: var(--vaadin-spreadsheet-cell-font, inherit);
             font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
+        }
+
+        /* Selection overlay: the wrapper .sheet-selection is
+           positioned by the connector with inline left/top/width/
+           height. The four border divs inside form the visible
+           outline. Their bounding box feeds the TestBench
+           isElementSelected check, so they must occupy the
+           wrapper's full perimeter. */
+        .sheet-selection {
+            position: absolute;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+        .sheet-selection .s-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(
+                --vaadin-spreadsheet-selection-color, #1976d2);
+        }
+        .sheet-selection .s-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(
+                --vaadin-spreadsheet-selection-color, #1976d2);
+        }
+        .sheet-selection .s-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(
+                --vaadin-spreadsheet-selection-color, #1976d2);
+        }
+        .sheet-selection .s-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 2px;
+            height: 100%;
+            background: var(
+                --vaadin-spreadsheet-selection-color, #1976d2);
+        }
+        .sheet-selection .selection-corner {
+            position: absolute;
+            right: -3px;
+            bottom: -3px;
+            width: 7px;
+            height: 7px;
+            background: var(
+                --vaadin-spreadsheet-selection-color, #1976d2);
+            cursor: crosshair;
+            pointer-events: auto;
+        }
+        /* Cells inside the active range get a subtle background
+           highlight by default; matches the previous selected-cell-
+           highlight affordance. */
+        .cell.cell-range,
+        [part~="cell-range"] {
+            background: var(
+                --vaadin-spreadsheet-cell-range-bg,
+                rgba(25, 118, 210, 0.1));
         }
 
         /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
