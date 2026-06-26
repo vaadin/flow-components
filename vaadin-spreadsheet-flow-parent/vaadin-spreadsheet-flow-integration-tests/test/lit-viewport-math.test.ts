@@ -11,6 +11,7 @@ import { expect } from 'chai';
 import {
     calculateLeftValueOfScrolledColumns,
     calculateTopValueOfScrolledRows,
+    computeTotalGridSize,
     computeViewportBounds,
     convertPixelsToPoint,
     convertPointsToPixel,
@@ -303,5 +304,110 @@ describe('ViewportMath — computeViewportBounds — rows beyond definedRows', (
         //   115 < 100? no. Stop.
         expect(r.firstRowIndex).to.equal(6);
         expect(r.firstRowPosition).to.equal(115);
+    });
+});
+
+describe('ViewportMath — computeTotalGridSize (slice 140)', () => {
+    it('sums all defined row heights + column widths', () => {
+        // 3 cols × widths 50/60/40 = 150 px wide.
+        // 2 rows × heights 20/30 = 50 px tall.
+        const result = computeTotalGridSize({
+            rows: 2,
+            cols: 3,
+            definedRowHeightsPx: [20, 30],
+            definedColWidthsPx: [50, 60, 40],
+            hiddenRows: new Set(),
+            hiddenColumns: new Set(),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalWidthPx).to.equal(150);
+        expect(result.totalHeightPx).to.equal(50);
+    });
+
+    it('uses defaults for rows + columns beyond the defined arrays', () => {
+        // 5 rows total; defined heights cover rows 1..2; rows 3..5 use
+        // the default 18px. Total = 20 + 30 + 3*18 = 104.
+        // 4 cols total; defined widths cover col 1; cols 2..4 use default
+        // 64px. Total = 50 + 3*64 = 242.
+        const result = computeTotalGridSize({
+            rows: 5,
+            cols: 4,
+            definedRowHeightsPx: [20, 30],
+            definedColWidthsPx: [50],
+            hiddenRows: new Set(),
+            hiddenColumns: new Set(),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalWidthPx).to.equal(242);
+        expect(result.totalHeightPx).to.equal(104);
+    });
+
+    it('hidden rows contribute 0 to total height', () => {
+        // 3 rows × heights 20/30/40. Row 2 hidden → total = 20 + 0 + 40 = 60.
+        const result = computeTotalGridSize({
+            rows: 3,
+            cols: 1,
+            definedRowHeightsPx: [20, 30, 40],
+            definedColWidthsPx: [50],
+            hiddenRows: new Set([2]),
+            hiddenColumns: new Set(),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalHeightPx).to.equal(60);
+    });
+
+    it('hidden columns contribute 0 to total width', () => {
+        // 3 cols × widths 40/50/60. Cols 1 + 3 hidden → total = 0 + 50 + 0 = 50.
+        const result = computeTotalGridSize({
+            rows: 1,
+            cols: 3,
+            definedRowHeightsPx: [20],
+            definedColWidthsPx: [40, 50, 60],
+            hiddenRows: new Set(),
+            hiddenColumns: new Set([1, 3]),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalWidthPx).to.equal(50);
+    });
+
+    it('hidden rows beyond definedRowHeightsPx still contribute 0', () => {
+        // 5 rows, defined heights cover 1..2 (20+30). Default 18.
+        // Hide row 4 (beyond defined) → total = 20 + 30 + 18 + 0 + 18 = 86.
+        const result = computeTotalGridSize({
+            rows: 5,
+            cols: 1,
+            definedRowHeightsPx: [20, 30],
+            definedColWidthsPx: [50],
+            hiddenRows: new Set([4]),
+            hiddenColumns: new Set(),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalHeightPx).to.equal(86);
+    });
+
+    it('returns 0 for both dimensions when the grid is empty', () => {
+        const result = computeTotalGridSize({
+            rows: 0,
+            cols: 0,
+            definedRowHeightsPx: [],
+            definedColWidthsPx: [],
+            hiddenRows: new Set(),
+            hiddenColumns: new Set(),
+            defaultRowHeightPx: 18,
+            defaultColWidthPx: 64,
+        });
+
+        expect(result.totalWidthPx).to.equal(0);
+        expect(result.totalHeightPx).to.equal(0);
     });
 });

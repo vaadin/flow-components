@@ -156,6 +156,8 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: {
                 activeCell: { col: 1, row: 1 },
                 activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
@@ -265,6 +267,8 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -304,6 +308,8 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: emptyCellGridRenderState().selection,
         };
         const el = await attachWithState(state);
@@ -345,6 +351,8 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -441,6 +449,8 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection,
         };
     }
@@ -566,6 +576,8 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection,
         };
     }
@@ -888,6 +900,8 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
             frozenColWidths: opts.horizontalSplitPosition > 0 ? [50, 50] : [],
             frozenRowY: opts.verticalSplitPosition > 0 ? [0, 20] : [],
             frozenRowHeights: opts.verticalSplitPosition > 0 ? [20, 20] : [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: emptyCellGridRenderState().selection,
         };
     }
@@ -1057,6 +1071,8 @@ describe('SpreadsheetCellGrid — render state updates', () => {
             frozenColWidths: [],
             frozenRowY: [],
             frozenRowHeights: [],
+            totalGridWidthPx: 0,
+            totalGridHeightPx: 0,
             selection: emptyCellGridRenderState().selection,
         });
 

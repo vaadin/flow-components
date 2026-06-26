@@ -280,12 +280,18 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         );
     });
 
-    it('appends the cell-grid to the host element', () => {
+    it('appends the cell-grid to the host element (via the scroll container)', () => {
+        // Slice 140: a scroll container now wraps the cell-grid so the
+        // host's scrollbar tracks reflect the full virtual-grid extent.
+        // The cell-grid is the scroll container's sole child.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
         expect(host.children).to.have.length(1);
-        expect(host.firstElementChild).to.equal(sheet.getCellGrid());
+        expect(host.firstElementChild).to.equal(sheet.getScrollContainer());
+        expect(sheet.getScrollContainer().firstElementChild).to.equal(
+            sheet.getCellGrid()
+        );
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -493,5 +499,202 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         if (state.rowHeights.length > 2) {
             expect(state.rowHeights[2]).to.equal(20);
         }
+    });
+});
+
+describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
+    /**
+     * Helper: attach the connector to a real DOM node so the scroll
+     * container has a measurable {@code clientWidth} / {@code clientHeight}.
+     * The host is appended to document.body and removed after each test.
+     */
+    function attachSheet(width: number, height: number): {
+        host: HTMLElement;
+        sheet: Spreadsheet;
+        cleanup: () => void;
+    } {
+        const host = document.createElement('div');
+        host.style.cssText = `width:${width}px;height:${height}px;`;
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        return {
+            host,
+            sheet,
+            cleanup: () => host.remove(),
+        };
+    }
+
+    it('wraps the cell-grid in a scroll container with overflow:auto', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+
+        const scroller = sheet.getScrollContainer();
+        expect(scroller).to.be.instanceOf(HTMLElement);
+        expect(scroller.className).to.equal('sheet-scroll');
+        expect(scroller.style.overflow).to.equal('auto');
+        // The cell-grid is the scroll container's only child.
+        expect(scroller.children).to.have.length(1);
+        expect(scroller.firstElementChild).to.equal(sheet.getCellGrid());
+
+        cleanup();
+    });
+
+    it('buildRenderState computes totalGridWidthPx + totalGridHeightPx', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);   // 250 total
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]); // 20 × 10 = 200 total
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 100,
+        });
+
+        expect(state.totalGridWidthPx).to.equal(250);
+        expect(state.totalGridHeightPx).to.equal(200);
+
+        cleanup();
+    });
+
+    it('applyRenderState sets the cell-grid inline size to total grid dimensions', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+
+        sheet.applyRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 100,
+        });
+
+        const cellGrid = sheet.getCellGrid();
+        expect(cellGrid.style.width).to.equal('250px');
+        expect(cellGrid.style.height).to.equal('200px');
+
+        cleanup();
+    });
+
+    it('scrolling the scroll container triggers a fresh render state', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(50);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50)); // 1000 total
+        sheet.setRowH(new Array(50).fill(15)); // 20 × 50 = 1000 total
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+
+        // Establish initial state + cell-grid intrinsic size.
+        sheet.applyRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 100,
+        });
+        const before = sheet.getCellGrid().renderState;
+
+        // Scroll horizontally + synchronously dispatch the scroll event
+        // (instead of waiting on a real rAF, which can be delayed under
+        // parallel wtr runs and time out the test).
+        const scroller = sheet.getScrollContainer();
+        scroller.scrollLeft = 100;
+        scroller.dispatchEvent(new Event('scroll'));
+
+        const after = sheet.getCellGrid().renderState;
+        // The render state should reflect the new scroll position —
+        // firstColumnIndex shifts past col 1 (since 100/50 = 2 cols scrolled).
+        expect(after).to.not.equal(before);
+        expect(after.viewport.firstColumnIndex).to.be.greaterThan(1);
+
+        cleanup();
+    });
+
+    it('scroll listener reads scrollTop + recomputes the viewport vertically', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(20);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+
+        // Establish cell-grid intrinsic size so scrolls don't clamp.
+        sheet.applyRenderState({
+            scrollLeft: 0, scrollTop: 0,
+            viewportWidth: 200, viewportHeight: 100,
+        });
+
+        const scroller = sheet.getScrollContainer();
+        // scrollTop = 200 → 10 rows scrolled (each 20px) → row 11 first.
+        scroller.scrollTop = 200;
+        scroller.dispatchEvent(new Event('scroll'));
+
+        const state = sheet.getCellGrid().renderState;
+        // 200 / 20 = 10 rows scrolled → firstRowIndex = 11 (no buffer).
+        expect(state.viewport.firstRowIndex).to.be.greaterThan(1);
+
+        cleanup();
+    });
+
+    it('emptyCellGridRenderState defaults total grid dimensions to 0', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        // No rows/cols set — buildRenderState should produce 0×0 totals.
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 0,
+            viewportWidth: 200,
+            viewportHeight: 100,
+        });
+
+        expect(state.totalGridWidthPx).to.equal(0);
+        expect(state.totalGridHeightPx).to.equal(0);
+
+        cleanup();
+    });
+
+    it('totalGridHeightPx respects the ppi used for row-height conversion', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(1);
+        sheet.setColW([50]);
+        sheet.setRowH([15, 15, 15, 15, 15]); // 15 pt each
+
+        // At 96 ppi: 15 pt → 20 px, total = 100.
+        const state96 = sheet.buildRenderState({
+            scrollLeft: 0, scrollTop: 0, viewportWidth: 50, viewportHeight: 200,
+        });
+        expect(state96.totalGridHeightPx).to.equal(100);
+
+        // At 192 ppi: 15 pt → 40 px, total = 200.
+        const state192 = sheet.buildRenderState({
+            scrollLeft: 0, scrollTop: 0, viewportWidth: 50, viewportHeight: 200,
+            ppi: 192,
+        });
+        expect(state192.totalGridHeightPx).to.equal(200);
+
+        cleanup();
+    });
+
+    it('hidden rows + columns reduce totalGrid dimensions', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(3);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15]);
+        sheet.setHiddenRowIndexes([2]);
+        sheet.setHiddenColumnIndexes([2]);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0, scrollTop: 0, viewportWidth: 200, viewportHeight: 100,
+        });
+        // Cols: 50 + 0 + 50 = 100. Rows: 20 + 0 + 20 = 40.
+        expect(state.totalGridWidthPx).to.equal(100);
+        expect(state.totalGridHeightPx).to.equal(40);
+
+        cleanup();
     });
 });

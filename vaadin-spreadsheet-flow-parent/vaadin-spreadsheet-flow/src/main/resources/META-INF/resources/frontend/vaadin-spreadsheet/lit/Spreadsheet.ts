@@ -18,6 +18,7 @@ import type {
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import { selectSingleCell, type SelectionState } from './state/SelectionState.js';
 import {
+    computeTotalGridSize,
     computeViewportBounds,
     FALLBACK_PPI,
     getDefaultRowHeightPx,
@@ -169,10 +170,58 @@ export class Spreadsheet implements SpreadsheetClientApi {
     /** The cell-grid sub-element. Created in the constructor + appended to the host. */
     private readonly cellGrid: SpreadsheetCellGrid;
 
+    /**
+     * The scroll surface — wraps the cell-grid and provides the
+     * scrollbars + viewport bounds. The user scrolls THIS element;
+     * the connector listens for {@code scroll} events and recomputes
+     * the visible viewport. The cell-grid's intrinsic size is set to
+     * the total grid dimensions so the scrollbar track reflects the
+     * full scroll extent (slice 140).
+     */
+    private readonly scrollContainer: HTMLElement;
+
     constructor(host: HTMLElement) {
         this.host = host;
         this.cellGrid = new SpreadsheetCellGrid();
-        this.host.appendChild(this.cellGrid);
+        this.scrollContainer = document.createElement('div');
+        this.scrollContainer.className = 'sheet-scroll';
+        this.scrollContainer.style.cssText =
+            'position:relative;overflow:auto;width:100%;height:100%;';
+        this.scrollContainer.appendChild(this.cellGrid);
+        this.host.appendChild(this.scrollContainer);
+        this.scrollContainer.addEventListener('scroll', this.handleScroll);
+    }
+
+    /**
+     * Scroll-event handler: recompute the visible viewport from the
+     * scroll container's current state + push a fresh render state
+     * to the cell-grid. Bound as an arrow function so the listener
+     * binding survives without explicit {@code .bind(this)}.
+     */
+    private readonly handleScroll = (): void => {
+        this.recomputeViewport();
+    };
+
+    /**
+     * Recompute the visible viewport from the scroll container's
+     * current scroll position + client dimensions, then push the
+     * resulting render state to the cell-grid. Exposed via the
+     * private listener {@link handleScroll}; tests call it through
+     * the public {@link applyRenderState} surface or by dispatching a
+     * scroll event on the scroll container.
+     */
+    private recomputeViewport(): void {
+        this.applyRenderState({
+            scrollLeft: this.scrollContainer.scrollLeft,
+            scrollTop: this.scrollContainer.scrollTop,
+            viewportWidth: this.scrollContainer.clientWidth,
+            viewportHeight: this.scrollContainer.clientHeight,
+        });
+    }
+
+    /** Test-only accessor: the scroll container element. */
+    getScrollContainer(): HTMLElement {
+        return this.scrollContainer;
     }
 
     // ====================================================================
@@ -209,7 +258,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
         viewportHeight: number;
         ppi?: number;
     }): void {
-        this.cellGrid.renderState = this.buildRenderState(opts);
+        const state = this.buildRenderState(opts);
+        // Size the cell-grid to the full virtual grid so the scroll
+        // surface's scrollWidth / scrollHeight reflect actual extent.
+        // Cells render at absolute virtual coordinates inside; the
+        // scroll container clips + scrolls them visually.
+        this.cellGrid.style.width = `${state.totalGridWidthPx}px`;
+        this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
+        this.cellGrid.renderState = state;
     }
 
     /**
@@ -313,6 +369,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
             frozenCumY += h;
         }
 
+        // Total grid dimensions in pixels — used by the scroll surface
+        // to establish scroll extent. Row heights are passed as points
+        // converted via the active PPI; column widths come through
+        // as-is (already pixels).
+        const definedRowHeightsPx: number[] = [];
+        for (let row = 1; row <= definedRowsLength; row++) {
+            definedRowHeightsPx.push(convertPointsToPixel(this.rowHeights[row - 1], ppi));
+        }
+        const { totalWidthPx, totalHeightPx } = computeTotalGridSize({
+            rows: this.rows,
+            cols: this.cols,
+            definedRowHeightsPx,
+            definedColWidthsPx: Array.from(this.colWidths),
+            hiddenRows: hiddenRowSet,
+            hiddenColumns: hiddenColSet,
+            defaultRowHeightPx,
+            defaultColWidthPx: this.defColWidth,
+        });
+
         return {
             viewport,
             cellData: this.cellDataByKey,
@@ -329,6 +404,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
             frozenColWidths,
             frozenRowY,
             frozenRowHeights,
+            totalGridWidthPx: totalWidthPx,
+            totalGridHeightPx: totalHeightPx,
         };
     }
 

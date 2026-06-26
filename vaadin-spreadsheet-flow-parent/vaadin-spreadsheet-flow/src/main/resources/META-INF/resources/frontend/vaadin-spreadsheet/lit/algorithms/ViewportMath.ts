@@ -261,3 +261,60 @@ export function computeViewportBounds(input: ViewportInput): ViewportBounds {
         lastRowPosition,
     };
 }
+
+/** Inputs for {@link computeTotalGridSize}. */
+export interface TotalGridSizeInput {
+    /** Total number of rows in the sheet (1-based count). */
+    rows: number;
+    /** Total number of columns in the sheet (1-based count). */
+    cols: number;
+    /**
+     * Per-row pixel heights, indexed by {@code row - 1}. Rows beyond
+     * the array use {@link defaultRowHeightPx}.
+     */
+    definedRowHeightsPx: ReadonlyArray<number>;
+    /** Per-column pixel widths, indexed by {@code col - 1}. */
+    definedColWidthsPx: ReadonlyArray<number>;
+    /** 1-based row indices that are hidden — contribute 0 to total height. */
+    hiddenRows: ReadonlySet<number>;
+    /** 1-based column indices that are hidden — contribute 0 to total width. */
+    hiddenColumns: ReadonlySet<number>;
+    /** Pixel height for rows beyond {@link definedRowHeightsPx}. */
+    defaultRowHeightPx: number;
+    /** Pixel width for columns beyond {@link definedColWidthsPx}. */
+    defaultColWidthPx: number;
+}
+
+/**
+ * Total pixel dimensions of the entire virtual grid. Used by the
+ * connector to size the scroll surface so the host's scrollbar tracks
+ * reflect actual scroll extent.
+ *
+ * Hidden rows/columns contribute 0. Out-of-range indices use the
+ * defaults — matches {@link getRowHeightPx} behavior so the scroll
+ * extent and the per-cell positions stay consistent.
+ */
+export function computeTotalGridSize(input: TotalGridSizeInput): {
+    totalWidthPx: number;
+    totalHeightPx: number;
+} {
+    let totalWidthPx = 0;
+    for (let col = 1; col <= input.cols; col++) {
+        if (input.hiddenColumns.has(col)) {
+            continue;
+        }
+        totalWidthPx += col > input.definedColWidthsPx.length
+            ? input.defaultColWidthPx
+            : input.definedColWidthsPx[col - 1];
+    }
+    let totalHeightPx = 0;
+    for (let row = 1; row <= input.rows; row++) {
+        if (input.hiddenRows.has(row)) {
+            continue;
+        }
+        totalHeightPx += row > input.definedRowHeightsPx.length
+            ? input.defaultRowHeightPx
+            : input.definedRowHeightsPx[row - 1];
+    }
+    return { totalWidthPx, totalHeightPx };
+}

@@ -122,6 +122,17 @@ export interface CellGridRenderState {
 
     /** Pixel heights for the frozen rows, same indexing as {@link frozenRowY}. */
     frozenRowHeights: ReadonlyArray<number>;
+
+    /**
+     * Total pixel width of the entire (virtual) grid — the sum of all
+     * non-hidden column widths. Used by the connector to size the
+     * scroll surface so the host's horizontal scrollbar tracks reflect
+     * actual scroll extent.
+     */
+    totalGridWidthPx: number;
+
+    /** Symmetric vertical variant of {@link totalGridWidthPx}. */
+    totalGridHeightPx: number;
 }
 
 /**
@@ -154,6 +165,8 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         frozenColWidths: [],
         frozenRowY: [],
         frozenRowHeights: [],
+        totalGridWidthPx: 0,
+        totalGridHeightPx: 0,
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },
