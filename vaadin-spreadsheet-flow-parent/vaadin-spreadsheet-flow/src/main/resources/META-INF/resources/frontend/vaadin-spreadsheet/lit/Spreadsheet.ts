@@ -553,6 +553,44 @@ export class Spreadsheet implements SpreadsheetClientApi {
      */
     private readonly handleKeyDown = (e: KeyboardEvent): void => {
         const key = e.key;
+
+        // F2 opens the cell editor at the active cell, loaded with
+        // the cell's existing value (Excel convention). Slice 153.
+        if (key === 'F2' && !this.editor) {
+            if (this.rows <= 0 || this.cols <= 0) {
+                return;
+            }
+            e.preventDefault();
+            const { col, row } = this.selection.activeCell;
+            const cellData = this.cellDataByKey.get(toKey(col, row));
+            this.editor = {
+                col, row,
+                initialValue: cellData?.value ?? '',
+            };
+            this.recomputeViewport();
+            return;
+        }
+
+        // Type-to-edit: any printable character key without
+        // Ctrl/Meta/Alt modifiers opens the cell editor at the
+        // active cell with the typed character as the initial
+        // value. Excel convention — typing a letter directly
+        // starts replacing the cell's content. Slice 153.
+        if (!this.editor
+                && key.length === 1
+                && !e.ctrlKey
+                && !e.metaKey
+                && !e.altKey) {
+            if (this.rows <= 0 || this.cols <= 0) {
+                return;
+            }
+            e.preventDefault();
+            const { col, row } = this.selection.activeCell;
+            this.editor = { col, row, initialValue: key };
+            this.recomputeViewport();
+            return;
+        }
+
         // Delete + Backspace clear the cell contents in the current
         // selection. Pure pass-through to the server — the connector
         // dispatches `deleteSelectedCells` and the server replies

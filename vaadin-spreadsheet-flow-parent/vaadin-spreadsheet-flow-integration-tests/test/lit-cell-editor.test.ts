@@ -407,6 +407,180 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
+    it('F2 opens the editor at the active cell with the cell value (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.updateBottomRightCellValues([
+            { col: 2, row: 2, value: 'cell value', cellStyle: 'cs0',
+              locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+        // Move active to (2, 2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'F2',
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        const editor = sheet.getCellGrid().renderState.editor;
+        expect(editor).to.not.be.null;
+        expect(editor!.col).to.equal(2);
+        expect(editor!.row).to.equal(2);
+        expect(editor!.initialValue).to.equal('cell value');
+
+        cleanup();
+    });
+
+    it('F2 is a no-op when the editor is already open (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Open editor at (3, 3) via dblclick.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 3, row: 3 },
+            bubbles: true, composed: true,
+        }));
+        const beforeEditor = sheet.getCellGrid().renderState.editor;
+
+        // F2 should not re-open / change anything.
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'F2',
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        // Editor unchanged (same coords, same value).
+        const afterEditor = sheet.getCellGrid().renderState.editor;
+        expect(afterEditor!.col).to.equal(beforeEditor!.col);
+        expect(afterEditor!.row).to.equal(beforeEditor!.row);
+
+        cleanup();
+    });
+
+    it('type-to-edit: a printable key opens the editor with that char as initial value (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        // Move active to (3, 3) — the cell has no existing value.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'x',
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        const editor = sheet.getCellGrid().renderState.editor;
+        expect(editor).to.not.be.null;
+        expect(editor!.col).to.equal(3);
+        expect(editor!.row).to.equal(3);
+        // Initial value is the typed char (Excel convention — the
+        // typed key REPLACES the cell's content; if the user wants
+        // to keep the cell and append, they'd press F2 instead).
+        expect(editor!.initialValue).to.equal('x');
+
+        cleanup();
+    });
+
+    it('type-to-edit ignores keys with Ctrl/Meta modifiers (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Ctrl+c (copy shortcut) should NOT open the editor.
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'c',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+        expect(sheet.getCellGrid().renderState.editor).to.be.null;
+
+        // Meta+v (paste on Mac) should NOT open the editor either.
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'v',
+            metaKey: true,
+            bubbles: true,
+            cancelable: true,
+        }));
+        expect(sheet.getCellGrid().renderState.editor).to.be.null;
+
+        cleanup();
+    });
+
+    it('type-to-edit is a no-op when editor is already open (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Open editor at (3, 3) via F2 first.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'F2',
+            bubbles: true,
+            cancelable: true,
+        }));
+        const beforeInitial = sheet.getCellGrid().renderState.editor!.initialValue;
+
+        // Typing 'a' should NOT overwrite the open editor; the
+        // input itself handles the keystroke via DOM focus.
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'a',
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        // Editor's initialValue is unchanged (typing into the
+        // input updates input.value, not renderState.editor).
+        expect(sheet.getCellGrid().renderState.editor!.initialValue).to.equal(beforeInitial);
+
+        cleanup();
+    });
+
+    it('type-to-edit does not fire for navigation keys (slice 153)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        for (const key of ['ArrowDown', 'Tab', 'Enter', 'Home', 'End', 'Escape', 'F1', 'PageDown']) {
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key,
+                bubbles: true,
+                cancelable: true,
+            }));
+            expect(sheet.getCellGrid().renderState.editor, key).to.be.null;
+        }
+
+        cleanup();
+    });
+
     it('cell-editor-cancel clears the editor WITHOUT dispatching cellValueEdited', () => {
         const { host, sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
