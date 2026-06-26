@@ -59,8 +59,6 @@ public class Accordion extends Component implements HasSize, HasStyle {
 
     /**
      * Initializes a new Accordion component.
-     * 
-     * @since 25.1.7
      */
     public Accordion() {
         if (getElement().getPropertyRaw(OPENED_PROPERTY) == null) {
