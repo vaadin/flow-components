@@ -8,8 +8,7 @@
  * license.
  */
 import { LitElement, html } from 'lit';
-import { Spreadsheet as GwtSpreadsheet } from './spreadsheet-export.js';
-import { Spreadsheet as LitSpreadsheet } from './lit/Spreadsheet.js';
+import { Spreadsheet } from './lit/Spreadsheet.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
@@ -36,18 +35,11 @@ window.Vaadin.Flow.spreadsheetConnector = window.Vaadin.Flow.spreadsheetConnecto
     if (element.$connector) {
       return;
     }
-    // Slice 162: opt-in to the TS/Lit client implementation. Default
-    // stays on the GWT bundle for production safety until the Lit
-    // path is feature-complete + visually verified. Two opt-in paths:
-    //   - `use-lit` attribute on the <vaadin-spreadsheet> element
-    //   - global `window.VAADIN_SPREADSHEET_USE_LIT = true`
-    // Setting either picks the new TS class; otherwise the GWT
-    // bundle is used. This lets tests run side-by-side without
-    // breaking the default behaviour.
-    const useLit = element.hasAttribute('use-lit')
-      || window.VAADIN_SPREADSHEET_USE_LIT === true;
-    const SpreadsheetCtor = useLit ? LitSpreadsheet : GwtSpreadsheet;
-    element.$connector = new SpreadsheetCtor(element, element.renderRoot);
+    // Slice 178: the TS/Lit Spreadsheet is the only client
+    // implementation. The use-lit / global flag opt-in from
+    // slice 162 is gone; the GWT bundle was deleted in this
+    // slice. Every spreadsheet instance uses the Lit path.
+    element.$connector = new Spreadsheet(element, element.renderRoot);
     element.$connector.setHeight('100%');
     element.$connector.setWidth('100%');
     element.createCallbacks();

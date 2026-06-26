@@ -60,12 +60,119 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         return spreadsheet.$(DivElement.class).first();
     }
 
-    protected TestBenchElement findElementInShadowRoot(By by) {
-        return getSpreadsheetInShadowRoot().findElement(by);
+    /**
+     * Slice 178: deep-search through the spreadsheet's nested shadow
+     * roots (the Lit cell-grid, column-header, row-header, formula-bar,
+     * and sheet-tabs each own their own shadow root). Maps the legacy
+     * GWT selectors to their Lit-DOM equivalents on the fly so the
+     * existing IT call sites don't need bulk rewriting.
+     */
+    protected WebElement findElementInShadowRoot(By by) {
+        WebElement el = findInLitShadowRoots(toCssSelector(by));
+        if (el == null) {
+            throw new org.openqa.selenium.NoSuchElementException(
+                    "no such element in any spreadsheet shadow root: " + by);
+        }
+        return el;
     }
 
     protected List<WebElement> findElementsInShadowRoot(By by) {
-        return getSpreadsheetInShadowRoot().findElements(by);
+        return findAllInLitShadowRoots(toCssSelector(by));
+    }
+
+    /**
+     * Convert a Selenium {@link By} locator to its equivalent CSS
+     * selector string. Selenium's {@code By.toString()} returns
+     * {@code "By.cssSelector: <sel>"} or {@code "By.className: <name>"};
+     * normalize both shapes to a plain CSS selector. Slice 178.
+     */
+    private String toCssSelector(By by) {
+        String raw = by.toString();
+        if (raw.startsWith("By.cssSelector: ")) {
+            return raw.substring("By.cssSelector: ".length());
+        }
+        if (raw.startsWith("By.className: ")) {
+            return "." + raw.substring("By.className: ".length());
+        }
+        if (raw.startsWith("By.tagName: ")) {
+            return raw.substring("By.tagName: ".length());
+        }
+        return raw;
+    }
+
+    /**
+     * Translate a legacy GWT-era CSS selector to its Lit-DOM
+     * equivalent. Returns the input unchanged when no translation
+     * applies. Slice 178.
+     */
+    private String translateSelector(String selector) {
+        // Headers — GWT used .ch / .rh class on header cells; Lit
+        // uses .col-header-cell / .row-header-cell.
+        selector = selector.replace(".ch.col", ".col-header-cell.col");
+        selector = selector.replace(".rh.row", ".row-header-cell.row");
+        // Sheet tab — GWT used .sheet-tabsheet for the strip +
+        // .sheet-tabsheet-tab.selected-tab for the active tab.
+        selector = selector.replace(".sheet-tabsheet-tab.selected-tab",
+                ".sheet-tab.active");
+        // Formula bar — GWT used input.addressfield + .functionfield.
+        selector = selector.replace("input.addressfield",
+                "[part~=\"address-field\"]");
+        selector = selector.replace(".addressfield",
+                "[part~=\"address-field\"]");
+        selector = selector.replace(".functionfield",
+                "[part~=\"formula-field\"]");
+        // Cell editor input.
+        selector = selector.replace("input[id='cellinput']",
+                "[part~=\"cell-input\"]");
+        return selector;
+    }
+
+    private WebElement findInLitShadowRoots(String cssSelector) {
+        String translated = translateSelector(cssSelector);
+        return (WebElement) ((org.openqa.selenium.JavascriptExecutor)
+                getDriver()).executeScript("""
+                        const host = arguments[0];
+                        const selector = arguments[1];
+                        function searchShadow(root) {
+                            if (!root) return null;
+                            const hit = root.querySelector(selector);
+                            if (hit) return hit;
+                            // Recurse into nested shadow roots of all
+                            // descendants.
+                            const children = root.querySelectorAll('*');
+                            for (const c of children) {
+                                if (c.shadowRoot) {
+                                    const sub = searchShadow(c.shadowRoot);
+                                    if (sub) return sub;
+                                }
+                            }
+                            return null;
+                        }
+                        return searchShadow(host.shadowRoot);
+                        """,
+                $(SpreadsheetElement.class).first(), translated);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<WebElement> findAllInLitShadowRoots(String cssSelector) {
+        String translated = translateSelector(cssSelector);
+        return (List<WebElement>) ((org.openqa.selenium.JavascriptExecutor)
+                getDriver()).executeScript("""
+                        const host = arguments[0];
+                        const selector = arguments[1];
+                        const out = [];
+                        function searchShadow(root) {
+                            if (!root) return;
+                            out.push(...root.querySelectorAll(selector));
+                            const children = root.querySelectorAll('*');
+                            for (const c of children) {
+                                if (c.shadowRoot) searchShadow(c.shadowRoot);
+                            }
+                        }
+                        searchShadow(host.shadowRoot);
+                        return out;
+                        """,
+                $(SpreadsheetElement.class).first(), translated);
     }
 
     public void selectCell(String address) {
@@ -275,8 +382,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
-        // Force sheet initial focus
-        findElementInShadowRoot(By.className("sheet-tabsheet")).click();
+        // Slice 178: force sheet initial focus. The legacy
+        // `.sheet-tabsheet` class doesn't exist in the Lit DOM; click
+        // a tab inside the sheet-tabs element instead — clicking any
+        // tab focuses the spreadsheet.
+        WebElement firstTab = findInLitShadowRoots("[part~=\"tab\"]");
+        if (firstTab != null) {
+            firstTab.click();
+        }
     }
 
     public void setCellValue(String address, String value) {
