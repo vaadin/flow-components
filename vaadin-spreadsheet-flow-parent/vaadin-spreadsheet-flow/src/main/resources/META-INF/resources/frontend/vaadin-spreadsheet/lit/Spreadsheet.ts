@@ -31,7 +31,9 @@ import type {
     RowSelectedData,
     SpreadsheetEvent,
 } from './types/rpc-client-to-server.js';
-import type { CellEditorState, PositionedOverlay } from './elements/types.js';
+import type {
+    CellEditorState, PositionedOverlay, PositionedPopupButton,
+} from './elements/types.js';
 import {
     computeTotalGridSize,
     computeViewportBounds,
@@ -181,6 +183,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
      * overlay sources. Slice 160.
      */
     private resources: Record<string, string> = {};
+    /**
+     * Popup-button states from {@link setPopupButtons}. Slice 161.
+     */
+    private popupButtonStates: PopupButtonState[] = [];
     private cellKeysToEditorIdMap: Record<string, string> = {};
     private componentIDtoCellKeysMap: Record<string, string> = {};
     private hyperlinksTooltips: Record<string, string> = {};
@@ -410,6 +416,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.handleCellMouseOver as EventListener
         );
         document.addEventListener('mouseup', this.handleDocumentMouseUp);
+        // Popup-button click → dispatch popupButtonClick (slice
+        // 161). The server's `onPopupButtonClick` opens the
+        // associated popup component.
+        this.cellGrid.addEventListener(
+            'popup-button-click',
+            this.handlePopupButtonClick as EventListener
+        );
         // Header click delegation (slice 148). Each header element
         // emits its own custom event with the col / row coordinate;
         // the connector translates them into whole-column / whole-
@@ -468,6 +481,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }
         this.recomputeViewport();
         this.dispatchSelectionEvent();
+    };
+
+    /**
+     * Popup-button click handler (slice 161). Translates the
+     * cell-grid's local event into a server-bound
+     * `popupButtonClick` spreadsheet-event so the server can
+     * open the popup component.
+     */
+    private readonly handlePopupButtonClick = (
+        e: CustomEvent<{ col: number; row: number }>
+    ): void => {
+        const { col, row } = e.detail;
+        this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+            detail: {
+                type: 'popupButtonClick',
+                data: { row, column: col },
+            },
+            bubbles: true,
+            composed: true,
+        }));
     };
 
     /**
@@ -1063,6 +1096,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'cell-mouseover',
             this.handleCellMouseOver as EventListener
         );
+        this.cellGrid.removeEventListener(
+            'popup-button-click',
+            this.handlePopupButtonClick as EventListener
+        );
         document.removeEventListener('mouseup', this.handleDocumentMouseUp);
         this.resizeObserver.disconnect();
     }
@@ -1317,6 +1354,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
             rowHeightForIndex
         );
 
+        // Compute positioned popup buttons (slice 161). Each
+        // button anchors at its cell's bottom-right corner.
+        const positionedPopupButtons = computePositionedPopupButtons(
+            this.popupButtonStates,
+            colWidthForIndex,
+            rowHeightForIndex
+        );
+
         return {
             viewport,
             cellData: this.cellDataByKey,
@@ -1339,6 +1384,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
             scrollTop: opts.scrollTop,
             editor: this.editor,
             overlays: positionedOverlays,
+            popupButtons: positionedPopupButtons,
         };
     }
 
@@ -1686,8 +1732,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
             this.resources = {};
         }
     }
-    setPopupButtons(_popupButtons: PopupButtonState[]): void {
-        // TODO Phase 3.5 — register popup-button anchors.
+    setPopupButtons(popupButtons: PopupButtonState[]): void {
+        // Store the raw popup-button list. The connector computes
+        // positions at render time via `buildRenderState`. Slice
+        // 161.
+        this.popupButtonStates = popupButtons;
     }
 
     setWorkbookProtected(isProtected: boolean): void {
@@ -1955,6 +2004,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
     isSheetProtected(): boolean {
         return this.sheetProtected;
     }
+}
+
+/**
+ * Pure helper: build the positioned-popup-button list from the
+ * server-pushed `PopupButtonState` list. Each button anchors at
+ * the bottom-right corner of its target cell — pixel position =
+ * (sum of widths 1..col + col width, sum of heights 1..row + row
+ * height). Slice 161.
+ */
+export function computePositionedPopupButtons(
+    states: ReadonlyArray<PopupButtonState>,
+    colWidth: (col: number) => number,
+    rowHeight: (row: number) => number
+): PositionedPopupButton[] {
+    return states.map((state) => {
+        let left = 0;
+        for (let c = 1; c <= state.col; c++) {
+            left += colWidth(c);
+        }
+        let top = 0;
+        for (let r = 1; r <= state.row; r++) {
+            top += rowHeight(r);
+        }
+        return {
+            col: state.col,
+            row: state.row,
+            leftPx: left,
+            topPx: top,
+            active: state.active,
+        };
+    });
 }
 
 /**

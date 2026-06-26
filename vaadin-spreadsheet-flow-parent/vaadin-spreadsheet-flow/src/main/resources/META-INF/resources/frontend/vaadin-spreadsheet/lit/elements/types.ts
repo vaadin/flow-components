@@ -166,6 +166,32 @@ export interface CellGridRenderState {
      * are active. Slice 160.
      */
     overlays: ReadonlyArray<PositionedOverlay>;
+
+    /**
+     * Positioned popup-button anchors (slice 161). The cell-grid
+     * renders a small {@code <div class="popup-button">} in the
+     * bottom-right corner of each anchor cell. Clicking dispatches
+     * {@code popup-button-click}; the connector translates to
+     * {@code popupButtonClick} for the server.
+     */
+    popupButtons: ReadonlyArray<PositionedPopupButton>;
+}
+
+/**
+ * A positioned popup-button anchor with the cell's pixel
+ * coordinates pre-computed by the connector. Slice 161.
+ */
+export interface PositionedPopupButton {
+    /** 1-based column of the anchor cell. */
+    col: number;
+    /** 1-based row of the anchor cell. */
+    row: number;
+    /** Pixel left of the anchor cell's bottom-right corner. */
+    leftPx: number;
+    /** Pixel top of the anchor cell's bottom-right corner. */
+    topPx: number;
+    /** True when the popup is currently shown — affects the indicator style. */
+    active: boolean;
 }
 
 /**
@@ -252,6 +278,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         scrollTop: 0,
         editor: null,
         overlays: [],
+        popupButtons: [],
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },

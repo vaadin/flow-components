@@ -102,6 +102,28 @@ export class SpreadsheetCellGrid extends LitElement {
             display: block;
         }
 
+        /* Popup-button anchor — small triangle in the bottom-right
+           of a cell that opens a popup on click (slice 161). The
+           popup itself is provided by the Flow wrapper via slot;
+           this is just the click target + visual indicator. */
+        .popup-button {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            transform: translate(-100%, -100%);
+            background: var(--vaadin-spreadsheet-popup-button-bg, #1976d2);
+            color: var(--vaadin-spreadsheet-popup-button-fg, #fff);
+            cursor: pointer;
+            font-size: 8px;
+            text-align: center;
+            line-height: 12px;
+            z-index: 6;
+            user-select: none;
+        }
+        .popup-button.active {
+            background: var(--vaadin-spreadsheet-popup-button-active-bg, #0d47a1);
+        }
+
         /* Cell editor input — absolutely positioned over the cell
            being edited, sized to match. z-index above all cells +
            overlays so the input + caret are always on top. Slice
@@ -443,7 +465,8 @@ export class SpreadsheetCellGrid extends LitElement {
         const selectionOverlay = buildSelectionOverlay(this.renderState);
         const editor = buildCellEditorOverlay(this.renderState);
         const sheetOverlays = buildSheetOverlays(this.renderState);
-        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${sheetOverlays}${editor}`;
+        const popupButtons = buildPopupButtons(this.renderState);
+        return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${sheetOverlays}${popupButtons}${editor}`;
     }
 }
 
@@ -894,6 +917,37 @@ function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
             <div class="sheet-overlay sheet-overlay-component"
                  data-overlay-id=${overlay.id}
                  style=${style}></div>
+        `;
+    });
+}
+
+/**
+ * Build the popup-button rendering (slice 161). One small
+ * triangle/icon per anchor cell at its bottom-right corner.
+ * Click on a button dispatches `popup-button-click { col, row }`
+ * which the connector translates to a `popupButtonClick`
+ * spreadsheet-event for the server.
+ */
+function buildPopupButtons(state: CellGridRenderState): TemplateResult[] {
+    const buttons = state.popupButtons ?? [];
+    return buttons.map((b) => {
+        const className = b.active ? 'popup-button active' : 'popup-button';
+        const style = `left:${b.leftPx}px;top:${b.topPx}px;`;
+        const onClick = (e: Event) => {
+            e.stopPropagation();
+            (e.currentTarget as Element).dispatchEvent(new CustomEvent(
+                'popup-button-click',
+                {
+                    detail: { col: b.col, row: b.row },
+                    bubbles: true,
+                    composed: true,
+                }
+            ));
+        };
+        return html`
+            <div class=${className} style=${style}
+                 data-col=${b.col} data-row=${b.row}
+                 @click=${onClick}>▼</div>
         `;
     });
 }

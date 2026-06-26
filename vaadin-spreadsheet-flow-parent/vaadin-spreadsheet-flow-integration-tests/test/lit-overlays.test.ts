@@ -12,8 +12,11 @@ import { expect } from 'chai';
 import {
     Spreadsheet,
     computePositionedOverlays,
+    computePositionedPopupButtons,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import type { OverlayInfo } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import type {
+    OverlayInfo, PopupButtonState,
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
  * Slice 160 — sheet overlay rendering.
@@ -111,6 +114,39 @@ describe('computePositionedOverlays — anchor positioning', () => {
         const result = computePositionedOverlays(overlays, {}, variableWidth, uniformHeight);
         // col 3 → widths 1..2 sum = 100 + 50 = 150.
         expect(result[0].leftPx).to.equal(150);
+    });
+});
+
+describe('computePositionedPopupButtons (slice 161)', () => {
+    const uniformWidth = (_c: number) => 50;
+    const uniformHeight = (_r: number) => 20;
+
+    it('returns empty array when input is empty', () => {
+        const result = computePositionedPopupButtons([], uniformWidth, uniformHeight);
+        expect(result).to.deep.equal([]);
+    });
+
+    it('positions a button at the anchor cell\'s bottom-right corner', () => {
+        const states: PopupButtonState[] = [
+            { col: 2, row: 3, active: false, headerHidden: false,
+              popupHeight: null, popupWidth: null, sheet: 'X' },
+        ];
+        const result = computePositionedPopupButtons(states, uniformWidth, uniformHeight);
+        // col 2 → widths 1..2 sum = 100. row 3 → heights 1..3 sum = 60.
+        expect(result[0].leftPx).to.equal(100);
+        expect(result[0].topPx).to.equal(60);
+        expect(result[0].col).to.equal(2);
+        expect(result[0].row).to.equal(3);
+        expect(result[0].active).to.be.false;
+    });
+
+    it('preserves active flag', () => {
+        const states: PopupButtonState[] = [
+            { col: 1, row: 1, active: true, headerHidden: false,
+              popupHeight: null, popupWidth: null, sheet: 'X' },
+        ];
+        const result = computePositionedPopupButtons(states, uniformWidth, uniformHeight);
+        expect(result[0].active).to.be.true;
     });
 });
 
@@ -234,6 +270,61 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         expect(overlay.style.top).to.equal('23px');
         expect(overlay.style.width).to.equal('80px');
         expect(overlay.style.height).to.equal('40px');
+        cleanup();
+    });
+
+    it('setPopupButtons + render: dispatches popupButtonClick on click (slice 161)', async () => {
+        const { host, sheet, cleanup } = attachSheet(400, 300);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+        sheet.setPopupButtons([
+            { col: 2, row: 3, active: false, headerHidden: false,
+              popupHeight: null, popupWidth: null, sheet: 'Sheet1' },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const button = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.popup-button'
+        ) as HTMLElement;
+        expect(button).to.not.be.null;
+        expect(button.dataset.col).to.equal('2');
+        expect(button.dataset.row).to.equal('3');
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'popupButtonClick') {
+                received = detail;
+            }
+        });
+
+        button.click();
+
+        expect(received).to.exist;
+        expect(received!.data).to.deep.equal({ row: 3, column: 2 });
+        cleanup();
+    });
+
+    it('active popup button gets .active class (slice 161)', async () => {
+        const { sheet, cleanup } = attachSheet(400, 300);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setPopupButtons([
+            { col: 1, row: 1, active: true, headerHidden: false,
+              popupHeight: null, popupWidth: null, sheet: 'Sheet1' },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const button = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.popup-button'
+        ) as HTMLElement;
+        expect(button.classList.contains('active')).to.be.true;
         cleanup();
     });
 
