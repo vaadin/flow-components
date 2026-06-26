@@ -110,6 +110,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     private editor: CellEditorState | null = null;
 
     /**
+     * Mouse-drag state (slice 155). True between mousedown on a
+     * cell and the subsequent mouseup (anywhere). While true,
+     * {@code cell-mouseover} events extend the active range from
+     * the drag's anchor cell to the hovered cell.
+     */
+    private dragging = false;
+
+    /**
      * The "current extend position" for shift+arrow navigation
      * (slice 147). Starts equal to the active cell. Shift+arrow
      * moves this corner ±1; the resulting range is normalized
@@ -383,6 +391,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'cell-editor-cancel',
             this.handleCellEditorCancel as EventListener
         );
+        // Mouse drag selection (slice 155). The cell-grid emits
+        // cell-mousedown + cell-mouseover; the connector watches
+        // mouseup at the document level so a drag that ends
+        // outside the spreadsheet still terminates cleanly.
+        this.cellGrid.addEventListener(
+            'cell-mousedown',
+            this.handleCellMouseDown as EventListener
+        );
+        this.cellGrid.addEventListener(
+            'cell-mouseover',
+            this.handleCellMouseOver as EventListener
+        );
+        document.addEventListener('mouseup', this.handleDocumentMouseUp);
         // Header click delegation (slice 148). Each header element
         // emits its own custom event with the col / row coordinate;
         // the connector translates them into whole-column / whole-
@@ -441,6 +462,90 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }
         this.recomputeViewport();
         this.dispatchSelectionEvent();
+    };
+
+    /**
+     * Mouse drag — mousedown begin (slice 155). Starts a drag.
+     * Sets the selection to the single cell at the mousedown
+     * coord (anchor) + opens the dragging flag so subsequent
+     * `cell-mouseover` events extend the range. Doesn't dispatch
+     * `cellSelected` here — the existing `cell-click` handler
+     * (which fires on mouseup) takes care of that for a no-drag
+     * click. A real drag ends with a `cellRangeSelected` event
+     * in {@link handleDocumentMouseUp}.
+     */
+    private readonly handleCellMouseDown = (
+        e: CustomEvent<{
+            col: number; row: number; shiftKey: boolean; ctrlKey: boolean;
+            metaKey: boolean; altKey: boolean;
+        }>
+    ): void => {
+        const { col, row, shiftKey } = e.detail;
+        this.dragging = true;
+        if (shiftKey) {
+            // Shift+mousedown: extend existing range to the
+            // mousedown coord (treat the existing anchor as the
+            // drag start). Standard Excel "shift-drag" behavior.
+            const anchor = this.selection.activeCell;
+            this.selection = selectRange(anchor.col, anchor.row, col, row);
+            this.extendCol = col;
+            this.extendRow = row;
+        } else {
+            this.selection = selectSingleCell(col, row);
+            this.extendCol = col;
+            this.extendRow = row;
+        }
+        this.recomputeViewport();
+    };
+
+    /**
+     * Mouse drag — mouseover during drag (slice 155). Extends
+     * the range from the active cell (anchor) to the hovered
+     * cell. Mouseover events that fire while NOT dragging are
+     * silently ignored — the cell-grid emits on every hover.
+     */
+    private readonly handleCellMouseOver = (
+        e: CustomEvent<{ col: number; row: number }>
+    ): void => {
+        if (!this.dragging) {
+            return;
+        }
+        const { col, row } = e.detail;
+        // Same as shift-arrow: keep activeCell as anchor, move
+        // the extend corner.
+        const anchor = this.selection.activeCell;
+        this.selection = {
+            activeCell: anchor,
+            activeRange: normalizedRange(anchor.col, anchor.row, col, row),
+            auxRanges: [],
+        };
+        this.extendCol = col;
+        this.extendRow = row;
+        this.recomputeViewport();
+    };
+
+    /**
+     * Mouse drag — mouseup end (slice 155). Closes the drag.
+     * Dispatches a {@code cellRangeSelected} event when the
+     * final range covers more than one cell (single-cell drag
+     * is treated as a click, whose `cell-click` handler already
+     * dispatched `cellSelected`).
+     */
+    private readonly handleDocumentMouseUp = (): void => {
+        if (!this.dragging) {
+            return;
+        }
+        this.dragging = false;
+        const range = this.selection.activeRange;
+        if (range.c1 !== range.c2 || range.r1 !== range.r2) {
+            // Multi-cell range — dispatch the server-bound
+            // selection event so the server learns the final
+            // dragged range.
+            this.dispatchSelectionEvent();
+        }
+        // Single-cell drag (mousedown + mouseup on the same cell
+        // with no mouseover-extension) is handled by the existing
+        // `cell-click` handler — no double dispatch.
     };
 
     /**
@@ -753,6 +858,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
             'sheet-tab-click',
             this.handleSheetTabClick as EventListener
         );
+        this.cellGrid.removeEventListener(
+            'cell-mousedown',
+            this.handleCellMouseDown as EventListener
+        );
+        this.cellGrid.removeEventListener(
+            'cell-mouseover',
+            this.handleCellMouseOver as EventListener
+        );
+        document.removeEventListener('mouseup', this.handleDocumentMouseUp);
         this.resizeObserver.disconnect();
     }
 

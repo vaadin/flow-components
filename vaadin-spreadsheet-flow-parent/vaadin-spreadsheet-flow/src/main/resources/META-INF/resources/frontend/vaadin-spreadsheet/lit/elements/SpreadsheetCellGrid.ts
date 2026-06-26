@@ -138,6 +138,14 @@ export class SpreadsheetCellGrid extends LitElement {
         // dispatches `cell-doubleclick` so the connector can open
         // its editor at the dbl-clicked cell.
         this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick);
+        // Mouse drag selection (slice 155). The cell-grid emits
+        // `cell-mousedown` + `cell-mouseover`; the connector
+        // tracks a dragging flag + extends the range as the
+        // mouse moves over new cells. mouseup is bound at the
+        // document level by the connector so a drag that ends
+        // outside the spreadsheet still terminates cleanly.
+        this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown);
+        this.shadowRoot!.addEventListener('mouseover', this.handleShadowMouseOver);
     }
 
     /**
@@ -160,6 +168,69 @@ export class SpreadsheetCellGrid extends LitElement {
             }
         }
     }
+
+    /**
+     * Mousedown handler — emits {@code cell-mousedown} so the
+     * connector can mark the start of a drag-select. The
+     * connector decides whether to consume the event vs let the
+     * normal click handler run (Excel: mousedown immediately
+     * selects, then drag extends, then mouseup commits the
+     * range). Slice 155.
+     */
+    private readonly handleShadowMouseDown = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
+            return;
+        }
+        const ev = e as MouseEvent;
+        this.dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: {
+                col, row,
+                shiftKey: ev.shiftKey,
+                ctrlKey: ev.ctrlKey,
+                metaKey: ev.metaKey,
+                altKey: ev.altKey,
+            },
+            bubbles: true,
+            composed: true,
+        }));
+    };
+
+    /**
+     * Mouseover handler — emits {@code cell-mouseover} when the
+     * mouse enters a new cell. Fires on every hover (not just
+     * during drag); the connector filters by checking its
+     * dragging flag. Slice 155.
+     */
+    private readonly handleShadowMouseOver = (e: Event): void => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const cell = target.closest<HTMLElement>('.cell');
+        if (!cell) {
+            return;
+        }
+        const col = Number(cell.dataset.col);
+        const row = Number(cell.dataset.row);
+        if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('cell-mouseover', {
+            detail: { col, row },
+            bubbles: true,
+            composed: true,
+        }));
+    };
 
     /**
      * Double-click handler — opens the cell editor at the clicked

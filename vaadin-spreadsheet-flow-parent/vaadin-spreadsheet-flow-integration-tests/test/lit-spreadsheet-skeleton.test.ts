@@ -1722,6 +1722,184 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('mousedown on a cell starts a drag and selects the anchor cell (slice 155)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 4, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 4, row: 3 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 4, c2: 4, r1: 3, r2: 3,
+        });
+        cleanup();
+    });
+
+    it('mouseover during drag extends the range from anchor to hover cell (slice 155)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Start drag at (2, 2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        // Drag over (5, 4).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mouseover', {
+            detail: { col: 5, row: 4 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 5, r1: 2, r2: 4,
+        });
+        cleanup();
+    });
+
+    it('mouseover when NOT dragging does not change selection (slice 155)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        const before = sheet.getSelection();
+        // Mouseover without mousedown — just hovering.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mouseover', {
+            detail: { col: 5, row: 5 },
+            bubbles: true,
+            composed: true,
+        }));
+        expect(sheet.getSelection() === before).to.be.true;
+        cleanup();
+    });
+
+    it('mouseup ends the drag and dispatches cellRangeSelected for multi-cell ranges (slice 155)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Drag from (2, 2) to (5, 4).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mouseover', {
+            detail: { col: 5, row: 4 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'cellRangeSelected') {
+                received = detail;
+            }
+        });
+
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        expect(received).to.exist;
+        expect(received!.data).to.deep.equal({
+            row1: 2, col1: 2, row2: 4, col2: 5,
+        });
+        cleanup();
+    });
+
+    it('mouseup after a single-cell drag does NOT dispatch a duplicate cellSelected (slice 155)', () => {
+        // mousedown + mouseup on the same cell = a click. The
+        // existing cell-click handler dispatches `cellSelected`;
+        // mouseup should NOT additionally dispatch since the
+        // range is single-cell.
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        let received = 0;
+        host.addEventListener('spreadsheet-event', () => { received++; });
+
+        // No mouseover → range stays single cell. mouseup should not dispatch.
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        expect(received).to.equal(0);
+        cleanup();
+    });
+
+    it('mouseup is a no-op when no drag was in progress (slice 155)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+
+        let received = false;
+        host.addEventListener('spreadsheet-event', () => { received = true; });
+
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        expect(received).to.be.false;
+        cleanup();
+    });
+
+    it('shift+mousedown extends range from existing anchor (slice 155)', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        // Initial selection at (2, 2) via plain mousedown.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+        // Shift+mousedown at (5, 5) extends from anchor.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-mousedown', {
+            detail: { col: 5, row: 5, shiftKey: true, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true,
+            composed: true,
+        }));
+
+        // Anchor stays at (2, 2), range covers (2,2)-(5,5).
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        expect(sheet.getSelection().activeRange).to.deep.equal({
+            c1: 2, c2: 5, r1: 2, r2: 5,
+        });
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render
