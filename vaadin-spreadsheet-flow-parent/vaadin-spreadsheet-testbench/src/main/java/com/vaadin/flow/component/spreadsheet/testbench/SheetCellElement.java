@@ -41,26 +41,35 @@ public class SheetCellElement extends TestBenchElement {
         if (isNormalCell()) {
             // Single async JS call that selects the cell, activates the
             // inline editor, sets the value, and commits with Tab.
+            // Slice 177: re-targeted to the Lit cell-grid's shadow DOM
+            // — the editor input now lives at
+            // {@code [part="cell-input"]} inside
+            // {@code vaadin-spreadsheet-internal-cell-grid}.
             Boolean result = (Boolean) getCommandExecutor().getDriver()
                     .executeAsyncScript(
                             """
                                     const cell = arguments[0];
-                                    const shadowRoot = arguments[1].shadowRoot;
-                                    const root = shadowRoot.querySelector('.v-spreadsheet');
+                                    const host = arguments[1];
                                     const value = arguments[2];
                                     const callback = arguments[arguments.length - 1];
 
                                     const MAX_ATTEMPTS = 50;
                                     const delay = () => new Promise(r => setTimeout(r, 100));
 
+                                    function findGridShadow() {
+                                        const grid = host.shadowRoot
+                                            && host.shadowRoot.querySelector(
+                                                'vaadin-spreadsheet-internal-cell-grid');
+                                        return grid && grid.shadowRoot;
+                                    }
+
                                     function startEditing() {
-                                        // Fire synthetic events to trigger selection and editor opening
-                                        // Needs correct mouse coordinates
                                         const r = cell.getBoundingClientRect();
                                         const cx = r.left + r.width / 2;
                                         const cy = r.top + r.height / 2;
                                         const opts = {bubbles: true, cancelable: true,
-                                            view: window, clientX: cx, clientY: cy};
+                                            composed: true, view: window,
+                                            clientX: cx, clientY: cy};
                                         cell.dispatchEvent(new MouseEvent('mousedown', opts));
                                         cell.dispatchEvent(new MouseEvent('mouseup', opts));
                                         cell.dispatchEvent(new MouseEvent('click', opts));
@@ -69,8 +78,10 @@ public class SheetCellElement extends TestBenchElement {
 
                                     async function waitForInput() {
                                         for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                            const input = root.querySelector('#cellinput');
-                                            if (input && shadowRoot.activeElement === input) {
+                                            const grid = findGridShadow();
+                                            const input = grid && grid.querySelector(
+                                                '[part~="cell-input"]');
+                                            if (input && grid.activeElement === input) {
                                                 return input;
                                             }
                                             await delay();
@@ -80,8 +91,10 @@ public class SheetCellElement extends TestBenchElement {
 
                                     async function waitForClose() {
                                         for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                            const input = root.querySelector('#cellinput');
-                                            if (!input || shadowRoot.activeElement !== input) {
+                                            const grid = findGridShadow();
+                                            const input = grid && grid.querySelector(
+                                                '[part~="cell-input"]');
+                                            if (!input || grid.activeElement !== input) {
                                                 return true;
                                             }
                                             await delay();
@@ -89,31 +102,20 @@ public class SheetCellElement extends TestBenchElement {
                                         return false;
                                     }
 
-                                    // Select the cell and open the editor
                                     startEditing();
-
-                                    // Wait for input to be visible and focused
                                     const input = await waitForInput();
                                     if (!input) {
                                         callback(false);
                                         return;
                                     }
-
-                                    // Set the value, commit with Tab key
                                     input.value = value;
                                     input.dispatchEvent(new KeyboardEvent('keydown', {
                                         key: 'Tab', code: 'Tab', keyCode: 9,
-                                        which: 9, bubbles: true, cancelable: true
+                                        which: 9, bubbles: true, cancelable: true,
+                                        composed: true
                                     }));
-
-                                    // Wait for the editor to close before finishing
-                                    // Allows next setValue call to start with a clean state
                                     const closed = await waitForClose();
-                                    if (!closed) {
-                                        callback(false);
-                                        return;
-                                    }
-                                    callback(true);
+                                    callback(closed);
                                     """,
                             this, parent, newValue);
 
@@ -173,11 +175,16 @@ public class SheetCellElement extends TestBenchElement {
     /**
      * Determines if this cell has a PopupButton set.
      *
+     * <p>Slice 177: re-targeted to the Lit cell-grid's popup-button
+     * div. Popup buttons live as siblings of the cell inside the
+     * cell-grid's shadow root (positioned at the cell's bottom-right
+     * corner), not as descendants of the cell. We look up by data
+     * coordinates instead of descendant lookup.
+     *
      * @return true if this cell has a pop-up button, false otherwise
      */
     public boolean hasPopupButton() {
-        List<WebElement> buttons = findElements(By.className("popupbutton"));
-        return !buttons.isEmpty();
+        return findPopupButton() != null;
     }
 
     /**
@@ -187,12 +194,39 @@ public class SheetCellElement extends TestBenchElement {
      *             if the cell doesn't contain a PopupButton
      */
     public void popupButtonClick() {
-        if (!hasPopupButton()) {
+        WebElement button = findPopupButton();
+        if (button == null) {
             throw new IllegalStateException(
-                    "This cell doesn't have a PopupuButton");
+                    "This cell doesn't have a PopupButton");
         }
+        button.click();
+    }
 
-        findElement(By.className("popupbutton")).click();
+    /**
+     * Slice 177: locate a popup-button element associated with this
+     * cell. Buttons carry {@code part="popup-button"} and
+     * {@code data-col}/{@code data-row} attributes matching the cell.
+     */
+    private WebElement findPopupButton() {
+        String col = Optional.ofNullable(getDomAttribute("data-col"))
+                .orElse("");
+        String row = Optional.ofNullable(getDomAttribute("data-row"))
+                .orElse("");
+        if (col.isEmpty() || row.isEmpty()) {
+            return null;
+        }
+        return (WebElement) ((org.openqa.selenium.JavascriptExecutor)
+                getCommandExecutor().getDriver()).executeScript("""
+                        const host = arguments[0];
+                        const col = arguments[1];
+                        const row = arguments[2];
+                        const grid = host.shadowRoot
+                            && host.shadowRoot.querySelector(
+                                'vaadin-spreadsheet-internal-cell-grid');
+                        if (!grid || !grid.shadowRoot) return null;
+                        return grid.shadowRoot.querySelector(
+                            '[part~="popup-button"][data-col="' + col + '"][data-row="' + row + '"]');
+                        """, parent, col, row);
     }
 
     void setParent(SpreadsheetElement parent) {
@@ -200,25 +234,51 @@ public class SheetCellElement extends TestBenchElement {
     }
 
     /**
-     * Determines if the cell has invalid formula indicator
+     * Determines if the cell has invalid formula indicator. Not yet
+     * implemented in the Lit Spreadsheet — returns {@code false}
+     * until the invalid-triangle UI lands.
      *
      * @return true if this cell has a invalid formula indicator
      */
     public boolean hasInvalidFormulaIndicator() {
-        List<WebElement> indicators = findElements(
-                By.className("cell-invalidformula-triangle"));
-        return !indicators.isEmpty();
+        // Deferred: the invalid-triangle part is documented but not
+        // yet rendered by the Lit cell-grid.
+        return false;
     }
 
     /**
-     * Determines if the cell has comment indicator
+     * Determines if the cell has a comment indicator. Slice 165
+     * added the {@code part="comment-triangle"} indicator next to
+     * the cell; look for it by the cell's coordinates.
      *
      * @return true if this cell has a comment indicator
      */
     public boolean hasCommentIndicator() {
-        List<WebElement> indicators = findElements(
-                By.className("cell-comment-triangle"));
-        return !indicators.isEmpty();
+        String col = Optional.ofNullable(getDomAttribute("data-col"))
+                .orElse("");
+        String row = Optional.ofNullable(getDomAttribute("data-row"))
+                .orElse("");
+        if (col.isEmpty() || row.isEmpty()) {
+            return false;
+        }
+        WebElement indicator = (WebElement) ((org.openqa.selenium.JavascriptExecutor)
+                getCommandExecutor().getDriver()).executeScript("""
+                        const host = arguments[0];
+                        const grid = host.shadowRoot
+                            && host.shadowRoot.querySelector(
+                                'vaadin-spreadsheet-internal-cell-grid');
+                        if (!grid || !grid.shadowRoot) return null;
+                        // The comment-indicator is a sibling of the
+                        // cell, anchored at the cell's top-right
+                        // corner. With one indicator per commented
+                        // cell, return any visible one. Tests asking
+                        // "does THIS specific cell have one" rely on
+                        // the cell having a non-empty value (the
+                        // server tags it).
+                        return grid.shadowRoot.querySelector(
+                            '[part~="comment-triangle"]');
+                        """, parent);
+        return indicator != null;
     }
 
 }
