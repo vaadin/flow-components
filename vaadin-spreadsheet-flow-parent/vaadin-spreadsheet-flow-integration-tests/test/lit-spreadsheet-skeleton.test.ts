@@ -2514,6 +2514,108 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('cell comments: setCellComments + recomputeViewport renders comment-indicator divs (slice 165)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setCellComments({
+            'col2 row3': 'reviewer note',
+            'col1 row1': 'header comment',
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const indicators = sheet.getCellGrid().shadowRoot!.querySelectorAll(
+            '.comment-indicator'
+        );
+        expect(indicators).to.have.length(2);
+        cleanup();
+    });
+
+    it('hyperlink cells: setHyperlinksTooltips + click dispatches linkCellClicked (slice 165)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHyperlinksTooltips({
+            'col3 row2': 'https://example.com',
+        });
+
+        let received: { type: string; data: Record<string, unknown> } | undefined;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'linkCellClicked') {
+                received = detail;
+            }
+        });
+
+        // Click the hyperlink cell.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 2, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        expect(received).to.exist;
+        expect(received!.data).to.deep.equal({ row: 2, column: 3 });
+        cleanup();
+    });
+
+    it('non-hyperlink cells do NOT dispatch linkCellClicked on click (slice 165)', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHyperlinksTooltips({
+            'col3 row2': 'https://example.com',
+        });
+
+        let received = false;
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            if ((e as CustomEvent).detail.type === 'linkCellClicked') {
+                received = true;
+            }
+        });
+
+        // Click a different cell.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 1, row: 1, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        expect(received).to.be.false;
+        cleanup();
+    });
+
+    it('hyperlink cells render with .link-cell class for visual styling (slice 165)', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHyperlinksTooltips({
+            'col2 row2': 'https://example.com',
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const linkCell = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.col2.row2.link-cell'
+        );
+        expect(linkCell).to.not.be.null;
+        // Other cells should NOT have the link-cell class.
+        const otherCell = sheet.getCellGrid().shadowRoot!.querySelector(
+            '.col1.row1'
+        );
+        expect(otherCell!.classList.contains('link-cell')).to.be.false;
+        cleanup();
+    });
+
     it('recomputeViewport runs without throwing on a detached host (zero dimensions)', () => {
         // Constructor without DOM attachment: clientWidth/Height = 0.
         // The viewport math should still produce a valid render

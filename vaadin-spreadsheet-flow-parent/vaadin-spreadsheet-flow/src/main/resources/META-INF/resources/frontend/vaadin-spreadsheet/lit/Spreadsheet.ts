@@ -550,6 +550,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
         }
         this.recomputeViewport();
         this.dispatchSelectionEvent();
+        // Hyperlink cells additionally dispatch `linkCellClicked`
+        // after the normal selection event (slice 165). The
+        // server's onLinkCellClicked handler opens the URL.
+        const cellKey = toKey(col, row);
+        if (this.hyperlinksTooltips[cellKey] !== undefined) {
+            this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
+                detail: {
+                    type: 'linkCellClicked',
+                    data: { row, column: col },
+                },
+                bubbles: true,
+                composed: true,
+            }));
+        }
     };
 
     /**
@@ -1671,6 +1685,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
             editor: this.editor,
             overlays: positionedOverlays,
             popupButtons: positionedPopupButtons,
+            // Comment-bearing + hyperlink cell keys (slice 165).
+            // The maps from setCellComments / setHyperlinksTooltips
+            // are keyed by the cell-key format already, so a Set
+            // of their keys is the right shape for the render.
+            commentCells: new Set(Object.keys(this.cellComments)),
+            hyperlinkCells: new Set(Object.keys(this.hyperlinksTooltips)),
         };
     }
 

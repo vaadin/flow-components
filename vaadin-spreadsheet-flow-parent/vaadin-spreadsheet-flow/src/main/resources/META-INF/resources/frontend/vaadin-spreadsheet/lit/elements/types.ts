@@ -175,6 +175,22 @@ export interface CellGridRenderState {
      * {@code popupButtonClick} for the server.
      */
     popupButtons: ReadonlyArray<PositionedPopupButton>;
+
+    /**
+     * Cell keys (in {@link toKey} format — `"col<C> row<R>"`)
+     * whose cell carries a comment. The cell-grid renders a
+     * small yellow corner-triangle indicator on each. Empty
+     * set when no cell has a comment. Slice 165.
+     */
+    commentCells: ReadonlySet<string>;
+
+    /**
+     * Cell keys whose cell is a clickable hyperlink. Click on
+     * such a cell dispatches {@code linkCellClicked} INSTEAD OF
+     * (well, in addition to) the normal {@code cellSelected}.
+     * Empty set when no cells are hyperlinks. Slice 165.
+     */
+    hyperlinkCells: ReadonlySet<string>;
 }
 
 /**
@@ -279,6 +295,8 @@ export function emptyCellGridRenderState(): CellGridRenderState {
         editor: null,
         overlays: [],
         popupButtons: [],
+        commentCells: new Set(),
+        hyperlinkCells: new Set(),
         selection: {
             activeCell: { col: 1, row: 1 },
             activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 },

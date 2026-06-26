@@ -102,6 +102,31 @@ export class SpreadsheetCellGrid extends LitElement {
             display: block;
         }
 
+        /* Comment indicator — small red triangle in the top-right
+           of a cell with a comment (slice 165). The triangle is
+           drawn via border + clip-path so no extra image asset
+           is needed. Excel renders red; gnumeric+LibreOffice
+           render yellow. We follow Excel. */
+        .comment-indicator {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            transform: translate(-100%, 0);
+            background: var(--vaadin-spreadsheet-comment-bg, #d32f2f);
+            clip-path: polygon(100% 0, 100% 100%, 0 0);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Hyperlink cells get a visual underline + color hint
+           (slice 165). The actual click handling lives in the
+           connector; this style just matches the Excel convention. */
+        .cell.link-cell {
+            color: var(--vaadin-spreadsheet-link-fg, #1976d2);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
         /* Popup-button anchor — small triangle in the bottom-right
            of a cell that opens a popup on click (slice 161). The
            popup itself is provided by the Flow wrapper via slot;
@@ -531,11 +556,29 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
             const inSelection = isCellSelected(selection, col, row);
             const isActive = isActiveCell(selection, col, row);
             const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+            // Hyperlink cells get a `link-cell` class for visual
+            // styling (blue + underline). The click handler in
+            // the connector dispatches `linkCellClicked` based
+            // on the same hyperlinks map. Slice 165.
+            // Defensive default — older fixtures may not declare
+            // the hyperlinkCells / commentCells sets (slice 165
+            // introduced them).
+            const hyperlinkCells = state.hyperlinkCells ?? new Set();
+            const commentCells = state.commentCells ?? new Set();
+            const linkClass = hyperlinkCells.has(key) ? ' link-cell' : '';
             const classList = `cell col${col} row${row} quadrant-${quadrantName}`
                 + (cellStyleClass ? ` ${cellStyleClass}` : '')
-                + cellRangeClass;
+                + cellRangeClass
+                + linkClass;
             const style =
                 `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+            // Comment indicator — render an additional triangle
+            // anchored at the cell's top-right when the cell has
+            // a comment. Slice 165.
+            const commentIndicator = commentCells.has(key)
+                ? html`<div class="comment-indicator"
+                            style="left:${left + width}px;top:${top}px;"></div>`
+                : '';
             // data-col + data-row drive the click-delegation handler
             // in firstUpdated() (slice 146) — single source of truth
             // for the cell's coordinate when the event bubbles.
@@ -544,6 +587,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
                      data-col=${col} data-row=${row}>
                     ${text}
                 </div>
+                ${commentIndicator}
             `);
         }
     }
