@@ -54,11 +54,38 @@ import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
- * The Spreadsheet client class. Slice 169 flipped the wrapper to
- * load this implementation unconditionally; slice 170 deleted the
- * legacy GWT-compiled client. The Lit wrapper at
- * {@code ../vaadin-spreadsheet.js} holds a reference to an
- * instance of this class as {@code this.$connector}.
+ * The new Spreadsheet client class — the replacement for the
+ * GWT-compiled {@code Spreadsheet} class exported from
+ * {@code spreadsheet-export.js}. The Lit wrapper at
+ * {@code ../vaadin-spreadsheet.js} holds a reference to an instance of
+ * this class as {@code this.api} once Phase 3.6 flips the import.
+ *
+ * Today this class is a **type-safe stub**. Every method on
+ * {@link SpreadsheetClientApi} is implemented with a minimal placeholder
+ * (typically just storing the argument into a private field, or a
+ * {@code TODO} comment naming the phase that fills it in). The
+ * TypeScript compiler enforces that every method the interface declares
+ * is present here, so the team gradually fills in real implementations
+ * without losing track of any.
+ *
+ * Implementation roadmap (per
+ * {@code refactor-artifacts/TIER3_PLAN.md} § 6):
+ *
+ * - **Phase 3.2** — Cell grid + virtual scrolling. The
+ *   `update*CellValues` / `setRowH` / `setColW` / `notifyStateChanges`
+ *   methods get real implementations that build / recycle DOM.
+ * - **Phase 3.3** — Editing + formula bar. `updateFormulaBar`,
+ *   `showSelectedCell`, `setSelectedCellAndRange` get real
+ *   implementations.
+ * - **Phase 3.4** — Vaadin integration. `setResources` +
+ *   custom-editor + popup-button methods get real implementations.
+ * - **Phase 3.5** — Polish. Remaining setters + edge cases.
+ *
+ * Until Phase 3.6 (rollout), this class is NOT loaded by the Lit
+ * wrapper — it exists alongside the GWT bundle. Only when the wrapper's
+ * `import { Spreadsheet } from './spreadsheet-export.js'` flips to
+ * `import { Spreadsheet } from './lit/Spreadsheet.js'` does this code
+ * actually run.
  */
 export class Spreadsheet implements SpreadsheetClientApi {
     // ====================================================================
