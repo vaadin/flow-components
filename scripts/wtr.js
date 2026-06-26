@@ -103,7 +103,7 @@ async function runTests() {
       console.log(`Running tests in ${itFolder}`);
       try {
         const watchFlag = options.watch ? ' --watch' : '';
-        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve${watchFlag}`, {
+        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts${watchFlag}`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
