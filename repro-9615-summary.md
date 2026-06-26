@@ -6,7 +6,7 @@
 
 - **Verdict:** reproduced
 - **Hypothesis tested:** The bug is a TabSheet (or any wide content) inside a `Dialog` overflowing the viewport, triggered by opening the dialog on a narrow/mobile viewport, observable as the dialog content bleeding past the right screen edge instead of being clipped/scrolled inside the dialog.
-- **Branch:** `repro/9615` — pushed to `vaadin/flow-components`
+- **Branch:** [`repro/9615`](https://github.com/vaadin/flow-components/tree/repro/9615) — pushed to `vaadin/flow-components`
 - **Reproduced on:** flow-components @ `25.3-SNAPSHOT` (pulls published `@vaadin/dialog` 25.2.x web components)
 - **Present on main?:** yes (still broken on the 25.3 line)
 - **Theme / Browser:** Lumo / Chromium (Playwright), viewport 390×844 (mobile)
