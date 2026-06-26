@@ -212,7 +212,10 @@ describe('SpreadsheetCellGrid — editor input keydown (slice 152)', () => {
             buildEditorState({ col: 2, row: 2, initialValue: 'old' })
         );
 
-        let received: { col: number; row: number; value: string } | undefined;
+        let received: {
+            col: number; row: number; value: string;
+            key?: string; shiftKey?: boolean;
+        } | undefined;
         el.addEventListener('cell-editor-commit', (e: Event) => {
             received = (e as CustomEvent).detail;
         });
@@ -228,7 +231,13 @@ describe('SpreadsheetCellGrid — editor input keydown (slice 152)', () => {
             cancelable: true,
         }));
 
-        expect(received).to.deep.equal({ col: 2, row: 2, value: 'new value' });
+        expect(received!.col).to.equal(2);
+        expect(received!.row).to.equal(2);
+        expect(received!.value).to.equal('new value');
+        // Slice 158: key+shift are also in the detail so the
+        // connector can pick the next active-cell direction.
+        expect(received!.key).to.equal('Enter');
+        expect(received!.shiftKey).to.equal(false);
         el.remove();
     });
 
@@ -578,6 +587,139 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
             expect(sheet.getCellGrid().renderState.editor, key).to.be.null;
         }
 
+        cleanup();
+    });
+
+    it('Enter commit moves the active cell DOWN by 1 (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+
+        // Open editor at (2, 2).
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true, composed: true,
+        }));
+
+        // Commit via Enter.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 2, row: 2, value: 'x', key: 'Enter', shiftKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 3 });
+        cleanup();
+    });
+
+    it('Shift+Enter commit moves the active cell UP by 1 (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 3 },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 2, row: 3, value: 'x', key: 'Enter', shiftKey: true },
+            bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        cleanup();
+    });
+
+    it('Tab commit moves the active cell RIGHT by 1 (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 2 },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 2, row: 2, value: 'x', key: 'Tab', shiftKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 2 });
+        cleanup();
+    });
+
+    it('Shift+Tab commit moves the active cell LEFT by 1 (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 3, row: 2 },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 3, row: 2, value: 'x', key: 'Tab', shiftKey: true },
+            bubbles: true, composed: true,
+        }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+        cleanup();
+    });
+
+    it('blur commit (no key) leaves the active cell unchanged (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+
+        // Real-world: a click precedes the dblclick, setting active.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 3, row: 3 },
+            bubbles: true, composed: true,
+        }));
+        // Blur commit: no key in detail.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 3, row: 3, value: 'x' },
+            bubbles: true, composed: true,
+        }));
+
+        // Active cell stays at the committed cell — no move.
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        cleanup();
+    });
+
+    it('Enter commit at last row stays at last row (clamped) (slice 158)', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(3);
+        sheet.setCols(3);
+        sheet.setColW([50, 50, 50]);
+        sheet.setRowH([15, 15, 15]);
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
+            detail: { col: 2, row: 3 },
+            bubbles: true, composed: true,
+        }));
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-commit', {
+            detail: { col: 2, row: 3, value: 'x', key: 'Enter', shiftKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        // row stays at 3 (last).
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 3 });
         cleanup();
     });
 

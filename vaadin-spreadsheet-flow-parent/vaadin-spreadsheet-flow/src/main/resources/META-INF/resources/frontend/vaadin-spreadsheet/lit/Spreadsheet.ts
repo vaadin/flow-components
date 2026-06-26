@@ -568,21 +568,48 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
 
     /**
-     * Cell-editor commit (slice 152 scaffolding, slice 153 wires
-     * the server dispatch). Called when the user presses Enter,
-     * Tab, or blurs the input. Reads the typed value out of the
-     * event detail, dispatches `cellValueEdited` to the server,
-     * and closes the editor.
+     * Cell-editor commit. Called when the user presses Enter,
+     * Tab, or blurs the input. Reads the typed value, dispatches
+     * `cellValueEdited` to the server, closes the editor. When
+     * the commit key was Enter/Tab (slice 158), moves the active
+     * cell in the canonical Excel direction:
+     *   Enter           → row + 1
+     *   Shift+Enter     → row - 1
+     *   Tab             → col + 1
+     *   Shift+Tab       → col - 1
+     *   blur (no key)   → stay at the committed cell
      */
     private readonly handleCellEditorCommit = (
-        e: CustomEvent<{ col: number; row: number; value: string }>
+        e: CustomEvent<{
+            col: number; row: number; value: string;
+            key?: string; shiftKey?: boolean;
+        }>
     ): void => {
-        const { col, row, value } = e.detail;
+        const { col, row, value, key, shiftKey } = e.detail;
         // Close the editor first so the re-render removes the
         // input — important to do BEFORE dispatching the server
         // event so the editor doesn't briefly flash on top of the
         // server's response.
         this.editor = null;
+        // Move the active cell to the next slot per Excel
+        // convention (slice 158). For 'Enter' / 'Tab' the move
+        // direction is fixed; blur leaves the selection at the
+        // committed cell. Clamped to grid bounds.
+        if (key === 'Enter' && this.rows > 0) {
+            const nextRow = shiftKey
+                ? Math.max(1, row - 1)
+                : Math.min(this.rows, row + 1);
+            this.selection = selectSingleCell(col, nextRow);
+            this.extendCol = col;
+            this.extendRow = nextRow;
+        } else if (key === 'Tab' && this.cols > 0) {
+            const nextCol = shiftKey
+                ? Math.max(1, col - 1)
+                : Math.min(this.cols, col + 1);
+            this.selection = selectSingleCell(nextCol, row);
+            this.extendCol = nextCol;
+            this.extendRow = row;
+        }
         this.recomputeViewport();
         const data: CellValueEditedData = { row, col, value };
         this.host.dispatchEvent(new CustomEvent('spreadsheet-event', {
@@ -590,6 +617,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
             bubbles: true,
             composed: true,
         }));
+        // If we moved the active cell, also dispatch the
+        // selection event so the server stays in sync (slice
+        // 150 contract — every selection write emits an event).
+        if (key === 'Enter' || key === 'Tab') {
+            this.dispatchSelectionEvent();
+        }
     };
 
     /**

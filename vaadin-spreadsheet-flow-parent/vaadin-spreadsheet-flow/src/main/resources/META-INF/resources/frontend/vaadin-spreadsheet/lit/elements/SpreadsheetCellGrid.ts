@@ -796,10 +796,16 @@ function buildCellEditorOverlay(
     const dispatchEditorEvent = (
         target: EventTarget,
         type: 'cell-editor-commit' | 'cell-editor-cancel',
-        value: string
+        value: string,
+        key?: string,
+        shiftKey?: boolean
     ): void => {
         target.dispatchEvent(new CustomEvent(type, {
-            detail: { col, row, value },
+            // Include the key + shift modifier so the connector can
+            // pick the next active-cell direction after commit
+            // (Excel convention: Enter moves down, Tab moves right;
+            // shift reverses each). Slice 158.
+            detail: { col, row, value, key, shiftKey },
             bubbles: true,
             composed: true,
         }));
@@ -809,7 +815,10 @@ function buildCellEditorOverlay(
         const input = e.currentTarget as HTMLInputElement;
         if (e.key === 'Enter' || e.key === 'Tab') {
             e.preventDefault();
-            dispatchEditorEvent(input, 'cell-editor-commit', input.value);
+            dispatchEditorEvent(
+                input, 'cell-editor-commit', input.value,
+                e.key, e.shiftKey
+            );
         } else if (e.key === 'Escape') {
             e.preventDefault();
             dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
@@ -822,6 +831,8 @@ function buildCellEditorOverlay(
 
     const onBlur = (e: FocusEvent): void => {
         const input = e.currentTarget as HTMLInputElement;
+        // Blur commit doesn't pass key/shift — the connector
+        // leaves the selection at the committed cell.
         dispatchEditorEvent(input, 'cell-editor-commit', input.value);
     };
 
