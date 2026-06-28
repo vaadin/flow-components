@@ -64,21 +64,6 @@ public class SelectionPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setSelectionRangeWithoutFocus_appliesRangeAndKeepsFocusElsewhere() {
-        // Move focus somewhere unrelated (the deselect button) to prove the
-        // server call doesn't yank focus back to the field when focus=false.
-        findElement(By.id("deselect")).click();
-
-        clickButton("set-range-no-focus");
-
-        Assert.assertEquals(2, selectionStart(textField));
-        Assert.assertEquals(7, selectionEnd(textField));
-        Assert.assertFalse(
-                "setSelectionRange(_, _, false) should not move focus",
-                isFocused(textField));
-    }
-
-    @Test
     public void setCursorPosition_focusesAndCollapsesAtPosition() {
         clickButton("set-cursor");
 
