@@ -7,6 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import { isFirefox } from '@vaadin/component-base/src/browser-utils.js';
 import { iterateRowCells, updatePart } from '@vaadin/grid/src/vaadin-grid-helpers.js';
 
 function isEditedRow(grid, rowData) {
@@ -16,7 +17,7 @@ function isEditedRow(grid, rowData) {
 const LOADING_EDITOR_CELL_ATTRIBUTE = 'loading-editor';
 
 window.Vaadin.Flow.gridProConnector = {
-  selectAll: (editor, itemKey, grid) => {
+  handleCustomEditorValueUpdate: (editor, itemKey, grid) => {
     if (editor.__itemKey !== itemKey) {
       // This is an outdated call that can occur if the user starts editing a cell,
       // and quickly starts editing another cell on the same column before the editor
@@ -61,6 +62,21 @@ window.Vaadin.Flow.gridProConnector = {
       stopCellEdit.apply(this, arguments);
       this._grid.toggleAttribute(LOADING_EDITOR_CELL_ATTRIBUTE, false);
     };
+
+    if (isFirefox && !component.__firefoxChangeWorkaroundInstalled) {
+      // The editor is focused before its value is set from the server. Firefox
+      // treats an input as unchanged when its value on blur equals the value it
+      // had on focus, ignoring programmatic changes in between. So typing the
+      // value from the previous edit again would not fire a change event and
+      // the cell would not update. As a workaround, always fire a synthetic
+      // change event when an input loses focus.
+      component.addEventListener('focusout', (e) => {
+        if (e.target instanceof HTMLInputElement) {
+          e.target.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      component.__firefoxChangeWorkaroundInstalled = true;
+    }
   },
 
   patchEditModeRenderer(column) {

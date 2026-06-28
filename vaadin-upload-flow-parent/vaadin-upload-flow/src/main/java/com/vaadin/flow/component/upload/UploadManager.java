@@ -530,7 +530,7 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.2.0-beta2")
+    @NpmPackage(value = "@vaadin/upload", version = "25.2.0")
     static class Connector extends Component {
     }
 

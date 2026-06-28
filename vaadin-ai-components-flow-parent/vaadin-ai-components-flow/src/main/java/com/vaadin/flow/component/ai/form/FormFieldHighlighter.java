@@ -19,8 +19,8 @@ import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Bridges {@link FormAIController#showHighlight} /
- * {@link FormAIController#hideHighlight} to the
+ * Bridges {@link FormAIController#showFieldHighlight} /
+ * {@link FormAIController#hideFieldHighlight} to the
  * {@code vaadin-field-highlighter} web component. Each controller passes its
  * own {@code userId} so the AI user does not collide with any other user the
  * application may keep on the same field.

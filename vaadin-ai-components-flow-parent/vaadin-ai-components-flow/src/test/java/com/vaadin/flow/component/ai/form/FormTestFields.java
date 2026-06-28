@@ -104,7 +104,7 @@ final class FormTestFields {
     }
 
     /**
-     * Integer-valued field used to exercise {@code valueOptions} with a
+     * Integer-valued field used to exercise {@code fieldValueOptions} with a
      * non-{@link String} value type, where {@code toValue} must convert the
      * chosen label into the field's actual value type.
      */
@@ -196,7 +196,7 @@ final class FormTestFields {
      * Collection-valued field that does not implement {@link MultiSelect}. Used
      * to verify the controller rejects this shape — Collection-valued fields
      * must implement {@code MultiSelect} to be registered via
-     * {@code valueOptions(...)}.
+     * {@code fieldValueOptions(...)}.
      */
     @Tag("collection-without-multiselect-field")
     static class CollectionWithoutMultiSelectField

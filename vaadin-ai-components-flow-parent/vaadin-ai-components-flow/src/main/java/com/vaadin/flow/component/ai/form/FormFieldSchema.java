@@ -78,7 +78,15 @@ final class FormFieldSchema {
             node.put("readOnly", true);
         }
         applyType(node, field, type, hints);
-        applyValue(node, field, type, hints);
+        if (descriptor.hideValue()) {
+            // The value is kept private: render null and flag it, whether or
+            // not a value is set, so the LLM never sees the value yet still
+            // knows the field exists and can be written.
+            node.putNull(FIELD_VALUE);
+            node.put("valueHidden", true);
+        } else {
+            applyValue(node, field, type, hints);
+        }
         return node;
     }
 
@@ -91,10 +99,10 @@ final class FormFieldSchema {
             applySelectionOptions(items, field, hints);
             return;
         }
-        // valueOptions turns any field into a constrained-choice field from
-        // the LLM's perspective: the LLM picks a label, valueOptionsToValue
-        // converts back. Emit type=string + enum/queryable so the LLM sees the
-        // signal regardless of the underlying value type.
+        // fieldValueOptions turns any field into a constrained-choice field
+        // from the LLM's perspective: the LLM picks a label,
+        // valueOptionsToValue converts back. Emit type=string + enum/queryable
+        // so the LLM sees the signal regardless of the underlying value type.
         if (type == FormFieldType.SINGLE_SELECT || hasValueOptions(hints)) {
             node.put(FIELD_TYPE, TYPE_STRING);
             applySelectionOptions(node, field, hints);
@@ -160,9 +168,9 @@ final class FormFieldSchema {
             node.putNull(FIELD_VALUE);
             return;
         }
-        // valueOptions rewrites the schema type to "string" + enum/queryable
-        // for non-selection fields; render the value as a string so the two
-        // halves of the payload agree.
+        // fieldValueOptions rewrites the schema type to "string" +
+        // enum/queryable for non-selection fields; render the value as a
+        // string so the two halves of the payload agree.
         if (hasValueOptions(hints) && type != FormFieldType.SINGLE_SELECT
                 && type != FormFieldType.MULTI_SELECT) {
             node.put(FIELD_VALUE, FormValueConverter.renderItem(field, value));

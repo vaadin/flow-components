@@ -43,7 +43,6 @@ import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
-import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -144,7 +143,7 @@ class FillFormToolTest {
         secret.setLabel("Secret");
         secret.setValue("classified");
         var controller = controllerFor(visible, secret);
-        controller.ignore(secret);
+        controller.ignoreField(secret);
 
         var raw = fillFormPayload(controller, payload(visible, "\"Acme\""));
 
@@ -154,6 +153,34 @@ class FillFormToolTest {
                 "Ignored field's label must not appear, got: " + raw);
         Assertions.assertFalse(raw.contains("classified"),
                 "Ignored field's value must not appear, got: " + raw);
+    }
+
+    @Test
+    void fillForm_writesFieldsButMasksValuesWhenValuesHidden() {
+        // setFieldValuesHidden keeps every field writable: the AI can fill
+        // them.
+        // The writes must land, but the response must still mask the values
+        // (null + valueHidden) rather than echoing what was written.
+        var name = new LabeledStringField();
+        name.setLabel("Name");
+        var controller = controllerFor(name);
+        controller.setFieldValuesHidden(true);
+
+        var result = fillFormResult(controller, payload(name, "\"Acme Corp\""));
+
+        Assertions.assertEquals("Acme Corp", name.getValue(),
+                "Field must still accept the write while values are hidden");
+        Assertions.assertTrue(success(result),
+                "Write must not be rejected, got: " + result);
+        var node = fieldEntry(result, idOf(name));
+        Assertions.assertTrue(node.path("value").isNull(),
+                "Response must mask the value, got: " + node);
+        Assertions.assertTrue(node.path("valueHidden").asBoolean(false),
+                "Response must flag the masked value, got: " + node);
+        Assertions.assertFalse(
+                fillFormPayload(controller, payload(name, "\"Acme Corp\""))
+                        .contains("Acme Corp"),
+                "The written value must never appear in the response");
     }
 
     @Test
@@ -521,7 +548,7 @@ class FillFormToolTest {
         secret.setLabel("Secret");
         secret.setValue("original");
         var controller = controllerFor(visible, secret);
-        controller.ignore(secret);
+        controller.ignoreField(secret);
 
         var args = JacksonUtils.createObjectNode();
         args.put(idOf(visible), "set");
@@ -1263,12 +1290,12 @@ class FillFormToolTest {
     @Test
     void fillForm_singleSelect_writesResolvedValueViaValueOptionsToValue() {
         // The LLM speaks in labels for SINGLE_SELECT fields with
-        // valueOptions registered. The tool must apply toValue so the
+        // fieldValueOptions registered. The tool must apply toValue so the
         // field gets the domain instance, not the raw label string.
         var field = new SingleSelectField<Project>();
         var projects = Map.of("Apollo", new Project("P-1", "Apollo"));
         var controller = newController(field);
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("Apollo")), projects::get);
         controller.onRequest();
 
@@ -1282,7 +1309,7 @@ class FillFormToolTest {
 
     @Test
     void fillForm_singleSelect_withoutValueOptionsIsRejectedWithHint() {
-        // SINGLE_SELECT without a valueOptions registration means the
+        // SINGLE_SELECT without a fieldValueOptions registration means the
         // LLM has no labels to pick and the converter has no toValue to
         // resolve. The fill must fail loudly with a reason that points
         // at the missing registration so the developer can fix it.
@@ -1295,8 +1322,9 @@ class FillFormToolTest {
         Assertions.assertFalse(success(result));
         Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
         Assertions.assertTrue(
-                rejectionReason(result, idOf(field)).contains("valueOptions"),
-                "Reason must point at the missing valueOptions "
+                rejectionReason(result, idOf(field))
+                        .contains("fieldValueOptions"),
+                "Reason must point at the missing fieldValueOptions "
                         + "registration; got: "
                         + rejectionReason(result, idOf(field)));
     }
@@ -1308,7 +1336,7 @@ class FillFormToolTest {
         // already surfaces its items as `enum`. The converter must resolve
         // an LLM-supplied label against those items via
         // FormValueConverter.renderItem so the field is writable without
-        // also requiring FormAIController.valueOptions(...).
+        // also requiring FormAIController.fieldValueOptions(...).
         var field = new SingleSelectField<String>();
         field.setItems("EUR", "USD", "GBP");
         var controller = controllerFor(field);
@@ -1370,7 +1398,7 @@ class FillFormToolTest {
         // pass null to setValue (which would silently clear the field).
         var field = new SingleSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("Apollo")), label -> null);
         controller.onRequest();
 
@@ -1387,12 +1415,12 @@ class FillFormToolTest {
 
     @Test
     void fillForm_multiSelect_writesResolvedSetViaValueOptions() {
-        // valueOptions on a MultiSelectField takes a single-item Function;
+        // fieldValueOptions on a MultiSelectField takes a single-item Function;
         // the converter accumulates per-label items into the Set<Project>
         // value type via an internal LinkedHashSet.
         var field = new MultiSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field)
                         .options((filter, limit) -> List.of("Apollo", "Vega")),
                 label -> new Project(label, label));
@@ -1415,8 +1443,8 @@ class FillFormToolTest {
 
         Assertions.assertEquals(Set.of(), field.getValue());
         Assertions.assertEquals(List.of(idOf(field)), rejectedIds(result));
-        Assertions.assertTrue(
-                rejectionReason(result, idOf(field)).contains("valueOptions"));
+        Assertions.assertTrue(rejectionReason(result, idOf(field))
+                .contains("fieldValueOptions"));
     }
 
     @Test
@@ -1426,7 +1454,7 @@ class FillFormToolTest {
         // `setItems(...)` has a non-empty ListDataProvider and the schema
         // surfaces the items as the `items.enum` of the array. The
         // converter must resolve each label against those items so the
-        // field is writable without also requiring valueOptions(...).
+        // field is writable without also requiring fieldValueOptions(...).
         var field = new MultiSelectField<String>();
         field.setItems("AI", "Cloud", "Security");
         var controller = controllerFor(field);
@@ -1493,7 +1521,7 @@ class FillFormToolTest {
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of()), label -> existing);
         controller.onRequest();
 
@@ -1512,7 +1540,7 @@ class FillFormToolTest {
         var existing = new Project("X", "X");
         field.setValue(Set.of(existing));
         var controller = newController(field);
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field)
                         .options((filter, limit) -> List.of("Apollo")),
                 label -> new Project(label, label));
@@ -1531,15 +1559,15 @@ class FillFormToolTest {
 
     @Test
     void fillForm_multiSelect_reregistrationOverwritesPriorOptions() {
-        // valueOptions called twice on the same MultiSelect field — the
+        // fieldValueOptions called twice on the same MultiSelect field — the
         // second call wins, including switching from fixed to queryable
         // and replacing the toValue function.
         var field = new MultiSelectField<Project>();
         var controller = newController(field);
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of("First")),
                 label -> new Project("v1", label));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field)
                         .options((filter, limit) -> List.of("Second")),
                 label -> new Project("v2", label));
@@ -1555,15 +1583,15 @@ class FillFormToolTest {
     }
 
     @Test
-    void fillForm_valueOptionsOnPrimitiveTypeUsesToValueNotTypeDrivenParsing() {
-        // Registering valueOptions(...) on a non-SELECT field still makes
+    void fillForm_fieldValueOptionsOnPrimitiveTypeUsesToValueNotTypeDrivenParsing() {
+        // Registering fieldValueOptions(...) on a non-SELECT field still makes
         // the LLM speak in labels (the schema advertises an enum/queryable
         // string). The converter must apply toValue and skip type-driven
         // parsing — otherwise the field would receive a raw String and a
         // typed setValue (e.g. ComboBox<Project>) would reject it.
         var field = new IntField();
         var controller = newController(field);
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field)
                         .options((filter, limit) -> List.of("low", "high")),
                 label -> "low".equals(label) ? 1 : 10);
@@ -1827,7 +1855,7 @@ class FillFormToolTest {
     /**
      * Builds a controller around a form attached to {@code MockUIExtension}'s
      * UI but stops short of {@code onRequest()} so callers can register
-     * {@code valueOptions} before the first turn. Attaching the form is
+     * {@code fieldValueOptions} before the first turn. Attaching the form is
      * required: {@code executeFill} throws {@link IllegalStateException} on a
      * detached form, matching the production contract.
      */

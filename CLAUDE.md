@@ -37,7 +37,7 @@ Shared modules used across components:
 - Extend Flow `Component` and implement mixin interfaces like `HasText`, `HasEnabled`, `ClickNotifier`
 - Use `@Tag` and `@JsModule` annotations to link to the corresponding Vaadin web component
 - Can have theme variants by implementing the `HasThemeVariant` interface and defining an enum for variants extending from `ThemeVariant`
-- Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/resources/frontend`
+- Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/frontend`
 - Connector initialization, as well as any inline JavaScript run with `Element.executeJs()`, are run in the component's attach handler to ensure they are always run again when Flow creates a new element for the same component instance on the client side
 
 ### Testing
@@ -76,7 +76,7 @@ mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integr
 mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests -Dit.test='{file-pattern}' -DskipUnitTests
 
 # Start integration test server for a component
-mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
+mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
 ```
 
 **Notes on test commands**:

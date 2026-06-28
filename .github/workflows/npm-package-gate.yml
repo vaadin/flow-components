@@ -1,0 +1,134 @@
+name: NpmPackage 24h gate
+
+# Self-contained @NpmPackage version-bump gate. On every PR it detects an added
+# @NpmPackage version and, if found, posts a CHANGES_REQUESTED block, then 24
+# hours later automatically dismisses it, approves the PR and enables auto-merge.
+#
+# It triggers on `pull_request` (same PR events as validation.yml), so it catches
+# PR creation and updates on its own. The `repository_dispatch` trigger is an
+# internal hop: the `block` job dispatches `npm-package-blocked` to launch the
+# `wait-and-unblock` job in a separate run. That run is immune to PR pushes, so
+# the 24h timer is anchored to the block message and never reset by new commits.
+#
+# The 24h wait is implemented with an Environment named "24h-gate" that has a
+# Wait timer of 1440 minutes (Settings -> Environments). A job waiting on a wait
+# timer does not consume runner minutes, so this costs nothing while it waits,
+# and it sidesteps the 6h single-job limit (the timer runs before the job does).
+
+on:
+  pull_request:
+  repository_dispatch:
+    types: [npm-package-blocked]
+
+env:
+  MARKER: '<!-- vaadin-flow-components:npm-package-bump-review -->'
+
+jobs:
+  block:
+    name: Detect bump and request changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      # A newer push supersedes an in-flight detection; cheap to cancel.
+      group: npm-package-gate-block-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Detect bump, block and schedule unblock
+        env:
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Detect an added @NpmPackage version in the PR's .java files. Use the
+          # PR files API so we diff against the merge base, not against main's
+          # current tip — otherwise unrelated @NpmPackage commits already merged
+          # into main since the PR branched would trigger a false positive.
+          if ! gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
+               --jq '.[] | select(.filename | endswith(".java")) | .patch // ""' \
+             | grep -qE '^\+.*@NpmPackage'; then
+            echo "No added @NpmPackage version, nothing to block."
+            exit 0
+          fi
+
+          # Only fire once per block: if the block review already exists, the
+          # gate is already running and re-dispatching would spawn a second
+          # waiter. This is what stops every later push from re-blocking.
+          existing=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            --jq "[.[] | select(.state == \"CHANGES_REQUESTED\") | select(.body | contains(\"$MARKER\"))] | length")
+          if [ "$existing" -gt 0 ]; then
+            echo "Block review already present, gate already running."
+            exit 0
+          fi
+
+          BODY=$(sed 's/^          //' <<'EOF'
+          <!-- vaadin-flow-components:npm-package-bump-review -->
+          This PR updates the `@NpmPackage` version. Because the default value of `vaadin.npm.minimumFrontendPackageAgeDays` is 1, I'm blocking it for now to avoid producing a failed snapshot for other projects.
+
+          **No action needed — this is fully automated:**
+          - I posted this block automatically when CI detected the `@NpmPackage` version bump.
+          - **24 hours after this message**, I will automatically dismiss this review, approve the PR, and enable auto-merge (squash) so it merges as soon as all required checks pass.
+
+          **What affects the 24h timer:**
+          - New commits / pushes **do not** reset it — the countdown is anchored to this message, so it keeps running no matter how many times you push.
+          - The timer only restarts if this block review is **manually dismissed** and a later CI run detects an `@NpmPackage` bump again (that posts a fresh block).
+          - If the PR is **merged or closed** before the 24 hours elapse, the auto-unblock simply does nothing.
+          EOF
+          )
+          gh api -X POST "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            -f event=REQUEST_CHANGES \
+            -f body="$BODY"
+
+          # Schedule the follow-up unblock job in a separate run that PR pushes
+          # can't cancel or reset. A PAT/app token is required here: events sent
+          # with the default GITHUB_TOKEN do not trigger other workflows
+          # (anti-recursion rule).
+          gh api -X POST "repos/$REPO/dispatches" --input - \
+            <<<"{\"event_type\":\"npm-package-blocked\",\"client_payload\":{\"pr\":$PR_NUMBER}}"
+
+  wait-and-unblock:
+    name: Auto-unblock after 24h
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    # The Wait timer configured on this environment pauses the job for 24h
+    # before it starts running.
+    environment: 24h-gate
+    permissions:
+      contents: read
+    concurrency:
+      # One waiter per PR; never cancel, or we'd kill a pending 24h waiter.
+      group: npm-package-gate-wait-${{ github.event.client_payload.pr }}
+      cancel-in-progress: false
+    steps:
+      - name: Dismiss block and approve
+        env:
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT }}
+          PR_NUMBER: ${{ github.event.client_payload.pr }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Re-check current state: skip if the PR was merged/closed meanwhile.
+          state=$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.state')
+          if [ "$state" != "open" ]; then
+            echo "PR #$PR_NUMBER is '$state', nothing to unblock."
+            exit 0
+          fi
+          # Find the active block review carrying our marker (skip if already
+          # dismissed manually).
+          review_id=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            --jq "[.[] | select(.state == \"CHANGES_REQUESTED\") | select(.body | contains(\"$MARKER\"))] | last | .id // empty")
+          if [ -z "$review_id" ]; then
+            echo "No active block review found, nothing to dismiss."
+            exit 0
+          fi
+          echo "Dismissing block review $review_id on PR #$PR_NUMBER"
+          gh api -X PUT "repos/$REPO/pulls/$PR_NUMBER/reviews/$review_id/dismissals" \
+            -f message="24 hours have passed since the @NpmPackage block. Auto-unblocking and approving." \
+            -f event=DISMISS
+          echo "Approving PR #$PR_NUMBER"
+          gh api -X POST "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+            -f event=APPROVE \
+            -f body="Automatically approved 24 hours after the @NpmPackage version bump block."
+          echo "Enabling auto-merge for PR #$PR_NUMBER"
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --auto --squash \
+            || echo "::warning::Could not enable auto-merge for PR #$PR_NUMBER (already merged, or no pending required checks)."

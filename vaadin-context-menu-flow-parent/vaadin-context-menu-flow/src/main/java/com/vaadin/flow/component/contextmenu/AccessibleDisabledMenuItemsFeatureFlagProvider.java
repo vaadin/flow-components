@@ -25,8 +25,8 @@ public class AccessibleDisabledMenuItemsFeatureFlagProvider
 
     public static final Feature ACCESSIBLE_DISABLED_MENU_ITEMS = new Feature(
             "Accessible disabled menu items", "accessibleDisabledMenuItems",
-            "https://github.com/vaadin/web-components/issues/10415", true,
-            null);
+            "https://vaadin.com/docs/latest/components/context-menu#disabled-menu-items",
+            true, null);
 
     @Override
     public List<Feature> getFeatures() {

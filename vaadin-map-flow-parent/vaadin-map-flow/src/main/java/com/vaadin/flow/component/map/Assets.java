@@ -19,13 +19,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  */
 public class Assets {
     public static final ImageAsset PIN = new ImageAsset("pin.png",
-            "/META-INF/resources/frontend/vaadin-map/assets/pin.png", 80, 104);
+            "/META-INF/resources/vaadin-map/assets/pin.png", 80, 104);
     public static final ImageAsset POINT = new ImageAsset("point.png",
-            "/META-INF/resources/frontend/vaadin-map/assets/point.png", 128,
-            128);
+            "/META-INF/resources/vaadin-map/assets/point.png", 128, 128);
     public static final ImageAsset CLUSTER = new ImageAsset("cluster.png",
-            "/META-INF/resources/frontend/vaadin-map/assets/cluster.png", 72,
-            72);
+            "/META-INF/resources/vaadin-map/assets/cluster.png", 72, 72);
 
     public static class Asset implements Serializable {
         private final String fileName;

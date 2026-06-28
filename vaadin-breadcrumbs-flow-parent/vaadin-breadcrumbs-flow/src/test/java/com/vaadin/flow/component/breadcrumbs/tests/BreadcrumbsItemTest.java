@@ -172,6 +172,30 @@ class BreadcrumbsItemTest {
         Assertions.assertEquals(prefix, item.getPrefixComponent());
     }
 
+    @Test
+    void setTextAfterPrefix_prefixPreserved() {
+        var item = new BreadcrumbsItem("Inbox (2 items)");
+        var prefix = new Div();
+        item.setPrefixComponent(prefix);
+
+        item.setText("Inbox (3 items)");
+
+        Assertions.assertEquals("Inbox (3 items)", item.getText());
+        Assertions.assertEquals(prefix, item.getPrefixComponent());
+    }
+
+    @Test
+    void setEmptyTextAfterPrefix_prefixPreserved() {
+        var item = new BreadcrumbsItem("Home");
+        var prefix = new Div();
+        item.setPrefixComponent(prefix);
+
+        item.setText("");
+
+        Assertions.assertEquals("", item.getText());
+        Assertions.assertEquals(prefix, item.getPrefixComponent());
+    }
+
     @SafeVarargs
     private void runWithMockRouter(Runnable test,
             Class<? extends Component>... routes) {

@@ -25,6 +25,11 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-breadcrumbs-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -46,6 +51,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -106,7 +116,7 @@
     </build>
     <profiles>
         <profile>
-            <id>build-frontend</id>
+            <id>frontend</id>
             <activation>
                 <property>
                     <name>!skipFrontend</name>
@@ -119,13 +129,14 @@
                         <artifactId>flow-maven-plugin</artifactId>
                         <configuration>
                             <frontendDirectory>./frontend</frontendDirectory>
+                            <generateBundle>false</generateBundle>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
         <profile>
-            <id>run-jetty</id>
+            <id>jetty</id>
             <activation>
                 <property>
                     <name>!skipJetty</name>
