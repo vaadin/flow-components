@@ -38,22 +38,45 @@ final class SelectionSignalSupport implements Serializable {
             const host = this;
             if (host._vaadinSelectionInstalled) return;
             host._vaadinSelectionInstalled = true;
+            let last;
             const fire = () => {
               const i = host.inputElement;
               if (!i) return;
               const start = i.selectionStart || 0;
               const end = i.selectionEnd || 0;
               const value = i.value || '';
+              const content = value.substring(start, end);
+              // Coalesced events can report an unchanged selection; skip those
+              // so the server isn't pinged for a no-op.
+              const key = start + ':' + end + ':' + content;
+              if (key === last) return;
+              last = key;
               host.dispatchEvent(new CustomEvent('vaadin-selection-change', {
-                detail: { start, end, content: value.substring(start, end) }
+                detail: { start, end, content }
               }));
+            };
+            // Debounce so a burst of changes (typing, drag-selecting, the
+            // collapse-then-settle of a click) results in a single server
+            // round-trip carrying the final selection, instead of one per
+            // intermediate state. The latter keeps the loading indicator up
+            // almost permanently while typing and emits a transient empty
+            // selection mid-gesture.
+            let timer;
+            const fireDebounced = () => {
+              clearTimeout(timer);
+              timer = setTimeout(fire, 100);
             };
             const ready = host.updateComplete || Promise.resolve();
             ready.then(() => {
               const i = host.inputElement;
               if (!i) return;
-              ['select','keyup','mouseup','input','focus'].forEach(evt =>
-                i.addEventListener(evt, fire));
+              // selectionchange fires for every caret/selection change,
+              // including clicking inside an existing selection to collapse it
+              // — which mouseup/keyup miss or read too early. select is kept as
+              // a fallback for browsers without input-level selectionchange;
+              // input and focus cover value edits and the initial state.
+              ['selectionchange','select','input','focus'].forEach(evt =>
+                i.addEventListener(evt, fireDebounced));
               fire();
             });
             """;
