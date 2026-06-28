@@ -27,6 +27,18 @@ import com.vaadin.flow.signals.Signal;
  * {@code selectionStart} / {@code selectionEnd}: indices are zero-based, with
  * {@code selectionStart} the index of the first selected character and
  * {@code selectionEnd} the index after the last selected character.
+ * <p>
+ * <strong>Known browser limitations.</strong> Text selection depends on native
+ * browser behavior that is not consistent across platforms:
+ * <ul>
+ * <li>On iOS Safari, focusing a field programmatically does not work, so the
+ * selection is painted in the faded inactive color (Safari 18 does not paint it
+ * at all; Safari 26 does).</li>
+ * <li>On iOS and Android, {@link #selectionSignal()} updates reliably for
+ * tapping, typing, and the cut/copy/paste/select actions, but not for selection
+ * changes made by long-pressing to move the cursor or to adjust the selection
+ * handles.</li>
+ * </ul>
  */
 public interface HasSelection extends HasElement {
 
