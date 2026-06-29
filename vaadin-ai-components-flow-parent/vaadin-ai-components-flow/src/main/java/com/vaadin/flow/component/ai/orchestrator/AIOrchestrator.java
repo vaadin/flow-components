@@ -649,9 +649,13 @@ public class AIOrchestrator implements Serializable {
         SessionContextTool(String content) {
             this.content = content;
             this.description = """
-                    Read for current session context (e.g. date and time, user \
-                    locale). The content below is captured at the start of \
-                    this turn:
+                    Read for current session context. If a date/time is \
+                    included below, use it to resolve relative phrases in \
+                    the user's prompt — "today", "tomorrow", "yesterday", \
+                    "next Friday", "in two weeks", "end of next month", \
+                    etc. — into ISO date / date-time / time strings.
+
+                    Captured at the start of this turn:
 
                     """ + content;
         }
