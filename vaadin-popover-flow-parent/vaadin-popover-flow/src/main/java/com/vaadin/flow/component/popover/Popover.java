@@ -390,7 +390,6 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
      *            the role to set
      * @since 25.0
      * @deprecated Use {@link #setAriaRole(String)} instead
-     * @since 25.0
      */
     @Deprecated(since = "25.3", forRemoval = true)
     public void setRole(String role) {
@@ -420,7 +419,6 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
      * @return the role
      * @since 25.0
      * @deprecated Use {@link #getAriaRole()} instead
-     * @since 25.0
      */
     @Deprecated(since = "25.3", forRemoval = true)
     public String getRole() {
