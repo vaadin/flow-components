@@ -223,6 +223,9 @@ async function copySources() {
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/frontend`, `${itFolder}`);
     // copy java sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`);
+    // copy pnpm-workspace.yaml so @vaadin/* web component bumps bypass the
+    // frontend package age check (all modules ship an identical copy)
+    copyFileSync(`${parent}/${id}-integration-tests/pnpm-workspace.yaml`, `${itFolder}`);
   });
 
   // Always copy LumoAppShell, so that merged ITs run with Lumo theme applied. Some ITs do not work property with
