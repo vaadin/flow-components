@@ -514,36 +514,29 @@ class FormAIControllerTest {
                             (java.util.function.BiFunction<String, Integer, List<String>>) null));
             Assertions.assertThrows(NullPointerException.class,
                     () -> config.options((java.util.Collection<String>) null));
-            // A null converter passed to the controller's two-argument
-            // overload throws NPE.
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.fieldValueOptions(ValueOptions
-                            .forField(new IntField()).options(List.of("a")),
-                            null));
+                    () -> config.itemLabelGenerator(null));
             // An empty fixed-options list leaves the field un-fillable;
             // rejected at the options() call site.
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> config.options(List.<String> of()));
-            // A ValueOptions with no options(...) set is rejected by the
-            // controller at registration. The missing-converter case is
-            // compile-time enforced (no overload accepts a non-String
-            // ValueOptions without a Function argument), so it has no
-            // corresponding runtime test.
+            // A ValueOptions with no options(...) set is rejected at
+            // registration.
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> controller
                             .fieldValueOptions(ValueOptions.forField(field)));
         }
 
         @Test
-        void fieldValueOptionsAcceptsNonStringFieldWithToValueConverter() {
-            // fieldValueOptions is generic over the field's value type — verify
-            // that an Integer-valued field can be registered with a label
-            // -> Integer converter, and that the labels still flow through
-            // the query tool unchanged.
+        void fieldValueOptionsAcceptsAnyValueType() {
+            // fieldValueOptions is generic over the field's value type — an
+            // Integer-valued field carries Integer items, and the
+            // String.valueOf fallback renders the LLM-facing labels when the
+            // field has no item-label generator of its own.
             var field = new IntField();
             var controller = new FormAIController(new Div(field));
-            controller.fieldValueOptions(ValueOptions.forField(field)
-                    .options(List.of("1", "2", "3")), Integer::parseInt);
+            controller.fieldValueOptions(
+                    ValueOptions.forField(field).options(List.of(1, 2, 3)));
             controller.onRequest();
 
             Assertions.assertEquals("1\n2\n3\n",
@@ -551,9 +544,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void identityToValueLetsStringFieldsUseLabelsDirectly() {
-            // Passing Function.identity() for toValue is the canonical
-            // String-field shortcut: the chosen label is the value as-is.
+        void fixedOptionsExposeLabelsThroughQueryTool() {
             // Smoke-test both shapes (query callback and fixed collection).
             var queriedField = new TestField();
             var fixedField = new TestField();
@@ -574,8 +565,7 @@ class FormAIControllerTest {
         @Test
         void reregisteringWithBiFunctionClearsPriorFixedOptionsFlag() {
             // Each fieldValueOptions call replaces the previous registration
-            // for
-            // the same field. The fixed-options variant sets a flag that
+            // for the same field. The fixed-options variant sets a flag that
             // makes the schema render options as 'enum'; re-registering with
             // a query callback must reset that flag so the schema rendering
             // matches the new registration (queryable, not enum).
@@ -599,21 +589,53 @@ class FormAIControllerTest {
         }
 
         @Test
+        void reregisteringValueOptionsOverwritesItemLabelGenerator() {
+            // Each fieldValueOptions call replaces the previous registration
+            // in full — including the item-label generator — so a stale
+            // labeler cannot survive a re-registration. Asserted on both the
+            // enum block (the wrapped query path) and the schema's value
+            // string (the value-rendering path) so a half-overwrite of one
+            // but not the other is caught.
+            var alpha = new FormTestFields.Project("P-1", "Alpha");
+            var combo = new FormTestFields.SingleSelectField<FormTestFields.Project>();
+            combo.setValue(alpha);
+            var controller = new FormAIController(new Div(combo));
+            controller.fieldValueOptions(
+                    ValueOptions.forField(combo).options(List.of(alpha))
+                            .itemLabelGenerator(FormTestFields.Project::code));
+            controller.fieldValueOptions(
+                    ValueOptions.forField(combo).options(List.of(alpha))
+                            .itemLabelGenerator(FormTestFields.Project::name));
+
+            var f = json(findTool(controller.getTools(), "get_form_state")
+                    .execute(JacksonUtils.createObjectNode())).path("fields")
+                    .get(0);
+            var labels = new java.util.ArrayList<String>();
+            f.path("enum").forEach(n -> labels.add(n.asString()));
+
+            Assertions.assertEquals(List.of("Alpha"), labels,
+                    "Second registration's labeler must drive the enum "
+                            + "block; got: " + labels);
+            Assertions.assertEquals("Alpha", f.path("value").asString(),
+                    "Second registration's labeler must drive the value "
+                            + "rendering; got: " + f.path("value"));
+        }
+
+        @Test
         void fieldValueOptionsForFieldOnUpcastMultiSelectReferenceThrowsIllegalArgument() {
             // A MultiSelect statically typed as such picks the MultiSelect-
-            // typed forField overload at compile time. This runtime check
-            // is for the upcast case: the developer holds a HasValue
-            // reference to a MultiSelect instance, so the compiler picks
-            // the single-value overload and the controller would otherwise
-            // accept a Set-returning converter. The check redirects to the
-            // typed MultiSelect overload.
+            // typed forField overload at compile time. This runtime check is
+            // for the upcast case: the developer holds a HasValue reference
+            // to a MultiSelect instance, so the compiler picks the
+            // single-value overload. The check redirects to the typed
+            // MultiSelect overload.
             var multiSelect = new FormTestFields.MultiSelectField<String>();
             HasValue<?, java.util.Set<String>> upcast = multiSelect;
             var controller = new FormAIController(new Div(multiSelect));
             var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.fieldValueOptions(
-                            ValueOptions.forField(upcast).options(List.of("a")),
-                            label -> java.util.Set.of(label)));
+                    () -> controller
+                            .fieldValueOptions(ValueOptions.forField(upcast)
+                                    .options(List.of(java.util.Set.of("a")))));
             Assertions.assertTrue(ex.getMessage().contains("MultiSelect"),
                     "Rejection must name MultiSelect so the developer can "
                             + "tighten the reference type; got: "
@@ -623,14 +645,13 @@ class FormAIControllerTest {
         @Test
         void fieldValueOptionsRejectsCollectionValuedFieldNotImplementingMultiSelect() {
             // Collection-valued fields must implement MultiSelect; otherwise
-            // there is no defined aggregation for per-label converter results
-            // and the controller refuses to register them.
+            // there is no defined aggregation for the resolved items and the
+            // controller refuses to register them.
             var field = new FormTestFields.CollectionWithoutMultiSelectField();
             var controller = new FormAIController(new Div(field));
             var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.fieldValueOptions(
-                            ValueOptions.forField(field).options(List.of("a")),
-                            label -> List.of(label)));
+                    () -> controller.fieldValueOptions(ValueOptions
+                            .forField(field).options(List.of(List.of("a")))));
             Assertions.assertTrue(
                     ex.getMessage().contains("Collection")
                             && ex.getMessage().contains("MultiSelect"),
@@ -640,16 +661,14 @@ class FormAIControllerTest {
         }
 
         @Test
-        void fieldValueOptionsAcceptsTypedMultiSelectFieldWithNonStringConverter() {
+        void fieldValueOptionsAcceptsTypedMultiSelectFieldWithNonStringElementType() {
             // Counterpart to the Collection-value rejection: a MultiSelect-
-            // typed field with a non-String per-element type and an explicit
-            // converter must remain accepted, even though its empty value is
-            // itself a Collection.
+            // typed field with a non-String per-element type must remain
+            // accepted, even though its empty value is itself a Collection.
             var field = new FormTestFields.MultiSelectField<Integer>();
             var controller = new FormAIController(new Div(field));
             Assertions.assertDoesNotThrow(() -> controller.fieldValueOptions(
-                    ValueOptions.forField(field).options(List.of("1", "2")),
-                    Integer::parseInt));
+                    ValueOptions.forField(field).options(List.of(1, 2))));
         }
 
         @Test
@@ -712,6 +731,81 @@ class FormAIControllerTest {
             Assertions.assertTrue(items.path("queryable").isMissingNode(),
                     "Fixed-collection registration must surface as enum, "
                             + "not queryable; got items: " + items);
+        }
+
+        @Test
+        void fixedOptionsWithDuplicateLabelsWarnsAtRegistration() {
+            // Resolution under duplicate labels falls back to first-in-list
+            // ordering; the developer needs a registration-time signal so
+            // the ambiguity is fixed before the LLM sees it.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var first = new FormTestFields.Project("P-1", "Apollo");
+            var dup = new FormTestFields.Project("P-2", "Apollo");
+            var combo = new SingleSelectField<FormTestFields.Project>();
+            combo.setItemLabelGenerator(FormTestFields.Project::name);
+            var controller = new FormAIController(new Div(combo));
+
+            controller.fieldValueOptions(
+                    ValueOptions.forField(combo).options(List.of(first, dup)));
+
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(1, warnings.size(),
+                    "Duplicate-label registration must log exactly one "
+                            + "warning; got: " + warnings);
+            var formatted = warnings.get(0).getFormattedMessage();
+            Assertions.assertTrue(formatted.contains("Apollo"),
+                    "Warning must name the offending label so the developer "
+                            + "can locate it; got: " + formatted);
+            Assertions.assertTrue(formatted.contains("itemLabelGenerator"),
+                    "Warning must point at itemLabelGenerator as the "
+                            + "disambiguation knob; got: " + formatted);
+        }
+
+        @Test
+        void fixedOptionsWithUniqueLabelsDoesNotWarn() {
+            // Negative guard so the warning doesn't flood logs in the
+            // common unique-labels case.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var apollo = new FormTestFields.Project("P-1", "Apollo");
+            var vega = new FormTestFields.Project("P-2", "Vega");
+            var combo = new SingleSelectField<FormTestFields.Project>();
+            combo.setItemLabelGenerator(FormTestFields.Project::name);
+            var controller = new FormAIController(new Div(combo));
+
+            controller.fieldValueOptions(ValueOptions.forField(combo)
+                    .options(List.of(apollo, vega)));
+
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertTrue(warnings.isEmpty(),
+                    "Unique-label registration must not warn; got: "
+                            + warnings);
+        }
+
+        @Test
+        void queryModeDoesNotWarnAtRegistration() {
+            // Query mode can't be checked upfront — items arrive in
+            // batches. A registration-time warning would be wrong (we
+            // don't know the full set) and a per-batch warning would
+            // flood. Stay silent.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var apollo = new FormTestFields.Project("P-1", "Apollo");
+            var dup = new FormTestFields.Project("P-2", "Apollo");
+            var combo = new SingleSelectField<FormTestFields.Project>();
+            combo.setItemLabelGenerator(FormTestFields.Project::name);
+            var controller = new FormAIController(new Div(combo));
+
+            controller.fieldValueOptions(ValueOptions.forField(combo)
+                    .options((filter, limit) -> List.of(apollo, dup)));
+
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertTrue(warnings.isEmpty(),
+                    "Query-mode registration must not warn; got: " + warnings);
         }
 
     }

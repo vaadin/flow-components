@@ -18,6 +18,7 @@ package com.vaadin.flow.component.badge;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.SignalPropertySupport;
@@ -68,8 +69,8 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-badge")
 @NpmPackage(value = "@vaadin/badge", version = "25.2.0")
 @JsModule("@vaadin/badge/src/vaadin-badge.js")
-public class Badge extends Component
-        implements HasSize, HasText, HasThemeVariant<BadgeVariant> {
+public class Badge extends Component implements HasAriaRole, HasSize, HasText,
+        HasThemeVariant<BadgeVariant> {
 
     private static final String ICON_SLOT = "icon";
 
@@ -310,22 +311,22 @@ public class Badge extends Component
      *
      * @param role
      *            the ARIA role, or {@code null} to clear
+     * @deprecated Use {@link #setAriaRole(String)} instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setRole(String role) {
-        if (role == null) {
-            getElement().removeAttribute("role");
-        } else {
-            getElement().setAttribute("role", role);
-        }
+        setAriaRole(role);
     }
 
     /**
      * Gets the ARIA role attribute of the badge.
      *
      * @return the ARIA role, or {@code null} if not set
+     * @deprecated Use {@link #getAriaRole()} instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public String getRole() {
-        return getElement().getAttribute("role");
+        return getAriaRole().orElse(null);
     }
 
     private void updateText(String text) {
