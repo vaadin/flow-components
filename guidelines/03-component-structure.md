@@ -9,7 +9,7 @@ annotations, implements the mixin interfaces it needs, and delegates state to
 
 ```java
 @Tag("vaadin-example")
-@NpmPackage(value = "@vaadin/example", version = "25.2.0-alpha7")
+@NpmPackage(value = "@vaadin/example", version = "25.3.0-alpha1")
 @JsModule("@vaadin/example/src/vaadin-example.js")
 public class Example extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<ExampleVariant> {
