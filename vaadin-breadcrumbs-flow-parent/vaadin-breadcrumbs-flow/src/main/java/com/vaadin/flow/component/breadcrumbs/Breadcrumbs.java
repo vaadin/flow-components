@@ -60,6 +60,7 @@ import com.vaadin.flow.signals.Signal;
  * {@code com.vaadin.experimental.breadcrumbsComponent} feature flag.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 @Tag("vaadin-breadcrumbs")
 @NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0")

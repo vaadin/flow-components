@@ -109,6 +109,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/time-picker", version = "25.2.0")
@@ -295,6 +296,7 @@ public class TimePicker
      * @param listener
      *            the listener to receive value change events
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     * @since 23.1
      */
     public TimePicker(LocalTime time,
             ValueChangeListener<ComponentValueChangeEvent<TimePicker, LocalTime>> listener) {
@@ -314,6 +316,7 @@ public class TimePicker
      *            the listener to receive value change events
      * @see #setLabel(String)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     * @since 23.1
      */
     public TimePicker(String label, LocalTime time,
             ValueChangeListener<ComponentValueChangeEvent<TimePicker, LocalTime>> listener) {
@@ -330,6 +333,8 @@ public class TimePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -358,6 +363,7 @@ public class TimePicker
      *
      * @param value
      *            the LocalTime instance representing the selected time, or null
+     * @since 1.1.1
      */
     @Override
     public void setValue(LocalTime value) {
@@ -480,6 +486,7 @@ public class TimePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      * @deprecated Since v24.8
+     * @since 24.0
      */
     @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
@@ -493,6 +500,7 @@ public class TimePicker
      *
      * @return <code>true</code> if the input element's value is populated and
      *         unparsable, <code>false</code> otherwise
+     * @since 24.8
      */
     protected final boolean isInputUnparsable() {
         return unparsableValue != null;
@@ -535,6 +543,7 @@ public class TimePicker
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see TimePickerI18n#setRequiredErrorMessage(String)
+     * @since 2.0.2
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -546,6 +555,7 @@ public class TimePicker
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -624,6 +634,8 @@ public class TimePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
+     * 
+     * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<TimePicker> {
         private final boolean invalid;
@@ -664,6 +676,8 @@ public class TimePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 2.0.3
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -775,6 +789,7 @@ public class TimePicker
      * @param min
      *            the minimum time, or {@code null} to remove this constraint
      * @see TimePickerI18n#setMinErrorMessage(String)
+     * @since 22.0
      */
     public void setMin(LocalTime min) {
         getElement().setProperty("min", FORMATTER.apply(min));
@@ -785,6 +800,7 @@ public class TimePicker
      *
      * @return the minimum time, or {@code null} if no minimum is set
      * @see #setMax(LocalTime)
+     * @since 2.0
      */
     public LocalTime getMin() {
         return PARSER.apply(getElement().getProperty("min"));
@@ -800,6 +816,7 @@ public class TimePicker
      * @param max
      *            the maximum time, or {@code null} to remove this constraint
      * @see TimePickerI18n#setMaxErrorMessage(String)
+     * @since 22.0
      */
     public void setMax(LocalTime max) {
         getElement().setProperty("max", FORMATTER.apply(max));
@@ -810,6 +827,7 @@ public class TimePicker
      *
      * @return the maximum time, or {@code null} if no maximum is set
      * @see #setMin(LocalTime)
+     * @since 2.0
      */
     public LocalTime getMax() {
         return PARSER.apply(getElement().getProperty("max"));
@@ -905,6 +923,7 @@ public class TimePicker
      * {@link #setI18n(TimePickerI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public TimePickerI18n getI18n() {
         return i18n;
@@ -915,6 +934,7 @@ public class TimePicker
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(TimePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -928,6 +948,8 @@ public class TimePicker
 
     /**
      * The internationalization properties for {@link TimePicker}.
+     * 
+     * @since 24.5
      */
     public static class TimePickerI18n implements Serializable {
 

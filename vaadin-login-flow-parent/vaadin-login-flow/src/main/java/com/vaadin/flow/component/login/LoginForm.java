@@ -39,6 +39,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * automatically enabled for the next login attempt.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-login-form")
 @NpmPackage(value = "@vaadin/login", version = "25.2.0")

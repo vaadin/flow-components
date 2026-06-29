@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
+ * 
+ * @since 1.0
  */
 public enum MenuBarVariant implements ThemeVariant {
     LUMO_SMALL("small"),

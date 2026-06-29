@@ -30,6 +30,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
  * {@link Tabs} component.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-tab")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")

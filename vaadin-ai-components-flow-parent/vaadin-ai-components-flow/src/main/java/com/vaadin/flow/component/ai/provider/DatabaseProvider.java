@@ -97,6 +97,7 @@ import java.util.Map;
  * </pre>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public interface DatabaseProvider extends Serializable {
 

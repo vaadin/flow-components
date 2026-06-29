@@ -18,6 +18,8 @@ import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
 /**
  * Provides data for click events on geographic features
+ * 
+ * @since 23.0
  */
 @DomEvent("map-feature-click")
 public class MapFeatureClickEvent extends ComponentEvent<Map> {

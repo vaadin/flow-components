@@ -30,6 +30,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  *
  * @param <I>
  *            the menu item type
+ * @since 2.1
  */
 public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
         implements Serializable {

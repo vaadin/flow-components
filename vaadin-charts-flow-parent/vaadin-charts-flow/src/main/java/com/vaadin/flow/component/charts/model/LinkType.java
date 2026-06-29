@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * The type of the link shape.
+ * 
+ * @since 25.0
  */
 public enum LinkType implements ChartEnum {
 

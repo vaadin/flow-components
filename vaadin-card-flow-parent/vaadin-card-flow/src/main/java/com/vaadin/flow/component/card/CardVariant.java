@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-card} component.
+ * 
+ * @since 24.7
  */
 public enum CardVariant implements ThemeVariant {
     LUMO_ELEVATED("elevated"),

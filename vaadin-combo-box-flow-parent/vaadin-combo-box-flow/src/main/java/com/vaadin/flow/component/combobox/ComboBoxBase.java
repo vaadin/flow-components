@@ -88,6 +88,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
  *            Type of individual items that are selectable in the combo box
  * @param <TValue>
  *            Type of the selection / value of the extending component
+ * @since 23.2
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue> implements
@@ -371,6 +372,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param filterTimeout
      *            the time in milliseconds to wait after typing stops before
      *            filtering is triggered
+     * @since 25.1
      */
     public void setFilterTimeout(int filterTimeout) {
         getElement().setProperty("_filterTimeout", filterTimeout);
@@ -381,6 +383,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @return the time in milliseconds to wait after typing stops before
      *         filtering is triggered
+     * @since 25.1
      */
     public int getFilterTimeout() {
         return getElement().getProperty("_filterTimeout",
@@ -398,6 +401,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param required
      *            {@code true} to make the field required, {@code false}
      *            otherwise
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -409,6 +413,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -548,6 +553,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param item
      *            the data item
      * @return string class name for the data item
+     * @since 24.5
      */
     protected String generateClassName(TItem item) {
         if (item == null) {
@@ -989,6 +995,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return HasLazyDataView.super.setItems(fetchCallback, countCallback);
     }
 
+    /**
+     * @since 24.7
+     */
     public interface SpringData extends Serializable {
         /**
          * Callback interface for fetching a list of items from a backend based
@@ -1054,6 +1063,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a function that returns a sorted list of items from the
      *            backend based on the given pageable
      * @return a data view for further configuration
+     * @since 24.7
      */
     public ComboBoxLazyDataView<TItem> setItemsPageable(
             SpringData.FetchCallback<Pageable, TItem> fetchCallback) {
@@ -1084,6 +1094,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a function that returns the number of items in the back end
      *            based on the filter string
      * @return LazyDataView instance for further configuration
+     * @since 24.7
      */
     public ComboBoxLazyDataView<TItem> setItemsPageable(
             SpringData.FetchCallback<Pageable, TItem> fetchCallback,
@@ -1235,6 +1246,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Use this method when none of the {@code setItems} methods are applicable,
      * e.g. when having a data provider with filter that cannot be transformed
      * to {@code DataProvider<T, Void>}.
+     * 
+     * @since 24.2
      */
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
@@ -1258,6 +1271,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a callback for getting the count of items, not
      *            <code>null</code>
      * @see CallbackDataProvider
+     * @since 24.2
      */
     public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
@@ -1412,6 +1426,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 23.2.12
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -1424,6 +1440,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param <TComponent>
      *            The specific combo box component type
+     * @since 23.2.2
      */
     @DomEvent("custom-value-set")
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
@@ -1449,6 +1466,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * {@link #setI18n(ComboBoxBaseI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     protected ComboBoxBaseI18n getI18n() {
         return i18n;
@@ -1459,6 +1477,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     protected void setI18n(ComboBoxBaseI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,

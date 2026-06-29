@@ -12,6 +12,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for the {@code vaadin-map} component.
+ * 
+ * @since 23.0
  */
 public enum MapVariant implements ThemeVariant {
     /**

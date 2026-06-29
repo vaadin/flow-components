@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * The set of theme variants applicable to the {@code vaadin-details} component.
+ * 
+ * @since 1.0
  */
 public enum DetailsVariant implements ThemeVariant {
     FILLED("filled"),

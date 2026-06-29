@@ -20,6 +20,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 /**
  * Set of theme variants applicable for the {@link TextField} component, as well
  * as other components based on it.
+ * 
+ * @since 1.1
  */
 public enum TextFieldVariant implements ThemeVariant {
     LUMO_SMALL("small"),

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
+ * @since 6.0.1
  */
 public class DataLabelsFunnel extends AbstractDataLabels {
 
@@ -49,6 +50,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -57,6 +59,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
     /**
      * The background color or gradient for the data label. Defaults to
      * <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -64,6 +68,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -71,6 +76,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * The border color for the data label. Defaults to <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -78,6 +85,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setBorderRadius(Number)
+     * @since 18.0
      */
     public Number getBorderRadius() {
         return borderRadius;
@@ -87,6 +95,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
      * The border radius in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderRadius(Number borderRadius) {
         this.borderRadius = borderRadius;
@@ -94,6 +104,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -103,6 +114,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
      * The border width in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -130,6 +143,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -137,6 +151,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * The text color for the data labels. Defaults to <code>null</code>.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -144,6 +160,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setConnectorColor(Color)
+     * @since 18.0
      */
     public Color getConnectorColor() {
         return connectorColor;
@@ -163,6 +180,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
      * </p>
      * <p>
      * Defaults to: {point.color}
+     * 
+     * @since 18.0
      */
     public void setConnectorColor(Color connectorColor) {
         this.connectorColor = connectorColor;
@@ -186,6 +205,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setConnectorWidth(Number)
+     * @since 18.0
      */
     public Number getConnectorWidth() {
         return connectorWidth;
@@ -204,6 +224,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setConnectorWidth(Number connectorWidth) {
         this.connectorWidth = connectorWidth;
@@ -433,6 +455,7 @@ public class DataLabelsFunnel extends AbstractDataLabels {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -455,6 +478,8 @@ public class DataLabelsFunnel extends AbstractDataLabels {
      * <p>
      * Defaults to: {"color": "contrast", "fontSize": "11px", "fontWeight":
      * "bold", "textOutline": "1px contrast" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

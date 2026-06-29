@@ -32,6 +32,8 @@ import com.vaadin.flow.signals.Signal;
  * Internal utility for working with signal bindings in components.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
+ * 
+ * @since 25.2
  */
 public final class SignalBindingUtil {
 

@@ -27,6 +27,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * Abstract base class for icon components
  *
  * @author Vaadin Ltd
+ * @since 24.2
  */
 @Tag("vaadin-icon")
 @NpmPackage(value = "@vaadin/icon", version = "25.2.0")

@@ -17,6 +17,8 @@ package com.vaadin.flow.component.grid;
 
 /**
  * Set of theme variants applicable for {@code vaadin-grid} component.
+ * 
+ * @since 2.0
  */
 public enum GridVariant {
     LUMO_NO_BORDER("no-border"),

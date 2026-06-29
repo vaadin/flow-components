@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.YAxis;
 /**
  * The YAxesExtremesSetEvent class stores data for set extremes events on the y
  * axes of the chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("yaxes-extremes-set")
 public class YAxesExtremesSetEvent extends ComponentEvent<Chart>

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for the {@link Popover} component.
+ * 
+ * @since 24.5
  */
 public enum PopoverVariant implements ThemeVariant {
     LUMO_NO_PADDING("no-padding"),

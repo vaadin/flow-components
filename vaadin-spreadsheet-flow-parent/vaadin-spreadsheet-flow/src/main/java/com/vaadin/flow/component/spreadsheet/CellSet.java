@@ -19,6 +19,8 @@ import org.apache.poi.ss.util.CellReference;
  * <p>
  * <strong>Internal use only. May be renamed or removed in a future
  * release.</strong>
+ * 
+ * @since 25.0
  */
 public class CellSet extends HashSet<CellReference> {
 

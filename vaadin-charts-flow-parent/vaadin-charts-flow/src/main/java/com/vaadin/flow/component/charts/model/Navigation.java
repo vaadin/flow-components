@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * A collection of options for buttons and menus appearing in the exporting
  * module.
+ * 
+ * @since 6.0.1
  */
 public class Navigation extends AbstractConfigurationObject {
 
@@ -53,6 +55,7 @@ public class Navigation extends AbstractConfigurationObject {
 
     /**
      * @see #setMenuItemHoverStyle(Style)
+     * @since 18.0
      */
     public Style getMenuItemHoverStyle() {
         if (menuItemHoverStyle == null) {
@@ -67,6 +70,8 @@ public class Navigation extends AbstractConfigurationObject {
      * are rendered in HTML.
      * <p>
      * Defaults to: { "background": "#335cad", "color": "#ffffff" }
+     * 
+     * @since 18.0
      */
     public void setMenuItemHoverStyle(Style menuItemHoverStyle) {
         this.menuItemHoverStyle = menuItemHoverStyle;
@@ -74,6 +79,7 @@ public class Navigation extends AbstractConfigurationObject {
 
     /**
      * @see #setMenuItemStyle(Style)
+     * @since 18.0
      */
     public Style getMenuItemStyle() {
         if (menuItemStyle == null) {
@@ -89,6 +95,8 @@ public class Navigation extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "padding": "0.5em 1em", "color": "#333333", "background":
      * "none" }
+     * 
+     * @since 18.0
      */
     public void setMenuItemStyle(Style menuItemStyle) {
         this.menuItemStyle = menuItemStyle;
@@ -96,6 +104,7 @@ public class Navigation extends AbstractConfigurationObject {
 
     /**
      * @see #setMenuStyle(Style)
+     * @since 18.0
      */
     public Style getMenuStyle() {
         if (menuStyle == null) {
@@ -110,6 +119,8 @@ public class Navigation extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "border": "1px solid #999999", "background": "#ffffff",
      * "padding": "5px 0" }
+     * 
+     * @since 18.0
      */
     public void setMenuStyle(Style menuStyle) {
         this.menuStyle = menuStyle;

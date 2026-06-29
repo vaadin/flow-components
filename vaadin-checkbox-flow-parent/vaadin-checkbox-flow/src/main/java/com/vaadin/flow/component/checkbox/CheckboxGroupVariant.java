@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-checkbox-group} component.
+ * 
+ * @since 1.1
  */
 public enum CheckboxGroupVariant implements ThemeVariant {
     LUMO_VERTICAL("vertical"),

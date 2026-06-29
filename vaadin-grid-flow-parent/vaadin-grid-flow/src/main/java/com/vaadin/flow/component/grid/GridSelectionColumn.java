@@ -26,6 +26,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * Server side implementation for the flow specific grid selection column.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-grid-flow-selection-column")
 @JsModule("./vaadin-grid-flow-selection-column.js")
@@ -67,6 +68,7 @@ public class GridSelectionColumn extends Component {
      *
      * @param indeterminate
      *            the new indeterminate state of the select all checkbox
+     * @since 23.0.4
      */
     public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
         getElement().setProperty("_indeterminate", indeterminate);
@@ -109,6 +111,7 @@ public class GridSelectionColumn extends Component {
      * @param dragSelect
      *            <code>true</code> to enable drag select feature,
      *            <code>false</code> for disabling it
+     * @since 24.2
      */
     public void setDragSelect(boolean dragSelect) {
         getElement().setProperty("dragSelect", dragSelect);
@@ -119,6 +122,7 @@ public class GridSelectionColumn extends Component {
      *
      * @return <code>true</code> if drag select feature is enabled,
      *         <code>false</code> otherwise
+     * @since 24.2
      */
     @Synchronize("drag-select-changed")
     public boolean isDragSelect() {

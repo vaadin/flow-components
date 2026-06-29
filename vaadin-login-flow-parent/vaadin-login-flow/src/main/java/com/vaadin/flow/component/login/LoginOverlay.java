@@ -45,6 +45,7 @@ import com.vaadin.flow.dom.Style;
  * Login Overlay is modal in {@link ModalityMode#STRICT} mode.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-login-overlay")
 @NpmPackage(value = "@vaadin/login", version = "25.2.0")
@@ -237,6 +238,8 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     /**
      * Class for adding and removing components to the custom form area of the
      * overlay.
+     * 
+     * @since 24.2
      */
     final public static class LoginOverlayCustomFormArea
             extends LoginOverlayContent {
@@ -248,6 +251,8 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     /**
      * Class for adding and removing components to the footer area of the
      * overlay.
+     * 
+     * @since 24.2
      */
     final public static class LoginOverlayFooter extends LoginOverlayContent {
         private LoginOverlayFooter(LoginOverlay overlay) {
@@ -316,6 +321,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      * @throws UnsupportedOperationException
      *             LoginOverlay does not support adding styles to overlay
      *             wrapper
+     * @since 23.1
      */
     @Override
     public Style getStyle() {

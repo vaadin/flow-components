@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-virtual-list} component.
+ * 
+ * @since 25.0
  */
 public enum VirtualListVariant implements ThemeVariant {
     LUMO_OVERFLOW_INDICATORS("overflow-indicators"),

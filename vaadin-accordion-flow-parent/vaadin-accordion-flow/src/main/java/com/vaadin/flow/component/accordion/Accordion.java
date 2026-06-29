@@ -47,6 +47,7 @@ import com.vaadin.flow.shared.Registration;
  * inaccessible by keyboard or screen reader.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-accordion")
 @NpmPackage(value = "@vaadin/accordion", version = "25.2.0")

@@ -44,6 +44,7 @@ import com.vaadin.flow.dom.Element;
  *
  * @param <T>
  *            field value type
+ * @since 1.0
  */
 @Tag("vaadin-custom-field")
 @NpmPackage(value = "@vaadin/custom-field", version = "25.2.0")
@@ -86,6 +87,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *            by default.
      *
      * @see AbstractField#AbstractField(Object)
+     * @since 24.9
      */
     public CustomField(T defaultValue, boolean manualValueUpdate) {
         super(defaultValue);
@@ -146,6 +148,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @param components
      *            the components to add
+     * @since 2.0
      */
     protected void add(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -163,6 +166,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *            the components to remove
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component
+     * @since 2.0
      */
     protected void remove(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -210,6 +214,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @param variants
      *            theme variants to add
+     * @since 23.1
      */
     public void addThemeVariants(CustomFieldVariant... variants) {
         getThemeNames().addAll(
@@ -222,6 +227,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @param variants
      *            theme variants to remove
+     * @since 23.1
      */
     public void removeThemeVariants(CustomFieldVariant... variants) {
         getThemeNames().removeAll(

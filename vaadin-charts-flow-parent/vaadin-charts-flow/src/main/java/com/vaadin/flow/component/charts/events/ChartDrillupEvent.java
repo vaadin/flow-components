@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * ChartDrillupEvent triggered when the 'Back to previous series' button is
  * clicked
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-drillup")
 public class ChartDrillupEvent extends ComponentEvent<Chart> {

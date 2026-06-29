@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 
+/**
+ * @since 23.1
+ */
 public class ColorConverterUtil implements Serializable {
 
     public static String toRGBA(byte[] argb) {

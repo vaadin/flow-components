@@ -79,6 +79,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-checkbox")
 @NpmPackage(value = "@vaadin/checkbox", version = "25.2.0")
@@ -201,6 +202,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *            the value change listener to add
      * @see AbstractField#setValue(Object)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Checkbox(boolean initialValue,
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
@@ -221,6 +223,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * @see #setLabel(String)
      * @see AbstractField#setValue(Object)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Checkbox(String labelText, boolean initialValue,
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
@@ -240,6 +243,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see CheckboxI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -251,6 +255,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -412,6 +417,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 24.4
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -444,6 +451,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * {@link #setI18n(CheckboxI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public CheckboxI18n getI18n() {
         return i18n;
@@ -454,6 +462,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(CheckboxI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -466,6 +475,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     /**
      * The internationalization properties for {@link Checkbox}.
+     * 
+     * @since 24.5
      */
     public static class CheckboxI18n implements Serializable {
 

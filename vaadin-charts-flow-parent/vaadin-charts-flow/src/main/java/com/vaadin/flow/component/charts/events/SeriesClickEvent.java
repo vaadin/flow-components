@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The SeriesClickEvent class stores data for click events on the series of the
  * chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-click")
 public class SeriesClickEvent extends ComponentEvent<Chart>

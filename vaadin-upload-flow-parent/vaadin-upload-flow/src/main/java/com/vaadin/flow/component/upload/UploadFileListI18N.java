@@ -33,6 +33,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * errors</li>
  * <li>{@code units} - File size units</li>
  * </ul>
+ * 
+ * @since 25.1
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UploadFileListI18N implements Serializable {

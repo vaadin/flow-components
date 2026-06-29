@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ComponentEventListener;
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemMovedListener(ComponentEventListener)
+ * @since 24.6
  */
 public class DashboardItemMovedEvent extends ComponentEvent<Dashboard> {
 

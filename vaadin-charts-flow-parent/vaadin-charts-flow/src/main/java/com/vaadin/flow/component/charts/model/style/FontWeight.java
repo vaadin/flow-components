@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.ChartEnum;
 
 /**
  * Font weight used by Style class
+ * 
+ * @since 6.0.1
  */
 public enum FontWeight implements ChartEnum {
 

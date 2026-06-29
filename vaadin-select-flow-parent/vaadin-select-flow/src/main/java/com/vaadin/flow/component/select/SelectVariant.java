@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-select} component.
+ * 
+ * @since 23.1
  */
 public enum SelectVariant implements ThemeVariant {
     LUMO_SMALL("small"),

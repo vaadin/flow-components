@@ -28,6 +28,7 @@ import com.vaadin.flow.dom.Element;
  * Util methods for handling child elements inside slots.
  *
  * @author Vaadin Ltd
+ * @since 23.1
  */
 public class SlotUtils {
 
@@ -91,6 +92,7 @@ public class SlotUtils {
      *             if any of the components is a {@link Text} component.
      * @throws NullPointerException
      *             if the components array is null.
+     * @since 24.0
      */
     public static void addToSlot(HasElement parent, String slot,
             Component... components) {
@@ -120,6 +122,7 @@ public class SlotUtils {
      *            elements to add to the specified slot.
      * @throws NullPointerException
      *             if the elements array is null.
+     * @since 24.0
      */
     public static void addToSlot(HasElement parent, String slot,
             Element... elements) {
@@ -145,6 +148,7 @@ public class SlotUtils {
      *            components to add to the specified slot.
      * @throws NullPointerException
      *             if the components array is null.
+     * @since 24.0
      */
     public static void setSlot(HasElement parent, String slot,
             Component... components) {
@@ -165,6 +169,7 @@ public class SlotUtils {
      *            elements to add to the specified slot.
      * @throws NullPointerException
      *             if the elements array is null.
+     * @since 24.0
      */
     public static void setSlot(HasElement parent, String slot,
             Element... elements) {

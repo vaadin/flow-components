@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Plot options for {@link ChartType#SANKEY} charts.
+ * 
+ * @since 24.3
  */
 public class PlotOptionsSankey extends AbstractPlotOptions {
 

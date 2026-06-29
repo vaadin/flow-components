@@ -40,6 +40,7 @@ import com.vaadin.flow.signals.Signal;
  * element and its subclasses.
  *
  * @author Vaadin Ltd.
+ * @since 2.1
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
@@ -213,6 +214,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @param stepButtonsVisible
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
+     * @since 23.3
      */
     public void setStepButtonsVisible(boolean stepButtonsVisible) {
         getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
@@ -224,6 +226,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @see #setStep(double)
      *
      * @return {@code true} if buttons are visible, {@code false} otherwise
+     * @since 23.3
      */
     public boolean isStepButtonsVisible() {
         return getElement().getProperty("stepButtonsVisible", false);
@@ -349,6 +352,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
+     * @since 25.1
      */
     protected final SignalBinding<Double> bindMinInternal(
             Signal<Double> signal) {
@@ -361,6 +365,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
+     * @since 25.1
      */
     protected final SignalBinding<Double> bindMaxInternal(
             Signal<Double> signal) {
@@ -467,6 +472,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * {@link #setI18n(AbstractNumberFieldI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     protected AbstractNumberFieldI18n getI18n() {
         return i18n;
@@ -477,6 +483,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     protected void setI18n(AbstractNumberFieldI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,

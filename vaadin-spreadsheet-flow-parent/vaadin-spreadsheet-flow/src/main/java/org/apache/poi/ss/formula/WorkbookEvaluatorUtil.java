@@ -20,6 +20,8 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 /**
  * Helper to evaluate POI values that are package scoped, like formula Ptg[]
  * arrays.
+ * 
+ * @since 23.1
  */
 public class WorkbookEvaluatorUtil {
 

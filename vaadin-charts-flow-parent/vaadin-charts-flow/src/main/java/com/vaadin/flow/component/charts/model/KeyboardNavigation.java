@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Options for keyboard navigation.
+ * 
+ * @since 6.0.1
  */
 public class KeyboardNavigation extends AbstractConfigurationObject {
 

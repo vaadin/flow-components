@@ -29,6 +29,7 @@ import com.vaadin.flow.component.grid.Grid;
  *
  * @see EditorCloseEvent
  * @see Editor#addCloseListener(EditorCloseListener)
+ * @since 2.1
  */
 @FunctionalInterface
 public interface EditorCloseListener<T> extends Serializable {

@@ -40,6 +40,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @param <T>
  *            the grid bean type
+ * @since 2.1
  */
 public class EditorImpl<T> extends AbstractGridExtension<T>
         implements Editor<T> {

@@ -14,7 +14,7 @@ import java.io.Serializable;
  * Event for information about rescaling the axis. Wraps
  * <code>Axis.setExtremes()</code>.
  *
- * @since 2.0
+ * @since 6.0.1
  */
 public class AxisRescaledEvent implements Serializable {
 
