@@ -394,6 +394,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode">
      *      inputmode attribute</a>
+     * @since 25.3
      */
     public void setInputMode(InputMode inputMode) {
         if (inputMode == null) {
@@ -408,6 +409,7 @@ public class TextField extends TextFieldBase<TextField, String>
      *
      * @return the {@code inputmode} value, or {@code null} if not set
      * @see #setInputMode(InputMode)
+     * @since 25.3
      */
     public InputMode getInputMode() {
         String inputMode = getElement().getProperty("inputMode");
