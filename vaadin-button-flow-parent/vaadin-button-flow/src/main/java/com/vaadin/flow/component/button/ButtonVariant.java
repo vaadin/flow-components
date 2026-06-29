@@ -35,16 +35,19 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_ICON("icon"),
     /**
      * @deprecated Use {@link #PRIMARY} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_PRIMARY("primary"),
     /**
      * @deprecated Use {@link #TERTIARY} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_TERTIARY("tertiary"),
     /**
      * @deprecated Use {@link #ERROR} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_DANGER("danger"),

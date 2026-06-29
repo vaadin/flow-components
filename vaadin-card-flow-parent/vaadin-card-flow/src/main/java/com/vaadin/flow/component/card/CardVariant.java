@@ -30,26 +30,31 @@ public enum CardVariant implements ThemeVariant {
     LUMO_COVER_MEDIA("cover-media"),
     /**
      * @deprecated Use {@link #ELEVATED} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ELEVATED("elevated"),
     /**
      * @deprecated Use {@link #OUTLINED} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_OUTLINED("outlined"),
     /**
      * @deprecated Use {@link #HORIZONTAL} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HORIZONTAL("horizontal"),
     /**
      * @deprecated Use {@link #STRETCH_MEDIA} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_STRETCH_MEDIA("stretch-media"),
     /**
      * @deprecated Use {@link #COVER_MEDIA} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_COVER_MEDIA("cover-media"),

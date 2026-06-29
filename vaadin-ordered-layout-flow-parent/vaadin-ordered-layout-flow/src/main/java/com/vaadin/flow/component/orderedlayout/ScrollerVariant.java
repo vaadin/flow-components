@@ -28,16 +28,19 @@ public enum ScrollerVariant implements ThemeVariant {
     LUMO_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),
     /**
      * @deprecated Use {@link #OVERFLOW_INDICATORS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_OVERFLOW_INDICATORS("overflow-indicators"),
     /**
      * @deprecated Use {@link #OVERFLOW_INDICATOR_TOP} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_OVERFLOW_INDICATOR_TOP("overflow-indicator-top"),
     /**
      * @deprecated Use {@link #OVERFLOW_INDICATOR_BOTTOM} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_OVERFLOW_INDICATOR_BOTTOM("overflow-indicator-bottom"),

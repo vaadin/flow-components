@@ -26,6 +26,7 @@ public enum DialogVariant implements ThemeVariant {
     LUMO_NO_PADDING("no-padding"),
     /**
      * @deprecated Use {@link #NO_PADDING} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_PADDING("no-padding"),

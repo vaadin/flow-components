@@ -29,31 +29,37 @@ public enum TextAreaVariant implements ThemeVariant {
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     /**
      * @deprecated Use {@link #ALIGN_LEFT} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ALIGN_LEFT("align-left"),
     /**
      * @deprecated Use {@link #ALIGN_CENTER} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ALIGN_CENTER("align-center"),
     /**
      * @deprecated Use {@link #ALIGN_RIGHT} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ALIGN_RIGHT("align-right"),
     /**
      * @deprecated Use {@link #ALIGN_START} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ALIGN_START("align-start"),
     /**
      * @deprecated Use {@link #ALIGN_END} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ALIGN_END("align-end"),
     /**
      * @deprecated Use {@link #HELPER_ABOVE} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),

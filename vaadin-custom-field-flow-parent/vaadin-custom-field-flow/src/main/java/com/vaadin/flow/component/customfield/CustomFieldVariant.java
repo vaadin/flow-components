@@ -28,6 +28,7 @@ public enum CustomFieldVariant {
     LUMO_WHITESPACE("whitespace"),
     /**
      * @deprecated Use {@link #HELPER_ABOVE} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),

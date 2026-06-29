@@ -31,11 +31,13 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     /**
      * @deprecated Use {@link #HIDE_SCROLL_BUTTONS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     /**
      * @deprecated Use {@link #SHOW_SCROLL_BUTTONS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),

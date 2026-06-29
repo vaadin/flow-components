@@ -27,6 +27,7 @@ public enum SplitLayoutVariant implements ThemeVariant {
     LUMO_MINIMAL("minimal"),
     /**
      * @deprecated Use {@link #SMALL} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_SMALL("small"),

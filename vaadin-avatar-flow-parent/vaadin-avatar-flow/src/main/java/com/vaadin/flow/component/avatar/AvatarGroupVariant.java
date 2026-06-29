@@ -31,6 +31,7 @@ public enum AvatarGroupVariant implements ThemeVariant {
     AURA_FILLED("filled"),
     /**
      * @deprecated Use {@link #REVERSE} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_REVERSE("reverse"),

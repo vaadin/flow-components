@@ -171,6 +171,7 @@ public final class ValueOptions<V> {
      * @param generator
      *            the per-item label generator, not {@code null}
      * @return this registration, for chaining
+     * @since 25.3
      */
     public ValueOptions<V> itemLabelGenerator(ItemLabelGenerator<V> generator) {
         Objects.requireNonNull(generator,

@@ -27,6 +27,7 @@ public enum CheckboxGroupVariant implements ThemeVariant {
     LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
     /**
      * @deprecated Use {@link #HELPER_ABOVE} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),

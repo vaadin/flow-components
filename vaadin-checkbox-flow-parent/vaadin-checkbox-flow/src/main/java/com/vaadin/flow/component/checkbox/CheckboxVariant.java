@@ -38,6 +38,7 @@ public enum CheckboxVariant implements ThemeVariant {
     /**
      * @deprecated This variant is not working and will be removed in the next
      *             major.
+     * @since 25.1
      */
     @Deprecated(since = "25.2", forRemoval = true)
     HELPER_ABOVE("helper-above-field"),

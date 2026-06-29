@@ -18,6 +18,7 @@ public enum CrudVariant {
     LUMO_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_BORDER("no-border");
