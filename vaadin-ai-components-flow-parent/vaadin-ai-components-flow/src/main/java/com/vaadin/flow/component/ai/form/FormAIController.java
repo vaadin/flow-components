@@ -205,7 +205,15 @@ public class FormAIController implements AIController {
             and pick a returned label. Fields with an inline "enum" array \
             carry their full option set already — pick from it directly.
             3. Call fill_form({"values": {<id>: <value>}}) with every value \
-            you mean to set this turn. Skip fields the user did not mention.
+            you mean to set this turn. Skip fields the user did not mention. \
+            Before writing a queryable field whose query returned multiple \
+            matches, check its "description" for an ambiguity directive \
+            (e.g. "let the user pick when the query returns multiple \
+            items"). If present AND the user's prompt does not name the \
+            subset to write, omit that field and ask the user instead. \
+            Prompts like "Add both X and Y" or "Pick all of them" already \
+            name the subset — proceed. Without a directive, pick the most \
+            reasonable match (or all of them for a plural prompt).
             4. Read fill_form's response. The "fields" array is the \
             post-write form state and may differ from what get_form_state \
             showed at the start of the turn: value-change listeners can \
