@@ -19,7 +19,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   let lastRequestedFilter = '';
   let needsDataCommunicatorReset = false;
 
-  comboBox.dataProvider = function (params, callback) {
+  const dataProvider = function (params, callback) {
     if (params.pageSize != comboBox.pageSize) {
       throw 'Invalid pageSize';
     }
@@ -236,6 +236,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   comboBox.itemClassNameGenerator = function (item) {
     return item.className || '';
   };
+
+  // Assign last, after all `$connector` functions are defined.
+  comboBox.dataProvider = dataProvider;
 };
 
 window.Vaadin.ComboBoxPlaceholder = ComboBoxPlaceholder;
