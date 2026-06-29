@@ -20,12 +20,10 @@ describe('combo-box connector', () => {
   });
 
   describe('initialization while opened', () => {
-    // Flow defers the connector initialization for an initially hidden combo
-    // box until it becomes visible. When the server makes it visible and opens
-    // it in the same round-trip, initLazy runs while the combo box is already
-    // opened. Assigning the data provider then synchronously triggers a
-    // first-page load that calls back into the connector, so all $connector
-    // functions must already be defined by that point (see issue #9622).
+    // When a combo box is made visible and opened in the same round-trip,
+    // initLazy runs while it is already opened. Assigning the data provider
+    // then triggers a first-page load that calls back into the connector, so
+    // all $connector functions must already be defined by then.
     beforeEach(() => {
       comboBox = fixtureSync('<vaadin-combo-box opened></vaadin-combo-box>');
       init(comboBox);
