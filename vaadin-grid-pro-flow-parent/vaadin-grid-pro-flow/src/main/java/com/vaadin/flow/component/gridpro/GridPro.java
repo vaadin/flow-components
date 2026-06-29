@@ -46,14 +46,6 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * @since 1.0
- */
-@Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.2.0")
-@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
-@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
-@JsModule("./gridProConnector.js")
-/**
  * Grid Pro is an extension of the Grid component that provides inline editing
  * with full keyboard navigation.
  *
@@ -62,7 +54,13 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid bean type
  *
+ * @since 1.0
  */
+@Tag("vaadin-grid-pro")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.2.0")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
+@JsModule("./gridProConnector.js")
 public class GridPro<E> extends Grid<E> {
 
     /**
