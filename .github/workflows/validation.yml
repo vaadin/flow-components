@@ -227,15 +227,6 @@ jobs:
         if: matrix.type == 'war'
         run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
 
-      # Let @vaadin/* web component bumps bypass the frontend package age check
-      - name: Configure pnpm package age exclude
-        if: matrix.type == 'war'
-        run: |
-          cat > integration-tests/pnpm-workspace.yaml <<'EOF'
-          minimumReleaseAgeExclude:
-            - '@vaadin/*'
-          EOF
-
       - name: Setup JDK 21
         uses: actions/setup-java@v5
         with:
