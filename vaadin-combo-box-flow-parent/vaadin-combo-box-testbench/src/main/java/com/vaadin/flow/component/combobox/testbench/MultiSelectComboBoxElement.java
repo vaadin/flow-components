@@ -102,6 +102,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
                 "const isSelected = combobox.selectedItems.some(item => item.key === itemToSelect.key);" +
                 "if (!isSelected) {" +
                 "  combobox.selectedItems = [...combobox.selectedItems, itemToSelect];" +
+                "  combobox.dispatchEvent(new CustomEvent('change', { bubbles: true }));" +
                 "}" +
                 "return true;";
         //@formatter:on
@@ -128,6 +129,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
                 "const isSelected = combobox.selectedItems.some(item => item.label === label);" +
                 "if (isSelected) {" +
                 "  combobox.selectedItems = combobox.selectedItems.filter(item => item.label !== label);" +
+                "  combobox.dispatchEvent(new CustomEvent('change', { bubbles: true }));" +
                 "}";
         //@formatter:on
         executeScript(script, this, label);
@@ -137,7 +139,14 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
      * Deselects all items, effectively clearing the value.
      */
     public void deselectAll() {
-        String script = "const combobox = arguments[0]; combobox.selectedItems = [];";
+        //@formatter:off
+        String script =
+                "const combobox = arguments[0];" +
+                "if (combobox.selectedItems.length) {" +
+                "  combobox.selectedItems = [];" +
+                "  combobox.dispatchEvent(new CustomEvent('change', { bubbles: true }));" +
+                "}";
+        //@formatter:on
         executeScript(script, this);
     }
 
