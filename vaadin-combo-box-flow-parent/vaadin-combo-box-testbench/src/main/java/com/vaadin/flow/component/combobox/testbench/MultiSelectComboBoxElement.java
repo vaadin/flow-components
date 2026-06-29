@@ -143,8 +143,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
         String script =
                 "const combobox = arguments[0];" +
                 "if (combobox.selectedItems.length) {" +
-                "  combobox.selectedItems = [];" +
-                "  combobox.dispatchEvent(new CustomEvent('change', { bubbles: true }));" +
+                "  combobox.clear();" +
                 "}";
         //@formatter:on
         executeScript(script, this);
