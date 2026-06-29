@@ -416,12 +416,16 @@
                         </excludes>
                     </configuration>
                     <dependencies>
-                        <!-- Configure JUnit 4 provider explicitly to not depend on Surefire's auto-resolution when JUnit 6 is on the class path. -->
-                        <!-- JUnit 6 is pulled in transitively by modules that use Flow test dependencies -->
+                        <!-- Force the JUnit 4 provider for IT tests. TestBench's
+                             ParallelRunner (@RunWith) handles browser parameterization
+                             ([any_Chrome_] suffixes) and is not compatible with the
+                             JUnit Platform provider that is auto-selected when
+                             junit-jupiter-engine or junit-vintage-engine are on the
+                             classpath. -->
                         <dependency>
                             <groupId>org.apache.maven.surefire</groupId>
-                            <artifactId>surefire-junit4</artifactId>
-                            <version>${maven.surefire.plugin.version}</version>
+                            <artifactId>surefire-junit47</artifactId>
+                            <version>${maven.failsafe.plugin.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -601,6 +605,35 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <!-- Propagates -DchromeOptions=... to Failsafe forked JVMs so that
+                 TestBench LocalDriver.createDriver() receives the flags via
+                 Parameters.getChromeOptions(). Maven -D properties are NOT
+                 forwarded to forked JVMs automatically; systemPropertyVariables is
+                 the correct mechanism. Profile activates only when -DchromeOptions
+                 is explicitly set (e.g. no-sandbox,disable-dev-shm-usage in GHA). -->
+            <id>ci-chrome-options</id>
+            <activation>
+                <property>
+                    <name>chromeOptions</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <systemPropertyVariables>
+                                    <chromeOptions>${chromeOptions}</chromeOptions>
+                                </systemPropertyVariables>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
         <profile>
             <id>merged-it</id>
             <activation>

@@ -53,7 +53,7 @@ function runTests() {
       });
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
+      execSync(`npm install --ignore-scripts @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @web/test-runner-junit-reporter @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
@@ -64,12 +64,29 @@ function runTests() {
         stdio: 'inherit'
       });
 
+      // Generate a CI config that adds the JUnit reporter on top of the existing config
+      const hasBaseConfig = fs.existsSync(`${itFolder}/web-test-runner.config.mjs`);
+      const ciConfigPath = `${itFolder}/wtr-ci.config.mjs`;
+      fs.writeFileSync(ciConfigPath, [
+        `import { defaultReporter, summaryReporter } from '@web/test-runner';`,
+        `import { junitReporter } from '@web/test-runner-junit-reporter';`,
+        hasBaseConfig ? `import baseConfig from './web-test-runner.config.mjs';` : '',
+        `export default {`,
+        hasBaseConfig ? `  ...baseConfig,` : '',
+        `  reporters: [defaultReporter(), summaryReporter(), junitReporter({ outputPath: 'wtr-results.xml', reportLogs: true })],`,
+        `};`,
+      ].filter(Boolean).join('\n'));
+
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
-      execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
+      try {
+        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve --config wtr-ci.config.mjs`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      } finally {
+        fs.unlinkSync(ciConfigPath);
+      }
     }
   }
 }

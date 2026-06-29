@@ -15,6 +15,8 @@
  */
 package com.vaadin.tests;
 
+import org.openqa.selenium.chrome.ChromeOptions;
+
 public abstract class AbstractComponentIT
         extends com.vaadin.flow.testutil.AbstractComponentIT {
 
@@ -23,9 +25,21 @@ public abstract class AbstractComponentIT
     }
 
     @Override
+    protected void updateHeadlessChromeOptions(ChromeOptions chromeOptions) {
+        String extraArgs = System.getenv("TESTBENCH_CHROME_EXTRA_ARGS");
+        if (extraArgs != null && !extraArgs.isBlank()) {
+            chromeOptions.addArguments(extraArgs.split("\\s+"));
+        }
+
+        String chromeBinary = System.getenv("TESTBENCH_CHROME_BINARY");
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            chromeOptions.setBinary(chromeBinary);
+        }
+    }
+
+    @Override
     public void setup() throws Exception {
         super.setup();
-
         // Set a default window size
         testBench().resizeViewPortTo(1024, 800);
     }
