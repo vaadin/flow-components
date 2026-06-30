@@ -87,14 +87,16 @@ describe('grid connector - row details', () => {
   });
 
   it('should set details hidden on selected item click', () => {
-    grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
+    grid.$connector.setSelectionMode('SINGLE');
+    grid.$connector.updateFlatData([{ key: '0', name: 'foo', selected: true, detailsOpened: true }]);
     getBodyCellContent(grid, 0, 0)!.click();
     expect(grid.$server.setDetailsVisible).to.be.calledWith(null);
   });
 
   it('should set details hidden on selected item click when deselect is disallowed', () => {
+    grid.$connector.setSelectionMode('SINGLE');
     grid.__deselectDisallowed = true;
-    grid.$connector.updateFlatData([{ key: '0', name: 'foo', detailsOpened: true }]);
+    grid.$connector.updateFlatData([{ key: '0', name: 'foo', selected: true, detailsOpened: true }]);
     getBodyCellContent(grid, 0, 0)!.click();
     expect(grid.$server.setDetailsVisible).to.be.calledWith(null);
   });

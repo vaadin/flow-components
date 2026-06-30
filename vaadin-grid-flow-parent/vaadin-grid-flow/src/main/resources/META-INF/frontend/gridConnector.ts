@@ -113,13 +113,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const item = event.detail.model?.item;
 
     if (selectionMode === 'SINGLE') {
-      if (item && item.selected && grid.__deselectDisallowed) {
-        return;
-      }
-
       if (item && !item.selected) {
         grid.$connector.doSelection([item], true);
-      } else {
+      } else if (!grid.__deselectDisallowed) {
         grid.$connector.doDeselection([...grid.selectedItems], true);
       }
     }
