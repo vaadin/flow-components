@@ -179,7 +179,10 @@ public class Tooltip implements Serializable {
         var tooltip = getForElement(component.getElement());
         if (tooltip == null) {
             tooltip = forElement(component.getElement());
-            ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
+            var innermostComponent = ComponentUtil
+                    .getInnermostComponent(component.getElement());
+            ComponentUtil.setData(innermostComponent, TOOLTIP_DATA_KEY,
+                    tooltip);
         }
         return tooltip;
     }
