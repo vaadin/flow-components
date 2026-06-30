@@ -40,22 +40,17 @@ describe('grid connector - selection', () => {
       expect(grid.selectedItems[0].selected).to.be.true;
     });
 
-    it('should select item on row Space key', async () => {
+    it('should toggle item on row Space key', async () => {
       getBodyCell(grid, 0, 0)!.focus();
       // Move from cell focus mode to row focus mode
       await sendKeys({ press: 'ArrowLeft' });
+
       // Activate the focused row, which fires `row-activate`
       await sendKeys({ press: 'Space' });
       expect(grid.selectedItems.length).to.equal(1);
       expect(grid.selectedItems[0].key).to.equal('0');
-    });
 
-    it('should deselect item on row Space key', async () => {
-      getBodyCell(grid, 0, 0)!.focus();
-      // Move from cell focus mode to row focus mode
-      await sendKeys({ press: 'ArrowLeft' });
-      // Select, then deselect the focused row, which fires `row-activate`
-      await sendKeys({ press: 'Space' });
+      // Activate the focused row again to deselect it
       await sendKeys({ press: 'Space' });
       expect(grid.selectedItems).to.be.empty;
     });
