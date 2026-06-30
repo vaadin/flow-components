@@ -110,18 +110,22 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   function onItemActivate(event) {
-    const item = event.detail.model?.item;
+    const { item } = event.detail.model;
+    if (!item) {
+      // Item isn't loaded yet
+      return;
+    }
 
     if (selectionMode === 'SINGLE') {
-      if (item && !item.selected) {
+      if (!item.selected) {
         grid.$connector.doSelection([item], true);
       } else if (!grid.__deselectDisallowed) {
-        grid.$connector.doDeselection([...grid.selectedItems], true);
+        grid.$connector.doDeselection([item], true);
       }
     }
 
     if (!grid.__disallowDetailsOnClick) {
-      if (item && !item.detailsOpened) {
+      if (!item.detailsOpened) {
         grid.$server.setDetailsVisible(item.key);
       } else {
         grid.$server.setDetailsVisible(null);

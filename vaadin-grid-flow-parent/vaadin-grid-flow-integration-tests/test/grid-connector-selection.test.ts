@@ -62,6 +62,20 @@ describe('grid connector - selection', () => {
       expect(grid.selectedItems[0].key).to.equal('1');
     });
 
+    it('should not select when clicking a still-loading row', async () => {
+      // Reset to a single row whose data hasn't loaded yet, so it renders in a
+      // loading state with no item in its model
+      grid.$connector.reset();
+      grid.$connector.updateSize(1);
+      await nextFrame();
+
+      getBodyCellContent(grid, 0, 0)!.click();
+
+      expect(grid.selectedItems).to.be.empty;
+      expect(grid.$server.select).not.to.be.called;
+      expect(grid.$server.deselect).not.to.be.called;
+    });
+
     it('should mark the item deselected', () => {
       getBodyCellContent(grid, 0, 0)!.click();
       const item = grid.selectedItems[0];
@@ -209,6 +223,13 @@ describe('grid connector - selection', () => {
         expect(grid.$server.select).to.be.calledWith(items[2].key);
       });
 
+      it('should prevent selection of items on click after updateFlatData makes them non-selectable', () => {
+        grid.$connector.updateFlatData([{ ...items[2], selectable: false }]);
+        getBodyCellContent(grid, 2, 0)!.click();
+        expect(grid.selectedItems).to.be.empty;
+        expect(grid.$server.select).to.not.be.called;
+      });
+
       it('should prevent deselection of non-selectable items on click', () => {
         grid.$connector.doSelection([items[0]], false);
         getBodyCellContent(grid, 0, 0)!.click();
@@ -223,25 +244,19 @@ describe('grid connector - selection', () => {
         expect(grid.$server.deselect).to.not.be.called;
       });
 
-      it('should prevent deselection of non-selectable items on row click when active item data is stale', () => {
-        // item is selectable initially and is selected
-        grid.$connector.doSelection([items[2]], false);
-
-        // update grid items to make the item non-selectable
-        const updatedItems = items.map((item) => ({ ...item, selectable: false }));
-        setRootItems(grid.$connector, updatedItems);
-
-        // however clicking the row should not deselect the item
-        getBodyCellContent(grid, 2, 0)!.click();
-        expect(grid.selectedItems).to.deep.equal([updatedItems[2]]);
-        expect(grid.$server.deselect).to.not.be.called;
-      });
-
       it('should allow deselection of selectable items on row click', () => {
         grid.$connector.doSelection([items[2]], false);
         getBodyCellContent(grid, 2, 0)!.click();
         expect(grid.selectedItems).to.be.empty;
         expect(grid.$server.deselect).to.be.calledWith(items[2].key);
+      });
+
+      it('should prevent deselection of items on click after updateFlatData makes them non-selectable', () => {
+        grid.$connector.doSelection([items[2]], false);
+        grid.$connector.updateFlatData([{ ...items[2], selectable: false }]);
+        getBodyCellContent(grid, 2, 0)!.click();
+        expect(grid.selectedItems).to.deep.equal([items[2]]);
+        expect(grid.$server.deselect).to.not.be.called;
       });
 
       it('should always allow selection from server', () => {

@@ -111,4 +111,16 @@ describe('grid connector - row details', () => {
     setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
     expect(grid.$server.setDetailsVisible).not.to.be.calledWith('0');
   });
+
+  it('should not set details visible when clicking a still-loading row', async () => {
+    // Reset to a single row whose data hasn't loaded yet, so it renders in a
+    // loading state with no item in its model
+    grid.$connector.reset();
+    grid.$connector.updateSize(1);
+    await nextFrame();
+
+    getBodyCellContent(grid, 0, 0)!.click();
+
+    expect(grid.$server.setDetailsVisible).not.to.be.called;
+  });
 });
