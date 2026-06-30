@@ -43,11 +43,23 @@ import com.vaadin.flow.component.html.Div;
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable {
+    /**
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
     public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
 
     public static final String FILTER_TABLE_CONTENT_CLASSNAME = "spreadsheet-filter-table-content";
 
     protected final Map<PopupButton, HashSet<SpreadsheetFilter>> popupButtonToFiltersMap;
+    /**
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected final Map<PopupButton, Button> popupButtonToClearButtonMap;
     protected CellRangeAddress filteringRegion;
 
@@ -171,7 +183,12 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
 
     /**
      * Creates the "Clear filters" buttons for the pop-ups.
+     *
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected void initClearAllButtons() {
         for (PopupButton popupButton : getPopupButtons()) {
             Button clearButton = createClearButton();
@@ -220,7 +237,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
      * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name.
      *
      * @return Button for clearing the filters
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected Button createClearButton() {
         final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
