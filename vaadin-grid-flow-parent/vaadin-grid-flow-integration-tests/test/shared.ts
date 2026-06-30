@@ -58,6 +58,7 @@ export type Item = {
   dragData?: Record<string, string>;
   dragDisabled?: boolean;
   dropDisabled?: boolean;
+  selectionAriaLabel?: string;
 };
 
 export type FlowGrid = Grid<Item> & {
@@ -81,6 +82,8 @@ export type FlowGridSorter = GridSorter & {
 
 export type FlowGridSelectionColumn = GridColumn & {
   selectAll: boolean;
+  selectAllAccessibleName: string;
+  selectRowAccessibleNameGenerator: (item: Item) => string | null;
   $server: GridServer;
 };
 

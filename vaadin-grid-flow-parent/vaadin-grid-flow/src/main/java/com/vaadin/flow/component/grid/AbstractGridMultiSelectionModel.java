@@ -45,6 +45,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.Signal;
@@ -65,6 +66,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
     private Registration selectionBindingCleanup;
+    private SerializableFunction<T, String> selectRowCheckboxAriaLabelGenerator;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -390,6 +392,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }
+        if (selectRowCheckboxAriaLabelGenerator != null) {
+            String ariaLabel = selectRowCheckboxAriaLabelGenerator.apply(item);
+            if (ariaLabel != null) {
+                jsonObject.put("selectionAriaLabel", ariaLabel);
+            }
+        }
     }
 
     @Override
@@ -410,6 +418,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     public boolean isDragSelect() {
         return selectionColumn.isDragSelect();
+    }
+
+    @Override
+    public void setSelectAllCheckboxAriaLabel(String ariaLabel) {
+        selectionColumn.setSelectAllCheckboxAriaLabel(ariaLabel);
+    }
+
+    @Override
+    public void setSelectRowCheckboxAriaLabelGenerator(
+            SerializableFunction<T, String> generator) {
+        this.selectRowCheckboxAriaLabelGenerator = generator;
+        getGrid().getDataCommunicator().reset();
     }
 
     /**
