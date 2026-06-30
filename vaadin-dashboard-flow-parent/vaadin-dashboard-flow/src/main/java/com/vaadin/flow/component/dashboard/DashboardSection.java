@@ -36,7 +36,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-dashboard-section")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-section.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-alpha1")
 public class DashboardSection extends Component implements HasWidgets {
 
     private final List<DashboardWidget> widgets = new ArrayList<>();

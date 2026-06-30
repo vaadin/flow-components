@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.vaadin.flow.component.InputMode;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -84,7 +85,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/text-field", version = "25.2.0")
+@NpmPackage(value = "@vaadin/text-field", version = "25.3.0-alpha1")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -384,6 +385,41 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
+    }
+
+    /**
+     * Sets the {@link InputMode} that hints at the type of virtual keyboard to
+     * display when the user interacts with the field on a mobile device. If not
+     * set, the browser defaults to {@link InputMode#TEXT}.
+     *
+     * @param inputMode
+     *            the {@code inputmode} value, or {@code null} to unset
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode">
+     *      inputmode attribute</a>
+     * @since 25.3
+     */
+    public void setInputMode(InputMode inputMode) {
+        if (inputMode == null) {
+            getElement().removeProperty("inputMode");
+        } else {
+            getElement().setProperty("inputMode", inputMode.getValue());
+        }
+    }
+
+    /**
+     * Gets the {@link InputMode} of the field.
+     *
+     * @return the {@code inputmode} value, or {@code null} if not set
+     * @see #setInputMode(InputMode)
+     * @since 25.3
+     */
+    public InputMode getInputMode() {
+        String inputMode = getElement().getProperty("inputMode");
+        if (inputMode == null || inputMode.isEmpty()) {
+            return null;
+        }
+        return InputMode.valueOf(inputMode.toUpperCase());
     }
 
     @Override
