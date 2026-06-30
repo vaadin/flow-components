@@ -48,13 +48,13 @@ class BigDecimalField extends TextField {
         value: '.',
         sync: true,
         observer: '__decimalSeparatorChanged'
+      },
+
+      inputMode: {
+        type: String,
+        value: 'decimal'
       }
     };
-  }
-
-  ready() {
-    super.ready();
-    this.inputElement.setAttribute('inputmode', 'decimal');
   }
 
   __decimalSeparatorChanged(separator, oldSeparator) {

@@ -66,7 +66,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-badge")
-@NpmPackage(value = "@vaadin/badge", version = "25.2.0")
+@NpmPackage(value = "@vaadin/badge", version = "25.3.0-alpha1")
 @JsModule("@vaadin/badge/src/vaadin-badge.js")
 public class Badge extends Component implements HasAriaRole, HasSize, HasText,
         HasThemeVariant<BadgeVariant> {
