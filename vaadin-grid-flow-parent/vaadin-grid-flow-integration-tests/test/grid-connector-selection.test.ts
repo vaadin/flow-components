@@ -63,10 +63,8 @@ describe('grid connector - selection', () => {
     });
 
     it('should not select when clicking a still-loading row', async () => {
-      // Reset to a single row whose data hasn't loaded yet, so it renders in a
-      // loading state with no item in its model
-      grid.$connector.reset();
-      grid.$connector.updateSize(1);
+      // Clear the loaded data so the row goes back to a loading state
+      grid.$connector.clear(0, 2);
       await nextFrame();
 
       getBodyCellContent(grid, 0, 0)!.click();

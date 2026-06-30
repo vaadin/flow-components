@@ -111,13 +111,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   function onItemActivate(event) {
     const { item } = event.detail.model;
-    if (!item) {
-      // Item isn't loaded yet
+    // The row model can hold a stale item while its data is being loaded, so
+    // skip activation unless the item is actually loaded in the data cache
+    if (!dataProviderController.getItemContext(item)) {
       return;
     }
 
     if (selectionMode === 'SINGLE') {
-      if (!item.selected) {
+      if (!selectedKeys[item.key]) {
         grid.$connector.doSelection([item], true);
       } else if (!grid.__deselectDisallowed) {
         grid.$connector.doDeselection([item], true);
