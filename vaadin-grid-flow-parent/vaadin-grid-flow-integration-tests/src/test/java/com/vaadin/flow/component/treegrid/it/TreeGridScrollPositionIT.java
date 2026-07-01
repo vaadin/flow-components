@@ -112,6 +112,13 @@ public class TreeGridScrollPositionIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setItemSelectableProvider_scrollPositionNotChanged() {
+        assertScrollPositionNotChanged(() -> {
+            clickElementWithJs("set-item-selectable-provider");
+        });
+    }
+
+    @Test
     public void setEnabled_scrollPositionNotChanged() {
         assertScrollPositionNotChanged(() -> {
             clickElementWithJs("set-enabled");
