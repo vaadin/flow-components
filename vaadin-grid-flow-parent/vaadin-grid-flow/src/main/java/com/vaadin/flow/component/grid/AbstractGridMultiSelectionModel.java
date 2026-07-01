@@ -395,7 +395,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (selectRowCheckboxAriaLabelGenerator != null) {
             String ariaLabel = selectRowCheckboxAriaLabelGenerator.apply(item);
             if (ariaLabel != null) {
-                jsonObject.put("selectionAriaLabel", ariaLabel);
+                jsonObject.put("selectRowCheckboxAriaLabel", ariaLabel);
             }
         }
     }
@@ -429,7 +429,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public void setSelectRowCheckboxAriaLabelGenerator(
             SerializableFunction<T, String> generator) {
         this.selectRowCheckboxAriaLabelGenerator = generator;
-        getGrid().getDataCommunicator().reset();
+        getGrid().refreshViewport();
     }
 
     /**

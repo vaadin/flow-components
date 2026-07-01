@@ -32,7 +32,7 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     super();
     // The full aria-label is generated server-side and sent as a per-item
     // property; fall back to the default when the app has no generator set.
-    this.selectRowAccessibleNameGenerator = (item) => item?.selectionAriaLabel ?? 'Select Row';
+    this.selectRowAccessibleNameGenerator = (item) => item?.selectRowCheckboxAriaLabel ?? 'Select Row';
   }
 
   /**

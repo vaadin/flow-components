@@ -42,18 +42,18 @@ describe('grid connector - selection column accessible names', () => {
     // First item carries a server-generated full aria-label, the second one
     // does not (no generator value for it).
     setRootItems(grid.$connector, [
-      { key: '0', name: 'foo', selectionAriaLabel: 'Select Row Foo' },
+      { key: '0', name: 'foo', selectRowCheckboxAriaLabel: 'Select Row Foo' },
       { key: '1', name: 'bar' }
     ]);
     await nextFrame();
   });
 
-  it('should use the per-item selectionAriaLabel as the row checkbox name', async () => {
+  it('should use the per-item selectRowCheckboxAriaLabel as the row checkbox name', async () => {
     await enterMultiSelectMode();
     expect(rowCheckboxes()[0].accessibleName).to.equal('Select Row Foo');
   });
 
-  it('should fall back to the default name for items without a selectionAriaLabel', async () => {
+  it('should fall back to the default name for items without a selectRowCheckboxAriaLabel', async () => {
     await enterMultiSelectMode();
     expect(rowCheckboxes()[1].accessibleName).to.equal('Select Row');
   });

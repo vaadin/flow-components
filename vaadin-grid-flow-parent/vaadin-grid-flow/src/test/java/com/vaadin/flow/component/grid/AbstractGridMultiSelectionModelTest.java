@@ -845,7 +845,7 @@ class AbstractGridMultiSelectionModelTest {
                 .getSelectionModel();
         ObjectNode json = JacksonUtils.createObjectNode();
         selectionModel.generateData("foo", json);
-        Assertions.assertFalse(json.has("selectionAriaLabel"));
+        Assertions.assertFalse(json.has("selectRowCheckboxAriaLabel"));
     }
 
     @Test
@@ -858,7 +858,7 @@ class AbstractGridMultiSelectionModelTest {
         ObjectNode json = JacksonUtils.createObjectNode();
         selectionModel.generateData("foo", json);
         Assertions.assertEquals("Select Row foo",
-                json.get("selectionAriaLabel").asText());
+                json.get("selectRowCheckboxAriaLabel").asText());
     }
 
     @Test
@@ -869,7 +869,7 @@ class AbstractGridMultiSelectionModelTest {
         selectionModel.setSelectRowCheckboxAriaLabelGenerator(item -> null);
         ObjectNode json = JacksonUtils.createObjectNode();
         selectionModel.generateData("foo", json);
-        Assertions.assertFalse(json.has("selectionAriaLabel"));
+        Assertions.assertFalse(json.has("selectRowCheckboxAriaLabel"));
     }
 
     private DataProvider<String, ?> getInMemoryDataProvider() {

@@ -58,7 +58,7 @@ export type Item = {
   dragData?: Record<string, string>;
   dragDisabled?: boolean;
   dropDisabled?: boolean;
-  selectionAriaLabel?: string;
+  selectRowCheckboxAriaLabel?: string;
 };
 
 export type FlowGrid = Grid<Item> & {
