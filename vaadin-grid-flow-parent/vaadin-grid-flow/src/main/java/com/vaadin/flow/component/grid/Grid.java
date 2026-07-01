@@ -3128,7 +3128,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setItemSelectableProvider(SerializablePredicate<T> provider) {
         selectableProvider = provider;
-        getDataCommunicator().reset();
+        refreshViewport();
 
         if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
             multiSelectionModel.updateSelectAllCheckBoxVisibility();
