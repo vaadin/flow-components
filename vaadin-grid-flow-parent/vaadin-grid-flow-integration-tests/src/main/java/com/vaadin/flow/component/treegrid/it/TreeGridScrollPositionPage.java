@@ -89,6 +89,10 @@ public class TreeGridScrollPositionPage extends Div {
             treeGrid.getColumns().get(0)
                     .setPartNameGenerator(item -> "column-custom-part");
         });
+
+        addButton("set-item-selectable-provider", event -> {
+            treeGrid.setItemSelectableProvider(item -> true);
+        });
     }
 
     private void addButton(String id,

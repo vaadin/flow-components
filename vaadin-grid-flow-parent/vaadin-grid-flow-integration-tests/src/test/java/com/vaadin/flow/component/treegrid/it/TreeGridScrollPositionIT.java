@@ -111,6 +111,13 @@ public class TreeGridScrollPositionIT extends AbstractComponentIT {
         });
     }
 
+    @Test
+    public void setItemSelectableProvider_scrollPositionNotChanged() {
+        assertScrollPositionNotChanged(() -> {
+            clickElementWithJs("set-item-selectable-provider");
+        });
+    }
+
     public void assertScrollPositionNotChanged(SerializableRunnable action) {
         var firstVisibleRowIndex = treeGrid.getFirstVisibleRowIndex();
         action.run();
