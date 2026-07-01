@@ -93,6 +93,10 @@ public class TreeGridScrollPositionPage extends Div {
         addButton("set-item-selectable-provider", event -> {
             treeGrid.setItemSelectableProvider(item -> true);
         });
+
+        addButton("set-enabled", event -> {
+            treeGrid.setEnabled(!treeGrid.isEnabled());
+        });
     }
 
     private void addButton(String id,
