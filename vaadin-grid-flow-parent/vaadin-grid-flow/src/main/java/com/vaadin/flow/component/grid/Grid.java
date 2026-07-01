@@ -1267,14 +1267,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Remove the displayed details and remove details item from the list
+         * Remove the displayed details but keep the item in the list of
+         * details, so that the details stay open when the item is rendered
+         * again (for example after collapsing and expanding its parent row, or
+         * scrolling the item out of and back into view). Consistent with
+         * {@link #destroyAllData()}.
          *
          * @param item
          *            item to removed
          */
         @Override
         public void destroyData(T item) {
-            detailsVisible.remove(getItemId(item));
             if (itemDetailsDataGenerator != null) {
                 itemDetailsDataGenerator.destroyData(item);
             }
