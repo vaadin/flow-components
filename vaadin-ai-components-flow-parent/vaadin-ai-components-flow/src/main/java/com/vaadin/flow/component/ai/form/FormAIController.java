@@ -47,7 +47,6 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -155,10 +154,10 @@ import tools.jackson.databind.JsonNode;
  *
  * <p>
  * <b>Change tracking and highlight:</b> a listener registered through
- * {@link #addFieldValueChangedListener(SerializableConsumer)} fires once per
- * successful turn with the fields whose value changed during the turn — the
- * common driver for {@link #showFieldHighlight(HasValue)} /
- * {@link #hideFieldHighlight} to flash the AI's edits in the UI.
+ * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
+ * field whose value changed during a successful turn — the common driver for
+ * {@link #showFieldHighlight(HasValue)} / {@link #hideFieldHighlight} to flash
+ * the AI's edits in the UI.
  * </p>
  *
  * <p>
@@ -268,7 +267,7 @@ public class FormAIController implements AIController {
      * {@link #hideFieldHighlight}.
      */
     private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
-    private final List<SerializableConsumer<List<FieldValueChange>>> fieldValuesChangedListeners = new ArrayList<>();
+    private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -612,28 +611,31 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers a listener that is invoked once per successful turn with the
-     * fields whose value differs from what was read at the start of the turn.
+     * Registers a listener that is invoked once per field whose value changed
+     * during a successful AI turn. The listener fires once per changed field,
+     * in document order, after every field's post-turn value has been applied.
      * Comparison is by {@link Objects#equals(Object, Object)} so multi-select
      * sets, dates, and other value-objects work naturally.
      * <p>
-     * Multiple listeners are supported and fire in registration order. If one
-     * listener throws, the exception is logged and the remaining listeners
-     * still fire.
+     * Multiple listeners are supported. For each changed field, every listener
+     * fires in registration order before the next field's event is dispatched.
+     * If one listener throws, the exception is logged and the remaining
+     * listeners still fire — both for that change and for subsequent changes in
+     * the same turn.
      * <p>
-     * Only non-ignored fields are tracked, and only changed fields appear in
-     * the list. A field's pre-turn value is captured regardless of its current
-     * visibility, so a value cascaded into a freshly-revealed field is reported
-     * with the field's real pre-turn value rather than a spurious {@code null}.
-     * The listener is not called when the turn ended in error or when no field
-     * changed. The list iterates in document order; modifying it has no effect
-     * on the controller.
+     * Only non-ignored fields are tracked, and only fields whose value differs
+     * at end-of-turn produce events. A field's pre-turn value is captured
+     * regardless of its current visibility, so a value cascaded into a
+     * freshly-revealed field is reported with the field's real pre-turn value
+     * rather than a spurious {@code null}. No events fire when the turn ended
+     * in error.
      * <p>
-     * The listener runs on the UI thread with the session lock held, so it can
+     * Listeners run on the UI thread with the session lock held, so they can
      * update components and call {@link #showFieldHighlight} /
      * {@link #hideFieldHighlight} directly without {@code ui.access(...)}. A
      * typical use is to flash the AI's edits by calling
-     * {@code showFieldHighlight} on every changed field.
+     * {@code showFieldHighlight} on every event's
+     * {@link FieldValueChangeEvent#getField field}.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -641,11 +643,11 @@ public class FormAIController implements AIController {
      * @throws NullPointerException
      *             if {@code listener} is {@code null}
      */
-    public Registration addFieldValueChangedListener(
-            SerializableConsumer<List<FieldValueChange>> listener) {
+    public Registration addFieldValueChangeListener(
+            FieldValueChangeListener listener) {
         Objects.requireNonNull(listener, "Listener must not be null");
-        fieldValuesChangedListeners.add(listener);
-        return () -> fieldValuesChangedListeners.remove(listener);
+        fieldValueChangeListeners.add(listener);
+        return () -> fieldValueChangeListeners.remove(listener);
     }
 
     /**
@@ -791,7 +793,7 @@ public class FormAIController implements AIController {
     @Override
     public void onResponse(Throwable error) {
         try {
-            fireFieldValuesChanged(error);
+            fireFieldValueChanges(error);
         } finally {
             // Unlock regardless of success or failure: locks set in onRequest
             // must be released so the user can edit again. The failure path
@@ -803,7 +805,7 @@ public class FormAIController implements AIController {
     /**
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
-     * after diff for {@link #addFieldValueChangedListener}. Skipped when no
+     * after diff for {@link #addFieldValueChangeListener}. Skipped when no
      * listener is registered to avoid copying values that no one will read.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
@@ -812,7 +814,7 @@ public class FormAIController implements AIController {
      */
     private void snapshotPreTurnValues() {
         preTurnValues.clear();
-        if (fieldValuesChangedListeners.isEmpty()) {
+        if (fieldValueChangeListeners.isEmpty()) {
             return;
         }
         for (var field : collectKnownFields()) {
@@ -821,43 +823,54 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Builds the change list from the pre-turn snapshot and the post-turn value
-     * of every known field, then invokes every registered listener if anything
-     * changed. The post-turn walk picks up fields that were hidden (or absent)
-     * at turn start but became visible / were added during the turn, so
-     * visibility cascades report their value changes correctly. On error the
-     * snapshot is discarded and no listener fires — the application learns
-     * about errors through the orchestrator's response listener instead. A
-     * throwing listener is logged and otherwise ignored so subsequent listeners
-     * still fire and the rest of the response lifecycle (notably
+     * Walks the pre-turn snapshot against the post-turn value of every known
+     * field and fires one {@link FieldValueChangeEvent} per changed field, in
+     * document order. The post-turn walk picks up fields that were hidden (or
+     * absent) at turn start but became visible / were added during the turn, so
+     * visibility cascades report their value changes correctly.
+     * <p>
+     * The diff is materialised before any listener runs, so a listener that
+     * writes to a tracked field cannot retroactively change the
+     * {@code newValue} another field's event carries. The listener set is also
+     * snapshotted once per turn, so adding or removing listeners mid-dispatch
+     * (including a listener removing itself) affects only subsequent turns, not
+     * the rest of the current turn.
+     * <p>
+     * On error the snapshot is discarded and no events fire — the application
+     * learns about errors through the orchestrator's response listener instead.
+     * A throwing listener is logged and otherwise ignored so subsequent
+     * listeners still fire, subsequent change events in the same turn still
+     * fire, and the rest of the response lifecycle (notably
      * {@link #unlockFields}) still runs.
      */
-    private void fireFieldValuesChanged(Throwable error) {
+    private void fireFieldValueChanges(Throwable error) {
         if (preTurnValues.isEmpty() || error != null) {
             preTurnValues.clear();
             return;
         }
-        var changes = new ArrayList<FieldValueChange>();
+        var events = new ArrayList<FieldValueChangeEvent>();
         for (var field : collectKnownFields()) {
             var oldValue = preTurnValues.get(field);
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
-                changes.add(new FieldValueChange(field, oldValue, newValue));
+                events.add(new FieldValueChangeEvent(this, field, oldValue,
+                        newValue));
             }
         }
         preTurnValues.clear();
-        if (changes.isEmpty()) {
+        if (events.isEmpty()) {
             return;
         }
-        // Snapshot the list before iterating so a listener that adds or
-        // removes listeners (its own Registration included) doesn't break
-        // the dispatch.
-        for (var listener : List.copyOf(fieldValuesChangedListeners)) {
-            try {
-                listener.accept(changes);
-            } catch (Exception ex) {
-                LOGGER.warn("Field-values-changed listener threw an exception",
-                        ex);
+        var snapshot = List.copyOf(fieldValueChangeListeners);
+        for (var event : events) {
+            for (var listener : snapshot) {
+                try {
+                    listener.onFieldValueChange(event);
+                } catch (Exception ex) {
+                    LOGGER.warn(
+                            "Field-value-change listener threw an exception",
+                            ex);
+                }
             }
         }
     }
@@ -911,8 +924,8 @@ public class FormAIController implements AIController {
      * tracks — i.e. all discovered fields minus those hidden via
      * {@link #ignoreField(HasValue)}. Visibility and enabled state are NOT
      * filtered, so this is the right set for the snapshot + diff used by
-     * {@link #addFieldValueChangedListener}: a field hidden at turn start may
-     * be revealed during the turn, and a value cascaded into it should compare
+     * {@link #addFieldValueChangeListener}: a field hidden at turn start may be
+     * revealed during the turn, and a value cascaded into it should compare
      * against its real pre-turn value rather than {@code null}.
      */
     private List<HasValue<?, ?>> collectKnownFields() {

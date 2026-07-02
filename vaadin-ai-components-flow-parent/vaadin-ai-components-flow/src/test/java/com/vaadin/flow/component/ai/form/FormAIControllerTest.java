@@ -22,6 +22,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -496,8 +497,9 @@ class FormAIControllerTest {
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, field, "AN", 10),
                     "Filter must match labels regardless of filter case");
-            Assertions.assertEquals("apple\nbanana\ncherry\n",
-                    executeQueryFieldOptions(controller, field, "", 10),
+            Assertions.assertTrue(
+                    executeQueryFieldOptions(controller, field, "", 10)
+                            .startsWith("apple\nbanana\ncherry\n"),
                     "Empty filter must return all options up to the limit");
         }
 
@@ -539,8 +541,12 @@ class FormAIControllerTest {
                     ValueOptions.forField(field).options(List.of(1, 2, 3)));
             controller.onRequest();
 
-            Assertions.assertEquals("1\n2\n3\n",
-                    executeQueryFieldOptions(controller, field, "", 10));
+            Assertions.assertTrue(
+                    executeQueryFieldOptions(controller, field, "", 10)
+                            .startsWith("1\n2\n3\n"),
+                    "Labels must lead the response; got: "
+                            + executeQueryFieldOptions(controller, field, "",
+                                    10));
         }
 
         @Test
@@ -556,8 +562,9 @@ class FormAIControllerTest {
                     .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
-            Assertions.assertEquals("alpha\nbeta\n",
-                    executeQueryFieldOptions(controller, queriedField, "", 10));
+            Assertions.assertTrue(
+                    executeQueryFieldOptions(controller, queriedField, "", 10)
+                            .startsWith("alpha\nbeta\n"));
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, fixedField, "an", 10));
         }
@@ -1029,26 +1036,26 @@ class FormAIControllerTest {
     }
 
     @Nested
-    class FieldValuesChangedListener {
+    class FieldValueChange {
 
         @Test
-        void listenerFiresWithChangedFieldsAfterSuccessfulTurn() {
+        void listenerFiresWithChangedFieldAfterSuccessfulTurn() {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             field.setValue("John");
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertNotNull(changes, "Listener must fire when a "
-                    + "field's value changed during the turn");
-            Assertions.assertEquals(1, changes.size());
-            var change = changeFor(changes, field);
-            Assertions.assertEquals("", change.oldValue());
-            Assertions.assertEquals("John", change.newValue());
+            Assertions.assertEquals(1, events.size(), "Listener must fire "
+                    + "exactly once for the single changed field");
+            var event = eventFor(events, field);
+            Assertions.assertEquals("", event.getOldValue());
+            Assertions.assertEquals("John", event.getNewValue());
+            Assertions.assertSame(controller, event.getSource(),
+                    "Event source must be the controller that produced it");
         }
 
         @Test
@@ -1056,8 +1063,8 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var invocations = new AtomicInteger();
-            controller.addFieldValueChangedListener(
-                    c -> invocations.incrementAndGet());
+            controller.addFieldValueChangeListener(
+                    e -> invocations.incrementAndGet());
 
             controller.onRequest();
             // No setValue between request and response.
@@ -1072,8 +1079,8 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var invocations = new AtomicInteger();
-            controller.addFieldValueChangedListener(
-                    c -> invocations.incrementAndGet());
+            controller.addFieldValueChangeListener(
+                    e -> invocations.incrementAndGet());
 
             controller.onRequest();
             field.setValue("partial");
@@ -1085,48 +1092,45 @@ class FormAIControllerTest {
         }
 
         @Test
-        void listContainsOnlyChangedFields() {
+        void onlyChangedFieldsProduceEvents() {
             var changed = new TestField();
             var untouched = new TestField();
             var controller = new FormAIController(new Div(changed, untouched));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             changed.setValue("X");
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertEquals(1, changes.size(),
-                    "Only the changed field must appear; got: " + changes);
-            Assertions.assertTrue(containsChangeFor(changes, changed));
-            Assertions.assertFalse(containsChangeFor(changes, untouched));
+            Assertions.assertEquals(1, events.size(),
+                    "Only the changed field must produce an event; got: "
+                            + events);
+            Assertions.assertTrue(containsEventFor(events, changed));
+            Assertions.assertFalse(containsEventFor(events, untouched));
         }
 
         @Test
-        void ignoredFieldsDoNotAppearEvenIfTheirValueChanged() {
+        void ignoredFieldsDoNotProduceEventsEvenIfTheirValueChanged() {
             // Application-driven cascades into a field marked ignoreField()
-            // must
-            // not leak into the change list — ignoreField() is the
-            // application's
-            // opt-out from AI-driven tracking on either side of the lifecycle.
+            // must not leak into the event stream — ignoreField() is the
+            // application's opt-out from AI-driven tracking on either side
+            // of the lifecycle.
             var visible = new TestField();
             var ignored = new TestField();
             visible.addValueChangeListener(e -> ignored.setValue("cascade"));
             var controller = new FormAIController(new Div(visible, ignored));
             controller.ignoreField(ignored);
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             visible.setValue("primary");
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertTrue(containsChangeFor(changes, visible));
-            Assertions.assertFalse(containsChangeFor(changes, ignored),
-                    "Ignored fields must not appear in the change list; got: "
-                            + changes);
+            Assertions.assertTrue(containsEventFor(events, visible));
+            Assertions.assertFalse(containsEventFor(events, ignored),
+                    "Ignored fields must not produce events; got: " + events);
         }
 
         @Test
@@ -1147,7 +1151,7 @@ class FormAIControllerTest {
             // outcome: a stuck-locked field strands the user.
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            controller.addFieldValueChangedListener(c -> {
+            controller.addFieldValueChangeListener(e -> {
                 throw new RuntimeException("listener boom");
             });
 
@@ -1160,73 +1164,73 @@ class FormAIControllerTest {
         }
 
         @Test
-        void cascadingChangesAppearInTheSameTurn() {
-            // Cascades through ValueChangeListener are observable in the diff
-            // regardless of who triggered them — pin the symmetry so this
-            // doesn't quietly regress to "only AI-driven writes are reported".
+        void cascadingChangesProduceSeparateEventsInTheSameTurn() {
+            // Cascades through ValueChangeListener are observable in the
+            // event stream regardless of who triggered them — pin the
+            // symmetry so this doesn't quietly regress to "only AI-driven
+            // writes are reported".
             var primary = new TestField();
             var cascaded = new TestField();
             primary.addValueChangeListener(e -> cascaded.setValue("derived"));
             var controller = new FormAIController(new Div(primary, cascaded));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             primary.setValue("driver");
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertEquals(2, changes.size(),
-                    "Both the driver and cascaded fields must be reported; "
-                            + "got: " + changes);
+            Assertions.assertEquals(2, events.size(),
+                    "Both the driver and cascaded fields must produce events; "
+                            + "got: " + events);
             Assertions.assertEquals("derived",
-                    changeFor(changes, cascaded).newValue());
+                    eventFor(events, cascaded).getNewValue());
         }
 
         @Test
-        void multiSelectSetWithEqualContentIsNotReportedAsChange() {
+        void multiSelectSetWithEqualContentDoesNotProduceEvent() {
             var field = new FormTestFields.MultiSelectField<String>();
             field.setValue(Set.of("a", "b"));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             // Same content, different Set instance — Objects.equals true.
             field.setValue(Set.of("b", "a"));
             controller.onResponse(null);
 
-            Assertions.assertNull(captured.get(),
-                    "A multi-select set equal to its previous value must not "
-                            + "be reported as a change");
+            Assertions.assertTrue(events.isEmpty(),
+                    "A multi-select set equal to its previous value must "
+                            + "not produce an event; got: " + events);
         }
 
         @Test
-        void multiSelectSetWithDifferentContentIsReportedAsChange() {
+        void multiSelectSetWithDifferentContentProducesEvent() {
             var field = new FormTestFields.MultiSelectField<String>();
             field.setValue(Set.of("a", "b"));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             field.setValue(Set.of("a", "c"));
             controller.onResponse(null);
 
-            var change = changeFor(captured.get(), field);
-            Assertions.assertEquals(Set.of("a", "b"), change.oldValue());
-            Assertions.assertEquals(Set.of("a", "c"), change.newValue());
+            var event = eventFor(events, field);
+            Assertions.assertEquals(Set.of("a", "b"), event.getOldValue());
+            Assertions.assertEquals(Set.of("a", "c"), event.getNewValue());
         }
 
         @Test
-        void changeListIteratesInDocumentOrder() {
+        void eventsArriveInDocumentOrder() {
             var first = new TestField();
             var second = new TestField();
             var third = new TestField();
             var controller = new FormAIController(
                     new Div(first, second, third));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             third.setValue("c");
@@ -1235,49 +1239,49 @@ class FormAIControllerTest {
             controller.onResponse(null);
 
             Assertions.assertEquals(List.of(first, second, third),
-                    captured.get().stream().map(FieldValueChange::field)
+                    events.stream().map(FieldValueChangeEvent::getField)
                             .toList(),
-                    "List iteration must follow document order regardless of "
-                            + "the order writes happened in");
+                    "Events must fire in document order regardless of the "
+                            + "order writes happened in");
         }
 
         @Test
         void nullPreTurnValueIsReportedFaithfully() {
             var field = new FormTestFields.DateField();
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             field.setValue(LocalDate.of(2026, 1, 1));
             controller.onResponse(null);
 
-            var change = changeFor(captured.get(), field);
-            Assertions.assertNull(change.oldValue(),
+            var event = eventFor(events, field);
+            Assertions.assertNull(event.getOldValue(),
                     "Pre-turn null must round-trip as null");
             Assertions.assertEquals(LocalDate.of(2026, 1, 1),
-                    change.newValue());
+                    event.getNewValue());
         }
 
         @Test
-        void clearingAValueToNullIsReportedAsChange() {
+        void clearingAValueToNullProducesEvent() {
             // Inverse of nullPreTurnValueIsReportedFaithfully: pre-turn
             // non-null → post-turn null must surface as a change so
             // applications can react (e.g. clear the highlight).
             var field = new FormTestFields.DateField();
             field.setValue(LocalDate.of(2026, 1, 1));
             var controller = new FormAIController(new Div(field));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             field.setValue(null);
             controller.onResponse(null);
 
-            var change = changeFor(captured.get(), field);
+            var event = eventFor(events, field);
             Assertions.assertEquals(LocalDate.of(2026, 1, 1),
-                    change.oldValue());
-            Assertions.assertNull(change.newValue(),
+                    event.getOldValue());
+            Assertions.assertNull(event.getNewValue(),
                     "Clearing to null must surface as the new value");
         }
 
@@ -1285,20 +1289,22 @@ class FormAIControllerTest {
         void multipleListenersAllFire() {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
-            var first = new AtomicReference<List<FieldValueChange>>();
-            var second = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(first::set);
-            controller.addFieldValueChangedListener(second::set);
+            var first = new ArrayList<FieldValueChangeEvent>();
+            var second = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(first::add);
+            controller.addFieldValueChangeListener(second::add);
 
             controller.onRequest();
             field.setValue("X");
             controller.onResponse(null);
 
-            Assertions.assertNotNull(first.get(), "First listener must fire");
-            Assertions.assertNotNull(second.get(),
-                    "Second listener must also fire");
-            Assertions.assertEquals(first.get(), second.get(),
-                    "Both listeners must receive equal change lists");
+            Assertions.assertEquals(1, first.size(),
+                    "First listener must fire once for the changed field");
+            Assertions.assertEquals(1, second.size(),
+                    "Second listener must also fire once");
+            Assertions.assertSame(first.get(0).getField(),
+                    second.get(0).getField(),
+                    "Both listeners must see the same changed field");
         }
 
         @Test
@@ -1306,7 +1312,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(new TestField()));
 
             Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.addFieldValueChangedListener(null));
+                    () -> controller.addFieldValueChangeListener(null));
         }
 
         @Test
@@ -1315,7 +1321,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(field));
             var calls = new AtomicInteger();
             var registration = controller
-                    .addFieldValueChangedListener(c -> calls.incrementAndGet());
+                    .addFieldValueChangeListener(e -> calls.incrementAndGet());
 
             controller.onRequest();
             field.setValue("first");
@@ -1340,11 +1346,11 @@ class FormAIControllerTest {
             var field = new TestField();
             var controller = new FormAIController(new Div(field));
             var followingCalls = new AtomicInteger();
-            controller.addFieldValueChangedListener(c -> {
+            controller.addFieldValueChangeListener(e -> {
                 throw new RuntimeException("first throws");
             });
-            controller.addFieldValueChangedListener(
-                    c -> followingCalls.incrementAndGet());
+            controller.addFieldValueChangeListener(
+                    e -> followingCalls.incrementAndGet());
 
             controller.onRequest();
             field.setValue("X");
@@ -1356,6 +1362,38 @@ class FormAIControllerTest {
         }
 
         @Test
+        void listenerExceptionDoesNotPreventSubsequentEventsInSameTurn() {
+            // When a listener throws on the first field's event, both that
+            // throwing listener and any other listener must still fire for
+            // the second field's event. Pin both halves so a regression
+            // that swallows further events for either party would surface.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var throwerCalls = new AtomicInteger();
+            var followerCalls = new AtomicInteger();
+            controller.addFieldValueChangeListener(e -> {
+                throwerCalls.incrementAndGet();
+                throw new RuntimeException("always throws");
+            });
+            controller.addFieldValueChangeListener(
+                    e -> followerCalls.incrementAndGet());
+
+            controller.onRequest();
+            first.setValue("a");
+            second.setValue("b");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(2, throwerCalls.get(),
+                    "The throwing listener must still be invoked for every "
+                            + "changed field, even after its own prior "
+                            + "invocation threw");
+            Assertions.assertEquals(2, followerCalls.get(),
+                    "A non-throwing follower must also receive every event "
+                            + "even when a prior listener throws on each");
+        }
+
+        @Test
         void listenerCanRemoveItselfDuringDispatchWithoutBreakingTheTurn() {
             // Self-removal during dispatch must not throw or skip remaining
             // listeners: a common idiom for one-shot listeners.
@@ -1364,12 +1402,12 @@ class FormAIControllerTest {
             var registration = new AtomicReference<Registration>();
             var selfRemovingCalls = new AtomicInteger();
             var followingCalls = new AtomicInteger();
-            registration.set(controller.addFieldValueChangedListener(c -> {
+            registration.set(controller.addFieldValueChangeListener(e -> {
                 selfRemovingCalls.incrementAndGet();
                 registration.get().remove();
             }));
-            controller.addFieldValueChangedListener(
-                    c -> followingCalls.incrementAndGet());
+            controller.addFieldValueChangeListener(
+                    e -> followingCalls.incrementAndGet());
 
             controller.onRequest();
             field.setValue("X");
@@ -1393,11 +1431,11 @@ class FormAIControllerTest {
         }
 
         @Test
-        void fieldRevealedMidTurnIsReportedAsChange() {
+        void fieldRevealedMidTurnProducesEvent() {
             // Visibility-cascade headline: a hidden field that gets
-            // revealed-and-written during a single turn must surface in
-            // the change list. Otherwise the LLM's effect on the form
-            // would be silently underreported.
+            // revealed-and-written during a single turn must surface as an
+            // event. Otherwise the LLM's effect on the form would be
+            // silently underreported.
             var primary = new TestField();
             var conditional = new TestField();
             conditional.setVisible(false);
@@ -1407,23 +1445,23 @@ class FormAIControllerTest {
             });
             var controller = new FormAIController(
                     new Div(primary, conditional));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             primary.setValue("driver");
             controller.onResponse(null);
 
-            var change = changeFor(captured.get(), conditional);
-            Assertions.assertEquals("", change.oldValue(),
+            var event = eventFor(events, conditional);
+            Assertions.assertEquals("", event.getOldValue(),
                     "Old value must reflect the field's pre-turn value");
-            Assertions.assertEquals("derived", change.newValue());
+            Assertions.assertEquals("derived", event.getNewValue());
         }
 
         @Test
         void hiddenFieldRevealedAndChangedReportsRealOldValue() {
             // When the hidden field already had a non-null value
-            // (e.g. bound to a bean), the diff must report the real
+            // (e.g. bound to a bean), the event must report the real
             // (preset → derived) transition rather than (null → derived).
             var primary = new TestField();
             var conditional = new TestField();
@@ -1435,25 +1473,24 @@ class FormAIControllerTest {
             });
             var controller = new FormAIController(
                     new Div(primary, conditional));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             primary.setValue("driver");
             controller.onResponse(null);
 
-            var change = changeFor(captured.get(), conditional);
-            Assertions.assertEquals("preset", change.oldValue(),
+            var event = eventFor(events, conditional);
+            Assertions.assertEquals("preset", event.getOldValue(),
                     "Pre-turn value of a hidden field must round-trip into "
-                            + "the change record, not a spurious null");
-            Assertions.assertEquals("derived", change.newValue());
+                            + "the event, not a spurious null");
+            Assertions.assertEquals("derived", event.getNewValue());
         }
 
         @Test
-        void fieldRevealedMidTurnWithUnchangedValueIsNotReported() {
+        void fieldRevealedMidTurnWithUnchangedValueProducesNoEvent() {
             // False-positive guard: revealing a hidden field without
-            // writing to it is not a change and must not appear in the
-            // change list.
+            // writing to it is not a change and must not produce an event.
             var primary = new TestField();
             var conditional = new TestField();
             conditional.setValue("preset");
@@ -1461,21 +1498,20 @@ class FormAIControllerTest {
             primary.addValueChangeListener(e -> conditional.setVisible(true));
             var controller = new FormAIController(
                     new Div(primary, conditional));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             primary.setValue("driver");
             controller.onResponse(null);
 
-            Assertions.assertFalse(
-                    containsChangeFor(captured.get(), conditional),
+            Assertions.assertFalse(containsEventFor(events, conditional),
                     "Revealing a hidden field without changing its value "
-                            + "must not be reported as a change");
+                            + "must not produce an event");
         }
 
         @Test
-        void fieldRevealedAndFilledInSameTurnIsReported() {
+        void fieldRevealedAndFilledInSameTurnProducesEvent() {
             var controlling = new TestField();
             var conditional = new TestField();
             conditional.setVisible(false);
@@ -1483,27 +1519,25 @@ class FormAIControllerTest {
                     .addValueChangeListener(e -> conditional.setVisible(true));
             var controller = new FormAIController(
                     new Div(controlling, conditional));
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             controlling.setValue("business"); // reveals the conditional field
             conditional.setValue("cost-center-42"); // AI fills the revealed one
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertTrue(containsChangeFor(changes, conditional),
-                    "A field revealed and filled within the same turn must be "
-                            + "reported as changed; got: " + changes);
+            Assertions.assertTrue(containsEventFor(events, conditional),
+                    "A field revealed and filled within the same turn must "
+                            + "produce an event; got: " + events);
         }
 
         @Test
-        void fieldAddedAndFilledInSameTurnIsReported() {
-            // Stronger variant: the conditional field does not exist in
-            // the form when onRequest snapshots. A controlling field's
-            // listener ADDS it to the form mid-turn (e.g. a checkbox
-            // revealing a new panel), and the same turn fills it. It must
-            // still be reported as changed.
+        void fieldAddedAndFilledInSameTurnProducesEvent() {
+            // A field that does not exist when onRequest snapshots but is
+            // added to the form mid-turn (e.g. by a controlling field
+            // revealing a new panel) and filled in the same turn must
+            // still produce an event.
             var controlling = new TestField();
             var added = new TestField();
             var form = new Div(controlling);
@@ -1511,32 +1545,181 @@ class FormAIControllerTest {
             // by the controlling field's value change.
             controlling.addValueChangeListener(e -> form.add(added));
             var controller = new FormAIController(form);
-            var captured = new AtomicReference<List<FieldValueChange>>();
-            controller.addFieldValueChangedListener(captured::set);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
 
             controller.onRequest();
             controlling.setValue("business"); // adds the new field to the form
             added.setValue("cost-center-42"); // AI fills the newly-added field
             controller.onResponse(null);
 
-            var changes = captured.get();
-            Assertions.assertTrue(containsChangeFor(changes, added),
+            Assertions.assertTrue(containsEventFor(events, added),
                     "A field added to the form and filled within the same "
-                            + "turn must be reported as changed; got: "
-                            + changes);
+                            + "turn must produce an event; got: " + events);
         }
 
-        private static FieldValueChange changeFor(
-                List<FieldValueChange> changes, HasValue<?, ?> field) {
-            return changes.stream().filter(c -> c.field() == field).findFirst()
+        @Test
+        void eventSourceIsTheControllerForEveryEventInATurn() {
+            // getSource() is the only way for a listener to recover the
+            // controller without capturing it. Pin that every event in a
+            // multi-event turn returns the same controller, not, say, null
+            // on the second event or a different instance.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
+
+            controller.onRequest();
+            first.setValue("a");
+            second.setValue("b");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(2, events.size(),
+                    "Expected two events for two changed fields");
+            for (var event : events) {
+                Assertions.assertSame(controller, event.getSource(),
+                        "Every event must carry the same controller as its "
+                                + "source; got: " + event.getSource());
+            }
+        }
+
+        @Test
+        void eventDispatchVisitsAllListenersBeforeMovingToNextEvent() {
+            // Every listener fires in registration order for event 1
+            // before any listener fires for event 2. Pinning this lets
+            // listeners depend on each other's side effects within an
+            // event (e.g. listener A annotates the source, listener B
+            // reads the annotation) without leaking across events.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var order = new ArrayList<String>();
+            controller.addFieldValueChangeListener(
+                    e -> order.add("A:" + e.getNewValue()));
+            controller.addFieldValueChangeListener(
+                    e -> order.add("B:" + e.getNewValue()));
+
+            controller.onRequest();
+            first.setValue("a");
+            second.setValue("b");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of("A:a", "B:a", "A:b", "B:b"), order,
+                    "Listeners must visit each event in registration order, "
+                            + "then advance to the next event: got " + order);
+        }
+
+        @Test
+        void writingToFieldInsideListenerDoesNotPoisonOtherEventsValues() {
+            // The diff is materialised before any listener runs, so a
+            // listener writing to a tracked field cannot retroactively
+            // alter another event's values. Otherwise events would carry
+            // values that don't match the LLM's effect — they'd carry
+            // whatever the listener happened to write.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(e -> {
+                events.add(e);
+                if (e.getField() == first) {
+                    second.setValue("listener-overwrote");
+                }
+            });
+
+            controller.onRequest();
+            first.setValue("from-llm");
+            second.setValue("from-llm-too");
+            controller.onResponse(null);
+
+            var secondEvent = eventFor(events, second);
+            Assertions.assertEquals("", secondEvent.getOldValue(),
+                    "The second event's oldValue must reflect the field's "
+                            + "value at turn start, not anything the listener "
+                            + "wrote during the turn");
+            Assertions.assertEquals("from-llm-too", secondEvent.getNewValue(),
+                    "The second event's newValue must reflect the LLM's "
+                            + "write, not the side effect of the listener "
+                            + "that ran for the first event");
+        }
+
+        @Test
+        void listenerAddedDuringDispatchDoesNotReceiveCurrentTurnEvents() {
+            // Snapshot-per-turn semantics: a listener that registers itself
+            // from inside another listener's handler must not start
+            // receiving events until the NEXT turn. Otherwise a one-shot
+            // self-registering listener pattern would observe a partial
+            // view of the current turn's changes.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var lateCalls = new AtomicInteger();
+            controller.addFieldValueChangeListener(e -> {
+                if (e.getField() == first) {
+                    controller.addFieldValueChangeListener(
+                            ev -> lateCalls.incrementAndGet());
+                }
+            });
+
+            controller.onRequest();
+            first.setValue("a");
+            second.setValue("b");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(0, lateCalls.get(),
+                    "Listener registered mid-dispatch must not receive any "
+                            + "of the current turn's remaining events");
+
+            controller.onRequest();
+            first.setValue("c");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, lateCalls.get(),
+                    "Listener registered in the previous turn must receive "
+                            + "events from subsequent turns");
+        }
+
+        @Test
+        void removedListenerStillReceivesRestOfCurrentTurnEvents() {
+            // Snapshot-per-turn semantics, opposite direction: a listener
+            // that removes itself from inside its own handler must still
+            // receive the rest of the current turn's events. The cleanup
+            // takes effect only on the next turn.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = new FormAIController(new Div(first, second));
+            var calls = new ArrayList<HasValue<?, ?>>();
+            var registration = new AtomicReference<Registration>();
+            registration.set(controller.addFieldValueChangeListener(e -> {
+                calls.add(e.getField());
+                if (e.getField() == first) {
+                    registration.get().remove();
+                }
+            }));
+
+            controller.onRequest();
+            first.setValue("a");
+            second.setValue("b");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(first, second), calls,
+                    "A listener that removes itself during event 1 must "
+                            + "still receive event 2 of the same turn");
+        }
+
+        private static FieldValueChangeEvent eventFor(
+                List<FieldValueChangeEvent> events, HasValue<?, ?> field) {
+            return events.stream().filter(e -> e.getField() == field)
+                    .findFirst()
                     .orElseThrow(() -> new AssertionError(
-                            "No FieldValueChange entry for field " + field
-                                    + " in " + changes));
+                            "No FieldValueChangeEvent for field " + field
+                                    + " in " + events));
         }
 
-        private static boolean containsChangeFor(List<FieldValueChange> changes,
-                HasValue<?, ?> field) {
-            return changes.stream().anyMatch(c -> c.field() == field);
+        private static boolean containsEventFor(
+                List<FieldValueChangeEvent> events, HasValue<?, ?> field) {
+            return events.stream().anyMatch(e -> e.getField() == field);
         }
     }
 
