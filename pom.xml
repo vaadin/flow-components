@@ -460,28 +460,6 @@
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven.resources.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>copy-resources-for-demo-website</id>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <phase>process-resources</phase>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
-                                <overwrite>true</overwrite>
-                                <resources>
-                                    <resource>
-                                        <directory>src/test/java</directory>
-                                    </resource>
-                                    <resource>
-                                        <directory>src/main/webapp</directory>
-                                        <targetPath>META-INF/resources</targetPath>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>com.vaadin</groupId>
