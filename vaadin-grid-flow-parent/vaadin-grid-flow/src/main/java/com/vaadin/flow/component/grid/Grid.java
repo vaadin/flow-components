@@ -545,7 +545,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return this;
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({ "unchecked" })
         private void setupRenderer(Renderer<T> renderer) {
             this.renderer = Objects.requireNonNull(renderer,
                     "Renderer must not be null.");
@@ -560,8 +560,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             .getKeyMapper());
 
             rendering.getDataGenerator().ifPresent(dataGenerator -> {
-                rendererRegistrations.add(compositeDataGenerator
-                        .addDataGenerator((DataGenerator) dataGenerator));
+                rendererRegistrations.add(
+                        compositeDataGenerator.addDataGenerator(dataGenerator));
             });
 
             rendererRegistrations.add(rendering.getRegistration());
@@ -1133,7 +1133,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
                         columnInternalId);
                 editorRendererRegistration = compositeDataGenerator
-                        .addDataGenerator((DataGenerator) editorRenderer);
+                        .addDataGenerator(editorRenderer);
             }
 
             editorRenderer.render(getElement(), null);
