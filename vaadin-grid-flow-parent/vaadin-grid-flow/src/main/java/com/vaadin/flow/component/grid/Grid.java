@@ -547,13 +547,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             // The editor renderer is a wrapper around the regular renderer, so
             // we need to apply it again afterwards
             if (editorRenderer != null) {
-                Rendering<T> editorRendering = editorRenderer
-                        .render(getElement(), null);
-                editorDataGeneratorRegistration = editorRendering
-                        .getDataGenerator()
-                        .map(dataGenerator -> grid.addDataGenerator(
-                                (DataGenerator) dataGenerator))
-                        .orElse(null);
+                setupColumnEditor();
             }
 
             getGrid().refreshViewport();
@@ -1122,18 +1116,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setupColumnEditor() {
-            editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
-                    columnInternalId);
+            if (editorRenderer == null) {
+                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
+                        columnInternalId);
+            }
 
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
                     null);
 
-            Optional<DataGenerator<T>> dataGenerator = editorRendering
-                    .getDataGenerator();
-            if (dataGenerator.isPresent()) {
-                editorDataGeneratorRegistration = grid
-                        .addDataGenerator((DataGenerator) dataGenerator.get());
-            }
+            editorDataGeneratorRegistration = editorRendering.getDataGenerator()
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
         }
     }
 
