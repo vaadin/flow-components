@@ -417,12 +417,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
      * @param <T>
      *            type of the underlying grid this column is compatible with
      */
@@ -449,6 +443,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private SerializableComparator<T> comparator;
 
+        private final CompositeDataGenerator<T> compositeDataGenerator = new CompositeDataGenerator<>() {
+            @Override
+            public void generateData(T item, ObjectNode jsonObject) {
+                if (Column.this.isVisible()) {
+                    super.generateData(item, jsonObject);
+                }
+            }
+        };
+        private Registration compositeDataGeneratorRegistration;
+
         private Renderer<T> renderer;
         private List<Registration> rendererRegistrations = new ArrayList<>();
 
@@ -470,7 +474,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             super(grid);
             this.columnInternalId = columnId;
             comparator = (a, b) -> 0;
+            compositeDataGeneratorRegistration = grid
+                    .addDataGenerator(compositeDataGenerator);
             setupRenderer(renderer);
+        }
+
+        @Override
+        public void setVisible(boolean visible) {
+            boolean refreshViewport = visible && !isVisible();
+            super.setVisible(visible);
+            if (refreshViewport) {
+                getGrid().refreshViewport();
+            }
         }
 
         protected void destroyDataGenerators() {
@@ -482,6 +497,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (editorRendererRegistration != null) {
                 editorRendererRegistration.remove();
                 editorRendererRegistration = null;
+            }
+
+            if (compositeDataGeneratorRegistration != null) {
+                compositeDataGeneratorRegistration.remove();
+                compositeDataGeneratorRegistration = null;
             }
         }
 
@@ -540,8 +560,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             .getKeyMapper());
 
             rendering.getDataGenerator().ifPresent(dataGenerator -> {
-                rendererRegistrations.add(
-                        grid.addDataGenerator((DataGenerator) dataGenerator));
+                rendererRegistrations.add(compositeDataGenerator
+                        .addDataGenerator((DataGenerator) dataGenerator));
             });
 
             rendererRegistrations.add(rendering.getRegistration());
@@ -1112,7 +1132,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (editorRenderer == null) {
                 editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
                         columnInternalId);
-                editorRendererRegistration = grid
+                editorRendererRegistration = compositeDataGenerator
                         .addDataGenerator((DataGenerator) editorRenderer);
             }
 
@@ -1747,11 +1767,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * see {@link #addColumn(Renderer)}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     * <p>
      * <em>NOTE:</em> This method is a shorthand for
      * {@link #addColumn(ValueProvider, BiFunction)}
      * </p>
@@ -1778,11 +1793,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> For displaying components, see
      * {@link #addComponentColumn(ValueProvider)}. For using built-in renderers,
      * see {@link #addColumn(Renderer)}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
      * @param valueProvider
@@ -1842,11 +1852,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
      * built in renderers or using {@link LitRenderer}.
      * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @param componentProvider
      *            a value provider that will return a component for the given
@@ -1869,12 +1874,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
      * {@link ValueProvider}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @see Column#setComparator(ValueProvider)
      * @see Column#setSortProperty(String...)
@@ -1910,11 +1909,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * or using {@link LitRenderer}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     * <p>
      * <em>NOTE:</em> This method is a shorthand for
      * {@link #addColumn(Renderer, BiFunction)}
      * </p>
@@ -1946,11 +1940,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link LitRenderer}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
      * @param renderer
@@ -2055,12 +2044,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * from a bean type with {@link #Grid(Class)}.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * <p>
      * <strong>Note:</strong> This method is a shorthand for
      * {@link #addColumn(String, BiFunction)}
      * </p>
@@ -2094,12 +2077,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @see #addColumn(String)
      * @see #removeColumn(Column)
@@ -2171,12 +2148,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @param propertyNames
      *            the property names of the new columns, not <code>null</code>
@@ -4367,6 +4338,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         idToColumnMap.forEach((id, column) -> {
+            if (!column.isVisible()) {
+                return;
+            }
             String cellTooltip = column.tooltipGenerator.apply(item);
             if (cellTooltip != null) {
                 tooltips.put(id, cellTooltip);
@@ -4387,6 +4361,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         idToColumnMap.forEach((id, column) -> {
+            if (!column.isVisible()) {
+                return;
+            }
             String cellPartName = column.getPartNameGenerator().apply(item);
             if (cellPartName != null) {
                 part.put(id, cellPartName);
