@@ -466,14 +466,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the renderer to use in this column, must not be
          *            {@code null}
          */
-        @SuppressWarnings("unchecked")
         public Column(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid);
-            Objects.requireNonNull(renderer);
             this.columnInternalId = columnId;
-
             comparator = (a, b) -> 0;
-
             setupRenderer(renderer);
         }
 
@@ -513,8 +509,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @since 24.1
          */
         public Column<T> setRenderer(Renderer<T> renderer) {
-            Objects.requireNonNull(renderer, "Renderer must not be null.");
-
             setupRenderer(renderer);
 
             // The editor renderer is a wrapper around the regular renderer, so
@@ -529,10 +523,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setupRenderer(Renderer<T> renderer) {
+            this.renderer = Objects.requireNonNull(renderer,
+                    "Renderer must not be null.");
+
             rendererRegistrations.forEach(Registration::remove);
             rendererRegistrations.clear();
-
-            this.renderer = renderer;
 
             Rendering<T> rendering = renderer.render(getElement(),
                     (KeyMapper<T>) getGrid().getDataCommunicator()
