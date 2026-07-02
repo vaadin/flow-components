@@ -547,25 +547,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             rendererRegistrations.add(rendering.getRegistration());
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        private void setupEditorRenderer() {
-            if (editorRendererRegistration != null) {
-                editorRendererRegistration.remove();
-            }
-
-            if (editorRenderer == null) {
-                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
-                        columnInternalId);
-            }
-
-            Rendering<T> rendering = editorRenderer.render(getElement(), null);
-
-            editorRendererRegistration = rendering.getDataGenerator()
-                    .map(dataGenerator -> grid
-                            .addDataGenerator((DataGenerator) dataGenerator))
-                    .orElse(null);
-        }
-
         /**
          * Sets the width of this column as a CSS-string.
          * <p>
@@ -1124,6 +1105,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         @Override
         protected Column<?> getBottomLevelColumn() {
             return this;
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private void setupEditorRenderer() {
+            if (editorRenderer == null) {
+                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
+                        columnInternalId);
+                editorRendererRegistration = grid
+                        .addDataGenerator((DataGenerator) editorRenderer);
+            }
+
+            editorRenderer.render(getElement(), null);
         }
     }
 
