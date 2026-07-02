@@ -70,18 +70,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return grid;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Note that column data is not generated or sent to the client while the
-     * column is hidden.
-     * </p>
-     */
-    @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-    }
-
     private void scheduleHeaderRendering() {
         if (headerRenderingScheduled) {
             return;
