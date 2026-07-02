@@ -556,7 +556,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         (Editor) grid.getEditor(), columnInternalId);
             }
 
-            Rendering<T> rendering = renderer.render(getElement(), null);
+            Rendering<T> rendering = editorRenderer.render(getElement(), null);
 
             rendering.getDataGenerator().ifPresent(dataGenerator -> {
                 editorRendererRegistrations.add(
