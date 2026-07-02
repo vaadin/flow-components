@@ -135,6 +135,17 @@ public class MultiSelectComboBox<TItem>
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        // Synchronize the value on the web component's `change` event instead
+        // of the default `selected-items-changed` property notification. The
+        // notification fires for programmatic (server-set) changes as well,
+        // which - combined with multiple push frames around a value set - could
+        // relay a stale empty echo back as a spurious client-initiated value
+        // change. The web component dispatches `change` only on genuine user
+        // value commits, so this ensures only real user gestures are treated as
+        // client changes (see
+        // https://github.com/vaadin/flow-components/issues/9611).
+        setSynchronizedEvent("change");
+
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data
         // provider identify, and that the selection only changes if items
