@@ -1124,12 +1124,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
                     null);
 
-            Optional<DataGenerator<T>> dataGenerator = editorRendering
-                    .getDataGenerator();
-            if (dataGenerator.isPresent()) {
-                editorDataGeneratorRegistration = grid
-                        .addDataGenerator((DataGenerator) dataGenerator.get());
-            }
+            editorDataGeneratorRegistration = editorRendering.getDataGenerator()
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
         }
     }
 
