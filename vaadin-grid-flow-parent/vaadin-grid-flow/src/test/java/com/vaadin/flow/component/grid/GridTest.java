@@ -156,4 +156,32 @@ class GridTest {
             Assertions.fail("Could not call Grid.setViewportRange");
         }
     }
+
+    @Test
+    void getI18n_returnsNullByDefault() {
+        Assertions.assertNull(new Grid<String>().getI18n());
+    }
+
+    @Test
+    void setI18n_getI18n_returnsSameInstance() {
+        final Grid<String> grid = new Grid<>();
+        GridI18n i18n = new GridI18n();
+        grid.setI18n(i18n);
+        Assertions.assertSame(i18n, grid.getI18n());
+    }
+
+    @Test
+    void setI18n_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new Grid<String>().setI18n(null));
+    }
+
+    @Test
+    void i18nPropertySetters_returnSameInstance() {
+        GridI18n i18n = new GridI18n();
+        Assertions.assertSame(i18n,
+                i18n.setSelectAllCheckboxAriaLabel("Select all"));
+        Assertions.assertSame(i18n,
+                i18n.setSelectRowCheckboxAriaLabel("Select row {0}"));
+    }
 }
