@@ -180,8 +180,8 @@ class GridTest {
     void i18nPropertySetters_returnSameInstance() {
         GridI18n i18n = new GridI18n();
         Assertions.assertSame(i18n,
-                i18n.setSelectAllCheckboxAriaLabel("Select all"));
+                i18n.setSelectAll("Select all"));
         Assertions.assertSame(i18n,
-                i18n.setSelectRowCheckboxAriaLabel("Select row {0}"));
+                i18n.setSelectRow("Select row {0}"));
     }
 }

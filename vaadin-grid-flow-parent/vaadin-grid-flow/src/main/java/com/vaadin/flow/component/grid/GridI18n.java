@@ -29,8 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GridI18n implements Serializable {
-    private String selectAllCheckboxAriaLabel;
-    private String selectRowCheckboxAriaLabel;
+    private String selectAll;
+    private String selectRow;
 
     /**
      * Gets the accessible name (aria-label) for the select all checkbox in the
@@ -38,21 +38,20 @@ public class GridI18n implements Serializable {
      *
      * @return the accessible name for the select all checkbox
      */
-    public String getSelectAllCheckboxAriaLabel() {
-        return selectAllCheckboxAriaLabel;
+    public String getSelectAll() {
+        return selectAll;
     }
 
     /**
      * Sets the accessible name (aria-label) for the select all checkbox in the
      * selection column header cell.
      *
-     * @param selectAllCheckboxAriaLabel
+     * @param selectAll
      *            the accessible name for the select all checkbox
      * @return this instance for method chaining
      */
-    public GridI18n setSelectAllCheckboxAriaLabel(
-            String selectAllCheckboxAriaLabel) {
-        this.selectAllCheckboxAriaLabel = selectAllCheckboxAriaLabel;
+    public GridI18n setSelectAll(String selectAll) {
+        this.selectAll = selectAll;
         return this;
     }
 
@@ -62,8 +61,8 @@ public class GridI18n implements Serializable {
      *
      * @return the accessible name template for the select row checkbox
      */
-    public String getSelectRowCheckboxAriaLabel() {
-        return selectRowCheckboxAriaLabel;
+    public String getSelectRow() {
+        return selectRow;
     }
 
     /**
@@ -73,13 +72,12 @@ public class GridI18n implements Serializable {
      * {@link Grid.Column#setRowHeader(boolean)}), or the 1-based row index when
      * there is no row-header column.
      *
-     * @param selectRowCheckboxAriaLabel
+     * @param selectRow
      *            the accessible name template for the select row checkbox
      * @return this instance for method chaining
      */
-    public GridI18n setSelectRowCheckboxAriaLabel(
-            String selectRowCheckboxAriaLabel) {
-        this.selectRowCheckboxAriaLabel = selectRowCheckboxAriaLabel;
+    public GridI18n setSelectRow(String selectRow) {
+        this.selectRow = selectRow;
         return this;
     }
 }
