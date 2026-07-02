@@ -83,6 +83,17 @@ public class GridSelectionColumn extends Component {
     }
 
     /**
+     * Sets the accessible name (aria-label) for the select all checkbox in the
+     * header cell.
+     *
+     * @param ariaLabel
+     *            the accessible name for the select all checkbox
+     */
+    public void setSelectAllCheckboxAriaLabel(String ariaLabel) {
+        getElement().setProperty("selectAllAccessibleName", ariaLabel);
+    }
+
+    /**
      * Sets this column's frozen state.
      *
      * @param frozen

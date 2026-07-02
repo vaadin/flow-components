@@ -21,6 +21,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -187,4 +188,26 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
+
+    /**
+     * Sets the accessible name (aria-label) for the select all checkbox in the
+     * header cell.
+     *
+     * @param ariaLabel
+     *            the accessible name for the select all checkbox
+     */
+    void setSelectAllCheckboxAriaLabel(String ariaLabel);
+
+    /**
+     * Sets a generator that produces the accessible name (aria-label) for each
+     * row's select row checkbox. The generator receives the row item and
+     * returns the full aria-label, e.g.
+     * <code>item -&gt; "Select Row " + item.getName()</code>.
+     *
+     * @param generator
+     *            the generator returning the accessible name for a row, or
+     *            {@code null} to reset to the default
+     */
+    void setSelectRowCheckboxAriaLabelGenerator(
+            SerializableFunction<T, String> generator);
 }
