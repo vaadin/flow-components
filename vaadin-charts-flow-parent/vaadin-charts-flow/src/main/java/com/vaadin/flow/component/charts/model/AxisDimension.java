@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Possible axis dimensions with their indexes in client-side
+ * 
+ * @since 6.0.1
  */
 public enum AxisDimension {
     X_AXIS(0), Y_AXIS(1), Z_AXIS(2), COLOR_AXIS(3);

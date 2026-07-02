@@ -20,7 +20,7 @@ import com.vaadin.flow.shared.Registration;
  * unregistration.
  *
  * @author Vaadin Ltd.
- * @since 3.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class Action implements Serializable {
@@ -108,7 +108,6 @@ public class Action implements Serializable {
          * @param shortcut
          *            listener to add
          * @return registration for unregistering the listener
-         * @since 8.0
          */
         public Registration addShortcutListener(ShortcutEventListener shortcut);
     }
@@ -117,7 +116,6 @@ public class Action implements Serializable {
      * Interface implemented by classes who wish to handle actions.
      *
      * @author Vaadin Ltd.
-     * @since 3.0
      */
     public interface Handler extends Serializable {
 
@@ -158,7 +156,6 @@ public class Action implements Serializable {
      * action.
      *
      * @author Vaadin Ltd.
-     * @since 3.0
      */
     public interface Container extends Serializable {
 
@@ -195,6 +192,7 @@ public class Action implements Serializable {
      *
      * @param icon
      *            the icon to set.
+     * @since 25.1
      */
     public void setIcon(Icon icon) {
         this.icon = icon;

@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.util.Util;
 /**
  * The area range is a cartesian series type with higher and lower Y values
  * along an X axis. Requires <code>highcharts-more.js</code>.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsArearange extends AreaOptions {
 
@@ -157,6 +159,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -167,6 +170,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -174,6 +179,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -198,6 +204,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -223,6 +231,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -235,6 +244,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>low</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -258,6 +269,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -272,6 +284,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -318,6 +332,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -343,6 +358,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -436,6 +453,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -444,6 +462,8 @@ public class PlotOptionsArearange extends AreaOptions {
     /**
      * Fill color or gradient for the area. When <code>null</code>, the series'
      * <code>color</code> is used with the series' <code>fillOpacity</code>.
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
@@ -451,6 +471,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setFillOpacity(Number)
+     * @since 18.0
      */
     public Number getFillOpacity() {
         return fillOpacity;
@@ -465,6 +486,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * setting.
      * <p>
      * Defaults to: 0.75
+     * 
+     * @since 18.0
      */
     public void setFillOpacity(Number fillOpacity) {
         this.fillOpacity = fillOpacity;
@@ -560,6 +583,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -570,6 +594,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * <code>color</code> of the series, but the lineColor setting allows
      * setting a separate color for the line without altering the
      * <code>fillColor</code>.
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -577,6 +603,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -586,6 +613,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * Pixel width of the arearange graph line.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -626,6 +655,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -636,6 +666,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -643,6 +675,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setNegativeFillColor(Color)
+     * @since 18.0
      */
     public Color getNegativeFillColor() {
         return negativeFillColor;
@@ -650,6 +683,8 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * A separate color for the negative part of the area.
+     * 
+     * @since 18.0
      */
     public void setNegativeFillColor(Color negativeFillColor) {
         this.negativeFillColor = negativeFillColor;
@@ -657,6 +692,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -666,6 +702,8 @@ public class PlotOptionsArearange extends AreaOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

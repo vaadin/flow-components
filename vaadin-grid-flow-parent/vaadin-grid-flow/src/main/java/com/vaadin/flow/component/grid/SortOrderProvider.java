@@ -28,6 +28,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * @see Column#setSortOrderProvider
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @FunctionalInterface
 public interface SortOrderProvider

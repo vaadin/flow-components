@@ -14,6 +14,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
  * Map source for loading tiled images from an OpenStreetMap service. The source
  * will use the official OpenStreetMap service by default. A custom URL can be
  * configured to load data from a different service.
+ * 
+ * @since 23.0
  */
 public class OSMSource extends XYZSource {
 

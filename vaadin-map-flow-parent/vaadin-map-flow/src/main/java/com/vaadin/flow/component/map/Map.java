@@ -79,6 +79,8 @@ import tools.jackson.databind.node.ObjectNode;
  * the box, the map component has support for the {@code EPSG:4326} and
  * {@code EPSG:3857} projections. Custom coordinate projections can be defined
  * using {@link #defineProjection(String, String)}.
+ * 
+ * @since 23.0
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "25.3.0-alpha1")
@@ -123,6 +125,7 @@ public class Map extends MapBase {
      *
      * @param projection
      *            the user projection to use for all public facing API
+     * @since 23.2
      */
     public static void setUserProjection(String projection) {
         UI.getCurrentOrThrow().getPage().executeJs(
@@ -161,6 +164,7 @@ public class Map extends MapBase {
      *            a user or view projection
      * @param wksDefinition
      *            the Well Known Text (WKS) definition of the projection
+     * @since 23.2
      */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
@@ -327,6 +331,7 @@ public class Map extends MapBase {
      *
      * @param zoom
      *            new zoom level
+     * @since 24.0
      */
     public void setZoom(double zoom) {
         getView().setZoom(zoom);
@@ -338,6 +343,7 @@ public class Map extends MapBase {
      *
      * @param features
      *            the features to fit in the viewport
+     * @since 25.0
      */
     public void zoomToFit(List<Feature> features) {
         zoomToFit(features, 50, 400);
@@ -352,6 +358,7 @@ public class Map extends MapBase {
      *            padding in pixels to add around the features
      * @param duration
      *            animation duration in milliseconds, 0 for no animation
+     * @since 25.0
      */
     public void zoomToFit(List<Feature> features, int padding, int duration) {
         ArrayNode featureIds = JacksonUtils.createArrayNode();
@@ -380,6 +387,7 @@ public class Map extends MapBase {
      * {@link Control#setVisible} method.
      *
      * @return the default controls
+     * @since 25.1
      */
     public Controls getControls() {
         return controls;
@@ -387,6 +395,8 @@ public class Map extends MapBase {
 
     /**
      * The default controls available in the map.
+     * 
+     * @since 25.1
      */
     public static final class Controls implements Serializable {
         private final AttributionControl attributionControl = new AttributionControl();

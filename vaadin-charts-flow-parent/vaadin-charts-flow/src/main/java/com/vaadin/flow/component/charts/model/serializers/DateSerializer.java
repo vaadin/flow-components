@@ -21,6 +21,8 @@ import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Serializes all {@link Date} objects as UTC long.
+ * 
+ * @since 6.0.1
  */
 public class DateSerializer extends ValueSerializer<Date> {
 

@@ -34,6 +34,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  *
  * Scroll direction can be configured with
  * {@link #setScrollDirection(ScrollDirection)}
+ * 
+ * @since 3.1
  */
 @Tag("vaadin-scroller")
 @NpmPackage(value = "@vaadin/scroller", version = "25.3.0-alpha1")
@@ -176,6 +178,8 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
 
     /**
      * Scrolls the scroller to the top.
+     * 
+     * @since 24.5
      */
     public void scrollToTop() {
         getElement().executeJs("this.scrollTop = 0");
@@ -183,6 +187,8 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
 
     /**
      * Scrolls the scroller to the bottom.
+     * 
+     * @since 24.5
      */
     public void scrollToBottom() {
 

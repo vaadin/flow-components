@@ -14,6 +14,7 @@ package com.vaadin.flow.component.charts.model;
  * "diamond", "triangle" and "triangle-down". Additionally, the URL to a graphic
  * can be given on this form: URL.setUrl("url(graphic.png)").
  *
+ * @since 6.0.1
  */
 public enum MarkerSymbolEnum implements MarkerSymbol, ChartEnum {
     CIRCLE("circle"),

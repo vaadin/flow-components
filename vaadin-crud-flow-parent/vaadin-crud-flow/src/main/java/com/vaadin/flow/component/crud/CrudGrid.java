@@ -25,6 +25,7 @@ import com.vaadin.flow.shared.util.SharedUtil;
  *
  * @param <E>
  *            the bean type
+ * @since 1.0
  */
 public class CrudGrid<E> extends Grid<E> {
 

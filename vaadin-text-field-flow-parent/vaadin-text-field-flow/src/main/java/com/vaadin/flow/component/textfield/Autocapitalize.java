@@ -17,6 +17,8 @@ package com.vaadin.flow.component.textfield;
 
 /**
  * Capitalization options for the {@code autocapitalize} attribute.
+ * 
+ * @since 1.0
  */
 public enum Autocapitalize {
 

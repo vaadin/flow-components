@@ -40,6 +40,7 @@ import com.vaadin.flow.component.html.Div;
  * clears all the filters for that column (contained within the same pop-up).
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable {

@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * Alignment of the title relative to the axis values and more generically
  * horizontal alignment. Possible values are RIGHT("right"), CENTER("center") or
  * LEFT("left")
+ * 
+ * @since 6.0.1
  */
 public enum HorizontalAlign implements ChartEnum {
     RIGHT("right"), CENTER("center"), LEFT("left");

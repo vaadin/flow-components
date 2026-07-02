@@ -45,6 +45,7 @@ import java.util.Objects;
  * @param time
  *            the timestamp when the message was created; may be {@code null}
  * @author Vaadin Ltd
+ * @since 25.1
  */
 public record ChatMessage(Role role, String content, String messageId,
         Instant time) implements Serializable {

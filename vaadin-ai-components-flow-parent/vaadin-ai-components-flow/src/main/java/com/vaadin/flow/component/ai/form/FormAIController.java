@@ -171,6 +171,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class FormAIController implements AIController {
 

@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public class Stop extends AbstractConfigurationObject {
     private float position;
     private Color color;

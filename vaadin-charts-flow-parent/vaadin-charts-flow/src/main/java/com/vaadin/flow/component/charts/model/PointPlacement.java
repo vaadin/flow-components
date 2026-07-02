@@ -18,6 +18,8 @@ package com.vaadin.flow.component.charts.model;
  * amount between two points in time or in a certain sector of a polar chart.
  *
  * Defaults to null in Cartesian charts, BETWEEN in polar charts.
+ * 
+ * @since 6.0.1
  */
 public enum PointPlacement implements ChartEnum {
     ON("on"), BETWEEN("between");

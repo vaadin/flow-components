@@ -44,6 +44,7 @@ import com.vaadin.flow.signals.Signal;
  * optional prefix component (typically an icon) can be shown before the text.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 @Tag("vaadin-breadcrumbs-item")
 @NpmPackage(value = "@vaadin/breadcrumbs", version = "25.3.0-alpha1")

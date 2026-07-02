@@ -44,6 +44,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartDat
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.TitleProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.View3dData;
 
+/**
+ * @since 24.0
+ */
 @SuppressWarnings("serial")
 public class ChartDataToVaadinConfigWriter {
 

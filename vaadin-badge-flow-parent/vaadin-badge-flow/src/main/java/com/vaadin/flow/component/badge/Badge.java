@@ -64,6 +64,7 @@ import com.vaadin.flow.signals.Signal;
  * </pre>
  *
  * @author Vaadin Ltd
+ * @since 25.1
  */
 @Tag("vaadin-badge")
 @NpmPackage(value = "@vaadin/badge", version = "25.3.0-alpha1")

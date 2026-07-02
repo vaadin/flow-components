@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.rpc;
 
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetHandler;
 
+/**
+ * @since 23.1
+ */
 public interface SpreadsheetServerRpc extends SpreadsheetHandler {
 
     /**
@@ -77,6 +80,8 @@ public interface SpreadsheetServerRpc extends SpreadsheetHandler {
 
     /**
      * Context menu was closed.
+     * 
+     * @since 24.9.7
      */
     void contextMenuClosed();
 }

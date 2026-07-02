@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired when a series is shown
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-show")
 public class SeriesShowEvent extends ComponentEvent<Chart>

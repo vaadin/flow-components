@@ -19,6 +19,8 @@ import com.vaadin.flow.component.HasElement;
 
 /**
  * Mixin interface for fields with {@code autocorrect} attribute.
+ * 
+ * @since 1.0
  */
 public interface HasAutocorrect extends HasElement {
 

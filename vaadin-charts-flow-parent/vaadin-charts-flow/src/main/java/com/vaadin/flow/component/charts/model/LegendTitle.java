@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * A title to be added on top of the legend.
+ * 
+ * @since 6.0.1
  */
 public class LegendTitle extends AbstractConfigurationObject {
 
@@ -23,6 +25,7 @@ public class LegendTitle extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -35,6 +38,8 @@ public class LegendTitle extends AbstractConfigurationObject {
      * Generic CSS styles for the legend title.
      * <p>
      * Defaults to: {"fontWeight":"bold"}
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

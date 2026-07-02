@@ -18,6 +18,8 @@ package com.vaadin.flow.component.customfield;
 /**
  * The set of theme variants applicable to the {@code vaadin-custom-field}
  * component.
+ * 
+ * @since 23.1
  */
 public enum CustomFieldVariant {
 
@@ -26,6 +28,7 @@ public enum CustomFieldVariant {
     LUMO_WHITESPACE("whitespace"),
     /**
      * @deprecated Use {@link #HELPER_ABOVE} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),

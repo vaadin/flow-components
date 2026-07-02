@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Defines different step line types. Configurable in {@link PlotOptionsLine}.
+ * 
+ * @since 6.0.1
  */
 public enum StepType implements ChartEnum {
     RIGHT("right"), CENTER("center"), LEFT("left"), NONE("");

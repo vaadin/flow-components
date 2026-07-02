@@ -28,6 +28,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *     AppLayout layout = new AppLayout();
  *     layout.addToNavbar(new DrawerToggle());
  * </code>
+ * 
+ * @since 2.0
  */
 @Tag("vaadin-drawer-toggle")
 @NpmPackage(value = "@vaadin/app-layout", version = "25.3.0-alpha1")

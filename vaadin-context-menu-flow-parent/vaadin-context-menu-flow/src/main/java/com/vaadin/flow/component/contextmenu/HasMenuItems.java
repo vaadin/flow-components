@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ComponentEventListener;
  * @see SubMenu
  *
  * @author Vaadin Ltd.
+ * @since 2.0
  */
 public interface HasMenuItems extends Serializable {
 

@@ -26,6 +26,7 @@ import com.vaadin.flow.server.VaadinService;
  * A configuration class for a tooltips default behavior.
  *
  * @author Vaadin Ltd
+ * @since 23.3
  */
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha1")
 @JsModule("./tooltip.ts")

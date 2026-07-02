@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * of working around that is to <a href=
  * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/legend/navigation-enabled-false/"
  * >increase the chart height in export</a>.
+ * 
+ * @since 6.0.1
  */
 public class LegendNavigation extends AbstractConfigurationObject {
 
@@ -32,6 +34,7 @@ public class LegendNavigation extends AbstractConfigurationObject {
 
     /**
      * @see #setActiveColor(Color)
+     * @since 18.0
      */
     public Color getActiveColor() {
         return activeColor;
@@ -41,6 +44,8 @@ public class LegendNavigation extends AbstractConfigurationObject {
      * The color for the active up or down arrow in the legend page navigation.
      * <p>
      * Defaults to: #003399
+     * 
+     * @since 18.0
      */
     public void setActiveColor(Color activeColor) {
         this.activeColor = activeColor;
@@ -114,6 +119,7 @@ public class LegendNavigation extends AbstractConfigurationObject {
 
     /**
      * @see #setInactiveColor(Color)
+     * @since 18.0
      */
     public Color getInactiveColor() {
         return inactiveColor;
@@ -124,6 +130,8 @@ public class LegendNavigation extends AbstractConfigurationObject {
      * .
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setInactiveColor(Color inactiveColor) {
         this.inactiveColor = inactiveColor;
@@ -131,6 +139,7 @@ public class LegendNavigation extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -141,6 +150,8 @@ public class LegendNavigation extends AbstractConfigurationObject {
 
     /**
      * Text styles for the legend page navigation.
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

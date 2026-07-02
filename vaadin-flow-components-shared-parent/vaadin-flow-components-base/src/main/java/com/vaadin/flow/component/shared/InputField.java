@@ -43,7 +43,7 @@ import com.vaadin.flow.component.HasValue;
  *            the value type
  *
  * @author Vaadin Ltd
- * @since 24.1
+ * @since 24.2
  */
 public interface InputField<E extends HasValue.ValueChangeEvent<V>, V>
         extends HasEnabled, HasHelper, HasLabel, HasSize, HasStyle, HasTooltip,

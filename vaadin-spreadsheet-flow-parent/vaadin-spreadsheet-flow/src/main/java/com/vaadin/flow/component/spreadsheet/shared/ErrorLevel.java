@@ -12,7 +12,7 @@ package com.vaadin.flow.component.spreadsheet.shared;
  * Represents the error levels displayed on components.
  *
  * @author Vaadin Ltd
- * @since 8.2
+ * @since 23.1
  */
 public enum ErrorLevel {
 
