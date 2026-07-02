@@ -37,6 +37,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     protected final Grid<?> grid;
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
+    private boolean hideableSyncScheduled;
 
     private boolean sortingIndicators;
 
@@ -58,7 +59,16 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         addAttachListener(e -> {
             scheduleHeaderRendering();
             scheduleFooterRendering();
+            // An invisible column is attached to the client side as a
+            // placeholder without its properties, so hideable must be
+            // re-sent separately.
+            if (getElement().hasProperty("hideable")) {
+                scheduleHideableSync();
+            }
         });
+
+        getElement().addPropertyChangeListener("hideable",
+                event -> scheduleHideableSync());
     }
 
     /**
@@ -73,16 +83,85 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     /**
      * {@inheritDoc}
      * <p>
-     * Note that column related data is sent to the client side even if the
-     * column is invisible. Use {@link Grid#removeColumn(Column)} to remove
-     * column (or don't add the column all) and avoid sending extra data.
+     * While a column is invisible, its per-item data (cell content, tooltip and
+     * part information) is not sent to the client. When the column is made
+     * visible again, the grid's data is refreshed so that the rows already
+     * loaded on the client receive the column's data.
+     * <p>
+     * Use {@link Grid#removeColumn(Column)} to remove a column entirely (or
+     * don't add it at all).
      * </p>
      *
      * @see Grid#removeColumn(Column)
      */
     @Override
     public void setVisible(boolean visible) {
+        setVisible(visible, false);
+    }
+
+    /**
+     * Updates the visibility of this column, keeping track of whether the
+     * change originated from the client.
+     *
+     * @param visible
+     *            the new visibility
+     * @param fromClient
+     *            whether the change originated from the client
+     */
+    void setVisible(boolean visible, boolean fromClient) {
+        boolean wasVisible = isVisible();
         super.setVisible(visible);
+        if (wasVisible == visible) {
+            return;
+        }
+        // A column that becomes visible again needs its data re-sent, because
+        // it was skipped by the visibility-gated data generator while hidden.
+        if (visible && grid != null) {
+            grid.getDataCommunicator().reset();
+        }
+        onVisibilityChanged(visible, fromClient);
+    }
+
+    /**
+     * Called when this column's visibility has changed. Subclasses can override
+     * this to react, for example to fire a visibility change event.
+     *
+     * @param visible
+     *            the new visibility
+     * @param fromClient
+     *            whether the change originated from the client
+     */
+    protected void onVisibilityChanged(boolean visible, boolean fromClient) {
+        // NO-OP by default; overridden in Grid.Column.
+    }
+
+    /**
+     * Sends the {@code hideable} property to the client even while this column
+     * is invisible. Properties don't automatically synchronize to non-visible
+     * columns (see the {@code _flowId} handling in Grid#addColumn), but the
+     * grid's column toggle needs the up-to-date {@code hideable} state of
+     * hidden columns to decide whether to offer showing them again.
+     */
+    private void scheduleHideableSync() {
+        if (hideableSyncScheduled || grid == null) {
+            return;
+        }
+        hideableSyncScheduled = true;
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(grid, context -> {
+                    hideableSyncScheduled = false;
+                    // The visibility check runs here rather than at scheduling
+                    // time so it sees the final visibility of this round trip.
+                    // A visible column synchronizes the property normally.
+                    if (!isVisible() && getUI().isPresent()) {
+                        int nodeId = getElement().getNode().getId();
+                        String appId = ui.getInternals().getAppId();
+                        grid.getElement().executeJs(
+                                "Vaadin.Flow.clients[$0].getByNodeId($1).hideable = $2",
+                                appId, nodeId,
+                                getElement().getProperty("hideable", false));
+                    }
+                }));
     }
 
     private void scheduleHeaderRendering() {

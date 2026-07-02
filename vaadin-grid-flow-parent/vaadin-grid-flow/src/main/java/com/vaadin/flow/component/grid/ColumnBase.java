@@ -54,6 +54,47 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     }
 
     /**
+     * Sets whether this column can be hidden by the user through the grid's
+     * column toggle menu. Columns are not hideable by default.
+     * <p>
+     * The grid renders a toggle button in its top corner while it has at least
+     * one hideable column; the button opens a menu with one checkbox per
+     * hideable column. With no hideable columns the button is not shown.
+     * <p>
+     * Setting this to {@code false} only removes the column from the column
+     * toggle menu; it does not change the column's current visibility. Use
+     * {@link com.vaadin.flow.component.Component#setVisible(boolean)} to change
+     * the visibility programmatically.
+     *
+     * @param hideable
+     *            whether the user can hide this column through the grid's
+     *            column toggle menu
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    default T setHideable(boolean hideable) {
+        getElement().setProperty("hideable", hideable);
+        return (T) this;
+    }
+
+    /**
+     * Gets whether this column can be hidden by the user through the grid's
+     * column toggle menu.
+     * <p>
+     * The value is intentionally not synchronized from the client: hideable is
+     * controlled by the server only. A {@code @Synchronize} listener would also
+     * make the client revert the hideable state that {@code AbstractColumn}
+     * pushes to hidden columns with JS, because client updates to invisible
+     * elements are rejected.
+     *
+     * @return whether the user can hide this column through the grid's column
+     *         toggle menu
+     */
+    default boolean isHideable() {
+        return getElement().getProperty("hideable", false);
+    }
+
+    /**
      * Sets this column's frozen state.
      * <p>
      * <strong>Note:</strong> Columns are frozen in-place, freeze columns from
