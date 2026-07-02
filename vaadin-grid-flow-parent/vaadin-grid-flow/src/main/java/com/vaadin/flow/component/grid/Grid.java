@@ -437,6 +437,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private Component editorComponent;
         private EditorRenderer<T> editorRenderer;
+        private List<Registration> editorRendererRegistrations = new ArrayList<>();
 
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
@@ -448,11 +449,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private SerializableComparator<T> comparator;
 
-        private Registration columnDataGeneratorRegistration;
-        private Registration editorDataGeneratorRegistration;
-
         private Renderer<T> renderer;
-        private Rendering<T> rendering;
+        private List<Registration> rendererRegistrations = new ArrayList<>();
 
         private SerializableFunction<T, String> partNameGenerator = item -> null;
         private SerializableFunction<T, String> tooltipGenerator = item -> null;
@@ -473,31 +471,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             super(grid);
             Objects.requireNonNull(renderer);
             this.columnInternalId = columnId;
-            this.renderer = renderer;
 
             comparator = (a, b) -> 0;
 
-            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
-                    .getDataCommunicator().getKeyMapper());
-
-            Optional<DataGenerator<T>> dataGenerator = rendering
-                    .getDataGenerator();
-
-            if (dataGenerator.isPresent()) {
-                columnDataGeneratorRegistration = grid
-                        .addDataGenerator(dataGenerator.get());
-            }
+            setupRenderer(renderer);
         }
 
         protected void destroyDataGenerators() {
-            if (columnDataGeneratorRegistration != null) {
-                columnDataGeneratorRegistration.remove();
-                columnDataGeneratorRegistration = null;
-            }
-            if (editorDataGeneratorRegistration != null) {
-                editorDataGeneratorRegistration.remove();
-                editorDataGeneratorRegistration = null;
-            }
+            rendererRegistrations.forEach(Registration::remove);
+            rendererRegistrations.clear();
+
+            editorRendererRegistrations.forEach(Registration::remove);
+            editorRendererRegistrations.clear();
         }
 
         protected String getInternalId() {
@@ -528,30 +513,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @since 24.1
          */
         public Column<T> setRenderer(Renderer<T> renderer) {
-            this.renderer = Objects.requireNonNull(renderer,
-                    "Renderer must not be null.");
+            Objects.requireNonNull(renderer, "Renderer must not be null.");
 
-            destroyDataGenerators();
-            if (rendering != null) {
-                rendering.getRegistration().remove();
-            }
-
-            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
-                    .getDataCommunicator().getKeyMapper());
-
-            columnDataGeneratorRegistration = rendering.getDataGenerator()
-                    .map(dataGenerator -> grid
-                            .addDataGenerator((DataGenerator) dataGenerator))
-                    .orElse(null);
+            setupRenderer(renderer);
 
             // The editor renderer is a wrapper around the regular renderer, so
             // we need to apply it again afterwards
             if (editorRenderer != null) {
-                setupColumnEditor();
+                setupEditorRenderer();
             }
 
             getGrid().refreshViewport();
             return this;
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private void setupRenderer(Renderer<T> renderer) {
+            rendererRegistrations.forEach(Registration::remove);
+            rendererRegistrations.clear();
+
+            this.renderer = renderer;
+
+            Rendering<T> rendering = renderer.render(getElement(),
+                    (KeyMapper<T>) getGrid().getDataCommunicator()
+                            .getKeyMapper());
+
+            rendering.getDataGenerator().ifPresent(dataGenerator -> {
+                rendererRegistrations.add(
+                        grid.addDataGenerator((DataGenerator) dataGenerator));
+            });
+
+            rendererRegistrations.add(rendering.getRegistration());
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private void setupEditorRenderer() {
+            editorRendererRegistrations.forEach(Registration::remove);
+            editorRendererRegistrations.clear();
+
+            if (this.editorRenderer == null) {
+                this.editorRenderer = new EditorRenderer<>(
+                        (Editor) grid.getEditor(), columnInternalId);
+            }
+
+            Rendering<T> rendering = renderer.render(getElement(), null);
+
+            rendering.getDataGenerator().ifPresent(dataGenerator -> {
+                editorRendererRegistrations.add(
+                        grid.addDataGenerator((DataGenerator) dataGenerator));
+            });
+
+            editorRendererRegistrations.add(rendering.getRegistration());
         }
 
         /**
@@ -997,7 +1009,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
             editorComponent = null;
             if (editorRenderer == null && componentCallback != null) {
-                setupColumnEditor();
+                setupEditorRenderer();
             }
             if (editorRenderer != null) {
                 editorRenderer.setComponentFunction(componentCallback);
@@ -1112,22 +1124,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         @Override
         protected Column<?> getBottomLevelColumn() {
             return this;
-        }
-
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        private void setupColumnEditor() {
-            if (editorRenderer == null) {
-                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
-                        columnInternalId);
-            }
-
-            Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null);
-
-            editorDataGeneratorRegistration = editorRendering.getDataGenerator()
-                    .map(dataGenerator -> grid
-                            .addDataGenerator((DataGenerator) dataGenerator))
-                    .orElse(null);
         }
     }
 
