@@ -437,7 +437,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private Component editorComponent;
         private EditorRenderer<T> editorRenderer;
-        private List<Registration> editorRendererRegistrations = new ArrayList<>();
+        private Registration editorRendererRegistration;
 
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
@@ -474,11 +474,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         protected void destroyDataGenerators() {
-            rendererRegistrations.forEach(Registration::remove);
-            rendererRegistrations.clear();
+            if (rendererRegistrations != null) {
+                rendererRegistrations.forEach(Registration::remove);
+                rendererRegistrations.clear();
+            }
 
-            editorRendererRegistrations.forEach(Registration::remove);
-            editorRendererRegistrations.clear();
+            if (editorRendererRegistration != null) {
+                editorRendererRegistration.remove();
+                editorRendererRegistration = null;
+            }
         }
 
         protected String getInternalId() {
@@ -526,8 +530,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             this.renderer = Objects.requireNonNull(renderer,
                     "Renderer must not be null.");
 
-            rendererRegistrations.forEach(Registration::remove);
-            rendererRegistrations.clear();
+            if (rendererRegistrations != null) {
+                rendererRegistrations.forEach(Registration::remove);
+                rendererRegistrations.clear();
+            }
 
             Rendering<T> rendering = renderer.render(getElement(),
                     (KeyMapper<T>) getGrid().getDataCommunicator()
@@ -543,22 +549,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setupEditorRenderer() {
-            editorRendererRegistrations.forEach(Registration::remove);
-            editorRendererRegistrations.clear();
+            if (editorRendererRegistration != null) {
+                editorRendererRegistration.remove();
+            }
 
-            if (this.editorRenderer == null) {
-                this.editorRenderer = new EditorRenderer<>(
-                        (Editor) grid.getEditor(), columnInternalId);
+            if (editorRenderer == null) {
+                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
+                        columnInternalId);
             }
 
             Rendering<T> rendering = editorRenderer.render(getElement(), null);
 
-            rendering.getDataGenerator().ifPresent(dataGenerator -> {
-                editorRendererRegistrations.add(
-                        grid.addDataGenerator((DataGenerator) dataGenerator));
-            });
-
-            editorRendererRegistrations.add(rendering.getRegistration());
+            editorRendererRegistration = rendering.getDataGenerator()
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
         }
 
         /**
