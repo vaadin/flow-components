@@ -40,7 +40,7 @@ describe('grid connector - selection column accessible names', () => {
 
   it('should use the row header cell text for the select row placeholder', async () => {
     setup('<vaadin-grid-column path="name" row-header></vaadin-grid-column>');
-    grid.i18n = { selectRow: 'Select row {0}' };
+    grid.i18n = { selectRow: 'Select row {rowHeader}' };
     await enterMultiSelectMode();
     expect(rowCheckboxes()[0].accessibleName).to.equal('Select row foo');
     expect(rowCheckboxes()[1].accessibleName).to.equal('Select row bar');
@@ -48,7 +48,7 @@ describe('grid connector - selection column accessible names', () => {
 
   it('should fall back to the row index without a row header column', async () => {
     setup('<vaadin-grid-column path="name"></vaadin-grid-column>');
-    grid.i18n = { selectRow: 'Select row {0}' };
+    grid.i18n = { selectRow: 'Select row {rowHeader}' };
     await enterMultiSelectMode();
     expect(rowCheckboxes()[0].accessibleName).to.equal('Select row 1');
     expect(rowCheckboxes()[1].accessibleName).to.equal('Select row 2');

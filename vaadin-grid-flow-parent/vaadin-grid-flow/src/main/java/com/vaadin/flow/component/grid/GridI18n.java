@@ -67,7 +67,7 @@ public class GridI18n implements Serializable {
 
     /**
      * Sets the accessible name (aria-label) template for the select row
-     * checkbox in each selection column body cell. The {@code {0}} placeholder
+     * checkbox in each selection column body cell. The {@code {rowHeader}} placeholder
      * is replaced with the text content of the row's row-header cell (see
      * {@link Grid.Column#setRowHeader(boolean)}), or the 1-based row index when
      * there is no row-header column.

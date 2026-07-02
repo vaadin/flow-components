@@ -182,6 +182,6 @@ class GridTest {
         Assertions.assertSame(i18n,
                 i18n.setSelectAll("Select all"));
         Assertions.assertSame(i18n,
-                i18n.setSelectRow("Select row {0}"));
+                i18n.setSelectRow("Select row {rowHeader}"));
     }
 }
