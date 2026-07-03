@@ -113,7 +113,12 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
     /**
      * Creates the "Select All" filter component.
+     *
+     * @deprecated The "Select All" checkbox will be removed in Vaadin 26. It
+     *             will be replaced with dedicated "Select All" and "Clear"
+     *             buttons.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected void initAllItemsCheckbox() {
         allItems = new Checkbox("(Select All)", true);
         allItems.addValueChangeListener(event -> {
