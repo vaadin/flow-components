@@ -81,7 +81,6 @@ import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
 import com.vaadin.flow.data.provider.AbstractDataView;
-import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -1356,8 +1355,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final CompositeDataGenerator<T> gridDataGenerator;
     private final DataCommunicator<T> dataCommunicator;
-    @SuppressWarnings("rawtypes")
-    private DataCommunicatorBuilder dataCommunicatorBuilder;
 
     private int nextColumnId = 0;
 
@@ -1493,7 +1490,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the page size. Must be greater than zero.
      */
     public Grid(int pageSize) {
-        this(pageSize, new DataCommunicatorBuilder<>());
+        arrayUpdater = createDefaultArrayUpdater();
+        gridDataGenerator = new CompositeDataGenerator<>();
+        gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
+        gridDataGenerator.addDataGenerator(this::generatePartData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
+        gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
+        gridDataGenerator.addDataGenerator(this::generateDragData);
+        gridDataGenerator.addDataGenerator(this::generateSelectableData);
+
+        dataCommunicator = createDataCommunicator();
+
+        detailsManager = new DetailsManager(this);
+        setPageSize(pageSize);
+        setSelectionModel(SelectionMode.SINGLE.createModel(this),
+                SelectionMode.SINGLE);
+
+        columnLayers.add(new ColumnLayer(this));
+
+        addDragStartListener(this::onDragStart);
+        addDragEndListener(this::onDragEnd);
+
+        updateMultiSortPriority(defaultMultiSortPriority);
+
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -1545,127 +1565,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Grid(Class<T> beanType) {
         this(beanType, true);
-    }
-
-    /**
-     * Creates a new grid with an initial set of columns for each of the bean's
-     * properties. The property-values of the bean will be converted to Strings.
-     * Full names of the properties will be used as the
-     * {@link Column#setKey(String) column keys} and the property captions will
-     * be used as the {@link Column#setHeader(String) column headers}.
-     * <p>
-     * You can add columns for nested properties of the bean with
-     * {@link #addColumn(String)}.
-     *
-     * @param beanType
-     *            the bean type to use, not <code>null</code>
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             constructor will be removed in Vaadin 26.
-     */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType, B dataCommunicatorBuilder) {
-        this(beanType, dataCommunicatorBuilder, true);
-    }
-
-    /**
-     * Creates a new grid with an initial set of columns for each of the bean's
-     * properties. The property-values of the bean will be converted to Strings.
-     * Full names of the properties will be used as the
-     * {@link Column#setKey(String) column keys} and the property captions will
-     * be used as the {@link Column#setHeader(String) column headers}.
-     * <p>
-     * When autoCreateColumns is <code>true</code>, only the direct properties
-     * of the bean are included and they will be in alphabetical order. Use
-     * {@link Grid#setColumns(String...)} to define which properties to include
-     * and in which order. You can also add a column for an individual property
-     * with {@link #addColumn(String)}. Both of these methods support also
-     * sub-properties with dot-notation, eg.
-     * <code>"property.nestedProperty"</code>.
-     *
-     * @param beanType
-     *            the bean type to use, not <code>null</code>
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     * @param autoCreateColumns
-     *            when <code>true</code>, columns are created automatically for
-     *            the properties of the beanType
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             constructor will be removed in Vaadin 26.
-     */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType, B dataCommunicatorBuilder,
-            boolean autoCreateColumns) {
-        this(50, dataCommunicatorBuilder);
-        Objects.requireNonNull(dataCommunicatorBuilder,
-                "Data communicator builder can't be null");
-        configureBeanType(beanType, autoCreateColumns);
-    }
-
-    /**
-     * Creates a new instance, with the specified page size and data
-     * communicator.
-     * <p>
-     * The page size influences the {@link Query#getLimit()} sent by the client,
-     * but it's up to the webcomponent to determine the actual query limit,
-     * based on the height of the component and scroll position. Usually the
-     * limit is 3 times the page size (e.g. 150 items with a page size of 50).
-     *
-     * @param pageSize
-     *            the page size. Must be greater than zero.
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             constructor will be removed in Vaadin 26.
-     */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize, B dataCommunicatorBuilder) {
-        Objects.requireNonNull(dataCommunicatorBuilder,
-                "Data communicator builder can't be null");
-        this.dataCommunicatorBuilder = dataCommunicatorBuilder;
-        arrayUpdater = createDefaultArrayUpdater();
-        gridDataGenerator = new CompositeDataGenerator<>();
-        gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
-        gridDataGenerator.addDataGenerator(this::generatePartData);
-        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
-        gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
-        gridDataGenerator.addDataGenerator(this::generateDragData);
-        gridDataGenerator.addDataGenerator(this::generateSelectableData);
-
-        dataCommunicator = createDataCommunicator();
-
-        detailsManager = new DetailsManager(this);
-        setPageSize(pageSize);
-        setSelectionModel(SelectionMode.SINGLE.createModel(this),
-                SelectionMode.SINGLE);
-
-        columnLayers.add(new ColumnLayer(this));
-
-        addDragStartListener(this::onDragStart);
-        addDragEndListener(this::onDragEnd);
-
-        updateMultiSortPriority(defaultMultiSortPriority);
-
-        initSelectionPreservationHandler();
     }
 
     private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
@@ -1741,50 +1640,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the new data communicator
      */
     protected DataCommunicator<T> createDataCommunicator() {
-        return dataCommunicatorBuilder.build(getElement(),
-                getCompositeDataGenerator(), getArrayUpdater(),
-                this::getUniqueKeyProvider);
-    }
-
-    /**
-     * Builder for {@link DataCommunicator} object.
-     *
-     * @param <T>
-     *            the grid bean type
-     *
-     * @param <U>
-     *            the ArrayUpdater type
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             class and the constructors that accept it will be removed in
-     *             Vaadin 26.
-     */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected static class DataCommunicatorBuilder<T, U extends ArrayUpdater>
-            implements Serializable {
-
-        /**
-         * Build a new {@link DataCommunicator} object for the given Grid
-         * instance.
-         *
-         * @param element
-         *            the target grid element
-         * @param dataGenerator
-         *            the {@link CompositeDataGenerator} for the data
-         *            communicator
-         * @param arrayUpdater
-         *            the {@link ArrayUpdater} for the data communicator
-         * @param uniqueKeyProviderSupplier
-         *            the unique key value provider supplier for the data
-         *            communicator
-         * @return the build data communicator object
-         */
-        @Deprecated(since = "25.3", forRemoval = true)
-        protected DataCommunicator<T> build(Element element,
-                CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
-                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            return new GridDataCommunicator<>(element, dataGenerator,
-                    arrayUpdater);
-        }
+        return new GridDataCommunicator<>(getElement(),
+                getCompositeDataGenerator(), getArrayUpdater());
     }
 
     protected GridArrayUpdater createDefaultArrayUpdater() {

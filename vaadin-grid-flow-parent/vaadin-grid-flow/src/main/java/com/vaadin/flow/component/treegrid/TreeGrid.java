@@ -30,7 +30,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -38,7 +37,6 @@ import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -53,10 +51,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 
@@ -82,7 +78,7 @@ public class TreeGrid<T> extends Grid<T>
      * automatically sets up columns based on the type of presented data.
      */
     public TreeGrid() {
-        this(50, new TreeDataCommunicatorBuilder<T>());
+        this(50);
     }
 
     /**
@@ -93,16 +89,9 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             constructor will be removed in Vaadin 26.
      */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected TreeGrid(int pageSize,
-            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
-        super(pageSize, dataCommunicatorBuilder);
+    protected TreeGrid(int pageSize) {
+        super(pageSize);
 
         setUniqueKeyProperty("key");
         addTreeDataGenerator();
@@ -174,35 +163,7 @@ public class TreeGrid<T> extends Grid<T>
      *            the properties of the beanType
      */
     public TreeGrid(Class<T> beanType, boolean autoCreateColumns) {
-        this(beanType, new TreeDataCommunicatorBuilder<>(), autoCreateColumns);
-    }
-
-    /**
-     * Creates a new {@code TreeGrid} with an initial set of columns for each of
-     * the bean's properties. The property-values of the bean will be converted
-     * to Strings. Full names of the properties will be used as the
-     * {@link Column#setKey(String) column keys} and the property captions will
-     * be used as the {@link Column#setHeader(String) column headers}.
-     *
-     * @param beanType
-     *            the bean type to use, not {@code null}
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @deprecated Override {@link #createDataCommunicator()} instead. This
-     *             constructor will be removed in Vaadin 26.
-     */
-    @Deprecated(since = "25.3", forRemoval = true)
-    protected TreeGrid(Class<T> beanType,
-            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
-        this(beanType, dataCommunicatorBuilder, true);
-    }
-
-    @Deprecated(since = "25.3", forRemoval = true)
-    private TreeGrid(Class<T> beanType,
-            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder,
-            boolean autoCreateColumns) {
-        super(beanType, dataCommunicatorBuilder, autoCreateColumns);
+        super(beanType, autoCreateColumns);
 
         setUniqueKeyProperty("key");
         addTreeDataGenerator();
@@ -223,17 +184,11 @@ public class TreeGrid<T> extends Grid<T>
         setDataProvider(dataProvider);
     }
 
-    private static class TreeDataCommunicatorBuilder<T>
-            extends DataCommunicatorBuilder<T, GridArrayUpdater> {
-
-        @Override
-        protected DataCommunicator<T> build(Element element,
-                CompositeDataGenerator<T> dataGenerator,
-                GridArrayUpdater arrayUpdater,
-                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            return new TreeGridDataCommunicator<>(element, dataGenerator,
-                    arrayUpdater, uniqueKeyProviderSupplier);
-        }
+    @Override
+    protected DataCommunicator<T> createDataCommunicator() {
+        return new TreeGridDataCommunicator<>(getElement(),
+                getCompositeDataGenerator(), getArrayUpdater(),
+                this::getUniqueKeyProvider);
     }
 
     /**
