@@ -1354,10 +1354,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final GridArrayUpdater arrayUpdater;
 
-    private DataCommunicatorBuilder dataCommunicatorBuilder;
-
     private final CompositeDataGenerator<T> gridDataGenerator;
     private final DataCommunicator<T> dataCommunicator;
+    @SuppressWarnings("rawtypes")
+    private DataCommunicatorBuilder dataCommunicatorBuilder;
 
     private int nextColumnId = 0;
 
@@ -1741,8 +1741,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the new data communicator
      */
     protected DataCommunicator<T> createDataCommunicator() {
-        return dataCommunicatorBuilder.build(getElement(), gridDataGenerator,
-                arrayUpdater, this::getUniqueKeyProvider);
+        return dataCommunicatorBuilder.build(getElement(),
+                getCompositeDataGenerator(), getArrayUpdater(),
+                this::getUniqueKeyProvider);
     }
 
     /**
@@ -4517,6 +4518,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     protected GridArrayUpdater getArrayUpdater() {
         return arrayUpdater;
+    }
+
+    protected CompositeDataGenerator<T> getCompositeDataGenerator() {
+        return gridDataGenerator;
     }
 
     /**
