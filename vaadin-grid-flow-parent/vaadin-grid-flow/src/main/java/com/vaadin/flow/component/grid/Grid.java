@@ -1199,6 +1199,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private class DetailsManager extends AbstractGridExtension<T> {
 
         private final HashMap<Object, T> detailsVisible = new HashMap<>();
+        private Registration rendererRegistration;
+        private DataGenerator<T> rendererDataGenerator;
 
         /**
          * Constructs a new details manager for the given grid.
@@ -1208,6 +1210,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public DetailsManager(Grid<T> grid) {
             super(grid);
+        }
+
+        /**
+         * Sets the renderer to use for displaying the item details rows.
+         *
+         * @param renderer
+         *            the renderer to use for displaying item details rows,
+         *            {@code null} to remove the current renderer
+         */
+        public void setRenderer(Renderer<T> renderer) {
+            if (rendererRegistration != null) {
+                rendererRegistration.remove();
+                rendererRegistration = null;
+            }
+
+            if (renderer == null) {
+                return;
+            }
+
+            Rendering<T> rendering = renderer.render(getGrid().getElement(),
+                    getGrid().getDataCommunicator().getKeyMapper(),
+                    "rowDetailsRenderer");
+
+            rendererDataGenerator = rendering.getDataGenerator().orElse(null);
+
+            rendererRegistration = Registration.combine(() -> {
+                destroyAllData();
+                rendererDataGenerator = null;
+            }, rendering.getRegistration());
         }
 
         /**
@@ -1230,10 +1261,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 refresh = true;
             }
 
-            if (itemDetailsDataGenerator != null && refresh) {
+            if (rendererDataGenerator != null && refresh) {
                 refresh(item);
                 if (!detailsVisible.containsKey(itemId)) {
-                    itemDetailsDataGenerator.destroyData(item);
+                    rendererDataGenerator.destroyData(item);
                 }
             }
         }
@@ -1248,15 +1279,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *         {@code false} if it should be hidden
          */
         public boolean isDetailsVisible(T item) {
-            return itemDetailsDataGenerator != null
+            return rendererDataGenerator != null
                     && detailsVisible.containsKey(getItemId(item));
         }
 
         @Override
         public void generateData(T item, ObjectNode jsonObject) {
-            if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
+            if (rendererDataGenerator != null && isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
-                itemDetailsDataGenerator.generateData(item, jsonObject);
+                rendererDataGenerator.generateData(item, jsonObject);
             }
         }
 
@@ -1272,8 +1303,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         @Override
         public void destroyData(T item) {
-            if (itemDetailsDataGenerator != null) {
-                itemDetailsDataGenerator.destroyData(item);
+            if (rendererDataGenerator != null) {
+                rendererDataGenerator.destroyData(item);
             }
         }
 
@@ -1282,18 +1313,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         @Override
         public void destroyAllData() {
-            if (itemDetailsDataGenerator != null) {
-                itemDetailsDataGenerator.destroyAllData();
+            if (rendererDataGenerator != null) {
+                rendererDataGenerator.destroyAllData();
             }
         }
 
         @Override
         public void refreshData(T item) {
-            if (itemDetailsDataGenerator != null) {
+            if (rendererDataGenerator != null) {
                 if (isDetailsVisible(item)) {
-                    itemDetailsDataGenerator.refreshData(item);
+                    rendererDataGenerator.refreshData(item);
                 } else {
-                    itemDetailsDataGenerator.destroyData(item);
+                    rendererDataGenerator.destroyData(item);
                 }
             }
         }
@@ -1308,7 +1339,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 detailsVisible.put(getItemId(item), item);
             }
 
-            if (itemDetailsDataGenerator != null) {
+            if (rendererDataGenerator != null) {
                 for (T item : toRefresh) {
                     refresh(item);
                 }
@@ -1356,9 +1387,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private Class<T> beanType;
     private PropertySet<T> propertySet;
-
-    private DataGenerator<T> itemDetailsDataGenerator;
-    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -3357,27 +3385,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        detailsRenderingRegistrations.forEach(Registration::remove);
-        detailsRenderingRegistrations.clear();
-
-        if (renderer == null) {
-            return;
-        }
-
-        var rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-            itemDetailsDataGenerator = renderingDataGenerator;
-            Registration detailsRenderingDataGeneratorRegistration = () -> {
-                detailsManager.destroyAllData();
-                itemDetailsDataGenerator = null;
-            };
-            detailsRenderingRegistrations
-                    .add(detailsRenderingDataGeneratorRegistration);
-        });
-
-        detailsRenderingRegistrations.add(rendering.getRegistration());
+        detailsManager.setRenderer(renderer);
     }
 
     /**
