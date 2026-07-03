@@ -41,7 +41,8 @@ class GridHiddenColumnRenderingTest {
     private AtomicInteger dataProviderFetchCallCount = new AtomicInteger(0);
     private AtomicInteger dataProviderSizeCallCount = new AtomicInteger(0);
     private AtomicInteger columnValueProviderCallCount = new AtomicInteger(0);
-    private AtomicInteger columnTooltipGeneratorSpy = new AtomicInteger(0);
+    private AtomicInteger columnTooltipGeneratorCallCount = new AtomicInteger(
+            0);
     private AtomicInteger columnPartNameGeneratorCallCount = new AtomicInteger(
             0);
 
@@ -69,7 +70,7 @@ class GridHiddenColumnRenderingTest {
         });
 
         column.setTooltipGenerator(s -> {
-            columnTooltipGeneratorSpy.incrementAndGet();
+            columnTooltipGeneratorCallCount.incrementAndGet();
             return "tooltip";
         });
 
@@ -193,21 +194,22 @@ class GridHiddenColumnRenderingTest {
 
     private void resetColumnDataSpies() {
         columnValueProviderCallCount.set(0);
-        columnTooltipGeneratorSpy.set(0);
+        columnTooltipGeneratorCallCount.set(0);
         columnPartNameGeneratorCallCount.set(0);
     }
 
     private void assertColumnDataSent() {
         Assertions.assertEquals(ITEMS.size(),
                 columnValueProviderCallCount.get());
-        Assertions.assertEquals(ITEMS.size(), columnTooltipGeneratorSpy.get());
+        Assertions.assertEquals(ITEMS.size(),
+                columnTooltipGeneratorCallCount.get());
         Assertions.assertEquals(ITEMS.size(),
                 columnPartNameGeneratorCallCount.get());
     }
 
     private void assertColumnDataNotSent() {
         Assertions.assertEquals(0, columnValueProviderCallCount.get());
-        Assertions.assertEquals(0, columnTooltipGeneratorSpy.get());
+        Assertions.assertEquals(0, columnTooltipGeneratorCallCount.get());
         Assertions.assertEquals(0, columnPartNameGeneratorCallCount.get());
     }
 
