@@ -1362,6 +1362,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
     private SerializablePredicate<T> selectableProvider;
+    private GridI18n i18n;
 
     private final DetailsManager detailsManager;
 
@@ -3151,6 +3152,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(GridI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 25.3
+     */
+    public GridI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.3
+     */
+    public void setI18n(GridI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**

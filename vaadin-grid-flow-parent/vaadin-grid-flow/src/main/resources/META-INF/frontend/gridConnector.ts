@@ -434,10 +434,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       if (showSorter) {
         const sorter = document.createElement('vaadin-grid-sorter');
         sorter.setAttribute('path', sorterPath);
-        const ariaLabel = content instanceof Node ? content.textContent : content;
-        if (ariaLabel) {
-          sorter.setAttribute('aria-label', `Sort by ${ariaLabel}`);
-        }
         root.appendChild(sorter);
 
         // Use sorter as content root
