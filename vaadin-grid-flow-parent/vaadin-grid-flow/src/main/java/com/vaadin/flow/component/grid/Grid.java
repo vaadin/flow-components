@@ -1354,6 +1354,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final GridArrayUpdater arrayUpdater;
 
+    private DataCommunicatorBuilder dataCommunicatorBuilder;
+
     private final CompositeDataGenerator<T> gridDataGenerator;
     private final DataCommunicator<T> dataCommunicator;
 
@@ -1564,7 +1566,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
@@ -1597,7 +1602,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder,
             boolean autoCreateColumns) {
@@ -1625,12 +1633,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
+        this.dataCommunicatorBuilder = dataCommunicatorBuilder;
         arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
@@ -1640,9 +1651,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator.addDataGenerator(this::generateDragData);
         gridDataGenerator.addDataGenerator(this::generateSelectableData);
 
-        dataCommunicator = dataCommunicatorBuilder.build(getElement(),
-                gridDataGenerator, (U) arrayUpdater,
-                this::getUniqueKeyProvider);
+        dataCommunicator = createDataCommunicator();
 
         detailsManager = new DetailsManager(this);
         setPageSize(pageSize);
@@ -1726,6 +1735,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Creates the {@link DataCommunicator} that this Grid uses to handle all
+     * data communication.
+     *
+     * @return the new data communicator
+     */
+    protected DataCommunicator<T> createDataCommunicator() {
+        return dataCommunicatorBuilder.build(getElement(), gridDataGenerator,
+                arrayUpdater, this::getUniqueKeyProvider);
+    }
+
+    /**
      * Builder for {@link DataCommunicator} object.
      *
      * @param <T>
@@ -1733,7 +1753,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param <U>
      *            the ArrayUpdater type
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             class and the constructors that accept it will be removed in
+     *             Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected static class DataCommunicatorBuilder<T, U extends ArrayUpdater>
             implements Serializable {
 
@@ -1753,6 +1777,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            communicator
          * @return the build data communicator object
          */
+        @Deprecated(since = "25.3", forRemoval = true)
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
