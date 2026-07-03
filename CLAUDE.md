@@ -51,6 +51,11 @@ Shared modules used across components:
   - Each test consists of a test setup in form of a Vaadin Flow view and a JUnit test class
   - Both are linked using `@Route` and `@TestPath` annotations
   - New integration tests should extend from `com.vaadin.tests.AbstractComponentIT`
+- Client-side unit tests:
+  - Using web-test-runner (WTR) with Mocha, Chai and Sinon
+  - Test connector JavaScript in isolation, without a server
+  - Located in `vaadin-{component}-flow-integration-tests/test/*.test.ts` (only some components have them)
+  - Always run through `node scripts/wtr.js` (see below) — do not invoke `npx web-test-runner` directly, the script prepares the frontend bundle first
 
 ## Development Commands
 
@@ -77,6 +82,9 @@ mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integr
 
 # Start integration test server for a component
 mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
+
+# Run client-side unit tests (WTR) for a component
+node scripts/wtr.js {component}
 ```
 
 **Notes on test commands**:
@@ -86,6 +94,7 @@ mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
 - When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
 - To stop a running Jetty server, run `mvn jetty:stop -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests`. Do not use `TaskStop` on the background `jetty:run` task — that terminates the Maven wrapper but leaves the forked Jetty JVM running and holding port 8080.
+- `node scripts/wtr.js {component}` takes the short component name (e.g. `grid`, not `vaadin-grid-flow-parent`) and always runs the component's whole WTR suite — it cannot target a single test file.
 
 ### Code Quality
 
