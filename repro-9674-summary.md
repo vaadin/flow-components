@@ -31,6 +31,12 @@ cellTexts: ["Item", "dummy text"]   // after sort
 
 Console is clean (only the dev-server favicon 404 and the Lit dev-mode warning). This is a silent rendering bug — no exception.
 
+## Screenshot
+
+Inner TreeGrid after attach — `Item` header renders but the `dummy text` row is missing:
+
+![TreeGrid in Grid cell with missing row content](https://raw.githubusercontent.com/vaadin/flow-components/f78f2d54f4e130364c130a39b5f49f8c6e9fd236/repro-9674.png)
+
 ## Expected behavior
 
 The inner TreeGrid's row content (`dummy text`) should render right after attach, without any interaction with the outer Grid.
