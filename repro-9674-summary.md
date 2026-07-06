@@ -7,7 +7,7 @@
 
 ## Branch
 
-`repro/9674` on `vaadin/flow-components` — runnable reproduction View.
+[`repro/9674`](https://github.com/vaadin/flow-components/tree/repro/9674) on `vaadin/flow-components` — runnable reproduction View.
 
 ## Environment
 
