@@ -24,8 +24,7 @@ class GridProHiddenColumnCellEditableTest {
 
     private GridPro<String> grid;
     private GridPro.EditColumn<String> column;
-    private AtomicInteger cellEditableProviderCallCount = new AtomicInteger(
-            0);
+    private AtomicInteger cellEditableProviderCallCount = new AtomicInteger(0);
 
     @BeforeEach
     void setup() {
