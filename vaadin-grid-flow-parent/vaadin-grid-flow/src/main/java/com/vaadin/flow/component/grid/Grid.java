@@ -488,6 +488,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             setupRenderer(renderer);
         }
 
+        /**
+         * Adds a data generator for this column.
+         *
+         * @param dataGenerator
+         *            the data generator to add
+         * @return a registration for removing the data generator
+         */
+        protected Registration addDataGenerator(
+                DataGenerator<T> dataGenerator) {
+            return compositeDataGenerator.addDataGenerator(dataGenerator);
+        }
+
         private void generatePartData(T item, ObjectNode jsonObject) {
             String partName = partNameGenerator.apply(item);
             if (partName != null) {

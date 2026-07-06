@@ -39,7 +39,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonSerializer;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -105,8 +104,6 @@ public class GridPro<E> extends Grid<E> {
     }
 
     private void setup() {
-        addDataGenerator(this::generateCellEditableData);
-
         addItemPropertyChangedListener(e -> {
             if (e.getItem() == null) {
                 return;
@@ -214,9 +211,18 @@ public class GridPro<E> extends Grid<E> {
                 Renderer<T> renderer) {
             super(grid, columnId, renderer);
 
+            addDataGenerator(this::generateCellEditableData);
+
             addAttachListener(e -> this.getElement().executeJs(
                     "window.Vaadin.Flow.gridProConnector.initCellEditableProvider($0)",
                     this.getElement()));
+        }
+
+        private void generateCellEditableData(T item, ObjectNode jsonObject) {
+            if (cellEditableProvider != null) {
+                jsonObject.withObjectProperty("cellEditable")
+                        .put(getInternalId(), cellEditableProvider.test(item));
+            }
         }
 
         /**
@@ -524,30 +530,6 @@ public class GridPro<E> extends Grid<E> {
             String columnId) {
         EditColumn<E> column = new EditColumn<>(this, columnId, renderer);
         return column;
-    }
-
-    private void generateCellEditableData(E item, ObjectNode jsonObject) {
-        // Get visible edit columns with cell editable providers
-        List<EditColumn<E>> editColumns = getColumns().stream()
-                .filter(column -> column instanceof EditColumn<E> editColumn
-                        && editColumn.isVisible()
-                        && editColumn.cellEditableProvider != null)
-                .map(column -> (EditColumn<E>) column).toList();
-
-        // Don't generate any data if there are no columns with cell editable
-        // providers, assuming that all cells are editable
-        if (editColumns.isEmpty()) {
-            return;
-        }
-
-        // Generate data for each column
-        ObjectNode cellEditableData = JacksonUtils.createObjectNode();
-        editColumns.forEach(column -> {
-            boolean cellEditable = column.cellEditableProvider.test(item);
-            cellEditableData.put(column.getInternalId(), cellEditable);
-        });
-
-        jsonObject.set("cellEditable", cellEditableData);
     }
 
     /**
