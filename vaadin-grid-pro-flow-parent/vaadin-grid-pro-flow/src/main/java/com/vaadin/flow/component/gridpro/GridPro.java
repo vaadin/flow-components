@@ -527,9 +527,10 @@ public class GridPro<E> extends Grid<E> {
     }
 
     private void generateCellEditableData(E item, ObjectNode jsonObject) {
-        // Get edit columns with cell editable providers
+        // Get visible edit columns with cell editable providers
         List<EditColumn<E>> editColumns = getColumns().stream()
                 .filter(column -> column instanceof EditColumn<E> editColumn
+                        && editColumn.isVisible()
                         && editColumn.cellEditableProvider != null)
                 .map(column -> (EditColumn<E>) column).toList();
 
