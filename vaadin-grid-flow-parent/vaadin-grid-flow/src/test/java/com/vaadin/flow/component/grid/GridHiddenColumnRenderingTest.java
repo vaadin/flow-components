@@ -15,32 +15,37 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIExtension;
 
-class GridHiddenColumnRenderingTest {
+import tools.jackson.databind.node.ObjectNode;
 
-    private static List<String> ITEMS = IntStream.range(0, 10)
-            .mapToObj(i -> "Item " + i).toList();
+class GridHiddenColumnRenderingTest {
 
     @RegisterExtension
     private MockUIExtension ui = new MockUIExtension();
 
     private Grid<String> grid;
-
     private Grid.Column<String> column;
 
     private AtomicInteger dataProviderFetchCallCount = new AtomicInteger(0);
     private AtomicInteger dataProviderSizeCallCount = new AtomicInteger(0);
-    private AtomicInteger columnValueProviderCallCount = new AtomicInteger(0);
+    private AtomicInteger columnGenerateDataCallCount = new AtomicInteger(0);
+    private AtomicInteger columnRefreshDataCallCount = new AtomicInteger(0);
     private AtomicInteger columnTooltipGeneratorCallCount = new AtomicInteger(
             0);
     private AtomicInteger columnPartNameGeneratorCallCount = new AtomicInteger(
@@ -52,17 +57,14 @@ class GridHiddenColumnRenderingTest {
 
         grid.setItems(query -> {
             dataProviderFetchCallCount.incrementAndGet();
-            return ITEMS.stream().skip(query.getOffset())
+            return Stream.of("Item 0").skip(query.getOffset())
                     .limit(query.getLimit());
         }, query -> {
             dataProviderSizeCallCount.incrementAndGet();
-            return ITEMS.size();
+            return 1;
         });
 
-        column = grid.addColumn(s -> {
-            columnValueProviderCallCount.incrementAndGet();
-            return s;
-        });
+        column = grid.addColumn(createSpyRenderer());
 
         column.setPartNameGenerator(s -> {
             columnPartNameGeneratorCallCount.incrementAndGet();
@@ -78,139 +80,166 @@ class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    void initiallyVisibleColumn_columnDataSent() {
+    void initiallyVisibleColumn_columnDataGenerated() {
         ui.fakeClientCommunication();
-        assertColumnDataSent();
+        assertColumnDataGenerated();
     }
 
     @Test
-    void initiallyVisibleColumn_detachAndAttachGrid_columnDataSentOnReattach() {
+    void initiallyHiddenColumn_columnDataNotGenerated() {
+        column.setVisible(false);
         ui.fakeClientCommunication();
-        resetColumnDataSpies();
-
-        ui.remove(grid);
-        ui.add(grid);
-        ui.fakeClientCommunication();
-        assertColumnDataSent();
+        assertColumnDataNotGenerated();
     }
 
-    @Test
-    void initiallyHiddenColumn_columnDataNotSent() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        assertColumnDataNotSent();
+    @Nested
+    class InitiallyVisibleColumnClass {
+        @BeforeEach
+        void setup() {
+            ui.fakeClientCommunication();
+            resetColumnDataSpies();
+            resetDataProviderSpies();
+        }
+
+        @Test
+        void refreshItem_columnDataRefreshed() {
+            grid.getDataProvider().refreshItem("Item 0");
+            ui.fakeClientCommunication();
+            assertColumnDataRefreshed();
+        }
+
+        @Test
+        void detachAndAttachGrid_columnDataGenerated() {
+            ui.remove(grid);
+            ui.add(grid);
+            ui.fakeClientCommunication();
+            assertColumnDataGenerated();
+        }
+
+        @Test
+        void hideColumn_columnDataNotGenerated() {
+            column.setVisible(false);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+
+        @Test
+        void hideColumn_dataProviderNotCalled() {
+            column.setVisible(false);
+            ui.fakeClientCommunication();
+            assertDataProviderNotCalled();
+        }
+
+        @Test
+        void hideAndImmediatelyShowColumn_columnDataGenerated() {
+            column.setVisible(false);
+            column.setVisible(true);
+            ui.fakeClientCommunication();
+            assertColumnDataGenerated();
+        }
     }
 
-    @Test
-    void initiallyHiddenColumn_detachAndAttachGrid_columnDataNotSentOnReattach() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
+    @Nested
+    class InitiallyHiddenColumnClass {
+        @BeforeEach
+        void setup() {
+            column.setVisible(false);
+            ui.fakeClientCommunication();
+            resetColumnDataSpies();
+            resetDataProviderSpies();
+        }
 
-        ui.remove(grid);
-        ui.add(grid);
-        ui.fakeClientCommunication();
-        assertColumnDataNotSent();
+        @Test
+        void refreshItem_columnDataNotRefreshed() {
+            grid.getDataProvider().refreshItem("Item 0");
+            ui.fakeClientCommunication();
+            assertColumnDataNotRefreshed();
+        }
+
+        @Test
+        void detachAndAttachGrid_columnDataNotGenerated() {
+            ui.remove(grid);
+            ui.add(grid);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+
+        @Test
+        void setRenderer_columnDataNotGenerated() {
+            column.setRenderer(createSpyRenderer());
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+
+        @Test
+        void showColumn_columnDataGenerated() {
+            column.setVisible(true);
+            ui.fakeClientCommunication();
+            assertColumnDataGenerated();
+        }
+
+        @Test
+        void showColumn_dataProviderNotCalled() {
+            column.setVisible(true);
+            ui.fakeClientCommunication();
+            assertDataProviderNotCalled();
+        }
+
+        @Test
+        void showAndImmediatelyHideColumn_columnDataNotGenerated() {
+            column.setVisible(true);
+            column.setVisible(false);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
     }
 
-    @Test
-    void hideColumn_columnDataNotSent() {
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
+    private Renderer<String> createSpyRenderer() {
+        return new Renderer<>() {
+            @Override
+            public Rendering<String> render(Element container,
+                    DataKeyMapper<String> keyMapper, String rendererName) {
+                return () -> Optional.of(new DataGenerator<String>() {
+                    @Override
+                    public void generateData(String item,
+                            ObjectNode jsonObject) {
+                        columnGenerateDataCallCount.incrementAndGet();
+                    }
 
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        assertColumnDataNotSent();
-    }
-
-    @Test
-    void hideAndImmediatelyShowColumn_columnDataSent() {
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
-
-        column.setVisible(false);
-        column.setVisible(true);
-        ui.fakeClientCommunication();
-        assertColumnDataSent();
-    }
-
-    @Test
-    void showColumn_columnDataSent() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
-
-        column.setVisible(true);
-        ui.fakeClientCommunication();
-        assertColumnDataSent();
-    }
-
-    @Test
-    void showAndImmediatelyHideColumn_columnDataNotSent() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
-
-        column.setVisible(true);
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        assertColumnDataNotSent();
-    }
-
-    @Test
-    void hiddenColumn_setRenderer_columnDataNotSent() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        resetColumnDataSpies();
-
-        column.setRenderer(new ColumnPathRenderer<>("value", s -> {
-            columnValueProviderCallCount.incrementAndGet();
-            return s;
-        }));
-        ui.fakeClientCommunication();
-        assertColumnDataNotSent();
-    }
-
-    @Test
-    void hideColumn_dataProviderNotCalled() {
-        ui.fakeClientCommunication();
-        resetDataProviderSpies();
-
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        assertDataProviderNotCalled();
-    }
-
-    @Test
-    void showColumn_dataProviderNotCalled() {
-        column.setVisible(false);
-        ui.fakeClientCommunication();
-        resetDataProviderSpies();
-
-        column.setVisible(true);
-        ui.fakeClientCommunication();
-        assertDataProviderNotCalled();
+                    @Override
+                    public void refreshData(String item) {
+                        columnRefreshDataCallCount.incrementAndGet();
+                    }
+                });
+            }
+        };
     }
 
     private void resetColumnDataSpies() {
-        columnValueProviderCallCount.set(0);
+        columnRefreshDataCallCount.set(0);
+        columnGenerateDataCallCount.set(0);
         columnTooltipGeneratorCallCount.set(0);
         columnPartNameGeneratorCallCount.set(0);
     }
 
-    private void assertColumnDataSent() {
-        Assertions.assertEquals(ITEMS.size(),
-                columnValueProviderCallCount.get());
-        Assertions.assertEquals(ITEMS.size(),
-                columnTooltipGeneratorCallCount.get());
-        Assertions.assertEquals(ITEMS.size(),
-                columnPartNameGeneratorCallCount.get());
+    private void assertColumnDataGenerated() {
+        Assertions.assertEquals(1, columnGenerateDataCallCount.get());
+        Assertions.assertEquals(1, columnTooltipGeneratorCallCount.get());
+        Assertions.assertEquals(1, columnPartNameGeneratorCallCount.get());
     }
 
-    private void assertColumnDataNotSent() {
-        Assertions.assertEquals(0, columnValueProviderCallCount.get());
+    private void assertColumnDataNotGenerated() {
+        Assertions.assertEquals(0, columnGenerateDataCallCount.get());
         Assertions.assertEquals(0, columnTooltipGeneratorCallCount.get());
         Assertions.assertEquals(0, columnPartNameGeneratorCallCount.get());
+    }
+
+    private void assertColumnDataRefreshed() {
+        Assertions.assertEquals(1, columnRefreshDataCallCount.get());
+    }
+
+    private void assertColumnDataNotRefreshed() {
+        Assertions.assertEquals(0, columnRefreshDataCallCount.get());
     }
 
     private void resetDataProviderSpies() {

@@ -450,6 +450,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     super.generateData(item, jsonObject);
                 }
             }
+
+            @Override
+            public void refreshData(T item) {
+                if (Column.this.isVisible()) {
+                    super.refreshData(item);
+                }
+            }
         };
         private Registration compositeDataGeneratorRegistration;
 
