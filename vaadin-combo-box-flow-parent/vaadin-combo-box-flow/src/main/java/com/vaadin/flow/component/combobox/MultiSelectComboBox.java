@@ -135,6 +135,10 @@ public class MultiSelectComboBox<TItem>
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        // Synchronize the value on the change event, which the web component
+        // fires only for user-initiated changes. The default
+        // selected-items-changed notification also fires for programmatic
+        // changes, which could be echoed back as spurious client-side changes.
         setSynchronizedEvent("change");
 
         // Create the selection model that manages the currently selected items.

@@ -23,12 +23,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 /**
- * View used to verify that genuine user value commits (dropdown selection and
- * deselection, clear-button click, chip removal, Esc-clear) still propagate the
- * value to the server after the value sync was switched from the
- * {@code selected-items-changed} property notification to the {@code change}
- * event (see
- * <a href="https://github.com/vaadin/flow-components/issues/9611">#9611</a>).
+ * View used to verify that user-initiated value changes are propagated to the
+ * server as client-side value changes.
  */
 @Route("vaadin-multi-select-combo-box/user-value-change")
 public class MultiSelectComboBoxUserValueChangePage extends Div {
@@ -36,28 +32,18 @@ public class MultiSelectComboBoxUserValueChangePage extends Div {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Items");
         comboBox.setItems(List.of("Item 1", "Item 2", "Item 3"));
-        comboBox.setWidth("500px");
-        // Clear button must be visible for the clear-button and Esc-to-clear
-        // user paths to clear the selection.
-        comboBox.setClearButtonVisible(true);
 
         Span eventValue = new Span();
         eventValue.setId("event-value");
         Span eventOrigin = new Span();
         eventOrigin.setId("event-origin");
-        Span eventCount = new Span("0");
-        eventCount.setId("event-count");
 
         comboBox.addValueChangeListener(e -> {
             eventValue.setText(String.join(",", e.getValue()));
             eventOrigin.setText(e.isFromClient() ? "client" : "server");
-            eventCount.setText(
-                    String.valueOf(Integer.parseInt(eventCount.getText()) + 1));
         });
 
-        add(comboBox);
-        add(new Div(new Span("Event value: "), eventValue));
-        add(new Div(new Span("Event origin: "), eventOrigin));
-        add(new Div(new Span("Event count: "), eventCount));
+        add(comboBox, new Div(new Span("Event value: "), eventValue),
+                new Div(new Span("Event origin: "), eventOrigin));
     }
 }

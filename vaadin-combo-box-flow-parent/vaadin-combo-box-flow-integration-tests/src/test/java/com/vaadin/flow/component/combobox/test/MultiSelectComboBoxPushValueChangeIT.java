@@ -26,11 +26,9 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Regression test for
- * <a href="https://github.com/vaadin/flow-components/issues/9611">#9611</a>:
- * with {@code @Push} enabled, a server-side {@code setValue} surrounded by two
- * push frames must not produce a spurious client-initiated value change with an
- * empty value.
+ * Verifies that with {@code @Push} enabled, a server-side {@code setValue}
+ * surrounded by two push frames does not produce a spurious client-initiated
+ * value change with an empty value.
  */
 @TestPath("vaadin-multi-select-combo-box/push-value-change")
 public class MultiSelectComboBoxPushValueChangeIT extends AbstractComponentIT {
