@@ -64,6 +64,7 @@ public class GridI18n implements Serializable {
      * checkbox in each selection column body cell.
      *
      * @return the accessible name template for the select row checkbox
+     * @since 25.3
      */
     public String getSelectRow() {
         return selectRow;
