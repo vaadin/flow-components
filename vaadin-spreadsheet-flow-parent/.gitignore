@@ -23,8 +23,8 @@ node_modules
 .driver
 package*json
 pnpm*
-!**/pnpm-workspace.yaml
 .pnpm*
+!**/.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated
