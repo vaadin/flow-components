@@ -135,6 +135,8 @@ public class MultiSelectComboBox<TItem>
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        setSynchronizedEvent("change");
+
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data
         // provider identify, and that the selection only changes if items
