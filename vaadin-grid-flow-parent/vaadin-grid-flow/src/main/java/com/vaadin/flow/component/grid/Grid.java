@@ -483,7 +483,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             comparator = (a, b) -> 0;
             compositeDataGeneratorRegistration = grid
                     .addDataGenerator(compositeDataGenerator);
+            compositeDataGenerator.addDataGenerator(this::generatePartData);
+            compositeDataGenerator.addDataGenerator(this::generateTooltipData);
             setupRenderer(renderer);
+        }
+
+        private void generatePartData(T item, ObjectNode jsonObject) {
+            String partName = partNameGenerator.apply(item);
+            if (partName != null) {
+                jsonObject.withObjectProperty("part").put(columnInternalId,
+                        partName);
+            }
+        }
+
+        private void generateTooltipData(T item, ObjectNode jsonObject) {
+            String tooltip = tooltipGenerator.apply(item);
+            if (tooltip != null) {
+                jsonObject.withObjectProperty("gridtooltips")
+                        .put(columnInternalId, tooltip);
+            }
         }
 
         @Override
@@ -1663,7 +1681,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generatePartData);
-        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
         gridDataGenerator.addDataGenerator(this::generateSelectableData);
@@ -4371,49 +4389,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return partNameGenerator;
     }
 
-    private void generateTooltipTextData(T item, ObjectNode jsonObject) {
-        ObjectNode tooltips = JacksonUtils.createObjectNode();
-
-        String rowTooltip = tooltipGenerator.apply(item);
-        if (rowTooltip != null) {
-            tooltips.put("row", rowTooltip);
-        }
-
-        idToColumnMap.forEach((id, column) -> {
-            if (!column.isVisible()) {
-                return;
-            }
-            String cellTooltip = column.tooltipGenerator.apply(item);
-            if (cellTooltip != null) {
-                tooltips.put(id, cellTooltip);
-            }
-        });
-
-        if (!JacksonUtils.getKeys(tooltips).isEmpty()) {
-            jsonObject.set("gridtooltips", tooltips);
+    private void generateTooltipData(T item, ObjectNode jsonObject) {
+        String tooltip = tooltipGenerator.apply(item);
+        if (tooltip != null) {
+            jsonObject.withObjectProperty("gridtooltips").put("row", tooltip);
         }
     }
 
     private void generatePartData(T item, ObjectNode jsonObject) {
-        ObjectNode part = JacksonUtils.createObjectNode();
-
-        String rowPartName = partNameGenerator.apply(item);
-        if (rowPartName != null) {
-            part.put("row", rowPartName);
-        }
-
-        idToColumnMap.forEach((id, column) -> {
-            if (!column.isVisible()) {
-                return;
-            }
-            String cellPartName = column.getPartNameGenerator().apply(item);
-            if (cellPartName != null) {
-                part.put(id, cellPartName);
-            }
-        });
-
-        if (!JacksonUtils.getKeys(part).isEmpty()) {
-            jsonObject.set("part", part);
+        String partName = partNameGenerator.apply(item);
+        if (partName != null) {
+            jsonObject.withObjectProperty("part").put("row", partName);
         }
     }
 
