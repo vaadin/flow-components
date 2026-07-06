@@ -46,27 +46,25 @@ public class MultiSelectComboBoxUserValueChangeIT extends AbstractComponentIT {
     public void selectItem_valuePropagatedToServer() {
         comboBox.selectByText("Item 1");
 
-        waitUntil(driver -> "Item 1".equals(eventValue.getText()));
+        Assert.assertEquals("Item 1", eventValue.getText());
         Assert.assertEquals("client", eventOrigin.getText());
     }
 
     @Test
     public void deselectItem_valuePropagatedToServer() {
         comboBox.selectByText("Item 1");
-        waitUntil(driver -> "Item 1".equals(eventValue.getText()));
 
         comboBox.deselectByText("Item 1");
-        waitUntil(driver -> eventValue.getText().isEmpty());
+        Assert.assertTrue(eventValue.getText().isEmpty());
         Assert.assertEquals("client", eventOrigin.getText());
     }
 
     @Test
     public void deselectAll_valuePropagatedToServer() {
         comboBox.selectByText("Item 1");
-        waitUntil(driver -> "Item 1".equals(eventValue.getText()));
 
         comboBox.deselectAll();
-        waitUntil(driver -> eventValue.getText().isEmpty());
+        Assert.assertTrue(eventValue.getText().isEmpty());
         Assert.assertEquals("client", eventOrigin.getText());
     }
 }
