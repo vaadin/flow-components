@@ -85,6 +85,9 @@ mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl
 
 # Run client-side unit tests (WTR) for a component
 node scripts/wtr.js {component}
+
+# Run specific client-side unit test files (relative to the module's test/ folder)
+node scripts/wtr.js {component} --files {file-or-glob}
 ```
 
 **Notes on test commands**:
@@ -94,7 +97,7 @@ node scripts/wtr.js {component}
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
 - When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
 - To stop a running Jetty server, run `mvn jetty:stop -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests`. Do not use `TaskStop` on the background `jetty:run` task — that terminates the Maven wrapper but leaves the forked Jetty JVM running and holding port 8080.
-- `node scripts/wtr.js {component}` takes the short component name (e.g. `grid`, not `vaadin-grid-flow-parent`) and always runs the component's whole WTR suite — it cannot target a single test file.
+- `node scripts/wtr.js {component}` takes the short component name (e.g. `grid`, not `vaadin-grid-flow-parent`). It runs the component's whole WTR suite unless you pass `--files`, which targets a specific file or glob under the module's `test/` folder (e.g. `--files grid-connector-sorting.test.ts` or `--files 'grid-connector-selection*'`).
 
 ### Code Quality
 
