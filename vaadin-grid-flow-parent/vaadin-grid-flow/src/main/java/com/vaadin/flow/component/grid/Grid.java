@@ -4523,8 +4523,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Gets the {@link CompositeDataGenerator} that this Grid uses to
-     * generate data for the client side.
+     * Gets the {@link CompositeDataGenerator} that this Grid uses to generate
+     * data for the client side.
      *
      * @return the composite data generator
      *
