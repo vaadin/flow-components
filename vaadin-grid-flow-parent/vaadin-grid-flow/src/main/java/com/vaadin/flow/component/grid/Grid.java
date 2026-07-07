@@ -502,6 +502,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @param dataGenerator
          *            the data generator to add
          * @return a registration for removing the data generator
+         * @since 25.3
          */
         protected Registration addDataGenerator(
                 DataGenerator<T> dataGenerator) {

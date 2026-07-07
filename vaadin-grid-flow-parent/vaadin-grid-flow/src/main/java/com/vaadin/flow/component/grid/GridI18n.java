@@ -39,7 +39,6 @@ public class GridI18n implements Serializable {
      * selection column header cell.
      *
      * @return the accessible name for the select all checkbox
-     * @since 25.3
      */
     public String getSelectAll() {
         return selectAll;
@@ -52,7 +51,6 @@ public class GridI18n implements Serializable {
      * @param selectAll
      *            the accessible name for the select all checkbox
      * @return this instance for method chaining
-     * @since 25.3
      */
     public GridI18n setSelectAll(String selectAll) {
         this.selectAll = selectAll;
@@ -64,7 +62,6 @@ public class GridI18n implements Serializable {
      * checkbox in each selection column body cell.
      *
      * @return the accessible name template for the select row checkbox
-     * @since 25.3
      */
     public String getSelectRow() {
         return selectRow;
@@ -80,7 +77,6 @@ public class GridI18n implements Serializable {
      * @param selectRow
      *            the accessible name template for the select row checkbox
      * @return this instance for method chaining
-     * @since 25.3
      */
     public GridI18n setSelectRow(String selectRow) {
         this.selectRow = selectRow;
@@ -91,7 +87,6 @@ public class GridI18n implements Serializable {
      * Gets the accessible name (aria-label) template for the grid sorters.
      *
      * @return the accessible name template for the sorters
-     * @since 25.3
      */
     public String getSorter() {
         return sorter;
@@ -104,7 +99,6 @@ public class GridI18n implements Serializable {
      * @param sorter
      *            the accessible name template for the sorters
      * @return this instance for method chaining
-     * @since 25.3
      */
     public GridI18n setSorter(String sorter) {
         this.sorter = sorter;
