@@ -6,10 +6,8 @@
 module.exports = {
   hooks: {
     updateConfig(config) {
-      config.minimumReleaseAgeExclude = [
-        ...(config.minimumReleaseAgeExclude ?? []),
-        '@vaadin/*',
-      ];
+      config.minimumReleaseAgeExclude ??= [];
+      config.minimumReleaseAgeExclude.push('@vaadin/*');
       return config;
     },
   },
