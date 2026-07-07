@@ -135,6 +135,10 @@ public class MultiSelectComboBox<TItem>
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        // Use change instead of the default selected-items-changed
+        // event to avoid notification for programmatic value changes.
+        setSynchronizedEvent("change");
+
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data
         // provider identify, and that the selection only changes if items
