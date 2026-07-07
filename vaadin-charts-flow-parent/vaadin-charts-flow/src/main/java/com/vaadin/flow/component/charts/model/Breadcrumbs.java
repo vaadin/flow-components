@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * Options for the breadcrumbs, the navigation at the top leading the way up
  * through the drilldown levels.
+ * 
+ * @since 25.0
  */
 public class Breadcrumbs extends AbstractConfigurationObject {
 

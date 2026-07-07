@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.Grid;
  *            The Grid bean type.
  * @author Vaadin Ltd.
  * @see Grid#addDragEndListener(GridDragEndListener)
+ * @since 4.0
  */
 @SuppressWarnings("serial")
 @DomEvent("grid-dragend")

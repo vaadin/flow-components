@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointClickEvent class stores data for click events on the points of the
  * chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-click")
 public class PointClickEvent extends ComponentEvent<Chart>
@@ -43,6 +45,7 @@ public class PointClickEvent extends ComponentEvent<Chart>
      * @param category
      * @param pointIndex
      * @param pointId
+     * @since 22.0.1
      */
     public PointClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.pageX") int pageX,

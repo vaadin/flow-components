@@ -17,6 +17,8 @@ package com.vaadin.flow.component.upload;
 
 /**
  * Specifies the upload format to use when sending files to the server.
+ * 
+ * @since 25.1
  */
 public enum UploadFormat {
     /**

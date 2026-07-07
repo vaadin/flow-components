@@ -36,6 +36,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  * @see UploadManager
+ * @since 25.1
  */
 @Tag("vaadin-upload-button")
 @NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha2")

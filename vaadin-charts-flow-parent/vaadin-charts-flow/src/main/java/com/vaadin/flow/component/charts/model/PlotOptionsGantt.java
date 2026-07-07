@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the gantt series type.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class PlotOptionsGantt extends AbstractPlotOptions {

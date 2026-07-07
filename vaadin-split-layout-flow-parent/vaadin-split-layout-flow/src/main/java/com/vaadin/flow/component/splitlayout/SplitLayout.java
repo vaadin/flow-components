@@ -41,6 +41,7 @@ import com.vaadin.flow.shared.Registration;
  * handle between them.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-split-layout")
 @NpmPackage(value = "@vaadin/split-layout", version = "25.3.0-alpha2")
@@ -73,6 +74,7 @@ public class SplitLayout extends Component
      *
      * @param orientation
      *            the orientation set to the layout
+     * @since 23.1
      */
     public SplitLayout(Orientation orientation) {
         setOrientation(orientation);
@@ -113,6 +115,7 @@ public class SplitLayout extends Component
      *            the component set to the secondary split
      * @param orientation
      *            the orientation set to the layout
+     * @since 23.1
      */
     public SplitLayout(Component primaryComponent, Component secondaryComponent,
             Orientation orientation) {
@@ -213,6 +216,7 @@ public class SplitLayout extends Component
      * of the {@link SplitterDragEndEvent}.
      *
      * @return the splitter position, may be null
+     * @since 24.2
      */
     public Double getSplitterPosition() {
         return splitterPosition;
@@ -338,6 +342,9 @@ public class SplitLayout extends Component
         secondaryComponent = null;
     }
 
+    /**
+     * @since 25.0
+     */
     @DomEvent("splitter-dragend")
     public static class SplitterDragEndEvent
             extends ComponentEvent<SplitLayout> {
@@ -365,6 +372,7 @@ public class SplitLayout extends Component
      * @param listener
      *            the listener to add
      * @return a registration for removing the listener
+     * @since 25.0
      */
     public Registration addSplitterDragEndListener(
             ComponentEventListener<SplitterDragEndEvent> listener) {

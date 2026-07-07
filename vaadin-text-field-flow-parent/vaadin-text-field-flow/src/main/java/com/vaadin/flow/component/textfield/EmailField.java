@@ -86,6 +86,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
+ * @since 1.3
  */
 @Tag("vaadin-email-field")
 @NpmPackage(value = "@vaadin/email-field", version = "25.3.0-alpha2")
@@ -250,6 +251,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -409,6 +412,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 2.0.8
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -422,6 +427,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * {@link #setI18n(EmailFieldI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public EmailFieldI18n getI18n() {
         return i18n;
@@ -432,6 +438,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(EmailFieldI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -445,6 +452,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * The internationalization properties for {@link EmailField}.
+     * 
+     * @since 24.5
      */
     public static class EmailFieldI18n implements Serializable {
 

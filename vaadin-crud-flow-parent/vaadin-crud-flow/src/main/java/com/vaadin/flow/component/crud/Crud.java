@@ -46,6 +46,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <E>
  *            the bean type
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-crud")
 @NpmPackage(value = "@vaadin/crud", version = "25.3.0-alpha2")
@@ -267,6 +268,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the item to be edited
      * @param editMode
      *            the edit mode
+     * @since 2.0
      */
     public void edit(E item, EditMode editMode) {
         final CrudEvent<E> event;
@@ -312,6 +314,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @param dirty
      *            true if dirty and false if otherwise.
      * @see #getSaveButton()
+     * @since 2.0
      */
     public void setDirty(boolean dirty) {
         getElement().executeJs("this.__isDirty = $0", dirty);
@@ -433,6 +436,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @param editorPosition
      *            the editor position, never <code>null</code>
      * @see CrudEditorPosition
+     * @since 2.1
      */
     public void setEditorPosition(CrudEditorPosition editorPosition) {
         if (editorPosition == null) {
@@ -449,6 +453,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * The default position is {@link CrudEditorPosition#OVERLAY}.
      *
      * @return the editor position
+     * @since 2.1
      */
     public CrudEditorPosition getEditorPosition() {
         return CrudEditorPosition.toPosition(
@@ -465,6 +470,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *
      * @param editOnClick
      *            {@code true} to enable it ({@code false}, by default).
+     * @since 2.1
      */
     public void setEditOnClick(boolean editOnClick) {
         getElement().setProperty("editOnClick", editOnClick);
@@ -494,6 +500,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Gets whether click on row to edit item is enabled or not.
      *
      * @return {@code true} if enabled, {@code false} otherwise
+     * @since 2.1
      */
     public boolean isEditOnClick() {
         return getElement().getProperty("editOnClick", false);
@@ -538,6 +545,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *
      * @param value
      *            {@code true} to show the toolbar, {@code false} to hide it
+     * @since 22.0
      */
     public void setToolbarVisible(boolean value) {
         toolbarVisible = value;
@@ -552,6 +560,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Gets the visibility state of the toolbar.
      *
      * @return true if toolbar is visible, false otherwise
+     * @since 22.0
      */
     public boolean getToolbarVisible() {
         return toolbarVisible;
@@ -561,6 +570,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Gets the Crud new item button
      *
      * @return the new item button
+     * @since 24.0
      */
     public Component getNewButton() {
         return newButton;
@@ -571,6 +581,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *
      * @param button
      *            the new item button
+     * @since 24.0
      */
     public void setNewButton(Component button) {
         newButton = button;
@@ -581,6 +592,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Gets the Crud editor delete button
      *
      * @return the delete button
+     * @since 22.0
      */
     public Button getDeleteButton() {
         return deleteButton;
@@ -595,6 +607,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *
      * @return the save button
      * @see Crud#setDirty(boolean)
+     * @since 22.0
      */
     public Button getSaveButton() {
         return saveButton;
@@ -604,6 +617,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * Gets the Crud cancel button
      *
      * @return the cancel button
+     * @since 22.0
      */
     public Button getCancelButton() {
         return cancelButton;
@@ -904,6 +918,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
          *            represented in Grid
          * @param ignored
          *            an ignored parameter for a side effect
+         * @since 25.0
          */
         public EditEvent(Crud<E> source, boolean fromClient,
                 @EventData("event.detail.item") ObjectNode item,
@@ -975,6 +990,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
          * Gets new item being created
          *
          * @return a new instance of bean type
+         * @since 2.0
          */
         @Override
         public E getItem() {
@@ -1014,6 +1030,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * new item or an existing item.
      *
      * @see Crud#edit(Object, EditMode)
+     * @since 2.0
      */
     public enum EditMode {
         /**

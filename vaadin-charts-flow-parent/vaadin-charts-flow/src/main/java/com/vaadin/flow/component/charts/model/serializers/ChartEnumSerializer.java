@@ -19,6 +19,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializer for all classes implementing {@link ChartEnum}
  *
+ * @since 6.0.1
  */
 public class ChartEnumSerializer extends ValueSerializer<ChartEnum> {
 

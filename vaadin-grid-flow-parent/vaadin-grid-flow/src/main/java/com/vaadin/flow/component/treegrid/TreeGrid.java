@@ -70,6 +70,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid bean type
  * @author Vaadin Ltd
+ * @since 1.1
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
 @JsModule("./treeGridConnector.ts")
@@ -96,6 +97,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @since 24.5
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             constructor will be removed in Vaadin 26.
      */
@@ -172,6 +174,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @since 24.5
      */
     public TreeGrid(Class<T> beanType, boolean autoCreateColumns) {
         this(beanType, new TreeDataCommunicatorBuilder<>(), autoCreateColumns);
@@ -189,6 +192,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @since 24.5
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             constructor will be removed in Vaadin 26.
      */
@@ -334,6 +338,7 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -359,6 +364,7 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -385,6 +391,7 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -409,6 +416,7 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -433,6 +441,7 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -452,6 +461,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -469,6 +479,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -486,6 +497,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -546,6 +558,7 @@ public class TreeGrid<T> extends Grid<T>
      * @return the new column
      * @see #addColumn(Renderer)
      * @see #removeColumn(Column)
+     * @since 5.1
      */
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
@@ -778,7 +791,6 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to expand recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
     public void expandRecursively(Stream<T> items, int depth) {
         expandRecursively(items.toList(), depth);
@@ -797,7 +809,6 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to expand recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
     public void expandRecursively(Collection<T> items, int depth) {
         var expandedItems = getDataCommunicator()
@@ -857,7 +868,6 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to collapse recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
     public void collapseRecursively(Stream<T> items, int depth) {
         collapseRecursively(items.toList(), depth);
@@ -876,7 +886,6 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to collapse recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
     public void collapseRecursively(Collection<T> items, int depth) {
         var collapsedItems = getDataCommunicator()
@@ -964,6 +973,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param index
      *            zero based index of the item to scroll to
+     * @since 20.0.5
      */
     @Override
     public void scrollToIndex(int index) {
@@ -995,6 +1005,7 @@ public class TreeGrid<T> extends Grid<T>
      * @throws UnsupportedOperationException
      *             if the data provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
+     * @since 24.1
      */
     public void scrollToIndex(int... path) {
         if (!getDataProvider().getHierarchyFormat()
@@ -1133,6 +1144,7 @@ public class TreeGrid<T> extends Grid<T>
      *            the item to scroll to
      * @throws NoSuchElementException
      *             if the item does not belong to the tree
+     * @since 24.4
      */
     @Override
     public void scrollToItem(T item) {

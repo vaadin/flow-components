@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired after a chart is loaded
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-load")
 public class ChartLoadEvent extends ComponentEvent<Chart> {

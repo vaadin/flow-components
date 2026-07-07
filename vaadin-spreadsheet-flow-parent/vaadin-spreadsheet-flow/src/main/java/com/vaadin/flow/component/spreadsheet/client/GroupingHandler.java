@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.client;
 
+/**
+ * @since 23.1
+ */
 public interface GroupingHandler {
     void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed);
 

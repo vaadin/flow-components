@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * specifying a type option.
  *
  * Defaults to image/png.
+ * 
+ * @since 6.0.1
  */
 public enum ExportFileType implements ChartEnum {
 

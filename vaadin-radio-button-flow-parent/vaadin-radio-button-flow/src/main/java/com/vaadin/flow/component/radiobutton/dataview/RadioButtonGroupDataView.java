@@ -28,7 +28,7 @@ import com.vaadin.flow.function.SerializableSupplier;
  *
  * @param <T>
  *            the item type
- * @since
+ * @since 18.0
  */
 public class RadioButtonGroupDataView<T> extends AbstractDataView<T> {
 

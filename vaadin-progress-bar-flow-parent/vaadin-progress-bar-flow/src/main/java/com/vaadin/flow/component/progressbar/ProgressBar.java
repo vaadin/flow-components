@@ -32,6 +32,7 @@ import com.vaadin.flow.signals.Signal;
  * process that takes a noticeable time to finish.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-progress-bar")
 @NpmPackage(value = "@vaadin/progress-bar", version = "25.3.0-alpha2")

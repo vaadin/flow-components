@@ -49,6 +49,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
  *            the per-element type for multi-select fields
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ValueOptions<V> {
 
@@ -170,6 +171,7 @@ public final class ValueOptions<V> {
      * @param generator
      *            the per-item label generator, not {@code null}
      * @return this registration, for chaining
+     * @since 25.3
      */
     public ValueOptions<V> itemLabelGenerator(ItemLabelGenerator<V> generator) {
         Objects.requireNonNull(generator,

@@ -29,6 +29,7 @@ import com.vaadin.flow.component.grid.Grid;
  *
  * @see EditorOpenEvent
  * @see Editor#addOpenListener(EditorOpenListener)
+ * @since 2.1
  */
 @FunctionalInterface
 public interface EditorOpenListener<T> extends Serializable {

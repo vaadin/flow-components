@@ -16,6 +16,9 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.RadarSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class RadarSeriesWriter extends AreaSeriesDataWriter {
 
     public RadarSeriesWriter(RadarSeriesData series) {

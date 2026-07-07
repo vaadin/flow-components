@@ -48,6 +48,7 @@ import com.vaadin.flow.signals.Signal;
  * and mobile screen sizes.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-app-layout")
 @NpmPackage(value = "@vaadin/app-layout", version = "25.3.0-alpha2")
@@ -71,6 +72,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * {@link #setI18n(AppLayoutI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 23.0
      */
     public AppLayoutI18n getI18n() {
         return i18n;
@@ -81,6 +83,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 23.0
      */
     public void setI18n(AppLayoutI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -92,6 +95,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @see #setPrimarySection(Section)
      * @return value for the primarySection property. Default is
      *         {@link Section#NAVBAR}.
+     * @since 2.0
      */
     @Synchronize("primary-section-changed")
     public Section getPrimarySection() {
@@ -112,6 +116,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *            new value for the primarySection property. Not {@code null}.
      * @throws NullPointerException
      *             if primarySection is {@code null}.
+     * @since 2.0
      */
     public void setPrimarySection(Section primarySection) {
         Objects.requireNonNull(primarySection,
@@ -129,6 +134,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *
      * @return {@code true} if the drawer is opened (visible). {@code false}
      *         otherwise.
+     * @since 2.0
      */
     @Synchronize("drawer-opened-changed")
     public boolean isDrawerOpened() {
@@ -143,6 +149,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @see #isDrawerOpened
      * @see DrawerToggle for a component that allows the user to open and close
      *      the drawer.
+     * @since 2.0
      */
     public void setDrawerOpened(boolean drawerOpened) {
         getElement().setProperty("drawerOpened", drawerOpened);
@@ -176,6 +183,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *
      * @return {@code true} if drawer is an overlay on top of the content.
      *         {@code false} otherwise.
+     * @since 2.0
      */
     @Synchronize("overlay-changed")
     public boolean isOverlay() {
@@ -214,6 +222,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 2.0
      */
     public void addToDrawer(Component... components) {
         SlotUtils.addToSlot(this, "drawer", components);
@@ -227,6 +236,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 2.0
      */
     public void addToNavbar(Component... components) {
         final boolean touchOptimized = false;
@@ -244,6 +254,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 2.0
      */
     public void addToNavbar(boolean touchOptimized, Component... components) {
         final String slot = "navbar"
@@ -257,6 +268,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *
      * @param components
      *            Components to remove.
+     * @since 2.0
      */
     public void remove(Component... components) {
         for (Component component : components) {
@@ -272,6 +284,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *
      * @throws IllegalArgumentException
      *             if content is not a {@link Component}
+     * @since 2.0
      */
     @Override
     public void showRouterLayoutContent(HasElement content) {
@@ -318,6 +331,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * Sections in the component that can be used as primary.
      *
      * @see #setPrimarySection(Section)
+     * @since 2.0
      */
     public enum Section {
         NAVBAR, DRAWER;
@@ -335,6 +349,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
 
     /**
      * The internationalization properties for {@link AppLayout}
+     * 
+     * @since 23.0
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AppLayoutI18n implements Serializable {

@@ -107,6 +107,7 @@ import com.vaadin.flow.shared.Registration;
  * @param <T>
  *            the type of the items for the select
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-select")
 @NpmPackage(value = "@vaadin/select", version = "25.3.0-alpha2")
@@ -203,6 +204,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @param label
      *            the label describing the select
      * @see #setLabel(String)
+     * @since 25.0
      */
     public Select(String label) {
         this();
@@ -219,6 +221,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the items to be shown in the list of the select
      * @see #setLabel(String)
      * @see #setItems(Collection)
+     * @since 25.0
      */
     public Select(String label, Collection<T> items) {
         this();
@@ -236,6 +239,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the items to be shown in the list of the select
      * @see #setLabel(String)
      * @see #setItems(Object...)
+     * @since 25.0
      */
     @SafeVarargs
     public Select(String label, T... items) {
@@ -250,6 +254,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @param listener
      *            the value change listener to add
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Select(
             ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
@@ -267,6 +272,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the value change listener to add
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Select(String label,
             ValueChangeListener<ComponentValueChangeEvent<Select<T>, T>> listener) {
@@ -288,6 +294,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @see #setLabel(String)
      * @see #setItems(Object...)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     @SafeVarargs
     public Select(String label,
@@ -604,6 +611,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @param noVerticalOverlap
      *            whether the overlay should overlap the input element
+     * @since 24.5
      */
     public void setNoVerticalOverlap(boolean noVerticalOverlap) {
         getElement().setProperty("noVerticalOverlap", noVerticalOverlap);
@@ -614,6 +622,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @return {@code true} if the overlay should overlap the input element,
      *         {@code false} otherwise
+     * @since 24.5
      */
     public boolean isNoVerticalOverlap() {
         return getElement().getProperty("noVerticalOverlap", false);
@@ -628,6 +637,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @param dataProvider
      *            DataProvider instance to use, not <code>null</code>
+     * @since 24.2
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
@@ -691,6 +701,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * underlying data provider.
      *
      * @return the generic DataView instance implementing {@link Select}
+     * @since 18.0
      */
     @Override
     public SelectDataView<T> getGenericDataView() {
@@ -710,6 +721,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @return the list data view that provides access to the data bound to the
      *         {@link Select}
+     * @since 18.0
      */
     @Override
     public SelectListDataView<T> getListDataView() {
@@ -880,6 +892,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @param width
      *            the new dropdown width. Pass in null to set the dropdown width
      *            back to the default value.
+     * @since 24.5
      */
     public void setOverlayWidth(String width) {
         getStyle().set("--vaadin-select-overlay-width", width);
@@ -893,6 +906,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the width of the dropdown.
      * @param unit
      *            the unit used for the dropdown.
+     * @since 24.5
      */
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
@@ -904,6 +918,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @param opened
      *            the boolean value to set
+     * @since 24.0
      */
     protected void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
@@ -913,6 +928,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * Whether the dropdown is opened or not.
      *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
+     * @since 24.0
      */
     @Synchronize(property = "opened", value = "opened-changed")
     protected boolean isOpened() {
@@ -955,6 +971,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the second instance
      * @return <code>true</code> if the instances are equal; otherwise
      *         <code>false</code>
+     * @since 18.0
      */
     @Override
     protected boolean valueEquals(T value1, T value2) {
@@ -1178,6 +1195,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 24.0
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -1186,6 +1205,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
+     * 
+     * @since 24.0
      */
     public static class OpenedChangeEvent extends ComponentEvent<Select> {
         private final boolean opened;
@@ -1207,6 +1228,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @since 24.0
      */
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
@@ -1215,6 +1237,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
+     * 
+     * @since 24.0
      */
     public static class InvalidChangeEvent extends ComponentEvent<Select> {
         private final boolean invalid;
@@ -1236,6 +1260,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @since 24.0
      */
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
@@ -1249,6 +1274,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * update the component if not set again using {@link #setI18n(SelectI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public SelectI18n getI18n() {
         return i18n;
@@ -1259,6 +1285,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(SelectI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -1271,6 +1298,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * The internationalization properties for {@link Select}.
+     * 
+     * @since 24.5
      */
     public static class SelectI18n implements Serializable {
 

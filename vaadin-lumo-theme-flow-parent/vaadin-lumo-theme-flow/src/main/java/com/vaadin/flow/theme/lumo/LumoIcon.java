@@ -34,6 +34,7 @@ import com.vaadin.flow.component.icon.IconFactory;
  * bundle.
  *
  * @author Vaadin Ltd
+ * @since 23.2
  */
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.3.0-alpha2")
 @JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")

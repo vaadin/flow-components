@@ -54,6 +54,7 @@ import com.vaadin.flow.signals.Signal;
  * different style variants, and supports icons in addition to text labels.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-button")
 @NpmPackage(value = "@vaadin/button", version = "25.3.0-alpha2")
@@ -95,6 +96,7 @@ public class Button extends Component
      *
      * @param textSignal
      *            the signal of text value
+     * @since 25.1
      */
     public Button(Signal<String> textSignal) {
         this();
@@ -139,6 +141,7 @@ public class Button extends Component
      *            the signal of text value
      * @param icon
      *            the icon inside the button
+     * @since 25.1
      */
     public Button(Signal<String> textSignal, Component icon) {
         this();
@@ -171,6 +174,7 @@ public class Button extends Component
      *            the signal of text value
      * @param clickListener
      *            the event listener for click events
+     * @since 25.1
      */
     public Button(Signal<String> textSignal,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -227,6 +231,7 @@ public class Button extends Component
      *            the icon inside the button
      * @param clickListener
      *            the event listener for click events
+     * @since 25.1
      */
     public Button(Signal<String> textSignal, Component icon,
             ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -355,6 +360,8 @@ public class Button extends Component
     /**
      * Executes a click on this button at the client-side. Calling this method
      * behaves the same as if the user would have clicked on the button.
+     * 
+     * @since 1.3
      */
     public void clickInClient() {
         getElement().callJsFunction("click");
@@ -418,6 +425,7 @@ public class Button extends Component
      *            whether the button should be disabled when clicked
      * @throws IllegalStateException
      *             if the enabled state is already bound to a signal
+     * @since 1.2
      */
     public void setDisableOnClick(boolean disableOnClick) {
         boolean hasEnabledBinding = getElement().getNode()
@@ -436,6 +444,7 @@ public class Button extends Component
      * Gets whether the button is set to be disabled when clicked.
      *
      * @return whether button is set to be disabled on click
+     * @since 1.2
      */
     public boolean isDisableOnClick() {
         return disableOnClickController.isDisableOnClick();
@@ -460,6 +469,8 @@ public class Button extends Component
      *
      * This feature flag will also enable focus events and focus shortcuts for
      * disabled buttons.
+     * 
+     * @since 24.3.8
      */
     @Override
     public void setEnabled(boolean enabled) {
@@ -481,6 +492,7 @@ public class Button extends Component
      *         onChange} callbacks
      * @throws IllegalStateException
      *             if disable-on-click is active
+     * @since 25.1
      */
     @Override
     public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
@@ -504,6 +516,8 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
+     * 
+     * @since 24.7
      */
     @Override
     public ShortcutRegistration addFocusShortcut(Key key,
@@ -529,6 +543,8 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
+     * 
+     * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -554,6 +570,8 @@ public class Button extends Component
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
      * </pre>
+     * 
+     * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -588,6 +606,7 @@ public class Button extends Component
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     * @since 24.0
      */
     protected void remove(Component... components) {
         for (Component component : components) {

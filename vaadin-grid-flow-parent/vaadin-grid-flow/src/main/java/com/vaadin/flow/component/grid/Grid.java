@@ -211,6 +211,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid bean type
  *
+ * @since 1.0
  */
 @Tag("vaadin-grid")
 @NpmPackage(value = "@vaadin/grid", version = "25.3.0-alpha2")
@@ -231,6 +232,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * behavior when parsing nested properties which may contain
      * <code>null</code> values in the property chain
+     * 
+     * @since 14.5
      */
     public enum NestedNullBehavior {
         /**
@@ -250,6 +253,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
 
+    /**
+     * @since 1.1
+     */
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
         private final Element element;
@@ -378,6 +384,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @see Grid#setSelectionMode(SelectionMode)
      * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     * @since 23.2
      */
     public enum MultiSortPriority {
         /**
@@ -407,6 +414,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param priority
      *            the multi-sort priority to be used by all grid instances
+     * @since 23.2
      */
     public static void setDefaultMultiSortPriority(MultiSortPriority priority) {
         defaultMultiSortPriority = priority;
@@ -494,6 +502,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @param dataGenerator
          *            the data generator to add
          * @return a registration for removing the data generator
+         * @since 25.3
          */
         protected Registration addDataGenerator(
                 DataGenerator<T> dataGenerator) {
@@ -555,6 +564,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @return the renderer used for this column, should never be
          *         {@code null}
+         * @since 2.0
          */
         public Renderer<T> getRenderer() {
             return renderer;
@@ -693,6 +703,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            whether to enable or disable automatic width on this
          *            column
          * @return this column, for method chaining
+         * @since 4.0
          */
         public Column<T> setAutoWidth(boolean autoWidth) {
             getElement().setProperty("autoWidth", autoWidth);
@@ -703,6 +714,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Gets this column's auto width state.
          *
          * @return whether this column has automatic width enabled
+         * @since 4.0
          */
         public boolean isAutoWidth() {
             return getElement().getProperty("autoWidth", false);
@@ -1017,6 +1029,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see Grid#getEditor()
          * @see Binder#bind(HasValue, ValueProvider, Setter)
+         * @since 2.1
          */
         public Column<T> setEditorComponent(Component editorComponent) {
             if (editorComponent == null) {
@@ -1041,6 +1054,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see Grid#getEditor()
          * @see #setEditorComponent(Component)
+         * @since 2.1
          */
         public Column<T> setEditorComponent(
                 SerializableFunction<T, ? extends Component> componentCallback) {
@@ -1064,6 +1078,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *         {@link #setEditorComponent(SerializableFunction)}.
          *
          * @see #setEditorComponent(Component)
+         * @since 2.1
          */
         public Component getEditorComponent() {
             return editorComponent;
@@ -1085,6 +1100,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @throws NullPointerException
          *             if {@code partNameGenerator} is {@code null}
          * @see Grid#setPartNameGenerator(SerializableFunction)
+         * @since 24.0
          */
         public Column<T> setPartNameGenerator(
                 SerializableFunction<T, String> partNameGenerator) {
@@ -1105,6 +1121,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @return this column
          * @throws NullPointerException
          *             if {@code tooltipGenerator} is {@code null}
+         * @since 23.3
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
@@ -1121,6 +1138,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * cells in this column.
          *
          * @return the part name generator
+         * @since 24.0
          */
         public SerializableFunction<T, String> getPartNameGenerator() {
             return partNameGenerator;
@@ -1135,6 +1153,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @return whether cells in this column should be announced as row
          *         headers.
+         * @since 24.2
          */
         public boolean isRowHeader() {
             return getElement().getProperty("rowHeader", false);
@@ -1153,6 +1172,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @param rowHeader
          *            whether cells in this column should be announced as row
          *            headers
+         * @since 24.2
          */
         public Column<T> setRowHeader(boolean rowHeader) {
             getElement().setProperty("rowHeader", rowHeader);
@@ -1484,6 +1504,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param dataProvider
      *            the data provider, not {@code null}
      *
+     * @since 24.1
      */
     public Grid(DataProvider<T, Void> dataProvider) {
         this();
@@ -1496,6 +1517,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param dataProvider
      *            the data provider, not {@code null}
      *
+     * @since 24.1
      */
     public Grid(BackEndDataProvider<T, Void> dataProvider) {
         this();
@@ -1508,6 +1530,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param inMemoryDataProvider
      *            the data provider, not {@code null}
      *
+     * @since 24.1
      */
     public Grid(InMemoryDataProvider<T> inMemoryDataProvider) {
         this();
@@ -1520,6 +1543,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param dataProvider
      *            the data provider, not {@code null}
      *
+     * @since 24.1
      */
     public Grid(ListDataProvider<T> dataProvider) {
         this();
@@ -1533,6 +1557,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param items
      *            the collection of items, not {@code null}
      *
+     * @since 24.1
      */
     public Grid(Collection<T> items) {
         this();
@@ -1576,6 +1601,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @since 2.0
      */
     public Grid(Class<T> beanType, boolean autoCreateColumns) {
         this();
@@ -1624,6 +1650,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
+     * @since 24.9
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             constructor will be removed in Vaadin 26.
      */
@@ -1660,6 +1687,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @since 24.9
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             constructor will be removed in Vaadin 26.
      */
@@ -1691,6 +1719,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
+     * @since 24.9
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             constructor will be removed in Vaadin 26.
      */
@@ -1814,6 +1843,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param <U>
      *            the ArrayUpdater type
+     * @since 1.1
      * @deprecated Override {@link #createDataCommunicator()} instead. This
      *             class and the constructors that accept it will be removed in
      *             Vaadin 26.
@@ -1837,6 +1867,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the unique key value provider supplier for the data
          *            communicator
          * @return the build data communicator object
+         * @since 2.0
          */
         @Deprecated(since = "25.3", forRemoval = true)
         protected DataCommunicator<T> build(Element element,
@@ -1899,6 +1930,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #addComponentColumn(ValueProvider)
      * @see #addColumn(Renderer)
      * @see #removeColumn(Column)
+     * @since 3.0
      */
     protected <C extends Column<T>> C addColumn(
             ValueProvider<T, ?> valueProvider,
@@ -2047,6 +2079,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
+     * @since 3.0
      */
     protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
             BiFunction<Renderer<T>, String, C> columnFactory) {
@@ -2103,6 +2136,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             {@link #getDefaultColumnFactory} should be used instead.
      * @see #createColumnId(boolean)
      * @see Renderer
+     * @since 2.1
      */
     @Deprecated
     protected Column<T> createColumn(Renderer<T> renderer, String columnId) {
@@ -2115,6 +2149,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * This method must not return <code>null</code>.
      *
      * @return method for column creation
+     * @since 3.0
      */
     protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
         return this::createColumn;
@@ -2181,6 +2216,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the method that creates a new column instance for this
      *            {@link Grid} instance.
      * @return the created column
+     * @since 3.0
      */
     protected <C extends Column<T>> C addColumn(String propertyName,
             BiFunction<Renderer<T>, String, C> columnFactory) {
@@ -2247,6 +2283,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the property names of the new columns, not <code>null</code>
      * @see #addColumn(String)
      * @see #removeColumn(Column)
+     * @since 2.0
      */
     public void addColumns(String... propertyNames) {
         checkForBeanGrid();
@@ -2298,6 +2335,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @see #setColumns(String...)
      * @see #getColumnByKey(String)
+     * @since 2.0
      */
     public void setSortableColumns(String... propertyNames) {
         checkForBeanGrid();
@@ -2389,6 +2427,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             rows
      * @throws NoSuchElementException
      *             if the header row cannot be found
+     * @since 24.4
      */
     public void removeHeaderRow(HeaderRow headerRow) {
         Objects.requireNonNull(headerRow);
@@ -2433,6 +2472,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Removes all header rows from the grid.
      *
      * @see #removeHeaderRow(HeaderRow)
+     * @since 24.4
      */
     public void removeAllHeaderRows() {
         var headerRows = getHeaderRows();
@@ -2500,6 +2540,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the footer row to remove
      * @throws NoSuchElementException
      *             if the footer row cannot be found
+     * @since 24.4
      */
     public void removeFooterRow(FooterRow footerRow) {
         Objects.requireNonNull(footerRow);
@@ -2546,6 +2587,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Removes all footer rows from the grid.
      *
      * @see #removeFooterRow(FooterRow)
+     * @since 24.4
      */
     public void removeAllFooterRows() {
         getFooterRows().forEach(this::removeFooterRow);
@@ -2603,6 +2645,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param variants
      *            theme variants to add
+     * @since 2.0
      */
     public void addThemeVariants(GridVariant... variants) {
         getThemeNames().addAll(Stream.of(variants)
@@ -2614,6 +2657,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param variants
      *            theme variants to remove
+     * @since 2.0
      */
     public void removeThemeVariants(GridVariant... variants) {
         getThemeNames().removeAll(Stream.of(variants)
@@ -2837,6 +2881,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the generic {@link DataView} implementation for grid
      * @see #getListDataView()
      * @see #getLazyDataView()
+     * @since 18.0
      */
     @Override
     public GridDataView<T> getGenericDataView() {
@@ -2861,6 +2906,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * fetched lazily, use {@link #getLazyDataView()} instead.
      *
      * @return the list data view that provides access to the items in the grid
+     * @since 18.0
      */
     @Override
     public GridListDataView<T> getListDataView() {
@@ -2876,6 +2922,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return getLazyDataView();
     }
 
+    /**
+     * @since 24.7
+     */
     public interface SpringData extends Serializable {
         /**
          * Callback interface for fetching a list of items from a backend based
@@ -2936,6 +2985,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            a function that returns a sorted list of items from the
      *            backend based on the given pageable
      * @return a data view for further configuration
+     * @since 24.7
      */
     public GridLazyDataView<T> setItemsPageable(
             SpringData.FetchCallback<Pageable, T> fetchCallback) {
@@ -2965,6 +3015,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param countCallback
      *            a function that returns the number of items in the back end
      * @return LazyDataView instance for further configuration
+     * @since 24.7
      */
     public GridLazyDataView<T> setItemsPageable(
             SpringData.FetchCallback<Pageable, T> fetchCallback,
@@ -3013,6 +3064,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return the lazy data view that provides access to the data bound to the
      *         grid
+     * @since 18.0
      */
     @Override
     public GridLazyDataView<T> getLazyDataView() {
@@ -3126,6 +3178,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Returns the selection mode for this grid.
      *
      * @return the selection mode, not null
+     * @since 24.4
      */
     public SelectionMode getSelectionMode() {
         assert selectionMode != null : "No selection mode set by "
@@ -3176,6 +3229,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the function to use to determine whether an item may be
      *            selected or deselected by the user, or {@code null} to allow
      *            all items to be selected or deselected
+     * @since 24.6
      */
     public void setItemSelectableProvider(SerializablePredicate<T> provider) {
         selectableProvider = provider;
@@ -3322,6 +3376,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the selection preservation mode to switch to, not {@code null}
      *
      * @see SelectionPreservationMode
+     * @since 24.4
      */
     public void setSelectionPreservationMode(
             SelectionPreservationMode selectionPreservationMode) {
@@ -3340,6 +3395,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the selection preservation mode
      *
      * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     * @since 24.4
      */
     public SelectionPreservationMode getSelectionPreservationMode() {
         return selectionPreservationHandler.getSelectionPreservationMode();
@@ -3392,6 +3448,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param action
      *            the scroll action to execute
+     * @since 25.1
      */
     protected void scheduleScrollExecution(SerializableRunnable action) {
         getElement().getNode().runWhenAttached(ui -> {
@@ -3519,6 +3576,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
      *         {@code null} if no column has such an identifier
+     * @since 24.7.4
      */
     protected final Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
@@ -3584,6 +3642,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             if the column is {@code null}
      * @throws IllegalArgumentException
      *             if the column is not owned by this Grid
+     * @since 4.1
      */
     public void removeColumns(Column<T>... columns) {
         for (Column<T> column : columns) {
@@ -3593,6 +3652,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Removes all columns from this Grid.
+     * 
+     * @since 3.0
      */
     public void removeAllColumns() {
         getColumns().forEach(c -> removeColumn(c));
@@ -3700,6 +3761,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the multi-sort priority to set, not {@code null}
      *
      * @see MultiSortPriority
+     * @since 23.2
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
         doSetMultiSort(multiSort);
@@ -3716,6 +3778,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code true} to enable multi-sort by shift-clicking (when
      *            {@code multiSort = true}), {@code false} for normal multi-sort
      *            behavior
+     * @since 23.3
      */
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
         doSetMultiSort(multiSort);
@@ -3738,6 +3801,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            behavior
      *
      * @see MultiSortPriority
+     * @since 23.3
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority,
             boolean onShiftClickOnly) {
@@ -3794,6 +3858,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param ariaLabel
      *            the aria-label text to set or {@code null} to clear
+     * @since 24.6
      */
     public void setAriaLabel(String ariaLabel) {
         if (ariaLabel == null) {
@@ -3808,6 +3873,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return an optional aria-label of the component if no aria-label has been
      *         set
+     * @since 24.6
      */
     public Optional<String> getAriaLabel() {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
@@ -3817,6 +3883,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Adds a new context-menu for this grid.
      *
      * @return the added context-menu
+     * @since 1.2
      */
     public GridContextMenu<T> addContextMenu() {
         return new GridContextMenu<T>(this);
@@ -3940,6 +4007,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            <code>null</code> to reset any sort orders.
      * @see #setMultiSort(boolean)
      * @see #getSortOrder()
+     * @since 2.0
      */
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
@@ -4023,6 +4091,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets an list of the current sort orders in the Grid.
      *
      * @return an unmodifiable list of sort orders
+     * @since 2.0
      */
     public List<GridSortOrder<T>> getSortOrder() {
         return Collections.unmodifiableList(sortOrder);
@@ -4130,6 +4199,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param allRowsVisible
      *            <code>true</code> to make Grid compute its height by the
      *            number of rows, <code>false</code> for the default behavior
+     * @since 21.0
      */
     public void setAllRowsVisible(boolean allRowsVisible) {
         getElement().setProperty("allRowsVisible", allRowsVisible);
@@ -4140,6 +4210,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return <code>true</code> if Grid computes its height by the number of
      *         rows, <code>false</code> otherwise
+     * @since 21.0
      */
     @Synchronize("all-rows-visible-changed")
     public boolean isAllRowsVisible() {
@@ -4180,6 +4251,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            <code>null</code>
      * @return a registration that can be used to remove the ValueProvider from
      *         the Grid
+     * @since 2.0
      */
     public Registration addValueProvider(String property,
             ValueProvider<T, ?> valueProvider) {
@@ -4230,6 +4302,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @since 21.0
      */
     public void configureBeanType(Class<T> beanType,
             boolean autoCreateColumns) {
@@ -4258,6 +4331,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #Grid(Class)}. Or null if not constructed from a bean type.
      *
      * @return the Class of bean this Grid is constructed with
+     * @since 4.0
      */
     public Class<T> getBeanType() {
         return beanType;
@@ -4268,6 +4342,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #Grid(Class)}. Or null if not constructed from a bean type.
      *
      * @return the {@link PropertySet} of bean this Grid is constructed with
+     * @since 1.1
      */
     public PropertySet<T> getPropertySet() {
         return propertySet;
@@ -4281,6 +4356,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return a handle that can be used for removing the listener
      *
      * @see #addItemDoubleClickListener(ComponentEventListener)
+     * @since 2.1
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addItemClickListener(
@@ -4296,6 +4372,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 4.1
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addColumnResizeListener(
@@ -4322,6 +4399,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return a handle that can be used for removing the listener
      *
      * @see #addItemClickListener(ComponentEventListener)
+     * @since 2.1
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addItemDoubleClickListener(
@@ -4354,6 +4432,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 21.0
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addCellFocusListener(
@@ -4370,6 +4449,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #createEditor()
      *
      * @return the editor instance
+     * @since 2.1
      */
     public Editor<T> getEditor() {
         if (editor == null) {
@@ -4393,6 +4473,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @throws NullPointerException
      *             if {@code partNameGenerator} is {@code null}
      * @see Column#setPartNameGenerator(SerializableFunction)
+     * @since 24.0
      */
     public void setPartNameGenerator(
             SerializableFunction<T, String> partNameGenerator) {
@@ -4407,6 +4488,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * to {@code true}.
      *
      * @see Column#setAutoWidth(boolean)
+     * @since 4.0
      */
     public void recalculateColumnWidths() {
         // Defer column width recalculation to occur after the data was
@@ -4424,6 +4506,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * this grid.
      *
      * @return the part name generator
+     * @since 24.0
      */
     public SerializableFunction<T, String> getPartNameGenerator() {
         return partNameGenerator;
@@ -4477,6 +4560,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * automatically added to {@link DataCommunicator}.
      *
      * @return editor
+     * @since 2.1
      */
     protected Editor<T> createEditor() {
         return new EditorImpl<>(this, propertySet);
@@ -4486,6 +4570,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets optional value provider for unique key in row's generated JSON.
      *
      * @return ValueProvider for unique key for row or null if not set
+     * @since 1.1
      */
     protected ValueProvider<T, String> getUniqueKeyProvider() {
         return uniqueKeyProvider;
@@ -4498,6 +4583,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param uniqueKeyProvider
      *            ValueProvider for unique key for row
+     * @since 1.1
      */
     protected void setUniqueKeyProvider(
             ValueProvider<T, String> uniqueKeyProvider) {
@@ -4508,6 +4594,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets property name for unique key in row's generated JSON.
      *
      * @return the optional property name for unique key
+     * @since 1.1
      */
     protected String getUniqueKeyProperty() {
         return uniqueKeyProperty;
@@ -4518,6 +4605,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param uniqueKeyProperty
      *            the new optional property name for unique key
+     * @since 1.1
      */
     protected void setUniqueKeyProperty(String uniqueKeyProperty) {
         this.uniqueKeyProperty = uniqueKeyProperty;
@@ -4553,6 +4641,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see DataChangeEvent
      * @see DataProviderListener
      *
+     * @since 3.0
      */
     protected void onDataProviderChange() {
         SerializableSupplier<Editor<T>> factory = editorFactory;
@@ -4616,6 +4705,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 4.0
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addDropListener(
@@ -4630,6 +4720,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 4.0
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addDragStartListener(
@@ -4644,6 +4735,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 4.0
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addDragEndListener(
@@ -4682,6 +4774,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            Grid's row. Can be {@code null} to disable dropping on the
      *            grid.
      * @see GridDropEvent#getDropLocation()
+     * @since 4.0
      */
     public void setDropMode(GridDropMode dropMode) {
         getElement().setProperty("dropMode",
@@ -4694,6 +4787,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return Drop mode that describes the allowed drop locations within the
      *         Grid's row. {@code null} if dropping is not enabled.
+     * @since 4.0
      */
     public GridDropMode getDropMode() {
         String dropMode = getElement().getProperty("dropMode");
@@ -4708,6 +4802,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param rowsDraggable
      *            {@code true} if the rows can be dragged by the user;
      *            {@code false} if not
+     * @since 4.0
      */
     public void setRowsDraggable(boolean rowsDraggable) {
         getElement().setProperty("rowsDraggable", rowsDraggable);
@@ -4718,6 +4813,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets whether rows of the grid can be dragged.
      *
      * @return {@code true} if the rows are draggable, {@code false} otherwise
+     * @since 4.0
      */
     public boolean isRowsDraggable() {
         return getElement().getProperty("rowsDraggable", false);
@@ -4727,6 +4823,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets the active drop filter.
      *
      * @return The drop filter function
+     * @since 4.0
      */
     public SerializablePredicate<T> getDropFilter() {
         return dropFilter;
@@ -4736,6 +4833,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets the active drag filter.
      *
      * @return The drag filter function
+     * @since 4.0
      */
     public SerializablePredicate<T> getDragFilter() {
         return dragFilter;
@@ -4763,6 +4861,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
+     * 
+     * @since 4.0
      */
     public void setDropFilter(SerializablePredicate<T> dropFilter) {
         Objects.requireNonNull(dropFilter, "Drop filter can not be null");
@@ -4783,6 +4883,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
+     * 
+     * @since 4.0
      */
     public void setDragFilter(SerializablePredicate<T> dragFilter) {
         Objects.requireNonNull(dragFilter, "Drag filter can not be null");
@@ -4804,6 +4906,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            accessible during drop using this type.
      * @param dragDataGenerator
      *            Function to be executed on row data generation.
+     * @since 4.0
      */
     public void setDragDataGenerator(String type,
             SerializableFunction<T, String> dragDataGenerator) {
@@ -4842,6 +4945,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * focused. The default position is {@link TooltipPosition#BOTTOM}.
      *
      * @return the position of the tooltip
+     * @since 24.7
      */
     public TooltipPosition getTooltipPosition() {
         String position = getTooltipElement()
@@ -4856,6 +4960,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param position
      *            the position to set
+     * @since 24.7
      */
     public void setTooltipPosition(TooltipPosition position) {
         Objects.requireNonNull(position, "Position cannot be null");
@@ -4871,6 +4976,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return {@code true} if the content is rendered as Markdown,
      *         {@code false} if it is treated as plain text
+     * @since 25.0
      */
     public boolean isTooltipMarkdownEnabled() {
         return getTooltipElement().map(
@@ -4885,6 +4991,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param markdownEnabled
      *            {@code true} to render the content as Markdown, {@code false}
      *            to treat it as plain text
+     * @since 25.0
      */
     public void setTooltipMarkdownEnabled(boolean markdownEnabled) {
         addTooltipElementToTooltipSlot();
@@ -4930,6 +5037,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param dragData
      *            The drag data for selection drag. The map should consist of
      *            data type:data -entries
+     * @since 4.0
      */
     public void setSelectionDragDetails(int draggedItemsCount,
             Map<String, String> dragData) {
@@ -4953,6 +5061,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
+     * @since 4.1
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addColumnReorderListener(
@@ -4987,6 +5096,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             contain all columns currently present in the Grid, or if the
      *             column rearranging would require to split a joined
      *             header/footer cell group.
+     * @since 4.1
      */
     public void setColumnOrder(Column<T>... columns) {
         setColumnOrder(Arrays.asList(columns));
@@ -5018,6 +5128,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             contain all columns currently present in the Grid, or if the
      *             column rearranging would require to split a joined
      *             header/footer cell group.
+     * @since 4.1
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
@@ -5038,6 +5149,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param rowIndex
      *            zero based index of the item to scroll to in the current view.
+     * @since 4.1
      */
     public void scrollToIndex(int rowIndex) {
         setViewportRangeByIndex(rowIndex);
@@ -5089,6 +5201,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @throws UnsupportedOperationException
      *             if {@link ItemIndexProvider} is missing for grid with a lazy
      *             loading data provider.
+     * @since 24.4
      */
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
@@ -5108,6 +5221,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the beginning of the first data row.
+     * 
+     * @since 4.1
      */
     public void scrollToStart() {
         scrollToIndex(0);
@@ -5115,6 +5230,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the last data row of the grid.
+     * 
+     * @since 4.1
      */
     public void scrollToEnd() {
         scheduleScrollExecution(() -> getElement()
@@ -5127,6 +5244,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param columnIndex
      *            the index of the column to scroll to
+     * @since 25.1
      */
     public void scrollToColumn(int columnIndex) {
         getElement().callJsFunction("scrollToColumn", columnIndex);
@@ -5137,6 +5255,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param column
      *            the column to scroll to
+     * @since 25.1
      */
     public void scrollToColumn(Column<T> column) {
         getElement().callJsFunction("scrollToColumn", column.getElement());
@@ -5161,6 +5280,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param nestedNullBehavior
      *            the behavior when facing nested <code>null</code> values.
+     * @since 14.5
      */
     public void setNestedNullBehavior(NestedNullBehavior nestedNullBehavior) {
         this.nestedNullBehavior = nestedNullBehavior;
@@ -5170,6 +5290,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Get the behavior when facing nested <code>null</code> values.
      *
      * @return The current behavior when facing nested <code>null</code> values.
+     * @since 14.5
      */
     public NestedNullBehavior getNestedNullBehavior() {
         return nestedNullBehavior;
@@ -5224,6 +5345,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param columnRendering
      *            the column rendering mode to use
      * @see ColumnRendering
+     * @since 24.1
      */
     public void setColumnRendering(ColumnRendering columnRendering) {
         getElement().setProperty("columnRendering",
@@ -5236,6 +5358,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Gets the current column rendering mode.
      *
      * @return the current column rendering mode
+     * @since 24.1
      */
     public ColumnRendering getColumnRendering() {
         return ColumnRendering
@@ -5314,6 +5437,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param emptyStateComponent
      *            the component to be displayed when the grid is empty, or null
      *            to clear the empty state content
+     * @since 24.5
      */
     public void setEmptyStateComponent(Component emptyStateComponent) {
         this.emptyStateText = null;
@@ -5330,6 +5454,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param emptyStateText
      *            the text to be displayed when the grid is empty, or null to
      *            clear the empty state content
+     * @since 24.5
      */
     public void setEmptyStateText(String emptyStateText) {
         this.emptyStateComponent = null;
@@ -5342,6 +5467,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return the component that is displayed when the grid is empty or null if
      *         no empty state component is set
+     * @since 24.5
      */
     public Component getEmptyStateComponent() {
         return emptyStateComponent;
@@ -5352,6 +5478,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return the text that is displayed when the grid is empty or null if no
      *         empty state text is set
+     * @since 24.5
      */
     public String getEmptyStateText() {
         return emptyStateText;

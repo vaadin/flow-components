@@ -82,6 +82,8 @@ import com.vaadin.flow.component.map.configuration.layer.Layer;
  * just add more overhead, and where it's reasonable to just create new
  * instances instead.</li>
  * </ul>
+ * 
+ * @since 23.0
  */
 public abstract class AbstractConfigurationObject implements Serializable {
 
@@ -179,6 +181,8 @@ public abstract class AbstractConfigurationObject implements Serializable {
     /**
      * Convenience wrapper for {@link #addChild(AbstractConfigurationObject)}
      * that allows {@code configurationObject} to be a null reference.
+     * 
+     * @since 24.1
      */
     protected void addNullableChild(
             AbstractConfigurationObject configurationObject) {

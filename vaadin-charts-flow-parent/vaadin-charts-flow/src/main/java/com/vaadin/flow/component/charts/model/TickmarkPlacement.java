@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * For categorized axes only. If ON the tick mark is placed in the center of the
  * category, if BETWEEN the tick mark is placed between categories. Defaults to
  * BETWEEN.
+ * 
+ * @since 6.0.1
  */
 public enum TickmarkPlacement implements ChartEnum {
     ON("on"), BETWEEN("between");

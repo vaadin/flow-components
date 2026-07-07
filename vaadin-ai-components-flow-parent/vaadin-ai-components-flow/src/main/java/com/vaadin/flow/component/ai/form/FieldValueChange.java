@@ -33,6 +33,7 @@ import com.vaadin.flow.component.HasValue;
  *            the field's value at the end of the turn, possibly {@code null}
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public record FieldValueChange(HasValue<?, ?> field, Object oldValue,
         Object newValue) implements Serializable {

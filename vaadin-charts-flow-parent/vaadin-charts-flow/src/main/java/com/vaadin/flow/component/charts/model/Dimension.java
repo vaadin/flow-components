@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Axial dimension.
+ * 
+ * @since 6.0.1
  */
 public enum Dimension implements ChartEnum {
 

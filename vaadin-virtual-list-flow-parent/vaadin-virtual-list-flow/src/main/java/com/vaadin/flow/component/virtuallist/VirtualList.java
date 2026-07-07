@@ -68,6 +68,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @param <T>
  *            the type of the items supported by the list
+ * @since 21.0
  */
 @Tag("vaadin-virtual-list")
 @NpmPackage(value = "@vaadin/virtual-list", version = "25.3.0-alpha2")
@@ -318,6 +319,7 @@ public class VirtualList<T> extends Component
      *
      * @param rowIndex
      *            zero based index of the item to scroll to in the current view.
+     * @since 24.3
      */
     public void scrollToIndex(int rowIndex) {
         getElement().getNode().runWhenAttached(
@@ -327,6 +329,8 @@ public class VirtualList<T> extends Component
 
     /**
      * Scrolls to the first element.
+     * 
+     * @since 24.3
      */
     public void scrollToStart() {
         scrollToIndex(0);
@@ -334,6 +338,8 @@ public class VirtualList<T> extends Component
 
     /**
      * Scrolls to the last element of the list.
+     * 
+     * @since 24.3
      */
     public void scrollToEnd() {
         scrollToIndex(Integer.MAX_VALUE);
@@ -349,6 +355,7 @@ public class VirtualList<T> extends Component
      *            the item accessible name generator to set, not {@code null}
      * @throws NullPointerException
      *             if {@code itemAccessibleNameGenerator} is {@code null}
+     * @since 24.7
      */
     public void setItemAccessibleNameGenerator(
             SerializableFunction<T, String> itemAccessibleNameGenerator) {
@@ -362,6 +369,7 @@ public class VirtualList<T> extends Component
      * Gets the function that generates accessible names for virtual list items.
      *
      * @return the item accessible name generator
+     * @since 24.7
      */
     public SerializableFunction<T, String> getItemAccessibleNameGenerator() {
         return itemAccessibleNameGenerator;

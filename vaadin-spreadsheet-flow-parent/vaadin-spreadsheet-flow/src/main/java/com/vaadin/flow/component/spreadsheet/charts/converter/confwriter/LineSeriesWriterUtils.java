@@ -13,6 +13,9 @@ import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.MarkerSymbolEnum;
 import com.vaadin.flow.component.spreadsheet.charts.converter.Utils;
 
+/**
+ * @since 24.0
+ */
 public class LineSeriesWriterUtils {
     public static Marker getMarker(String markerSymbol) {
         if (markerSymbol.isEmpty())

@@ -20,6 +20,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 /**
  * Set of theme variants applicable for {@code vaadin-horizontal-layout}
  * component.
+ * 
+ * @since 25.0
  */
 public enum HorizontalLayoutVariant implements ThemeVariant {
     LUMO_MARGIN("margin"),
