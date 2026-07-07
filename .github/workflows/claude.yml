@@ -9,8 +9,9 @@ on:
     types: [submitted]
 
 env:
-  # Pin the Playwright MCP server so the browser and server versions stay in
-  # lockstep. Bump this to upgrade; the browser cache key tracks it.
+  # Pin the Playwright MCP server version for reproducible runs. The MCP drives
+  # the runner's preinstalled Chrome (--browser chrome), so no browser download
+  # is needed. Bump this to upgrade the server.
   PLAYWRIGHT_MCP_VERSION: '0.0.77'
 
 jobs:
@@ -87,17 +88,6 @@ jobs:
           git clone --depth 1 https://github.com/vaadin/web-components.git \
             "${{ runner.temp }}/reference/web-components"
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-mcp-${{ env.PLAYWRIGHT_MCP_VERSION }}
-
-      - name: Install Chromium for Playwright MCP
-        run: |
-          core_version=$(npm view "@playwright/mcp@${PLAYWRIGHT_MCP_VERSION}" dependencies.playwright-core)
-          npx --yes "playwright@${core_version}" install --with-deps chromium
-
       - name: Build Claude prompt
         id: prompt
         run: node "${{ runner.temp }}/prompt.js"
@@ -124,7 +114,7 @@ jobs:
             }
           claude_args: |
             --append-system-prompt-file ${{ runner.temp }}/system-prompt.md
-            --mcp-config '{"mcpServers":{"playwright":{"command":"npx","args":["@playwright/mcp@${{ env.PLAYWRIGHT_MCP_VERSION }}","--headless","--isolated"]}}}'
+            --mcp-config '{"mcpServers":{"playwright":{"command":"npx","args":["@playwright/mcp@${{ env.PLAYWRIGHT_MCP_VERSION }}","--headless","--isolated","--browser","chrome"]}}}'
             --allowedTools "mcp__playwright,Bash(mvn:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git branch:*),Bash(git add:*),Bash(git commit:*),Bash(git checkout:*),Bash(git restore:*),Bash(git stash:*),Bash(cd:*),Bash(npm install),Bash(npm ci),Bash(node scripts/wtr.js:*),Bash(node scripts/computeModules.js:*),Bash(scripts/checkstyle.sh:*),Bash(./scripts/checkstyle.sh:*),Bash(ls:*),Bash(cat:*),Bash(find:*),Bash(grep:*),Bash(rg:*),Bash(head:*),Bash(tail:*),Bash(sed:*),Bash(wc:*),Bash(echo:*)"
 
       - name: Summarize Claude session
