@@ -186,6 +186,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.resolvePendingCallbacks = () => {
     const { rootCache } = dataProviderController;
 
+    grid._hasData = true;
+
     preventRowUpdates(() => {
       Object.values(rootCache.pendingRequests).forEach((callback) => {
         // Set a flag so the grid re-checks all rendered rows after all callbacks
