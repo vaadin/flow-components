@@ -19,7 +19,7 @@
  *   node .github/claude/summary.js <execution-file>
  */
 
-const fs = require('fs');
+import fs from 'node:fs';
 
 // Pull the final result event out of the stream-json log. It is the last
 // message with type "result" and carries the run's aggregates.

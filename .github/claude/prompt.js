@@ -9,7 +9,7 @@
  *   node .github/claude/prompt.js
  */
 
-const fs = require('fs');
+import fs from 'node:fs';
 
 // The action's tag-mode prompt only contains the trigger comment's body, with
 // no link to the review thread it replies to — a reply like "@claude fix this"
