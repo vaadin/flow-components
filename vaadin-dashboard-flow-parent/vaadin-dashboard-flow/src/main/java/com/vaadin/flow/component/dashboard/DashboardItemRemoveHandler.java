@@ -31,6 +31,7 @@ import java.io.Serializable;
  * @author Vaadin Ltd.
  * @see Dashboard#setItemRemoveHandler(DashboardItemRemoveHandler)
  * @see DashboardItemRemoveEvent
+ * @since 25.1
  */
 @FunctionalInterface
 public interface DashboardItemRemoveHandler extends Serializable {

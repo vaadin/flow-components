@@ -22,7 +22,7 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
  * all available actions to the Spreadsheet.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  *
  */
 @SuppressWarnings("serial")

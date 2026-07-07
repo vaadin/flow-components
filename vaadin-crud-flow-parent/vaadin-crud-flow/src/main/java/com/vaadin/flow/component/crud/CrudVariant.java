@@ -10,12 +10,15 @@ package com.vaadin.flow.component.crud;
 
 /**
  * The set of theme variants applicable to the {@code vaadin-crud} component.
+ * 
+ * @since 1.0
  */
 public enum CrudVariant {
     NO_BORDER("no-border"),
     LUMO_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_BORDER("no-border");

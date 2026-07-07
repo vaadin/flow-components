@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * The {@link YAxis} will show percentage or absolute change depending on
  * whether compare is set to {@link Compare#PERCENT} or {@link Compare#VALUE}
+ * 
+ * @since 6.0.1
  */
 public enum Compare implements ChartEnum {
     PERCENT("percent"), VALUE("value");

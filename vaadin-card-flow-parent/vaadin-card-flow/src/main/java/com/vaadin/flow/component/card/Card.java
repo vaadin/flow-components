@@ -36,6 +36,7 @@ import com.vaadin.flow.dom.Element;
  * Card is a visual content container for creating a card-based layout.
  *
  * @author Vaadin Ltd
+ * @since 24.7
  */
 @Tag("vaadin-card")
 @NpmPackage(value = "@vaadin/card", version = "25.2.1")
@@ -62,6 +63,7 @@ public class Card extends Component implements HasSize,
      *
      * @param media
      *            the media component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setMedia(Component media) {
         SlotUtils.setSlot(this, MEDIA_SLOT_NAME, media);
@@ -71,6 +73,7 @@ public class Card extends Component implements HasSize,
      * Gets the current media component.
      *
      * @return the media component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getMedia() {
         return SlotUtils.getChildInSlot(this, MEDIA_SLOT_NAME);
@@ -88,6 +91,7 @@ public class Card extends Component implements HasSize,
      * @see #setTitle(String, Integer)
      * @see #setTitleHeadingLevel(Integer)
      * @see #getTitleAsText()
+     * @since 24.7.2
      */
     public void setTitle(String title) {
         doSetTitle((Component) null);
@@ -108,6 +112,7 @@ public class Card extends Component implements HasSize,
      * @see #setTitle(String)
      * @see #setTitleHeadingLevel(Integer)
      * @see #getTitleAsText()
+     * @since 24.7.2
      */
     public void setTitle(String title, Integer titleHeadingLevel) {
         setTitleHeadingLevel(titleHeadingLevel);
@@ -122,6 +127,7 @@ public class Card extends Component implements HasSize,
      *
      * @param titleHeadingLevel
      *            the title heading level property, {@code null} to remove
+     * @since 24.7.2
      */
     public void setTitleHeadingLevel(Integer titleHeadingLevel) {
         if (titleHeadingLevel == null) {
@@ -141,6 +147,7 @@ public class Card extends Component implements HasSize,
      *
      * @param title
      *            the title component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setTitle(Component title) {
         doSetTitle((String) null);
@@ -152,6 +159,7 @@ public class Card extends Component implements HasSize,
      * title is set.
      *
      * @return the value of the title property
+     * @since 24.7.2
      */
     public String getTitleAsText() {
         return getElement().getProperty(CARD_TITLE_PROPERTY, "");
@@ -161,6 +169,7 @@ public class Card extends Component implements HasSize,
      * Gets the current title component set using {@link #setTitle(Component)}.
      *
      * @return the title component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getTitle() {
         return SlotUtils.getChildInSlot(this, TITLE_SLOT_NAME);
@@ -175,6 +184,7 @@ public class Card extends Component implements HasSize,
      *
      * @param subtitle
      *            the subtitle component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setSubtitle(Component subtitle) {
         SlotUtils.setSlot(this, SUBTITLE_SLOT_NAME, subtitle);
@@ -188,6 +198,7 @@ public class Card extends Component implements HasSize,
      *
      * @param subtitle
      *            the subtitle, or {@code null} to remove
+     * @since 25.0
      */
     public void setSubtitle(String subtitle) {
         if (subtitle == null) {
@@ -201,6 +212,7 @@ public class Card extends Component implements HasSize,
      * Gets the current subtitle component.
      *
      * @return the subtitle component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getSubtitle() {
         return SlotUtils.getChildInSlot(this, SUBTITLE_SLOT_NAME);
@@ -216,6 +228,7 @@ public class Card extends Component implements HasSize,
      *
      * @param header
      *            the header component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setHeader(Component header) {
         SlotUtils.setSlot(this, HEADER_SLOT_NAME, header);
@@ -225,6 +238,7 @@ public class Card extends Component implements HasSize,
      * Gets the current header component.
      *
      * @return the header component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getHeader() {
         return SlotUtils.getChildInSlot(this, HEADER_SLOT_NAME);
@@ -238,6 +252,7 @@ public class Card extends Component implements HasSize,
      *
      * @param headerPrefix
      *            the header prefix component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setHeaderPrefix(Component headerPrefix) {
         SlotUtils.setSlot(this, HEADER_PREFIX_SLOT_NAME, headerPrefix);
@@ -247,6 +262,7 @@ public class Card extends Component implements HasSize,
      * Gets the current header prefix component.
      *
      * @return the header prefix component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getHeaderPrefix() {
         return SlotUtils.getChildInSlot(this, HEADER_PREFIX_SLOT_NAME);
@@ -260,6 +276,7 @@ public class Card extends Component implements HasSize,
      *
      * @param headerSuffix
      *            the header suffix component, or {@code null} to remove
+     * @since 24.7.2
      */
     public void setHeaderSuffix(Component headerSuffix) {
         SlotUtils.setSlot(this, HEADER_SUFFIX_SLOT_NAME, headerSuffix);
@@ -269,6 +286,7 @@ public class Card extends Component implements HasSize,
      * Gets the current header suffix component.
      *
      * @return the header suffix component, or {@code null} if none is set
+     * @since 24.7.2
      */
     public Component getHeaderSuffix() {
         return SlotUtils.getChildInSlot(this, HEADER_SUFFIX_SLOT_NAME);
@@ -279,6 +297,7 @@ public class Card extends Component implements HasSize,
      *
      * @param footerComponent
      *            the components to add into the footer
+     * @since 24.7.2
      */
     public void addToFooter(Component... footerComponent) {
         Objects.requireNonNull(footerComponent,
@@ -295,6 +314,7 @@ public class Card extends Component implements HasSize,
      * Gets all components added to the card's footer.
      *
      * @return an array of footer components
+     * @since 24.7.2
      */
     public Component[] getFooterComponents() {
         return SlotUtils.getElementsInSlot(this, FOOTER_SLOT_NAME)
@@ -345,6 +365,7 @@ public class Card extends Component implements HasSize,
      *
      * @param role
      *            the ARIA role, or {@code null} to clear
+     * @since 24.7.2
      */
     public void setAriaRole(String role) {
         if (role == null) {
@@ -358,6 +379,7 @@ public class Card extends Component implements HasSize,
      * Gets the ARIA role attribute of the card.
      *
      * @return an optional ARIA role of the card if no ARIA role has been set
+     * @since 24.7.2
      */
     public Optional<String> getAriaRole() {
         return Optional.ofNullable(getElement().getAttribute("role"));

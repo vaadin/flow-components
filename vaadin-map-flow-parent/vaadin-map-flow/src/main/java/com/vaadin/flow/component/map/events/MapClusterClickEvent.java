@@ -25,6 +25,8 @@ import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Provides data for click events on a cluster of features
+ * 
+ * @since 25.0
  */
 @DomEvent("map-cluster-click")
 public class MapClusterClickEvent extends ComponentEvent<MapBase> {

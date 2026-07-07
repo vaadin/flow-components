@@ -31,6 +31,7 @@ import com.vaadin.flow.component.charts.model.Configuration;
  * @param configuration
  *            the chart configuration
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public record ChartState(List<String> queries,
         Configuration configuration) implements Serializable {

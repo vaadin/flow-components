@@ -27,6 +27,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @deprecated Board is deprecated and will be removed in Vaadin 26. Consider
  *             using Dashboard as an alternative.
+ * @since 2.0.1
  */
 @Tag("vaadin-board")
 @NpmPackage(value = "@vaadin/board", version = "25.2.1")

@@ -40,6 +40,8 @@ import com.vaadin.flow.component.map.configuration.style.TextStyle;
  * features that extend from {@link PointBasedFeature}, such as
  * {@link MarkerFeature} can be added to the layer. Enabling clustering will
  * switch the layer's source to a {@link ClusterSource}.
+ * 
+ * @since 23.0
  */
 public class FeatureLayer extends VectorLayer {
 
@@ -110,6 +112,8 @@ public class FeatureLayer extends VectorLayer {
 
     /**
      * Removes all features from the layer
+     * 
+     * @since 24.0
      */
     public void removeAllFeatures() {
         this.getSource().removeAllFeatures();
@@ -119,6 +123,7 @@ public class FeatureLayer extends VectorLayer {
      * Returns whether clustering is enabled for this layer.
      *
      * @return true if clustering is enabled, false otherwise
+     * @since 25.0
      */
     @JsonIgnore
     public boolean isClusteringEnabled() {
@@ -137,6 +142,7 @@ public class FeatureLayer extends VectorLayer {
      *
      * @param clusteringEnabled
      *            true to enable clustering, false to disable
+     * @since 25.0
      */
     public void setClusteringEnabled(boolean clusteringEnabled) {
         if (this.clusteringEnabled != clusteringEnabled) {
@@ -152,6 +158,7 @@ public class FeatureLayer extends VectorLayer {
      * Only applies when clustering is enabled.
      *
      * @return the distance in pixels within which features should be clustered
+     * @since 25.0
      */
     @JsonIgnore
     public int getClusterDistance() {
@@ -166,6 +173,7 @@ public class FeatureLayer extends VectorLayer {
      * @param clusterDistance
      *            the distance in pixels within which features should be
      *            clustered
+     * @since 25.0
      */
     public void setClusterDistance(int clusterDistance) {
         this.clusterDistance = clusterDistance;
@@ -184,6 +192,7 @@ public class FeatureLayer extends VectorLayer {
      * Only applies when clustering is enabled.
      *
      * @return the minimum distance between clusters in pixels
+     * @since 25.0
      */
     @JsonIgnore
     public int getClusterMinDistance() {
@@ -197,6 +206,7 @@ public class FeatureLayer extends VectorLayer {
      *
      * @param clusterMinDistance
      *            the minimum distance between clusters in pixels
+     * @since 25.0
      */
     public void setClusterMinDistance(int clusterMinDistance) {
         this.clusterMinDistance = clusterMinDistance;
@@ -212,6 +222,7 @@ public class FeatureLayer extends VectorLayer {
      * features are rendered using their own style.
      *
      * @return the current cluster style
+     * @since 25.0
      */
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
@@ -225,6 +236,7 @@ public class FeatureLayer extends VectorLayer {
      *
      * @param clusterStyle
      *            the new cluster style, not null
+     * @since 25.0
      */
     public void setClusterStyle(Style clusterStyle) {
         Objects.requireNonNull(clusterStyle);

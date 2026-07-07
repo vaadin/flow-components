@@ -14,6 +14,8 @@ package com.vaadin.flow.component.charts.model;
  * axis.
  *
  * Defaults to solid.
+ * 
+ * @since 6.0.1
  */
 public enum BackgroundShape implements ChartEnum {
 

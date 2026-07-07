@@ -15,6 +15,9 @@ import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public class PlotOptionsSpline extends PointOptions {
 
     private Boolean allowPointSelect;
@@ -150,6 +153,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -160,6 +164,8 @@ public class PlotOptionsSpline extends PointOptions {
      * Note that lipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -167,6 +173,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -191,6 +198,8 @@ public class PlotOptionsSpline extends PointOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -216,6 +225,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -228,6 +238,8 @@ public class PlotOptionsSpline extends PointOptions {
      * set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -235,6 +247,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -249,6 +262,8 @@ public class PlotOptionsSpline extends PointOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -328,6 +343,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -353,6 +369,8 @@ public class PlotOptionsSpline extends PointOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -542,6 +560,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -551,6 +570,8 @@ public class PlotOptionsSpline extends PointOptions {
      * Pixel with of the graph line.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -622,6 +643,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -632,6 +654,8 @@ public class PlotOptionsSpline extends PointOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -639,6 +663,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -648,6 +673,8 @@ public class PlotOptionsSpline extends PointOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

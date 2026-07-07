@@ -81,6 +81,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-text-field")
 @NpmPackage(value = "@vaadin/text-field", version = "25.2.1")
@@ -280,6 +281,8 @@ public class TextField extends TextFieldBase<TextField, String>
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -398,6 +401,7 @@ public class TextField extends TextFieldBase<TextField, String>
      *
      * @param value
      *            the new value, not {@code null}
+     * @since 1.0.4
      */
     @Override
     public void setValue(String value) {
@@ -409,6 +413,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * field will return an empty string.
      *
      * @return the current value.
+     * @since 1.0.4
      */
     @Override
     public String getValue() {
@@ -433,6 +438,8 @@ public class TextField extends TextFieldBase<TextField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 2.0.8
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -446,6 +453,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * {@link #setI18n(TextFieldI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public TextFieldI18n getI18n() {
         return i18n;
@@ -456,6 +464,7 @@ public class TextField extends TextFieldBase<TextField, String>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(TextFieldI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -468,6 +477,8 @@ public class TextField extends TextFieldBase<TextField, String>
 
     /**
      * The internationalization properties for {@link TextField}.
+     * 
+     * @since 24.5
      */
     public static class TextFieldI18n implements Serializable {
 

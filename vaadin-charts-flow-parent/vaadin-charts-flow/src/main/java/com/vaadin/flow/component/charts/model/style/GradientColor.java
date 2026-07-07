@@ -14,6 +14,8 @@ import java.util.List;
 
 /**
  * Class providing gradient colors
+ * 
+ * @since 18.0
  */
 public class GradientColor implements Color {
 

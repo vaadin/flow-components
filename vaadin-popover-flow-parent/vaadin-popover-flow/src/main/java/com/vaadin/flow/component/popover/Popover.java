@@ -45,6 +45,7 @@ import tools.jackson.databind.node.ArrayNode;
  * specified component (target).
  *
  * @author Vaadin Ltd.
+ * @since 24.5
  */
 @Tag("vaadin-popover")
 @NpmPackage(value = "@vaadin/popover", version = "25.2.1")
@@ -354,6 +355,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @return {@code true} if tab focus into the popover is enabled,
      *         {@code false} otherwise
+     * @since 25.2
      */
     public boolean isTabFocusEnabled() {
         return !getElement().getProperty("noTabFocus", false);
@@ -374,6 +376,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param tabFocusEnabled
      *            {@code true} to allow tab focus into the popover,
      *            {@code false} to skip the popover in tab order
+     * @since 25.2
      */
     public void setTabFocusEnabled(boolean tabFocusEnabled) {
         getElement().setProperty("noTabFocus", !tabFocusEnabled);
@@ -384,6 +387,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @param role
      *            the role to set
+     * @since 25.0
      */
     public void setRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
@@ -410,6 +414,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * Defaults to {@code dialog}.
      *
      * @return the role
+     * @since 25.0
      */
     public String getRole() {
         return getElement().getProperty("role");

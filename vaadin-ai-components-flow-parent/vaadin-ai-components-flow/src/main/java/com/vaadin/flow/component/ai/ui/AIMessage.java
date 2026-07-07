@@ -23,6 +23,7 @@ import java.time.Instant;
  *
  * @author Vaadin Ltd
  * @see AIMessageList
+ * @since 25.1
  */
 public interface AIMessage extends Serializable {
 

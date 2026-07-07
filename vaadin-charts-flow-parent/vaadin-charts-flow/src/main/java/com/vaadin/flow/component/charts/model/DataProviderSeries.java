@@ -34,6 +34,8 @@ import com.vaadin.flow.shared.Registration;
  * Note that even if you use a lazy loading {@link DataProvider}, this series
  * will work in an eager fashion and load all the data from the provider at
  * once.
+ * 
+ * @since 6.0.1
  */
 public class DataProviderSeries<T> extends AbstractSeries {
 

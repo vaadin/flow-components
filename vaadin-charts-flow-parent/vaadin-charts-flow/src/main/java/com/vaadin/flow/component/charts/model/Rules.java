@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * A set of rules for responsive settings. The rules are executed from the top
  * down.
+ * 
+ * @since 6.0.1
  */
 public class Rules extends AbstractConfigurationObject {
 

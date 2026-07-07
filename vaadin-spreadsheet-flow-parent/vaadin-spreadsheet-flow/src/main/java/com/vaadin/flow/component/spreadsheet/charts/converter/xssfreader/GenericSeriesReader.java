@@ -19,6 +19,8 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.Abstrac
 /**
  * Can be used to test reading of a new chart type or as a temporary means to
  * see the data.
+ * 
+ * @since 24.0
  */
 @SuppressWarnings("rawtypes")
 public class GenericSeriesReader extends AbstractSeriesReader {

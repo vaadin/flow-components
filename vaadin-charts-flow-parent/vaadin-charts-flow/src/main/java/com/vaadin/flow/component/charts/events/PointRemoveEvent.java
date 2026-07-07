@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointRemoveEvent class stores data for remove events on the points of the
  * chart
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-remove")
 public class PointRemoveEvent extends ComponentEvent<Chart> implements HasItem {

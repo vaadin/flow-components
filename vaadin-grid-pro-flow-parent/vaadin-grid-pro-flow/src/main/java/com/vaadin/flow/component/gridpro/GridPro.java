@@ -45,6 +45,9 @@ import com.vaadin.flow.shared.Registration;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+/**
+ * @since 1.0
+ */
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/grid-pro", version = "25.2.1")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
@@ -368,6 +371,7 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
+     * @since 2.0
      */
     public EditColumnConfigurator<E> addEditColumn(
             ValueProvider<E, ?> valueProvider, Renderer<E> renderer) {
@@ -403,6 +407,7 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
+     * @since 2.0
      */
     public <V extends Comparable<? super V>> EditColumnConfigurator<E> addEditColumn(
             ValueProvider<E, V> valueProvider, String... sortingProperties) {
@@ -472,6 +477,7 @@ public class GridPro<E> extends Grid<E> {
      *            when <code>true</code>, after moving to next or previous
      *            editable cell using Tab / Shift+Tab, it will be focused
      *            without edit mode
+     * @since 2.0
      */
     public void setSingleCellEdit(boolean singleCellEdit) {
         getElement().setProperty("singleCellEdit", singleCellEdit);
@@ -483,6 +489,7 @@ public class GridPro<E> extends Grid<E> {
      * cell using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @return singleCellEdit value
+     * @since 2.0
      */
     public boolean getSingleCellEdit() {
         return getElement().getProperty("singleCellEdit", false);
@@ -496,6 +503,7 @@ public class GridPro<E> extends Grid<E> {
      * @param editOnClick
      *            when <code>true</code>, cell edit mode gets activated on a
      *            single click instead of the default double click
+     * @since 19.0
      */
     public void setEditOnClick(boolean editOnClick) {
         getElement().setProperty("editOnClick", editOnClick);
@@ -507,6 +515,7 @@ public class GridPro<E> extends Grid<E> {
      * instead of the default double click.
      *
      * @return editOnClick value
+     * @since 19.0
      */
     @Synchronize("edit-on-click-changed")
     public boolean getEditOnClick() {
@@ -559,6 +568,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param <E>
      *            the bean type
+     * @since 2.0
      */
     @DomEvent("cell-edit-started")
     public static class CellEditStartedEvent<E>
@@ -580,6 +590,7 @@ public class GridPro<E> extends Grid<E> {
          *            represented in Grid
          * @param path
          *            item subproperty that was changed
+         * @since 25.0
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
                 @EventData("event.detail.item") ObjectNode item,
@@ -616,6 +627,7 @@ public class GridPro<E> extends Grid<E> {
      * @param listener
      *            a listener to be notified
      * @return a handle that can be used to unregister the listener
+     * @since 2.0
      */
     public Registration addCellEditStartedListener(
             ComponentEventListener<CellEditStartedEvent<E>> listener) {
@@ -650,6 +662,7 @@ public class GridPro<E> extends Grid<E> {
          *            represented in Grid
          * @param path
          *            item subproperty that was changed
+         * @since 25.0
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
                 @EventData("event.detail.item") ObjectNode item,
@@ -802,6 +815,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param variants
      *            theme variants to add
+     * @since 23.1
      */
     public void addThemeVariants(GridProVariant... variants) {
         getThemeNames()
@@ -814,6 +828,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param variants
      *            theme variants to remove
+     * @since 23.1
      */
     public void removeThemeVariants(GridProVariant... variants) {
         getThemeNames().removeAll(

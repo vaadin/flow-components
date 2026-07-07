@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.FooterRow.FooterCell;
  * One row of {@link FooterCell}s in a Grid.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class FooterRow extends AbstractRow<FooterCell> {
 

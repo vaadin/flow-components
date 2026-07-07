@@ -169,6 +169,7 @@ import tools.jackson.databind.node.ObjectNode;
  * default position above the fields only when there isn't enough space.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-form-layout")
 @NpmPackage(value = "@vaadin/form-layout", version = "25.2.1")
@@ -307,6 +308,7 @@ public class FormLayout extends Component
          * construction with {@link #add(Component...)}.
          *
          * @see HasComponents#add(Component...)
+         * @since 1.0.3
          */
         public FormItem() {
         }
@@ -336,6 +338,7 @@ public class FormLayout extends Component
          * @see <a href=
          *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
          *      website about slots</a>
+         * @since 24.0
          */
         protected void addToLabel(Component... components) {
             SlotUtils.addToSlot(this, "label", components);
@@ -401,6 +404,7 @@ public class FormLayout extends Component
      * </pre>
      *
      * @author Vaadin Ltd
+     * @since 24.8
      */
     @Tag("vaadin-form-row")
     @NpmPackage(value = "@vaadin/form-layout", version = "25.2.1")
@@ -531,6 +535,7 @@ public class FormLayout extends Component
      * @param colspan
      *            the desired colspan for the component
      *
+     * @since 2.0
      */
     public void setColspan(Component component, int colspan) {
         Objects.requireNonNull(component, "component cannot be null");
@@ -549,6 +554,7 @@ public class FormLayout extends Component
      * @param colspan
      *            the desired colspan for the component
      *
+     * @since 2.0
      */
     public void add(Component component, int colspan) {
         add(component);
@@ -562,6 +568,7 @@ public class FormLayout extends Component
      * @param component
      *            the component whose colspan is retrieved
      * @return the colspan of the given component or 1 if none is set
+     * @since 2.0
      */
     public int getColspan(Component component) {
         String colspan = component.getElement().getAttribute("colspan");
@@ -678,6 +685,7 @@ public class FormLayout extends Component
      * @param components
      *            the components to add to the row
      * @return the created form row
+     * @since 24.8
      */
     public FormRow addFormRow(Component... components) {
         FormRow formRow = new FormRow();
@@ -694,6 +702,7 @@ public class FormLayout extends Component
      * @see <a href=
      *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
      *      position</a>
+     * @since 24.5
      */
     public void setLabelWidth(String width) {
         getStyle().set("--vaadin-form-layout-label-width", width);
@@ -707,6 +716,7 @@ public class FormLayout extends Component
      * @param unit
      *            the CSS unit of the width
      * @see #setLabelWidth(String)
+     * @since 24.8
      */
     public void setLabelWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -720,6 +730,7 @@ public class FormLayout extends Component
      * @see <a href=
      *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
      *      position</a>
+     * @since 24.5
      */
     public String getLabelWidth() {
         return getStyle().get("--vaadin-form-layout-label-width");
@@ -733,6 +744,7 @@ public class FormLayout extends Component
      * @param labelSpacing
      *            the gap between the label and the field
      * @see #setLabelSpacing(float, Unit)
+     * @since 24.8
      */
     public void setLabelSpacing(String labelSpacing) {
         getStyle().set("--vaadin-form-layout-label-spacing", labelSpacing);
@@ -748,6 +760,7 @@ public class FormLayout extends Component
      * @param unit
      *            the CSS unit of the gap
      * @see #setLabelSpacing(String)
+     * @since 24.8
      */
     public void setLabelSpacing(float labelSpacing, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -761,6 +774,7 @@ public class FormLayout extends Component
      * @return the value and CSS unit as a string
      * @see #setLabelSpacing(String)
      * @see #setLabelSpacing(float, Unit)
+     * @since 24.8
      */
     public String getLabelSpacing() {
         return getStyle().get("--vaadin-form-layout-label-spacing");
@@ -773,6 +787,7 @@ public class FormLayout extends Component
      * @param columnSpacing
      *            the gap between the columns
      * @see #setColumnSpacing(float, Unit)
+     * @since 24.8
      */
     public void setColumnSpacing(String columnSpacing) {
         getStyle().set("--vaadin-form-layout-column-spacing", columnSpacing);
@@ -787,6 +802,7 @@ public class FormLayout extends Component
      * @param unit
      *            the CSS unit of the gap
      * @see #setColumnSpacing(String)
+     * @since 24.8
      */
     public void setColumnSpacing(float columnSpacing, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -799,6 +815,7 @@ public class FormLayout extends Component
      * @return the value and CSS unit as a string
      * @see #setColumnSpacing(String)
      * @see #setColumnSpacing(float, Unit)
+     * @since 24.8
      */
     public String getColumnSpacing() {
         return getStyle().get("--vaadin-form-layout-column-spacing");
@@ -811,6 +828,7 @@ public class FormLayout extends Component
      * @param rowSpacing
      *            the gap between the rows
      * @see #setRowSpacing(float, Unit)
+     * @since 24.8
      */
     public void setRowSpacing(String rowSpacing) {
         getStyle().set("--vaadin-form-layout-row-spacing", rowSpacing);
@@ -825,6 +843,7 @@ public class FormLayout extends Component
      * @param unit
      *            the CSS unit of the gap
      * @see #setRowSpacing(String)
+     * @since 24.8
      */
     public void setRowSpacing(float rowSpacing, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -837,6 +856,7 @@ public class FormLayout extends Component
      * @return the value and CSS unit as a string
      * @see #setRowSpacing(String)
      * @see #setRowSpacing(float, Unit)
+     * @since 24.8
      */
     public String getRowSpacing() {
         return getStyle().get("--vaadin-form-layout-row-spacing");
@@ -874,6 +894,7 @@ public class FormLayout extends Component
      * @param autoResponsive
      *            {@code true} to enable auto responsive mode, {@code false} to
      *            disable
+     * @since 24.8
      */
     public void setAutoResponsive(boolean autoResponsive) {
         getElement().setProperty("autoResponsive", autoResponsive);
@@ -893,6 +914,7 @@ public class FormLayout extends Component
      *
      * @param autoRows
      *            {@code true} to enable auto rows mode, {@code false} otherwise
+     * @since 24.8
      */
     public void setAutoRows(boolean autoRows) {
         getElement().setProperty("autoRows", autoRows);
@@ -906,6 +928,7 @@ public class FormLayout extends Component
      * @return {@code true} if auto rows mode is enabled, {@code false}
      *         otherwise
      * @see #setAutoRows(boolean)
+     * @since 24.8
      */
     public boolean isAutoRows() {
         return getElement().getProperty("autoRows", false);
@@ -925,6 +948,7 @@ public class FormLayout extends Component
      *
      * @param columnWidth
      *            the width of columns or {@code null} to use the default
+     * @since 24.8
      */
     public void setColumnWidth(String columnWidth) {
         getElement().setProperty("columnWidth", columnWidth);
@@ -946,6 +970,7 @@ public class FormLayout extends Component
      *            the width of columns
      * @param unit
      *            the CSS unit of the width
+     * @since 24.8
      */
     public void setColumnWidth(float columnWidth, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -964,6 +989,7 @@ public class FormLayout extends Component
      *         in which case the web component uses its default value
      * @see #setColumnWidth(String)
      * @see #setColumnWidth(float, Unit)
+     * @since 24.8
      */
     public String getColumnWidth() {
         return getElement().getProperty("columnWidth");
@@ -981,6 +1007,7 @@ public class FormLayout extends Component
      *
      * @param maxColumns
      *            the maximum number of columns
+     * @since 24.8
      */
     public void setMaxColumns(int maxColumns) {
         getElement().setProperty("maxColumns", maxColumns);
@@ -992,6 +1019,7 @@ public class FormLayout extends Component
      *
      * @return the maximum number of columns or 0 if not explicitly set
      * @see #setMaxColumns(int)
+     * @since 24.8
      */
     public int getMaxColumns() {
         return getElement().getProperty("maxColumns", 0);
@@ -1007,6 +1035,7 @@ public class FormLayout extends Component
      *
      * @param minColumns
      *            the minimum number of columns
+     * @since 24.8
      */
     public void setMinColumns(int minColumns) {
         getElement().setProperty("minColumns", minColumns);
@@ -1018,6 +1047,7 @@ public class FormLayout extends Component
      *
      * @return the minimum number of columns or 0 if not explicitly set
      * @see #setMinColumns(int)
+     * @since 24.8
      */
     public int getMinColumns() {
         return getElement().getProperty("minColumns", 0);
@@ -1034,6 +1064,7 @@ public class FormLayout extends Component
      *
      * @param expandColumns
      *            {@code true} to expand columns, {@code false} otherwise
+     * @since 24.8
      */
     public void setExpandColumns(boolean expandColumns) {
         getElement().setProperty("expandColumns", expandColumns);
@@ -1045,6 +1076,7 @@ public class FormLayout extends Component
      *
      * @return {@code true} if columns should expand, {@code false} otherwise
      * @see #setExpandColumns(boolean)
+     * @since 24.8
      */
     public boolean isExpandColumns() {
         return getElement().getProperty("expandColumns", false);
@@ -1061,6 +1093,7 @@ public class FormLayout extends Component
      *
      * @param expandFields
      *            {@code true} to expand fields, {@code false} otherwise
+     * @since 24.8
      */
     public void setExpandFields(boolean expandFields) {
         getElement().setProperty("expandFields", expandFields);
@@ -1072,6 +1105,7 @@ public class FormLayout extends Component
      *
      * @return {@code true} if fields should expand, {@code false} otherwise
      * @see #setExpandFields(boolean)
+     * @since 24.8
      */
     public boolean isExpandFields() {
         return getElement().getProperty("expandFields", false);
@@ -1101,6 +1135,7 @@ public class FormLayout extends Component
      *
      * @param labelsAside
      *            {@code true} to position labels aside, {@code false} otherwise
+     * @since 24.8
      */
     public void setLabelsAside(boolean labelsAside) {
         getElement().setProperty("labelsAside", labelsAside);
@@ -1113,6 +1148,7 @@ public class FormLayout extends Component
      * @return {@code true} if labels are positioned aside, {@code false}
      *         otherwise
      * @see #setLabelsAside(boolean)
+     * @since 24.8
      */
     public boolean isLabelsAside() {
         return getElement().getProperty("labelsAside", false);

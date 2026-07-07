@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The ChartClickEvent class stores information on click events anywhere on the
  * area of the chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-click")
 public class ChartClickEvent extends ComponentEvent<Chart>

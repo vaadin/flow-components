@@ -30,6 +30,7 @@ import com.vaadin.flow.dom.Element;
  * tied to.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class ContextMenuManager implements Serializable {

@@ -13,6 +13,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 /**
  * Set of theme variants applicable for {@code vaadin-rich-text-editor}
  * component.
+ * 
+ * @since 1.0
  */
 public enum RichTextEditorVariant implements ThemeVariant {
     LUMO_NO_BORDER("no-border"), LUMO_COMPACT("compact");

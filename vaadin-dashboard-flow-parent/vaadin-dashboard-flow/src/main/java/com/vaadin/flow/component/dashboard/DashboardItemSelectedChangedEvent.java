@@ -19,6 +19,7 @@ import com.vaadin.flow.component.EventData;
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemSelectedChangedListener(ComponentEventListener)
+ * @since 24.6
  */
 @DomEvent("dashboard-item-selected-changed")
 public class DashboardItemSelectedChangedEvent

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-breadcrumbs} component.
+ * 
+ * @since 25.2
  */
 public enum BreadcrumbsVariant implements ThemeVariant {
     SLASH("slash"), LUMO_PRIMARY("primary"), AURA_ACCENT("accent");

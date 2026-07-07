@@ -15,6 +15,8 @@ package com.vaadin.flow.component.charts.model;
  * option.
  *
  * Defaults to undefined.
+ * 
+ * @since 6.0.1
  */
 public enum TextAlign implements ChartEnum {
 

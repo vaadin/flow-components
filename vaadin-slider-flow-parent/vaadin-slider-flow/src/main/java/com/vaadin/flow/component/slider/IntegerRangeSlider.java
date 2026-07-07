@@ -29,6 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * that supports decimal values.
  *
  * @author Vaadin Ltd.
+ * @since 25.2
  */
 @Tag("vaadin-range-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.2.1")

@@ -21,6 +21,7 @@ package com.vaadin.flow.component.grid;
  * @author Vaadin Ltd.
  *
  * @see Grid#setColumnRendering(ColumnRendering)
+ * @since 24.1
  */
 public enum ColumnRendering {
 

@@ -16,7 +16,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
  * Abstract base class for Spreadsheet commands.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public abstract class SpreadsheetCommand implements Command {
 
