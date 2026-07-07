@@ -86,7 +86,7 @@
         <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.7.0</spotless.plugin.version>
+        <spotless.plugin.version>3.8.0</spotless.plugin.version>
         <checkstyle.version>13.7.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
@@ -104,7 +104,7 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.1.0</spring-data-commons.version>
         <reactor-core.version>3.8.6</reactor-core.version>
-        <langchain4j.version>1.16.3</langchain4j.version>
+        <langchain4j.version>1.17.1</langchain4j.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>6.1.1</junit.jupiter.version>
@@ -460,28 +460,6 @@
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven.resources.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>copy-resources-for-demo-website</id>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <phase>process-resources</phase>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
-                                <overwrite>true</overwrite>
-                                <resources>
-                                    <resource>
-                                        <directory>src/test/java</directory>
-                                    </resource>
-                                    <resource>
-                                        <directory>src/main/webapp</directory>
-                                        <targetPath>META-INF/resources</targetPath>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>com.vaadin</groupId>

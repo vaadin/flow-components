@@ -98,7 +98,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 23.2
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0-alpha1")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0-alpha2")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -135,6 +135,10 @@ public class MultiSelectComboBox<TItem>
         super("selectedItems", new LinkedHashSet<>(), ArrayNode.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
+
+        // Use change instead of the default selected-items-changed
+        // event to avoid notification for programmatic value changes.
+        setSynchronizedEvent("change");
 
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data

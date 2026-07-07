@@ -70,21 +70,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return grid;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Note that column related data is sent to the client side even if the
-     * column is invisible. Use {@link Grid#removeColumn(Column)} to remove
-     * column (or don't add the column all) and avoid sending extra data.
-     * </p>
-     *
-     * @see Grid#removeColumn(Column)
-     */
-    @Override
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-    }
-
     private void scheduleHeaderRendering() {
         if (headerRenderingScheduled) {
             return;

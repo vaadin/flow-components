@@ -98,7 +98,10 @@ public class TreeGrid<T> extends Grid<T>
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
      * @since 24.5
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected TreeGrid(int pageSize,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         super(pageSize, dataCommunicatorBuilder);
@@ -190,12 +193,16 @@ public class TreeGrid<T> extends Grid<T>
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
      * @since 24.5
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
     }
 
+    @Deprecated(since = "25.3", forRemoval = true)
     private TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder,
             boolean autoCreateColumns) {

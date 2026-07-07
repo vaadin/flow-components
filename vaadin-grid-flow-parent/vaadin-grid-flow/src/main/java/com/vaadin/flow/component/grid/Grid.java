@@ -214,8 +214,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.3.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha1")
+@NpmPackage(value = "@vaadin/grid", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha2")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -425,12 +425,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
      * @param <T>
      *            type of the underlying grid this column is compatible with
      */
@@ -445,6 +439,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private Component editorComponent;
         private EditorRenderer<T> editorRenderer;
+        private Registration editorRendererRegistration;
 
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
@@ -456,11 +451,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private SerializableComparator<T> comparator;
 
-        private Registration columnDataGeneratorRegistration;
-        private Registration editorDataGeneratorRegistration;
+        private final CompositeDataGenerator<T> compositeDataGenerator = new CompositeDataGenerator<>() {
+            @Override
+            public void generateData(T item, ObjectNode jsonObject) {
+                if (Column.this.isVisible()) {
+                    super.generateData(item, jsonObject);
+                }
+            }
+
+            @Override
+            public void refreshData(T item) {
+                if (Column.this.isVisible()) {
+                    super.refreshData(item);
+                }
+            }
+        };
+        private Registration compositeDataGeneratorRegistration;
 
         private Renderer<T> renderer;
-        private Rendering<T> rendering;
+        private List<Registration> rendererRegistrations = new ArrayList<>();
 
         private SerializableFunction<T, String> partNameGenerator = item -> null;
         private SerializableFunction<T, String> tooltipGenerator = item -> null;
@@ -476,35 +485,68 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the renderer to use in this column, must not be
          *            {@code null}
          */
-        @SuppressWarnings("unchecked")
         public Column(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid);
-            Objects.requireNonNull(renderer);
             this.columnInternalId = columnId;
-            this.renderer = renderer;
-
             comparator = (a, b) -> 0;
+            compositeDataGeneratorRegistration = grid
+                    .addDataGenerator(compositeDataGenerator);
+            compositeDataGenerator.addDataGenerator(this::generatePartData);
+            compositeDataGenerator.addDataGenerator(this::generateTooltipData);
+            setupRenderer(renderer);
+        }
 
-            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
-                    .getDataCommunicator().getKeyMapper());
+        /**
+         * Adds a data generator for this column.
+         *
+         * @param dataGenerator
+         *            the data generator to add
+         * @return a registration for removing the data generator
+         */
+        protected Registration addDataGenerator(
+                DataGenerator<T> dataGenerator) {
+            return compositeDataGenerator.addDataGenerator(dataGenerator);
+        }
 
-            Optional<DataGenerator<T>> dataGenerator = rendering
-                    .getDataGenerator();
+        private void generatePartData(T item, ObjectNode jsonObject) {
+            String partName = partNameGenerator.apply(item);
+            if (partName != null) {
+                jsonObject.withObjectProperty("part").put(columnInternalId,
+                        partName);
+            }
+        }
 
-            if (dataGenerator.isPresent()) {
-                columnDataGeneratorRegistration = grid
-                        .addDataGenerator(dataGenerator.get());
+        private void generateTooltipData(T item, ObjectNode jsonObject) {
+            String tooltip = tooltipGenerator.apply(item);
+            if (tooltip != null) {
+                jsonObject.withObjectProperty("gridtooltips")
+                        .put(columnInternalId, tooltip);
+            }
+        }
+
+        @Override
+        public void setVisible(boolean visible) {
+            boolean refreshViewport = visible && !isVisible();
+            super.setVisible(visible);
+            if (refreshViewport) {
+                getGrid().refreshViewport();
             }
         }
 
         protected void destroyDataGenerators() {
-            if (columnDataGeneratorRegistration != null) {
-                columnDataGeneratorRegistration.remove();
-                columnDataGeneratorRegistration = null;
+            if (rendererRegistrations != null) {
+                rendererRegistrations.forEach(Registration::remove);
+                rendererRegistrations.clear();
             }
-            if (editorDataGeneratorRegistration != null) {
-                editorDataGeneratorRegistration.remove();
-                editorDataGeneratorRegistration = null;
+
+            if (editorRendererRegistration != null) {
+                editorRendererRegistration.remove();
+                editorRendererRegistration = null;
+            }
+
+            if (compositeDataGeneratorRegistration != null) {
+                compositeDataGeneratorRegistration.remove();
+                compositeDataGeneratorRegistration = null;
             }
         }
 
@@ -537,36 +579,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @since 24.1
          */
         public Column<T> setRenderer(Renderer<T> renderer) {
-            this.renderer = Objects.requireNonNull(renderer,
-                    "Renderer must not be null.");
-
-            destroyDataGenerators();
-            if (rendering != null) {
-                rendering.getRegistration().remove();
-            }
-
-            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
-                    .getDataCommunicator().getKeyMapper());
-
-            columnDataGeneratorRegistration = rendering.getDataGenerator()
-                    .map(dataGenerator -> grid
-                            .addDataGenerator((DataGenerator) dataGenerator))
-                    .orElse(null);
+            setupRenderer(renderer);
 
             // The editor renderer is a wrapper around the regular renderer, so
             // we need to apply it again afterwards
             if (editorRenderer != null) {
-                Rendering<T> editorRendering = editorRenderer
-                        .render(getElement(), null);
-                editorDataGeneratorRegistration = editorRendering
-                        .getDataGenerator()
-                        .map(dataGenerator -> grid.addDataGenerator(
-                                (DataGenerator) dataGenerator))
-                        .orElse(null);
+                setupEditorRenderer();
             }
 
             getGrid().refreshViewport();
             return this;
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        private void setupRenderer(Renderer<T> renderer) {
+            this.renderer = Objects.requireNonNull(renderer,
+                    "Renderer must not be null.");
+
+            if (rendererRegistrations != null) {
+                rendererRegistrations.forEach(Registration::remove);
+                rendererRegistrations.clear();
+            }
+
+            Rendering<T> rendering = renderer.render(getElement(),
+                    (KeyMapper<T>) getGrid().getDataCommunicator()
+                            .getKeyMapper());
+
+            rendering.getDataGenerator().ifPresent(dataGenerator -> {
+                rendererRegistrations.add(
+                        compositeDataGenerator.addDataGenerator(dataGenerator));
+            });
+
+            rendererRegistrations.add(rendering.getRegistration());
         }
 
         /**
@@ -1016,7 +1060,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
             editorComponent = null;
             if (editorRenderer == null && componentCallback != null) {
-                setupColumnEditor();
+                setupEditorRenderer();
             }
             if (editorRenderer != null) {
                 editorRenderer.setComponentFunction(componentCallback);
@@ -1140,19 +1184,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        private void setupColumnEditor() {
-            editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
-                    columnInternalId);
-
-            Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null);
-
-            Optional<DataGenerator<T>> dataGenerator = editorRendering
-                    .getDataGenerator();
-            if (dataGenerator.isPresent()) {
-                editorDataGeneratorRegistration = grid
-                        .addDataGenerator((DataGenerator) dataGenerator.get());
+        private void setupEditorRenderer() {
+            if (editorRenderer == null) {
+                editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
+                        columnInternalId);
+                editorRendererRegistration = compositeDataGenerator
+                        .addDataGenerator(editorRenderer);
             }
+
+            editorRenderer.render(getElement(), null);
         }
     }
 
@@ -1224,6 +1264,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private class DetailsManager extends AbstractGridExtension<T> {
 
         private final HashMap<Object, T> detailsVisible = new HashMap<>();
+        private Registration rendererRegistration;
+        private DataGenerator<T> rendererDataGenerator;
 
         /**
          * Constructs a new details manager for the given grid.
@@ -1233,6 +1275,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public DetailsManager(Grid<T> grid) {
             super(grid);
+        }
+
+        /**
+         * Sets the renderer to use for displaying the item details rows.
+         *
+         * @param renderer
+         *            the renderer to use for displaying item details rows,
+         *            {@code null} to remove the current renderer
+         */
+        public void setRenderer(Renderer<T> renderer) {
+            if (rendererRegistration != null) {
+                rendererRegistration.remove();
+                rendererRegistration = null;
+            }
+
+            if (renderer == null) {
+                return;
+            }
+
+            Rendering<T> rendering = renderer.render(getGrid().getElement(),
+                    getGrid().getDataCommunicator().getKeyMapper(),
+                    "rowDetailsRenderer");
+
+            rendererDataGenerator = rendering.getDataGenerator().orElse(null);
+
+            rendererRegistration = Registration.combine(() -> {
+                destroyAllData();
+                rendererDataGenerator = null;
+            }, rendering.getRegistration());
         }
 
         /**
@@ -1255,10 +1326,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 refresh = true;
             }
 
-            if (itemDetailsDataGenerator != null && refresh) {
+            if (rendererDataGenerator != null && refresh) {
                 refresh(item);
                 if (!detailsVisible.containsKey(itemId)) {
-                    itemDetailsDataGenerator.destroyData(item);
+                    rendererDataGenerator.destroyData(item);
                 }
             }
         }
@@ -1273,29 +1344,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *         {@code false} if it should be hidden
          */
         public boolean isDetailsVisible(T item) {
-            return itemDetailsDataGenerator != null
+            return rendererDataGenerator != null
                     && detailsVisible.containsKey(getItemId(item));
         }
 
         @Override
         public void generateData(T item, ObjectNode jsonObject) {
-            if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
+            if (rendererDataGenerator != null && isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
-                itemDetailsDataGenerator.generateData(item, jsonObject);
+                rendererDataGenerator.generateData(item, jsonObject);
             }
         }
 
         /**
-         * Remove the displayed details and remove details item from the list
+         * Remove the displayed details but keep the item in the list of
+         * details, so that the details stay open when the item is rendered
+         * again (for example after collapsing and expanding its parent row, or
+         * scrolling the item out of and back into view). Consistent with
+         * {@link #destroyAllData()}.
          *
          * @param item
          *            item to removed
          */
         @Override
         public void destroyData(T item) {
-            detailsVisible.remove(getItemId(item));
-            if (itemDetailsDataGenerator != null) {
-                itemDetailsDataGenerator.destroyData(item);
+            if (rendererDataGenerator != null) {
+                rendererDataGenerator.destroyData(item);
             }
         }
 
@@ -1304,18 +1378,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         @Override
         public void destroyAllData() {
-            if (itemDetailsDataGenerator != null) {
-                itemDetailsDataGenerator.destroyAllData();
+            if (rendererDataGenerator != null) {
+                rendererDataGenerator.destroyAllData();
             }
         }
 
         @Override
         public void refreshData(T item) {
-            if (itemDetailsDataGenerator != null) {
+            if (rendererDataGenerator != null) {
                 if (isDetailsVisible(item)) {
-                    itemDetailsDataGenerator.refreshData(item);
+                    rendererDataGenerator.refreshData(item);
                 } else {
-                    itemDetailsDataGenerator.destroyData(item);
+                    rendererDataGenerator.destroyData(item);
                 }
             }
         }
@@ -1330,7 +1404,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 detailsVisible.put(getItemId(item), item);
             }
 
-            if (itemDetailsDataGenerator != null) {
+            if (rendererDataGenerator != null) {
                 for (T item : toRefresh) {
                     refresh(item);
                 }
@@ -1358,12 +1432,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final CompositeDataGenerator<T> gridDataGenerator;
     private final DataCommunicator<T> dataCommunicator;
+    @SuppressWarnings("rawtypes")
+    private DataCommunicatorBuilder dataCommunicatorBuilder;
 
     private int nextColumnId = 0;
 
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
     private SerializablePredicate<T> selectableProvider;
+    private GridI18n i18n;
 
     private final DetailsManager detailsManager;
 
@@ -1378,9 +1455,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private Class<T> beanType;
     private PropertySet<T> propertySet;
-
-    private DataGenerator<T> itemDetailsDataGenerator;
-    private List<Registration> detailsRenderingRegistrations = new ArrayList<>();
 
     /**
      * Keeps track of the layers of column and column-group components. The
@@ -1576,7 +1650,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param <U>
      *            the GridArrayUpdater type
      * @since 24.9
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
@@ -1610,7 +1687,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
      * @since 24.9
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder,
             boolean autoCreateColumns) {
@@ -1639,24 +1719,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param <U>
      *            the GridArrayUpdater type
      * @since 24.9
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated(since = "25.3", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
+        this.dataCommunicatorBuilder = dataCommunicatorBuilder;
         arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generatePartData);
-        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
         gridDataGenerator.addDataGenerator(this::generateSelectableData);
 
-        dataCommunicator = dataCommunicatorBuilder.build(getElement(),
-                gridDataGenerator, (U) arrayUpdater,
-                this::getUniqueKeyProvider);
+        dataCommunicator = createDataCommunicator();
 
         detailsManager = new DetailsManager(this);
         setPageSize(pageSize);
@@ -1740,6 +1821,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Creates the {@link DataCommunicator} that this Grid uses to handle all
+     * data communication.
+     *
+     * @return the new data communicator
+     *
+     * @since 25.3
+     */
+    protected DataCommunicator<T> createDataCommunicator() {
+        return dataCommunicatorBuilder.build(getElement(),
+                getCompositeDataGenerator(), getArrayUpdater(),
+                this::getUniqueKeyProvider);
+    }
+
+    /**
      * Builder for {@link DataCommunicator} object.
      *
      * @param <T>
@@ -1748,7 +1843,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param <U>
      *            the ArrayUpdater type
      * @since 1.1
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             class and the constructors that accept it will be removed in
+     *             Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected static class DataCommunicatorBuilder<T, U extends ArrayUpdater>
             implements Serializable {
 
@@ -1769,6 +1868,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @return the build data communicator object
          * @since 2.0
          */
+        @Deprecated(since = "25.3", forRemoval = true)
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
@@ -1789,11 +1889,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> For displaying components, see
      * {@link #addComponentColumn(ValueProvider)}. For using built-in renderers,
      * see {@link #addColumn(Renderer)}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      * <p>
      * <em>NOTE:</em> This method is a shorthand for
@@ -1822,11 +1917,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> For displaying components, see
      * {@link #addComponentColumn(ValueProvider)}. For using built-in renderers,
      * see {@link #addColumn(Renderer)}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
      * @param valueProvider
@@ -1887,11 +1977,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
      * built in renderers or using {@link LitRenderer}.
      * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @param componentProvider
      *            a value provider that will return a component for the given
@@ -1914,12 +1999,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
      * {@link ValueProvider}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @see Column#setComparator(ValueProvider)
      * @see Column#setSortProperty(String...)
@@ -1955,11 +2034,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * or using {@link LitRenderer}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     * <p>
      * <em>NOTE:</em> This method is a shorthand for
      * {@link #addColumn(Renderer, BiFunction)}
      * </p>
@@ -1991,11 +2065,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link LitRenderer}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
      * @param renderer
@@ -2103,12 +2172,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * from a bean type with {@link #Grid(Class)}.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * <p>
      * <strong>Note:</strong> This method is a shorthand for
      * {@link #addColumn(String, BiFunction)}
      * </p>
@@ -2142,12 +2205,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @see #addColumn(String)
      * @see #removeColumn(Column)
@@ -2220,12 +2277,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
      *
      * @param propertyNames
      *            the property names of the new columns, not <code>null</code>
@@ -3181,7 +3232,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setItemSelectableProvider(SerializablePredicate<T> provider) {
         selectableProvider = provider;
-        getDataCommunicator().reset();
+        refreshViewport();
 
         if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
             multiSelectionModel.updateSelectAllCheckBoxVisibility();
@@ -3190,6 +3241,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(GridI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 25.3
+     */
+    public GridI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.3
+     */
+    public void setI18n(GridI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
@@ -3416,27 +3493,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        detailsRenderingRegistrations.forEach(Registration::remove);
-        detailsRenderingRegistrations.clear();
-
-        if (renderer == null) {
-            return;
-        }
-
-        var rendering = renderer.render(getElement(),
-                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-            itemDetailsDataGenerator = renderingDataGenerator;
-            Registration detailsRenderingDataGeneratorRegistration = () -> {
-                detailsManager.destroyAllData();
-                itemDetailsDataGenerator = null;
-            };
-            detailsRenderingRegistrations
-                    .add(detailsRenderingDataGeneratorRegistration);
-        });
-
-        detailsRenderingRegistrations.add(rendering.getRegistration());
+        detailsManager.setRenderer(renderer);
     }
 
     /**
@@ -4164,11 +4221,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         super.onEnabledStateChanged(enabled);
 
         /*
-         * The DataCommunicator needs to be reset so components rendered inside
-         * the cells can be updated to the new enabled state. The enabled state
-         * is passed as a property to the client via DataGenerators.
+         * The visible rows need to be re-rendered so that renderers relying on
+         * the enabled state, such as NativeButtonRenderer, can update the
+         * "disabled" property they push to the client via DataGenerators.
+         * Components rendered inside cells are updated automatically since they
+         * are part of the component tree.
          */
-        getDataCommunicator().reset();
+        refreshViewport();
     }
 
     /**
@@ -4452,43 +4511,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return partNameGenerator;
     }
 
-    private void generateTooltipTextData(T item, ObjectNode jsonObject) {
-        ObjectNode tooltips = JacksonUtils.createObjectNode();
-
-        String rowTooltip = tooltipGenerator.apply(item);
-        if (rowTooltip != null) {
-            tooltips.put("row", rowTooltip);
-        }
-
-        idToColumnMap.forEach((id, column) -> {
-            String cellTooltip = column.tooltipGenerator.apply(item);
-            if (cellTooltip != null) {
-                tooltips.put(id, cellTooltip);
-            }
-        });
-
-        if (!JacksonUtils.getKeys(tooltips).isEmpty()) {
-            jsonObject.set("gridtooltips", tooltips);
+    private void generateTooltipData(T item, ObjectNode jsonObject) {
+        String tooltip = tooltipGenerator.apply(item);
+        if (tooltip != null) {
+            jsonObject.withObjectProperty("gridtooltips").put("row", tooltip);
         }
     }
 
     private void generatePartData(T item, ObjectNode jsonObject) {
-        ObjectNode part = JacksonUtils.createObjectNode();
-
-        String rowPartName = partNameGenerator.apply(item);
-        if (rowPartName != null) {
-            part.put("row", rowPartName);
-        }
-
-        idToColumnMap.forEach((id, column) -> {
-            String cellPartName = column.getPartNameGenerator().apply(item);
-            if (cellPartName != null) {
-                part.put(id, cellPartName);
-            }
-        });
-
-        if (!JacksonUtils.getKeys(part).isEmpty()) {
-            jsonObject.set("part", part);
+        String partName = partNameGenerator.apply(item);
+        if (partName != null) {
+            jsonObject.withObjectProperty("part").put("row", partName);
         }
     }
 
@@ -4583,6 +4616,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     protected GridArrayUpdater getArrayUpdater() {
         return arrayUpdater;
+    }
+
+    /**
+     * Gets the {@link CompositeDataGenerator} that this Grid uses to generate
+     * data for the client side.
+     *
+     * @return the composite data generator
+     *
+     * @since 25.3
+     */
+    protected CompositeDataGenerator<T> getCompositeDataGenerator() {
+        return gridDataGenerator;
     }
 
     /**

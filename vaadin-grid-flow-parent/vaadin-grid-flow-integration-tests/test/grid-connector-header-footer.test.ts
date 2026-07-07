@@ -74,14 +74,6 @@ describe('grid connector - header and footer renderers', () => {
         expect(sorter).to.exist;
         expect(sorter.textContent).to.equal('Name');
       });
-
-      it('should set aria-label on the sorter', async () => {
-        grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
-        await nextFrame();
-
-        const sorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
-        expect(sorter.getAttribute('aria-label')).to.equal('Sort by Name');
-      });
     });
   });
 

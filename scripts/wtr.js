@@ -10,7 +10,8 @@ const { parseArgs } = require('util');
 
 const { values: options, positionals } = parseArgs({
   options: {
-    watch: { type: 'boolean', default: false }
+    watch: { type: 'boolean', default: false },
+    files: { type: 'string' }
   },
   allowPositionals: true
 });
@@ -94,8 +95,11 @@ async function runTests() {
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
       try {
+        const glob = options.files
+          ? `${wtrTestsFolderName}/${options.files}`
+          : `${wtrTestsFolderName}/**/*.test.ts`;
         const watchFlag = options.watch ? ' --watch' : '';
-        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts${watchFlag}`, {
+        execSync(`npx web-test-runner --playwright ${glob}${watchFlag}`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
@@ -112,6 +116,14 @@ async function runTests() {
 
 async function main() {
   await computeModules();
+
+  if (options.files && modules.length !== 1) {
+    console.error(
+      '--files requires exactly one component module, e.g. `node scripts/wtr.js grid --files grid-connector-sorting.test.ts`'
+    );
+    process.exit(1);
+  }
+
   await runTests();
 }
 
