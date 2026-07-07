@@ -34,12 +34,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpVisibleCells_smallGrid_returnsVisibleCells() {
+    public void getVisibleCellContents_smallGrid_returnsVisibleCells() {
         GridElement grid = $(GridElement.class).id("small-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpVisibleCells();
+        List<List<String>> cells = grid.getVisibleCellContents();
 
         Assert.assertNotNull("Cells should not be null", cells);
         Assert.assertTrue("Grid should have visible cells", cells.size() > 0);
@@ -53,12 +53,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpAllCells_smallGrid_returnsAllCells() {
+    public void getAllCellContents_smallGrid_returnsAllCells() {
         GridElement grid = $(GridElement.class).id("small-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpAllCells();
+        List<List<String>> cells = grid.getAllCellContents();
 
         Assert.assertEquals("Should have 10 rows", 10, cells.size());
 
@@ -70,12 +70,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpAllCells_mediumGrid_returnsAllCells() {
+    public void getAllCellContents_mediumGrid_returnsAllCells() {
         GridElement grid = $(GridElement.class).id("medium-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpAllCells();
+        List<List<String>> cells = grid.getAllCellContents();
 
         Assert.assertEquals("Should have 100 rows", 100, cells.size());
 
@@ -86,12 +86,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpCells_mediumGrid_returnsSpecifiedRange() {
+    public void getCellContents_mediumGrid_returnsSpecifiedRange() {
         GridElement grid = $(GridElement.class).id("medium-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpCells(20, 29);
+        List<List<String>> cells = grid.getCellContents(20, 29);
 
         Assert.assertEquals("Should have 10 rows", 10, cells.size());
 
@@ -103,12 +103,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpAllCells_largeGrid_returnsAllCells() {
+    public void getAllCellContents_largeGrid_returnsAllCells() {
         GridElement grid = $(GridElement.class).id("large-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpAllCells();
+        List<List<String>> cells = grid.getAllCellContents();
 
         Assert.assertEquals("Should have 1000 rows", 1000, cells.size());
 
@@ -119,12 +119,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpCells_largeGrid_returnsSpecifiedRange() {
+    public void getCellContents_largeGrid_returnsSpecifiedRange() {
         GridElement grid = $(GridElement.class).id("large-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpCells(800, 850);
+        List<List<String>> cells = grid.getCellContents(800, 850);
 
         Assert.assertEquals("Should have 51 rows", 51, cells.size());
         Assert.assertEquals("Person 800", cells.get(0).get(0));
@@ -132,12 +132,12 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpAllCells_hiddenColumn_onlyVisibleColumns() {
+    public void getAllCellContents_hiddenColumn_onlyVisibleColumns() {
         GridElement grid = $(GridElement.class).id("hidden-column-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        List<List<String>> cells = grid.dumpAllCells();
+        List<List<String>> cells = grid.getAllCellContents();
 
         Assert.assertEquals("Should have 10 rows", 10, cells.size());
 
@@ -150,27 +150,27 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpCells_invalidRange_throwsException() {
+    public void getCellContents_invalidRange_throwsException() {
         GridElement grid = $(GridElement.class).id("small-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
         try {
-            grid.dumpCells(-1, 5);
+            grid.getCellContents(-1, 5);
             Assert.fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
             // Expected
         }
 
         try {
-            grid.dumpCells(0, 100);
+            grid.getCellContents(0, 100);
             Assert.fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
             // Expected
         }
 
         try {
-            grid.dumpCells(5, 3);
+            grid.getCellContents(5, 3);
             Assert.fail("Should throw IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
             // Expected
@@ -178,35 +178,51 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dumpAllCells_fasterThanGetText() {
-        GridElement grid = $(GridElement.class).id("medium-grid");
+    public void getCellContents_matchesGetCellText() {
+        GridElement grid = $(GridElement.class).id("hidden-column-grid");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
 
-        // Test dumpAllCells performance
-        long startDump = System.currentTimeMillis();
-        List<List<String>> dumpedCells = grid.dumpAllCells();
-        long dumpTime = System.currentTimeMillis() - startDump;
+        List<List<String>> cells = grid.getAllCellContents();
 
-        // Test getText performance (just first 10 rows to keep test fast)
-        long startGetText = System.currentTimeMillis();
-        for (int row = 0; row < 10; row++) {
-            for (int col = 0; col < 2; col++) {
-                grid.getCell(row, col).getText();
+        int visibleColumns = grid.getVisibleColumns().size();
+        for (int row = 0; row < cells.size(); row++) {
+            for (int col = 0; col < visibleColumns; col++) {
+                Assert.assertEquals(
+                        "Cell content should match getCell().getText() at row "
+                                + row + ", column " + col,
+                        grid.getCell(row, col).getText(),
+                        cells.get(row).get(col));
             }
         }
-        long getTextTime = System.currentTimeMillis() - startGetText;
+    }
 
-        // Verify data is correct
-        Assert.assertEquals("Should have 100 rows", 100, dumpedCells.size());
-        Assert.assertEquals("Person 0", dumpedCells.get(0).get(0));
+    @Test
+    public void getVisibleCellContents_scrolled_returnsVisibleRowsInOrder() {
+        GridElement grid = $(GridElement.class).id("large-grid");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
 
-        // dumpAllCells should be significantly faster
-        // Even dumping 100 rows should be faster than getText on just 10 rows
-        Assert.assertTrue(
-                "dumpAllCells should be faster than getText. dumpAllCells: "
-                        + dumpTime + "ms, getText (10 rows): " + getTextTime
-                        + "ms",
-                dumpTime < getTextTime * 5);
+        grid.scrollToRow(500);
+
+        List<List<String>> cells = grid.getVisibleCellContents();
+
+        Assert.assertTrue("Grid should show more than one visible row",
+                cells.size() > 1);
+
+        // Only the rows in the viewport should be returned, in ascending index
+        // order, excluding the buffer rows the grid renders out of view. The
+        // grid also recycles row elements, so DOM order does not match index
+        // order after scrolling.
+        int firstVisible = grid.getFirstVisibleRowIndex();
+        int lastVisible = grid.getLastVisibleRowIndex();
+        Assert.assertEquals("Should return exactly the visible rows",
+                lastVisible - firstVisible + 1, cells.size());
+
+        int expectedIndex = firstVisible;
+        for (List<String> row : cells) {
+            Assert.assertEquals("Person " + expectedIndex, row.get(0));
+            expectedIndex++;
+        }
     }
 }

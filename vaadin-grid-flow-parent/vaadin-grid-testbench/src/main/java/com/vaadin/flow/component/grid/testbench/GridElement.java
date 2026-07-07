@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.grid.testbench;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -606,26 +608,53 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Dumps all currently visible cell text content into a 2D array. This is a
-     * fast operation requiring only a single browser round-trip.
-     * <p>
-     * Only visible columns are included in the output.
-     *
-     * @return a 2D array where each inner list represents a row, containing the
-     *         text content of each visible column
+     * JavaScript arrow function that, given a grid row (a {@code tr} element),
+     * returns the text content of its visible cells in column order. Hidden
+     * columns are skipped. The text extraction matches
+     * {@link GridTHTDElement#getText()}: the {@code textContent} of the nodes
+     * assigned to the cell's slot are joined, and a value that is only
+     * whitespace is returned as an empty string.
      */
-    public List<List<String>> dumpVisibleCells() {
+    private static final String ROW_CELL_CONTENTS_FUNCTION = """
+            (row) => Array.from(row.children)
+                .filter((cell) => cell._column && !cell._column.hidden)
+                .sort((a, b) => a._column._order - b._column._order)
+                .map((cell) => {
+                    const slot = cell.firstElementChild;
+                    if (!slot || !slot.assignedNodes) {
+                        return '';
+                    }
+                    const text = Array.from(slot.assignedNodes())
+                        .map((node) => node.textContent).join('');
+                    return text.trim() === '' ? '' : text;
+                })
+            """;
+
+    /**
+     * Gets the text content of the rows currently visible in the viewport as a
+     * 2D list, ordered by row index. This is a fast operation requiring only a
+     * single browser round-trip.
+     * <p>
+     * Rows that are rendered but scrolled out of view are not included; use
+     * {@link #getAllCellContents()} or {@link #getCellContents(int, int)} to
+     * include rows outside the viewport. Only visible columns are included, and
+     * the text of each cell matches {@link GridTHTDElement#getText()}.
+     *
+     * @return a list of rows, each a list holding the text of every visible
+     *         column
+     */
+    public List<List<String>> getVisibleCellContents() {
         waitUntilLoadingFinished();
-        String script = "const grid = arguments[0];"
-                + "const rows = grid._getRenderedRows();"
-                + "return Array.from(rows).map(row => {"
-                + "  return Array.from(row.children)"
-                + "    .filter(cell => cell._column && !cell._column.hidden)"
-                + "    .sort((a, b) => a._column._order - b._column._order)"
-                + "    .map(cell => {"
-                + "      return Array.from(cell.firstElementChild.assignedNodes())"
-                + "        .map(node => node.textContent)"
-                + "        .join('');" + "    });" + "});";
+        // The grid renders a buffer of rows outside the viewport, so filter the
+        // rendered rows down to the ones that are at least partially visible.
+        String script = "const [grid] = arguments;" + "const rowCellContents = "
+                + ROW_CELL_CONTENTS_FUNCTION + ";"
+                + "const first = grid._firstVisibleIndex;"
+                + "const last = grid._lastVisibleIndex;"
+                + "return Array.from(grid._getRenderedRows())"
+                + "    .filter((row) => row.index >= first && row.index <= last)"
+                + "    .sort((a, b) => a.index - b.index)"
+                + "    .map(rowCellContents);";
         @SuppressWarnings("unchecked")
         List<List<String>> result = (List<List<String>>) executeScript(script,
                 this);
@@ -633,20 +662,23 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Dumps cell text content for a specific row range. Automatically scrolls
-     * to ensure the specified rows are loaded.
+     * Gets the text content of the given row range as a 2D list, ordered by row
+     * index. The grid is scrolled as needed to load the requested rows.
      * <p>
-     * Only visible columns are included in the output.
+     * Only visible columns are included, and the text of each cell matches
+     * {@link GridTHTDElement#getText()}.
      *
      * @param fromRow
      *            starting row index (inclusive)
      * @param toRow
      *            ending row index (inclusive)
-     * @return a 2D array with cell text for the specified rows
+     * @return a list of rows, each a list holding the text of every visible
+     *         column
      * @throws IndexOutOfBoundsException
-     *             if row indexes are out of bounds
+     *             if the row indexes are out of bounds or {@code fromRow} is
+     *             greater than {@code toRow}
      */
-    public List<List<String>> dumpCells(int fromRow, int toRow)
+    public List<List<String>> getCellContents(int fromRow, int toRow)
             throws IndexOutOfBoundsException {
         int rowCount = getRowCount();
         if (fromRow < 0 || toRow < 0 || fromRow >= rowCount || toRow >= rowCount
@@ -656,84 +688,70 @@ public class GridElement extends TestBenchElement {
                             + " with fromRow <= toRow, but were " + fromRow
                             + " and " + toRow);
         }
+        return collectCellContents(fromRow, toRow);
+    }
 
-        // Use a map to store cells by row index to avoid duplicates
-        java.util.Map<Integer, List<String>> cellMap = new java.util.HashMap<>();
-        int currentScrollRow = fromRow;
-        int targetRowCount = toRow - fromRow + 1;
+    /**
+     * Scrolls through the given row range and collects the text content of each
+     * row. The caller is responsible for validating the range against the row
+     * count.
+     */
+    private List<List<String>> collectCellContents(int fromRow, int toRow) {
+        // Only a window of rows is rendered at a time, so scroll through the
+        // range and collect each rendered row by its index to avoid duplicates.
+        String script = "const [grid, fromRow, toRow] = arguments;"
+                + "const rowCellContents = " + ROW_CELL_CONTENTS_FUNCTION + ";"
+                + "return Array.from(grid._getRenderedRows())"
+                + "    .filter((row) => row.index >= fromRow && row.index <= toRow)"
+                + "    .map((row) => [row.index, rowCellContents(row)]);";
 
-        // Keep scrolling and collecting until we have all rows
-        while (cellMap.size() < targetRowCount) {
-            // Scroll to current position
-            scrollToRowByFlatIndex(currentScrollRow);
-
-            // Extract cells with row indices to avoid duplicates
-            String script = "const grid = arguments[0];"
-                    + "const fromRow = arguments[1];"
-                    + "const toRow = arguments[2];"
-                    + "const rows = grid._getRenderedRows();"
-                    + "return Array.from(rows)"
-                    + "  .filter(row => row.index >= fromRow && row.index <= toRow)"
-                    + "  .map(row => ({" + "    index: row.index,"
-                    + "    cells: Array.from(row.children)"
-                    + "      .filter(cell => cell._column && !cell._column.hidden)"
-                    + "      .sort((a, b) => a._column._order - b._column._order)"
-                    + "      .map(cell => Array.from(cell.firstElementChild.assignedNodes())"
-                    + "        .map(node => node.textContent)"
-                    + "        .join(''))" + "  }));";
+        Map<Integer, List<String>> cellsByRow = new HashMap<>();
+        int scrollRow = fromRow;
+        while (scrollRow <= toRow) {
+            scrollToRowByFlatIndex(scrollRow);
 
             @SuppressWarnings("unchecked")
-            List<java.util.Map<String, Object>> chunk = (List<java.util.Map<String, Object>>) executeScript(
+            List<List<Object>> chunk = (List<List<Object>>) executeScript(
                     script, this, fromRow, toRow);
 
-            if (chunk != null && !chunk.isEmpty()) {
-                int maxIndex = currentScrollRow;
-                for (java.util.Map<String, Object> rowData : chunk) {
-                    int index = ((Number) rowData.get("index")).intValue();
-                    @SuppressWarnings("unchecked")
-                    List<String> cells = (List<String>) rowData.get("cells");
-                    cellMap.putIfAbsent(index, cells);
-                    maxIndex = Math.max(maxIndex, index);
-                }
-
-                // Scroll forward for next iteration
-                currentScrollRow = maxIndex + 1;
-                if (currentScrollRow > toRow) {
-                    break;
-                }
-            } else {
-                // No more rows rendered, break to avoid infinite loop
-                break;
+            int maxIndex = scrollRow;
+            for (List<Object> row : chunk) {
+                int index = ((Number) row.get(0)).intValue();
+                @SuppressWarnings("unchecked")
+                List<String> contents = (List<String>) row.get(1);
+                cellsByRow.putIfAbsent(index, contents);
+                maxIndex = Math.max(maxIndex, index);
             }
+            // Advance past the rows just collected. The scroll target is always
+            // rendered, so maxIndex >= scrollRow and the loop makes progress.
+            scrollRow = maxIndex + 1;
         }
 
-        // Convert map to list in correct order
         List<List<String>> result = new ArrayList<>();
         for (int i = fromRow; i <= toRow; i++) {
-            if (cellMap.containsKey(i)) {
-                result.add(cellMap.get(i));
-            }
+            result.add(cellsByRow.get(i));
         }
-
         return result;
     }
 
     /**
-     * Dumps all cell text content in the grid by scrolling through all pages.
-     * This operation may take several seconds for large grids but is much
-     * faster than calling getText() on individual cells.
+     * Gets the text content of all rows in the grid as a 2D list, ordered by
+     * row index. The grid is scrolled through all pages, so this may take a few
+     * seconds for large grids, but is much faster than calling
+     * {@link GridTHTDElement#getText()} on individual cells.
      * <p>
-     * Only visible columns are included in the output.
+     * Only visible columns are included, and the text of each cell matches
+     * {@link GridTHTDElement#getText()}.
      *
-     * @return a 2D array where each inner list represents a row, containing the
-     *         text content of each visible column
+     * @return a list of rows, each a list holding the text of every visible
+     *         column
      */
-    public List<List<String>> dumpAllCells() {
+    public List<List<String>> getAllCellContents() {
         int rowCount = getRowCount();
         if (rowCount == 0) {
             return new ArrayList<>();
         }
-        return dumpCells(0, rowCount - 1);
+        return collectCellContents(0, rowCount - 1);
     }
 
     /**
