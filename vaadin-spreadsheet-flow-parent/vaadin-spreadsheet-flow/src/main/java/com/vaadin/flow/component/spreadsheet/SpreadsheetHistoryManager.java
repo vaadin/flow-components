@@ -24,6 +24,7 @@ import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
  * to allow the user to undo and redo any action.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetHistoryManager implements Serializable {

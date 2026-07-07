@@ -43,6 +43,7 @@ import com.vaadin.flow.function.ValueProvider;
  *            the type of the item used inside the renderer
  * @param <TARGET>
  *            the type of the output object, such as Number or LocalDate
+ * @since 22.0
  */
 public abstract class BasicRenderer<SOURCE, TARGET>
         extends ComponentRenderer<Component, SOURCE> {

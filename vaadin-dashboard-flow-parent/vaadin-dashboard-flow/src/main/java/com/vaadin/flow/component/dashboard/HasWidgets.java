@@ -22,6 +22,7 @@ import java.util.Objects;
  * @see DashboardWidget
  *
  * @author Vaadin Ltd
+ * @since 24.6
  */
 public interface HasWidgets extends Serializable {
 
@@ -85,6 +86,7 @@ public interface HasWidgets extends Serializable {
      * @throws IllegalArgumentException
      *             if the reference widget is not found in this component or any
      *             of its sections
+     * @since 25.1
      */
     void addWidgetAfter(DashboardWidget referenceWidget,
             DashboardWidget newWidget);

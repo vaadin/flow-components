@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * In Highcharts 1.0, the appearance of all markers belonging to the hovered
  * series. For settings on the hover state of the individual point, see
  * <a href="#plotOptions.series.marker.states.hover">marker.states.hover</a>.
+ * 
+ * @since 6.0.1
  */
 public class Marker extends AbstractConfigurationObject {
 
@@ -56,6 +58,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -64,6 +67,8 @@ public class Marker extends AbstractConfigurationObject {
     /**
      * The fill color of the point marker. When <code>null</code>, the series'
      * or point's color is used.
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
@@ -88,6 +93,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -98,6 +104,8 @@ public class Marker extends AbstractConfigurationObject {
      * series' or point's color is used.
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -105,6 +113,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -114,6 +123,8 @@ public class Marker extends AbstractConfigurationObject {
      * The width of the point marker's outline.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -179,6 +190,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setAlign(HorizontalAlign)
+     * @since 24.7
      */
     public HorizontalAlign getAlign() {
         return align;
@@ -187,6 +199,8 @@ public class Marker extends AbstractConfigurationObject {
     /**
      * Supported only in Gantt charts: Horizontal alignment of the markers
      * relative to the points. Defaults to "center"
+     * 
+     * @since 24.7
      */
     public void setAlign(HorizontalAlign align) {
         this.align = align;
@@ -194,6 +208,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setVerticalAlign(VerticalAlign)
+     * @since 24.7
      */
     public VerticalAlign getVerticalAlign() {
         return verticalAlign;
@@ -202,6 +217,8 @@ public class Marker extends AbstractConfigurationObject {
     /**
      * Supported only in Gantt charts: Vertical alignment of the markers
      * relative to the points. Defaults to "middle"
+     * 
+     * @since 24.7
      */
     public void setVerticalAlign(VerticalAlign verticalAlign) {
         this.verticalAlign = verticalAlign;
@@ -209,6 +226,7 @@ public class Marker extends AbstractConfigurationObject {
 
     /**
      * @see #setInside(Boolean)
+     * @since 24.7
      */
     public Boolean getInside() {
         return inside;
@@ -217,6 +235,8 @@ public class Marker extends AbstractConfigurationObject {
     /**
      * Supported only in Gantt charts: Whether to draw the markers inside the
      * points. Defaults to false.
+     * 
+     * @since 24.7
      */
     public void setInside(Boolean inside) {
         this.inside = inside;

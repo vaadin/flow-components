@@ -28,7 +28,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandl
  * external URLs.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class DefaultHyperlinkCellClickHandler

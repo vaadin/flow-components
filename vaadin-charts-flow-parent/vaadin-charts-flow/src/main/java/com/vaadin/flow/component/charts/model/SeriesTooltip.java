@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * A configuration object for the tooltip rendering of each single series.
  * Properties are inherited from <a href="#tooltip">tooltip</a>, but only the
  * following properties can be defined on a series level.
+ * 
+ * @since 6.0.1
  */
 public class SeriesTooltip extends AbstractConfigurationObject {
 

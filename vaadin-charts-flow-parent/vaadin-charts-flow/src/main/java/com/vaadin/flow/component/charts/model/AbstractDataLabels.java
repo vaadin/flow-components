@@ -11,6 +11,9 @@ package com.vaadin.flow.component.charts.model;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.Style;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";
@@ -28,51 +31,66 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public abstract Color getBackgroundColor();
 
     /**
      * The background color or gradient for the data label.
+     * 
+     * @since 18.0
      */
     public abstract void setBackgroundColor(Color backgroundColor);
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public abstract Color getBorderColor();
 
     /**
      * The border color for the data label.
+     * 
+     * @since 18.0
      */
     public abstract void setBorderColor(Color borderColor);
 
     /**
      * @see #setBorderRadius(Number)
+     * @since 18.0
      */
     public abstract Number getBorderRadius();
 
     /**
      * The border radius in pixels for the data label.
+     * 
+     * @since 18.0
      */
     public abstract void setBorderRadius(Number borderRadius);
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public abstract Color getColor();
 
     /**
      * The text color for the data labels.
+     * 
+     * @since 18.0
      */
     public abstract void setColor(Color color);
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public abstract Number getBorderWidth();
 
     /**
      * The border width in pixels for the data label.
+     * 
+     * @since 18.0
      */
     public abstract void setBorderWidth(Number borderWidth);
 
@@ -202,11 +220,14 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public abstract Style getStyle();
 
     /**
      * Styles for the label.
+     * 
+     * @since 18.0
      */
     public abstract void setStyle(Style style);
 

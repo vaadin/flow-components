@@ -42,6 +42,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  * @see UploadManager
+ * @since 25.1
  */
 @Tag("vaadin-upload-drop-zone")
 @NpmPackage(value = "@vaadin/upload", version = "25.2.1")

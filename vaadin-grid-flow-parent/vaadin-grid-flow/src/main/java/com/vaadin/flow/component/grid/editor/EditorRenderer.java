@@ -46,6 +46,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @see Column#setEditorComponent(Component)
  * @see Column#setEditorComponent(SerializableFunction)
+ * @since 2.1
  */
 public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 

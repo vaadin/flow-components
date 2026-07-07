@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired after a chart is printed using the print menu
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-after-print")
 public class ChartAfterPrintEvent extends ComponentEvent<Chart> {

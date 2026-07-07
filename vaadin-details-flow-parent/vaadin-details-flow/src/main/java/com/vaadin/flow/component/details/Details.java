@@ -54,6 +54,7 @@ import com.vaadin.flow.signals.Signal;
  * inaccessible by keyboard or screen reader.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/details", version = "25.2.1")
@@ -98,6 +99,7 @@ public class Details extends Component implements HasComponents, HasSize,
      * @param summary
      *            the summary component to set.
      * @see #setSummaryText(String)
+     * @since 23.1
      */
     public Details(String summary) {
         this();
@@ -110,6 +112,7 @@ public class Details extends Component implements HasComponents, HasSize,
      * @param summary
      *            the summary component to set.
      * @see #setSummary(Component)
+     * @since 23.1
      */
     public Details(Component summary) {
         this();
@@ -161,6 +164,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *
      * @see #setSummaryText(String)
      * @see #add(Component...)
+     * @since 23.1
      */
     public Details(String summary, Component... components) {
         this(summary);
@@ -178,6 +182,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *
      * @see #setSummary(Component)
      * @see #add(Component...)
+     * @since 23.1
      */
     public Details(Component summary, Component... components) {
         this(summary);
@@ -188,6 +193,7 @@ public class Details extends Component implements HasComponents, HasSize,
      * Creates the summary container component.
      *
      * @return the summary container
+     * @since 24.0
      */
     protected Component createSummaryContainer() {
         return new DetailsSummary();
@@ -246,6 +252,7 @@ public class Details extends Component implements HasComponents, HasSize,
      * @see #getContent()
      * @param components
      *            the components to add
+     * @since 24.2
      */
     @Override
     public void add(Collection<Component> components) {
@@ -258,6 +265,7 @@ public class Details extends Component implements HasComponents, HasSize,
      * @see #getContent()
      * @param text
      *            the text to add, not null
+     * @since 24.2
      */
     @Override
     public void add(String text) {
@@ -269,6 +277,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *
      * @param components
      *            the components to remove
+     * @since 24.2
      */
     @Override
     public void remove(Collection<Component> components) {
@@ -277,6 +286,8 @@ public class Details extends Component implements HasComponents, HasSize,
 
     /**
      * Removes all components from the content section
+     * 
+     * @since 24.2
      */
     @Override
     public void removeAll() {
@@ -295,6 +306,7 @@ public class Details extends Component implements HasComponents, HasSize,
      *            be non-negative and may not exceed the children count
      * @param component
      *            the component to add, value should not be null
+     * @since 24.2
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {

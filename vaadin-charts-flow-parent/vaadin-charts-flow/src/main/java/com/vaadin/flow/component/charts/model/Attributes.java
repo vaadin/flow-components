@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * A collection of style attributes for the {@link Halo}
+ * 
+ * @since 18.0
  */
 public class Attributes extends AbstractConfigurationObject {
 

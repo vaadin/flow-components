@@ -30,6 +30,7 @@ import com.vaadin.flow.data.provider.Query;
  *
  * @param <T>
  *            the type of the items in grid
+ * @since 18.0
  */
 public class GridLazyDataView<T> extends AbstractLazyDataView<T> {
 

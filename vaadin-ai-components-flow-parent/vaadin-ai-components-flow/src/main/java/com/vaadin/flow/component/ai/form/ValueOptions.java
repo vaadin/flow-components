@@ -49,6 +49,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
  *            the per-element type for multi-select fields
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ValueOptions<V> {
 

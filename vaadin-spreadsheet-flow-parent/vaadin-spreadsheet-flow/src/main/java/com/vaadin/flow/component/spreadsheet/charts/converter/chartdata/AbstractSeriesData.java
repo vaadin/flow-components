@@ -13,6 +13,9 @@ import java.util.List;
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.AbstractSeriesDataWriter;
 
+/**
+ * @since 24.0
+ */
 public abstract class AbstractSeriesData {
     public static class SeriesPoint {
 

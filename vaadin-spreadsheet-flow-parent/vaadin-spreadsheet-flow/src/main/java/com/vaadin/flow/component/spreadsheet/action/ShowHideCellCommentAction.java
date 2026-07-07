@@ -23,7 +23,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
  * Spreadsheet action for showing or hiding a cell comment.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class ShowHideCellCommentAction extends SpreadsheetAction {

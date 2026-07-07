@@ -13,6 +13,8 @@ import java.time.Instant;
 /**
  * DataSeriesItem that can hold also target and targetOptions. Used in e.g.
  * bullet series.
+ * 
+ * @since 18.0
  */
 public class DataSeriesItemBullet extends DataSeriesItem {
 

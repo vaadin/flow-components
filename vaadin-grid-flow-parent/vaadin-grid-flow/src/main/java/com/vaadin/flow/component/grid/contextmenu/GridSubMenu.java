@@ -31,6 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * sub menu. Sub menu will be rendered only if content has been added inside it.
  *
  * @author Vaadin Ltd.
+ * @since 3.0
  */
 public class GridSubMenu<T>
         extends SubMenuBase<GridContextMenu<T>, GridMenuItem<T>, GridSubMenu<T>>

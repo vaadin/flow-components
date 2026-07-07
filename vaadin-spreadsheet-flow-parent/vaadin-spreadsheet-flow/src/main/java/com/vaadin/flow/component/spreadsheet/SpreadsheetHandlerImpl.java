@@ -37,6 +37,8 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetServerRpc;
 
 /**
  * Implementation of the Spreadsheet Server RPC interface.
+ * 
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {

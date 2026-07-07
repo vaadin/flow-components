@@ -36,6 +36,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of the items in ComboBox
+ * @since 18.0
  */
 public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     private final DataCommunicator<T> dataCommunicator;
@@ -51,6 +52,7 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      * @param filterOrSortingChangedCallback
      *            callback, which is being invoked when the ComboBox's filtering
      *            or sorting changes, not <code>null</code>
+     * @since 23.2
      */
     public ComboBoxListDataView(DataCommunicator<T> dataCommunicator,
             ComboBoxBase<?, T, ?> comboBox,

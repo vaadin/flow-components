@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-tab} component.
+ * 
+ * @since 1.1
  */
 public enum TabVariant implements ThemeVariant {
     LUMO_ICON_ON_TOP("icon-on-top");

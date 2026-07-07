@@ -32,6 +32,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <C>
  *            Type of the component that uses this controller.
+ * @since 24.7
  */
 public class OverlayAutoAddController<C extends Component>
         implements Serializable {
@@ -80,6 +81,8 @@ public class OverlayAutoAddController<C extends Component>
      * the current opened state of the component. Allows components with custom
      * opening logic, such as ContextMenu, to add themselves to the UI and reuse
      * the automatic removal logic when the component is closed.
+     * 
+     * @since 25.0
      */
     public void add() {
         if (!isAttached()) {
@@ -101,6 +104,8 @@ public class OverlayAutoAddController<C extends Component>
      * Force remove the component from the UI in case it was auto-added. Can be
      * used by components with custom closing logic. For example, Notification
      * removes itself from the UI whenever it is detached.
+     * 
+     * @since 25.0
      */
     public void remove() {
         handleClose();
@@ -112,6 +117,7 @@ public class OverlayAutoAddController<C extends Component>
      *
      * @param skipOnNavigation
      *            whether to skip auto-adding on navigation
+     * @since 24.7.3
      */
     public void setSkipOnNavigation(boolean skipOnNavigation) {
         this.skipOnNavigation = skipOnNavigation;

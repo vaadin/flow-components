@@ -13,6 +13,8 @@ import java.util.List;
 
 /**
  * Alternative AxisContainer to allow multiple axes
+ * 
+ * @since 6.0.1
  */
 public class AxisList<T extends Axis> extends AbstractConfigurationObject {
 

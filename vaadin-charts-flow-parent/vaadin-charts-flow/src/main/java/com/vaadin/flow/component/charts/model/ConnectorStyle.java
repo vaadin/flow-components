@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * A configuration object to configure style of connectors (dependencies)
  * between two points in a Gantt chart.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class ConnectorStyle extends AbstractConfigurationObject {

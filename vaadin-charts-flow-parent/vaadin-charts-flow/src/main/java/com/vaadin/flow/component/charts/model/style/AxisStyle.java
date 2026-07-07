@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * The AxisStyle class contains options for customizing the style of an axis
+ * 
+ * @since 18.0
  */
 @SuppressWarnings("serial")
 public class AxisStyle extends AbstractConfigurationObject {

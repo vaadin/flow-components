@@ -29,6 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * source as input and renders the corresponding HTML.
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 @Tag("vaadin-markdown")
 @NpmPackage(value = "@vaadin/markdown", version = "25.2.1")

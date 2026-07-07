@@ -17,6 +17,8 @@ import com.vaadin.flow.component.map.configuration.source.Source;
 /**
  * Represents a map's viewport, responsible for changing properties like center
  * and zoom level
+ * 
+ * @since 23.0
  */
 public class View extends AbstractConfigurationObject {
 
@@ -103,6 +105,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param rotation
      *            the rotation in radians format
+     * @since 24.0
      */
     public void setRotation(double rotation) {
         this.rotation = rotation;
@@ -128,6 +131,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param zoom
      *            new zoom level
+     * @since 24.0
      */
     public void setZoom(double zoom) {
         this.zoom = zoom;
@@ -172,6 +176,7 @@ public class View extends AbstractConfigurationObject {
      *            the updated zoom level
      * @param extent
      *            the updated extent
+     * @since 24.0
      */
     public void updateInternalViewState(Coordinate center, double rotation,
             double zoom, Extent extent) {

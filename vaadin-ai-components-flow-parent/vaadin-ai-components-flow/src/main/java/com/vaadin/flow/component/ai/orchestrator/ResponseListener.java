@@ -44,6 +44,8 @@ import java.util.Optional;
  * <b>Threading:</b> the listener is called from a background thread (Reactor
  * scheduler). Blocking I/O (e.g. database writes) is safe directly. To update
  * Vaadin UI components from this listener, use {@code ui.access()}.
+ * 
+ * @since 25.2
  */
 @FunctionalInterface
 public interface ResponseListener extends Serializable {

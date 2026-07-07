@@ -27,6 +27,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * Vertical Layout places components top-to-bottom in a column. By default, it
  * has 100% width and undefined height, meaning its width is constrained by its
  * parent component and its height is determined by the components it contains.
+ * 
+ * @since 1.0
  */
 @Tag("vaadin-vertical-layout")
 @NpmPackage(value = "@vaadin/vertical-layout", version = "25.2.1")
@@ -68,6 +70,7 @@ public class VerticalLayout extends Component
      *
      * @see #add(Component...)
      * @see #setJustifyContentMode(JustifyContentMode)
+     * @since 24.1
      */
     public VerticalLayout(JustifyContentMode justifyContentMode,
             Component... children) {
@@ -86,6 +89,7 @@ public class VerticalLayout extends Component
      *
      * @see #add(Component...)
      * @see #setDefaultHorizontalComponentAlignment(Alignment)
+     * @since 24.1
      */
     public VerticalLayout(Alignment alignment, Component... children) {
         this(children);
@@ -265,6 +269,7 @@ public class VerticalLayout extends Component
      *
      * @param components
      *            the components to set, not <code>null</code>
+     * @since 2.0
      */
     public void addAndExpand(Component... components) {
         add(components);

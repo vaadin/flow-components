@@ -30,6 +30,8 @@ import tools.jackson.databind.ser.std.StdSerializer;
 /**
  * Custom JSON serializer for the map component using a Jackson
  * {@link ObjectMapper}
+ * 
+ * @since 23.0
  */
 public class MapSerializer {
 

@@ -29,7 +29,7 @@ import com.vaadin.flow.function.SerializableSupplier;
  *
  * @param <T>
  *            data type
- * @since
+ * @since 18.0
  */
 public class ListBoxListDataView<T> extends AbstractListDataView<T> {
 

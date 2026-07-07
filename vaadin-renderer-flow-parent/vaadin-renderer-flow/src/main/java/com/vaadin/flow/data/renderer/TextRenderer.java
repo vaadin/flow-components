@@ -30,6 +30,7 @@ import com.vaadin.flow.function.ValueProvider;
  *            the type of the input object that can be used by the rendered
  *            component
  *
+ * @since 22.0
  */
 public class TextRenderer<ITEM> extends BasicRenderer<ITEM, ITEM> {
 

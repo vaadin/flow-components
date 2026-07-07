@@ -19,6 +19,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <p>
  * The side for the frame around a 3D chart.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Side extends AbstractConfigurationObject {
 

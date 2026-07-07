@@ -11,6 +11,9 @@ package com.vaadin.flow.component.board.internal;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 
+/**
+ * @since 2.0.1
+ */
 public class FunctionCaller {
 
     /**

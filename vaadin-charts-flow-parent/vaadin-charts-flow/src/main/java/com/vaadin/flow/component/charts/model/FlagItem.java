@@ -13,6 +13,8 @@ import java.time.Instant;
 /**
  * DataSeriesItem that can hold also title and text values. Used in flags
  * charts.
+ * 
+ * @since 6.0.1
  */
 public class FlagItem extends DataSeriesItem {
 

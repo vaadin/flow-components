@@ -78,6 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * appropriate.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-dialog")
 @NpmPackage(value = "@vaadin/dialog", version = "25.2.1")
@@ -150,6 +151,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Gets the top position of the dialog.
      *
      * @return the top position of the dialog
+     * @since 24.6
      */
     public String getTop() {
         return getElement().getProperty("top");
@@ -165,6 +167,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param top
      *            the top position of the dialog
+     * @since 24.6
      */
     public void setTop(String top) {
         getElement().setProperty("top", top);
@@ -174,6 +177,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Gets the left position of the dialog.
      *
      * @return the left position of the dialog
+     * @since 24.6
      */
     public String getLeft() {
         return getElement().getProperty("left");
@@ -189,6 +193,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param left
      *            the left position of the dialog
+     * @since 24.6
      */
     public void setLeft(String left) {
         getElement().setProperty("left", left);
@@ -196,6 +201,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `resize` event is sent when the user finishes resizing the dialog.
+     * 
+     * @since 3.1
      */
     @DomEvent("resize")
     public static class DialogResizeEvent extends ComponentEvent<Dialog> {
@@ -239,6 +246,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * Gets the left position of the dialog after resize is done
          *
          * @return the left position in pixels of the dialog
+         * @since 24.6
          */
         public String getLeft() {
             return left;
@@ -248,6 +256,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * Gets the top position of the dialog after resize is done
          *
          * @return the top position in pixels of the dialog
+         * @since 24.6
          */
         public String getTop() {
             return top;
@@ -256,6 +265,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `dragged` event is sent when the user finishes dragging the dialog.
+     * 
+     * @since 24.6
      */
     @DomEvent("dragged")
     public static class DialogDraggedEvent extends ComponentEvent<Dialog> {
@@ -296,6 +307,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * which, when closing the dialog, is before the closing animation has
      * finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
+     * 
+     * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
         private final boolean opened;
@@ -313,6 +326,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
+     * 
+     * @since 25.0
      */
     @DomEvent("closed")
     public static class ClosedEvent extends ComponentEvent<Dialog> {
@@ -341,6 +356,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -381,6 +397,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -488,6 +505,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param listener
      *            the listener to add
      * @return registration for removal of listener
+     * @since 3.1
      */
     public Registration addResizeListener(
             ComponentEventListener<DialogResizeEvent> listener) {
@@ -505,6 +523,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param listener
      *            the listener to add
      * @return registration for removal of listener
+     * @since 24.6
      */
     public Registration addDraggedListener(
             ComponentEventListener<DialogDraggedEvent> listener) {
@@ -528,6 +547,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param title
      *            the title of the component
+     * @since 24.1
      */
     public Dialog(String title) {
         this();
@@ -541,6 +561,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            the title of the component
      * @param components
      *            the components inside the dialog
+     * @since 24.1
      */
     public Dialog(String title, Component... components) {
         this(components);
@@ -552,6 +573,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param components
      *            the components to add
+     * @since 24.0
      */
     @Override
     public void add(Collection<Component> components) {
@@ -567,6 +589,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            the index, where the component will be added.
      * @param component
      *            the component to add
+     * @since 1.1
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
@@ -643,6 +666,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if focus trap is enabled (default), {@code false}
      *         otherwise
+     * @since 25.1
      */
     public boolean isFocusTrap() {
         return !getElement().getProperty("noFocusTrap", false);
@@ -657,6 +681,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param focusTrap
      *            {@code true} to enable focus trap, {@code false} to disable it
+     * @since 25.1
      */
     public void setFocusTrap(boolean focusTrap) {
         getElement().setProperty("noFocusTrap", !focusTrap);
@@ -701,6 +726,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            {@code false} to enable dialog to open as modeless modal,
      *            {@code true} otherwise.
      * @deprecated use {@link #setModality(ModalityMode)} instead
+     * @since 3.1
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setModal(boolean modal) {
@@ -712,6 +738,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if modal dialog (default), {@code false} otherwise.
      * @deprecated use {@link #getModality()} instead
+     * @since 3.1
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public boolean isModal() {
@@ -742,6 +769,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param mode
      *            the modality mode, not null
+     * @since 25.0
      */
     public void setModality(ModalityMode mode) {
         this.modality = Objects.requireNonNull(mode,
@@ -754,6 +782,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Gets the modality of the dialog. {@link ModalityMode#VISUAL} by default.
      *
      * @return the modality mode, not null
+     * @since 25.0
      */
     public ModalityMode getModality() {
         return modality;
@@ -775,6 +804,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param draggable
      *            {@code true} to enable dragging of the dialog, {@code false}
      *            otherwise
+     * @since 3.1
      */
     public void setDraggable(boolean draggable) {
         getElement().setProperty("draggable", draggable);
@@ -785,6 +815,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if dragging is enabled, {@code false} otherwise
      *         (default).
+     * @since 3.1
      */
     public boolean isDraggable() {
         return getElement().getProperty("draggable", false);
@@ -800,6 +831,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param keepInViewport
      *            {@code true} to prevent the dialog from moving outside the
      *            viewport bounds, {@code false} otherwise
+     * @since 25.1
      */
     public void setKeepInViewport(boolean keepInViewport) {
         getElement().setProperty("keepInViewport", keepInViewport);
@@ -811,6 +843,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if the dialog is prevented from moving outside the
      *         viewport bounds, {@code false} otherwise
+     * @since 25.1
      */
     public boolean isKeepInViewport() {
         return getElement().getProperty("keepInViewport", false);
@@ -822,6 +855,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param resizable
      *            {@code true} to enabled resizing of the dialog, {@code false}
      *            otherwise.
+     * @since 3.1
      */
     public void setResizable(boolean resizable) {
         getElement().setProperty("resizable", resizable);
@@ -832,6 +866,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if resizing is enabled, {@code falsoe} otherwiser
      *         (default).
+     * @since 3.1
      */
     public boolean isResizable() {
         return getElement().getProperty("resizable", false);
@@ -842,6 +877,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param title
      *            title to be rendered
+     * @since 23.1
      */
     public void setHeaderTitle(String title) {
         getElement().setProperty("headerTitle", title);
@@ -851,6 +887,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Gets the title set for the dialog header.
      *
      * @return the title or an empty string, if a header title is not defined.
+     * @since 23.1
      */
     public String getHeaderTitle() {
         return getElement().getProperty("headerTitle", "");
@@ -863,6 +900,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@link DialogHeaderFooter#add(Component...)}.
      *
      * @return the header object
+     * @since 23.1
      */
     public DialogHeader getHeader() {
         if (this.dialogHeader == null) {
@@ -877,6 +915,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * component added with {@link DialogHeaderFooter#add(Component...)}.
      *
      * @return the header object
+     * @since 23.1
      */
     public DialogFooter getFooter() {
         if (this.dialogFooter == null) {
@@ -887,6 +926,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the header part of a dialog.
+     * 
+     * @since 23.1
      */
     final public static class DialogHeader extends DialogHeaderFooter {
         private DialogHeader(Dialog dialog) {
@@ -896,6 +937,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the footer part of a dialog.
+     * 
+     * @since 23.1
      */
     final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
@@ -1040,6 +1083,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param visible
      *            dialog visibility
      * @see Component#setVisible(boolean)
+     * @since 23.0
      */
     @Override
     public void setVisible(boolean visible) {
@@ -1158,6 +1202,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param listener
      *            the listener to add
      * @return a Registration for removing the event listener
+     * @since 25.0
      */
     public Registration addClosedListener(
             ComponentEventListener<ClosedEvent> listener) {
@@ -1252,6 +1297,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param role
      *            the role to set
+     * @since 25.0
      */
     public void setRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
@@ -1265,6 +1311,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param role
      *            the role to set
      * @deprecated Use {@link #setRole(String)} instead
+     * @since 24.5
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setOverlayRole(String role) {
@@ -1278,6 +1325,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Defaults to {@code dialog}.
      *
      * @return the role
+     * @since 25.0
      */
     public String getRole() {
         return getElement().getProperty("role");
@@ -1289,6 +1337,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the role
      * @deprecated Use {@link #getRole()} instead
+     * @since 24.5
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
@@ -1305,6 +1354,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * the returned value may not be the same as in client side.
      *
      * @return the {@code ariaLabel} property from the webcomponent
+     * @since 24.0
      */
     protected String getAriaLabel() {
         return getElement().getProperty("ariaLabel");
@@ -1318,6 +1368,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param ariaLabel
      *            the String value to set
+     * @since 24.0
      */
     protected void setAriaLabel(String ariaLabel) {
         getElement().setProperty("ariaLabel",
@@ -1359,6 +1410,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * @throws UnsupportedOperationException
      *             Dialog does not support adding styles
+     * @since 23.1
      */
     @Override
     public Style getStyle() {
@@ -1394,6 +1446,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @throws UnsupportedOperationException
      *             always thrown, as Dialog does not support binding children
      *             directly
+     * @since 25.1
      */
     @Override
     public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,

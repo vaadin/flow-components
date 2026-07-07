@@ -20,6 +20,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
+/**
+ * @since 23.1
+ */
 @SuppressWarnings("serial")
 public abstract class SheetOverlayWrapper implements Serializable {
 
@@ -281,6 +284,7 @@ public abstract class SheetOverlayWrapper implements Serializable {
      * Gets the handler serving this image
      *
      * @return Image resource
+     * @since 24.8
      */
     public DownloadHandler getResourceHandler() {
         return null;

@@ -17,6 +17,8 @@ package com.vaadin.flow.component.grid;
 
 /**
  * Set of theme variants applicable for {@code vaadin-grid} component.
+ * 
+ * @since 2.0
  */
 public enum GridVariant {
     LUMO_NO_BORDER("no-border"),
@@ -27,26 +29,31 @@ public enum GridVariant {
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_ROW_BORDERS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_ROW_BORDERS("no-row-borders"),
     /**
      * @deprecated Use {@link #COLUMN_BORDERS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_COLUMN_BORDERS("column-borders"),
     /**
      * @deprecated Use {@link #ROW_STRIPES} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ROW_STRIPES("row-stripes"),
     /**
      * @deprecated Use {@link #WRAP_CELL_CONTENT} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_WRAP_CELL_CONTENT("wrap-cell-content"),

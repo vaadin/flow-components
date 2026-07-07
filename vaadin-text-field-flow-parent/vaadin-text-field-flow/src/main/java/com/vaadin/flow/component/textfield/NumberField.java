@@ -75,6 +75,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
+ * @since 1.3
  */
 @Tag("vaadin-number-field")
 @NpmPackage(value = "@vaadin/number-field", version = "25.2.1")
@@ -187,6 +188,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -195,6 +198,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
 
     /**
      * @see NumberFieldI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -342,6 +346,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * {@link #setI18n(NumberFieldI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     @Override
     public NumberFieldI18n getI18n() {
@@ -353,6 +358,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(NumberFieldI18n i18n) {
         super.setI18n(i18n);
@@ -360,6 +366,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
 
     /**
      * The internationalization properties for {@link NumberField}.
+     * 
+     * @since 24.5
      */
     public static class NumberFieldI18n implements AbstractNumberFieldI18n {
         private String requiredErrorMessage;

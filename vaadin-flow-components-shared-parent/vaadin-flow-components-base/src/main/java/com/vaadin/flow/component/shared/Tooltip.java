@@ -30,6 +30,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * A handle that can be used to configure and control tooltips.
  *
  * @author Vaadin Ltd
+ * @since 23.3
  */
 @NpmPackage(value = "@vaadin/tooltip", version = "25.2.1")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
@@ -80,6 +81,7 @@ public class Tooltip implements Serializable {
          * @param position
          *            the position string
          * @return the {@link TooltipPosition}
+         * @since 24.7
          */
         public static TooltipPosition fromPosition(String position) {
             return Arrays.stream(TooltipPosition.values())
@@ -91,6 +93,8 @@ public class Tooltip implements Serializable {
     /**
      * Controls which ARIA attribute links the target element(s) with the
      * tooltip content.
+     * 
+     * @since 25.2
      */
     public enum AriaLinkMode {
         /**
@@ -232,6 +236,7 @@ public class Tooltip implements Serializable {
      *
      * @param markdown
      *            the text to set in Markdown format
+     * @since 25.0
      */
     public void setMarkdown(String markdown) {
         tooltipElement.setProperty("text", markdown);
@@ -263,6 +268,7 @@ public class Tooltip implements Serializable {
      *
      * @param markdown
      *            the text to set in Markdown format
+     * @since 25.0
      */
     public Tooltip withMarkdown(String markdown) {
         setMarkdown(markdown);
@@ -462,6 +468,7 @@ public class Tooltip implements Serializable {
      * @param ariaLinkMode
      *            the ARIA link mode to set, or {@code null} to reset to the
      *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
+     * @since 25.2
      */
     public void setAriaLinkMode(AriaLinkMode ariaLinkMode) {
         if (ariaLinkMode == null) {
@@ -475,6 +482,7 @@ public class Tooltip implements Serializable {
      * tooltip content. Defaults to {@link AriaLinkMode#ARIA_DESCRIBED_BY}.
      *
      * @return the ARIA link mode
+     * @since 25.2
      */
     public AriaLinkMode getAriaLinkMode() {
         return AriaLinkMode
@@ -489,6 +497,7 @@ public class Tooltip implements Serializable {
      *            the ARIA link mode to set, or {@code null} to reset to the
      *            default {@link AriaLinkMode#ARIA_DESCRIBED_BY}
      * @return the tooltip handle for chaining
+     * @since 25.2
      */
     public Tooltip withAriaLinkMode(AriaLinkMode ariaLinkMode) {
         setAriaLinkMode(ariaLinkMode);

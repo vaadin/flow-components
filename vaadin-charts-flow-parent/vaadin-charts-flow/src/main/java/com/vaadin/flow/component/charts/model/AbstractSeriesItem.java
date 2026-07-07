@@ -16,6 +16,7 @@ import com.vaadin.flow.component.charts.util.Util;
 /**
  * Abstract superclass for chart series items
  *
+ * @since 6.0.1
  */
 public class AbstractSeriesItem extends AbstractConfigurationObject {
 
@@ -132,6 +133,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      *
      * @see #setColor(Color)
      * @return The color of the item.
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -143,6 +145,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      *
      * @param color
      *            Color of the item.
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
