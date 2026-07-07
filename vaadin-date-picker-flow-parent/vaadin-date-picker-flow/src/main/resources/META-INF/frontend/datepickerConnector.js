@@ -183,9 +183,11 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
   // given range as an array of `DatePickerDate` objects.
   function computeStaticDisabledDates({ start, end }) {
     const result = [];
-    const date = new Date(start.year, start.month, start.day);
+    const first = new Date(start.year, start.month, start.day);
     const last = new Date(end.year, end.month, end.day);
-    while (date <= last) {
+    const days = Math.round((last - first) / (24 * 60 * 60 * 1000));
+    for (let i = 0; i <= days; i++) {
+      const date = new Date(first.getFullYear(), first.getMonth(), first.getDate() + i);
       const isoWeekday = date.getDay() === 0 ? 7 : date.getDay();
       if (
         disabledDatesSet.has(dateKey(date.getFullYear(), date.getMonth(), date.getDate())) ||
@@ -193,7 +195,6 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
       ) {
         result.push({ year: date.getFullYear(), month: date.getMonth(), day: date.getDate() });
       }
-      date.setDate(date.getDate() + 1);
     }
     return result;
   }
