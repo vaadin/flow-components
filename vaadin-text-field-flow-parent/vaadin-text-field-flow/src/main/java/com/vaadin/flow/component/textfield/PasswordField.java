@@ -85,7 +85,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/password-field", version = "25.2.2")
+@NpmPackage(value = "@vaadin/password-field", version = "25.2.3")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -263,7 +263,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -443,7 +443,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.8
      */
     protected void validate() {
@@ -483,7 +483,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * The internationalization properties for {@link PasswordField}.
-     * 
+     *
      * @since 24.5
      */
     public static class PasswordFieldI18n implements Serializable {

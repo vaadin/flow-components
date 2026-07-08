@@ -32,7 +32,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd
  * @since 23.3
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.2")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.3")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -93,7 +93,7 @@ public class Tooltip implements Serializable {
     /**
      * Controls which ARIA attribute links the target element(s) with the
      * tooltip content.
-     * 
+     *
      * @since 25.2
      */
     public enum AriaLinkMode {

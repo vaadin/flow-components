@@ -41,7 +41,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @since 24.1
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.2.2")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.2.3")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component implements HasSideNavItems, HasSize,
         HasStyle, HasThemeVariant<SideNavVariant> {
@@ -210,7 +210,7 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
 
     /**
      * The internationalization properties for {@link SideNav}.
-     * 
+     *
      * @since 24.2
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)

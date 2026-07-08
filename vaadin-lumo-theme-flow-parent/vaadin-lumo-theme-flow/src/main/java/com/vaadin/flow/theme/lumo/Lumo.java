@@ -29,11 +29,11 @@ import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Lumo component theme class implementation.
- * 
+ *
  * @since 1.0
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.2.2")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.2.2")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.2.3")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.2.3")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 
@@ -44,7 +44,7 @@ public class Lumo implements AbstractTheme {
      * The path to the Lumo stylesheet. Can be used as argument to a
      * {@link StyleSheet} on an {@link AppShellConfigurator} class to apply the
      * Lumo theme to an application.
-     * 
+     *
      * @since 25.0
      */
     public static final String STYLESHEET = "lumo/lumo.css";
@@ -54,7 +54,7 @@ public class Lumo implements AbstractTheme {
      * used as argument to a {@link StyleSheet} on an
      * {@link AppShellConfigurator} class to apply the utility classes to an
      * application.
-     * 
+     *
      * @since 25.0
      */
     public static final String UTILITY_STYLESHEET = "lumo/utility.css";
@@ -69,7 +69,7 @@ public class Lumo implements AbstractTheme {
      * stylesheet referenced by {@link #STYLESHEET}, not instead of it. Make
      * sure to load the compact preset after the main Lumo stylesheet so that it
      * can override the relevant CSS custom properties.
-     * 
+     *
      * @since 25.0
      */
     public static final String COMPACT_STYLESHEET = "lumo/presets/compact.css";

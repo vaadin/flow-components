@@ -78,7 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.3
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "25.2.2")
+@NpmPackage(value = "@vaadin/number-field", version = "25.2.3")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -188,7 +188,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -366,7 +366,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
 
     /**
      * The internationalization properties for {@link NumberField}.
-     * 
+     *
      * @since 24.5
      */
     public static class NumberFieldI18n implements AbstractNumberFieldI18n {

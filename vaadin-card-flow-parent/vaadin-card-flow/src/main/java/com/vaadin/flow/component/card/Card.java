@@ -39,7 +39,7 @@ import com.vaadin.flow.dom.Element;
  * @since 24.7
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.2.2")
+@NpmPackage(value = "@vaadin/card", version = "25.2.3")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize,
         HasThemeVariant<CardVariant>, HasComponents, HasAriaLabel {

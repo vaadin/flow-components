@@ -214,8 +214,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.2.2")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.2")
+@NpmPackage(value = "@vaadin/grid", version = "25.2.3")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.3")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -232,7 +232,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * behavior when parsing nested properties which may contain
      * <code>null</code> values in the property chain
-     * 
+     *
      * @since 14.5
      */
     public enum NestedNullBehavior {
@@ -3594,7 +3594,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Removes all columns from this Grid.
-     * 
+     *
      * @since 3.0
      */
     public void removeAllColumns() {
@@ -4817,7 +4817,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
-     * 
+     *
      * @since 4.0
      */
     public void setDropFilter(SerializablePredicate<T> dropFilter) {
@@ -4839,7 +4839,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
-     * 
+     *
      * @since 4.0
      */
     public void setDragFilter(SerializablePredicate<T> dragFilter) {
@@ -5177,7 +5177,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the beginning of the first data row.
-     * 
+     *
      * @since 4.1
      */
     public void scrollToStart() {
@@ -5186,7 +5186,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the last data row of the grid.
-     * 
+     *
      * @since 4.1
      */
     public void scrollToEnd() {

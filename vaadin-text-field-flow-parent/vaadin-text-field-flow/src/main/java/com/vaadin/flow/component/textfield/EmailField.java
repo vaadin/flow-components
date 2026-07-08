@@ -89,7 +89,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.3
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/email-field", version = "25.2.2")
+@NpmPackage(value = "@vaadin/email-field", version = "25.2.3")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -251,7 +251,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -412,7 +412,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.8
      */
     protected void validate() {
@@ -452,7 +452,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * The internationalization properties for {@link EmailField}.
-     * 
+     *
      * @since 24.5
      */
     public static class EmailFieldI18n implements Serializable {

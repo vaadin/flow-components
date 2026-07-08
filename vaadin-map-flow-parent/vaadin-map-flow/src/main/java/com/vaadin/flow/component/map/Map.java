@@ -79,11 +79,11 @@ import tools.jackson.databind.node.ObjectNode;
  * the box, the map component has support for the {@code EPSG:4326} and
  * {@code EPSG:3857} projections. Custom coordinate projections can be defined
  * using {@link #defineProjection(String, String)}.
- * 
+ *
  * @since 23.0
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.2.2")
+@NpmPackage(value = "@vaadin/map", version = "25.2.3")
 // ol is also a transitive dep of @vaadin/map, but mapConnector.js imports
 // from `ol/*` directly, which only resolves when ol is a top-level
 // node_modules entry. Keep version in sync with the one in @vaadin/map.
@@ -395,7 +395,7 @@ public class Map extends MapBase {
 
     /**
      * The default controls available in the map.
-     * 
+     *
      * @since 25.1
      */
     public static final class Controls implements Serializable {

@@ -71,7 +71,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 2.1
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/integer-field", version = "25.2.2")
+@NpmPackage(value = "@vaadin/integer-field", version = "25.2.3")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer>
         implements HasThemeVariant<TextFieldVariant> {
@@ -185,7 +185,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -363,7 +363,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
 
     /**
      * The internationalization properties for {@link IntegerField}.
-     * 
+     *
      * @since 24.5
      */
     public static class IntegerFieldI18n implements AbstractNumberFieldI18n {

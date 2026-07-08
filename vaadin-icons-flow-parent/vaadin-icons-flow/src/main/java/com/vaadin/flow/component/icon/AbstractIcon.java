@@ -30,7 +30,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * @since 24.2
  */
 @Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/icon", version = "25.2.2")
+@NpmPackage(value = "@vaadin/icon", version = "25.2.3")
 @JsModule("@vaadin/icon/src/vaadin-icon.js")
 public abstract class AbstractIcon<T extends AbstractIcon<T>> extends Component
         implements ClickNotifier<T>, HasTooltip {
