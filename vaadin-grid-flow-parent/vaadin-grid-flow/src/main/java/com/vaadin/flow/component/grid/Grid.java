@@ -232,7 +232,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * behavior when parsing nested properties which may contain
      * <code>null</code> values in the property chain
-     * 
+     *
      * @since 14.5
      */
     public enum NestedNullBehavior {
@@ -3652,7 +3652,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Removes all columns from this Grid.
-     * 
+     *
      * @since 3.0
      */
     public void removeAllColumns() {
@@ -4861,7 +4861,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
-     * 
+     *
      * @since 4.0
      */
     public void setDropFilter(SerializablePredicate<T> dropFilter) {
@@ -4883,7 +4883,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE: If the filtering conditions change dynamically, remember to
      * explicitly invoke {@code getDataProvider().refreshItem(item)} for the
      * relevant items to get the filters re-run for them.
-     * 
+     *
      * @since 4.0
      */
     public void setDragFilter(SerializablePredicate<T> dragFilter) {
@@ -5008,11 +5008,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // No <vaadin-tooltip> yet added to the grid, add one
         Element tooltipElement = new Element("vaadin-tooltip");
 
-        tooltipElement.addAttachListener(e ->
-        // Assigns a generator that returns a column-specific
-        // tooltip text from the item
-        tooltipElement.executeJs(
-                "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
+        tooltipElement.addAttachListener(e -> {
+            // Assigns a generator that returns a column-specific
+            // tooltip text from the item
+            tooltipElement.executeJs(
+                    """
+                            this.generator = ({ item, column }) => {
+                                const { gridtooltips } = item;
+                                if (gridtooltips) {
+                                    return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
+                                }
+                            }
+                            """);
+        });
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
     }
 
@@ -5221,7 +5229,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the beginning of the first data row.
-     * 
+     *
      * @since 4.1
      */
     public void scrollToStart() {
@@ -5230,7 +5238,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Scrolls to the last data row of the grid.
-     * 
+     *
      * @since 4.1
      */
     public void scrollToEnd() {
