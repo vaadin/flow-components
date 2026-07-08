@@ -24,7 +24,7 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
  * 
  * @since 25.0
  */
-@NpmPackage(value = "@vaadin/aura", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/aura", version = "dev-disable-dates")
 public class Aura {
     /**
      * The path to the Aura stylesheet. Can be used as argument to a

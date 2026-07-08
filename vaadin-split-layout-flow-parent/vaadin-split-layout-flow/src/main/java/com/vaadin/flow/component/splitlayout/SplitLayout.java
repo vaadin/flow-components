@@ -44,7 +44,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/split-layout", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/split-layout", version = "dev-disable-dates")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
