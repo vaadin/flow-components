@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -54,6 +55,7 @@ public class SplitLayout extends Component
     private Component secondaryComponent;
     private StateTree.ExecutionRegistration updateStylesRegistration;
     private Double splitterPosition;
+    private SplitLayoutI18n i18n;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -427,5 +429,38 @@ public class SplitLayout extends Component
 
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(SplitLayoutI18n)}.
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 25.3
+     */
+    public SplitLayoutI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component. It enables you
+     * to customize and translate the accessible labels used in the split
+     * layout.
+     * <p>
+     * Note: updating the object properties after setting the i18n will not
+     * update the component. To make the changes effective, you need to set the
+     * updated object again.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.3
+     */
+    public void setI18n(SplitLayoutI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 }
