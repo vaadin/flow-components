@@ -178,6 +178,30 @@ public class GridDumpIT extends AbstractComponentIT {
     }
 
     @Test
+    public void getAllCellContents_emptyGrid_returnsEmptyList() {
+        GridElement grid = $(GridElement.class).id("empty-grid");
+        scrollToElement(grid);
+
+        List<List<String>> cells = grid.getAllCellContents();
+
+        Assert.assertTrue("Empty grid should return no rows", cells.isEmpty());
+    }
+
+    @Test
+    public void getCellContents_emptyGrid_throwsWithClearMessage() {
+        GridElement grid = $(GridElement.class).id("empty-grid");
+        scrollToElement(grid);
+
+        try {
+            grid.getCellContents(0, 0);
+            Assert.fail("Should throw IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+            Assert.assertTrue("Message should mention the empty grid, but was: "
+                    + e.getMessage(), e.getMessage().contains("empty"));
+        }
+    }
+
+    @Test
     public void getCellContents_matchesGetCellText() {
         GridElement grid = $(GridElement.class).id("hidden-column-grid");
         scrollToElement(grid);

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,6 +33,19 @@ public class GridDumpPage extends Div {
         createMediumGrid();
         createLargeGrid();
         createGridWithHiddenColumn();
+        createEmptyGrid();
+    }
+
+    private void createEmptyGrid() {
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(List.of());
+
+        grid.addColumn(Person::getFirstName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        grid.setId("empty-grid");
+
+        add(grid);
     }
 
     private void createSmallGrid() {

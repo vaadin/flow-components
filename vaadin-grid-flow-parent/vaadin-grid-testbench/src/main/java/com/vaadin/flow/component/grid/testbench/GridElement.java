@@ -675,12 +675,16 @@ public class GridElement extends TestBenchElement {
      * @return a list of rows, each a list holding the text of every visible
      *         column
      * @throws IndexOutOfBoundsException
-     *             if the row indexes are out of bounds or {@code fromRow} is
-     *             greater than {@code toRow}
+     *             if the grid is empty, if the row indexes are out of bounds,
+     *             or if {@code fromRow} is greater than {@code toRow}
      */
     public List<List<String>> getCellContents(int fromRow, int toRow)
             throws IndexOutOfBoundsException {
         int rowCount = getRowCount();
+        if (rowCount == 0) {
+            throw new IndexOutOfBoundsException(
+                    "Cannot get cell contents: the grid is empty");
+        }
         if (fromRow < 0 || toRow < 0 || fromRow >= rowCount || toRow >= rowCount
                 || fromRow > toRow) {
             throw new IndexOutOfBoundsException(
