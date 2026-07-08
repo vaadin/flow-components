@@ -84,7 +84,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/text-field", version = "25.2.1")
+@NpmPackage(value = "@vaadin/text-field", version = "25.2.3")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -281,7 +281,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -438,7 +438,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.8
      */
     protected void validate() {
@@ -477,7 +477,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
     /**
      * The internationalization properties for {@link TextField}.
-     * 
+     *
      * @since 24.5
      */
     public static class TextFieldI18n implements Serializable {

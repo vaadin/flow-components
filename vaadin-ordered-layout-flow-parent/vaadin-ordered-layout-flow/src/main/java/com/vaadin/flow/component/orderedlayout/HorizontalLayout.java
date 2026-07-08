@@ -39,11 +39,11 @@ import com.vaadin.flow.shared.Registration;
  * Horizontal Layout places components side-by-side in a row. By default, it has
  * undefined width and height, meaning its size is determined by the components
  * it contains.
- * 
+ *
  * @since 1.0
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.2.1")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.2.3")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout>,
@@ -312,7 +312,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
-     * 
+     *
      * @since 24.7
      */
     @Override
@@ -324,7 +324,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
-     * 
+     *
      * @since 24.7
      */
     @Override

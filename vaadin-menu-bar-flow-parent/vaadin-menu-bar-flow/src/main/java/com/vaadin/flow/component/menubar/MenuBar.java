@@ -54,8 +54,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.2.1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.1")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.2.3")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.3")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
@@ -479,7 +479,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     /**
      * The internationalization properties for {@link MenuBar}
-     * 
+     *
      * @since 22.0
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -512,7 +512,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     /**
      * Closes the current submenu.
-     * 
+     *
      * @since 24.4
      */
     public void close() {

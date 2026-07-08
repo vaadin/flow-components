@@ -82,7 +82,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.2.1")
+@NpmPackage(value = "@vaadin/checkbox", version = "25.2.3")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
@@ -417,7 +417,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.4
      */
     protected void validate() {
@@ -475,7 +475,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     /**
      * The internationalization properties for {@link Checkbox}.
-     * 
+     *
      * @since 24.5
      */
     public static class CheckboxI18n implements Serializable {

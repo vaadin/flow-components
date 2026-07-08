@@ -64,7 +64,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.2.1")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.2.3")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @ModalRoot
 public class ConfirmDialog extends Component
@@ -122,7 +122,7 @@ public class ConfirmDialog extends Component
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
-     * 
+     *
      * @since 25.0
      */
     @DomEvent("closed")
@@ -139,7 +139,7 @@ public class ConfirmDialog extends Component
      * which, when closing the confirm dialog, is before the closing animation
      * has finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
-     * 
+     *
      * @since 25.0
      */
     public static class OpenedChangeEvent
@@ -761,7 +761,7 @@ public class ConfirmDialog extends Component
      * <p>
      * Removes all components from this component except elements that have slot
      * attribute, such as header and buttons.
-     * 
+     *
      * @since 24.4
      */
     @Override
