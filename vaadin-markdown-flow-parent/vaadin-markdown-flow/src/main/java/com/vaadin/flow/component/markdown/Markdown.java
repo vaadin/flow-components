@@ -35,7 +35,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 24.8
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-alpha3")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
