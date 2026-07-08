@@ -112,7 +112,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.2.3")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.2.1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -333,7 +333,7 @@ public class TimePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     *
+     * 
      * @since 24.5
      */
     @Override
@@ -634,7 +634,7 @@ public class TimePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     *
+     * 
      * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<TimePicker> {
@@ -676,7 +676,7 @@ public class TimePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     *
+     * 
      * @since 2.0.3
      */
     protected void validate() {
@@ -948,7 +948,7 @@ public class TimePicker
 
     /**
      * The internationalization properties for {@link TimePicker}.
-     *
+     * 
      * @since 24.5
      */
     public static class TimePickerI18n implements Serializable {

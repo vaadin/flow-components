@@ -57,8 +57,8 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.2.3")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.3")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.2.1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.1")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
@@ -345,7 +345,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds a separator between items.
-     *
+     * 
      * @since 24.8
      */
     public void addSeparator() {
@@ -393,7 +393,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * {@code opened-changed} event is sent when the opened state changes.
-     *
+     * 
      * @since 23.3
      */
     public static class OpenedChangeEvent<TComponent extends ContextMenuBase<TComponent, ?, ?>>

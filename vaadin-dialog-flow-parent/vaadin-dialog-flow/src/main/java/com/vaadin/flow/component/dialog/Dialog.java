@@ -81,7 +81,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.2.3")
+@NpmPackage(value = "@vaadin/dialog", version = "25.2.1")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
@@ -201,7 +201,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `resize` event is sent when the user finishes resizing the dialog.
-     *
+     * 
      * @since 3.1
      */
     @DomEvent("resize")
@@ -265,7 +265,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `dragged` event is sent when the user finishes dragging the dialog.
-     *
+     * 
      * @since 24.6
      */
     @DomEvent("dragged")
@@ -307,7 +307,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * which, when closing the dialog, is before the closing animation has
      * finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
-     *
+     * 
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
@@ -326,7 +326,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
-     *
+     * 
      * @since 25.0
      */
     @DomEvent("closed")
@@ -926,7 +926,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the header part of a dialog.
-     *
+     * 
      * @since 23.1
      */
     final public static class DialogHeader extends DialogHeaderFooter {
@@ -937,7 +937,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the footer part of a dialog.
-     *
+     * 
      * @since 23.1
      */
     final public static class DialogFooter extends DialogHeaderFooter {

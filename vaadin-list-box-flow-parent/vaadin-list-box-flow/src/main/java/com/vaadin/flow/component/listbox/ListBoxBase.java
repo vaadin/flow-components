@@ -71,7 +71,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 2.1
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/list-box", version = "25.2.3")
+@NpmPackage(value = "@vaadin/list-box", version = "25.2.1")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>

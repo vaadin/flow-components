@@ -48,7 +48,7 @@ import com.vaadin.flow.dom.Style;
  * @since 1.0
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/login", version = "25.2.3")
+@NpmPackage(value = "@vaadin/login", version = "25.2.1")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 @ModalRoot(slot = "footer")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
@@ -238,7 +238,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     /**
      * Class for adding and removing components to the custom form area of the
      * overlay.
-     *
+     * 
      * @since 24.2
      */
     final public static class LoginOverlayCustomFormArea
@@ -251,7 +251,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     /**
      * Class for adding and removing components to the footer area of the
      * overlay.
-     *
+     * 
      * @since 24.2
      */
     final public static class LoginOverlayFooter extends LoginOverlayContent {

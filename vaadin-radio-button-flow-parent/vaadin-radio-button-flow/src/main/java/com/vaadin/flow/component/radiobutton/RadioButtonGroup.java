@@ -104,7 +104,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.2.3")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.2.1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
@@ -912,7 +912,7 @@ public class RadioButtonGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     *
+     * 
      * @since 24.0
      */
     protected void validate() {
@@ -952,7 +952,7 @@ public class RadioButtonGroup<T>
 
     /**
      * The internationalization properties for {@link RadioButtonGroup}.
-     *
+     * 
      * @since 24.5
      */
     public static class RadioButtonGroupI18n implements Serializable {

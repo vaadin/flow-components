@@ -67,7 +67,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-tabs")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "25.2.3")
+@NpmPackage(value = "@vaadin/tabs", version = "25.2.1")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -302,7 +302,7 @@ public class Tabs extends Component
      * were added only at the client-side.
      * <p>
      * This will reset the {@link #getSelectedIndex() selected index} to zero.
-     *
+     * 
      * @since 1.0.4
      */
     public void removeAll() {

@@ -71,7 +71,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 21.0
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.2.3")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.2.1")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -329,7 +329,7 @@ public class VirtualList<T> extends Component
 
     /**
      * Scrolls to the first element.
-     *
+     * 
      * @since 24.3
      */
     public void scrollToStart() {
@@ -338,7 +338,7 @@ public class VirtualList<T> extends Component
 
     /**
      * Scrolls to the last element of the list.
-     *
+     * 
      * @since 24.3
      */
     public void scrollToEnd() {

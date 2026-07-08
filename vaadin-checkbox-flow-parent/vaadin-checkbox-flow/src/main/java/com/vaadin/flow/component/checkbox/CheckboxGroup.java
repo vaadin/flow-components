@@ -112,7 +112,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.2.3")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.2.1")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -999,7 +999,7 @@ public class CheckboxGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     *
+     * 
      * @since 24.0
      */
     protected void validate() {
@@ -1039,7 +1039,7 @@ public class CheckboxGroup<T>
 
     /**
      * The internationalization properties for {@link CheckboxGroup}.
-     *
+     * 
      * @since 24.5
      */
     public static class CheckboxGroupI18n implements Serializable {

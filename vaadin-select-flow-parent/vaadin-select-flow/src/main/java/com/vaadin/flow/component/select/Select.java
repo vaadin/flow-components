@@ -110,7 +110,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "25.2.3")
+@NpmPackage(value = "@vaadin/select", version = "25.2.1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -1195,7 +1195,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     *
+     * 
      * @since 24.0
      */
     protected void validate() {
@@ -1205,7 +1205,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
-     *
+     * 
      * @since 24.0
      */
     public static class OpenedChangeEvent extends ComponentEvent<Select> {
@@ -1237,7 +1237,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     *
+     * 
      * @since 24.0
      */
     public static class InvalidChangeEvent extends ComponentEvent<Select> {
@@ -1298,7 +1298,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * The internationalization properties for {@link Select}.
-     *
+     * 
      * @since 24.5
      */
     public static class SelectI18n implements Serializable {
