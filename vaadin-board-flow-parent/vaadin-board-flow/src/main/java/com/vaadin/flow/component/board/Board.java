@@ -30,7 +30,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 2.0.1
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/board", version = "25.2.1")
+@NpmPackage(value = "@vaadin/board", version = "25.2.2")
 @JsModule("@vaadin/board/src/vaadin-board.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Board extends Component
