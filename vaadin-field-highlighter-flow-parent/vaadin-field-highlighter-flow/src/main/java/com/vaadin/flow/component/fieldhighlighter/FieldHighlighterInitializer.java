@@ -24,7 +24,7 @@ import com.vaadin.flow.shared.Registration;
 /**
  * @since 23.0.15
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "dev-disable-dates")
 @JsModule("@vaadin/field-highlighter/src/vaadin-field-highlighter.js")
 public class FieldHighlighterInitializer {
     protected static Registration init(Element field) {

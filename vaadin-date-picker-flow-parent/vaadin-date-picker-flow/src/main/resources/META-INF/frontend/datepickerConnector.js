@@ -162,6 +162,88 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     return referenceDate ? new Date(referenceDate.year, referenceDate.month, referenceDate.day) : new Date();
   }
 
+  // Disabled dates state, populated from the server through
+  // `setDisabledDatesConfig`. Keys use the `year-month-day` (0-based month)
+  // format also produced while iterating a range below.
+  let disabledDatesSet = new Set();
+  let disabledWeekdaysSet = new Set();
+  let hasServerProvider = false;
+  let disabledDatesRequestId = 0;
+  const pendingDisabledDatesRequests = new Map();
+
+  function dateKey(year, month, day) {
+    return `${year}-${month}-${day}`;
+  }
+
+  function isoToDateParts(iso) {
+    return extractDateParts(_parseDate(iso));
+  }
+
+  // Returns the statically disabled dates (fixed list + weekdays) within the
+  // given range as an array of `DatePickerDate` objects.
+  function computeStaticDisabledDates({ start, end }) {
+    const result = [];
+    const first = new Date(start.year, start.month, start.day);
+    const last = new Date(end.year, end.month, end.day);
+    const days = Math.round((last - first) / (24 * 60 * 60 * 1000));
+    for (let i = 0; i <= days; i++) {
+      const date = new Date(first.getFullYear(), first.getMonth(), first.getDate() + i);
+      const isoWeekday = date.getDay() === 0 ? 7 : date.getDay();
+      if (
+        disabledDatesSet.has(dateKey(date.getFullYear(), date.getMonth(), date.getDate())) ||
+        disabledWeekdaysSet.has(isoWeekday)
+      ) {
+        result.push({ year: date.getFullYear(), month: date.getMonth(), day: date.getDate() });
+      }
+    }
+    return result;
+  }
+
+  function updateDisabledDatesProvider() {
+    if (disabledDatesSet.size === 0 && disabledWeekdaysSet.size === 0 && !hasServerProvider) {
+      datepicker.disabledDatesProvider = undefined;
+      return;
+    }
+
+    datepicker.disabledDatesProvider = (range) => {
+      const staticDisabled = computeStaticDisabledDates(range);
+      if (!hasServerProvider) {
+        return staticDisabled;
+      }
+
+      // Ask the server for the range and block rendering until it responds.
+      const requestId = ++disabledDatesRequestId;
+      return new Promise((resolve) => {
+        pendingDisabledDatesRequests.set(requestId, (serverDates) => {
+          resolve(staticDisabled.concat(serverDates.map(isoToDateParts)));
+        });
+        const pad = (value, length) => String(value).padStart(length, '0');
+        const toIso = (parts) => `${pad(parts.year, 4)}-${pad(parts.month + 1, 2)}-${pad(parts.day, 2)}`;
+        datepicker.$server.requestDisabledDates(toIso(range.start), toIso(range.end), requestId);
+      });
+    };
+  }
+
+  datepicker.$connector.setDisabledDatesConfig = (config) => {
+    disabledDatesSet = new Set(
+      (config.dates || []).map((iso) => {
+        const parts = isoToDateParts(iso);
+        return dateKey(parts.year, parts.month, parts.day);
+      })
+    );
+    disabledWeekdaysSet = new Set(config.weekdays || []);
+    hasServerProvider = !!config.hasProvider;
+    updateDisabledDatesProvider();
+  };
+
+  datepicker.$connector.resolveDisabledDates = (requestId, dates) => {
+    const resolve = pendingDisabledDatesRequests.get(requestId);
+    if (resolve) {
+      pendingDisabledDatesRequests.delete(requestId);
+      resolve(dates);
+    }
+  };
+
   datepicker.$connector.updateI18n = (locale, i18n) => {
     // Either use custom formats specified in I18N, or create format from locale
     const hasCustomFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;

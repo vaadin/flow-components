@@ -16,12 +16,16 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
@@ -32,6 +36,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -94,7 +99,7 @@ class DateTimePickerTimePicker
  * @since 1.0
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "dev-disable-dates")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -981,6 +986,72 @@ public class DateTimePicker
     public SignalBinding<String> bindMax(Signal<LocalDateTime> signal) {
         return getElement().bindProperty("max",
                 signal == null ? null : signal.map(FORMATTER::apply), null);
+    }
+
+    /**
+     * Sets a fixed set of dates that cannot be selected in the date part.
+     *
+     * @param dates
+     *            the dates to disable, or {@code null} to clear
+     * @see DatePicker#setDisabledDates(Collection)
+     */
+    public void setDisabledDates(Collection<LocalDate> dates) {
+        datePicker.setDisabledDates(dates);
+    }
+
+    /**
+     * Gets the fixed set of dates that cannot be selected.
+     *
+     * @return the disabled dates, never {@code null}
+     * @see #setDisabledDates(Collection)
+     */
+    public Set<LocalDate> getDisabledDates() {
+        return datePicker.getDisabledDates();
+    }
+
+    /**
+     * Sets the weekdays that cannot be selected in the date part, for example
+     * to disable weekends.
+     *
+     * @param weekdays
+     *            the weekdays to disable, or {@code null} to clear
+     * @see DatePicker#setDisabledWeekdays(Set)
+     */
+    public void setDisabledWeekdays(Set<DayOfWeek> weekdays) {
+        datePicker.setDisabledWeekdays(weekdays);
+    }
+
+    /**
+     * Gets the weekdays that cannot be selected.
+     *
+     * @return the disabled weekdays, never {@code null}
+     * @see #setDisabledWeekdays(Set)
+     */
+    public Set<DayOfWeek> getDisabledWeekdays() {
+        return datePicker.getDisabledWeekdays();
+    }
+
+    /**
+     * Sets a provider that determines, for a single date, whether it can be
+     * selected in the date part. See
+     * {@link DatePicker#setDisabledDatesProvider}.
+     *
+     * @param provider
+     *            the provider, or {@code null} to remove it
+     */
+    public void setDisabledDatesProvider(
+            DatePicker.DisabledDatesProvider provider) {
+        datePicker.setDisabledDatesProvider(provider);
+    }
+
+    /**
+     * Gets the provider that determines whether a date is disabled.
+     *
+     * @return the provider, or {@code null} if none is set
+     * @see #setDisabledDatesProvider(DatePicker.DisabledDatesProvider)
+     */
+    public DatePicker.DisabledDatesProvider getDisabledDatesProvider() {
+        return datePicker.getDisabledDatesProvider();
     }
 
     /**

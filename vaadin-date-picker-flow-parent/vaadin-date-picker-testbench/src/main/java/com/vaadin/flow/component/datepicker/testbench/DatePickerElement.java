@@ -93,6 +93,48 @@ public class DatePickerElement extends TestBenchElement
             return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
         }
+
+        /**
+         * Gets the non-empty date cells rendered by this month calendar.
+         *
+         * @return the date cells
+         */
+        public List<TestBenchElement> getDateCells() {
+            return this.$(TestBenchElement.class).all().stream()
+                    .filter(cell -> hasPart(cell, "date")
+                            && !cell.getText().trim().isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        /**
+         * Gets the date cell for the given day of the month.
+         *
+         * @param day
+         *            the day of the month
+         * @return the date cell, or {@code null} if not found
+         */
+        public TestBenchElement getDateCell(int day) {
+            return getDateCells().stream().filter(
+                    cell -> cell.getText().trim().equals(String.valueOf(day)))
+                    .findFirst().orElse(null);
+        }
+
+        /**
+         * Returns whether the date cell for the given day is disabled.
+         *
+         * @param day
+         *            the day of the month
+         * @return {@code true} if the cell is disabled
+         */
+        public boolean isDateDisabled(int day) {
+            TestBenchElement cell = getDateCell(day);
+            return cell != null && hasPart(cell, "disabled");
+        }
+
+        private static boolean hasPart(TestBenchElement element, String part) {
+            String parts = element.getDomAttribute("part");
+            return parts != null && List.of(parts.split(" ")).contains(part);
+        }
     }
 
     public static class WeekdayElement extends TestBenchElement {
