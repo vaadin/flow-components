@@ -608,17 +608,16 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
-  grid.cellPartNameGenerator = function (column, rowData) {
-    const part = rowData.item.part;
-    if (!part) {
-      return;
+  grid.cellPartNameGenerator = function (column, { item }) {
+    const { part } = item;
+    if (part) {
+      return [part.row, column ? part[column._flowId] : null].filter(Boolean).join(' ');
     }
-    return (part.row || '') + ' ' + ((column && part[column._flowId]) || '');
   };
 
-  grid.dropFilter = (rowData) => rowData.item && !rowData.item.dropDisabled;
+  grid.dropFilter = ({ item }) => item && !item.dropDisabled;
 
-  grid.dragFilter = (rowData) => rowData.item && !rowData.item.dragDisabled;
+  grid.dragFilter = ({ item }) => item && !item.dragDisabled;
 
   grid.addEventListener('grid-dragstart', (e) => {
     const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
