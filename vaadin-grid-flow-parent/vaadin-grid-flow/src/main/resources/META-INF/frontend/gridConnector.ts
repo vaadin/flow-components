@@ -370,6 +370,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // We're done applying changes from this batch, resolve pending
     // callbacks
     const { rootCache } = dataProviderController;
+
+    grid._hasData = true;
+
     Object.entries(rootCache.pendingRequests).forEach(([page, callback]) => {
       const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
       // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
