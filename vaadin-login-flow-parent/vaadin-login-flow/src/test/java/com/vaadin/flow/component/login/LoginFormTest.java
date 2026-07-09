@@ -191,17 +191,17 @@ public class LoginFormTest {
     }
 
     @Test
-    void setActionWithUnsafeScheme_throws() {
+    public void setActionWithUnsafeScheme_throws() {
         final LoginForm form = new LoginForm();
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(IllegalArgumentException.class,
                 () -> form.setAction("javascript:alert(1)"));
     }
 
     @Test
-    void setUnsafeActionWithUnsafeScheme_actionSet() {
+    public void setUnsafeActionWithUnsafeScheme_actionSet() {
         final LoginForm form = new LoginForm();
         form.setUnsafeAction("javascript:alert(1)");
 
-        Assertions.assertEquals("javascript:alert(1)", form.getAction());
+        Assert.assertEquals("javascript:alert(1)", form.getAction());
     }
 }
