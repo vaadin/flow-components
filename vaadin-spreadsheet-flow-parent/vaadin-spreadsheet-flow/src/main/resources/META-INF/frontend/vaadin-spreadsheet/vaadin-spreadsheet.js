@@ -187,7 +187,7 @@ export class VaadinSpreadsheet extends LitElement {
     // container's root so the scoped rules apply there too.
     const root = this._overlays.getRootNode();
     if (root instanceof ShadowRoot && !root.adoptedStyleSheets.includes(spreadsheetOverlayStyles.styleSheet)) {
-      root.adoptedStyleSheets = [...root.adoptedStyleSheets, spreadsheetOverlayStyles.styleSheet];
+      root.adoptedStyleSheets.push(spreadsheetOverlayStyles.styleSheet);
     }
   }
 
