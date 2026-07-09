@@ -29,6 +29,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.server.InitParameters;
@@ -114,8 +115,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * See class Javadoc for more information.
      *
      * @throws IllegalArgumentException
-     *             if {@code action} uses a scheme that is not considered safe;
-     *             see {@link #setUnsafeAction(String)} and the
+     *             if {@code action} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeAction(String)} and the
      *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
      *             property
      *

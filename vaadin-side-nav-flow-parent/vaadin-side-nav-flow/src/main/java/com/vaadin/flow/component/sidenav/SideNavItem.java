@@ -35,6 +35,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -88,8 +89,10 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            the path to link to
      * @throws IllegalArgumentException
-     *             if {@code path} uses a scheme that is not considered safe;
-     *             see {@link #setUnsafePath(String)} and the
+     *             if {@code path} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafePath(String)} and the
      *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
      *             property
      */
@@ -160,8 +163,10 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param prefixComponent
      *            the prefix component for the item (usually an icon)
      * @throws IllegalArgumentException
-     *             if {@code path} uses a scheme that is not considered safe;
-     *             see {@link #setUnsafePath(String)} and the
+     *             if {@code path} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafePath(String)} and the
      *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
      *             property
      */
@@ -258,8 +263,16 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            The path to link to. Set to null to disable navigation for
      *            this item.
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      *
      * @see SideNavItem#setPath(Class)
+     * @see #setUnsafePath(String)
      */
     public void setPath(String path) {
         if (path != null && !UrlUtil.isSafeUrl(path)) {

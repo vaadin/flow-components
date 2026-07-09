@@ -10,6 +10,7 @@ package com.vaadin.flow.component.charts.model;
 
 import java.util.Map;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.server.InitParameters;
 
@@ -171,8 +172,10 @@ public class Exporting extends AbstractConfigurationObject {
      * Defaults to: https://code.highcharts.com/{version}/lib
      *
      * @throws IllegalArgumentException
-     *             if {@code libURL} uses a scheme that is not considered safe;
-     *             see {@link #setUnsafeLibURL(String)} and the
+     *             if {@code libURL} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeLibURL(String)} and the
      *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
      *             property
      * @see #setUnsafeLibURL(String)
@@ -337,7 +340,9 @@ public class Exporting extends AbstractConfigurationObject {
      * Defaults to: https://export.highcharts.com
      *
      * @throws IllegalArgumentException
-     *             if {@code url} uses a scheme that is not considered safe; see
+     *             if {@code url} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
      *             {@link #setUnsafeUrl(String)} and the
      *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
      *             property

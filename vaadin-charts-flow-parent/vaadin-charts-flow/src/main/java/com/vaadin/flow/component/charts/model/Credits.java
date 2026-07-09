@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Style;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.server.InitParameters;
 
@@ -58,6 +59,15 @@ public class Credits extends AbstractConfigurationObject {
      * The URL for the credits label.
      * <p>
      * Defaults to: http://www.highcharts.com
+     *
+     * @throws IllegalArgumentException
+     *             if {@code href} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeHref(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     * @see #setUnsafeHref(String)
      */
     public void setHref(String href) {
         if (href != null && !UrlUtil.isSafeUrl(href)) {
