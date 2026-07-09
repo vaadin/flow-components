@@ -175,6 +175,16 @@ export class VaadinSpreadsheet extends LitElement {
 
       this._firstUpdate = true;
     }
+
+    // The overlay container lives in light DOM, so the overlay styles are
+    // injected into `document.head` (see constructor). That does not reach the
+    // container when `<vaadin-spreadsheet>` is nested inside another element's
+    // shadow root. In that case, also adopt the overlay styles onto the
+    // container's root so the scoped rules apply there too.
+    const root = this._overlays.getRootNode();
+    if (root instanceof ShadowRoot && !root.adoptedStyleSheets.includes(spreadsheetOverlayStyles.styleSheet)) {
+      root.adoptedStyleSheets.push(spreadsheetOverlayStyles.styleSheet);
+    }
   }
 
   disconnectedCallback() {
