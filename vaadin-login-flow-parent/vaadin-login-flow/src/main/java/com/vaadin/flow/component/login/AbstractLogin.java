@@ -18,7 +18,10 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -74,9 +77,40 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * action is defined a {@link AbstractLogin.LoginEvent} is not fired
      * anymore.
      *
+     * @throws IllegalArgumentException
+     *             if {@code action} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeAction(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     *
      * @see #getAction()
+     * @see #setUnsafeAction(String)
      */
     public void setAction(String action) {
+        if (action != null && !UrlUtil.isSafeUrl(action)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "action", action, "setUnsafeAction(String)"));
+        }
+        getElement().setProperty(PROP_ACTION, action);
+    }
+
+    /**
+     * Sets the action URL without validating its scheme.
+     * <p>
+     * Unlike {@link #setAction(String)}, this method does not reject URLs based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for URLs that are fully under your control and known to be safe,
+     * such as a hard-coded {@code javascript:} URL. Passing untrusted input
+     * here can expose the application to cross-site scripting (XSS) attacks.
+     *
+     * @see #setAction(String)
+     *
+     * @param action
+     *            the action URL
+     */
+    public void setUnsafeAction(String action) {
         getElement().setProperty(PROP_ACTION, action);
     }
 
