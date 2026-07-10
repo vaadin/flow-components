@@ -8,58 +8,88 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import java.util.Set;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.VaadinService;
 
 public class ExportingTest {
 
+    private static MockedStatic<VaadinService> vaadinServiceMock;
+
+    @BeforeClass
+    public static void enableUrlSchemeValidation() {
+        // URL scheme validation is disabled by default in this branch, so
+        // configure a strict set of safe schemes to exercise the validation.
+        DeploymentConfiguration config = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(config.getUrlSafeSchemes())
+                .thenReturn(Set.of("http", "https", "mailto", "tel", "ftp"));
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(service.getDeploymentConfiguration()).thenReturn(config);
+        vaadinServiceMock = Mockito.mockStatic(VaadinService.class);
+        vaadinServiceMock.when(VaadinService::getCurrent).thenReturn(service);
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        vaadinServiceMock.close();
+    }
+
     @Test
-    void setUrl_safeScheme_urlSet() {
+    public void setUrl_safeScheme_urlSet() {
         Exporting exporting = new Exporting();
         exporting.setUrl("https://export.highcharts.com");
 
-        Assertions.assertEquals("https://export.highcharts.com",
+        Assert.assertEquals("https://export.highcharts.com",
                 exporting.getUrl());
     }
 
     @Test
-    void setUrl_unsafeScheme_throws() {
+    public void setUrl_unsafeScheme_throws() {
         Exporting exporting = new Exporting();
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(IllegalArgumentException.class,
                 () -> exporting.setUrl("javascript:alert(1)"));
     }
 
     @Test
-    void setUnsafeUrl_unsafeScheme_urlSet() {
+    public void setUnsafeUrl_unsafeScheme_urlSet() {
         Exporting exporting = new Exporting();
         exporting.setUnsafeUrl("javascript:alert(1)");
 
-        Assertions.assertEquals("javascript:alert(1)", exporting.getUrl());
+        Assert.assertEquals("javascript:alert(1)", exporting.getUrl());
     }
 
     @Test
-    void setLibURL_safeScheme_libURLSet() {
+    public void setLibURL_safeScheme_libURLSet() {
         Exporting exporting = new Exporting();
         exporting.setLibURL("https://code.highcharts.com/lib");
 
-        Assertions.assertEquals("https://code.highcharts.com/lib",
+        Assert.assertEquals("https://code.highcharts.com/lib",
                 exporting.getLibURL());
     }
 
     @Test
-    void setLibURL_unsafeScheme_throws() {
+    public void setLibURL_unsafeScheme_throws() {
         Exporting exporting = new Exporting();
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(IllegalArgumentException.class,
                 () -> exporting.setLibURL("javascript:alert(1)"));
     }
 
     @Test
-    void setUnsafeLibURL_unsafeScheme_libURLSet() {
+    public void setUnsafeLibURL_unsafeScheme_libURLSet() {
         Exporting exporting = new Exporting();
         exporting.setUnsafeLibURL("javascript:alert(1)");
 
-        Assertions.assertEquals("javascript:alert(1)", exporting.getLibURL());
+        Assert.assertEquals("javascript:alert(1)", exporting.getLibURL());
     }
 }

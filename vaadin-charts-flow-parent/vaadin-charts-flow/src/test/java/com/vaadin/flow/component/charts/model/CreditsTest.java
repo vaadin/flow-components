@@ -8,32 +8,62 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import java.util.Set;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.VaadinService;
 
 public class CreditsTest {
 
-    @Test
-    void setHref_safeScheme_hrefSet() {
-        Credits credits = new Credits();
-        credits.setHref("https://vaadin.com");
+    private static MockedStatic<VaadinService> vaadinServiceMock;
 
-        Assertions.assertEquals("https://vaadin.com", credits.getHref());
+    @BeforeClass
+    public static void enableUrlSchemeValidation() {
+        // URL scheme validation is disabled by default in this branch, so
+        // configure a strict set of safe schemes to exercise the validation.
+        DeploymentConfiguration config = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(config.getUrlSafeSchemes())
+                .thenReturn(Set.of("http", "https", "mailto", "tel", "ftp"));
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(service.getDeploymentConfiguration()).thenReturn(config);
+        vaadinServiceMock = Mockito.mockStatic(VaadinService.class);
+        vaadinServiceMock.when(VaadinService::getCurrent).thenReturn(service);
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        vaadinServiceMock.close();
     }
 
     @Test
-    void setHref_unsafeScheme_throws() {
+    public void setHref_safeScheme_hrefSet() {
+        Credits credits = new Credits();
+        credits.setHref("https://vaadin.com");
+
+        Assert.assertEquals("https://vaadin.com", credits.getHref());
+    }
+
+    @Test
+    public void setHref_unsafeScheme_throws() {
         Credits credits = new Credits();
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(IllegalArgumentException.class,
                 () -> credits.setHref("javascript:alert(1)"));
     }
 
     @Test
-    void setUnsafeHref_unsafeScheme_hrefSet() {
+    public void setUnsafeHref_unsafeScheme_hrefSet() {
         Credits credits = new Credits();
         credits.setUnsafeHref("javascript:alert(1)");
 
-        Assertions.assertEquals("javascript:alert(1)", credits.getHref());
+        Assert.assertEquals("javascript:alert(1)", credits.getHref());
     }
 }
