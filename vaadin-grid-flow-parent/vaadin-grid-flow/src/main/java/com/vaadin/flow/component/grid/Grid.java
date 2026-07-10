@@ -2035,8 +2035,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * or using {@link LitRenderer}.
      * </p>
      * <p>
-     * <em>NOTE:</em> Columns created with a {@link Renderer} are not sortable by
-     * default. To make such a column sortable, either set a comparator with
+     * <em>NOTE:</em> Columns created with a {@link Renderer} are not sortable
+     * by default. To make such a column sortable, either set a comparator with
      * {@link Column#setComparator(Comparator)} for in-memory sorting, or define
      * the sort properties with {@link Column#setSortProperty(String...)} and
      * implement the sorting in the data provider for backend sorting.
