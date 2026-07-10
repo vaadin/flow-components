@@ -27,6 +27,10 @@ package com.vaadin.flow.component.charts.model;
 
 import java.util.Map;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.server.InitParameters;
+
 /**
  * Options for the exporting module. For an overview on the matter, see
  * <a href="http://www.highcharts.com/docs/export-module/export-module-overview"
@@ -183,8 +187,41 @@ public class Exporting extends AbstractConfigurationObject {
      * for client side export in certain browsers.
      * <p>
      * Defaults to: https://code.highcharts.com/{version}/lib
+     *
+     * @throws IllegalArgumentException
+     *             if {@code libURL} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeLibURL(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     * @see #setUnsafeLibURL(String)
      */
     public void setLibURL(String libURL) {
+        if (libURL != null && !UrlUtil.isSafeUrl(libURL)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "libURL", libURL, "setUnsafeLibURL(String)"));
+        }
+        this.libURL = libURL;
+    }
+
+    /**
+     * Sets the path for the export module dependencies without validating its
+     * scheme.
+     * <p>
+     * Unlike {@link #setLibURL(String)}, this method does not reject URLs based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for URLs that are fully under your control and known to be safe.
+     * Passing untrusted input here can expose the application to cross-site
+     * scripting (XSS) attacks.
+     *
+     * @see #setLibURL(String)
+     *
+     * @param libURL
+     *            the path where Highcharts will look for export module
+     *            dependencies
+     */
+    public void setUnsafeLibURL(String libURL) {
         this.libURL = libURL;
     }
 
@@ -318,8 +355,40 @@ public class Exporting extends AbstractConfigurationObject {
      * format. By default this points to Highchart's free web service.
      * <p>
      * Defaults to: https://export.highcharts.com
+     *
+     * @throws IllegalArgumentException
+     *             if {@code url} uses a scheme that is not considered safe
+     *             according to
+     *             {@link DeploymentConfiguration#getUrlSafeSchemes()}; see
+     *             {@link #setUnsafeUrl(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     * @see #setUnsafeUrl(String)
      */
     public void setUrl(String url) {
+        if (url != null && !UrlUtil.isSafeUrl(url)) {
+            throw new IllegalArgumentException(UrlUtil
+                    .getUnsafeUrlMessage("url", url, "setUnsafeUrl(String)"));
+        }
+        this.url = url;
+    }
+
+    /**
+     * Sets the URL for the export server without validating its scheme.
+     * <p>
+     * Unlike {@link #setUrl(String)}, this method does not reject URLs based on
+     * the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it only
+     * for URLs that are fully under your control and known to be safe. Passing
+     * untrusted input here can expose the application to cross-site scripting
+     * (XSS) attacks.
+     *
+     * @see #setUrl(String)
+     *
+     * @param url
+     *            the URL for the server module converting the SVG string to an
+     *            image format
+     */
+    public void setUnsafeUrl(String url) {
         this.url = url;
     }
 
