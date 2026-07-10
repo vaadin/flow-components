@@ -777,6 +777,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Sorting with a back-end is done using
          * {@link Column#setSortProperty(String...)}.
          * <p>
+         * <strong>Note:</strong> the comparator is only used with in-memory
+         * data providers, such as {@link ListDataProvider}. It has no effect
+         * when the grid uses a lazy data provider. In that case, define the
+         * sort properties with {@link Column#setSortProperty(String...)} and
+         * implement the sorting in the data provider, which receives the
+         * properties through {@link Query#getSortOrders()}.
+         * <p>
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
          * <p>
@@ -797,9 +804,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Sets a comparator to use with in-memory sorting with this column
-         * based on the return type of the given {@link ValueProvider}.Sorting
+         * based on the return type of the given {@link ValueProvider}. Sorting
          * with a back-end is done using
          * {@link Column#setSortProperty(String[])}.
+         * <p>
+         * <strong>Note:</strong> the comparator is only used with in-memory
+         * data providers, such as {@link ListDataProvider}. It has no effect
+         * when the grid uses a lazy data provider. In that case, define the
+         * sort properties with {@link Column#setSortProperty(String...)} and
+         * implement the sorting in the data provider, which receives the
+         * properties through {@link Query#getSortOrders()}.
          * <p>
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
@@ -825,8 +839,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Gets the comparator to use with in-memory sorting for this column
          * when sorting in the given direction.
          * <p>
-         * <strong>Note:</strong> calling this method automatically sets the
-         * column as sortable with {@link #setSortable(boolean)}.
+         * <strong>Note:</strong> as a side effect, calling this method also
+         * sets the column as sortable with {@link #setSortable(boolean)}.
          *
          * @param sortDirection
          *            the direction this column is sorted by
@@ -844,6 +858,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Sets strings describing back end properties to be used when sorting
          * this column.
+         * <p>
+         * <strong>Note:</strong> sort properties are only used with lazy data
+         * providers, which receive them through {@link Query#getSortOrders()}
+         * and are responsible for applying the sorting. They are ignored by
+         * in-memory data providers, such as {@link ListDataProvider}, even if
+         * the items are originally loaded from a backend. Use
+         * {@link Column#setComparator(Comparator)} for in-memory sorting.
          * <p>
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
@@ -868,6 +889,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * <p>
          * The default provider uses the sort properties set with
          * {@link #setSortProperty(String...)}.
+         * <p>
+         * <strong>Note:</strong> the sort orders are only used with lazy data
+         * providers, which receive them through {@link Query#getSortOrders()}
+         * and are responsible for applying the sorting. They are ignored by
+         * in-memory data providers, such as {@link ListDataProvider}. Use
+         * {@link Column#setComparator(Comparator)} for in-memory sorting.
          * <p>
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
@@ -903,6 +930,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Sets whether the user can sort this column or not.
+         * <p>
+         * <strong>Note:</strong> this method only controls the sorting UI in
+         * the column header; it does not define how the data is sorted. Columns
+         * created with {@link Grid#addColumn(ValueProvider)} are sorted
+         * in-memory automatically, based on the values returned by the value
+         * provider. For other columns, or when the grid uses a lazy data
+         * provider, define the sorting with {@link #setComparator(Comparator)}
+         * (in-memory) or {@link #setSortProperty(String...)} (lazy data
+         * provider). Without one of these, activating the sorter has no effect
+         * on the data.
+         * <p>
+         * <strong>Note:</strong> the sorter is rendered as part of the column
+         * header content, so the column needs a header for the user to be able
+         * to sort it.
          *
          * @param sortable
          *            {@code true} if the column can be sorted by the user;
@@ -1978,6 +2019,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
      * built in renderers or using {@link LitRenderer}.
      * </p>
+     * <p>
+     * <em>NOTE:</em> Component columns are not sortable by default. To make
+     * such a column sortable, either set a comparator with
+     * {@link Column#setComparator(Comparator)} for in-memory sorting, or define
+     * the sort properties with {@link Column#setSortProperty(String...)} and
+     * implement the sorting in the data provider for backend sorting.
+     * </p>
      *
      * @param componentProvider
      *            a value provider that will return a component for the given
@@ -1987,6 +2035,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the new column
      * @see #addColumn(Renderer)
      * @see #removeColumn(Column)
+     * @see Column#setComparator(Comparator)
+     * @see Column#setSortProperty(String...)
      */
     public <V extends Component> Column<T> addComponentColumn(
             ValueProvider<T, V> componentProvider) {
@@ -1995,7 +2045,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Adds a new text column to this {@link Grid} with a value provider and
-     * sorting properties.The value is converted to a JSON value by using
+     * sorting properties. The value is converted to a JSON value by using
      * {@link JacksonSerializer#toJson(Object)}. The sorting properties are used
      * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
@@ -4010,12 +4060,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * When Grid is not configured to have multi-sorting enabled, all the
      * columns in the list except the first one are ignored.
+     * <p>
+     * The same sorting requirements apply as with user-triggered sorting: a
+     * column is only sorted if it has a comparator (in-memory data provider) or
+     * sort properties applied by the data provider (lazy data provider).
      *
      * @param order
      *            the list of sort orders to set on the client, or
      *            <code>null</code> to reset any sort orders.
      * @see #setMultiSort(boolean)
      * @see #getSortOrder()
+     * @see Column#setComparator(Comparator)
+     * @see Column#setSortProperty(String...)
      * @since 2.0
      */
     public void sort(List<GridSortOrder<T>> order) {
