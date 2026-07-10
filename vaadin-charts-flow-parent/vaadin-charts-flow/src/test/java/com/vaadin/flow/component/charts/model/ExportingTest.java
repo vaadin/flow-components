@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -19,11 +18,6 @@ public class ExportingTest {
 
     @Rule
     public MockUIRule mockUIRule = new MockUIRule();
-
-    @Before
-    public void enableUrlSchemeValidation() {
-        mockUIRule.enableUrlSchemeValidation();
-    }
 
     @Test
     public void setUrl_safeScheme_urlSet() {
