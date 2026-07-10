@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -34,6 +36,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.NotFoundException;
@@ -44,13 +47,35 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 
 import tools.jackson.databind.node.ArrayNode;
 
 public class SideNavItemTest {
 
+    private static MockedStatic<VaadinService> vaadinServiceMock;
+
     private SideNavItem sideNavItem;
+
+    @BeforeClass
+    public static void enableUrlSchemeValidation() {
+        // URL scheme validation is disabled by default in this branch, so
+        // configure a strict set of safe schemes to exercise the validation.
+        DeploymentConfiguration config = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(config.getUrlSafeSchemes())
+                .thenReturn(Set.of("http", "https", "mailto", "tel", "ftp"));
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(service.getDeploymentConfiguration()).thenReturn(config);
+        vaadinServiceMock = Mockito.mockStatic(VaadinService.class);
+        vaadinServiceMock.when(VaadinService::getCurrent).thenReturn(service);
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        vaadinServiceMock.close();
+    }
 
     @Before
     public void setup() {
