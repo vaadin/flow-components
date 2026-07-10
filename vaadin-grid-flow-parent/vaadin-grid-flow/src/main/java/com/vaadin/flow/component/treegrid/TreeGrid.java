@@ -760,8 +760,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the items to expand
      */
-    public void expand(Collection<T> items) {
-        expand(items, false);
+    public void expand(Collection<? extends T> items) {
+        expand(new ArrayList<>(items), false);
     }
 
     /**
@@ -792,7 +792,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param depth
      *            the maximum depth of recursion
      */
-    public void expandRecursively(Stream<T> items, int depth) {
+    public void expandRecursively(Stream<? extends T> items, int depth) {
         expandRecursively(items.toList(), depth);
     }
 
@@ -810,9 +810,9 @@ public class TreeGrid<T> extends Grid<T>
      * @param depth
      *            the maximum depth of recursion
      */
-    public void expandRecursively(Collection<T> items, int depth) {
-        var expandedItems = getDataCommunicator()
-                .expand(getItemsWithChildrenRecursively(items, depth));
+    public void expandRecursively(Collection<? extends T> items, int depth) {
+        var expandedItems = getDataCommunicator().expand(
+                getItemsWithChildrenRecursively(new ArrayList<>(items), depth));
         fireEvent(new ExpandEvent<>(this, false, expandedItems));
     }
 
@@ -837,8 +837,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the collection of items to collapse
      */
-    public void collapse(Collection<T> items) {
-        collapse(items, false);
+    public void collapse(Collection<? extends T> items) {
+        collapse(new ArrayList<>(items), false);
     }
 
     /**
@@ -869,7 +869,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param depth
      *            the maximum depth of recursion
      */
-    public void collapseRecursively(Stream<T> items, int depth) {
+    public void collapseRecursively(Stream<? extends T> items, int depth) {
         collapseRecursively(items.toList(), depth);
     }
 
@@ -887,9 +887,9 @@ public class TreeGrid<T> extends Grid<T>
      * @param depth
      *            the maximum depth of recursion
      */
-    public void collapseRecursively(Collection<T> items, int depth) {
-        var collapsedItems = getDataCommunicator()
-                .collapse(getItemsWithChildrenRecursively(items, depth));
+    public void collapseRecursively(Collection<? extends T> items, int depth) {
+        var collapsedItems = getDataCommunicator().collapse(
+                getItemsWithChildrenRecursively(new ArrayList<>(items), depth));
         fireEvent(new CollapseEvent<>(this, false, collapsedItems));
     }
 
