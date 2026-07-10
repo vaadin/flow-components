@@ -347,28 +347,28 @@ class TabSheetTest {
     void addTab_addedAsLastTab() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
-        Assertions.assertEquals(1, tabs.indexOf(tab1));
+        Assertions.assertEquals(1, tabs.getIndexOf(tab1));
     }
 
     @Test
     void addTabToNegativeIndex_addedAsLastTab() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), -1);
-        Assertions.assertEquals(1, tabs.indexOf(tab1));
+        Assertions.assertEquals(1, tabs.getIndexOf(tab1));
     }
 
     @Test
     void addTabToEndIndex_addedAsLastTab() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), 1);
-        Assertions.assertEquals(1, tabs.indexOf(tab1));
+        Assertions.assertEquals(1, tabs.getIndexOf(tab1));
     }
 
     @Test
     void addTabToStartIndex_addedAsFirstTab() {
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), 0);
-        Assertions.assertEquals(0, tabs.indexOf(tab1));
+        Assertions.assertEquals(0, tabs.getIndexOf(tab1));
     }
 
     @Test

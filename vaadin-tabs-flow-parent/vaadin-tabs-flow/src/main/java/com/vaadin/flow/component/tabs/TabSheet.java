@@ -290,7 +290,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * @return the index of the tab or -1 if the tab is not added
      */
     public int getIndexOf(Tab tab) {
-        return tabs.indexOf(tab);
+        return tabs.getIndexOf(tab);
     }
 
     /**
