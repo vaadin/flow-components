@@ -44,20 +44,14 @@ public class MockUIRule extends ExternalResource {
     private UI ui;
     private VaadinSession session;
     private VaadinService service;
+    private DeploymentConfiguration deploymentConfig;
 
     @Override
     @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     protected void before() {
         service = Mockito.mock(VaadinService.class);
-        DeploymentConfiguration deploymentConfig = Mockito
-                .mock(DeploymentConfiguration.class);
+        deploymentConfig = Mockito.mock(DeploymentConfiguration.class);
         Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
-        // Enable URL-scheme validation (e.g. UrlUtil.isSafeUrl) during tests by
-        // exposing the default set of safe schemes through the deployment
-        // configuration. Without this stub the mock would return null and any
-        // scheme validation would fail.
-        Mockito.when(deploymentConfig.getUrlSafeSchemes())
-                .thenReturn(Set.of("http", "https", "mailto", "tel", "ftp"));
         Mockito.when(service.getDeploymentConfiguration())
                 .thenReturn(deploymentConfig);
 
@@ -68,7 +62,6 @@ public class MockUIRule extends ExternalResource {
 
         UI.setCurrent(ui);
         VaadinSession.setCurrent(session);
-        VaadinService.setCurrent(service);
     }
 
     @Override
@@ -126,6 +119,19 @@ public class MockUIRule extends ExternalResource {
      */
     public VaadinService getService() {
         return service;
+    }
+
+    /**
+     * Enables URL-scheme validation (for example {@code UrlUtil.isSafeUrl}) for
+     * the duration of the test by making the mocked {@link VaadinService}
+     * current and exposing a default set of safe schemes. Validation is opt-in
+     * so that tests not calling this method are unaffected.
+     */
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    public void enableUrlSchemeValidation() {
+        Mockito.when(deploymentConfig.getUrlSafeSchemes())
+                .thenReturn(Set.of("http", "https", "mailto", "tel", "ftp"));
+        VaadinService.setCurrent(service);
     }
 
     /**

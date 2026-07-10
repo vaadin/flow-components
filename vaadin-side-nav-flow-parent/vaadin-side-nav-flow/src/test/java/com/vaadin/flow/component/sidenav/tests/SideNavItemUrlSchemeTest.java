@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -32,6 +33,11 @@ public class SideNavItemUrlSchemeTest {
 
     @Rule
     public MockUIRule mockUIRule = new MockUIRule();
+
+    @Before
+    public void enableUrlSchemeValidation() {
+        mockUIRule.enableUrlSchemeValidation();
+    }
 
     @Test
     public void setPathWithUnsafeScheme_throws() {

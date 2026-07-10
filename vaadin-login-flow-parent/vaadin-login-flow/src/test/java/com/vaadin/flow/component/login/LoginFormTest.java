@@ -197,6 +197,7 @@ public class LoginFormTest {
 
     @Test
     public void setActionWithUnsafeScheme_throws() {
+        mockUIRule.enableUrlSchemeValidation();
         final LoginForm form = new LoginForm();
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> form.setAction("javascript:alert(1)"));
@@ -204,6 +205,7 @@ public class LoginFormTest {
 
     @Test
     public void setUnsafeActionWithUnsafeScheme_actionSet() {
+        mockUIRule.enableUrlSchemeValidation();
         final LoginForm form = new LoginForm();
         form.setUnsafeAction("javascript:alert(1)");
 
