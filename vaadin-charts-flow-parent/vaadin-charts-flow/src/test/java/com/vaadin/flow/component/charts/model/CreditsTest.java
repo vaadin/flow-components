@@ -8,32 +8,38 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.vaadin.tests.MockUIRule;
 
 public class CreditsTest {
 
+    @Rule
+    public MockUIRule mockUIRule = new MockUIRule();
+
     @Test
-    void setHref_safeScheme_hrefSet() {
+    public void setHref_safeScheme_hrefSet() {
         Credits credits = new Credits();
         credits.setHref("https://vaadin.com");
 
-        Assertions.assertEquals("https://vaadin.com", credits.getHref());
+        Assert.assertEquals("https://vaadin.com", credits.getHref());
     }
 
     @Test
-    void setHref_unsafeScheme_throws() {
+    public void setHref_unsafeScheme_throws() {
         Credits credits = new Credits();
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assert.assertThrows(IllegalArgumentException.class,
                 () -> credits.setHref("javascript:alert(1)"));
     }
 
     @Test
-    void setUnsafeHref_unsafeScheme_hrefSet() {
+    public void setUnsafeHref_unsafeScheme_hrefSet() {
         Credits credits = new Credits();
         credits.setUnsafeHref("javascript:alert(1)");
 
-        Assertions.assertEquals("javascript:alert(1)", credits.getHref());
+        Assert.assertEquals("javascript:alert(1)", credits.getHref());
     }
 }
