@@ -18,7 +18,6 @@ package com.vaadin.flow.component.login;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -28,12 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.MockUIRule;
 
 public class LoginFormTest {
-
-    @Rule
-    public MockUIRule mockUIRule = new MockUIRule();
 
     @Test
     public void onForgotPasswordEvent() {
