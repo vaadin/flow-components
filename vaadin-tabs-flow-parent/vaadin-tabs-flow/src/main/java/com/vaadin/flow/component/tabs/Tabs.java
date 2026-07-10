@@ -91,7 +91,7 @@ public class Tabs extends Component
     public Tabs() {
         setSelectedIndex(-1);
         getElement().addPropertyChangeListener(SELECTED, event -> {
-            int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
+            int oldIndex = selectedTab != null ? getIndexOf(selectedTab) : -1;
             int newIndex = getSelectedIndex();
             if (newIndex >= getTabCount()) {
                 LoggerFactory.getLogger(getClass()).warn(String.format(
@@ -248,7 +248,7 @@ public class Tabs extends Component
      */
     public void remove(Tab... tabs) {
         int selectedIndex = getSelectedIndex();
-        int lowerIndices = (int) Stream.of(tabs).map(this::indexOf)
+        int lowerIndices = (int) Stream.of(tabs).map(this::getIndexOf)
                 .filter(index -> index >= 0 && index < selectedIndex).count();
 
         Tab selectedTab = getSelectedTab();
@@ -595,7 +595,7 @@ public class Tabs extends Component
             return;
         }
 
-        int selectedIndex = indexOf(selectedTab);
+        int selectedIndex = getIndexOf(selectedTab);
         if (selectedIndex < 0) {
             throw new IllegalArgumentException(
                     "Tab to select must be a child: " + selectedTab);
@@ -719,7 +719,7 @@ public class Tabs extends Component
      * @param component
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not a child
-     * @deprecated since 24.0, use {@link #indexOf(Tab)} instead.
+     * @deprecated since 24.0, use {@link #getIndexOf(Tab)} instead.
      * @since 24.0
      */
     @Deprecated
@@ -729,7 +729,7 @@ public class Tabs extends Component
             throw new IllegalArgumentException(
                     "Adding a component other than a Tab is not supported.");
         }
-        return indexOf((Tab) component);
+        return getIndexOf((Tab) component);
     }
 
     /**
@@ -738,9 +738,23 @@ public class Tabs extends Component
      * @param tab
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not a child
+     * @deprecated since 25.3, use {@link #getIndexOf(Tab)} instead.
      * @since 24.0
      */
+    @Deprecated
     public int indexOf(Tab tab) {
+        return getIndexOf(tab);
+    }
+
+    /**
+     * Returns the index of the given tab.
+     *
+     * @param tab
+     *            the tab to look up, can not be <code>null</code>
+     * @return the index of the tab or -1 if the tab is not a child
+     * @since 25.3
+     */
+    public int getIndexOf(Tab tab) {
         if (tab == null) {
             throw new IllegalArgumentException(
                     "The 'tab' parameter cannot be null");
