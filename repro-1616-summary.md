@@ -2,7 +2,7 @@
 > **Automated reproduction — produced by the Claude Code `repro` skill. Needs human verification.**
 > The steps, verdict, and root-cause pointer below were generated automatically and must be confirmed by a human before being treated as authoritative.
 
-- **Verdict:** reproduced — the selected-item caption in the input stays stale after `refreshAll()`, and also after the targeted `refreshItem()` (broader than originally reported)
+- **Verdict:** reproduced — duplicate of #3239 (same root cause, trigger, and symptom); the selected-item caption in the input stays stale after `refreshAll()`, and also after the targeted `refreshItem()` (broader than originally reported)
 - **Hypothesis tested:** The bug is that the ComboBox input's selected-item caption is not refreshed when the selected item's label changes via a data-provider refresh, triggered by mutating the item and firing `refreshAll()`/`refreshItem()`, observable as the input showing the old label while the overlay shows the new one.
 - **Regression?:** not a regression (reported against Vaadin 14.0.12 in 2019, same behavior on current main; no known-good version)
 - **Flavor:** Flow
@@ -50,6 +50,10 @@ https://github.com/vaadin/flow-components/blob/29d9da5f76b2f8cd8b773e7e42b2601f2
 https://github.com/vaadin/flow-components/blob/29d9da5f76b2f8cd8b773e7e42b2601f26ccb1d5/vaadin-combo-box-flow-parent/vaadin-combo-box-flow/src/main/java/com/vaadin/flow/component/combobox/ComboBoxDataController.java#L634-L647
 
 A fix shape: after a `DataRefreshEvent` matching the current value (or any `reset()`), call `comboBox.refreshValue()` for single-select too.
+
+## Duplicate
+
+Same bug as **#3239** (open, triaged: `bug`, `Severity: Major`, `data provider`): identical trigger (mutate item + `refreshAll()` with an item label generator), identical symptom (overlay updates, input caption stale), and #3239's description names the same root cause this reproduction confirmed in source — `ComboBoxBase.refreshValue` is not run on data-provider refresh. #3239 already cross-references #1616 and additionally covers MultiSelectComboBox chips (not verified by this reproduction). Recommend consolidating: close #1616 as a duplicate of the newer but better-triaged #3239, or vice versa — team's call.
 
 ## Notes
 
