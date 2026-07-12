@@ -47,7 +47,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @since 25.1
  */
 @Tag("vaadin-upload-file-list")
-@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha3")
+@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha4")
 @JsModule("@vaadin/upload/src/vaadin-upload-file-list.js")
 public class UploadFileList extends Component implements HasUploadManager,
         HasThemeVariant<UploadFileListVariant>, HasSize, HasEnabled {

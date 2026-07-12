@@ -60,7 +60,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha3")
+@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha4")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
