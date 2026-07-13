@@ -63,7 +63,7 @@ jobs:
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Run Claude Code
-        uses: vaadin/github-actions/claude-code@8d67337454442d68a592141b9f599f2f080e1eb2
+        uses: vaadin/github-actions/claude-code@bfb2659c1efe77731d70b4bb57f1433f5dbf3d90
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           reference-repos: |
