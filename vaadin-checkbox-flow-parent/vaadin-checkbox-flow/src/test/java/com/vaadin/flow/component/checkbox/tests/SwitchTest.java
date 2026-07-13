@@ -70,7 +70,7 @@ class SwitchTest {
 
     @Test
     void implementsHasThemeVariant() {
-        Assertions
-                .assertTrue(HasThemeVariant.class.isAssignableFrom(Switch.class));
+        Assertions.assertTrue(
+                HasThemeVariant.class.isAssignableFrom(Switch.class));
     }
 }
