@@ -83,7 +83,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 23.0
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "25.2.3")
+@NpmPackage(value = "@vaadin/map", version = "25.2.4")
 // ol is also a transitive dep of @vaadin/map, but mapConnector.js imports
 // from `ol/*` directly, which only resolves when ol is a top-level
 // node_modules entry. Keep version in sync with the one in @vaadin/map.
