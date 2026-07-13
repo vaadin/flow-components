@@ -24,6 +24,7 @@ class GridI18nTest {
     void defaultValues_areNull() {
         GridI18n i18n = new GridI18n();
         Assertions.assertNull(i18n.getSelectAll());
+        Assertions.assertNull(i18n.getSelectAllUnavailable());
         Assertions.assertNull(i18n.getSelectRow());
         Assertions.assertNull(i18n.getSorter());
     }
@@ -33,6 +34,8 @@ class GridI18nTest {
         GridI18n i18n = new GridI18n();
         Assertions.assertSame(i18n, i18n.setSelectAll("Select all"));
         Assertions.assertSame(i18n,
+                i18n.setSelectAllUnavailable("Select All unavailable"));
+        Assertions.assertSame(i18n,
                 i18n.setSelectRow("Select row {rowHeader}"));
         Assertions.assertSame(i18n, i18n.setSorter("Sort by {column}"));
     }
@@ -40,9 +43,12 @@ class GridI18nTest {
     @Test
     void setters_updateValues() {
         GridI18n i18n = new GridI18n().setSelectAll("Select all")
+                .setSelectAllUnavailable("Select All unavailable")
                 .setSelectRow("Select row {rowHeader}")
                 .setSorter("Sort by {column}");
         Assertions.assertEquals("Select all", i18n.getSelectAll());
+        Assertions.assertEquals("Select All unavailable",
+                i18n.getSelectAllUnavailable());
         Assertions.assertEquals("Select row {rowHeader}", i18n.getSelectRow());
         Assertions.assertEquals("Sort by {column}", i18n.getSorter());
     }
@@ -70,11 +76,14 @@ class GridI18nTest {
     void grid_setI18n_setsElementProperty() {
         Grid<String> grid = new Grid<>();
         grid.setI18n(new GridI18n().setSelectAll("Select all")
+                .setSelectAllUnavailable("Select All unavailable")
                 .setSelectRow("Select row {rowHeader}")
                 .setSorter("Sort by {column}"));
 
         String json = grid.getElement().getPropertyRaw("i18n").toString();
         Assertions.assertTrue(json.contains("\"selectAll\":\"Select all\""));
+        Assertions.assertTrue(json.contains(
+                "\"selectAllUnavailable\":\"Select All unavailable\""));
         Assertions.assertTrue(
                 json.contains("\"selectRow\":\"Select row {rowHeader}\""));
         Assertions.assertTrue(json.contains("\"sorter\":\"Sort by {column}\""));
