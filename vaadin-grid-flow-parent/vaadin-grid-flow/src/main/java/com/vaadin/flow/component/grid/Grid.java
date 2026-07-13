@@ -4030,7 +4030,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (column == null) {
                 // The column may have been removed on the server between the
                 // client emitting the event and the server handling it. Skip
-                // the stale sorter instead of failing the whole call.
+                // the stale sorter.
                 continue;
             }
             if (sorter.has("direction") && sorter.get("direction")
