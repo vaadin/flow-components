@@ -1,0 +1,173 @@
+name: Code Review
+
+# Reviews a pull request, triggered automatically when a PR is opened 
+# (eligibility rules on the job condition) or by a "/code-review" PR comment.
+# A prepare step pre-computes the review input (diff, metadata, merge-base
+# checkout), the claude-code-action runs the review and reports findings via
+# the ReportFindings tool, and a posting step posts them as one review.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+# One review per PR at a time; a re-trigger queues instead of aborting a run
+# that may be mid-posting.
+concurrency:
+  group: code-review-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+env:
+  PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+
+jobs:
+  review:
+    # Comment trigger: collaborators only. Auto trigger on opened PRs skips
+    # drafts, chore PRs, known bots, and non-collaborators (also keeps fork
+    # PRs out, which would fail on missing secrets anyway).
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       github.event.comment.body == '/code-review' &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.draft == false &&
+       !contains(fromJSON('["dependabot[bot]", "vaadin-bot"]'), github.event.pull_request.user.login) &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) &&
+       !startsWith(github.event.pull_request.title, 'chore:') &&
+       !startsWith(github.event.pull_request.title, 'chore('))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: React to trigger
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            target="issues/comments/${{ github.event.comment.id }}"
+          else
+            target="issues/$PR_NUMBER"
+          fi
+          gh api "repos/${{ github.repository }}/$target/reactions" \
+            -f content=eyes
+
+      - name: Checkout repository
+        # Default branch first, so the trusted infra staged below never comes
+        # from the PR branch. This matters twice here: PR branches must not be
+        # able to modify the review prompt or scripts, and the synthetic
+        # reproduction PRs used for testing have base branches that reconstruct
+        # old repo states without this infra at all.
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Stage action infra
+        run: |
+          cp .github/claude/review-prompt.md "${{ runner.temp }}/review-prompt.md"
+          cp .github/claude/prepare-review.js "${{ runner.temp }}/prepare-review.js"
+          cp .github/claude/post-review.js "${{ runner.temp }}/post-review.js"
+          cp .github/claude/summary.js "${{ runner.temp }}/summary.js"
+
+      - name: Checkout PR branch
+        # The review investigates related code in the PR head tree.
+        uses: actions/checkout@v6
+        with:
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
+          fetch-depth: 1
+
+      - name: Prepare review scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node "${{ runner.temp }}/prepare-review.js" "$PR_NUMBER"
+
+      - name: Clone upstream references (read-only context)
+        run: |
+          git clone --depth 1 https://github.com/vaadin/flow.git \
+            "${{ runner.temp }}/reference/flow"
+          git clone --depth 1 https://github.com/vaadin/web-components.git \
+            "${{ runner.temp }}/reference/web-components"
+
+      - name: Build review prompt
+        id: build-prompt
+        run: |
+          {
+            echo 'prompt<<PROMPT_EOF'
+            sed "s|{{OVERVIEW_PATH}}|${{ runner.temp }}/pr-review/overview.md|" \
+              "${{ runner.temp }}/review-prompt.md"
+            echo 'PROMPT_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude Code review
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        # CLAUDE_CODE_DISABLE_BACKGROUND_TASKS forces synchronous subagent
+        # dispatch. Without it the Agent tool may launch subagents in the
+        # background (nondeterministic, feature-flag driven); the headless
+        # session then ends while they are still running and the review is
+        # silently lost — job green, no findings reported. The CLI (2.1.198)
+        # checks this variable directly in the dispatch decision, so with it
+        # set every subagent runs inline; batched Agent calls still run in
+        # parallel. A step-level env reaches the CLI because the base action
+        # spawns it with a copy of its own process env.
+        env:
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Extra working directories go through settings instead of --add-dir:
+          # the action's claude_args parser takes only a single value per
+          # --add-dir flag and overwrites repeated flags, silently dropping all
+          # but one directory (see base-action/src/parse-sdk-options.ts).
+          settings: |
+            {
+              "permissions": {
+                "additionalDirectories": [
+                  "${{ runner.temp }}/pr-review",
+                  "${{ runner.temp }}/reference/flow",
+                  "${{ runner.temp }}/reference/web-components",
+                  "/tmp"
+                ]
+              }
+            }
+          prompt: ${{ steps.build-prompt.outputs.prompt }}
+          claude_args: |
+            --allowedTools "Agent,Task,ReportFindings,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git status:*),Bash(ls:*),Bash(cat:*),Bash(find:*),Bash(grep:*),Bash(rg:*),Bash(head:*),Bash(tail:*),Bash(wc:*)"
+
+      - name: Post review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: node "${{ runner.temp }}/post-review.js" "$PR_NUMBER"
+
+      - name: Summarize Claude session
+        if: always() && steps.claude.outputs.execution_file != ''
+        run: node "${{ runner.temp }}/summary.js" "${{ steps.claude.outputs.execution_file }}"
+
+      - name: Extract findings
+        if: always() && steps.claude.outputs.execution_file != ''
+        run: |
+          jq -e '[.[] | select(.type == "assistant") | .message.content[]?
+                  | select(.type == "tool_use" and .name == "ReportFindings") | .input] | last' \
+            "${{ steps.claude.outputs.execution_file }}" > "${{ runner.temp }}/findings.json" \
+            || rm -f "${{ runner.temp }}/findings.json"
+
+      - name: Upload findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-review-findings-pr${{ env.PR_NUMBER }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/findings.json
+          if-no-files-found: ignore
+
+      - name: Upload Claude execution log
+        if: always() && vars.CLAUDE_DEBUG == 'true' && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-review-execution-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          retention-days: 7
