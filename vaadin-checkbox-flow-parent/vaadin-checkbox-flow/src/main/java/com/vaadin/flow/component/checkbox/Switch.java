@@ -41,7 +41,6 @@ import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
  * Switch is an input field representing a binary on/off choice.
@@ -91,9 +90,6 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
 
     private final NativeLabel labelElement;
 
-    private static final PropertyChangeListener NO_OP = event -> {
-    };
-
     private SwitchI18n i18n;
 
     private Validator<Boolean> defaultValidator = (value, context) -> {
@@ -117,8 +113,6 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
     public Switch() {
         super("checked", false, false);
         getElement().setProperty("manualValidation", true);
-        getElement().addPropertyChangeListener("checked", "checked-changed",
-                NO_OP);
         // Initialize property value unless it has already been set from a
         // template
         if (getElement().getProperty("checked") == null) {
@@ -235,7 +229,7 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
                 .get(ui.getSession().getService().getContext());
         if (!featureFlags
                 .isEnabled(SwitchFeatureFlagProvider.SWITCH_COMPONENT)) {
-            throw new ExperimentalFeatureException();
+            throw new SwitchExperimentalFeatureException();
         }
     }
 

@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.checkbox.ExperimentalFeatureException;
 import com.vaadin.flow.component.checkbox.Switch;
+import com.vaadin.flow.component.checkbox.SwitchExperimentalFeatureException;
 import com.vaadin.flow.component.checkbox.SwitchFeatureFlagProvider;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
@@ -45,7 +45,7 @@ class SwitchFeatureFlagTest {
         featureFlagExtension.disableFeature();
 
         var field = new Switch();
-        Assertions.assertThrows(ExperimentalFeatureException.class,
+        Assertions.assertThrows(SwitchExperimentalFeatureException.class,
                 () -> ui.add(field));
     }
 }

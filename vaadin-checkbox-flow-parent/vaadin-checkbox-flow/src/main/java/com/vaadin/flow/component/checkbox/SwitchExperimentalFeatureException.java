@@ -22,11 +22,11 @@ package com.vaadin.flow.component.checkbox;
  * @author Vaadin Ltd
  * @since 25.3
  */
-public class ExperimentalFeatureException extends RuntimeException {
+public class SwitchExperimentalFeatureException extends RuntimeException {
     /**
      * Creates a new exception with a default message.
      */
-    public ExperimentalFeatureException() {
+    public SwitchExperimentalFeatureException() {
         super("""
                 The Switch component is currently an experimental feature \
                 and needs to be explicitly enabled. The component can be \
