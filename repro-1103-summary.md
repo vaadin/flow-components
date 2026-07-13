@@ -12,7 +12,7 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium
-- **Screenshot:** `![combo-box stays closed on direct load](https://raw.githubusercontent.com/vaadin/flow-components/REPLACE_SHA/repro-1103.png)`
+- **Screenshot:** `![combo-box stays closed on direct load](https://raw.githubusercontent.com/vaadin/flow-components/6a9fd892ede9e9be5da4d3c4d42d97d74464a59b/repro-1103.png)`
 
 ## Observed behavior
 
@@ -54,7 +54,7 @@ add(combo);
 
 `setOpened(true)` only sets the `opened` element property; the overlay open is then handled on the client. On attach the connector and lazy data provider are wired in `onAttach` (`initConnector()` + `dataController.onAttach()`). On a direct render the `opened=true` sync is processed around the same time the data provider is being connected, so the overlay opens before any items/size are available and is dismissed; on client-side navigation the ordering differs and the open survives.
 
-https://github.com/vaadin/flow-components/blob/REPLACE_SHA/vaadin-combo-box-flow-parent/vaadin-combo-box-flow/src/main/java/com/vaadin/flow/component/combobox/ComboBoxBase.java#L607-L612
+https://github.com/vaadin/flow-components/blob/6a9fd892ede9e9be5da4d3c4d42d97d74464a59b/vaadin-combo-box-flow-parent/vaadin-combo-box-flow/src/main/java/com/vaadin/flow/component/combobox/ComboBoxBase.java#L607-L612
 
 ## Notes
 
