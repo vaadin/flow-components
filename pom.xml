@@ -107,7 +107,7 @@
         <langchain4j.version>1.17.2</langchain4j.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <junit.version>4.13.2</junit.version>
-        <junit.jupiter.version>6.1.1</junit.jupiter.version>
+        <junit.jupiter.version>6.1.2</junit.jupiter.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
