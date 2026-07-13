@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -223,6 +224,110 @@ class ClipboardTest {
     }
 
     @Test
+    void paste_hiddenTargetRow_pastesIntoVisibleRowsOnly() {
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\nA2\"]");
+
+        Assertions.assertEquals("A1", getCellValue("A1"));
+        Assertions.assertNull(spreadsheet.getCell("A2"));
+        Assertions.assertEquals("A2", getCellValue("A3"));
+    }
+
+    @Test
+    void paste_hiddenTargetColumn_pastesIntoVisibleColumnsOnly() {
+        spreadsheet.setColumnHidden(1, true);
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\tB1\"]");
+
+        Assertions.assertEquals("A1", getCellValue("A1"));
+        Assertions.assertNull(spreadsheet.getCell("B1"));
+        Assertions.assertEquals("B1", getCellValue("C1"));
+    }
+
+    @Test
+    void paste_hiddenTargetRow_selectionSpansToLastPastedRow() {
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\nA2\"]");
+
+        Assertions.assertEquals("A1:A3", spreadsheet.getCellSelectionManager()
+                .getSelectedCellRange().formatAsString());
+    }
+
+    @Test
+    void paste_hiddenTargetRow_eventDoesNotContainHiddenCell() {
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1");
+
+        var event = new AtomicReference<CellValueChangeEvent>();
+        spreadsheet.addCellValueChangeListener(e -> event.set(e));
+        paste("[\"A1\\nA2\"]");
+
+        var sheetName = spreadsheet.getActiveSheet().getSheetName();
+        var changedCells = event.get().getChangedCells();
+        Assertions.assertTrue(changedCells
+                .contains(new CellReference(sheetName, 0, 0, false, false)));
+        Assertions.assertFalse(changedCells
+                .contains(new CellReference(sheetName, 1, 0, false, false)));
+        Assertions.assertTrue(changedCells
+                .contains(new CellReference(sheetName, 2, 0, false, false)));
+    }
+
+    @Test
+    void paste_hiddenTargetRow_lockedVisibleTargetCell_cellHasOriginalValue() {
+        lockCell("A3");
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\nA2\"]");
+
+        Assertions.assertEquals("locked", getCellValue("A3"));
+    }
+
+    @Test
+    void paste_hiddenTargetRow_undo_cellsHaveOriginalValues() {
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\nA2\\nA3\"]");
+
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1");
+        paste("[\"X1\\nX2\"]");
+        undo();
+
+        Assertions.assertEquals("A1", getCellValue("A1"));
+        Assertions.assertEquals("A2", getCellValue("A2"));
+        Assertions.assertEquals("A3", getCellValue("A3"));
+    }
+
+    @Test
+    void cut_hiddenRow_keepsHiddenCellValue() {
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\nA2\\nA3\"]");
+
+        spreadsheet.setRowHidden(1, true);
+        spreadsheet.setSelection("A1:A3");
+        cut();
+
+        Assertions.assertEquals("", getCellValue("A1"));
+        Assertions.assertEquals("A2", getCellValue("A2"));
+        Assertions.assertEquals("", getCellValue("A3"));
+    }
+
+    @Test
+    void cut_hiddenColumn_keepsHiddenCellValue() {
+        spreadsheet.setSelection("A1");
+        paste("[\"A1\\tB1\\tC1\"]");
+
+        spreadsheet.setColumnHidden(1, true);
+        spreadsheet.setSelection("A1:C1");
+        cut();
+
+        Assertions.assertEquals("", getCellValue("A1"));
+        Assertions.assertEquals("B1", getCellValue("B1"));
+        Assertions.assertEquals("", getCellValue("C1"));
+    }
+
+    @Test
     void cut_clearsSelectedCells() {
         spreadsheet.setSelection("A1:A2");
         paste("[\"A1\"]");
@@ -316,7 +421,9 @@ class ClipboardTest {
 
     private void lockCell(String cellAddress) {
         lockSheet();
-        spreadsheet.createCell(0, 0, "locked");
+        var cellReference = new CellReference(cellAddress);
+        spreadsheet.createCell(cellReference.getRow(), cellReference.getCol(),
+                "locked");
         var lockedCellStyle = spreadsheet.getActiveSheet().getWorkbook()
                 .createCellStyle();
         lockedCellStyle.setLocked(true);

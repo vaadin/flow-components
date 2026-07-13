@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.IntPredicate;
 
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
@@ -280,11 +282,25 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         int rowIndex = selectedCellReference.getRow();
         int colIndex = selectedCellReference.getCol();
 
+        // Map the pasted grid onto visible rows and columns only, so that
+        // cells hidden e.g. by filters are not overwritten
+        SpreadsheetVersion version = workbook.getSpreadsheetVersion();
+        List<Integer> targetRows = collectVisibleIndexes(rowIndex, pasteHeight,
+                version.getLastRowIndex(), spreadsheet::isRowHidden);
+        List<Integer> targetColumns = collectVisibleIndexes(colIndex,
+                pasteWidth, version.getLastColumnIndex(),
+                spreadsheet::isColumnHidden);
+        if (targetRows.isEmpty() || targetColumns.isEmpty()) {
+            return;
+        }
+        int lastTargetRow = targetRows.get(targetRows.size() - 1);
+        int lastTargetColumn = targetColumns.get(targetColumns.size() - 1);
+
         // Check for protected cells at target
-        for (int i = 0; i < pasteHeight; i++) {
-            for (int j = 0; j < pasteWidth; j++) {
-                CellAddress cellAddress = new CellAddress(rowIndex + i,
-                        colIndex + j);
+        for (int targetRow : targetRows) {
+            for (int targetColumn : targetColumns) {
+                CellAddress cellAddress = new CellAddress(targetRow,
+                        targetColumn);
                 if (spreadsheet.isCellLocked(cellAddress)) {
                     protectedCellWriteAttempted();
                     return;
@@ -294,21 +310,20 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         CellValueCommand command = new CellValueCommand(spreadsheet);
         CellRangeAddress affectedRange = new CellRangeAddress(rowIndex,
-                rowIndex + pasteHeight - 1, colIndex,
-                colIndex + pasteWidth - 1);
+                lastTargetRow, colIndex, lastTargetColumn);
         command.captureCellRangeValues(affectedRange);
 
-        for (int i = 0; i < pasteHeight; i++) {
+        for (int i = 0; i < targetRows.size(); i++) {
             String line = lines[i];
-            Row row = activesheet.getRow(rowIndex + i);
+            Row row = activesheet.getRow(targetRows.get(i));
             if (row == null) {
-                row = activesheet.createRow(rowIndex + i);
+                row = activesheet.createRow(targetRows.get(i));
             }
             String[] tokens = splitOnTab(line);
-            for (int j = 0; j < pasteWidth; j++) {
-                Cell cell = row.getCell(colIndex + j);
+            for (int j = 0; j < targetColumns.size(); j++) {
+                Cell cell = row.getCell(targetColumns.get(j));
                 if (cell == null) {
-                    cell = row.createCell(colIndex + j);
+                    cell = row.createCell(targetColumns.get(j));
                 }
                 if (j < tokens.length) {
                     String cellContent = tokens[j];
@@ -332,21 +347,36 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         spreadsheet.updateMarkedCells();
-        // re-set selection to copied area
-        spreadsheet.setSelectionRange(rowIndex, colIndex,
-                rowIndex + pasteHeight - 1, colIndex + pasteWidth - 1);
+        // re-set selection to pasted area
+        spreadsheet.setSelectionRange(rowIndex, colIndex, lastTargetRow,
+                lastTargetColumn);
 
-        fireCellValueChangeEvent(affectedRange);
+        fireCellValueChangeEvent(targetRows, targetColumns);
     }
 
-    private void fireCellValueChangeEvent(CellRangeAddress region) {
+    /**
+     * Collects up to {@code count} non-hidden indexes, starting from
+     * {@code startIndex} (inclusive) and not going past {@code maxIndex}.
+     */
+    private List<Integer> collectVisibleIndexes(int startIndex, int count,
+            int maxIndex, IntPredicate isHidden) {
+        List<Integer> indexes = new ArrayList<Integer>(count);
+        for (int i = startIndex; i <= maxIndex && indexes.size() < count; i++) {
+            if (!isHidden.test(i)) {
+                indexes.add(i);
+            }
+        }
+        return indexes;
+    }
+
+    private void fireCellValueChangeEvent(List<Integer> rows,
+            List<Integer> columns) {
         Set<CellReference> cells = new HashSet<CellReference>();
-        for (int x = region.getFirstColumn(); x <= region
-                .getLastColumn(); x++) {
-            for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
-                cells.add(new CellReference(
-                        spreadsheet.getActiveSheet().getSheetName(), y, x,
-                        false, false));
+        String sheetName = spreadsheet.getActiveSheet().getSheetName();
+        for (int row : rows) {
+            for (int column : columns) {
+                cells.add(new CellReference(sheetName, row, column, false,
+                        false));
             }
         }
         fireCellValueChangeEvent(cells);
@@ -422,8 +452,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getCellSelectionManager().getCellRangeAddresses();
         for (CellRangeAddress a : cellRangeAddresses) {
             for (int row = a.getFirstRow(); row <= a.getLastRow(); row++) {
+                if (spreadsheet.isRowHidden(row)) {
+                    // hidden cells are not copied on cut, so don't clear them
+                    continue;
+                }
                 for (int col = a.getFirstColumn(); col <= a
                         .getLastColumn(); col++) {
+                    if (spreadsheet.isColumnHidden(col)) {
+                        continue;
+                    }
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
                         if (spreadsheet.isCellLocked(cell.getAddress())) {
@@ -439,13 +476,17 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         // clear single cell
         CellReference reference = spreadsheet.getCellSelectionManager()
                 .getSelectedCellReference();
-        Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
-        if (cell != null) {
-            if (spreadsheet.isCellLocked(cell.getAddress())) {
-                protectedCellWriteAttempted();
-                return;
+        if (!spreadsheet.isRowHidden(reference.getRow())
+                && !spreadsheet.isColumnHidden(reference.getCol())) {
+            Cell cell = spreadsheet.getCell(reference.getRow(),
+                    reference.getCol());
+            if (cell != null) {
+                if (spreadsheet.isCellLocked(cell.getAddress())) {
+                    protectedCellWriteAttempted();
+                    return;
+                }
+                targetCells.add(cell);
             }
-            targetCells.add(cell);
         }
         CellValueCommand command = new CellValueCommand(spreadsheet);
         if (reference != null) {
@@ -461,7 +502,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             spreadsheet.markCellAsDeleted(targetCell, true);
         }
 
-        fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
+        Set<CellReference> changedCells = new HashSet<CellReference>();
+        for (CellReference selectedCell : spreadsheet
+                .getSelectedCellReferences()) {
+            if (!spreadsheet.isRowHidden(selectedCell.getRow())
+                    && !spreadsheet.isColumnHidden(selectedCell.getCol())) {
+                changedCells.add(selectedCell);
+            }
+        }
+        fireCellValueChangeEvent(changedCells);
         spreadsheet.refreshAllCellValues();
     }
 

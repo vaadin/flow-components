@@ -53,20 +53,34 @@ public class CopyPasteHandlerImpl implements CopyPasteHandler {
             int yMin = sheetWidget.getSelectionTopRow();
             int yMax = sheetWidget.getSelectionBottomRow();
 
+            SheetHandler handler = sheetWidget.getSheetHandler();
             StringBuilder sb = new StringBuilder();
 
+            boolean firstRow = true;
             for (int row = yMin; row <= yMax; row++) {
+                if (handler.isRowHidden(row)) {
+                    continue;
+                }
+                if (!firstRow) {
+                    sb.append("\n");
+                }
+                firstRow = false;
+
+                boolean firstCol = true;
                 for (int col = xMin; col <= xMax; col++) {
+                    if (handler.isColumnHidden(col)) {
+                        continue;
+                    }
+                    if (!firstCol) {
+                        sb.append("\t");
+                    }
+                    firstCol = false;
+
                     String cellValue = sheetWidget.getCellValue(col, row);
                     if (cellValue != null) {
                         sb.append(cellValue);
                     }
-                    if (col != xMax)
-                        sb.append("\t");
                 }
-
-                if (row != yMax)
-                    sb.append("\n");
             }
 
             String result = sb.toString();
