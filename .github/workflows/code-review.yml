@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: React to trigger
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT || github.token }}
         run: |
           if [ "${{ github.event_name }}" = "issue_comment" ]; then
             target="issues/comments/${{ github.event.comment.id }}"
@@ -65,6 +65,7 @@ jobs:
         # old repo states without this infra at all.
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 1
 
       - name: Stage action infra
@@ -73,6 +74,11 @@ jobs:
           cp .github/claude/prepare-review.js "${{ runner.temp }}/prepare-review.js"
           cp .github/claude/post-review.js "${{ runner.temp }}/post-review.js"
           cp .github/claude/summary.js "${{ runner.temp }}/summary.js"
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
 
       - name: Checkout PR branch
         # The review investigates related code in the PR head tree.
@@ -105,7 +111,7 @@ jobs:
 
       - name: Run Claude Code review
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@37b464ce72700f7b2c5ff8d2db7fa7b15df792f5 # v1.0.169
         # CLAUDE_CODE_DISABLE_BACKGROUND_TASKS forces synchronous subagent
         # dispatch. Without it the Agent tool may launch subagents in the
         # background (nondeterministic, feature-flag driven); the headless
@@ -140,7 +146,7 @@ jobs:
 
       - name: Post review
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT || github.token }}
           EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
         run: node "${{ runner.temp }}/post-review.js" "$PR_NUMBER"
 
