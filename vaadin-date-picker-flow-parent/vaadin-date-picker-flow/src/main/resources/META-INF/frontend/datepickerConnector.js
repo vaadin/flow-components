@@ -180,7 +180,7 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
   }
 
   // Returns the statically disabled dates (fixed list + weekdays) within the
-  // given range as an array of `DatePickerDate` objects.
+  // given range as an array of `DatePickerDateMetadata` objects.
   function computeStaticDisabledDates({ start, end }) {
     const result = [];
     const first = new Date(start.year, start.month, start.day);
@@ -193,19 +193,19 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
         disabledDatesSet.has(dateKey(date.getFullYear(), date.getMonth(), date.getDate())) ||
         disabledWeekdaysSet.has(isoWeekday)
       ) {
-        result.push({ year: date.getFullYear(), month: date.getMonth(), day: date.getDate() });
+        result.push({ year: date.getFullYear(), month: date.getMonth(), day: date.getDate(), disabled: true });
       }
     }
     return result;
   }
 
-  function updateDisabledDatesProvider() {
+  function updateDateMetadataProvider() {
     if (disabledDatesSet.size === 0 && disabledWeekdaysSet.size === 0 && !hasServerProvider) {
-      datepicker.disabledDatesProvider = undefined;
+      datepicker.dateMetadataProvider = undefined;
       return;
     }
 
-    datepicker.disabledDatesProvider = (range) => {
+    datepicker.dateMetadataProvider = (range) => {
       const staticDisabled = computeStaticDisabledDates(range);
       if (!hasServerProvider) {
         return staticDisabled;
@@ -215,7 +215,7 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
       const requestId = ++disabledDatesRequestId;
       return new Promise((resolve) => {
         pendingDisabledDatesRequests.set(requestId, (serverDates) => {
-          resolve(staticDisabled.concat(serverDates.map(isoToDateParts)));
+          resolve(staticDisabled.concat(serverDates.map((iso) => ({ ...isoToDateParts(iso), disabled: true }))));
         });
         const pad = (value, length) => String(value).padStart(length, '0');
         const toIso = (parts) => `${pad(parts.year, 4)}-${pad(parts.month + 1, 2)}-${pad(parts.day, 2)}`;
@@ -233,7 +233,7 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     );
     disabledWeekdaysSet = new Set(config.weekdays || []);
     hasServerProvider = !!config.hasProvider;
-    updateDisabledDatesProvider();
+    updateDateMetadataProvider();
   };
 
   datepicker.$connector.resolveDisabledDates = (requestId, dates) => {
