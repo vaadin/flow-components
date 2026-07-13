@@ -4028,8 +4028,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             JsonNode sorter = sorters.get(i);
             Column<T> column = idToColumnMap.get(sorter.get("path").asString());
             if (column == null) {
-                throw new IllegalArgumentException(
-                        "Received a sorters changed call from the client for a non-existent column");
+                // The column may have been removed on the server between the
+                // client emitting the event and the server handling it. Skip
+                // the stale sorter instead of failing the whole call.
+                continue;
             }
             if (sorter.has("direction") && sorter.get("direction")
                     .getNodeType() == JsonNodeType.STRING) {
