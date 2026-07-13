@@ -165,6 +165,7 @@ public class DatePicker
     private final Set<DayOfWeek> disabledWeekdays = EnumSet
             .noneOf(DayOfWeek.class);
     private DisabledDatesProvider disabledDatesProvider;
+    private SerializableFunction<LocalDate, String> datePartNameGenerator;
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
@@ -671,34 +672,75 @@ public class DatePicker
     }
 
     /**
-     * Called by the client to request the disabled dates within a range that
-     * the calendar is about to render. The result is pushed back to the
+     * Sets a generator that assigns custom CSS {@code part} names to dates. It
+     * runs on the server for each date in the range the calendar is about to
+     * render, and should return the part name (or several names separated by
+     * spaces), or {@code null} to add none.
+     * <p>
+     * The part names are added to the date cells, so a theme can style specific
+     * dates with the {@code ::part()} selector, for example to mark a date as
+     * busy or almost fully booked. This does not disable the dates; combine it
+     * with {@link #setDisabledDatesProvider(DisabledDatesProvider)} if needed.
+     *
+     * @param generator
+     *            the generator, or {@code null} to remove it
+     */
+    public void setDatePartNameGenerator(
+            SerializableFunction<LocalDate, String> generator) {
+        this.datePartNameGenerator = generator;
+        requestDisabledDatesUpdate();
+    }
+
+    /**
+     * Gets the generator that assigns custom part names to dates.
+     *
+     * @return the generator, or {@code null} if none is set
+     * @see #setDatePartNameGenerator(SerializableFunction)
+     */
+    public SerializableFunction<LocalDate, String> getDatePartNameGenerator() {
+        return datePartNameGenerator;
+    }
+
+    /**
+     * Called by the client to request the metadata for the dates within a range
+     * that the calendar is about to render. The result is pushed back to the
      * connector, which resolves the pending render for that range.
      */
     @ClientCallable
     private void requestDisabledDates(String fromIso, String toIso,
             int requestId) {
         getElement().callJsFunction("$connector.resolveDisabledDates",
-                requestId, computeDisabledDatesForRange(fromIso, toIso));
+                requestId, computeDateMetadataForRange(fromIso, toIso));
     }
 
     /**
-     * Runs the disabled dates provider for each date in the given ISO date
-     * range and returns the disabled dates as an array of ISO date strings for
+     * Runs the disabled dates provider and the part name generator for each
+     * date in the given ISO date range and returns the metadata for the dates
+     * that have any, as an array of {@code {date, disabled, part}} objects for
      * the connector.
      */
-    ArrayNode computeDisabledDatesForRange(String fromIso, String toIso) {
-        ArrayNode datesArray = JacksonUtils.createArrayNode();
-        if (disabledDatesProvider != null) {
-            LocalDate to = LocalDate.parse(toIso);
-            for (LocalDate date = LocalDate.parse(fromIso); !date
-                    .isAfter(to); date = date.plusDays(1)) {
-                if (disabledDatesProvider.isDisabled(date)) {
-                    datesArray.add(FORMATTER.apply(date));
+    ArrayNode computeDateMetadataForRange(String fromIso, String toIso) {
+        ArrayNode metadata = JacksonUtils.createArrayNode();
+        LocalDate to = LocalDate.parse(toIso);
+        for (LocalDate date = LocalDate.parse(fromIso); !date
+                .isAfter(to); date = date.plusDays(1)) {
+            boolean disabled = disabledDatesProvider != null
+                    && disabledDatesProvider.isDisabled(date);
+            String part = datePartNameGenerator != null
+                    ? datePartNameGenerator.apply(date)
+                    : null;
+            if (disabled || (part != null && !part.isEmpty())) {
+                ObjectNode entry = metadata.addObject();
+                entry.put("date", FORMATTER.apply(date));
+                if (disabled) {
+                    entry.put("disabled", true);
+                }
+                if (part != null && !part.isEmpty()) {
+                    entry.put("part", part);
                 }
             }
         }
-        return datesArray;
+        return metadata;
     }
 
     private void requestDisabledDatesUpdate() {
@@ -722,7 +764,8 @@ public class DatePicker
     /**
      * Builds the disabled dates configuration sent to the connector: the fixed
      * disabled dates as ISO strings, the disabled weekdays as ISO weekday
-     * numbers (Monday=1 .. Sunday=7), and whether a server provider is set.
+     * numbers (Monday=1 .. Sunday=7), and whether the server has to be queried
+     * for a range (a disabled dates provider or a part name generator is set).
      */
     ObjectNode createDisabledDatesConfig() {
         ObjectNode config = JacksonUtils.createObjectNode();
@@ -731,7 +774,8 @@ public class DatePicker
         ArrayNode weekdaysArray = config.putArray("weekdays");
         disabledWeekdays
                 .forEach(weekday -> weekdaysArray.add(weekday.getValue()));
-        config.put("hasProvider", disabledDatesProvider != null);
+        config.put("hasProvider",
+                disabledDatesProvider != null || datePartNameGenerator != null);
         return config;
     }
 

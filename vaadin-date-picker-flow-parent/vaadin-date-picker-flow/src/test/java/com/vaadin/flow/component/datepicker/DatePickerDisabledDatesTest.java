@@ -85,23 +85,60 @@ class DatePickerDisabledDatesTest {
         Assertions.assertTrue(config.get("hasProvider").asBoolean());
     }
 
+    @Test
+    void setDatePartNameGenerator_configHasProviderFlag() {
+        datePicker.setDatePartNameGenerator(date -> null);
+
+        ObjectNode config = datePicker.createDisabledDatesConfig();
+        Assertions.assertTrue(config.get("hasProvider").asBoolean());
+    }
+
     // --- Server computation for a requested range -------------------------
 
     @Test
-    void setDisabledDatesProvider_computesDisabledDatesForRange() {
+    void setDisabledDatesProvider_computesDisabledMetadataForRange() {
         // Disable Mondays.
         datePicker.setDisabledDatesProvider(
                 date -> date.getDayOfWeek() == DayOfWeek.MONDAY);
 
-        ArrayNode result = datePicker.computeDisabledDatesForRange("2023-03-01",
+        ArrayNode result = datePicker.computeDateMetadataForRange("2023-03-01",
                 "2023-03-14");
         Assertions.assertEquals(List.of("2023-03-06", "2023-03-13"),
-                toStringList(result));
+                datesOf(result));
+        result.forEach(entry -> Assertions
+                .assertTrue(entry.get("disabled").asBoolean()));
     }
 
     @Test
-    void noProvider_computesEmptyRange() {
-        ArrayNode result = datePicker.computeDisabledDatesForRange("2023-03-01",
+    void setDatePartNameGenerator_computesPartMetadataForRange() {
+        datePicker.setDatePartNameGenerator(
+                date -> date.getDayOfMonth() == 10 ? "busy" : null);
+
+        ArrayNode result = datePicker.computeDateMetadataForRange("2023-03-01",
+                "2023-03-31");
+        Assertions.assertEquals(List.of("2023-03-10"), datesOf(result));
+        Assertions.assertEquals("busy", result.get(0).get("part").asString());
+        // A part-only date is not disabled.
+        Assertions.assertFalse(result.get(0).has("disabled"));
+    }
+
+    @Test
+    void disabledAndPart_combinedInSameMetadataEntry() {
+        datePicker.setDisabledDatesProvider(date -> date.getDayOfMonth() == 10);
+        datePicker.setDatePartNameGenerator(
+                date -> date.getDayOfMonth() == 10 ? "busy" : null);
+
+        ArrayNode result = datePicker.computeDateMetadataForRange("2023-03-10",
+                "2023-03-10");
+        Assertions.assertEquals(1, result.size());
+        JsonNode entry = result.get(0);
+        Assertions.assertTrue(entry.get("disabled").asBoolean());
+        Assertions.assertEquals("busy", entry.get("part").asString());
+    }
+
+    @Test
+    void noProviderOrGenerator_computesEmptyRange() {
+        ArrayNode result = datePicker.computeDateMetadataForRange("2023-03-01",
                 "2023-03-31");
         Assertions.assertTrue(result.isEmpty());
     }
@@ -173,6 +210,11 @@ class DatePickerDisabledDatesTest {
     private static List<String> toStringList(ArrayNode array) {
         return StreamSupport.stream(array.spliterator(), false)
                 .map(JsonNode::asString).toList();
+    }
+
+    private static List<String> datesOf(ArrayNode metadata) {
+        return StreamSupport.stream(metadata.spliterator(), false)
+                .map(entry -> entry.get("date").asString()).toList();
     }
 
     private static Set<Integer> toIntSet(ArrayNode array) {

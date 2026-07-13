@@ -199,6 +199,19 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     return result;
   }
 
+  // Merges metadata entries from several sources by date, so a date that is both
+  // statically disabled and given a part name keeps both.
+  function mergeMetadata(...lists) {
+    const byKey = new Map();
+    lists.forEach((list) =>
+      list.forEach((meta) => {
+        const key = dateKey(meta.year, meta.month, meta.day);
+        byKey.set(key, { ...byKey.get(key), ...meta });
+      })
+    );
+    return [...byKey.values()];
+  }
+
   function updateDateMetadataProvider() {
     if (disabledDatesSet.size === 0 && disabledWeekdaysSet.size === 0 && !hasServerProvider) {
       datepicker.dateMetadataProvider = undefined;
@@ -214,8 +227,18 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
       // Ask the server for the range and block rendering until it responds.
       const requestId = ++disabledDatesRequestId;
       return new Promise((resolve) => {
-        pendingDisabledDatesRequests.set(requestId, (serverDates) => {
-          resolve(staticDisabled.concat(serverDates.map((iso) => ({ ...isoToDateParts(iso), disabled: true }))));
+        pendingDisabledDatesRequests.set(requestId, (serverMetadata) => {
+          const server = serverMetadata.map((entry) => {
+            const meta = isoToDateParts(entry.date);
+            if (entry.disabled) {
+              meta.disabled = true;
+            }
+            if (entry.part) {
+              meta.part = entry.part;
+            }
+            return meta;
+          });
+          resolve(mergeMetadata(staticDisabled, server));
         });
         const pad = (value, length) => String(value).padStart(length, '0');
         const toIso = (parts) => `${pad(parts.year, 4)}-${pad(parts.month + 1, 2)}-${pad(parts.day, 2)}`;
@@ -236,11 +259,11 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     updateDateMetadataProvider();
   };
 
-  datepicker.$connector.resolveDisabledDates = (requestId, dates) => {
+  datepicker.$connector.resolveDisabledDates = (requestId, metadata) => {
     const resolve = pendingDisabledDatesRequests.get(requestId);
     if (resolve) {
       pendingDisabledDatesRequests.delete(requestId);
-      resolve(dates);
+      resolve(metadata);
     }
   };
 

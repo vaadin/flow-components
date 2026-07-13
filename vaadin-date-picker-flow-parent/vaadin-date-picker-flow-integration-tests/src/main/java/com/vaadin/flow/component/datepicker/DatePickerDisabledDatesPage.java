@@ -33,6 +33,8 @@ import com.vaadin.flow.router.Route;
 public class DatePickerDisabledDatesPage extends Div {
 
     public static final int PROVIDER_DISABLED_DAY = 15;
+    public static final int PART_DAY = 25;
+    public static final String PART_NAME = "busy";
     public static final List<LocalDate> FIXED_DISABLED_DATES = List
             .of(LocalDate.of(2023, 1, 10), LocalDate.of(2023, 1, 20));
 
@@ -51,9 +53,14 @@ public class DatePickerDisabledDatesPage extends Div {
             System.out.println("Checking " + date);
             return date.getDayOfMonth() == PROVIDER_DISABLED_DAY;
         });
+        // Part generator: tag the 25th of every month as busy (enabled,
+        // styled).
+        datePicker.setDatePartNameGenerator(
+                date -> date.getDayOfMonth() == PART_DAY ? PART_NAME : null);
 
         add(new Paragraph(
-                "Disabled: January 10 and 20, 2023 (fixed list); the 15th of every month (provider)."),
+                "Disabled: January 10 and 20, 2023 (fixed list); the 15th of every month (provider). "
+                        + "The 25th of every month has the 'busy' part."),
                 datePicker);
     }
 }

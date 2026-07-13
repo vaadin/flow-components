@@ -58,6 +58,25 @@ public class DatePickerDisabledDatesIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openOverlay_partNameIsAddedToDate() {
+        datePicker.open();
+
+        MonthCalendarElement january = getJanuary2023();
+        // The part generator resolves through the same async request; wait for
+        // the 25th to get the 'busy' part.
+        waitUntil(driver -> january.hasDatePart(
+                DatePickerDisabledDatesPage.PART_DAY,
+                DatePickerDisabledDatesPage.PART_NAME));
+
+        // A date with only a part name is styled but not disabled.
+        Assert.assertFalse("A date with only a part name should stay enabled",
+                january.isDateDisabled(DatePickerDisabledDatesPage.PART_DAY));
+        Assert.assertFalse("An unaffected date should not have the part",
+                january.hasDatePart(DatePickerDisabledDatesPage.PART_DAY + 1,
+                        DatePickerDisabledDatesPage.PART_NAME));
+    }
+
+    @Test
     public void selectProviderDisabledDate_fieldIsInvalid() {
         datePicker.setDate(LocalDate.of(2023, 1,
                 DatePickerDisabledDatesPage.PROVIDER_DISABLED_DAY));

@@ -131,6 +131,21 @@ public class DatePickerElement extends TestBenchElement
             return cell != null && hasPart(cell, "disabled");
         }
 
+        /**
+         * Returns whether the date cell for the given day has the given custom
+         * part name.
+         *
+         * @param day
+         *            the day of the month
+         * @param part
+         *            the part name to check for
+         * @return {@code true} if the cell has the part name
+         */
+        public boolean hasDatePart(int day, String part) {
+            TestBenchElement cell = getDateCell(day);
+            return cell != null && hasPart(cell, part);
+        }
+
         private static boolean hasPart(TestBenchElement element, String part) {
             String parts = element.getDomAttribute("part");
             return parts != null && List.of(parts.split(" ")).contains(part);
