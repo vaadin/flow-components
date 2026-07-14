@@ -102,7 +102,7 @@ node scripts/wtr.js {component} --files {file-or-glob}
 ### Code Quality
 
 ```sh
-# Format code
+# Format code, must be run before every commit
 mvn spotless:apply
 
 # Run checkstyle validation
