@@ -153,8 +153,7 @@ class GridColumnTest {
     void setWidth_getWidth() {
         firstColumn.setWidth("100px");
         Assertions.assertEquals("100px", firstColumn.getWidth());
-        Assertions.assertTrue(
-                firstColumn.getElement().hasProperty("width"));
+        Assertions.assertTrue(firstColumn.getElement().hasProperty("width"));
     }
 
     @Test
@@ -162,8 +161,7 @@ class GridColumnTest {
         firstColumn.setWidth("100px");
         firstColumn.setWidth(null);
         Assertions.assertNull(firstColumn.getWidth());
-        Assertions.assertFalse(
-                firstColumn.getElement().hasProperty("width"));
+        Assertions.assertFalse(firstColumn.getElement().hasProperty("width"));
     }
 
     @Test
