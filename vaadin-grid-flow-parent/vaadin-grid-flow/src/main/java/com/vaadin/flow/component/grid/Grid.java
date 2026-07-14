@@ -625,12 +625,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @see #setFlexGrow(int)
          *
          * @param width
-         *            the width to set this column to, as a CSS-string, not
-         *            {@code null}
+         *            the width to set this column to, as a CSS-string, or
+         *            {@code null} to reset the width to the default
          * @return this column, for method chaining
          */
         public Column<T> setWidth(String width) {
-            getElement().setProperty("width", width);
+            if (width != null) {
+                getElement().setProperty("width", width);
+            } else {
+                getElement().removeProperty("width");
+            }
             return this;
         }
 

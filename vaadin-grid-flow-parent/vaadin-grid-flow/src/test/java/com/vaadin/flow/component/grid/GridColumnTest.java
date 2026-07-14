@@ -150,6 +150,23 @@ class GridColumnTest {
     }
 
     @Test
+    void setWidth_getWidth() {
+        firstColumn.setWidth("100px");
+        Assertions.assertEquals("100px", firstColumn.getWidth());
+        Assertions.assertTrue(
+                firstColumn.getElement().hasProperty("width"));
+    }
+
+    @Test
+    void setWidthNull_widthPropertyRemoved() {
+        firstColumn.setWidth("100px");
+        firstColumn.setWidth(null);
+        Assertions.assertNull(firstColumn.getWidth());
+        Assertions.assertFalse(
+                firstColumn.getElement().hasProperty("width"));
+    }
+
+    @Test
     void addColumn_defaultComparator() {
         Grid<Person> grid = new Grid<>();
 
