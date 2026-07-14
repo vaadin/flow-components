@@ -332,9 +332,6 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
 
     /**
      * Get the state for the auto-focus property of the switch.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
      *
      * @return the {@code autofocus} property from the switch
      */
@@ -400,8 +397,8 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
         private String requiredErrorMessage;
 
         /**
-         * Gets the error message displayed when the field is required but
-         * empty.
+         * Gets the error message displayed when the field is required but not
+         * checked.
          *
          * @return the error message or {@code null} if not set
          * @see Switch#isRequiredIndicatorVisible()
@@ -412,8 +409,8 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
         }
 
         /**
-         * Sets the error message to display when the field is required but
-         * empty.
+         * Sets the error message to display when the field is required but not
+         * checked.
          * <p>
          * Note, custom error messages set with
          * {@link Switch#setErrorMessage(String)} take priority over i18n error
