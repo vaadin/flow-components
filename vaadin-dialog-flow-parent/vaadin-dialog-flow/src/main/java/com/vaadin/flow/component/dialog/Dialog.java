@@ -16,11 +16,8 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -46,8 +43,6 @@ import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.dom.ElementDetachEvent;
-import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
@@ -85,7 +80,6 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-dialog")
 @NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha4")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("./flow-component-renderer.js")
 @ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant>, HasAriaRole {
@@ -111,11 +105,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        // Needs to be updated on each
-        // attach, as element depends on node id which is subject to change if
-        // the dialog is transferred to another UI, e.g. due to
-        // @PreserveOnRefresh
-        getElement().getNode().addAttachListener(this::attachComponentRenderer);
+        // Dimensions are applied via executeJs, which does not persist across
+        // reattach (e.g. when the dialog is transferred to another UI due to
+        // @PreserveOnRefresh), so they must be re-applied on each attach.
+        getElement().getNode().addAttachListener(this::reapplyDimensions);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
@@ -571,20 +564,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Adds the given components into this dialog.
-     *
-     * @param components
-     *            the components to add
-     * @since 24.0
-     */
-    @Override
-    public void add(Collection<Component> components) {
-        HasComponents.super.add(components);
-
-        updateVirtualChildNodeIds();
-    }
-
-    /**
      * Adds the given component into this dialog at the given index.
      *
      * @param index
@@ -618,8 +597,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     getElement().indexOfChild(children.get(index).getElement()),
                     component.getElement());
         }
-
-        updateVirtualChildNodeIds();
     }
 
     private boolean isHeaderFooterWrapper(Element element) {
@@ -640,11 +617,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void removeAll() {
-        // HasComponents.removeAll triggers a special RPC call that clears the
-        // innerHTML of the dialog element. This results in removing the content
-        // elements created by the web component for slotting contents into its
-        // overlay. To avoid this, we manually remove all children instead.
-        // getChildren() excludes header/footer content, so those are preserved.
+        // HasComponents.removeAll would clear all children of the dialog
+        // element, including the slotted header/footer wrappers. getChildren()
+        // returns only the main content, so removing those preserves the
+        // header/footer.
         getChildren().forEach(this::remove);
     }
 
@@ -1237,63 +1213,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
-    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    // Must not use lambda here as that would break serialization. See
-    // https://github.com/vaadin/flow-components/issues/5597
-    private ElementDetachListener childDetachListener = new ElementDetachListener() {
-        @Override
-        public void onDetach(ElementDetachEvent e) {
-            var child = e.getSource();
-            var childDetachedFromContainer = !getElement().getChildren()
-                    .anyMatch(containerChild -> Objects.equals(child,
-                            containerChild));
-
-            if (childDetachedFromContainer) {
-                // The child was removed from the dialog
-
-                // Remove the registration for the child detach listener
-                childDetachListenerMap.get(child).remove();
-                childDetachListenerMap.remove(child);
-
-                updateVirtualChildNodeIds();
-            }
-        }
-    };
-
-    /**
-     * Updates the virtualChildNodeIds property of the dialog element.
-     * <p>
-     * This method is called whenever the dialog's child components change.
-     * <p>
-     * Also calls {@code requestContentUpdate} on the dialog element to trigger
-     * the content update.
-     */
-    private void updateVirtualChildNodeIds() {
-        List<Element> contentChildren = getElement().getChildren()
-                .filter(element -> !isHeaderFooterWrapper(element))
-                .collect(Collectors.toList());
-
-        // Add detach listeners (child may be removed with removeFromParent())
-        contentChildren.forEach(child -> {
-            if (!childDetachListenerMap.containsKey(child)) {
-                childDetachListenerMap.put(child,
-                        child.addDetachListener(childDetachListener));
-            }
-        });
-
-        this.getElement().setPropertyList("virtualChildNodeIds",
-                contentChildren.stream()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
-
-        this.getElement().callJsFunction("requestContentUpdate");
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        updateVirtualChildNodeIds();
         registerClientCloseHandler();
         applyModality();
     }
@@ -1390,16 +1313,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 dimension, value);
     }
 
-    private void attachComponentRenderer() {
-        this.getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-
-        String appId = UI.getCurrentOrThrow().getInternals().getAppId();
-
-        getElement().executeJs(
-                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
-                appId);
-
+    private void reapplyDimensions() {
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
