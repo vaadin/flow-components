@@ -57,6 +57,10 @@ Shared modules used across components:
   - Located in `vaadin-{component}-flow-integration-tests/test/*.test.ts` (only some components have them)
   - Always run through `node scripts/wtr.js` (see below) — do not invoke `npx web-test-runner` directly, the script prepares the frontend bundle first
 
+## Conventions
+
+Conventions are listed in CONVENTIONS.md. Read and apply these rules when **authoring code** or **reviewing code**. 
+
 ## Development Commands
 
 ### Building and Testing
