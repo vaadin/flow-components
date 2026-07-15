@@ -53,10 +53,16 @@ public class DialogRemoveAllIT extends AbstractComponentIT {
     public void removeAll_preservesHeaderAndFooterContent() {
         Assert.assertTrue(dialog.$("span").withText("Header content").exists());
         Assert.assertTrue(dialog.$("span").withText("Footer content").exists());
+        // The content is slotted, which the web component reflects as state
+        // attributes on the dialog element
+        Assert.assertNotNull(dialog.getDomAttribute("has-header"));
+        Assert.assertNotNull(dialog.getDomAttribute("has-footer"));
 
         dialog.$("button").id("replace-content").click();
 
         Assert.assertTrue(dialog.$("span").withText("Header content").exists());
         Assert.assertTrue(dialog.$("span").withText("Footer content").exists());
+        Assert.assertNotNull(dialog.getDomAttribute("has-header"));
+        Assert.assertNotNull(dialog.getDomAttribute("has-footer"));
     }
 }
