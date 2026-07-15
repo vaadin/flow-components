@@ -86,10 +86,11 @@ public class SplitLayout extends Component
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
-            setPrimaryStyle("flex",
-                    String.format("1 1 %s", e.primaryComponentFlexBasis));
-            setSecondaryStyle("flex",
-                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+            setInnerComponentStyle("flex",
+                    String.format("1 1 %s", e.primaryComponentFlexBasis), true);
+            setInnerComponentStyle("flex",
+                    String.format("1 1 %s", e.secondaryComponentFlexBasis),
+                    false);
         });
     }
 
@@ -263,8 +264,10 @@ public class SplitLayout extends Component
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
-        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
+        setInnerComponentStyle("flex", String.format("1 1 %s%%", primary),
+                true);
+        setInnerComponentStyle("flex", String.format("1 1 %s%%", secondary),
+                false);
     }
 
     /**
@@ -274,7 +277,10 @@ public class SplitLayout extends Component
      *            name of the style to set
      * @param value
      *            the value to set
+     * @deprecated since 25.3, use {@link #getPrimaryComponent()} and set styles
+     *             on the primary component directly instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setPrimaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, true);
     }
@@ -286,7 +292,10 @@ public class SplitLayout extends Component
      *            name of the style to set
      * @param value
      *            the value to set
+     * @deprecated since 25.3, use {@link #getSecondaryComponent()} and set
+     *             styles on the secondary component directly instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setSecondaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, false);
     }
