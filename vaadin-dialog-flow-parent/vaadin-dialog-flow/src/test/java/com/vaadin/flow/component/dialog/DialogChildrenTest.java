@@ -168,7 +168,6 @@ class DialogChildrenTest {
         dialog.getHeader().add(new Div());
         dialog.getFooter().add(new Div());
 
-        // The header/footer wrappers are real, slotted children of the dialog
         Assertions.assertEquals(2, dialog.getElement().getChildCount());
         Assertions.assertEquals(dialog.getElement(),
                 dialog.getHeader().root.getParent());

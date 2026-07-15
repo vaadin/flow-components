@@ -203,7 +203,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `resize` event is sent when the user finishes resizing the dialog.
-     * 
+     *
      * @since 3.1
      */
     @DomEvent("resize")
@@ -267,7 +267,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `dragged` event is sent when the user finishes dragging the dialog.
-     * 
+     *
      * @since 24.6
      */
     @DomEvent("dragged")
@@ -309,7 +309,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * which, when closing the dialog, is before the closing animation has
      * finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
-     * 
+     *
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
@@ -328,7 +328,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
-     * 
+     *
      * @since 25.0
      */
     @DomEvent("closed")
@@ -622,17 +622,20 @@ public class Dialog extends Component implements HasComponents, HasSize,
         updateVirtualChildNodeIds();
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Only the main content components are returned. Components added to the
-     * header or footer via {@link #getHeader()} / {@link #getFooter()} live in
-     * separate slotted wrapper elements and are excluded.
-     */
+    private boolean isHeaderFooterWrapper(Element element) {
+        return (dialogHeader != null && dialogHeader.root.equals(element))
+                || (dialogFooter != null && dialogFooter.root.equals(element));
+    }
+
     @Override
     public Stream<Component> getChildren() {
-        return super.getChildren().filter(
-                child -> isContentChild(child.getElement().getParent()));
+        // Collect into a list so the returned stream is a snapshot, matching
+        // Component.getChildren() and staying safe when callers such as
+        // removeAll() remove children while iterating.
+        return getElement().getChildren()
+                .filter(element -> !isHeaderFooterWrapper(element))
+                .flatMap(element -> element.getComponent().stream()).toList()
+                .stream();
     }
 
     @Override
@@ -964,7 +967,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the header part of a dialog.
-     * 
+     *
      * @since 23.1
      */
     final public static class DialogHeader extends DialogHeaderFooter {
@@ -975,7 +978,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the footer part of a dialog.
-     * 
+     *
      * @since 23.1
      */
     final public static class DialogFooter extends DialogHeaderFooter {
@@ -1267,7 +1270,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     private void updateVirtualChildNodeIds() {
         List<Element> contentChildren = getElement().getChildren()
-                .filter(this::isContentChild).collect(Collectors.toList());
+                .filter(element -> !isHeaderFooterWrapper(element))
+                .collect(Collectors.toList());
 
         // Add detach listeners (child may be removed with removeFromParent())
         contentChildren.forEach(child -> {
@@ -1283,17 +1287,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
                         .collect(Collectors.toList()));
 
         this.getElement().callJsFunction("requestContentUpdate");
-    }
-
-    /**
-     * Checks whether the given element holds main dialog content, as opposed to
-     * the header/footer wrappers which carry a {@code slot} attribute. Only
-     * content children are relayed through the {@code virtualChildNodeIds}
-     * renderer; the slotted wrappers must be excluded so they are not moved
-     * into the content renderer root.
-     */
-    private boolean isContentChild(Element element) {
-        return !element.hasAttribute("slot");
     }
 
     @Override
