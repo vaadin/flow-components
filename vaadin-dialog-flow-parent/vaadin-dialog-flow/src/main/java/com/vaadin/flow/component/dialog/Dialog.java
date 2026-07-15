@@ -600,40 +600,26 @@ public class Dialog extends Component implements HasComponents, HasSize,
             throw new IllegalArgumentException(
                     "Cannot add a component with a negative index");
         }
-        // The header/footer wrappers are also element children, so the content
-        // index must be translated to the matching element index that skips
-        // them. Otherwise a wrapper preceding the position would offset it.
-        HasComponents.super.addComponentAtIndex(toElementIndex(index),
-                component);
+
+        // getChildren() returns only the main content; the header/footer live
+        // in separate slotted wrappers. Translate the content index to the
+        // matching element index so the wrappers do not offset the position.
+        var children = getChildren().toList();
+        if (index > children.size()) {
+            throw new IllegalArgumentException(
+                    "Cannot add a component at index " + index
+                            + ", there are only " + children.size()
+                            + " content components");
+        }
+        if (index == children.size()) {
+            getElement().appendChild(component.getElement());
+        } else {
+            getElement().insertChild(
+                    getElement().indexOfChild(children.get(index).getElement()),
+                    component.getElement());
+        }
 
         updateVirtualChildNodeIds();
-    }
-
-    /**
-     * Translates an index into the main content (as seen by
-     * {@link #getChildren()}) to the corresponding index into the dialog
-     * element's children, which also include the slotted header/footer
-     * wrappers.
-     */
-    private int toElementIndex(int contentIndex) {
-        List<Element> children = getElement().getChildren()
-                .collect(Collectors.toList());
-        int contentSeen = 0;
-        for (int elementIndex = 0; elementIndex < children
-                .size(); elementIndex++) {
-            if (contentSeen == contentIndex) {
-                return elementIndex;
-            }
-            if (isContentChild(children.get(elementIndex))) {
-                contentSeen++;
-            }
-        }
-        if (contentSeen < contentIndex) {
-            throw new IllegalArgumentException(String.format(
-                    "Cannot add a component at index %d, there are only %d content components",
-                    contentIndex, contentSeen));
-        }
-        return children.size();
     }
 
     /**
@@ -645,10 +631,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public Stream<Component> getChildren() {
-        return super.getChildren().filter(child -> {
-            Element parent = child.getElement().getParent();
-            return parent == null || isContentChild(parent);
-        });
+        return super.getChildren().filter(
+                child -> isContentChild(child.getElement().getParent()));
     }
 
     @Override
@@ -1282,17 +1266,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * the content update.
      */
     private void updateVirtualChildNodeIds() {
+        List<Element> contentChildren = getElement().getChildren()
+                .filter(this::isContentChild).collect(Collectors.toList());
+
         // Add detach listeners (child may be removed with removeFromParent())
-        getElement().getChildren().filter(this::isContentChild)
-                .forEach(child -> {
-                    if (!childDetachListenerMap.containsKey(child)) {
-                        childDetachListenerMap.put(child,
-                                child.addDetachListener(childDetachListener));
-                    }
-                });
+        contentChildren.forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
 
         this.getElement().setPropertyList("virtualChildNodeIds",
-                getElement().getChildren().filter(this::isContentChild)
+                contentChildren.stream()
                         .map(element -> element.getNode().getId())
                         .collect(Collectors.toList()));
 
@@ -1300,16 +1286,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Checks whether the given child element holds main dialog content, as
-     * opposed to the header/footer wrapper elements which are slotted into the
-     * dialog's {@code header-content} / {@code footer} slots. Only content
-     * children are relayed through the {@code virtualChildNodeIds} renderer;
-     * the slotted wrappers must be excluded so they are not moved into the
-     * content renderer root.
+     * Checks whether the given element holds main dialog content, as opposed to
+     * the header/footer wrappers which carry a {@code slot} attribute. Only
+     * content children are relayed through the {@code virtualChildNodeIds}
+     * renderer; the slotted wrappers must be excluded so they are not moved
+     * into the content renderer root.
      */
-    private boolean isContentChild(Element child) {
-        return (dialogHeader == null || !child.equals(dialogHeader.root))
-                && (dialogFooter == null || !child.equals(dialogFooter.root));
+    private boolean isContentChild(Element element) {
+        return !element.hasAttribute("slot");
     }
 
     @Override
