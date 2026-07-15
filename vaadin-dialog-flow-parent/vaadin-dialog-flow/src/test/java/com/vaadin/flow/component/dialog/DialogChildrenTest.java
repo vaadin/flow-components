@@ -164,15 +164,87 @@ class DialogChildrenTest {
     }
 
     @Test
-    void headerAndFooterAddedAsVirtualChildren() {
+    void headerAndFooterAddedAsSlottedChildren() {
         dialog.getHeader().add(new Div());
         dialog.getFooter().add(new Div());
 
-        Assertions.assertEquals(0, dialog.getElement().getChildCount());
+        Assertions.assertEquals(2, dialog.getElement().getChildCount());
         Assertions.assertEquals(dialog.getElement(),
                 dialog.getHeader().root.getParent());
         Assertions.assertEquals(dialog.getElement(),
                 dialog.getFooter().root.getParent());
+        Assertions.assertEquals("header-content",
+                dialog.getHeader().root.getAttribute("slot"));
+        Assertions.assertEquals("footer",
+                dialog.getFooter().root.getAttribute("slot"));
+    }
+
+    @Test
+    void headerAndFooter_notIncludedInVirtualChildNodeIds() {
+        var content = new Div();
+        dialog.add(content);
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        // Only the main content child is relayed through virtualChildNodeIds;
+        // the slotted header/footer wrappers must be excluded
+        assertVirtualChildren(content);
+    }
+
+    @Test
+    void emptyHeader_wrapperDetached() {
+        var child = new Div();
+        dialog.getHeader().add(child);
+        Assertions.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+
+        dialog.getHeader().remove(child);
+        Assertions.assertNull(dialog.getHeader().root.getParent());
+
+        // Re-adding content re-attaches the wrapper to the dialog
+        dialog.getHeader().add(new Div());
+        Assertions.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+    }
+
+    @Test
+    void headerPresent_getChildrenExcludesHeaderFooterContent() {
+        var content = new Div();
+        dialog.add(content);
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        Assertions.assertEquals(List.of(content),
+                dialog.getChildren().collect(Collectors.toList()));
+        Assertions.assertEquals(1, dialog.getComponentCount());
+    }
+
+    @Test
+    void headerPresent_addComponentAtIndex_contentOrderPreserved() {
+        // Header content added first, so its wrapper precedes main content in
+        // the element child list
+        dialog.getHeader().add(new Div());
+
+        var a = new Div();
+        var b = new Div();
+        var c = new Div();
+        dialog.add(a);
+        dialog.add(b);
+        dialog.addComponentAtIndex(1, c);
+
+        Assertions.assertEquals(List.of(a, c, b),
+                dialog.getChildren().collect(Collectors.toList()));
+        // virtualChildNodeIds must follow the same content order
+        assertVirtualChildren(a, c, b);
+    }
+
+    @Test
+    void headerPresent_addComponentAtIndexOutOfRange_throws() {
+        dialog.getHeader().add(new Div());
+        dialog.add(new Div());
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> dialog.addComponentAtIndex(2, new Div()));
     }
 
     @Test
