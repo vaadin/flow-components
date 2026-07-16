@@ -13,7 +13,7 @@ Not reproduced: say so plainly and name the likely reason — fixed on `main` (c
 The outward action is the user's; present it as an `AskUserQuestion` (2–4 options, recommended first), never a prose "want me to post…?":
 
 - **Reproduced:** `Push + post + label` · `Push branch only` · `Report only`.
-- **Not reproduced / fixed / duplicate:** when fix archaeology named the fix, the first option cites it — `Post close comment "Fixed by #PR"` (or `Duplicate of #N`); only when nothing was found offer the generic `Post "Could not reproduce using the latest Vaadin version. Closing as stale."`. Always include `Report only`.
+- **Not reproduced / fixed / duplicate:** the first option cites everything fix archaeology found — `Post close comment "Duplicate of <repo>#N, fixed by #PR"` (or just the PR / duplicate when only one is known); only when nothing was found offer the generic `Post "Could not reproduce using the latest Vaadin version. Closing as stale."`. Always include `Report only`.
 - **Reproduced but works-as-designed / already tracked by an enhancement:** `Report only` · `Push + post noting it`.
 
 Posting the comment is yours on approval; **closing the issue stays the user's action** unless they explicitly ask.

@@ -31,10 +31,11 @@ Old issues are often already fixed, the fix never linked back. Before scaffoldin
 
 1. Grep the component's IT module for an existing regression view/test matching the symptom.
 2. `git log --oneline -S "<distinctive symbol or error string>" -- <suspect paths>` to find the fixing commit/PR; record `fixing PR: <#N | none found>` for the summary. Many fixes are broad reworks with no single greppable PR — "none found" is a normal answer.
-3. Check the reported API still exists (e.g. `TemplateRenderer` was removed) — a removed API trends the verdict toward "obsolete".
-4. Before citing a candidate fixing PR, confirm it touched the relevant module — `git show <sha> --stat`. A matching title can mislead.
+3. When a fixing PR is found, **resolve the issue it closed** — `gh pr view <n> --repo vaadin/<repo> --json closingIssuesReferences,body`. That issue is usually the duplicate that got fixed while the triaged report stayed open (common when they live in different trackers); record it in the summary's `Duplicate of:` field.
+4. Check the reported API still exists (e.g. `TemplateRenderer` was removed) — a removed API trends the verdict toward "obsolete".
+5. Before citing a candidate fixing PR, confirm it touched the relevant module — `git show <sha> --stat`. A matching title can mislead.
 
-A found fix does **not** skip browser verification, but it lets the view stay minimal and the report cite "fixed by #PR (with regression test)" — far more closeable than "could not reproduce".
+A found fix does **not** skip browser verification, but it lets the view stay minimal and the report cite "duplicate of #N, fixed by #PR (with regression test)" — far more closeable than "could not reproduce".
 
 ## 5. Intended behavior, then hypothesis
 
