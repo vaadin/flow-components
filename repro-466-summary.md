@@ -11,7 +11,7 @@
 - **Reproduced on:** vaadin/flow-components @ `main` (343bc14f16, Flow 25.3-SNAPSHOT)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (playwright-cli)
-- **Screenshot:** `![Filter row present in default Crud, gone after setColumns](https://raw.githubusercontent.com/vaadin/flow-components/42460402f1eaebc7c83f64260f078fd4edd7bd5a/repro-466.png)`
+- **Screenshot:** ![Filter row present in default Crud, gone after setColumns](https://raw.githubusercontent.com/vaadin/flow-components/42460402f1eaebc7c83f64260f078fd4edd7bd5a/repro-466.png)
 
 ## Observed behavior
 
