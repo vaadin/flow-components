@@ -48,10 +48,22 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
         // scroll to actual end, no more items returned and size is adjusted
         doScroll(500, 500, 5, 450, 500);
         Assert.assertEquals(499, grid.getLastVisibleRowIndex());
-        // TODO #1038 test further after grid is note fetching extra stuff when
-        // size has been adjusted to less than what it is
-        // doScroll(0, 500, 6, 0, 100);
-        // doScroll(450, 500, 7, 400, 500);
+
+        // After the size was adjusted down from the estimate, scrolling back
+        // and forth must keep the adjusted size and must not make the grid
+        // fetch extra earlier ranges (regression test for #1038 / flow #9166).
+        int fetchCountAfterEnd = getFetchQueryCount();
+        doScroll(0, 500, 6, 0, 100);
+        doScroll(450, 500, 7, 400, 500);
+        // Scrolling within the already-known size fetches at most the two
+        // visited viewports (top and around row 450), never a storm of
+        // earlier-range refetches. Observed delta is 4; a small margin guards
+        // against viewport/row-height variance while still catching the
+        // pre-fix behavior, which refetched many earlier ranges.
+        Assert.assertTrue(
+                "Scrolling after the size was adjusted must not trigger "
+                        + "unnecessary fetches for earlier ranges",
+                getFetchQueryCount() - fetchCountAfterEnd <= 6);
     }
 
     @Test
