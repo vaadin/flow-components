@@ -20,6 +20,10 @@ on:
         required: false
         default: false
         type: boolean
+      local-wc-ref:
+        description: 'Branch or ref of web-components to use with local-wc-validation, empty for main'
+        required: false
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
@@ -203,7 +207,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: vaadin/web-components
-          ref: main
+          ref: ${{ inputs.local-wc-ref || 'main' }}
           path: web-components
 
       - name: Install web-components
