@@ -47,7 +47,7 @@ import com.vaadin.flow.dom.Element;
  * @since 1.0
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/custom-field", version = "25.2.4")
+@NpmPackage(value = "@vaadin/custom-field", version = "25.2.5")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements Focusable<CustomField<T>>,
