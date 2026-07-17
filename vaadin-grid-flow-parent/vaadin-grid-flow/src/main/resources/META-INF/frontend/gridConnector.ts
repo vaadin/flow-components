@@ -8,15 +8,6 @@ function isRangeEqual(range1, range2) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
 }
 
-function singleTimeRenderer(renderer) {
-  return (root) => {
-    if (renderer) {
-      renderer(root);
-      renderer = null;
-    }
-  };
-}
-
 function renderContent(root, content) {
   if (content instanceof Node) {
     root.appendChild(content);
@@ -430,11 +421,15 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    column.headerRenderer = singleTimeRenderer((root) => {
-      // Render sorter
+    // The renderer can run multiple times, e.g. when the grid re-creates
+    // header cells. The sorter is cached between runs: re-creating it would
+    // reset its direction and fire a sorters-changed round-trip to the server.
+    let sorter;
+
+    column.headerRenderer = (root) => {
       let contentRoot = root;
       if (showSorter) {
-        const sorter = document.createElement('vaadin-grid-sorter');
+        sorter ??= document.createElement('vaadin-grid-sorter');
         sorter.setAttribute('path', sorterPath);
         root.appendChild(sorter);
 
@@ -443,7 +438,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       }
 
       renderContent(contentRoot, content);
-    });
+    };
   };
 
   // This method is overridden to prevent the grid web component from
@@ -488,7 +483,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
 
-    column.footerRenderer = singleTimeRenderer((root) => renderContent(root, content));
+    column.footerRenderer = (root) => renderContent(root, content);
   };
 
   grid.addEventListener('vaadin-context-menu-before-open', function (e) {
