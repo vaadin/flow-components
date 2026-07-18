@@ -71,7 +71,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 2.1
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/integer-field", version = "25.2.4")
+@NpmPackage(value = "@vaadin/integer-field", version = "25.2.5")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer>
         implements HasThemeVariant<TextFieldVariant> {
