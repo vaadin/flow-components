@@ -112,7 +112,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-select")
 @NpmPackage(value = "@vaadin/select", version = "25.3.0-alpha5")
 @JsModule("@vaadin/select/src/vaadin-select.js")
-@JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
@@ -187,6 +186,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         // string
         setPresentationValue(null);
 
+        listBox.getElement().setAttribute("slot", "overlay");
         getElement().appendChild(listBox.getElement());
 
         addValueChangeListener(e -> validate());
@@ -954,7 +954,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        initConnector();
+        runBeforeClientResponse(ui -> resetPending = false);
     }
 
     /**
@@ -982,16 +982,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             return false;
         }
         return getItemId(value1).equals(getItemId(value2));
-    }
-
-    private void initConnector() {
-        runBeforeClientResponse(ui -> {
-            ui.getPage().executeJs(
-                    "window.Vaadin.Flow.selectConnector.initLazy($0)",
-                    getElement());
-            // connector init will handle first data setting
-            resetPending = false;
-        });
     }
 
     private boolean isItemEnabled(T item) {
