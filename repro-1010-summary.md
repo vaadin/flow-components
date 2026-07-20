@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `25.3-SNAPSHOT` (main)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![Checkmark on item 0 while status says item 1 is checked](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-1010.png) — embeds inline.
+- **Screenshot** (static bug): ![Checkmark on item 0 while status says item 1 is checked](https://raw.githubusercontent.com/vaadin/flow-components/a93bce998cc5e7e14c2a0f2c79af84fd88fdc5bd/repro-1010.png) — embeds inline.
 
 ## Observed behavior
 
