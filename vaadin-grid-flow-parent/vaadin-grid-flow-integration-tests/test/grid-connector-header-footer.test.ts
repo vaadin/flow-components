@@ -66,13 +66,42 @@ describe('grid connector - header and footer renderers', () => {
     });
 
     describe('sorter', () => {
-      it('should render content inside the sorter', async () => {
+      it('should render sorter', async () => {
         grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
         await nextFrame();
 
         const sorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
         expect(sorter).to.exist;
+        expect(sorter.path).to.equal('name');
+      });
+
+      it('should render text content inside sorter', async () => {
+        grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
+        await nextFrame();
+
+        const sorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
         expect(sorter.textContent).to.equal('Name');
+      });
+
+      it('should render node content inside sorter', async () => {
+        const span = document.createElement('span');
+        span.textContent = 'Name';
+        grid.$connector.setHeaderRenderer(column, { content: span, showSorter: true, sorterPath: 'name' });
+        await nextFrame();
+
+        const sorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
+        expect(sorter.contains(span)).to.be.true;
+      });
+
+      it('should reuse sorter element when renderer runs again', async () => {
+        grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
+        await nextFrame();
+
+        const oldSorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
+        grid.requestContentUpdate();
+        const newSorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
+
+        expect(newSorter).to.equal(oldSorter);
       });
     });
   });
