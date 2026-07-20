@@ -56,6 +56,7 @@ public class Accordion extends Component implements HasSize, HasStyle {
 
     private static final String OPENED_PROPERTY = "opened";
     private static final String OPENED_CHANGED_DOM_EVENT = "opened-changed";
+    private static final String HEADING_LEVEL_PROPERTY = "headingLevel";
 
     /**
      * Initializes a new Accordion component.
@@ -215,6 +216,40 @@ public class Accordion extends Component implements HasSize, HasStyle {
                 ? Optional.empty()
                 : accordion.getElement().getChild(index).getComponent()
                         .map(AccordionPanel.class::cast);
+    }
+
+    /**
+     * Gets the ARIA heading level applied to the panel headings.
+     *
+     * @return the heading level, or {@code null} if none is set
+     * @since 25.3
+     */
+    public Integer getHeadingLevel() {
+        if (getElement().getPropertyRaw(HEADING_LEVEL_PROPERTY) == null) {
+            return null;
+        }
+        return (int) getElement().getProperty(HEADING_LEVEL_PROPERTY, 0.0);
+    }
+
+    /**
+     * Sets the ARIA heading level for the panel headings, exposing them at the
+     * level that matches the surrounding page structure. This sets the
+     * {@code aria-level} attribute on each panel heading.
+     * <p>
+     * By default no heading level is set and screen readers announce the
+     * headings using their default level. Set to {@code null} to restore the
+     * default.
+     *
+     * @param headingLevel
+     *            the heading level, or {@code null} to remove it
+     * @since 25.3
+     */
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty(HEADING_LEVEL_PROPERTY);
+        } else {
+            getElement().setProperty(HEADING_LEVEL_PROPERTY, headingLevel);
+        }
     }
 
     /**
