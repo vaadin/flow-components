@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -112,7 +111,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-select")
 @NpmPackage(value = "@vaadin/select", version = "25.3.0-alpha5")
 @JsModule("@vaadin/select/src/vaadin-select.js")
-@JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
@@ -138,7 +136,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private Registration dataProviderListenerRegistration;
 
-    private boolean resetPending = true;
+    private boolean contentUpdateScheduled;
 
     private boolean emptySelectionAllowed;
 
@@ -187,6 +185,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         // string
         setPresentationValue(null);
 
+        listBox.getElement().setAttribute("slot", "overlay");
         getElement().appendChild(listBox.getElement());
 
         addValueChangeListener(e -> validate());
@@ -329,11 +328,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     /*
      * Internal version of list box that is just used to delegate the child
      * components to.
-     *
-     * Using this internally allows all events and updates to the children
-     * (items, possible child components) to work even though the list box
-     * element is moved on the client side in the renderer method from light-dom
-     * to be a child of the select overlay.
      *
      * Not using the proper ListBox because all communication & updates are
      * going through the Select. Using ListBox would just duplicate things, and
@@ -951,12 +945,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return isItemEnabled(item);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        initConnector();
-    }
-
     /**
      * Compares two value instances to each other to determine whether they are
      * equal. Equality is used to determine whether to update internal state and
@@ -982,16 +970,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             return false;
         }
         return getItemId(value1).equals(getItemId(value2));
-    }
-
-    private void initConnector() {
-        runBeforeClientResponse(ui -> {
-            ui.getPage().executeJs(
-                    "window.Vaadin.Flow.selectConnector.initLazy($0)",
-                    getElement());
-            // connector init will handle first data setting
-            resetPending = false;
-        });
     }
 
     private boolean isItemEnabled(T item) {
@@ -1028,7 +1006,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         }
         updateItemEnabled(vaadinItem);
 
-        requestClientSideContentUpdateIfNotPending();
+        scheduleContentUpdate();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -1059,7 +1037,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         keyMapper.removeAll();
         listBox.removeAll();
         clear();
-        requestClientSideContentUpdateIfNotPending();
 
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
@@ -1088,15 +1065,20 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         }
     }
 
-    private void requestClientSideContentUpdateIfNotPending() {
-
-        // reset added at this point to avoid unnecessary selected item update
-        if (!resetPending) {
-            resetPending = true;
+    /**
+     * Requests the web component to refresh the selected item's visual
+     * representation. Adding or removing items is picked up natively via the
+     * list-box {@code items-changed} event, but mutating an existing item's
+     * content does not fire it, so the selected value button must be refreshed
+     * explicitly. Multiple requests are coalesced into a single client call.
+     */
+    private void scheduleContentUpdate() {
+        if (!contentUpdateScheduled) {
+            contentUpdateScheduled = true;
             runBeforeClientResponse(ui -> {
                 ui.getPage().executeJs("$0.requestContentUpdate();",
                         getElement());
-                resetPending = false;
+                contentUpdateScheduled = false;
             });
         }
     }
@@ -1195,7 +1177,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.0
      */
     protected void validate() {
@@ -1205,7 +1187,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
-     * 
+     *
      * @since 24.0
      */
     public static class OpenedChangeEvent extends ComponentEvent<Select> {
@@ -1237,7 +1219,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     * 
+     *
      * @since 24.0
      */
     public static class InvalidChangeEvent extends ComponentEvent<Select> {
@@ -1298,7 +1280,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     /**
      * The internationalization properties for {@link Select}.
-     * 
+     *
      * @since 24.5
      */
     public static class SelectI18n implements Serializable {
