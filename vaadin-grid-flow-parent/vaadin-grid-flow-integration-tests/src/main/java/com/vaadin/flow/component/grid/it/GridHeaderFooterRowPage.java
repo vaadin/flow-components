@@ -97,6 +97,13 @@ public class GridHeaderFooterRowPage extends Div {
         button.setId("set-components-for-headers");
         add(button);
 
+        button = new NativeButton("Set components for footers",
+                event -> grid.getFooterRows().stream()
+                        .flatMap(row -> row.getCells().stream())
+                        .forEach(cell -> cell.setComponent(new Span("foo"))));
+        button.setId("set-components-for-footers");
+        add(button);
+
         button = new NativeButton("Set text for headers",
                 event -> grid.getHeaderRows().stream()
                         .flatMap(row -> row.getCells().stream())

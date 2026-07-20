@@ -117,6 +117,42 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setHeaderComponent_appendHeader_componentIsPreserved() {
+        clickButton("append-header");
+        clickButton("set-components-for-headers");
+        clickButton("append-header");
+
+        List<WebElement> headerCells = getHeaderCells();
+        Assert.assertEquals("Unexpected amount of header cells", 2,
+                headerCells.size());
+        Assert.assertEquals(
+                "The first header row should contain the moved component",
+                "<span>foo</span>",
+                headerCells.get(0).getDomProperty("innerHTML"));
+        Assert.assertEquals(
+                "The appended header row should contain only its own text", "1",
+                headerCells.get(1).getDomProperty("innerHTML"));
+    }
+
+    @Test
+    public void setFooterComponent_prependFooter_componentIsPreserved() {
+        clickButton("append-footer");
+        clickButton("set-components-for-footers");
+        clickButton("prepend-footer");
+
+        List<WebElement> footerCells = getFooterCells();
+        Assert.assertEquals("Unexpected amount of footer cells", 2,
+                footerCells.size());
+        Assert.assertEquals(
+                "The prepended footer row should contain only its own text",
+                "1", footerCells.get(0).getDomProperty("innerHTML"));
+        Assert.assertEquals(
+                "The last footer row should contain the moved component",
+                "<span>foo</span>",
+                footerCells.get(1).getDomProperty("innerHTML"));
+    }
+
+    @Test
     public void appendHeaderAfterGridIsRendered_lastHeaderIsEmpty() {
         clickButton("append-header");
         clickButton("append-header-without-content");
