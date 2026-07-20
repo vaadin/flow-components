@@ -330,11 +330,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * Internal version of list box that is just used to delegate the child
      * components to.
      *
-     * Using this internally allows all events and updates to the children
-     * (items, possible child components) to work even though the list box
-     * element is moved on the client side in the renderer method from light-dom
-     * to be a child of the select overlay.
-     *
      * Not using the proper ListBox because all communication & updates are
      * going through the Select. Using ListBox would just duplicate things, and
      * cause e.g. unnecessary synchronizations and dependency to the Java
