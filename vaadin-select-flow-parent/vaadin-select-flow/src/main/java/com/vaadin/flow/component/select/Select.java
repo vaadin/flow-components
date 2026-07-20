@@ -136,6 +136,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private Registration dataProviderListenerRegistration;
 
+    private boolean contentUpdateScheduled;
+
     private boolean emptySelectionAllowed;
 
     private String emptySelectionCaption;
@@ -1003,6 +1005,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             vaadinItem.getElement().removeAttribute(LABEL_ATTRIBUTE);
         }
         updateItemEnabled(vaadinItem);
+
+        scheduleContentUpdate();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -1058,6 +1062,24 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                 // multiple size change events during server round trips
                 runBeforeClientResponse(sizeRequest);
             }
+        }
+    }
+
+    /**
+     * Requests the web component to refresh the selected item's visual
+     * representation. Adding or removing items is picked up natively via the
+     * list-box {@code items-changed} event, but mutating an existing item's
+     * content does not fire it, so the selected value button must be refreshed
+     * explicitly. Multiple requests are coalesced into a single client call.
+     */
+    private void scheduleContentUpdate() {
+        if (!contentUpdateScheduled) {
+            contentUpdateScheduled = true;
+            runBeforeClientResponse(ui -> {
+                ui.getPage().executeJs("$0.requestContentUpdate();",
+                        getElement());
+                contentUpdateScheduled = false;
+            });
         }
     }
 
