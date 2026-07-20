@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -136,8 +135,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
     private Registration dataProviderListenerRegistration;
-
-    private boolean resetPending = true;
 
     private boolean emptySelectionAllowed;
 
@@ -946,12 +943,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return isItemEnabled(item);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        runBeforeClientResponse(ui -> resetPending = false);
-    }
-
     /**
      * Compares two value instances to each other to determine whether they are
      * equal. Equality is used to determine whether to update internal state and
@@ -1012,8 +1003,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             vaadinItem.getElement().removeAttribute(LABEL_ATTRIBUTE);
         }
         updateItemEnabled(vaadinItem);
-
-        requestClientSideContentUpdateIfNotPending();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -1044,7 +1033,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         keyMapper.removeAll();
         listBox.removeAll();
         clear();
-        requestClientSideContentUpdateIfNotPending();
 
         if (isEmptySelectionAllowed()) {
             addEmptySelectionItem();
@@ -1070,19 +1058,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                 // multiple size change events during server round trips
                 runBeforeClientResponse(sizeRequest);
             }
-        }
-    }
-
-    private void requestClientSideContentUpdateIfNotPending() {
-
-        // reset added at this point to avoid unnecessary selected item update
-        if (!resetPending) {
-            resetPending = true;
-            runBeforeClientResponse(ui -> {
-                ui.getPage().executeJs("$0.requestContentUpdate();",
-                        getElement());
-                resetPending = false;
-            });
         }
     }
 
