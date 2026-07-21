@@ -994,7 +994,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setText(labelText);
-            grid.updateClientSideSorterIndicators();
+            grid.updateClientSorterDirections();
             return this;
         }
 
@@ -1034,7 +1034,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 defaultHeaderRow = getGrid().addFirstHeaderRow();
             }
             defaultHeaderRow.getCell(this).setComponent(headerComponent);
-            grid.updateClientSideSorterIndicators();
+            grid.updateClientSorterDirections();
             return this;
         }
 
@@ -3224,10 +3224,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         selectionModel = model;
         this.selectionMode = selectionMode;
-        updateSelectionModeOnClient();
+        updateClientSelectionMode();
     }
 
+    /**
+     * @deprecated internal method, will be removed without a replacement.
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected void updateSelectionModeOnClient() {
+        updateClientSelectionMode();
+    }
+
+    private void updateClientSelectionMode() {
         getElement().executeJs(
                 "if (this.$connector) { this.$connector.setSelectionMode($0) }",
                 selectionMode.name());
@@ -4091,8 +4099,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         initConnector();
-        updateClientSideSorterIndicators(sortOrder);
-        updateSelectionModeOnClient();
+        updateClientSorterDirections();
+        updateClientSelectionMode();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -4134,7 +4142,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (!userOriginated) {
-            updateClientSideSorterIndicators(order);
+            updateClientSorterDirections(order);
         }
 
         sortOrder.clear();
@@ -4164,12 +4172,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return Collections.unmodifiableList(sortOrder);
     }
 
-    private void updateClientSideSorterIndicators() {
-        updateClientSideSorterIndicators(sortOrder);
+    private void updateClientSorterDirections() {
+        updateClientSorterDirections(sortOrder);
     }
 
-    private void updateClientSideSorterIndicators(
-            List<GridSortOrder<T>> order) {
+    private void updateClientSorterDirections(List<GridSortOrder<T>> order) {
         if (pendingSorterUpdate != null
                 && !pendingSorterUpdate.isSentToBrowser()) {
             pendingSorterUpdate.cancelExecution();
@@ -5207,7 +5214,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setColumnOrder(List<Column<T>> columns) {
         new GridColumnOrderHelper<>(this).setColumnOrder(columns);
-        updateClientSideSorterIndicators(sortOrder);
+        updateClientSorterDirections(sortOrder);
         fireColumnReorderEvent(getColumns());
     }
 
