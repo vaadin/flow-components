@@ -249,10 +249,9 @@ class ComboBoxDataController<TItem>
             dataCommunicator.reset();
         }
         comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                // If-statement is needed because on the first attach this
+                // Optional chaining is needed because on the first attach this
                 // JavaScript is called before initializing the connector.
-                "if($0.$connector) $0.$connector.reset();",
-                comboBox.getElement()));
+                "$0.$connector?.reset()", comboBox.getElement()));
     }
 
     /**
