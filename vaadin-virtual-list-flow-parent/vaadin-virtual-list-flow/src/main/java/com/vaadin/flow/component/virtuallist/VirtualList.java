@@ -150,7 +150,7 @@ public class VirtualList<T> extends Component
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached VirtualList"))
                 .getPage().executeJs(
-                        "window.Vaadin.Flow.virtualListConnector.initLazy($0)",
+                        "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
                         getElement());
     }
 
