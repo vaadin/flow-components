@@ -3176,8 +3176,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement()
-                .executeJs("if (this.$connector) { this.$connector.reset() }");
+        getElement().executeJs("this.$connector?.reset()");
         getDataCommunicator().setPageSize(pageSize);
         setViewportRange(0, pageSize);
         getDataCommunicator().reset();
@@ -3228,8 +3227,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().executeJs(
-                "if (this.$connector) { this.$connector.setSelectionMode($0) }",
+        getElement().executeJs("this.$connector?.setSelectionMode($0)",
                 selectionMode.name());
     }
 
@@ -4201,8 +4199,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (getElement().getNode().isAttached()) {
             this.pendingSorterUpdate = getElement().executeJs(
-                    "if (this.$connector) { this.$connector.setSorterDirections($0) }",
-                    directions);
+                    "this.$connector?.setSorterDirections($0)", directions);
         }
     }
 
