@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.upload.tests;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,13 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadErrorEvent;
+import com.vaadin.flow.component.upload.UploadErrorReason;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 class UploadTest {
 
@@ -59,6 +65,54 @@ class UploadTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Upload.class));
+    }
+
+    @Test
+    void uploadErrorEvent_firedWhenDomEventReceived() {
+        var upload = new Upload();
+        var receivedEvent = new AtomicReference<UploadErrorEvent>();
+        upload.addUploadErrorListener(receivedEvent::set);
+
+        simulateUploadErrorDomEvent(upload, "blocked.txt", 403);
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event, "UploadError should have fired");
+        Assertions.assertSame(upload, event.getSource());
+        Assertions.assertTrue(event.isFromClient());
+        Assertions.assertEquals("blocked.txt", event.getFileName());
+        Assertions.assertEquals(UploadErrorReason.FORBIDDEN, event.getReason());
+        Assertions.assertEquals(403, event.getStatusCode());
+    }
+
+    @Test
+    void uploadErrorEvent_incompleteRequest_firedWithServerUnavailableReason() {
+        var upload = new Upload();
+        var receivedEvent = new AtomicReference<UploadErrorEvent>();
+        upload.addUploadErrorListener(receivedEvent::set);
+
+        simulateUploadErrorDomEvent(upload, "file.txt", 0);
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event, "UploadError should have fired");
+        Assertions.assertEquals(UploadErrorReason.SERVER_UNAVAILABLE,
+                event.getReason());
+        Assertions.assertEquals(0, event.getStatusCode());
+    }
+
+    /**
+     * Simulates the client-side "upload-error" DOM event on the upload element.
+     */
+    private void simulateUploadErrorDomEvent(Upload upload, String fileName,
+            int status) {
+        var element = upload.getElement();
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.file.name", fileName);
+        eventData.put("event.detail.xhr.status", status);
+        // Required by the all-finished tracking listener registered for the
+        // same DOM event
+        eventData.put("element.files.some(file => file.uploading)", false);
+        var event = new DomEvent(element, "upload-error", eventData);
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
     // --- Accepted MIME Types ---

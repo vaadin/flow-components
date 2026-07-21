@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.upload.UploadErrorReason;
 import com.vaadin.flow.component.upload.UploadFormat;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.dom.DisabledUpdateMode;
@@ -385,6 +387,14 @@ class UploadManagerTest {
     }
 
     @Test
+    void addUploadErrorListener_registersListener() {
+        var registration = manager.addUploadErrorListener(event -> {
+        });
+
+        Assertions.assertNotNull(registration);
+    }
+
+    @Test
     void removeListener_unregistersListener() {
         var registration = manager.addFileRemovedListener(event -> {
         });
@@ -436,6 +446,17 @@ class UploadManagerTest {
         Assertions.assertEquals(UploadManager.FileRejectionReason.UNKNOWN,
                 UploadManager.FileRejectionReason
                         .fromClientCode("someNewCode"));
+    }
+
+    @Test
+    void uploadErrorEvent_hasFileNameReasonAndStatusCode() {
+        var event = new UploadManager.UploadErrorEvent(new Div(), true,
+                UploadErrorReason.FORBIDDEN, "blocked.txt", 403);
+
+        Assertions.assertEquals("blocked.txt", event.getFileName());
+        Assertions.assertEquals(UploadErrorReason.FORBIDDEN, event.getReason());
+        Assertions.assertEquals(403, event.getStatusCode());
+        Assertions.assertTrue(event.isFromClient());
     }
 
     @Test
@@ -580,6 +601,35 @@ class UploadManagerTest {
                 "AllFinished should fire twice");
     }
 
+    @Test
+    void uploadErrorEvent_firedWhenDomEventReceived() {
+        var receivedEvent = new AtomicReference<UploadManager.UploadErrorEvent>();
+        manager.addUploadErrorListener(receivedEvent::set);
+
+        simulateUploadErrorDomEvent(manager, "blocked.txt", "forbidden", 403);
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event, "UploadError should have fired");
+        Assertions.assertSame(owner, event.getSource());
+        Assertions.assertTrue(event.isFromClient());
+        Assertions.assertEquals("blocked.txt", event.getFileName());
+        Assertions.assertEquals(UploadErrorReason.FORBIDDEN, event.getReason());
+        Assertions.assertEquals(403, event.getStatusCode());
+    }
+
+    @Test
+    void uploadErrorEvent_unknownErrorKey_firedWithUnknownReason() {
+        var receivedEvent = new AtomicReference<UploadManager.UploadErrorEvent>();
+        manager.addUploadErrorListener(receivedEvent::set);
+
+        simulateUploadErrorDomEvent(manager, "file.txt", "someNewKey", 0);
+
+        var event = receivedEvent.get();
+        Assertions.assertNotNull(event, "UploadError should have fired");
+        Assertions.assertEquals(UploadErrorReason.UNKNOWN, event.getReason());
+        Assertions.assertEquals(0, event.getStatusCode());
+    }
+
     // --- Wrapper delegation of ElementRequestHandler defaults ---
     //
     // These tests verify that the file-type-validation wrapper created
@@ -675,6 +725,21 @@ class UploadManagerTest {
         Element element = connector.getElement();
         DomEvent event = new DomEvent(element, "all-finished",
                 JacksonUtils.createObjectNode());
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
+    }
+
+    /**
+     * Simulates the client-side "upload-error" DOM event on the connector.
+     */
+    private void simulateUploadErrorDomEvent(UploadManager manager,
+            String fileName, String errorKey, int status) {
+        Component connector = getConnector(manager);
+        Element element = connector.getElement();
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.fileName", fileName);
+        eventData.put("event.detail.errorKey", errorKey);
+        eventData.put("event.detail.status", status);
+        DomEvent event = new DomEvent(element, "upload-error", eventData);
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 

@@ -17,6 +17,7 @@ import { UploadManager, type UploadFormat } from '@vaadin/upload/vaadin-upload-m
  * Events dispatched to the connector element for server-side handling:
  * - file-remove: When a file is removed
  * - file-reject: When a file is rejected
+ * - upload-error: When an upload fails
  */
 class UploadManagerConnector extends HTMLElement {
   public manager = new UploadManager();
@@ -78,6 +79,19 @@ class UploadManagerConnector extends HTMLElement {
           detail: {
             fileName: e.detail.file?.name,
             errorMessage: e.detail.error
+          },
+          bubbles: false
+        })
+      );
+    });
+
+    this.manager.addEventListener('upload-error', (e: CustomEvent) => {
+      this.dispatchEvent(
+        new CustomEvent('upload-error', {
+          detail: {
+            fileName: e.detail.file?.name,
+            errorKey: e.detail.file?.errorKey,
+            status: e.detail.xhr?.status ?? 0
           },
           bubbles: false
         })

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.io.IOException;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.upload.UploadButton;
@@ -87,6 +89,9 @@ public class UploadManagerPage extends UploadDropZone {
         manager.addFileRejectedListener(event -> log("Rejected: "
                 + event.getFileName() + " - " + event.getReason()));
         manager.addAllFinishedListener(event -> log("All uploads finished"));
+        manager.addUploadErrorListener(event -> log("Upload error: "
+                + event.getFileName() + " - " + event.getReason() + " ("
+                + event.getStatusCode() + ")"));
 
         // Create upload button linked to the manager
         uploadButton = new UploadButton(manager);
@@ -208,8 +213,15 @@ public class UploadManagerPage extends UploadDropZone {
                     log("Handler set: ALWAYS disabled mode");
                 });
         setAlwaysDisabledHandler.setId("set-always-disabled-handler");
+        var setFailingHandler = new NativeButton("Failing handler", e -> {
+            manager.setUploadHandler(uploadEvent -> {
+                throw new IOException("Simulated upload failure");
+            });
+            log("Handler set: failing handler");
+        });
+        setFailingHandler.setId("set-failing-handler");
         enabledGroup.add(disableManager, enableManager,
-                setAlwaysDisabledHandler);
+                setAlwaysDisabledHandler, setFailingHandler);
         layout.add(enabledGroup);
 
         // --- Owner Lifecycle ---

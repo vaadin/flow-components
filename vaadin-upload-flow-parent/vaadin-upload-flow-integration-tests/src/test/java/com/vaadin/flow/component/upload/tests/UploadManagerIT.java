@@ -261,6 +261,18 @@ public class UploadManagerIT extends AbstractUploadIT {
     }
 
     @Test
+    public void failingUploadHandler_uploadErrorEventIsFired()
+            throws Exception {
+        clickButton("set-failing-handler");
+
+        File tempFile = createTempFile("txt");
+        uploadFile(tempFile);
+
+        assertLogContains("Upload error: " + tempFile.getName()
+                + " - UNEXPECTED_SERVER_ERROR (500)");
+    }
+
+    @Test
     public void disableManager_uploadFails() throws Exception {
         clickButton("disable-manager");
 

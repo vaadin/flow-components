@@ -121,6 +121,20 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
+    public void failingUploadHandler_uploadErrorEventIsFired()
+            throws Exception {
+        clickElementWithJs("set-failing-handler");
+
+        File tempFile = createTempFile("txt");
+        getUpload().upload(tempFile);
+
+        waitUntil(driver -> uploadOutput.getText().contains("ERROR:"
+                + tempFile.getName() + ":UNEXPECTED_SERVER_ERROR:500"));
+        Assert.assertTrue("Upload error event was not fired",
+                eventsOutput.getText().contains("-error"));
+    }
+
+    @Test
     public void uploadInvalidFile_fileIsRejected() throws Exception {
         clickElementWithJs("set-accept-file-type-txt");
 

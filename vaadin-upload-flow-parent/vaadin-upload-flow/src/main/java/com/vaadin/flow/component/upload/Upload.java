@@ -128,6 +128,17 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 
+        final String eventDetailXhrStatus = "event.detail.xhr.status";
+        getElement().addEventListener("upload-error", event -> {
+            String detailFileName = event.getEventData()
+                    .get(eventDetailFileName).asString();
+            int statusCode = event.getEventData().get(eventDetailXhrStatus)
+                    .asInt();
+            fireEvent(new UploadErrorEvent(this,
+                    UploadErrorReason.fromStatusCode(statusCode),
+                    detailFileName, statusCode));
+        }).addEventData(eventDetailFileName).addEventData(eventDetailXhrStatus);
+
         // If client aborts upload mark upload as interrupted on server also
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
@@ -888,6 +899,36 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public Registration addFileRemovedListener(
             ComponentEventListener<FileRemovedEvent> listener) {
         return addListener(FileRemovedEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener for {@code upload-error} events fired when an upload
+     * fails on the client side, e.g. because the server responded with an error
+     * status, could not be reached, or the request timed out.
+     * <p>
+     * The reason and status code reflect the HTTP response as seen by the
+     * browser. The response may come from infrastructure between the browser
+     * and the application, such as a reverse proxy, a load balancer, or a web
+     * application firewall. This means the event also covers uploads that never
+     * reach the application, and it does not tell whether the upload handler
+     * was invoked.
+     * <p>
+     * The event is based on information reported by the browser and should be
+     * used for informational purposes only, such as showing a notification. For
+     * failures that occur while the server processes the upload, use a
+     * {@link com.vaadin.flow.server.streams.TransferProgressListener} with an
+     * {@link com.vaadin.flow.server.streams.UploadHandler} implementing the
+     * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     * interface.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     * @since 25.3
+     */
+    public Registration addUploadErrorListener(
+            ComponentEventListener<UploadErrorEvent> listener) {
+        return addListener(UploadErrorEvent.class, listener);
     }
 
     /**

@@ -150,6 +150,23 @@ public class UploadManager implements Serializable {
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
 
+        final String eventDetailErrorKey = "event.detail.errorKey";
+        final String eventDetailStatus = "event.detail.status";
+
+        connector.getElement().addEventListener("upload-error", event -> {
+            String fileName = event.getEventData().get(eventDetailFileName)
+                    .asString();
+            String errorKey = event.getEventData().get(eventDetailErrorKey)
+                    .asString();
+            int statusCode = event.getEventData().get(eventDetailStatus)
+                    .asInt();
+            ComponentUtil.fireEvent(owner,
+                    new UploadErrorEvent(owner, true,
+                            UploadErrorReason.fromClientCode(errorKey),
+                            fileName, statusCode));
+        }).addEventData(eventDetailFileName).addEventData(eventDetailErrorKey)
+                .addEventData(eventDetailStatus);
+
         // Listen for all-finished event from client (triggered when all
         // uploads are complete, including success, error, or abort)
         connector.getElement().addEventListener("all-finished",
@@ -525,6 +542,37 @@ public class UploadManager implements Serializable {
     }
 
     /**
+     * Adds a listener for {@code upload-error} events fired when an upload
+     * fails on the client side, e.g. because the server responded with an error
+     * status, could not be reached, or the request timed out.
+     * <p>
+     * The reason and status code reflect the HTTP response as seen by the
+     * browser. The response may come from infrastructure between the browser
+     * and the application, such as a reverse proxy, a load balancer, or a web
+     * application firewall. This means the event also covers uploads that never
+     * reach the application, and it does not tell whether the upload handler
+     * was invoked.
+     * <p>
+     * The event is based on information reported by the browser and should be
+     * used for informational purposes only, such as showing a notification. For
+     * failures that occur while the server processes the upload, use a
+     * {@link com.vaadin.flow.server.streams.TransferProgressListener} with an
+     * {@link UploadHandler} implementing the
+     * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     * interface.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     * @since 25.3
+     */
+    public Registration addUploadErrorListener(
+            ComponentEventListener<UploadErrorEvent> listener) {
+        return ComponentUtil.addListener(owner, UploadErrorEvent.class,
+                listener);
+    }
+
+    /**
      * Internal connector component that loads the JS module and handles
      * client-server communication. Added as a virtual child of the owner
      * component so it doesn't appear in the DOM.
@@ -687,6 +735,73 @@ public class UploadManager implements Serializable {
          */
         public FileRejectionReason getReason() {
             return reason;
+        }
+    }
+
+    /**
+     * Event fired when an upload fails on the client side, e.g. because the
+     * server responded with an error status or could not be reached. This also
+     * covers requests that never reach the application, e.g. uploads blocked by
+     * a reverse proxy or a web application firewall. The event source is the
+     * owner component passed to the {@link UploadManager} constructor.
+     * <p>
+     * This event is based on information reported by the browser and should be
+     * used for informational purposes only, such as showing a notification.
+     */
+    public static class UploadErrorEvent extends ComponentEvent<Component> {
+        private final String fileName;
+        private final UploadErrorReason reason;
+        private final int statusCode;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            whether the event originated from the client
+         * @param reason
+         *            the reason why the upload failed
+         * @param fileName
+         *            the name of the file that failed to upload
+         * @param statusCode
+         *            the HTTP status code of the upload response, or 0 if the
+         *            request did not complete
+         */
+        public UploadErrorEvent(Component source, boolean fromClient,
+                UploadErrorReason reason, String fileName, int statusCode) {
+            super(source, fromClient);
+            this.reason = reason;
+            this.fileName = fileName;
+            this.statusCode = statusCode;
+        }
+
+        /**
+         * Gets the name of the file that failed to upload.
+         *
+         * @return the file name
+         */
+        public String getFileName() {
+            return fileName;
+        }
+
+        /**
+         * Gets the reason why the upload failed.
+         *
+         * @return the failure reason
+         */
+        public UploadErrorReason getReason() {
+            return reason;
+        }
+
+        /**
+         * Gets the HTTP status code of the upload response.
+         *
+         * @return the HTTP status code, or 0 if the request did not complete
+         *         (e.g. network error or timeout)
+         */
+        public int getStatusCode() {
+            return statusCode;
         }
     }
 

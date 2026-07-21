@@ -74,6 +74,11 @@ public class UploadView extends Div {
             eventsOutput.add("-removed");
             output.add("REMOVED:" + event.getFileName());
         });
+        upload.addUploadErrorListener(event -> {
+            eventsOutput.add("-error");
+            output.add("ERROR:" + event.getFileName() + ":" + event.getReason()
+                    + ":" + event.getStatusCode());
+        });
         upload.addProgressListener(
                 event -> output.add("PROGRESS:" + event.getFileName()));
 
@@ -154,7 +159,14 @@ public class UploadView extends Div {
             log("Handler set: UploadHandler");
         });
         useUploadHandler.setId("use-upload-handler");
-        handlerGroup.add(useUploadHandler);
+        var setFailingHandler = new NativeButton("Failing handler", e -> {
+            upload.setUploadHandler(uploadEvent -> {
+                throw new IOException("Simulated upload failure");
+            });
+            log("Handler set: failing handler");
+        });
+        setFailingHandler.setId("set-failing-handler");
+        handlerGroup.add(useUploadHandler, setFailingHandler);
         add(handlerGroup);
     }
 
