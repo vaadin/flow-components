@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Style options for the guide box. The guide box has one state by default, the
  * default state.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class GuideBox extends AbstractConfigurationObject {

@@ -14,6 +14,9 @@ import java.util.List;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.AbstractSeriesDataWriter;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.BubbleSeriesDataWriter;
 
+/**
+ * @since 24.0
+ */
 public class BubbleSeriesData extends AbstractSeriesData {
 
     public List<Number> bubbleSizes;

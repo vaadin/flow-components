@@ -23,6 +23,7 @@ import tools.jackson.databind.JsonNode;
  * {@link CrudI18n#createDefault()}
  *
  * @see Crud#setI18n(CrudI18n)
+ * @since 1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CrudI18n implements Serializable {

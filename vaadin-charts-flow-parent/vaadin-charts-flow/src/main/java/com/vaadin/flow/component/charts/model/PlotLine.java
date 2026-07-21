@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>.highcharts-plot-line</code> class in addition to the
  * <code>className</code> option.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class PlotLine extends AbstractConfigurationObject {
 
@@ -55,6 +57,7 @@ public class PlotLine extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -62,6 +65,8 @@ public class PlotLine extends AbstractConfigurationObject {
 
     /**
      * The color of the line.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -69,6 +74,7 @@ public class PlotLine extends AbstractConfigurationObject {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -81,6 +87,8 @@ public class PlotLine extends AbstractConfigurationObject {
      * >this overview</a>.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -133,6 +141,7 @@ public class PlotLine extends AbstractConfigurationObject {
 
     /**
      * @see #setWidth(Number)
+     * @since 18.0
      */
     public Number getWidth() {
         return width;
@@ -140,6 +149,8 @@ public class PlotLine extends AbstractConfigurationObject {
 
     /**
      * The width or thickness of the plot line.
+     * 
+     * @since 18.0
      */
     public void setWidth(Number width) {
         this.width = width;

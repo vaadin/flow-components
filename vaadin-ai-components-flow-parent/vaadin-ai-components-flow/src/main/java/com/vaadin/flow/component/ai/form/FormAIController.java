@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.form;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
@@ -81,12 +84,13 @@ import tools.jackson.databind.JsonNode;
  * {@code fieldValueOptions} takes a {@link ValueOptions} built via
  * {@link ValueOptions#forField(HasValue) forField} — the compiler picks the
  * {@link ValueOptions#forField(MultiSelect) MultiSelect overload} automatically
- * for fields statically typed as {@link MultiSelect}. For fields whose value
- * type is anything other than {@link String}, the
- * {@link #fieldValueOptions(ValueOptions, Function) two-argument overload} also
- * accepts a label-to-value converter, which the controller applies per label;
- * for multi-select fields the resolved elements are then aggregated into a
- * {@link LinkedHashSet} before {@link HasValue#setValue}.
+ * for fields statically typed as {@link MultiSelect}. The controller resolves a
+ * chosen label back to one of the registered items via the registration's
+ * item-label generator; for multi-select fields the resolved elements are
+ * aggregated into a {@link LinkedHashSet} before {@link HasValue#setValue}.
+ * LLM-facing labels are derived from the field's
+ * {@code setItemLabelGenerator(...)} by default; see {@link ValueOptions} for
+ * the full resolution chain.
  * </p>
  *
  * <p>
@@ -166,6 +170,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class FormAIController implements AIController {
 
@@ -338,89 +343,44 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Registers a known set of labels for a {@link String}-typed field. The
-     * labels are presented to the LLM as the field's choices. No converter is
-     * needed — the chosen label is itself the value written to the field. For
-     * any non-{@link String} value type, use
-     * {@link #fieldValueOptions(ValueOptions, Function) the two-argument
-     * overload} to supply a converter; this is enforced at compile time.
+     * Registers a known set of items for a field. The LLM sees one label per
+     * item; when it picks a label, the controller walks the registration's
+     * items, applies the item-label generator per item, and returns the first
+     * whose label matches. The label-generator chain is documented on
+     * {@link ValueOptions}.
      * <p>
-     * For {@link MultiSelect MultiSelect} fields the controller wraps the
-     * chosen labels into a {@link LinkedHashSet} before
+     * Items that share a label resolve to the first in registration order; a
+     * fixed-options registration logs a warning when this happens. Labels that
+     * match no item are rejected back to the LLM with a reason it can correct
+     * on the next turn. For {@link MultiSelect MultiSelect} fields the resolved
+     * items are wrapped into a {@link LinkedHashSet} before
      * {@link HasValue#setValue}. Later calls for the same field overwrite
      * earlier ones.
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
+     *            its item source set via either
      *            {@link ValueOptions#options(Collection)} or
      *            {@link ValueOptions#options(BiFunction)}
+     * @param <V>
+     *            the item type — the field's value type for single-value
+     *            fields, the per-element type for multi-select
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
+     *             if the registration has no item source set; if the developer
      *             routed a {@code MultiSelect} field through the single-value
      *             {@code forField} overload (upcast reference); or if the
      *             field's value type is a Collection but the field does not
      *             implement {@link MultiSelect}
      */
-    public FormAIController fieldValueOptions(ValueOptions<String> config) {
+    public <V> FormAIController fieldValueOptions(ValueOptions<V> config) {
         Objects.requireNonNull(config, "Value options must not be null");
-        return applyValueOptions(config, Function.identity());
+        return applyValueOptions(config);
     }
 
-    /**
-     * Registers a known set of labels for a field, paired with a converter that
-     * resolves a chosen label to the field's value type. When the LLM picks a
-     * label, the controller calls {@code toValue} on it and writes the result
-     * to the field. If {@code toValue} returns {@code null} or throws — for
-     * example because the LLM picked a label the converter does not recognize —
-     * the write is rejected back to the LLM with a reason and the model can
-     * correct on the next turn.
-     * <p>
-     * A typical converter delegates to a service or repository that looks the
-     * domain object up by its display name, for example
-     * {@code label -> projectService.findByName(label)} for a
-     * {@code ComboBox<Project>}. For {@link MultiSelect MultiSelect} fields the
-     * converter runs once per chosen label and the controller wraps the
-     * resolved elements into a {@link LinkedHashSet} before
-     * {@link HasValue#setValue}.
-     * <p>
-     * Later calls for the same field overwrite earlier ones. Use
-     * {@link #fieldValueOptions(ValueOptions) the single-argument overload} for
-     * {@link String}-typed fields; the converter is implicit there.
-     *
-     * @param config
-     *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
-     *            {@link ValueOptions#options(Collection)} or
-     *            {@link ValueOptions#options(BiFunction)}
-     * @param toValue
-     *            converts a chosen label to one element of the field's value
-     *            type, not {@code null}
-     * @param <V>
-     *            the per-label item type — the field's value type for
-     *            single-value fields, the per-element type for multi-select
-     * @return this controller, for chaining
-     * @throws NullPointerException
-     *             if {@code config} or {@code toValue} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
-     *             routed a {@code MultiSelect} field through the single-value
-     *             {@code forField} overload (upcast reference); or if the
-     *             field's value type is a Collection but the field does not
-     *             implement {@link MultiSelect}
-     */
-    public <V> FormAIController fieldValueOptions(ValueOptions<V> config,
-            Function<String, V> toValue) {
-        Objects.requireNonNull(config, "Value options must not be null");
-        Objects.requireNonNull(toValue, "Value converter must not be null");
-        return applyValueOptions(config, toValue);
-    }
-
-    private FormAIController applyValueOptions(ValueOptions<?> config,
-            Function<String, ?> toValue) {
+    private FormAIController applyValueOptions(ValueOptions<?> config) {
         var fixed = config.fixedOptions();
         var query = config.query();
         if ((fixed == null) == (query == null)) {
@@ -428,41 +388,161 @@ public class FormAIController implements AIController {
                     "ValueOptions requires options(...) "
                             + "(fixed Collection or query BiFunction)");
         }
-        // The single-value forField overload accepts MultiSelect fields whose
-        // static reference is upcast to HasValue. Reject so the typed
-        // MultiSelect overload remains the only path for multi-select
-        // registrations and toValue stays per-item rather than Set-returning.
-        var isMultiSelect = config.field() instanceof MultiSelect;
+        // forField(HasValue) accepts MultiSelect fields whose static reference
+        // is upcast. Reject so the typed MultiSelect overload is the only
+        // entry for multi-select registrations.
+        var field = config.field();
+        var isMultiSelect = field instanceof MultiSelect;
         if (!config.isMulti() && isMultiSelect) {
             throw new IllegalArgumentException(
                     "Field implements MultiSelect — declare the reference as "
                             + "MultiSelect so the MultiSelect-typed forField "
-                            + "overload picks up, and toValue can return one "
-                            + "item rather than a Set");
+                            + "overload picks up");
         }
-        // Collection-valued fields must implement MultiSelect — otherwise we
-        // have no defined aggregation for per-label converter results.
-        // field.getEmptyValue() is the runtime signal: non-MultiSelect fields
-        // whose empty value is a Collection are the case we reject.
-        if (!isMultiSelect
-                && config.field().getEmptyValue() instanceof Collection) {
+        // Collection-valued fields must implement MultiSelect — otherwise
+        // there is no defined aggregation for the resolved items.
+        if (!isMultiSelect && field.getEmptyValue() instanceof Collection) {
             throw new IllegalArgumentException(
                     "Field's value type is a Collection but the field does "
                             + "not implement MultiSelect. Collection-valued "
                             + "fields must implement MultiSelect to be "
                             + "registered via fieldValueOptions(...).");
         }
-        var hints = hintsFor(config.field());
-        hints.valueOptionsToValue = toValue;
+        var hints = hintsFor(field);
+        var explicit = config.itemLabelGenerator();
         if (fixed != null) {
-            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(fixed,
-                    filter, limit);
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            List<Object> items = (List) fixed;
             hints.fixedOptions = true;
+            hints.valueOptionsTurnSetup = () -> rebindFixedOptions(hints, field,
+                    explicit, items);
+            hints.valueOptionsTurnSetup.run();
+            warnOnDuplicateLabels(items, hints.itemLabelGenerator);
         } else {
-            hints.valueOptionsQuery = query;
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            BiFunction<String, Integer, List<Object>> rawQuery = (BiFunction) query;
             hints.fixedOptions = false;
+            hints.valueOptionsTurnSetup = () -> rebindQueryOptions(hints, field,
+                    explicit, rawQuery);
+            hints.valueOptionsTurnSetup.run();
         }
         return this;
+    }
+
+    /**
+     * Rebuilds the fixed-options bindings on {@code hints} from the original
+     * item list and the current state of {@code field} / {@code explicit}.
+     * Invoked at registration and again on every {@link #onRequest()} so the
+     * labeler captured in {@link FormFieldHints#itemLabelGenerator} reflects
+     * the field's current {@code setItemLabelGenerator(...)}.
+     */
+    private static void rebindFixedOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            List<Object> items) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>(items.size());
+        for (var item : items) {
+            map.putIfAbsent(labeler.apply(item), item);
+        }
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> filterLabels(map.keySet(),
+                filter, limit);
+    }
+
+    /**
+     * Rebuilds the query-options bindings on {@code hints} and resets the
+     * observed-items map. The wrapped query callback dedupes by label as
+     * batches arrive (first item per label wins) so repeated overlapping
+     * queries within the same turn don't inflate the map.
+     */
+    private static void rebindQueryOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            BiFunction<String, Integer, List<Object>> rawQuery) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>();
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> {
+            var batch = rawQuery.apply(filter, limit);
+            var labels = new ArrayList<String>(batch.size());
+            for (var item : batch) {
+                var label = labeler.apply(item);
+                labels.add(label);
+                map.putIfAbsent(label, item);
+            }
+            return labels;
+        };
+    }
+
+    /**
+     * Logs a warning when two or more items in a fixed-options registration
+     * render to the same label. Resolution under
+     * {@link FormFieldHints#valueOptionsItems} keeps only the first-per-label
+     * (the Map's {@code putIfAbsent} semantic), so duplicates are recoverable
+     * but ambiguous — a unique
+     * {@link ValueOptions#itemLabelGenerator(ItemLabelGenerator)} is the
+     * unambiguous fix. Fires once at registration; a labeler swap between turns
+     * that introduces new duplicates does not re-warn.
+     */
+    private static void warnOnDuplicateLabels(List<Object> items,
+            Function<Object, String> labeler) {
+        var seen = new HashSet<String>();
+        var duplicates = new LinkedHashSet<String>();
+        for (var item : items) {
+            var label = labeler.apply(item);
+            if (!seen.add(label)) {
+                duplicates.add(label);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            LOGGER.warn(
+                    "ValueOptions registration contains items with duplicate "
+                            + "labels {}; the first item per label will win on "
+                            + "resolution. Supply a unique itemLabelGenerator "
+                            + "to disambiguate.",
+                    duplicates);
+        }
+    }
+
+    /**
+     * Resolves the V-to-label function for one valueOptions registration.
+     * Priority: an explicit {@link ItemLabelGenerator} on the registration,
+     * otherwise the field's own {@code getItemLabelGenerator()} (via
+     * {@link FormValueConverter#renderItem}, which also covers the
+     * {@link String#valueOf} fallback). Called once per turn at
+     * {@link #onRequest()} so a swap on the field between turns is picked up.
+     */
+    private static Function<Object, String> resolveItemLabeler(
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit) {
+        if (explicit != null) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            ItemLabelGenerator<Object> typed = (ItemLabelGenerator) explicit;
+            return item -> applyItemLabeler(typed, item);
+        }
+        return item -> FormValueConverter.renderItem(field, item);
+    }
+
+    /**
+     * Applies an explicit per-item label generator, falling back to
+     * {@link String#valueOf(Object)} for {@code null} items, {@code null}
+     * labels, and labelers that throw. Mirrors the safety guarantees of
+     * {@link FormValueConverter#renderItem} so a misbehaving label generator
+     * cannot collapse the whole tool call.
+     */
+    private static String applyItemLabeler(ItemLabelGenerator<Object> labeler,
+            Object item) {
+        if (item == null) {
+            return "";
+        }
+        try {
+            var label = labeler.apply(item);
+            return label != null ? label : String.valueOf(item);
+        } catch (Exception ex) {
+            LOGGER.warn("Item label generator threw for {}", item.getClass(),
+                    ex);
+            return String.valueOf(item);
+        }
     }
 
     /**
@@ -694,8 +774,21 @@ public class FormAIController implements AIController {
         // are picked up.
         attachIds();
         seedDescriptionsFromBinder();
+        refreshValueOptionsBindings();
         lockFields();
         snapshotPreTurnValues();
+    }
+
+    /**
+     * Re-runs each value-options registration's setup at the start of a turn.
+     * Captures the current item-label generator from the field so a swap
+     * between turns is reflected, repopulates the fixed-options map from its
+     * immutable list, and clears the query-options map so each turn starts with
+     * a fresh cache.
+     */
+    private void refreshValueOptionsBindings() {
+        hintsById.values().stream().map(hints -> hints.valueOptionsTurnSetup)
+                .filter(Objects::nonNull).forEach(Runnable::run);
     }
 
     @Override
@@ -954,13 +1047,13 @@ public class FormAIController implements AIController {
         return id;
     }
 
-    private static List<String> filterAndLimit(List<String> source,
+    private static List<String> filterLabels(Collection<String> labels,
             String filter, int limit) {
-        var stream = source.stream();
+        var stream = labels.stream();
         if (filter != null && !filter.isEmpty()) {
             var needle = filter.toLowerCase(Locale.ROOT);
-            stream = stream
-                    .filter(o -> o.toLowerCase(Locale.ROOT).contains(needle));
+            stream = stream.filter(
+                    label -> label.toLowerCase(Locale.ROOT).contains(needle));
         }
         return stream.limit(limit).toList();
     }

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Helper class when JSON structure needs object with just style field
+ * 
+ * @since 18.0
  */
 public class StyleWrapper extends AbstractConfigurationObject {
     private Style style = new Style();

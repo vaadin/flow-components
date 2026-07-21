@@ -53,10 +53,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * used standalone as a regular component.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "25.2.0")
+@NpmPackage(value = "@vaadin/avatar", version = "25.3.0-alpha6")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
@@ -279,6 +280,7 @@ public class Avatar extends Component
      * @see Avatar#setImage(String)
      * @param downloadHandler
      *            the download resource or {@code null} to remove the resource
+     * @since 24.8
      */
     public void setImageHandler(DownloadHandler downloadHandler) {
         if (downloadHandler == null) {
@@ -331,6 +333,7 @@ public class Avatar extends Component
      *
      * @return <code>true</code> if the tooltip is shown on hover or focus,
      *         <code>false</code> otherwise
+     * @since 23.3
      */
     public boolean isTooltipEnabled() {
         return getElement().getProperty("withTooltip", false);
@@ -342,6 +345,7 @@ public class Avatar extends Component
      * @param tooltipEnabled
      *            <code>true</code> to show the tooltip on hover or focus,
      *            <code>false</code> to not show it
+     * @since 23.3
      */
     public void setTooltipEnabled(boolean tooltipEnabled) {
         getElement().setProperty("withTooltip", tooltipEnabled);

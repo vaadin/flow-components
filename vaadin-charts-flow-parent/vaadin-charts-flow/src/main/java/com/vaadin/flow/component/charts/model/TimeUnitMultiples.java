@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Class used to define allowed multiples a time unit is allowed to be grouped
  * to.
+ * 
+ * @since 6.0.1
  */
 public class TimeUnitMultiples extends AbstractConfigurationObject {
 

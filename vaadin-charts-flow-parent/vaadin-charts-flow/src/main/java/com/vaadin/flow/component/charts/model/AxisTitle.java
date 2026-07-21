@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The axis title, showing next to the axis line.
+ * 
+ * @since 6.0.1
  */
 public class AxisTitle extends AbstractConfigurationObject {
 
@@ -114,6 +116,7 @@ public class AxisTitle extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -136,6 +139,8 @@ public class AxisTitle extends AbstractConfigurationObject {
      * </p>
      * <p>
      * Defaults to: { "color": "#666666" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

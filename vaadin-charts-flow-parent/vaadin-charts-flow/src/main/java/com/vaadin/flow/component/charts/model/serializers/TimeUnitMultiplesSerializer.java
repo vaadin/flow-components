@@ -20,6 +20,7 @@ import tools.jackson.databind.module.SimpleModule;
  * Serializer for
  * {@link com.vaadin.flow.component.charts.model.TimeUnitMultiples}.
  *
+ * @since 6.0.1
  */
 public class TimeUnitMultiplesSerializer
         extends ValueSerializer<TimeUnitMultiples> {

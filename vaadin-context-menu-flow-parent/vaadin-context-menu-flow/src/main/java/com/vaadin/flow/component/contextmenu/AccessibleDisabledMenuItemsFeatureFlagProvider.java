@@ -20,6 +20,9 @@ import java.util.List;
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlagProvider;
 
+/**
+ * @since 25.2
+ */
 public class AccessibleDisabledMenuItemsFeatureFlagProvider
         implements FeatureFlagProvider {
 

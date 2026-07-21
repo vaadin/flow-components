@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Options for range selector buttons.
+ * 
+ * @since 6.0.1
  */
 public class RangeSelectorButton extends AbstractConfigurationObject {
 

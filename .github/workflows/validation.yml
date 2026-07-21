@@ -20,6 +20,10 @@ on:
         required: false
         default: false
         type: boolean
+      local-wc-ref:
+        description: 'Branch or ref of web-components to use with local-wc-validation, empty for main'
+        required: false
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
@@ -199,20 +203,20 @@ jobs:
           node-version: '24'
 
       - name: Checkout web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        if: matrix.type != 'unit' && (github.event_name == 'schedule' || inputs.local-wc-validation)
         uses: actions/checkout@v6
         with:
           repository: vaadin/web-components
-          ref: main
+          ref: ${{ inputs.local-wc-ref || 'main' }}
           path: web-components
 
       - name: Install web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        if: matrix.type != 'unit' && (github.event_name == 'schedule' || inputs.local-wc-validation)
         run: yarn install --ignore-engines --ignore-scripts
         working-directory: web-components
 
       - name: Configure local web-components
-        if: matrix.type != 'unit' && github.event_name == 'schedule' || inputs.local-wc-validation
+        if: matrix.type != 'unit' && (github.event_name == 'schedule' || inputs.local-wc-validation)
         run: echo "LOCAL_WEB_COMPONENTS_PATH=web-components" > .env
 
       - name: npm install
@@ -222,15 +226,6 @@ jobs:
       - name: Merge ITs
         if: matrix.type == 'war'
         run: node scripts/mergeITs.js ${{ needs.build.outputs.components }}
-
-      # Let @vaadin/* web component bumps bypass the frontend package age check
-      - name: Configure pnpm package age exclude
-        if: matrix.type == 'war'
-        run: |
-          cat > integration-tests/pnpm-workspace.yaml <<'EOF'
-          minimumReleaseAgeExclude:
-            - '@vaadin/*'
-          EOF
 
       - name: Setup JDK 21
         uses: actions/setup-java@v5
@@ -306,7 +301,7 @@ jobs:
         if: matrix.type == 'war'
         run: |
           mvn package -pl integration-tests \
-            -Dvaadin.pnpm.enable -Drun-it -Drelease \
+            -Drun-it -Drelease \
             -Dvaadin.productionMode -Dvaadin.force.production.build=true \
             -Dmaven.test.skip=true -DskipJetty $MAVEN_ARGS
 

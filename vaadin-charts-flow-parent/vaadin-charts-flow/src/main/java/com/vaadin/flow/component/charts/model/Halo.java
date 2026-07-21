@@ -23,6 +23,8 @@ package com.vaadin.flow.component.charts.model;
  * >styled mode</a>, the halo is styled with the <code>.highcharts-halo</code>
  * class, with colors inherited from <code>.highcharts-color-{n}</code>.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Halo extends AbstractConfigurationObject {
 
@@ -35,6 +37,7 @@ public class Halo extends AbstractConfigurationObject {
 
     /**
      * @see #setAttributes(Attributes)
+     * @since 18.0
      */
     public Attributes getAttributes() {
         if (attributes == null) {
@@ -47,6 +50,8 @@ public class Halo extends AbstractConfigurationObject {
      * A collection of SVG attributes to override the appearance of the halo,
      * for example <code>fill</code>, <code>stroke</code> and
      * <code>stroke-width</code>.
+     * 
+     * @since 18.0
      */
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
@@ -54,6 +59,7 @@ public class Halo extends AbstractConfigurationObject {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -65,6 +71,8 @@ public class Halo extends AbstractConfigurationObject {
      * apply opacity to colors of hex or rgb(a) formats.
      * <p>
      * Defaults to: 0.25
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

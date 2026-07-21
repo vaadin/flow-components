@@ -91,9 +91,10 @@ class DateTimePickerTimePicker
  * the fields are focused.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.2.0")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-alpha6")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -490,6 +491,7 @@ public class DateTimePicker
      *
      * @param ariaLabel
      *            the value to set as aria-label
+     * @since 24.1
      */
     public void setAriaLabel(String ariaLabel) {
         getElement().setProperty("accessibleName", ariaLabel);
@@ -500,6 +502,7 @@ public class DateTimePicker
      *
      * @return an optional aria-label or an empty optional if no aria-label has
      *         been set
+     * @since 24.1
      */
     public Optional<String> getAriaLabel() {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
@@ -517,6 +520,7 @@ public class DateTimePicker
      * @param dateLabel
      *            the value to be used as a suffix in the date picker
      *            aria-label.
+     * @since 24.1
      */
     public void setDateAriaLabel(String dateLabel) {
         dateAriaLabel = dateLabel;
@@ -532,6 +536,7 @@ public class DateTimePicker
      *
      * @return an optional label or an empty optional if no label has been set
      *         with this method before.
+     * @since 24.1
      */
     public Optional<String> getDateAriaLabel() {
         return Optional.ofNullable(dateAriaLabel);
@@ -549,6 +554,7 @@ public class DateTimePicker
      * @param timeLabel
      *            the value to be used as a suffix in the time picker
      *            aria-label.
+     * @since 24.1
      */
     public void setTimeAriaLabel(String timeLabel) {
         timeAriaLabel = timeLabel;
@@ -564,6 +570,7 @@ public class DateTimePicker
      *
      * @return an optional label or an empty optional if no label has been set
      *         with this method before.
+     * @since 24.1
      */
     public Optional<String> getTimeAriaLabel() {
         return Optional.ofNullable(timeAriaLabel);
@@ -1011,6 +1018,7 @@ public class DateTimePicker
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
      *         properties weren't set.
+     * @since 24.5
      */
     public DateTimePickerI18n getI18n() {
         return i18n;
@@ -1021,6 +1029,7 @@ public class DateTimePicker
      *
      * @param i18n
      *            the internationalized properties, not <code>null</code>
+     * @since 24.5
      */
     public void setI18n(DateTimePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -1050,6 +1059,7 @@ public class DateTimePicker
      *
      * @param autoOpen
      *            Value for the auto open property,
+     * @since 14.5
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty("autoOpenDisabled", !autoOpen);
@@ -1064,6 +1074,8 @@ public class DateTimePicker
 
     /**
      * The internationalization properties for {@link DateTimePicker}.
+     * 
+     * @since 24.1
      */
     public static class DateTimePickerI18n implements Serializable {
         private String dateLabel;
@@ -1139,6 +1151,7 @@ public class DateTimePicker
          * that the server is unable to convert to type {@link LocalDateTime}.
          *
          * @return the error message or {@code null} if not set
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getBadInputErrorMessage() {
@@ -1156,6 +1169,7 @@ public class DateTimePicker
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
+         * @since 24.5
          */
         public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
@@ -1167,6 +1181,7 @@ public class DateTimePicker
          * empty.
          *
          * @return the error message or {@code null} if not set
+         * @since 24.8
          */
         @JsonIgnore // Not used on the client side
         public String getIncompleteInputErrorMessage() {
@@ -1184,6 +1199,7 @@ public class DateTimePicker
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
+         * @since 24.8
          */
         public DateTimePickerI18n setIncompleteInputErrorMessage(
                 String errorMessage) {
@@ -1198,6 +1214,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#isRequiredIndicatorVisible()
          * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getRequiredErrorMessage() {
@@ -1217,6 +1234,7 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#isRequiredIndicatorVisible()
          * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         public DateTimePickerI18n setRequiredErrorMessage(String errorMessage) {
             requiredErrorMessage = errorMessage;
@@ -1230,6 +1248,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#getMin()
          * @see DateTimePicker#setMin(LocalDateTime)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getMinErrorMessage() {
@@ -1249,6 +1268,7 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#getMin()
          * @see DateTimePicker#setMin(LocalDateTime)
+         * @since 24.5
          */
         public DateTimePickerI18n setMinErrorMessage(String errorMessage) {
             minErrorMessage = errorMessage;
@@ -1262,6 +1282,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#getMax()
          * @see DateTimePicker#setMax(LocalDateTime)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getMaxErrorMessage() {
@@ -1281,6 +1302,7 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#getMax()
          * @see DateTimePicker#setMax(LocalDateTime)
+         * @since 24.5
          */
         public DateTimePickerI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;

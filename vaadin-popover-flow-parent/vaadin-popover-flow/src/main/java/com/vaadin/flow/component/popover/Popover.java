@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -45,13 +46,14 @@ import tools.jackson.databind.node.ArrayNode;
  * specified component (target).
  *
  * @author Vaadin Ltd.
+ * @since 24.5
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.2.0")
+@NpmPackage(value = "@vaadin/popover", version = "25.3.0-alpha6")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
-public class Popover extends Component implements HasAriaLabel, HasComponents,
-        HasThemeVariant<PopoverVariant> {
+public class Popover extends Component implements HasAriaLabel, HasAriaRole,
+        HasComponents, HasThemeVariant<PopoverVariant> {
 
     private static Integer defaultHideDelay;
     private static Integer defaultFocusDelay;
@@ -76,7 +78,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         getElement().setProperty("opened", false);
 
         updateTrigger();
-        setRole("dialog");
+        setAriaRole("dialog");
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
@@ -354,6 +356,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @return {@code true} if tab focus into the popover is enabled,
      *         {@code false} otherwise
+     * @since 25.2
      */
     public boolean isTabFocusEnabled() {
         return !getElement().getProperty("noTabFocus", false);
@@ -374,6 +377,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param tabFocusEnabled
      *            {@code true} to allow tab focus into the popover,
      *            {@code false} to skip the popover in tab order
+     * @since 25.2
      */
     public void setTabFocusEnabled(boolean tabFocusEnabled) {
         getElement().setProperty("noTabFocus", !tabFocusEnabled);
@@ -384,11 +388,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @param role
      *            the role to set
+     * @since 25.0
+     * @deprecated Use {@link #setAriaRole(String)} instead
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        getElement().setProperty("role", role);
+        setAriaRole(role);
     }
 
     /**
@@ -396,13 +403,13 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @param role
      *            the role to set
-     * @deprecated Use {@link #setRole(String)} instead
+     * @deprecated Use {@link #setAriaRole(String)} instead
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setOverlayRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        setRole(role);
+        setAriaRole(role);
     }
 
     /**
@@ -410,9 +417,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * Defaults to {@code dialog}.
      *
      * @return the role
+     * @since 25.0
+     * @deprecated Use {@link #getAriaRole()} instead
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public String getRole() {
-        return getElement().getProperty("role");
+        return getAriaRole().orElse(null);
     }
 
     /**
@@ -420,11 +430,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * {@code dialog}.
      *
      * @return the role
-     * @deprecated Use {@link #getRole()} instead
+     * @deprecated Use {@link #getAriaRole()} instead
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
-        return getRole();
+        return getAriaRole().orElse(null);
     }
 
     /**

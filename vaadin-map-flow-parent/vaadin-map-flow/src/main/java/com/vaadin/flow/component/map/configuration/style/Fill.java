@@ -11,6 +11,9 @@ package com.vaadin.flow.component.map.configuration.style;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
 
+/**
+ * @since 23.0
+ */
 public class Fill extends AbstractConfigurationObject {
 
     private String color;

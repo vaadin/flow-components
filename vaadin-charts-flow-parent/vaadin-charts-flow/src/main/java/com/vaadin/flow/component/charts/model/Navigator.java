@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * The navigator is a small series below the main series, displaying a view of
  * the entire data set. It provides tools to zoom in and out on parts of the
  * data as well as panning across the dataset.
+ * 
+ * @since 6.0.1
  */
 public class Navigator extends AbstractConfigurationObject {
 
@@ -77,6 +79,7 @@ public class Navigator extends AbstractConfigurationObject {
 
     /**
      * @see #setHandles(Handles)
+     * @since 18.0
      */
     public Handles getHandles() {
         if (handles == null) {
@@ -98,6 +101,8 @@ public class Navigator extends AbstractConfigurationObject {
      * <code>.highcharts-navigator-handle-left</code> and
      * <code>.highcharts-navigator-handle-right</code> classes.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setHandles(Handles handles) {
         this.handles = handles;
@@ -137,6 +142,7 @@ public class Navigator extends AbstractConfigurationObject {
 
     /**
      * @see #setMaskFill(Color)
+     * @since 18.0
      */
     public Color getMaskFill() {
         return maskFill;
@@ -148,6 +154,8 @@ public class Navigator extends AbstractConfigurationObject {
      * with an opacity of 0.3 to see the series below.
      * <p>
      * Defaults to: rgba(102,133,194,0.3)
+     * 
+     * @since 18.0
      */
     public void setMaskFill(Color maskFill) {
         this.maskFill = maskFill;
@@ -189,6 +197,7 @@ public class Navigator extends AbstractConfigurationObject {
 
     /**
      * @see #setOutlineColor(Color)
+     * @since 18.0
      */
     public Color getOutlineColor() {
         return outlineColor;
@@ -198,6 +207,8 @@ public class Navigator extends AbstractConfigurationObject {
      * The color of the line marking the currently zoomed area in the navigator.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setOutlineColor(Color outlineColor) {
         this.outlineColor = outlineColor;
@@ -205,6 +216,7 @@ public class Navigator extends AbstractConfigurationObject {
 
     /**
      * @see #setOutlineWidth(Number)
+     * @since 18.0
      */
     public Number getOutlineWidth() {
         return outlineWidth;
@@ -214,6 +226,8 @@ public class Navigator extends AbstractConfigurationObject {
      * The width of the line marking the currently zoomed area in the navigator.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 18.0
      */
     public void setOutlineWidth(Number outlineWidth) {
         this.outlineWidth = outlineWidth;
@@ -257,6 +271,8 @@ public class Navigator extends AbstractConfigurationObject {
      * 		}
      * 	}
      * </pre>
+     * 
+     * @since 24.7
      */
     public void setSeries(AbstractPlotOptions series) {
         this.series = series;

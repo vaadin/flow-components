@@ -13,7 +13,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Event for information about a new series to be added
  *
- * @since 4.0
+ * @since 6.0.1
  *
  */
 public class SeriesAddedEvent extends AbstractSeriesEvent {

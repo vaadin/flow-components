@@ -33,6 +33,7 @@ import com.vaadin.flow.shared.Registration;
  *            the type of the object model
  *
  * @see Renderer#render(Element, com.vaadin.flow.data.provider.DataKeyMapper)
+ * @since 22.0
  */
 public interface Rendering<SOURCE> extends Serializable {
 

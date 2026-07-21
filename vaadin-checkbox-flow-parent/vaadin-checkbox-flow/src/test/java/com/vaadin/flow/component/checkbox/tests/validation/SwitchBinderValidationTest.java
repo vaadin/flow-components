@@ -1,0 +1,126 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.checkbox.tests.validation;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import com.vaadin.flow.component.checkbox.Switch;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+
+class SwitchBinderValidationTest {
+    private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
+    private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
+
+    private Switch field;
+
+    @Captor
+    private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
+
+    @Mock
+    private BindingValidationStatusHandler statusHandlerMock;
+
+    public static class Bean {
+        private Boolean value;
+
+        public Boolean getValue() {
+            return value;
+        }
+
+        public void setValue(Boolean value) {
+            this.value = value;
+        }
+    }
+
+    @BeforeEach
+    void init() {
+        MockitoAnnotations.openMocks(this);
+        field = new Switch();
+    }
+
+    @Test
+    void elementWithBinderValidation_invalidValue_binderValidationFails() {
+        var binder = attachBinderToField();
+
+        field.setValue(true);
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_FAIL_MESSAGE,
+                statusCaptor.getValue().getMessage().orElse(""));
+    }
+
+    @Test
+    void setRequiredOnBinder_validate_binderValidationFails() {
+        var binder = attachBinderToField(true);
+        binder.validate();
+
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+        Assertions.assertTrue(statusCaptor.getValue().isError());
+        Assertions.assertEquals(BINDER_REQUIRED_MESSAGE,
+                statusCaptor.getValue().getMessage().orElse(""));
+    }
+
+    @Test
+    void setRequiredOnComponent_validate_binderValidationPasses() {
+        var binder = attachBinderToField();
+        field.setRequiredIndicatorVisible(true);
+        binder.validate();
+
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
+    }
+
+    @Test
+    void setRequiredOnBinder_setValidValue_binderValidationPasses() {
+        attachBinderToField(true);
+
+        field.setValue(true);
+
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+        Assertions.assertFalse(statusCaptor.getValue().isError());
+    }
+
+    private Binder<Bean> attachBinderToField() {
+        return attachBinderToField(false);
+    }
+
+    private Binder<Bean> attachBinderToField(boolean isRequired) {
+        var binder = new Binder<>(Bean.class);
+        var binding = binder.forField(field)
+                .withValidationStatusHandler(statusHandlerMock);
+
+        if (isRequired) {
+            binding.asRequired(BINDER_REQUIRED_MESSAGE);
+        } else {
+            // Consider un-checked as valid
+            binding.withValidator(value -> Boolean.FALSE.equals(value),
+                    BINDER_FAIL_MESSAGE);
+        }
+
+        binding.bind("value");
+
+        return binder;
+    }
+}

@@ -38,6 +38,7 @@ import com.vaadin.flow.component.dependency.JsModule;
  *
  * @param <C>
  *            Type of the component that uses this controller.
+ * @since 24.6
  */
 @JsModule("./disableOnClickFunctions.js")
 public class DisableOnClickController<C extends Component & HasEnabled>

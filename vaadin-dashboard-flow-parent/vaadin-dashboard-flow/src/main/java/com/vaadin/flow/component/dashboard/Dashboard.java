@@ -57,11 +57,12 @@ import tools.jackson.databind.node.ObjectNode;
  * @see DashboardI18n
  *
  * @author Vaadin Ltd
+ * @since 24.6
  */
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-alpha6")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -352,6 +353,7 @@ public class Dashboard extends Component
      * Returns the fixed row height of the dashboard.
      *
      * @return the fixed row height of the dashboard
+     * @since 25.2
      */
     public String getRowHeight() {
         return getStyle().get("--vaadin-dashboard-row-height");
@@ -366,6 +368,7 @@ public class Dashboard extends Component
      * @param rowHeight
      *            the new fixed row height. Pass in {@code null} to set the row
      *            height back to the default value.
+     * @since 25.2
      */
     public void setRowHeight(String rowHeight) {
         getStyle().set("--vaadin-dashboard-row-height", rowHeight);
@@ -515,6 +518,7 @@ public class Dashboard extends Component
      *            behavior
      * @see DashboardItemRemoveHandler
      * @see DashboardItemRemoveEvent
+     * @since 25.1
      */
     public void setItemRemoveHandler(DashboardItemRemoveHandler handler) {
         this.itemRemoveHandler = handler;
@@ -525,6 +529,7 @@ public class Dashboard extends Component
      *
      * @return the current handler, or {@code null} if no handler is set
      * @see #setItemRemoveHandler(DashboardItemRemoveHandler)
+     * @since 25.1
      */
     public DashboardItemRemoveHandler getItemRemoveHandler() {
         return itemRemoveHandler;
@@ -629,6 +634,7 @@ public class Dashboard extends Component
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -657,6 +663,7 @@ public class Dashboard extends Component
      *
      * @param rootHeadingLevel
      *            the root heading level property, {@code null} to remove
+     * @since 24.8
      */
     public void setRootHeadingLevel(Integer rootHeadingLevel) {
         if (rootHeadingLevel == null) {

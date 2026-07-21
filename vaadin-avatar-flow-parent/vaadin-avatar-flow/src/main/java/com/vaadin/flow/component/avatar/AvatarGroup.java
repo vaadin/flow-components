@@ -70,10 +70,11 @@ import tools.jackson.databind.node.ObjectNode;
  * the overflow item displays the overflowing avatars and names in a list.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.2.0")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.3.0-alpha6")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -244,6 +245,7 @@ public class AvatarGroup extends Component
          * @param downloadHandler
          *            the download resource or {@code null} to remove the
          *            resource
+         * @since 24.8
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
             if (downloadHandler == null) {
@@ -415,6 +417,7 @@ public class AvatarGroup extends Component
          *
          * @param classNames
          *            the class name or class names to be added to the item
+         * @since 24.3
          */
         public void addClassNames(String... classNames) {
             this.classNames.addAll(Arrays.asList(classNames));
@@ -429,6 +432,7 @@ public class AvatarGroup extends Component
          *
          * @param classNames
          *            the class name or class names to be removed from the item
+         * @since 24.3
          */
         public void removeClassNames(String... classNames) {
             this.classNames.removeAll(Arrays.asList(classNames));
@@ -441,6 +445,7 @@ public class AvatarGroup extends Component
          * Gets the CSS class name set on this item.
          *
          * @return a space-delimited list of CSS class names
+         * @since 24.3
          */
         public String getClassName() {
             if (classNames.isEmpty()) {

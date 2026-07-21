@@ -98,7 +98,7 @@ public class BasicUseIT extends AbstractComponentIT {
     public void filterHasAriaLabel() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertEquals("Filter by First Name",
-                crud.getFilterFields().get(0).getDomAttribute("aria-label"));
+                crud.getFilterFields().get(0).getDomProperty("accessibleName"));
     }
 
     @Test

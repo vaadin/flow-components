@@ -57,9 +57,10 @@ import com.vaadin.flow.shared.Registration;
  * button or via drag and drop.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.2.0")
+@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha6")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -187,6 +188,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *
      * @param handler
      *            upload handler that handles the upload, not {@code null}
+     * @since 24.8
      */
     public Upload(UploadHandler handler) {
         this();
@@ -203,6 +205,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *            the endpoint name (single path segment), used as the last path
      *            segment of the dynamically generated upload URL; must not be
      *            blank
+     * @since 25.0
      */
     public Upload(UploadHandler handler, String targetName) {
         this();
@@ -215,6 +218,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @param listener
      *            all finished listener to add
      * @return a {@link Registration} for removing the event listener
+     * @since 2.1
      */
     public Registration addAllFinishedListener(
             ComponentEventListener<AllFinishedEvent> listener) {
@@ -245,6 +249,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *
      * @param type
      *            the format type
+     * @since 25.1
      */
     public void setUploadFormat(UploadFormat type) {
         getElement().setAttribute("upload-format", type.name().toLowerCase());
@@ -368,6 +373,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *             if a {@link Receiver} is currently set, or if
      *             {@link #setAcceptedFileTypes(String...)} is configured, as
      *             mixing the deprecated and new APIs is not supported
+     * @since 25.2
      */
     public void setAcceptedMimeTypes(String... mimeTypes) {
         if (mimeTypes != null && mimeTypes.length > 0) {
@@ -400,6 +406,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @throws IllegalStateException
      *             if {@link #setAcceptedFileTypes(String...)} is configured, as
      *             mixing the deprecated and new APIs is not supported
+     * @since 25.2
      */
     public List<String> getAcceptedMimeTypes() {
         checkNoDeprecatedFileTypes("getAcceptedMimeTypes");
@@ -435,6 +442,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *             if a {@link Receiver} is currently set, or if
      *             {@link #setAcceptedFileTypes(String...)} is configured, as
      *             mixing the deprecated and new APIs is not supported
+     * @since 25.2
      */
     public void setAcceptedFileExtensions(String... extensions) {
         if (extensions != null && extensions.length > 0) {
@@ -466,6 +474,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @throws IllegalStateException
      *             if {@link #setAcceptedFileTypes(String...)} is configured, as
      *             mixing the deprecated and new APIs is not supported
+     * @since 25.2
      */
     public List<String> getAcceptedFileExtensions() {
         checkNoDeprecatedFileTypes("getAcceptedFileExtensions");
@@ -750,6 +759,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *            actual size of the file being uploaded, if known
      * @param fileName
      *            name of the file being uploaded
+     * @since 24.4
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength,
             String fileName) {
@@ -860,6 +870,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @since 2.1
      */
     public Registration addFileRejectedListener(
             ComponentEventListener<FileRejectedEvent> listener) {
@@ -872,6 +883,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @since 24.4
      */
     public Registration addFileRemovedListener(
             ComponentEventListener<FileRemovedEvent> listener) {
@@ -951,6 +963,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}
+     * @since 24.8
      */
     public void setUploadHandler(UploadHandler handler) {
         setUploadHandler(handler, "upload");
@@ -969,6 +982,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      *            the endpoint name (single path segment), used as the last path
      *            segment of the dynamically generated upload URL; must not be
      *            blank
+     * @since 25.0
      */
     public void setUploadHandler(UploadHandler handler, String targetName) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
@@ -1056,6 +1070,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     /**
      * Clear the list of files being processed, or already uploaded.
+     * 
+     * @since 23.0
      */
     public void clearFileList() {
         getElement().executeJs("this.files = [];");

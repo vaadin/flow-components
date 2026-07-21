@@ -17,6 +17,8 @@ import com.vaadin.flow.server.InitParameters;
  * Options for the exporting module. For an overview on the matter, see
  * <a href="http://www.highcharts.com/docs/export-module/export-module-overview"
  * >the docs</a>.
+ * 
+ * @since 6.0.1
  */
 public class Exporting extends AbstractConfigurationObject {
 
@@ -200,6 +202,7 @@ public class Exporting extends AbstractConfigurationObject {
      * @param libURL
      *            the path where Highcharts will look for export module
      *            dependencies
+     * @since 25.2
      */
     public void setUnsafeLibURL(String libURL) {
         this.libURL = libURL;
@@ -365,6 +368,7 @@ public class Exporting extends AbstractConfigurationObject {
      * @param url
      *            the URL for the server module converting the SVG string to an
      *            image format
+     * @since 25.2
      */
     public void setUnsafeUrl(String url) {
         this.url = url;

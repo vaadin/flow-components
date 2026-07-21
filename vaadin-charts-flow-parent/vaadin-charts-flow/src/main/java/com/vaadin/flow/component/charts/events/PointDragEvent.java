@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  * Fired while dragging a point.
+ * 
+ * @since 24.7
  */
 @DomEvent("point-drag")
 public class PointDragEvent extends ComponentEvent<Chart> implements HasItem {

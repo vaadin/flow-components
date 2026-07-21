@@ -61,9 +61,10 @@ import com.vaadin.flow.signals.Signal;
  * Confirm Dialog is modal in {@link ModalityMode#STRICT} mode.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.2.0")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.3.0-alpha6")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @ModalRoot
 public class ConfirmDialog extends Component
@@ -121,6 +122,8 @@ public class ConfirmDialog extends Component
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
+     * 
+     * @since 25.0
      */
     @DomEvent("closed")
     public static class ClosedEvent extends ComponentEvent<ConfirmDialog> {
@@ -136,6 +139,8 @@ public class ConfirmDialog extends Component
      * which, when closing the confirm dialog, is before the closing animation
      * has finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
+     * 
+     * @since 25.0
      */
     public static class OpenedChangeEvent
             extends ComponentEvent<ConfirmDialog> {
@@ -168,6 +173,7 @@ public class ConfirmDialog extends Component
      *
      * @param width
      *            the width to set, may be {@code null}
+     * @since 2.0.1
      */
     @Override
     public void setWidth(String width) {
@@ -196,6 +202,7 @@ public class ConfirmDialog extends Component
      *
      * @param height
      *            the height to set, may be {@code null}
+     * @since 2.0.1
      */
     @Override
     public void setHeight(String height) {
@@ -210,6 +217,7 @@ public class ConfirmDialog extends Component
     /**
      * @throws UnsupportedOperationException
      *             ConfirmDialog does not support adding styles
+     * @since 23.1
      */
     @Override
     public Style getStyle() {
@@ -231,6 +239,7 @@ public class ConfirmDialog extends Component
      *
      * @param describedBy
      *            the attribute value
+     * @since 24.1
      */
     public void setAriaDescribedBy(String describedBy) {
         getElement().setProperty("accessibleDescriptionRef", describedBy);
@@ -244,6 +253,7 @@ public class ConfirmDialog extends Component
      *
      * @return an optional aria-describedby of the dialog, or an empty optional
      *         if no aria-describedby has been set
+     * @since 24.1
      */
     public Optional<String> getAriaDescribedBy() {
         return Optional.ofNullable(
@@ -408,6 +418,7 @@ public class ConfirmDialog extends Component
      *
      * @param component
      *            the component to display instead of default Reject button
+     * @since 1.2
      */
     public void setRejectButton(Component component) {
         SlotUtils.setSlot(this, "reject-button", component);
@@ -451,6 +462,7 @@ public class ConfirmDialog extends Component
      *
      * @param component
      *            the component to display instead of default Cancel button
+     * @since 1.2
      */
     public void setCancelButton(Component component) {
         SlotUtils.setSlot(this, "cancel-button", component);
@@ -493,6 +505,7 @@ public class ConfirmDialog extends Component
      *
      * @param component
      *            the component to display instead of default Confirm button
+     * @since 1.2
      */
     public void setConfirmButton(Component component) {
         SlotUtils.setSlot(this, "confirm-button", component);
@@ -511,6 +524,7 @@ public class ConfirmDialog extends Component
      * @param component
      *            the component to display instead of default confirmation text
      *            node
+     * @since 1.2
      */
     public void setText(Component component) {
         getElement().appendChild(component.getElement());
@@ -621,6 +635,7 @@ public class ConfirmDialog extends Component
      * @param listener
      *            the listener to add
      * @return a Registration for removing the event listener
+     * @since 25.0
      */
     public Registration addClosedListener(
             ComponentEventListener<ClosedEvent> listener) {
@@ -638,6 +653,7 @@ public class ConfirmDialog extends Component
      * @param listener
      *            the listener to add
      * @return a Registration for removing the event listener
+     * @since 25.0
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
@@ -656,6 +672,7 @@ public class ConfirmDialog extends Component
      *
      * @param component
      *            the component to display instead of default header text
+     * @since 1.2
      */
     public void setHeader(Component component) {
         SlotUtils.setSlot(this, "header", component);
@@ -719,6 +736,7 @@ public class ConfirmDialog extends Component
      *
      * @return {@code true} if this dialog can be closed with the esc-key,
      *         {@code false} otherwise
+     * @since 23.1
      */
     public boolean isCloseOnEsc() {
         return !getElement().getProperty("noCloseOnEsc", false);
@@ -732,6 +750,7 @@ public class ConfirmDialog extends Component
      * @param closeOnEsc
      *            {@code true} to enable closing this dialog with the esc-key,
      *            {@code false} to disable it
+     * @since 23.1
      */
     public void setCloseOnEsc(boolean closeOnEsc) {
         getElement().setProperty("noCloseOnEsc", !closeOnEsc);
@@ -742,6 +761,8 @@ public class ConfirmDialog extends Component
      * <p>
      * Removes all components from this component except elements that have slot
      * attribute, such as header and buttons.
+     * 
+     * @since 24.4
      */
     @Override
     public void removeAll() {

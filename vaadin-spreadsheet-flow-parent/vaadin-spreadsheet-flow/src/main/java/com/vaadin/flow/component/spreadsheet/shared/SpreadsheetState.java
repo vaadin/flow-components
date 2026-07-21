@@ -17,6 +17,9 @@ import java.util.Set;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 
+/**
+ * @since 23.1
+ */
 @SuppressWarnings("serial")
 public class SpreadsheetState {
 
@@ -42,8 +45,6 @@ public class SpreadsheetState {
 
     /**
      * Level of error.
-     *
-     * @since 8.2
      */
     public ErrorLevel errorLevel = null;
 

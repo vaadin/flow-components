@@ -17,6 +17,7 @@ import com.vaadin.flow.component.Component;
  *
  * @param <E>
  *            the bean type
+ * @since 1.0
  */
 public interface CrudEditor<E> extends Serializable {
 
@@ -61,6 +62,7 @@ public interface CrudEditor<E> extends Serializable {
      * indicators for invalid fields.
      *
      * @return true if valid or false if otherwise
+     * @since 2.0
      */
     boolean validate();
 

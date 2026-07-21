@@ -17,6 +17,8 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 /**
  * Geometry that represents a line string, which is a series of connected line
  * segments.
+ * 
+ * @since 25.1
  */
 public class LineString extends SimpleGeometry {
 

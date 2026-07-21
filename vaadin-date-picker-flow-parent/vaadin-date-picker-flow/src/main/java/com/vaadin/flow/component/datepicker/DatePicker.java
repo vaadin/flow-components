@@ -126,9 +126,10 @@ import tools.jackson.databind.node.ObjectNode;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.2.0")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.3.0-alpha6")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -399,6 +400,8 @@ public class DatePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -705,6 +708,7 @@ public class DatePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      * @deprecated Since v24.8
+     * @since 24.0
      */
     @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
@@ -718,6 +722,7 @@ public class DatePicker
      *
      * @return <code>true</code> if the input element's value is populated and
      *         unparsable, <code>false</code> otherwise
+     * @since 24.8
      */
     protected final boolean isInputUnparsable() {
         return unparsableValue != null;
@@ -774,6 +779,7 @@ public class DatePicker
      *
      * @param fallbackParser
      *            the parser function
+     * @since 24.6
      */
     public void setFallbackParser(
             SerializableFunction<String, Result<LocalDate>> fallbackParser) {
@@ -786,6 +792,7 @@ public class DatePicker
      * parsed using the i18n date formats.
      *
      * @return the parser function
+     * @since 24.6
      */
     public SerializableFunction<String, Result<LocalDate>> getFallbackParser() {
         return fallbackParser;
@@ -975,6 +982,7 @@ public class DatePicker
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see DatePickerI18n#setRequiredErrorMessage(String)
+     * @since 2.0.3
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -986,6 +994,7 @@ public class DatePicker
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -1110,6 +1119,8 @@ public class DatePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 2.0.5
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -1118,6 +1129,8 @@ public class DatePicker
     /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
+     * 
+     * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<DatePicker> {
         private final boolean opened;
@@ -1147,6 +1160,8 @@ public class DatePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
+     * 
+     * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<DatePicker> {
         private final boolean invalid;
@@ -1280,6 +1295,7 @@ public class DatePicker
          * date displayed in the text field, and for parsing the user input
          *
          * @return list of date patterns or null
+         * @since 22.0
          */
         public List<String> getDateFormats() {
             return dateFormats;
@@ -1315,6 +1331,7 @@ public class DatePicker
          *            A string with a date format pattern, or null to remove the
          *            previous custom format
          * @return this instance for method chaining
+         * @since 22.0
          */
         public DatePickerI18n setDateFormat(String dateFormat) {
             this.setDateFormats(dateFormat);
@@ -1349,6 +1366,7 @@ public class DatePicker
          * @param additionalParsingFormats
          *            Additional date format patterns to be used for parsing
          * @return this instance for method chaining
+         * @since 22.0
          */
         public DatePickerI18n setDateFormats(String primaryFormat,
                 String... additionalParsingFormats) {
@@ -1446,6 +1464,7 @@ public class DatePicker
          * Gets the {@code referenceDate}.
          *
          * @return the reference date
+         * @since 23.3
          */
         public LocalDate getReferenceDate() {
             return referenceDate;
@@ -1464,6 +1483,7 @@ public class DatePicker
          * @param referenceDate
          *            the date used to base relative dates on
          * @return this instance for method chaining
+         * @since 23.3
          */
         public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
             this.referenceDate = referenceDate;
@@ -1475,6 +1495,7 @@ public class DatePicker
          * that the server is unable to convert to type {@link LocalDate}.
          *
          * @return the error message or {@code null} if not set
+         * @since 24.5
          */
         @JsonIgnore // Not used in client side
         public String getBadInputErrorMessage() {
@@ -1492,6 +1513,7 @@ public class DatePicker
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
+         * @since 24.5
          */
         public DatePickerI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
@@ -1505,6 +1527,7 @@ public class DatePicker
          * @return the error message or {@code null} if not set
          * @see DatePicker#isRequiredIndicatorVisible()
          * @see DatePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         @JsonIgnore // Not used in client side
         public String getRequiredErrorMessage() {
@@ -1524,6 +1547,7 @@ public class DatePicker
          * @return this instance for method chaining
          * @see DatePicker#isRequiredIndicatorVisible()
          * @see DatePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         public DatePickerI18n setRequiredErrorMessage(String errorMessage) {
             requiredErrorMessage = errorMessage;
@@ -1537,6 +1561,7 @@ public class DatePicker
          * @return the error message or {@code null} if not set
          * @see DatePicker#getMin()
          * @see DatePicker#setMin(LocalDate)
+         * @since 24.5
          */
         @JsonIgnore // Not used in client side
         public String getMinErrorMessage() {
@@ -1556,6 +1581,7 @@ public class DatePicker
          * @return this instance for method chaining
          * @see DatePicker#getMin()
          * @see DatePicker#setMin(LocalDate)
+         * @since 24.5
          */
         public DatePickerI18n setMinErrorMessage(String errorMessage) {
             minErrorMessage = errorMessage;
@@ -1569,6 +1595,7 @@ public class DatePicker
          * @return the error message or {@code null} if not set
          * @see DatePicker#getMax()
          * @see DatePicker#setMax(LocalDate)
+         * @since 24.5
          */
         @JsonIgnore // Not used in client side
         public String getMaxErrorMessage() {
@@ -1588,6 +1615,7 @@ public class DatePicker
          * @return this instance for method chaining
          * @see DatePicker#getMax()
          * @see DatePicker#setMax(LocalDate)
+         * @since 24.5
          */
         public DatePickerI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;

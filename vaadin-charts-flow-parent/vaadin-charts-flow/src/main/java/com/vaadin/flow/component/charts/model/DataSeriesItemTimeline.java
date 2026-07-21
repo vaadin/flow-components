@@ -13,6 +13,8 @@ import java.time.Instant;
 /**
  * DataSeriesItem that can hold also Label and Description values. Used in e.g.
  * timeline series.
+ * 
+ * @since 18.0
  */
 public class DataSeriesItemTimeline extends DataSeriesItem {
 

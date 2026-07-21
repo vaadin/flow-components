@@ -39,9 +39,11 @@ import com.vaadin.flow.shared.Registration;
  * Horizontal Layout places components side-by-side in a row. By default, it has
  * undefined width and height, meaning its size is determined by the components
  * it contains.
+ * 
+ * @since 1.0
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.2.0")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.3.0-alpha6")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout>,
@@ -78,6 +80,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      *
      * @see #add(Component...)
      * @see #setJustifyContentMode(JustifyContentMode)
+     * @since 24.1
      */
     public HorizontalLayout(JustifyContentMode justifyContentMode,
             Component... children) {
@@ -96,6 +99,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      *
      * @see #add(Component...)
      * @see #setDefaultVerticalComponentAlignment(Alignment)
+     * @since 24.1
      */
     public HorizontalLayout(Alignment alignment, Component... children) {
         this(children);
@@ -267,6 +271,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      *
      * @param components
      *            the components to set, not <code>null</code>
+     * @since 2.0
      */
     public void addAndExpand(Component... components) {
         add(components);
@@ -307,6 +312,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
+     * 
+     * @since 24.7
      */
     @Override
     public void add(Collection<Component> components) {
@@ -317,6 +324,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
+     * 
+     * @since 24.7
      */
     @Override
     public void add(Component... components) {
@@ -357,6 +366,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToStart(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -372,6 +382,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToStart(Collection<Component> components) {
         var idx = getChildren().filter((child) -> {
@@ -402,6 +413,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToMiddle(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -417,6 +429,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToMiddle(Collection<Component> components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -459,6 +472,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToEnd(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
@@ -474,6 +488,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @throws NullPointerException
      *             if any of the components is null or if the components array
      *             is null.
+     * @since 24.7
      */
     public void addToEnd(Collection<Component> components) {
         Objects.requireNonNull(components, "Components should not be null");

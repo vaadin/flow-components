@@ -106,4 +106,34 @@ class ExpandCollapseTest {
         Assertions.assertEquals(List.of("Item 0", "Item 0-0", "Item 0-0-0"),
                 collapseEvent.get().getItems());
     }
+
+    @Test
+    void expandCollapse_acceptCollectionOfSubtype() {
+        TreeGrid<CharSequence> grid = new TreeGrid<>();
+        var treeData = new TreeData<CharSequence>();
+        treeData.addRootItems("Item 0");
+        treeData.addItems("Item 0", "Item 0-0");
+        treeData.addItems("Item 0-0", "Item 0-0-0");
+        grid.setDataProvider(new TreeDataProvider<>(treeData));
+
+        // List<String> is a Collection<? extends CharSequence>
+        List<String> items = List.of("Item 0");
+
+        grid.expand(items);
+        Assertions.assertTrue(grid.isExpanded("Item 0"));
+        grid.collapse(items);
+        Assertions.assertFalse(grid.isExpanded("Item 0"));
+
+        grid.expandRecursively(items, 1);
+        Assertions.assertTrue(grid.isExpanded("Item 0"));
+        Assertions.assertTrue(grid.isExpanded("Item 0-0"));
+        grid.collapseRecursively(items, 1);
+        Assertions.assertFalse(grid.isExpanded("Item 0"));
+        Assertions.assertFalse(grid.isExpanded("Item 0-0"));
+
+        grid.expandRecursively(items.stream(), 0);
+        Assertions.assertTrue(grid.isExpanded("Item 0"));
+        grid.collapseRecursively(items.stream(), 0);
+        Assertions.assertFalse(grid.isExpanded("Item 0"));
+    }
 }
