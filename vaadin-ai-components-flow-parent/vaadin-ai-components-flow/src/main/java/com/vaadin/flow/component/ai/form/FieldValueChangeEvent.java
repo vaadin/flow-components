@@ -27,6 +27,8 @@ import com.vaadin.flow.component.HasValue;
  * field whose post-turn value equals its pre-turn value (by
  * {@link Objects#equals(Object, Object)}) does not produce an event. No events
  * fire when the turn ended in error.
+ *
+ * @since 25.2
  */
 public final class FieldValueChangeEvent implements Serializable {
 
