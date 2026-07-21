@@ -117,7 +117,7 @@ public class VirtualList<T> extends Component
 
         @Override
         public void initialize() {
-            initConnector();
+            // NO-OP
         }
     };
 
@@ -144,6 +144,9 @@ public class VirtualList<T> extends Component
     }
 
     private void initConnector() {
+        // Using Page.executeJs to ensure this runs before any other
+        // executeJs calls scheduled on the component that require the
+        // connector.
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached VirtualList"))
                 .getPage().executeJs(
@@ -378,6 +381,8 @@ public class VirtualList<T> extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+
+        initConnector();
 
         // When the component is detached and reattached in the same roundtrip,
         // data communicator will clear all data generators, which will also
