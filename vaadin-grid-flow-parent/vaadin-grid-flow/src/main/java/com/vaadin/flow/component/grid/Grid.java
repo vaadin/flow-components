@@ -1466,7 +1466,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @Override
         public void initialize() {
-            setViewportRange(0, getPageSize());
+            // NO-OP
         }
     }
 
@@ -4101,6 +4101,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         initConnector();
         updateClientSorterDirections();
         updateClientSelectionMode();
+        if (pendingScrollRegistration == null) {
+            setViewportRange(0, getPageSize());
+        }
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }

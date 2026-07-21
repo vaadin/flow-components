@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,6 +132,26 @@ class GridScrollToIndexTest {
         ui.add(grid);
         ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
+    }
+
+    @Test
+    void scrollToIndex_afterAttach_viewportRangePreloaded() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        ui.add(grid);
+        grid.scrollToIndex(500);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("500-550", getViewportRange(grid));
+    }
+
+    @Test
+    void scrollToIndex_beforeAttach_thenAttach_viewportRangePreloaded() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        grid.scrollToIndex(500);
+        ui.add(grid);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
