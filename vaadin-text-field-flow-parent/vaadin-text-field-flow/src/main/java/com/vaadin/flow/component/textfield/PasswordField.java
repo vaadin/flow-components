@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasSelection;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
@@ -88,7 +89,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 @NpmPackage(value = "@vaadin/password-field", version = "25.3.0-alpha6")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
-        implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
+        implements HasAllowedCharPattern, HasSelection,
+        HasThemeVariant<TextFieldVariant> {
 
     private PasswordFieldI18n i18n;
 
