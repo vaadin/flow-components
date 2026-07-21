@@ -497,9 +497,8 @@ class FormAIControllerTest {
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, field, "AN", 10),
                     "Filter must match labels regardless of filter case");
-            Assertions.assertTrue(
-                    executeQueryFieldOptions(controller, field, "", 10)
-                            .startsWith("apple\nbanana\ncherry\n"),
+            Assertions.assertEquals("apple\nbanana\ncherry\n",
+                    executeQueryFieldOptions(controller, field, "", 10),
                     "Empty filter must return all options up to the limit");
         }
 
@@ -541,12 +540,8 @@ class FormAIControllerTest {
                     ValueOptions.forField(field).options(List.of(1, 2, 3)));
             controller.onRequest();
 
-            Assertions.assertTrue(
-                    executeQueryFieldOptions(controller, field, "", 10)
-                            .startsWith("1\n2\n3\n"),
-                    "Labels must lead the response; got: "
-                            + executeQueryFieldOptions(controller, field, "",
-                                    10));
+            Assertions.assertEquals("1\n2\n3\n",
+                    executeQueryFieldOptions(controller, field, "", 10));
         }
 
         @Test
@@ -562,9 +557,8 @@ class FormAIControllerTest {
                     .options(List.of("apple", "banana", "cherry")));
             controller.onRequest();
 
-            Assertions.assertTrue(
-                    executeQueryFieldOptions(controller, queriedField, "", 10)
-                            .startsWith("alpha\nbeta\n"));
+            Assertions.assertEquals("alpha\nbeta\n",
+                    executeQueryFieldOptions(controller, queriedField, "", 10));
             Assertions.assertEquals("banana\n",
                     executeQueryFieldOptions(controller, fixedField, "an", 10));
         }
@@ -1302,9 +1296,9 @@ class FormAIControllerTest {
                     "First listener must fire once for the changed field");
             Assertions.assertEquals(1, second.size(),
                     "Second listener must also fire once");
-            Assertions.assertSame(first.get(0).getField(),
-                    second.get(0).getField(),
-                    "Both listeners must see the same changed field");
+            Assertions.assertSame(first.get(0), second.get(0),
+                    "Both listeners must receive the same event instance, so "
+                            + "they see identical field and values");
         }
 
         @Test
@@ -1556,6 +1550,32 @@ class FormAIControllerTest {
             Assertions.assertTrue(containsEventFor(events, added),
                     "A field added to the form and filled within the same "
                             + "turn must produce an event; got: " + events);
+            Assertions.assertEquals(added.getEmptyValue(),
+                    eventFor(events, added).getOldValue(),
+                    "A field with no pre-turn snapshot must report its empty "
+                            + "value as the old value");
+        }
+
+        @Test
+        void fieldAddedMidTurnWithoutWriteProducesNoEvent() {
+            // False-positive guard: a field added to the form mid-turn that
+            // keeps its empty value was not changed by the turn and must not
+            // produce an event, even though it has no pre-turn snapshot.
+            var controlling = new TestField();
+            var added = new TestField();
+            var form = new Div(controlling);
+            controlling.addValueChangeListener(e -> form.add(added));
+            var controller = new FormAIController(form);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
+
+            controller.onRequest();
+            controlling.setValue("business"); // adds the new field, no write
+            controller.onResponse(null);
+
+            Assertions.assertFalse(containsEventFor(events, added),
+                    "A field added mid-turn but never written must not "
+                            + "produce an event; got: " + events);
         }
 
         @Test

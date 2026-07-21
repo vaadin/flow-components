@@ -628,8 +628,9 @@ public class FormAIController implements AIController {
      * at end-of-turn produce events. A field's pre-turn value is captured
      * regardless of its current visibility, so a value cascaded into a
      * freshly-revealed field is reported with the field's real pre-turn value
-     * rather than a spurious {@code null}. No events fire when the turn ended
-     * in error.
+     * rather than a spurious {@code null}. A field added to the form during the
+     * turn is compared against its {@link HasValue#getEmptyValue() empty
+     * value}. No events fire when the turn ended in error.
      * <p>
      * Listeners run on the UI thread with the session lock held, so they can
      * update components and call {@link #showFieldHighlight} /
@@ -828,7 +829,9 @@ public class FormAIController implements AIController {
      * field and fires one {@link FieldValueChangeEvent} per changed field, in
      * document order. The post-turn walk picks up fields that were hidden (or
      * absent) at turn start but became visible / were added during the turn, so
-     * visibility cascades report their value changes correctly.
+     * visibility cascades report their value changes correctly. A field with no
+     * snapshot entry (added mid-turn) compares against its empty value, so
+     * adding a field that keeps its empty value does not produce an event.
      * <p>
      * The diff is materialised before any listener runs, so a listener that
      * writes to a tracked field cannot retroactively change the
@@ -851,7 +854,9 @@ public class FormAIController implements AIController {
         }
         var events = new ArrayList<FieldValueChangeEvent>();
         for (var field : collectKnownFields()) {
-            var oldValue = preTurnValues.get(field);
+            var oldValue = preTurnValues.containsKey(field)
+                    ? preTurnValues.get(field)
+                    : field.getEmptyValue();
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
                 events.add(new FieldValueChangeEvent(this, field, oldValue,

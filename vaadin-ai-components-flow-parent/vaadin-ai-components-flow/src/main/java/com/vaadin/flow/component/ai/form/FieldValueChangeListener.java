@@ -22,7 +22,7 @@ import java.io.Serializable;
  * {@link FormAIController} after a successful AI turn. One event is delivered
  * per changed field, in document order.
  *
- * @since 25.2
+ * @since 25.3
  */
 @FunctionalInterface
 public interface FieldValueChangeListener extends Serializable {

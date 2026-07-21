@@ -28,14 +28,16 @@ import com.vaadin.flow.component.HasValue;
  * {@link Objects#equals(Object, Object)}) does not produce an event. No events
  * fire when the turn ended in error.
  *
- * @since 25.2
+ * @since 25.3
  */
 public final class FieldValueChangeEvent implements Serializable {
 
     private final transient FormAIController source;
     private final HasValue<?, ?> field;
-    private final transient Object oldValue;
-    private final transient Object newValue;
+    @SuppressWarnings("java:S1948")
+    private final Object oldValue;
+    @SuppressWarnings("java:S1948")
+    private final Object newValue;
 
     FieldValueChangeEvent(FormAIController source, HasValue<?, ?> field,
             Object oldValue, Object newValue) {
@@ -50,8 +52,12 @@ public final class FieldValueChangeEvent implements Serializable {
      * to call back into the controller (e.g.
      * {@link FormAIController#showFieldHighlight}) without capturing it from
      * the registration site.
+     * <p>
+     * The source is transient, so it is {@code null} on an event restored from
+     * a serialized session.
      *
-     * @return the source controller, never {@code null}
+     * @return the source controller, or {@code null} if this event was
+     *         deserialized
      */
     public FormAIController getSource() {
         return source;
@@ -69,9 +75,11 @@ public final class FieldValueChangeEvent implements Serializable {
 
     /**
      * Returns the field's value at the start of the turn, before the LLM ran.
-     * For a field that was hidden or absent at turn start and revealed during
-     * the turn, this is the field's actual pre-turn value rather than
-     * {@code null}.
+     * For a field that was hidden at turn start and revealed during the turn,
+     * this is the field's actual pre-turn value rather than {@code null}. For a
+     * field added to the form during the turn, this is the field's
+     * {@link HasValue#getEmptyValue() empty value} — the field had no pre-turn
+     * value to report.
      *
      * @return the pre-turn value, possibly {@code null}
      */
