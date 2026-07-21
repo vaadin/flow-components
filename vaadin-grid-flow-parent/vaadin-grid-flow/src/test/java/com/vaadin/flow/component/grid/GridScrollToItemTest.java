@@ -52,6 +52,7 @@ class GridScrollToItemTest {
 
         grid.setItems(items);
 
+        ui.add(grid);
         grid.scrollToItem(items.get(500));
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
@@ -76,6 +77,7 @@ class GridScrollToItemTest {
                 q -> items.stream().skip(q.getOffset()).limit(q.getLimit()))
                 .setItemIndexProvider((item, query) -> items.indexOf(item));
 
+        ui.add(grid);
         grid.scrollToItem(items.get(500));
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
