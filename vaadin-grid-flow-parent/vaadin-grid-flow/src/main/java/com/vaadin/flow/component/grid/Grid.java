@@ -4101,9 +4101,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         initConnector();
         updateClientSorterDirections();
         updateClientSelectionMode();
-        if (pendingScrollRegistration == null) {
-            setViewportRange(0, getPageSize());
-        }
+        setViewportRange(0, getPageSize());
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -5237,10 +5235,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 4.1
      */
     public void scrollToIndex(int rowIndex) {
-        setViewportRangeByIndex(rowIndex);
+        getElement().getNode().runWhenAttached((ui) -> {
+            setViewportRangeByIndex(rowIndex);
 
-        scheduleScrollExecution(
-                () -> getElement().callJsFunction("scrollToIndex", rowIndex));
+            scheduleScrollExecution(() -> getElement()
+                    .callJsFunction("scrollToIndex", rowIndex));
+        });
     }
 
     private void setViewportRangeByIndex(int rowIndex) {
@@ -5298,10 +5298,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
 
-        setViewportRangeByIndex(itemIndex);
+        getElement().getNode().runWhenAttached((ui) -> {
+            setViewportRangeByIndex(itemIndex);
 
-        scheduleScrollExecution(() -> getElement()
-                .callJsFunction("$connector.scrollToItem", itemKey, itemIndex));
+            scheduleScrollExecution(() -> getElement().callJsFunction(
+                    "$connector.scrollToItem", itemKey, itemIndex));
+        });
     }
 
     /**
