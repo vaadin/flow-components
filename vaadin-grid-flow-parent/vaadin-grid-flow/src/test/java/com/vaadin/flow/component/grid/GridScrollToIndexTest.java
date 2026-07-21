@@ -45,30 +45,35 @@ class GridScrollToIndexTest {
 
     @Test
     void scrollToStart_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(0);
         Assertions.assertEquals("0-50", getViewportRange(grid));
     }
 
     @Test
     void scrollToEnd_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(950);
         Assertions.assertEquals("950-1000", getViewportRange(grid));
     }
 
     @Test
     void scrollToStartOfPage_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(500);
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     void scrollToSecondIndexOfPage_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(501);
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     void scrollToSecondLastIndexOfPage_preloadTwoPages() {
+        ui.add(grid);
         grid.scrollToIndex(499);
         Assertions.assertEquals("450-550", getViewportRange(grid));
     }
@@ -76,6 +81,7 @@ class GridScrollToIndexTest {
     @Test
     void smallPageSize_scrollToIndex_preloadMultiplePages() {
         grid.setPageSize(5);
+        ui.add(grid);
         grid.scrollToIndex(499);
         Assertions.assertEquals("495-540", getViewportRange(grid));
     }
