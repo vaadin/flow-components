@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ main (25.3.0-alpha5)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (playwright-cli)
-- **Screenshot:** ![Clicking inside Dialog 1 opened Dialog 2; counters at 2](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-24974.png) — embeds inline.
+- **Screenshot:** ![Clicking inside Dialog 1 opened Dialog 2; counters at 2](https://raw.githubusercontent.com/vaadin/flow-components/da6c2c7bb2ff76d829fbeac69f17934354c66b6c/repro-24974.png) — embeds inline.
 
 ## Observed behavior
 
