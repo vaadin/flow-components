@@ -32,10 +32,10 @@ import com.vaadin.flow.component.HasValue;
  */
 public final class FieldValueChangeEvent implements Serializable {
 
-    private final FormAIController source;
+    private final transient FormAIController source;
     private final HasValue<?, ?> field;
-    private final Object oldValue;
-    private final Object newValue;
+    private final transient Object oldValue;
+    private final transient Object newValue;
 
     FieldValueChangeEvent(FormAIController source, HasValue<?, ?> field,
             Object oldValue, Object newValue) {
@@ -62,6 +62,7 @@ public final class FieldValueChangeEvent implements Serializable {
      *
      * @return the changed field, never {@code null}
      */
+    @SuppressWarnings("java:S1452")
     public HasValue<?, ?> getField() {
         return field;
     }
