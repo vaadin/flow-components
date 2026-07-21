@@ -12,9 +12,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Class providing pattern fills, an accessibility feature that renders series or
- * points with an SVG pattern (defined by an SVG path or an image) instead of a
- * plain color. This is useful to distinguish data for color-blind users.
+ * Class providing pattern fills, an accessibility feature that renders series
+ * or points with an SVG pattern (defined by an SVG path or an image) instead of
+ * a plain color. This is useful to distinguish data for color-blind users.
  * <p>
  * The produced JSON matches the Highcharts pattern option shape, for example:
  *
@@ -38,9 +38,9 @@ public class PatternColor implements Color {
         private Number height;
         private Number x;
         private Number y;
-        private Color color;
+        private SolidColor color;
         private Number opacity;
-        private Color backgroundColor;
+        private SolidColor backgroundColor;
         private Number aspectRatio;
         private String patternTransform;
         private String id;
@@ -60,6 +60,8 @@ public class PatternColor implements Color {
          * {@code d}/{@code strokeWidth}); only the string form is exposed here.
          * A pattern should define either a path or an {@link #setImage(String)
          * image}, not both.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param path
          *            the SVG path data
@@ -78,6 +80,8 @@ public class PatternColor implements Color {
         /**
          * Sets the URL of an image to use as the pattern. A pattern should
          * define either an image or a {@link #setPath(String) path}, not both.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param image
          *            the image URL
@@ -95,6 +99,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the width of the pattern.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param width
          *            the pattern width
@@ -112,6 +118,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the height of the pattern.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param height
          *            the pattern height
@@ -129,6 +137,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the horizontal offset of the pattern.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param x
          *            the horizontal offset
@@ -146,6 +156,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the vertical offset of the pattern.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param y
          *            the vertical offset
@@ -157,18 +169,20 @@ public class PatternColor implements Color {
         /**
          * @return the color of the pattern path
          */
-        public Color getColor() {
+        public SolidColor getColor() {
             return color;
         }
 
         /**
-         * Sets the color of the pattern path. Use a {@link SolidColor} so that
-         * it serializes to a bare color string.
+         * Sets the color of the pattern path. Only a {@link SolidColor} is
+         * accepted so that it serializes to a bare color string.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param color
          *            the pattern color
          */
-        public void setColor(Color color) {
+        public void setColor(SolidColor color) {
             this.color = color;
         }
 
@@ -181,6 +195,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the opacity of the pattern, between 0 and 1.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param opacity
          *            the pattern opacity
@@ -192,18 +208,21 @@ public class PatternColor implements Color {
         /**
          * @return the background color of the pattern
          */
-        public Color getBackgroundColor() {
+        public SolidColor getBackgroundColor() {
             return backgroundColor;
         }
 
         /**
-         * Sets the background color rendered behind the pattern. Use a
-         * {@link SolidColor} so that it serializes to a bare color string.
+         * Sets the background color rendered behind the pattern. Only a
+         * {@link SolidColor} is accepted so that it serializes to a bare color
+         * string.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param backgroundColor
          *            the background color
          */
-        public void setBackgroundColor(Color backgroundColor) {
+        public void setBackgroundColor(SolidColor backgroundColor) {
             this.backgroundColor = backgroundColor;
         }
 
@@ -216,6 +235,8 @@ public class PatternColor implements Color {
 
         /**
          * Sets the aspect ratio used to fit an image pattern.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param aspectRatio
          *            the aspect ratio
@@ -234,6 +255,8 @@ public class PatternColor implements Color {
         /**
          * Sets the SVG transform applied to the pattern (for example
          * {@code "rotate(45)"}).
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param patternTransform
          *            the SVG transform
@@ -250,8 +273,10 @@ public class PatternColor implements Color {
         }
 
         /**
-         * Sets an explicit id for the pattern definition. When omitted, an id is
-         * generated on the client side based on the pattern content.
+         * Sets an explicit id for the pattern definition. When omitted, an id
+         * is generated on the client side based on the pattern content.
+         * <p>
+         * Defaults to unset, so the Highcharts default applies.
          *
          * @param id
          *            the pattern id
@@ -294,16 +319,16 @@ public class PatternColor implements Color {
      * @param path
      *            the SVG path data, for example {@code "M 0 0 L 10 10"}
      * @param color
-     *            the color of the pattern path; use a {@link SolidColor} so it
-     *            serializes to a bare color string
+     *            the color of the pattern path; only a {@link SolidColor} is
+     *            accepted so it serializes to a bare color string
      * @param width
      *            the width of the pattern
      * @param height
      *            the height of the pattern
      * @return a new path-based pattern color
      */
-    public static PatternColor createPath(String path, Color color, int width,
-            int height) {
+    public static PatternColor createPath(String path, SolidColor color,
+            int width, int height) {
         Objects.requireNonNull(path, "path");
         PatternColor ret = new PatternColor();
         ret.pattern.setPath(path);

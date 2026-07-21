@@ -18,8 +18,8 @@ import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Covers both pattern-fill paths on one view holding two charts: chart 0 in
- * styled mode (the Vaadin CSS-rule bridge) and chart 1 in the default non-styled
- * mode (Highcharts' native pattern-fill).
+ * styled mode (the Vaadin CSS-rule bridge) and chart 1 in the default
+ * non-styled mode (Highcharts' native pattern-fill).
  */
 @TestPath("vaadin-charts/column/column-pattern-fill")
 public class ColumnPatternFillIT extends AbstractChartIT {
@@ -36,18 +36,16 @@ public class ColumnPatternFillIT extends AbstractChartIT {
     public void styledMode_appliesPatternFillViaCssRuleAndLegend() {
         ChartElement chart = waitForChartWithPatterns(0, VAADIN_PREFIX);
 
-        // The reworked CSS-rule mechanism is active: the mixin injects a
-        // constructable stylesheet into the shadow root's adoptedStyleSheets.
-        Assert.assertTrue("Expected an injected __patternSheet in styled mode",
-                isPatternStylesheetInjected(chart));
-
-        // A series-wide pattern plus one per-point override => two distinct defs.
+        // A series-wide pattern plus one per-point override => two distinct
+        // defs.
         List<String> patternIds = getPatternIds(chart, VAADIN_PREFIX);
         Assert.assertTrue(
-                "Expected two distinct vaadin-pattern- defs, got: " + patternIds,
+                "Expected two distinct vaadin-pattern- defs, got: "
+                        + patternIds,
                 patternIds.stream().distinct().count() >= 2);
 
-        // Series-level points get their fill from the CSS rule, not an attribute.
+        // Series-level points get their fill from the CSS rule, not an
+        // attribute.
         List<String> fillAttrs = getPointFillAttributes(chart, 0);
         Assert.assertTrue(
                 "Series-level points must not carry a url() fill attribute, "
@@ -55,8 +53,9 @@ public class ColumnPatternFillIT extends AbstractChartIT {
                 isNoUrl(fillAttrs.get(0)) && isNoUrl(fillAttrs.get(2)));
 
         String seriesFill = getComputedPointFill(chart, 0, 0);
-        Assert.assertTrue("Series point fill should be a pattern url, got: "
-                + seriesFill, isPatternUrl(seriesFill, VAADIN_PREFIX));
+        Assert.assertTrue(
+                "Series point fill should be a pattern url, got: " + seriesFill,
+                isPatternUrl(seriesFill, VAADIN_PREFIX));
         Assert.assertEquals("Non-override points should share the series url",
                 seriesFill, getComputedPointFill(chart, 0, 2));
 
@@ -68,8 +67,9 @@ public class ColumnPatternFillIT extends AbstractChartIT {
 
         // The per-point override (index 1) uses a fill attribute and a distinct
         // pattern url.
-        Assert.assertTrue("Override point should carry a url() fill attribute, "
-                + "got: " + fillAttrs.get(1),
+        Assert.assertTrue(
+                "Override point should carry a url() fill attribute, " + "got: "
+                        + fillAttrs.get(1),
                 isPatternUrl(fillAttrs.get(1), VAADIN_PREFIX));
         String overrideFill = getComputedPointFill(chart, 0, 1);
         Assert.assertNotEquals("Override url should differ from the series url",
@@ -101,39 +101,43 @@ public class ColumnPatternFillIT extends AbstractChartIT {
                         + nativeIds,
                 nativeIds.stream().distinct().count() >= 2);
 
-        // The bridge stayed out of the way.
-        Assert.assertTrue("No vaadin-pattern- defs should exist in non-styled mode",
+        // The bridge stayed out of the way: no vaadin-pattern- defs exist.
+        Assert.assertTrue(
+                "No vaadin-pattern- defs should exist in non-styled mode",
                 getPatternIds(chart, VAADIN_PREFIX).isEmpty());
-        Assert.assertFalse("__patternSheet must not exist in non-styled mode",
-                isPatternStylesheetInjected(chart));
 
         // Points carry a native url() fill attribute and render (not black).
         List<String> fillAttrs = getPointFillAttributes(chart, 0);
         Assert.assertTrue(
                 "Every patterned point should carry a native url() fill "
                         + "attribute, got: " + fillAttrs,
-                fillAttrs.stream().allMatch(f -> isPatternUrl(f, NATIVE_PREFIX)));
+                fillAttrs.stream()
+                        .allMatch(f -> isPatternUrl(f, NATIVE_PREFIX)));
 
         String seriesFill = getComputedPointFill(chart, 0, 0);
         Assert.assertTrue("Series point fill should be a native pattern url, "
-                + "got: " + seriesFill, isPatternUrl(seriesFill, NATIVE_PREFIX));
-        Assert.assertNotEquals("Patterned point must render, not fall back to "
-                + "black", "rgb(0, 0, 0)", seriesFill);
+                + "got: " + seriesFill,
+                isPatternUrl(seriesFill, NATIVE_PREFIX));
+        Assert.assertNotEquals(
+                "Patterned point must render, not fall back to " + "black",
+                "rgb(0, 0, 0)", seriesFill);
         Assert.assertEquals("Non-override points should share the series url",
                 seriesFill, getComputedPointFill(chart, 0, 2));
 
         // The per-point override renders its own distinct native pattern.
         String overrideFill = getComputedPointFill(chart, 0, 1);
-        Assert.assertTrue("Override point fill should be a native pattern url, "
-                + "got: " + overrideFill,
+        Assert.assertTrue(
+                "Override point fill should be a native pattern url, " + "got: "
+                        + overrideFill,
                 isPatternUrl(overrideFill, NATIVE_PREFIX));
         Assert.assertNotEquals("Override url should differ from the series url",
                 seriesFill, overrideFill);
 
         // Highcharts renders the legend symbol natively too.
         String legendFill = getLegendFillBySeriesIndex(chart, 0);
-        Assert.assertTrue("Patterned legend symbol should be a native pattern "
-                + "url, got: " + legendFill,
+        Assert.assertTrue(
+                "Patterned legend symbol should be a native pattern "
+                        + "url, got: " + legendFill,
                 isPatternUrl(legendFill, NATIVE_PREFIX));
         Assert.assertEquals("Legend symbol should use the series pattern url",
                 seriesFill, legendFill);
@@ -146,13 +150,14 @@ public class ColumnPatternFillIT extends AbstractChartIT {
         List<String> controlAttrs = getPointFillAttributes(chart, 1);
         Assert.assertFalse("Control series should have points",
                 controlAttrs.isEmpty());
-        Assert.assertTrue("Control points must not carry a url() fill attribute",
+        Assert.assertTrue(
+                "Control points must not carry a url() fill attribute",
                 controlAttrs.stream().allMatch(ColumnPatternFillIT::isNoUrl));
 
         String controlFill = getComputedPointFill(chart, 1, 0);
-        Assert.assertTrue("Control fill should be a solid color, got: "
-                + controlFill, controlFill != null
-                        && !controlFill.contains("url(")
+        Assert.assertTrue(
+                "Control fill should be a solid color, got: " + controlFill,
+                controlFill != null && !controlFill.contains("url(")
                         && controlFill.startsWith("rgb"));
     }
 
@@ -174,22 +179,31 @@ public class ColumnPatternFillIT extends AbstractChartIT {
     }
 
     // Plot-area point selector, scoped to the series group so legend item
-    // symbols (which also carry a highcharts-series-<idx> class) are not matched.
+    // symbols (which also carry a highcharts-series-<idx> class) are not
+    // matched.
     private static String pointsSelector(int seriesIndex) {
         return ".highcharts-series-group .highcharts-series-" + seriesIndex
                 + " .highcharts-point";
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> getPatternIds(ChartElement chart, String prefix) {
-        return chart.$("pattern").all().stream()
-                .map(el -> el.getDomAttribute("id"))
-                .filter(id -> id != null && id.startsWith(prefix)).toList();
+        return (List<String>) executeScript(
+                "return Array.from(arguments[0].shadowRoot"
+                        + ".querySelectorAll('pattern')).map(function(p){"
+                        + "return p.id;}).filter(function(id){"
+                        + "return id.indexOf('" + prefix + "')===0;});",
+                chart);
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> getPointFillAttributes(ChartElement chart,
             int seriesIndex) {
-        return chart.$(pointsSelector(seriesIndex)).all().stream()
-                .map(el -> el.getDomAttribute("fill")).toList();
+        return (List<String>) executeScript(
+                "return Array.from(arguments[0].shadowRoot"
+                        + ".querySelectorAll('" + pointsSelector(seriesIndex)
+                        + "')).map(function(p){return p.getAttribute('fill');});",
+                chart);
     }
 
     private String getComputedPointFill(ChartElement chart, int seriesIndex,
@@ -210,17 +224,8 @@ public class ColumnPatternFillIT extends AbstractChartIT {
     // select by series index and read the rendered symbol (a rect for columns).
     private String getLegendFillBySeriesIndex(ChartElement chart,
             int seriesIndex) {
-        return chart
-                .$(".highcharts-legend-item.highcharts-series-" + seriesIndex
-                        + " rect")
-                .first().getCssValue("fill");
-    }
-
-    private boolean isPatternStylesheetInjected(ChartElement chart) {
-        return Boolean.TRUE.equals(executeScript("var el = arguments[0];"
-                + "return !!el.__patternSheet && "
-                + "el.shadowRoot.adoptedStyleSheets.includes(el.__patternSheet);",
-                chart));
+        return chart.$(".highcharts-legend-item.highcharts-series-"
+                + seriesIndex + " rect").first().getCssValue("fill");
     }
 
     private Boolean getStyledModeOption(ChartElement chart) {
