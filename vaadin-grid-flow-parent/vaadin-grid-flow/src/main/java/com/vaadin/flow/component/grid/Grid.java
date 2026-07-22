@@ -255,7 +255,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * @since 1.1
+     * @deprecated To customize array updates, override
+     *             {@link #createDefaultArrayUpdater()} and return a
+     *             {@link GridArrayUpdater} whose
+     *             {@link GridArrayUpdater#startUpdate(int) startUpdate} method
+     *             returns a custom {@link Update} implementation. This class
+     *             will be made private in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
         private final Element element;
