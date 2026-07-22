@@ -15,6 +15,19 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
+The AI controllers (`ChartAIController`, `FormAIController`, `GridAIController`)
+are part of the commercial `vaadin-ai-components-pro-flow` module:
+```
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-ai-components-pro-flow</artifactId>
+    <version>${component.version}</version>
+</dependency>
+```
+
 ## License
 
-Apache License 2.0
+`vaadin-ai-components-flow` is distributed under Apache License 2.0.
+
+`vaadin-ai-components-pro-flow` is distributed under
+[Vaadin Commercial License and Service Terms](https://vaadin.com/commercial-license-and-service-terms).

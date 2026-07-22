@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-ai-components-flow</artifactId>
+            <artifactId>vaadin-ai-components-pro-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
