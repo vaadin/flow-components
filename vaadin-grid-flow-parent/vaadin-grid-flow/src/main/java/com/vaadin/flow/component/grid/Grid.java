@@ -3577,17 +3577,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         });
     }
 
-    private void runWhenComponentAttached(SerializableRunnable action) {
-        if (isAttached()) {
-            action.run();
-        } else {
-            addAttachListener((event) -> {
-                event.unregisterListener();
-                action.run();
-            });
-        }
-    }
-
     /**
      * Adds a selection listener to the current selection model.
      * <p>
@@ -5292,15 +5281,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 4.1
      */
     public void scrollToIndex(int rowIndex) {
-        // getNode().runWhenAttached can't be used here: it would run before
-        // onAttach, whose viewport range reset would overwrite the preloaded
-        // range.
-        runWhenComponentAttached(() -> {
-            setViewportRangeByIndex(rowIndex);
+        setViewportRangeByIndex(rowIndex);
 
-            scheduleScrollExecution(() -> getElement()
-                    .callJsFunction("scrollToIndex", rowIndex));
-        });
+        scheduleScrollExecution(() -> getElement()
+                .callJsFunction("scrollToIndex", rowIndex));
     }
 
     private void setViewportRangeByIndex(int rowIndex) {
@@ -5358,15 +5342,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .orElseThrow(() -> new NoSuchElementException(
                         "Item to scroll to cannot be found: " + item));
 
-        // getNode().runWhenAttached can't be used here: it would run before
-        // onAttach, whose viewport range reset would overwrite the preloaded
-        // range.
-        runWhenComponentAttached(() -> {
-            setViewportRangeByIndex(itemIndex);
+        setViewportRangeByIndex(itemIndex);
 
-            scheduleScrollExecution(() -> getElement().callJsFunction(
-                    "$connector.scrollToItem", itemKey, itemIndex));
-        });
+        scheduleScrollExecution(() -> getElement().callJsFunction(
+                "$connector.scrollToItem", itemKey, itemIndex));
     }
 
     /**
