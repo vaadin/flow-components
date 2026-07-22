@@ -128,6 +128,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.1
  */
 public class AIOrchestrator implements Serializable {
 
@@ -296,6 +297,7 @@ public class AIOrchestrator implements Serializable {
      *             if no UI context is available, or if the orchestrator needs
      *             to be reconnected after deserialization (see
      *             {@link #reconnect(LLMProvider)})
+     * @since 25.2
      */
     public void prompt(String userMessage, List<AIAttachment> attachments) {
         Objects.requireNonNull(attachments, "attachments cannot be null");
@@ -686,9 +688,13 @@ public class AIOrchestrator implements Serializable {
         SessionContextTool(String content) {
             this.content = content;
             this.description = """
-                    Read for current session context (e.g. date and time, user \
-                    locale). The content below is captured at the start of \
-                    this turn:
+                    Read for current session context. If a date/time is \
+                    included below, use it to resolve relative phrases in \
+                    the user's prompt — "today", "tomorrow", "yesterday", \
+                    "next Friday", "in two weeks", "end of next month", \
+                    etc. — into ISO date / date-time / time strings.
+
+                    Captured at the start of this turn:
 
                     """ + content;
         }
@@ -842,6 +848,7 @@ public class AIOrchestrator implements Serializable {
          * @return this reconnector
          * @throws IllegalArgumentException
          *             if any tool name is invalid
+         * @since 25.2
          */
         public Reconnector withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
@@ -1139,6 +1146,7 @@ public class AIOrchestrator implements Serializable {
          *             if controller is {@code null}
          * @throws IllegalArgumentException
          *             if any tool name is invalid
+         * @since 25.2
          */
         public Builder withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
@@ -1204,6 +1212,7 @@ public class AIOrchestrator implements Serializable {
          * @param listener
          *            the listener to call on each prompt
          * @return this builder
+         * @since 25.2
          */
         public Builder withRequestListener(RequestListener listener) {
             warnIfAlreadySet(this.requestListener, "Request listener");
@@ -1264,6 +1273,7 @@ public class AIOrchestrator implements Serializable {
          * @param listener
          *            the listener to call after each exchange
          * @return this builder
+         * @since 25.2
          */
         public Builder withResponseListener(ResponseListener listener) {
             warnIfAlreadySet(this.responseListener, "Response listener");
@@ -1302,6 +1312,7 @@ public class AIOrchestrator implements Serializable {
          *            supplier of the per-turn context string, or {@code null}
          *            to disable session context entirely
          * @return this builder
+         * @since 25.2
          */
         public Builder withMetadata(
                 SerializableSupplier<String> contextSupplier) {

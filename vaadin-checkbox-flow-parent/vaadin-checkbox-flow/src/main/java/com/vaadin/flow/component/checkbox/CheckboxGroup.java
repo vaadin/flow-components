@@ -109,9 +109,10 @@ import tools.jackson.databind.node.ArrayNode;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.3.0-alpha6")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -185,6 +186,7 @@ public class CheckboxGroup<T>
      * @param label
      *            the label describing the checkbox group
      * @see #setLabel(String)
+     * @since 23.1
      */
     public CheckboxGroup(String label) {
         this();
@@ -201,6 +203,7 @@ public class CheckboxGroup<T>
      *            the items to be shown in the list of the checkbox group
      * @see #setLabel(String)
      * @see #setItems(Collection)
+     * @since 23.1
      */
     public CheckboxGroup(String label, Collection<T> items) {
         this();
@@ -218,6 +221,7 @@ public class CheckboxGroup<T>
      *            the items to be shown in the list of the checkbox group
      * @see #setLabel(String)
      * @see #setItems(Object...)
+     * @since 23.1
      */
     @SafeVarargs
     public CheckboxGroup(String label, T... items) {
@@ -232,6 +236,7 @@ public class CheckboxGroup<T>
      * @param listener
      *            the value change listener to add
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public CheckboxGroup(
             ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
@@ -249,6 +254,7 @@ public class CheckboxGroup<T>
      *            the value change listener to add
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public CheckboxGroup(String label,
             ValueChangeListener<ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
@@ -269,6 +275,7 @@ public class CheckboxGroup<T>
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
      * @see #setItems(Object...)
+     * @since 23.1
      */
     @SafeVarargs
     public CheckboxGroup(String label,
@@ -323,6 +330,7 @@ public class CheckboxGroup<T>
      *
      * @return the list data view that provides access to the data bound to the
      *         checkbox group
+     * @since 18.0
      */
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
@@ -338,6 +346,7 @@ public class CheckboxGroup<T>
      *
      * @return the generic DataView instance implementing
      *         {@link CheckboxGroupDataView}
+     * @since 18.0
      */
     @Override
     public CheckboxGroupDataView<T> getGenericDataView() {
@@ -421,6 +430,7 @@ public class CheckboxGroup<T>
      *
      * @param dataProvider
      *            DataProvider instance to use, not <code>null</code>
+     * @since 24.2
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
@@ -456,6 +466,7 @@ public class CheckboxGroup<T>
      *            the new value to set, not {@code null}
      * @throws NullPointerException
      *             if value is {@code null}
+     * @since 2.0.1
      */
     @Override
     public void setValue(Set<T> value) {
@@ -488,6 +499,7 @@ public class CheckboxGroup<T>
      * instead.
      *
      * @return the data provider used by this CheckboxGroup
+     * @since 24.2
      */
     public DataProvider<T, ?> getDataProvider() {
         // dataProvider reference won't have been initialized before
@@ -663,6 +675,7 @@ public class CheckboxGroup<T>
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see CheckboxGroupI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -674,6 +687,7 @@ public class CheckboxGroup<T>
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -705,6 +719,7 @@ public class CheckboxGroup<T>
      *
      * @param disabled
      *            the boolean value to set
+     * @since 24.0
      */
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
@@ -714,6 +729,7 @@ public class CheckboxGroup<T>
      * If true, the user cannot interact with this element.
      *
      * @return the {@code disabled} property from the webcomponent
+     * @since 24.0
      */
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
@@ -792,6 +808,7 @@ public class CheckboxGroup<T>
      *            the selection preservation mode to switch to, not {@code null}
      *
      * @see SelectionPreservationMode
+     * @since 24.4
      */
     public void setSelectionPreservationMode(
             SelectionPreservationMode selectionPreservationMode) {
@@ -805,6 +822,7 @@ public class CheckboxGroup<T>
      * @return the selection preservation mode
      *
      * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     * @since 24.4
      */
     public SelectionPreservationMode getSelectionPreservationMode() {
         return selectionPreservationHandler.getSelectionPreservationMode();
@@ -981,6 +999,8 @@ public class CheckboxGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 24.0
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -994,6 +1014,7 @@ public class CheckboxGroup<T>
      * {@link #setI18n(CheckboxGroupI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public CheckboxGroupI18n getI18n() {
         return i18n;
@@ -1004,6 +1025,7 @@ public class CheckboxGroup<T>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(CheckboxGroupI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -1017,6 +1039,8 @@ public class CheckboxGroup<T>
 
     /**
      * The internationalization properties for {@link CheckboxGroup}.
+     * 
+     * @since 24.5
      */
     public static class CheckboxGroupI18n implements Serializable {
 

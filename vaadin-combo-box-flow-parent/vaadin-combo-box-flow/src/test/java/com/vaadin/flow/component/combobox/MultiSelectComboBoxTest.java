@@ -33,6 +33,8 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.shared.JsonConstants;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -47,6 +49,23 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     void initialValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
+    }
+
+    @Test
+    void valueSynchronizedOnChangeEvent() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        ElementListenerMap listeners = comboBox.getElement().getNode()
+                .getFeature(ElementListenerMap.class);
+        String syncExpression = JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                + "selectedItems";
+
+        Assertions.assertTrue(
+                listeners.getExpressions("change").contains(syncExpression),
+                "value should synchronize on the change event");
+        Assertions.assertFalse(
+                listeners.getExpressions("selected-items-changed")
+                        .contains(syncExpression),
+                "value should not synchronize on selected-items-changed");
     }
 
     @Test

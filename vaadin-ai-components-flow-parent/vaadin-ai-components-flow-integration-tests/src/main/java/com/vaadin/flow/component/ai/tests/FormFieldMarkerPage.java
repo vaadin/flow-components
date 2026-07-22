@@ -72,7 +72,7 @@ public class FormFieldMarkerPage extends VerticalLayout {
         form.setId("form");
 
         // The controller highlights every field it changes automatically; no
-        // showHighlight wiring is needed.
+        // showFieldHighlight wiring is needed.
         var controller = new FormAIController(form);
 
         Map<HasValue<?, String>, String> filled = Map.of(name, "Ada Lovelace",

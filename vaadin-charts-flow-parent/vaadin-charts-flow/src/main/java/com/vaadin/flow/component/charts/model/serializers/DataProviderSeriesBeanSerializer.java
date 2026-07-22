@@ -29,6 +29,8 @@ import tools.jackson.databind.node.ValueNode;
 
 /**
  * Custom bean serializer for {@link DataProviderSeries}
+ * 
+ * @since 6.0.1
  */
 public class DataProviderSeriesBeanSerializer
         extends BeanSerializationDelegate<DataProviderSeries> {

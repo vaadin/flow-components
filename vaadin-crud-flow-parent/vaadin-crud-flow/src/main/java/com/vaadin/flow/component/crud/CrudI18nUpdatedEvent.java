@@ -22,6 +22,8 @@ import com.vaadin.flow.component.ComponentEvent;
  *       // Localize an item in myGrid.<br>
  *     });<br>
  * </code>
+ * 
+ * @since 1.0
  */
 public class CrudI18nUpdatedEvent extends ComponentEvent<Crud<?>> {
 

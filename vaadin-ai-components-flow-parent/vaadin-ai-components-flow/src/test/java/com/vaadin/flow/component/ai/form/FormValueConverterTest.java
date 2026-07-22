@@ -19,6 +19,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -231,37 +234,37 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_singleSelectWithoutValueOptions_rejectedWithRegistrationHint() {
-        // Without a valueOptions(...) registration, the LLM has no labels
-        // to pick and the converter has no toValue function to resolve them
-        // — fail loudly and point the developer at the right API.
+    void convert_singleSelectWithoutFieldValueOptions_rejectedWithRegistrationHint() {
+        // Without a fieldValueOptions(...) registration and no eager
+        // setItems(...), the field has no option source at all — fail loudly
+        // and point the developer at the right API.
         var field = wrap(new SingleSelectField<String>(),
                 FormFieldType.SINGLE_SELECT);
 
         var json = json("\"any\"");
         var ex = Assertions.assertThrows(RejectedValueException.class,
                 () -> FormValueConverter.convert(field, json));
-        Assertions.assertTrue(ex.getMessage().contains("valueOptions"),
-                "Rejection reason must point at the missing valueOptions "
+        Assertions.assertTrue(ex.getMessage().contains("fieldValueOptions"),
+                "Rejection reason must point at the missing fieldValueOptions "
                         + "registration; got: " + ex.getMessage());
     }
 
     @Test
-    void convert_multiSelectWithoutValueOptions_rejectedWithRegistrationHint() {
+    void convert_multiSelectWithoutFieldValueOptions_rejectedWithRegistrationHint() {
         var field = wrap(new MultiSelectField<String>(),
                 FormFieldType.MULTI_SELECT);
 
         var json = json("[\"any\"]");
         var ex = Assertions.assertThrows(RejectedValueException.class,
                 () -> FormValueConverter.convert(field, json));
-        Assertions.assertTrue(ex.getMessage().contains("valueOptions"),
-                "Rejection reason must point at the missing valueOptions "
+        Assertions.assertTrue(ex.getMessage().contains("fieldValueOptions"),
+                "Rejection reason must point at the missing fieldValueOptions "
                         + "registration; got: " + ex.getMessage());
     }
 
     @Test
     void convert_singleSelectFromItems_nonStringJsonRejected() {
-        // Eager-items SINGLE_SELECT (no valueOptions registered, items
+        // Eager-items SINGLE_SELECT (no fieldValueOptions registered, items
         // populated via setItems) must reject a non-string JSON shape
         // before reaching renderItem-based matching — otherwise a JSON
         // boolean true coincidentally renders to "true" and could match
@@ -300,25 +303,25 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_singleSelectWithValueOptionsToValue_resolvesLabel() {
-        // The LLM sends a label string; the registered toValue resolves it
-        // to the field's actual value type. Verifies the converter routes
-        // SINGLE_SELECT through valueOptionsToValue instead of doing
-        // type-driven parsing that would hand setValue a raw String.
+    void convert_singleSelectWithObservedItems_resolvesLabel() {
+        // The converter walks the registration's items, applies the labeler
+        // per item, and returns the first whose label matches.
+        var apollo = new Project("P-1", "Apollo");
         var field = wrap(new SingleSelectField<Project>(),
                 FormFieldType.SINGLE_SELECT,
-                hintsWithToValue(label -> new Project("P-1", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var result = FormValueConverter.convert(field, json("\"Apollo\""));
 
-        Assertions.assertEquals(new Project("P-1", "Apollo"), result);
+        Assertions.assertSame(apollo, result);
     }
 
     @Test
     void convert_singleSelectNonStringJsonRejected() {
+        var apollo = new Project("P-1", "Apollo");
         var field = wrap(new SingleSelectField<Project>(),
                 FormFieldType.SINGLE_SELECT,
-                hintsWithToValue(label -> new Project("P-1", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var json = json("42");
         Assertions.assertThrows(RejectedValueException.class,
@@ -326,83 +329,108 @@ class FormValueConverterTest {
     }
 
     @Test
-    void convert_singleSelectToValueReturnsNullRejectedAsUnknownLabel() {
-        // Convention: returning null from toValue signals "I don't
-        // recognise this label". The converter must reject rather than
-        // pass null to setValue (which would silently clear the field).
+    void convert_singleSelectUnknownLabelRejected() {
+        // A label matching no registered item must reject rather than pass
+        // null to setValue (which would silently clear the field).
+        var apollo = new Project("P-1", "Apollo");
         var field = wrap(new SingleSelectField<Project>(),
-                FormFieldType.SINGLE_SELECT, hintsWithToValue(label -> null));
+                FormFieldType.SINGLE_SELECT,
+                hintsWithItems(List.of(apollo), Project::name));
 
-        var json = json("\"NotAProject\"");
         var ex = Assertions.assertThrows(RejectedValueException.class,
-                () -> FormValueConverter.convert(field, json));
+                () -> FormValueConverter.convert(field,
+                        json("\"NotAProject\"")));
         Assertions.assertTrue(ex.getMessage().contains("NotAProject"),
                 "Rejection reason must name the unmatched label; got: "
                         + ex.getMessage());
     }
 
     @Test
-    void convert_singleSelectToValueThrowsRejectedWithCuratedReason() {
-        // The application's toValue can throw arbitrary RuntimeException
-        // with arbitrary text; the converter must reject with a curated
-        // reason that does NOT echo the third-party exception text.
+    void convert_singleSelectEmptyObservedItemsRejectedWithQueryHint() {
+        // Empty observed-items list = query-mode registration that was
+        // never queried. The rejection must direct the LLM at
+        // query_field_options.
         var field = wrap(new SingleSelectField<Project>(),
-                FormFieldType.SINGLE_SELECT, hintsWithToValue(label -> {
-                    throw new IllegalStateException(
-                            "internal-detail-from-toValue");
-                }));
+                FormFieldType.SINGLE_SELECT,
+                hintsWithItems(new ArrayList<>(), Project::name));
 
-        var json = json("\"Apollo\"");
         var ex = Assertions.assertThrows(RejectedValueException.class,
-                () -> FormValueConverter.convert(field, json));
-        Assertions.assertFalse(
-                ex.getMessage().contains("internal-detail-from-toValue"),
-                "Curated rejection must not echo the third-party "
-                        + "exception text; got: " + ex.getMessage());
-        Assertions.assertTrue(ex.getMessage().contains("Apollo"),
-                "Curated rejection should still name the offending label "
-                        + "so the LLM can correlate; got: " + ex.getMessage());
+                () -> FormValueConverter.convert(field, json("\"Apollo\"")));
+        Assertions.assertTrue(ex.getMessage().contains("query_field_options"),
+                "Empty-cache rejection must direct the LLM to call "
+                        + "query_field_options first; got: " + ex.getMessage());
+    }
+
+    @Test
+    void convert_singleSelectFirstDuplicateLabelWins() {
+        // Duplicate labels resolve in registration order; pin so a switch
+        // to last-wins is caught.
+        var first = new Project("P-1", "Apollo");
+        var dup = new Project("P-2", "Apollo");
+        var field = wrap(new SingleSelectField<Project>(),
+                FormFieldType.SINGLE_SELECT,
+                hintsWithItems(List.of(first, dup), Project::name));
+
+        var result = FormValueConverter.convert(field, json("\"Apollo\""));
+
+        Assertions.assertSame(first, result);
     }
 
     @Test
     void convert_multiSelectBuildsSetFromLabels() {
-        // toValue maps one label to one Project; the converter aggregates
-        // them into a LinkedHashSet that matches the field's Set<Project>
-        // value type via MultiSelect-erasure.
+        // Each chosen label resolves to its registered item; the converter
+        // aggregates the matches into a LinkedHashSet.
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project(label, label)));
+                hintsWithItems(List.of(apollo, vega), Project::name));
 
         var result = FormValueConverter.convert(field,
                 json("[\"Apollo\", \"Vega\"]"));
 
-        Assertions.assertEquals(Set.of(new Project("Apollo", "Apollo"),
-                new Project("Vega", "Vega")), result);
+        Assertions.assertEquals(Set.of(apollo, vega), result);
+    }
+
+    @Test
+    void convert_multiSelectPreservesLabelOrder() {
+        // Iteration order in the resolved set must reflect LLM-supplied
+        // label order, not item-registration order.
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
+        var field = wrap(new MultiSelectField<Project>(),
+                FormFieldType.MULTI_SELECT,
+                hintsWithItems(List.of(apollo, vega), Project::name));
+
+        @SuppressWarnings("unchecked")
+        var result = (Set<Project>) FormValueConverter.convert(field,
+                json("[\"Vega\", \"Apollo\"]"));
+
+        Assertions.assertEquals(List.of(vega, apollo), new ArrayList<>(result));
     }
 
     @Test
     void convert_multiSelectDeduplicatesRepeatedLabels() {
-        // The converter aggregates into a LinkedHashSet so duplicate labels
-        // collapse to one item — matches the MultiSelect contract.
+        // Duplicate labels in the LLM's array collapse via the
+        // LinkedHashSet — matches the MultiSelect contract.
+        var apollo = new Project("APL", "Apollo");
+        var vega = new Project("VGA", "Vega");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project(label, label)));
+                hintsWithItems(List.of(apollo, vega), Project::name));
 
         var result = FormValueConverter.convert(field,
                 json("[\"Apollo\", \"Apollo\", \"Vega\"]"));
 
-        Assertions.assertEquals(
-                Set.of(new Project("Apollo", "Apollo"),
-                        new Project("Vega", "Vega")),
-                result,
-                "Repeated labels must collapse into a single set entry");
+        Assertions.assertEquals(Set.of(apollo, vega), result);
     }
 
     @Test
     void convert_multiSelectNonArrayJsonRejected() {
+        var apollo = new Project("APL", "Apollo");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project("c", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var json = json("\"Apollo\"");
         Assertions.assertThrows(RejectedValueException.class,
@@ -414,9 +442,10 @@ class FormValueConverterTest {
         // JSON null on a multi-select clears the selection — the null
         // short-circuit at the top of convert() must win over the
         // multi-select array-shape enforcement.
+        var apollo = new Project("APL", "Apollo");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project("c", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var result = FormValueConverter.convert(field, json("null"));
 
@@ -425,12 +454,10 @@ class FormValueConverterTest {
 
     @Test
     void convert_multiSelectEmptyArrayBuildsEmptySet() {
-        // Empty array is the LLM clearing the multi-select; the converter
-        // produces an empty LinkedHashSet which the field accepts as the
-        // cleared selection.
+        var apollo = new Project("APL", "Apollo");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project("c", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var result = FormValueConverter.convert(field, json("[]"));
 
@@ -439,9 +466,10 @@ class FormValueConverterTest {
 
     @Test
     void convert_multiSelectArrayElementNotStringRejected() {
+        var apollo = new Project("APL", "Apollo");
         var field = wrap(new MultiSelectField<Project>(),
                 FormFieldType.MULTI_SELECT,
-                hintsWithToValue(label -> new Project("c", label)));
+                hintsWithItems(List.of(apollo), Project::name));
 
         var json = json("[42]");
         Assertions.assertThrows(RejectedValueException.class,
@@ -450,50 +478,28 @@ class FormValueConverterTest {
 
     @Test
     void convert_multiSelectElementUnknownLabelRejected() {
+        var apollo = new Project("APL", "Apollo");
         var field = wrap(new MultiSelectField<Project>(),
-                FormFieldType.MULTI_SELECT, hintsWithToValue(label -> null));
+                FormFieldType.MULTI_SELECT,
+                hintsWithItems(List.of(apollo), Project::name));
 
-        var json = json("[\"Apollo\", \"Unknown\"]");
         var ex = Assertions.assertThrows(RejectedValueException.class,
-                () -> FormValueConverter.convert(field, json));
-        Assertions.assertTrue(ex.getMessage().contains("Apollo"),
-                "Rejection reason must name the first unmatched label so "
-                        + "the LLM knows which entry to fix; got: "
+                () -> FormValueConverter.convert(field,
+                        json("[\"Apollo\", \"Unknown\"]")));
+        Assertions.assertTrue(ex.getMessage().contains("Unknown"),
+                "Rejection reason must name the unmatched label so the "
+                        + "LLM knows which entry to fix; got: "
                         + ex.getMessage());
     }
 
     @Test
-    void convert_multiSelectToValueThrowsRejectedWithCuratedReason() {
-        // The application's toValue can throw arbitrary text on any label
-        // inside the array. The rejection reason must not echo that text
-        // back to the LLM, but it should still name the offending label
-        // so the LLM can correlate.
-        var field = wrap(new MultiSelectField<Project>(),
-                FormFieldType.MULTI_SELECT, hintsWithToValue(label -> {
-                    throw new IllegalStateException(
-                            "internal-detail-from-toValue");
-                }));
-
-        var json = json("[\"Apollo\"]");
-        var ex = Assertions.assertThrows(RejectedValueException.class,
-                () -> FormValueConverter.convert(field, json));
-        Assertions.assertFalse(
-                ex.getMessage().contains("internal-detail-from-toValue"),
-                "Curated rejection must not echo the third-party "
-                        + "exception text; got: " + ex.getMessage());
-        Assertions.assertTrue(ex.getMessage().contains("Apollo"),
-                "Curated rejection should still name the offending label; "
-                        + "got: " + ex.getMessage());
-    }
-
-    @Test
-    void convert_valueOptionsOnPrimitiveTypeRoutesThroughToValue() {
-        // Even when a field's underlying type is not SINGLE_SELECT (e.g.
-        // an Integer-typed text field), registering valueOptions(...)
-        // makes the LLM speak in labels. The converter must apply toValue
-        // instead of trying to parse the label as an integer.
+    void convert_fieldValueOptionsOnPrimitiveTypeRoutesThroughItems() {
+        // Even when a field's underlying type is not SINGLE_SELECT (e.g. an
+        // Integer-typed text field), registering fieldValueOptions(...)
+        // makes the LLM speak in labels. The converter must resolve via
+        // the items list instead of parsing the label as an integer.
         var field = wrap(new IntField(), FormFieldType.INTEGER,
-                hintsWithToValue(label -> "low".equals(label) ? 1 : 10));
+                hintsWithItems(List.of(1, 10), v -> v == 1 ? "low" : "high"));
 
         Assertions.assertEquals(1,
                 FormValueConverter.convert(field, json("\"low\"")));
@@ -557,10 +563,17 @@ class FormValueConverterTest {
                 false, false);
     }
 
-    private static FormFieldHints hintsWithToValue(
-            Function<String, ?> toValue) {
+    private static <T> FormFieldHints hintsWithItems(List<T> items,
+            Function<T, String> labeler) {
         var hints = new FormFieldHints();
-        hints.valueOptionsToValue = toValue;
+        var map = new LinkedHashMap<String, Object>();
+        for (var item : items) {
+            map.putIfAbsent(labeler.apply(item), item);
+        }
+        hints.valueOptionsItems = map;
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        Function<Object, String> typed = (Function) labeler;
+        hints.itemLabelGenerator = typed;
         return hints;
     }
 

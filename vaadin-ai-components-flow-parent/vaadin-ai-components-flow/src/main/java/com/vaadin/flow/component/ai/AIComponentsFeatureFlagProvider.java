@@ -25,6 +25,7 @@ import com.vaadin.experimental.FeatureFlagProvider;
  * AIOrchestrator, modular upload components, and MessageListItem attachments.
  *
  * @author Vaadin Ltd
+ * @since 25.1
  */
 public class AIComponentsFeatureFlagProvider implements FeatureFlagProvider {
 
@@ -40,7 +41,7 @@ public class AIComponentsFeatureFlagProvider implements FeatureFlagProvider {
      */
     public static final Feature AI_COMPONENTS = new Feature("AI Components", // title
             FEATURE_FLAG_ID, // id
-            null, // moreInfoLink
+            "https://vaadin.com/docs/latest/flow/ai-support", // moreInfoLink
             false, // requiresServerRestart
             null); // componentClassName
 

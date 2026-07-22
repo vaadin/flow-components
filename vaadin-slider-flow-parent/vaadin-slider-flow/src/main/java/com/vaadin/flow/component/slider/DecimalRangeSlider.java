@@ -29,9 +29,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * that supports integer values.
  *
  * @author Vaadin Ltd.
+ * @since 25.2
  */
 @Tag("vaadin-range-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/slider", version = "25.3.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class DecimalRangeSlider extends
         NumberRangeSlider<DecimalRangeSlider, DecimalRangeSliderValue, Double> {

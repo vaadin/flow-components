@@ -21,6 +21,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * >styled mode</a>, the label is styled with the
  * <code>.highcharts-crosshair-label</code> class.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class CrosshairLabel extends AbstractConfigurationObject {
 
@@ -56,6 +58,7 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -64,6 +67,8 @@ public class CrosshairLabel extends AbstractConfigurationObject {
     /**
      * The background color for the label. Defaults to the related series color,
      * or <code>#666666</code> if that is not available.
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -71,6 +76,7 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -78,6 +84,8 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 
     /**
      * The border color for the crosshair label
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -101,6 +109,7 @@ public class CrosshairLabel extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -110,6 +119,8 @@ public class CrosshairLabel extends AbstractConfigurationObject {
      * The border width for the crosshair label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;

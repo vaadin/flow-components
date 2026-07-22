@@ -14,6 +14,8 @@ export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
   initLazy: (grid: Grid) => void;
   updateSize: (size: number) => void;
+  updateUniqueItemIdPath: (path: string) => void;
+  hasRootRequestQueue: () => boolean;
   set: (index: number, items: any[]) => void;
   confirm: (index: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
@@ -22,7 +24,10 @@ export type GridConnector = {
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number) => void;
   setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
-  setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
+  getRenderedRange: () => [number, number];
+  setHeaderRenderer: (column: GridColumn, options: { content: Node | string | null, showSorter?: boolean, sorterPath?: string }) => void;
+  setFooterRenderer: (column: GridColumn, options: { content: Node | string | null }) => void;
+  scrollToItem: (itemKey: string, index: number) => void;
 };
 
 export type GridServer = {
@@ -36,6 +41,7 @@ export type GridServer = {
   setViewportRange: ((firstIndex: number, size: number) => Promise<void>) & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
   sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
   setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
+  updateContextMenuTargetItem: ((key: string, columnId: string) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
@@ -49,6 +55,9 @@ export type Item = {
   detailsOpened?: boolean;
   style?: Record<string, string>;
   part?: Record<string, string>;
+  dragData?: Record<string, string>;
+  dragDisabled?: boolean;
+  dropDisabled?: boolean;
 };
 
 export type FlowGrid = Grid<Item> & {
@@ -56,9 +65,14 @@ export type FlowGrid = Grid<Item> & {
   $server: GridServer;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
+  __dragDataTypes?: string[];
+  __selectionDragData?: Record<string, string>;
+  __selectionDraggedItemsCount?: number;
   _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+  preventContextMenu: (event: Event) => boolean;
+  getContextMenuBeforeOpenDetail: (event: { detail: { sourceEvent?: Event } }) => { key: string, columnId: string };
 };
 
 export type FlowGridSorter = GridSorter & {
@@ -102,6 +116,7 @@ export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector):
     }),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
+    updateContextMenuTargetItem: sinon.spy(),
   };
 
   gridConnector.initLazy(grid);
@@ -131,12 +146,25 @@ export function getHeaderCellContent(column: GridColumn): HTMLElement {
 }
 
 /**
- * Returns a cell in the grid body.
+ * Returns the content of a footer cell.
+ */
+export function getFooterCellContent(column: GridColumn): HTMLElement {
+  return (column as any)._footerCell._content as HTMLElement;
+}
+
+/**
+ * Returns a row in the grid body.
+ */
+export function getBodyRow(grid: Grid, rowIndex: number): HTMLElement | null {
+  const row = [...grid.shadowRoot!.querySelectorAll('.row')].find((row) => (row as any).index === rowIndex);
+  return row as HTMLElement ?? null;
+}
+
+/**
+ * Returns a cell in a grid body row.
  */
 export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
-  const items = grid.shadowRoot!.querySelector(`#items`)!;
-
-  const row = [...items.children].find((row) => (row as any).index === rowIndex);
+  const row = getBodyRow(grid, rowIndex);
   if (!row) {
     return null;
   }
@@ -148,6 +176,13 @@ export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): 
   }).map(cell => cell as HTMLElement);
 
   return cellsInVisualOrder[columnIndex];
+}
+
+/**
+ * Returns the details cell in a grid body row.
+ */
+export function getDetailsCell(grid: Grid, rowIndex: number): HTMLElement | null {
+  return getBodyRow(grid, rowIndex)?.querySelector('.details-cell') ?? null;
 }
 
 /**

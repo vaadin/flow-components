@@ -22,6 +22,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.BarSerie
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ColumnSeriesData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Stacking;
 
+/**
+ * @since 24.0
+ */
 public class BarSeriesReader
         extends AbstractSeriesReader<CTBarSer, ColumnSeriesData> {
 

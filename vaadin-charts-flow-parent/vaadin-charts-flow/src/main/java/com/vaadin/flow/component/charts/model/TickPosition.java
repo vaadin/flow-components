@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * The position of the tick marks relative to the axis line. Can be one of
  * INSIDE and OUTSIDE. Defaults to OUTSIDE.
+ * 
+ * @since 6.0.1
  */
 public enum TickPosition implements ChartEnum {
     INSIDE("inside"), OUTSIDE("outside");

@@ -29,9 +29,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * values.
  *
  * @author Vaadin Ltd.
+ * @since 25.2
  */
 @Tag("vaadin-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/slider", version = "25.3.0-alpha6")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     /**

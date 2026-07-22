@@ -37,7 +37,7 @@ Shared modules used across components:
 - Extend Flow `Component` and implement mixin interfaces like `HasText`, `HasEnabled`, `ClickNotifier`
 - Use `@Tag` and `@JsModule` annotations to link to the corresponding Vaadin web component
 - Can have theme variants by implementing the `HasThemeVariant` interface and defining an enum for variants extending from `ThemeVariant`
-- Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/resources/frontend`
+- Some components use additional client-side JavaScript for integrating with the web component or to add extra functionality. These so-called "connectors" are located in `src/main/resources/META-INF/frontend`
 - Connector initialization, as well as any inline JavaScript run with `Element.executeJs()`, are run in the component's attach handler to ensure they are always run again when Flow creates a new element for the same component instance on the client side
 
 ### Testing
@@ -51,6 +51,15 @@ Shared modules used across components:
   - Each test consists of a test setup in form of a Vaadin Flow view and a JUnit test class
   - Both are linked using `@Route` and `@TestPath` annotations
   - New integration tests should extend from `com.vaadin.tests.AbstractComponentIT`
+- Client-side unit tests:
+  - Using web-test-runner (WTR) with Mocha, Chai and Sinon
+  - Test connector JavaScript in isolation, without a server
+  - Located in `vaadin-{component}-flow-integration-tests/test/*.test.ts` (only some components have them)
+  - Always run through `node scripts/wtr.js` (see below) — do not invoke `npx web-test-runner` directly, the script prepares the frontend bundle first
+
+## Conventions
+
+Conventions are listed in CONVENTIONS.md. Read and apply these rules when **authoring code** or **reviewing code**. 
 
 ## Development Commands
 
@@ -76,7 +85,13 @@ mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integr
 mvn verify -am -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests -Dit.test='{file-pattern}' -DskipUnitTests
 
 # Start integration test server for a component
-mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
+mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -q -DskipTests -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests
+
+# Run client-side unit tests (WTR) for a component
+node scripts/wtr.js {component}
+
+# Run specific client-side unit test files (relative to the module's test/ folder)
+node scripts/wtr.js {component} --files {file-or-glob}
 ```
 
 **Notes on test commands**:
@@ -86,11 +101,12 @@ mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -am 
 - Integration tests can fail if the 8080 port is already in use. At that point stop and ask the user whether to kill the process using that port. If you started the server yourself and want to run tests against it, add `-DskipJetty` to the integration test command.
 - When waiting for the server to start, use `TaskOutput` with `block=false` to poll the background task output for the message "Frontend compiled successfully" rather than using arbitrary sleep commands.
 - To stop a running Jetty server, run `mvn jetty:stop -pl vaadin-{component}-flow-parent/vaadin-{component}-flow-integration-tests`. Do not use `TaskStop` on the background `jetty:run` task — that terminates the Maven wrapper but leaves the forked Jetty JVM running and holding port 8080.
+- `node scripts/wtr.js {component}` takes the short component name (e.g. `grid`, not `vaadin-grid-flow-parent`). It runs the component's whole WTR suite unless you pass `--files`, which targets a specific file or glob under the module's `test/` folder (e.g. `--files grid-connector-sorting.test.ts` or `--files 'grid-connector-selection*'`).
 
 ### Code Quality
 
 ```sh
-# Format code
+# Format code, must be run before every commit
 mvn spotless:apply
 
 # Run checkstyle validation

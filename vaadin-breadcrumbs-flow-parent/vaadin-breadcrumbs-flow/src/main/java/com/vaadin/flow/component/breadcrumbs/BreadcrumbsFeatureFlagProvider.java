@@ -25,6 +25,7 @@ import com.vaadin.experimental.FeatureFlagProvider;
  * {@link Breadcrumbs} component.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class BreadcrumbsFeatureFlagProvider implements FeatureFlagProvider {
 
@@ -35,7 +36,7 @@ public class BreadcrumbsFeatureFlagProvider implements FeatureFlagProvider {
     public static final Feature BREADCRUMBS_COMPONENT = new Feature(
             "Breadcrumbs component", // title
             "breadcrumbsComponent", // id
-            "https://github.com/vaadin/web-components/issues/7960", // moreInfoLink
+            "https://vaadin.com/docs/latest/components/breadcrumbs", // moreInfoLink
             true, // requiresServerRestart
             "com.vaadin.flow.component.breadcrumbs.Breadcrumbs"); // componentClassName
 

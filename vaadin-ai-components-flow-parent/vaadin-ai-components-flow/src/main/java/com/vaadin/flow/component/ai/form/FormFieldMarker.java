@@ -20,13 +20,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Bridges {@link FormAIController#showHighlight} /
- * {@link FormAIController#hideHighlight} to the {@code vaadin-ai-field-marker}
- * web component, which annotates a field as AI-filled and offers a popover to
- * review and revert the value. It also toggles the field's "AI is working"
- * shimmer ({@link #startWorking} / {@link #stopWorking}) shown while a fill is
- * in progress. The annotations on this class load the web component on the
- * client.
+ * Bridges {@link FormAIController#showFieldHighlight} /
+ * {@link FormAIController#hideFieldHighlight} to the
+ * {@code vaadin-ai-field-marker} web component, which annotates a field as
+ * AI-filled and offers a popover to review and revert the value. It also
+ * toggles the field's "AI is working" shimmer ({@link #startWorking} /
+ * {@link #stopWorking}) shown while a fill is in progress. The annotations on
+ * this class load the web component on the client.
  */
 @NpmPackage(value = "@vaadin/field-base", version = "25.2.0-beta2")
 @JsModule("@vaadin/field-base/src/vaadin-ai-field-marker.js")
@@ -60,36 +60,38 @@ final class FormFieldMarker {
      * the AI is about to overwrite. The read-only state is set on the client
      * only — it is a UX guard, not a server-side state change — and the field's
      * own inputs are updated too for a {@code vaadin-custom-field}, which does
-     * not propagate {@code readonly} to them. The shimmer animation lives in the
-     * marker's stylesheet, which is adopted into the DOM only by {@code mark} /
-     * {@code unmark}; calling {@code unmark} on a field that has no marker yet
-     * adopts the stylesheet without other effect, so it is invoked only when no
-     * marker is present (a marked field keeps its badge through the working
-     * state).
+     * not propagate {@code readonly} to them. The shimmer animation lives in
+     * the marker's stylesheet, which is adopted into the DOM only by
+     * {@code mark} / {@code unmark}; calling {@code unmark} on a field that has
+     * no marker yet adopts the stylesheet without other effect, so it is
+     * invoked only when no marker is present (a marked field keeps its badge
+     * through the working state).
      */
     static void startWorking(Element field) {
-        field.executeJs("""
-                if (!this.querySelector('vaadin-ai-field-marker')) {
-                  customElements.get('vaadin-ai-field-marker').unmark(this);
-                }
-                this.classList.add('ai-working');
-                this.readonly = true;
-                if (this.localName === 'vaadin-custom-field') {
-                  (this.inputs ?? []).forEach((input) => { input.readonly = true; });
-                }""");
+        field.executeJs(
+                """
+                        if (!this.querySelector('vaadin-ai-field-marker')) {
+                          customElements.get('vaadin-ai-field-marker').unmark(this);
+                        }
+                        this.classList.add('ai-working');
+                        this.readonly = true;
+                        if (this.localName === 'vaadin-custom-field') {
+                          (this.inputs ?? []).forEach((input) => { input.readonly = true; });
+                        }""");
     }
 
     /**
-     * Clears the "AI is working" state set by {@link #startWorking}: removes the
-     * shimmer and the client-side read-only guard, leaving any AI marker the
-     * fill applied in place.
+     * Clears the "AI is working" state set by {@link #startWorking}: removes
+     * the shimmer and the client-side read-only guard, leaving any AI marker
+     * the fill applied in place.
      */
     static void stopWorking(Element field) {
-        field.executeJs("""
-                this.classList.remove('ai-working');
-                this.readonly = false;
-                if (this.localName === 'vaadin-custom-field') {
-                  (this.inputs ?? []).forEach((input) => { input.readonly = false; });
-                }""");
+        field.executeJs(
+                """
+                        this.classList.remove('ai-working');
+                        this.readonly = false;
+                        if (this.localName === 'vaadin-custom-field') {
+                          (this.inputs ?? []).forEach((input) => { input.readonly = false; });
+                        }""");
     }
 }

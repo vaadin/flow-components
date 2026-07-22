@@ -41,7 +41,7 @@ class IdStorageTest {
         // production code reads it from.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.describe(field, "X");
+        controller.describeField(field, "X");
 
         Assertions.assertNotNull(idOf(field),
                 "A Component that implements HasValue must receive an id "
@@ -54,7 +54,7 @@ class IdStorageTest {
         var controller = new FormAIController(new Div());
 
         var ex = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> controller.describe(detached, "X"));
+                () -> controller.describeField(detached, "X"));
         Assertions.assertTrue(ex.getMessage().contains("Component"),
                 "Rejection message must point at the Component-backing "
                         + "requirement; got: " + ex.getMessage());
@@ -68,11 +68,11 @@ class IdStorageTest {
         var field = new TestField();
         var form = new Div(field);
         var firstController = new FormAIController(form);
-        firstController.describe(field, "X");
+        firstController.describeField(field, "X");
         var firstId = idOf(field);
 
         var secondController = new FormAIController(form);
-        secondController.describe(field, "Y");
+        secondController.describeField(field, "Y");
         var secondId = idOf(field);
 
         Assertions.assertEquals(firstId, secondId,
@@ -85,8 +85,8 @@ class IdStorageTest {
         var a = new TestField();
         var b = new TestField();
         var controller = new FormAIController(new Div(a, b));
-        controller.describe(a, "A");
-        controller.describe(b, "B");
+        controller.describeField(a, "A");
+        controller.describeField(b, "B");
 
         Assertions.assertNotEquals(idOf(a), idOf(b),
                 "Two distinct Components must get distinct field ids");

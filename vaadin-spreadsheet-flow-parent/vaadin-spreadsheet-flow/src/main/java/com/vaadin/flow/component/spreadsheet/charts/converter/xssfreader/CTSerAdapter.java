@@ -19,6 +19,8 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.Utils;
  * This is an adapter for CT*Ser classes to use reflection to call some common
  * methods, as they don't declare implementing a common interface, although
  * share many methods.
+ * 
+ * @since 24.0
  */
 public class CTSerAdapter {
     private XmlObject ctSer;

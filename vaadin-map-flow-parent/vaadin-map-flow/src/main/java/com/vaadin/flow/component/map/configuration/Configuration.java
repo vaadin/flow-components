@@ -25,6 +25,8 @@ import com.vaadin.flow.component.map.configuration.layer.Layer;
 
 /**
  * Contains the configuration for the map, such as layers, sources, features.
+ * 
+ * @since 23.0
  */
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
@@ -105,6 +107,7 @@ public class Configuration extends AbstractConfigurationObject {
      * The list of controls added to the map. This returns an immutable list.
      * 
      * @return the list of controls added to the map
+     * @since 25.1
      */
     @JsonIgnore
     public List<Control> getControls() {
@@ -116,6 +119,7 @@ public class Configuration extends AbstractConfigurationObject {
      * list.
      *
      * @return the list of visible controls added to the map
+     * @since 25.1
      */
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
@@ -132,6 +136,7 @@ public class Configuration extends AbstractConfigurationObject {
      *            the control to be added
      * @throws IllegalArgumentException
      *             if a control of the same type already exists
+     * @since 25.1
      */
     public void addControl(Control control) {
         Objects.requireNonNull(control);
@@ -154,6 +159,7 @@ public class Configuration extends AbstractConfigurationObject {
      *
      * @param control
      *            the control to be removed
+     * @since 25.1
      */
     public void removeControl(Control control) {
         Objects.requireNonNull(control);

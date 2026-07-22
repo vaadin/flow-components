@@ -74,7 +74,7 @@
     </scm>
     <properties>
         <flow.version>25.3-SNAPSHOT</flow.version>
-        <testbench.version>25.2.0-beta1</testbench.version>
+        <testbench.version>25.2.0</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -86,8 +86,8 @@
         <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <spotless.plugin.version>3.7.0</spotless.plugin.version>
-        <checkstyle.version>13.6.0</checkstyle.version>
+        <spotless.plugin.version>3.8.0</spotless.plugin.version>
+        <checkstyle.version>13.8.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -96,7 +96,7 @@
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
         <failIfNoTests>false</failIfNoTests>
-        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
+        <vaadin.pnpm.enable>true</vaadin.pnpm.enable>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName/>
@@ -104,10 +104,10 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.1.0</spring-data-commons.version>
         <reactor-core.version>3.8.6</reactor-core.version>
-        <langchain4j.version>1.16.3</langchain4j.version>
+        <langchain4j.version>1.17.2</langchain4j.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <junit.version>4.13.2</junit.version>
-        <junit.jupiter.version>6.1.0</junit.jupiter.version>
+        <junit.jupiter.version>6.1.2</junit.jupiter.version>
 
         <!-- spreadsheet -->
         <poi.version>5.5.1</poi.version>
@@ -460,28 +460,6 @@
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven.resources.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>copy-resources-for-demo-website</id>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <phase>process-resources</phase>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
-                                <overwrite>true</overwrite>
-                                <resources>
-                                    <resource>
-                                        <directory>src/test/java</directory>
-                                    </resource>
-                                    <resource>
-                                        <directory>src/main/webapp</directory>
-                                        <targetPath>META-INF/resources</targetPath>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>com.vaadin</groupId>

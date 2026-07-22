@@ -101,9 +101,10 @@ import com.vaadin.flow.signals.Signal;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.3.0-alpha6")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
@@ -199,6 +200,7 @@ public class RadioButtonGroup<T>
      * @param label
      *            the label describing the radio button group
      * @see #setLabel(String)
+     * @since 23.1
      */
     public RadioButtonGroup(String label) {
         this();
@@ -215,6 +217,7 @@ public class RadioButtonGroup<T>
      *            the items to be shown in the list of the radio button group
      * @see #setLabel(String)
      * @see #setItems(Collection)
+     * @since 23.1
      */
     public RadioButtonGroup(String label, Collection<T> items) {
         this(label);
@@ -231,6 +234,7 @@ public class RadioButtonGroup<T>
      *            the items to be shown in the list of the radio button group
      * @see #setLabel(String)
      * @see #setItems(Object...)
+     * @since 23.1
      */
     @SafeVarargs
     public RadioButtonGroup(String label, T... items) {
@@ -244,6 +248,7 @@ public class RadioButtonGroup<T>
      * @param listener
      *            the value change listener to add
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public RadioButtonGroup(
             ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
@@ -261,6 +266,7 @@ public class RadioButtonGroup<T>
      *            the value change listener to add
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public RadioButtonGroup(String label,
             ValueChangeListener<ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
@@ -281,6 +287,7 @@ public class RadioButtonGroup<T>
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
      * @see #setItems(Object...)
+     * @since 23.1
      */
     @SafeVarargs
     public RadioButtonGroup(String label,
@@ -335,6 +342,7 @@ public class RadioButtonGroup<T>
      *
      * @return the list data view that provides access to the data bound to the
      *         RadioButtonGroup
+     * @since 18.0
      */
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
@@ -350,6 +358,7 @@ public class RadioButtonGroup<T>
      *
      * @return the generic DataView instance implementing
      *         {@link RadioButtonGroupDataView}
+     * @since 18.0
      */
     @Override
     public RadioButtonGroupDataView<T> getGenericDataView() {
@@ -377,6 +386,7 @@ public class RadioButtonGroup<T>
      *
      * @param dataProvider
      *            DataProvider instance to use, not <code>null</code>
+     * @since 24.2
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
@@ -406,6 +416,7 @@ public class RadioButtonGroup<T>
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
+     * @since 23.0
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
@@ -420,6 +431,7 @@ public class RadioButtonGroup<T>
      * in the radio button group for each item.
      *
      * @return the item label generator used, not null
+     * @since 23.0
      */
     public ItemLabelGenerator<T> getItemLabelGenerator() {
         return itemLabelGenerator;
@@ -463,6 +475,7 @@ public class RadioButtonGroup<T>
      * instead.
      *
      * @return the data provider used by this RadioButtonGroup
+     * @since 24.2
      */
     public DataProvider<T, ?> getDataProvider() {
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
@@ -550,6 +563,7 @@ public class RadioButtonGroup<T>
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -561,6 +575,7 @@ public class RadioButtonGroup<T>
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -571,6 +586,7 @@ public class RadioButtonGroup<T>
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
      * @return {@code true} if the field is required, {@code false} otherwise
+     * @since 1.1
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -582,6 +598,7 @@ public class RadioButtonGroup<T>
      * @param required
      *            {@code true} to make the field required, {@code false}
      *            otherwise
+     * @since 1.1
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
@@ -592,6 +609,7 @@ public class RadioButtonGroup<T>
      *
      * @param label
      *            value for the {@code label} property in the webcomponent
+     * @since 1.1
      */
     public void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
@@ -601,6 +619,7 @@ public class RadioButtonGroup<T>
      * String used for the label element.
      *
      * @return the {@code label} property from the webcomponent
+     * @since 1.1
      */
     public String getLabel() {
         return getElement().getProperty("label");
@@ -616,6 +635,7 @@ public class RadioButtonGroup<T>
      *            the selection preservation mode to switch to, not {@code null}
      *
      * @see SelectionPreservationMode
+     * @since 24.4
      */
     public void setSelectionPreservationMode(
             SelectionPreservationMode selectionPreservationMode) {
@@ -629,6 +649,7 @@ public class RadioButtonGroup<T>
      * @return the selection preservation mode
      *
      * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     * @since 24.4
      */
     public SelectionPreservationMode getSelectionPreservationMode() {
         return selectionPreservationHandler.getSelectionPreservationMode();
@@ -776,6 +797,7 @@ public class RadioButtonGroup<T>
      *            the second instance
      * @return <code>true</code> if the instances are equal; otherwise
      *         <code>false</code>
+     * @since 18.0
      */
     @Override
     protected boolean valueEquals(T value1, T value2) {
@@ -890,6 +912,8 @@ public class RadioButtonGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 24.0
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -903,6 +927,7 @@ public class RadioButtonGroup<T>
      * {@link #setI18n(RadioButtonGroupI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public RadioButtonGroupI18n getI18n() {
         return i18n;
@@ -913,6 +938,7 @@ public class RadioButtonGroup<T>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(RadioButtonGroupI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -926,6 +952,8 @@ public class RadioButtonGroup<T>
 
     /**
      * The internationalization properties for {@link RadioButtonGroup}.
+     * 
+     * @since 24.5
      */
     public static class RadioButtonGroupI18n implements Serializable {
 

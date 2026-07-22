@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasElement;
  * pasting text.
  *
  * @author Vaadin Ltd
+ * @since 23.2
  */
 public interface HasAllowedCharPattern extends HasElement {
 

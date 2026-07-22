@@ -20,6 +20,8 @@ import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Fired when viewport movement has ended.
+ * 
+ * @since 23.0
  */
 @DomEvent("map-view-moveend")
 public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {

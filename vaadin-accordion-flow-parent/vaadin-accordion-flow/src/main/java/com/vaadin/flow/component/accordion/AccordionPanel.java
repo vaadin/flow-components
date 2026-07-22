@@ -23,9 +23,11 @@ import com.vaadin.flow.component.details.Details;
 
 /**
  * An accordion panel which could be opened or closed.
+ * 
+ * @since 1.0
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/accordion", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/accordion", version = "25.3.0-alpha6")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 
@@ -51,6 +53,7 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary component to set.
      * @see #setSummaryText(String)
+     * @since 23.1
      */
     public AccordionPanel(String summary) {
         this();
@@ -63,6 +66,7 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary component to set.
      * @see #setSummary(Component)
+     * @since 23.1
      */
     public AccordionPanel(Component summary) {
         this();
@@ -104,6 +108,7 @@ public class AccordionPanel extends Details {
      *
      * @see #setSummaryText(String)
      * @see #add(Component...)
+     * @since 23.1
      */
     public AccordionPanel(String summary, Component... components) {
         this(summary);
@@ -121,6 +126,7 @@ public class AccordionPanel extends Details {
      *
      * @see #setSummary(Component)
      * @see #add(Component...)
+     * @since 23.1
      */
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
@@ -131,6 +137,7 @@ public class AccordionPanel extends Details {
      * Creates the summary container component.
      *
      * @return the summary container
+     * @since 24.0
      */
     protected Component createSummaryContainer() {
         return new AccordionHeading();

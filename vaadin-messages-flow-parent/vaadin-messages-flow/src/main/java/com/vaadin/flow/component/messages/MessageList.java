@@ -50,11 +50,12 @@ import com.vaadin.flow.signals.Signal;
  * can be configured with {@link #setItems(Collection)}.
  *
  * @author Vaadin Ltd.
+ * @since 14.7
  */
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/message-list", version = "25.3.0-alpha6")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
@@ -111,7 +112,7 @@ public class MessageList extends Component
      * @param itemsSignal
      *            the signal to bind the items to, not {@code null}
      * @see #bindItems(Signal)
-     * @since 25.1
+     * @since 25.2
      */
     public <S extends Signal<MessageListItem>> MessageList(
             Signal<List<S>> itemsSignal) {
@@ -157,6 +158,7 @@ public class MessageList extends Component
      *
      * @param item
      *            the item to add, not {@code null}
+     * @since 24.8
      */
     public void addItem(MessageListItem item) {
         SignalBindingUtil.throwIfBindingActive(this, ITEMS_BINDING);
@@ -195,7 +197,7 @@ public class MessageList extends Component
      *            the type of signal holding individual items
      * @param itemsSignal
      *            the signal to bind the items to, not {@code null}
-     * @since 25.1
+     * @since 25.2
      */
     public <S extends Signal<MessageListItem>> SignalBinding<List<S>> bindItems(
             Signal<List<S>> itemsSignal) {
@@ -345,6 +347,7 @@ public class MessageList extends Component
      *
      * @param markdown
      *            {@code true} if the message text is parsed as Markdown.
+     * @since 24.8
      */
     public void setMarkdown(boolean markdown) {
         getElement().setProperty("markdown", markdown);
@@ -354,6 +357,7 @@ public class MessageList extends Component
      * Returns whether the messages are parsed as markdown.
      *
      * @return {@code true} if the message text is parsed as Markdown.
+     * @since 24.8
      */
     public boolean isMarkdown() {
         return getElement().getProperty("markdown", false);
@@ -367,6 +371,7 @@ public class MessageList extends Component
      * @param announceMessages
      *            {@code true} if new messages should be announced to assistive
      *            technologies.
+     * @since 24.8
      */
     public void setAnnounceMessages(boolean announceMessages) {
         getElement().setProperty("announceMessages", announceMessages);
@@ -377,6 +382,7 @@ public class MessageList extends Component
      *
      * @return {@code true} if new messages are announced to assistive
      *         technologies.
+     * @since 24.8
      */
     public boolean isAnnounceMessages() {
         return getElement().getProperty("announceMessages", false);
@@ -388,6 +394,7 @@ public class MessageList extends Component
      * @param listener
      *            the listener to add
      * @return a registration that can be used to remove the listener
+     * @since 25.1
      */
     public Registration addAttachmentClickListener(
             ComponentEventListener<AttachmentClickEvent> listener) {
@@ -400,6 +407,8 @@ public class MessageList extends Component
      * Note: This event listens to the {@code attachment-click-flow} event
      * dispatched by the connector, which enriches the web component's
      * {@code attachment-click} event with item and attachment indexes.
+     * 
+     * @since 25.1
      */
     @DomEvent("attachment-click-flow")
     public static class AttachmentClickEvent

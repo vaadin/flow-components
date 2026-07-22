@@ -20,6 +20,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * an X, Y and Z value. Each points is drawn as a bubble where the position
  * along the X and Y axes mark the X and Y values, and the size of the bubble
  * relates to the Z value. Requires <code>highcharts-more.js</code>.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsBubble extends AbstractPlotOptions {
 
@@ -149,6 +151,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -159,6 +162,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -166,6 +171,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -190,6 +196,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -215,6 +223,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -227,6 +236,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>z</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -234,6 +245,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -248,6 +260,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -294,6 +308,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -319,6 +334,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -527,6 +544,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -536,6 +554,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * The width of the line connecting the data points.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -631,6 +651,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -642,6 +663,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * color is used.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -649,6 +672,7 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -658,6 +682,8 @@ public class PlotOptionsBubble extends AbstractPlotOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

@@ -130,7 +130,6 @@ function runJetty(module, modeKey) {
   const args = [
     'package',
     'jetty:run',
-    '-Dvaadin.pnpm.enable',
     '-Dvaadin.frontend.hotdeploy=true',
     '-Djetty.scan=5',
     '-am',
@@ -156,7 +155,6 @@ function runUnitTests(module, modeKey, pattern = '') {
 function runIntegrationTests(module, modeKey, pattern = '') {
   const args = [
     'verify',
-    '-Dvaadin.pnpm.enable',
     '-Dvaadin.frontend.hotdeploy=true',
     '-am',
     '-B',

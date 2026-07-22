@@ -17,8 +17,6 @@ package com.vaadin.flow.component.ai.tests;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.UI;
@@ -87,10 +85,6 @@ public class FormAIChatPage extends Div {
             new Country("GB", "United Kingdom"),
             new Country("US", "United States"));
 
-    private static final Map<String, Country> COUNTRIES_BY_NAME = COUNTRIES
-            .stream()
-            .collect(Collectors.toUnmodifiableMap(Country::name, c -> c));
-
     private static final List<Project> PROJECTS = List.of(
             new Project("P-1001", "Apollo Redesign"),
             new Project("P-1002", "Beacon Migration"),
@@ -107,10 +101,6 @@ public class FormAIChatPage extends Div {
             new Project("P-1013", "Meridian Marketplace"),
             new Project("P-1014", "Nimbus Infra"),
             new Project("P-1015", "Orion Outreach"));
-
-    private static final Map<String, Project> PROJECTS_BY_LABEL = PROJECTS
-            .stream().collect(Collectors
-                    .toUnmodifiableMap(FormAIChatPage::projectLabel, p -> p));
 
     private FormLayout form;
     private ComboBox<Country> country;
@@ -135,16 +125,12 @@ public class FormAIChatPage extends Div {
         form = buildExpenseForm();
 
         var formController = new FormAIController(form);
-        formController.valueOptions(
-                ValueOptions.forField(country)
-                        .options((filter, limit) -> filterCountries(filter)
-                                .map(Country::name).limit(limit).toList()),
-                COUNTRIES_BY_NAME::get);
-        formController.valueOptions(ValueOptions.forField(projects)
-                .options((filter, limit) -> filterProjects(filter)
-                        .map(FormAIChatPage::projectLabel).limit(limit)
-                        .toList()),
-                PROJECTS_BY_LABEL::get);
+        formController.fieldValueOptions(ValueOptions.forField(country)
+                .options((filter, limit) -> filterCountries(filter).limit(limit)
+                        .toList()));
+        formController.fieldValueOptions(ValueOptions.forField(projects)
+                .options((filter, limit) -> filterProjects(filter).limit(limit)
+                        .toList()));
 
         var messageList = new MessageList();
         messageList.setWidthFull();

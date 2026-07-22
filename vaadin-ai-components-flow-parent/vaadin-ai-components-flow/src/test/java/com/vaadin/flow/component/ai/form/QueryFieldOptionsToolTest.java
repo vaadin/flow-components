@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.form.FormTestFields.Project;
+import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
 
@@ -41,13 +43,13 @@ class QueryFieldOptionsToolTest {
 
     @Test
     void queryFieldOptionsReturnsRegisteredOptions() {
-        // End-to-end: register valueOptions on a field, then drive the tool
-        // the way an LLM would — call getTools().execute(...) with the field
-        // id. Pins the wiring from valueOptions registration through
-        // ToolCallbacks to the query function.
+        // End-to-end: register fieldValueOptions on a field, then drive the
+        // tool the way an LLM would — call getTools().execute(...) with the
+        // field id. Pins the wiring from fieldValueOptions registration
+        // through ToolCallbacks to the query function.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("apple", "banana", "cherry")));
         controller.onRequest();
 
@@ -58,21 +60,21 @@ class QueryFieldOptionsToolTest {
                         + "returned, got: " + result);
         Assertions.assertFalse(result.contains("Error"),
                 "Tool must not error for a field that was registered with "
-                        + "valueOptions, got: " + result);
+                        + "fieldValueOptions, got: " + result);
     }
 
     @Test
     void queryFieldOptionsReportsUnknownFieldId() {
         // When the LLM sends a field id the controller doesn't recognize
         // (hallucinated, stale, or for a field that was registered with
-        // describe()/ignore() but not valueOptions), the tool must surface a
-        // specific 'unknown field id' error including the id itself so the
-        // LLM can correlate parallel tool calls and recover.
+        // describeField()/ignoreField() but not fieldValueOptions), the tool
+        // must surface a specific 'unknown field id' error including the id
+        // itself so the LLM can correlate parallel tool calls and recover.
         var registered = new TestField();
         var unregistered = new TestField();
         var controller = new FormAIController(
                 new Div(registered, unregistered));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(registered).options(List.of("apple")));
         controller.onRequest();
 
@@ -92,7 +94,7 @@ class QueryFieldOptionsToolTest {
 
         Assertions.assertTrue(
                 resultFieldWithoutOptions.contains("Unknown field id"),
-                "Field that was never registered with valueOptions should "
+                "Field that was never registered with fieldValueOptions should "
                         + "produce the same unknown-id error, got: "
                         + resultFieldWithoutOptions);
         Assertions.assertTrue(
@@ -109,7 +111,7 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedLimit.set(limit);
                     return List.of();
@@ -150,7 +152,7 @@ class QueryFieldOptionsToolTest {
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedFilter.set(filter);
                     capturedLimit.set(limit);
@@ -172,7 +174,7 @@ class QueryFieldOptionsToolTest {
         var capturedFilter = new AtomicReference<String>();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedFilter.set(filter);
                     capturedLimit.set(limit);
@@ -190,7 +192,7 @@ class QueryFieldOptionsToolTest {
     void queryFieldOptionsEmitsOneLinePerLabel() {
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("Apollo #P-1", "Polaris #P-2")));
         controller.onRequest();
 
@@ -204,7 +206,7 @@ class QueryFieldOptionsToolTest {
         var field = new TestField();
         var capturedLimit = new AtomicInteger();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     capturedLimit.set(limit);
                     // Return more items than the cap so truncation kicks in.
@@ -238,7 +240,7 @@ class QueryFieldOptionsToolTest {
         // message should only appear when items were dropped.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("only-one")));
         controller.onRequest();
 
@@ -256,7 +258,7 @@ class QueryFieldOptionsToolTest {
         // explicit signal rather than just "".
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of()));
         controller.onRequest();
 
@@ -276,7 +278,7 @@ class QueryFieldOptionsToolTest {
         // original label.
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(ValueOptions.forField(field)
+        controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of("first\nsecond", "third")));
         controller.onRequest();
 
@@ -300,7 +302,7 @@ class QueryFieldOptionsToolTest {
                 + "TOKEN=abc123";
         var field = new TestField();
         var controller = new FormAIController(new Div(field));
-        controller.valueOptions(
+        controller.fieldValueOptions(
                 ValueOptions.forField(field).options((filter, limit) -> {
                     throw new IllegalStateException(sentinel);
                 }));
@@ -319,6 +321,47 @@ class QueryFieldOptionsToolTest {
                 result.contains("jdbc:") || result.contains("TOKEN="),
                 "Fragments of the exception message must not leak either, "
                         + "got: " + result);
+    }
+
+    @Test
+    void queryFieldOptionsRendersItemsViaExplicitItemLabelGenerator() {
+        // Items returned by the query callback are rendered through the
+        // labeler chain before the LLM sees them. An explicit labeler on
+        // ValueOptions wins over the field's own setItemLabelGenerator,
+        // so the LLM can pick from labels different from the UI ones.
+        var alpha = new Project("P-1", "Alpha");
+        var beta = new Project("P-2", "Beta");
+        var combo = new SingleSelectField<Project>();
+        combo.setItemLabelGenerator(Project::name);
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of(alpha, beta))
+                .itemLabelGenerator(Project::code));
+        controller.onRequest();
+
+        var result = executeQueryFieldOptions(controller, combo, "", 10);
+
+        Assertions.assertEquals("P-1\nP-2\n", result,
+                "query_field_options labels must come from the explicit "
+                        + "ValueOptions labeler, got: " + result);
+    }
+
+    @Test
+    void queryFieldOptionsRendersItemsViaFieldsItemLabelGeneratorByDefault() {
+        // With no explicit labeler on ValueOptions, the query callback's
+        // items render through the field's setItemLabelGenerator. No
+        // duplication of the V-to-label mapping at registration time.
+        var alpha = new Project("P-1", "Alpha");
+        var combo = new SingleSelectField<Project>();
+        combo.setItemLabelGenerator(Project::name);
+        var controller = new FormAIController(new Div(combo));
+        controller.fieldValueOptions(ValueOptions.forField(combo)
+                .options((filter, limit) -> List.of(alpha)));
+        controller.onRequest();
+
+        var result = executeQueryFieldOptions(controller, combo, "", 10);
+
+        Assertions.assertEquals("Alpha\n", result);
     }
 
     @Test

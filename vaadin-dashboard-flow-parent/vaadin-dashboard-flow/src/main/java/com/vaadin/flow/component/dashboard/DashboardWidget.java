@@ -24,10 +24,11 @@ import com.vaadin.flow.signals.Signal;
  * @see Dashboard
  *
  * @author Vaadin Ltd
+ * @since 24.6
  */
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-alpha6")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;
@@ -239,6 +240,7 @@ public class DashboardWidget extends Component {
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override

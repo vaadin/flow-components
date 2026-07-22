@@ -2550,6 +2550,34 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void sessionContextToolDescription_carriesRelativeDateGuidance() {
+        // Real LLMs often leave date fields empty on the first turn when the
+        // user writes "tomorrow" or "next Friday" because nothing in the
+        // tool surface tells them to anchor relative phrases against the
+        // date that the session-context tool carries. Pin the load-bearing
+        // phrases that close that gap; a regression here re-opens it.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var description = captor.getValue().explicitTools().getFirst()
+                .getDescription();
+
+        for (var anchor : List.of("relative", "tomorrow", "ISO", "phrase")) {
+            Assertions.assertTrue(description.contains(anchor),
+                    "Description must mention '" + anchor + "', got: "
+                            + description);
+        }
+    }
+
+    @Test
     void prompt_withCustomContextSupplier_replacesDefaultAndExposesContent() {
         stubAddMessage();
         Mockito.when(

@@ -27,6 +27,7 @@ import java.util.Objects;
  *            the end value of the range
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public record DecimalRangeSliderValue(Double start,
         Double end) implements Range<Double> {

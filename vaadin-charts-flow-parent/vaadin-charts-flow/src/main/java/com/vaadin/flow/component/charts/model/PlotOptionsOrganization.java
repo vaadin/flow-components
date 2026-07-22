@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Plot options for {@link ChartType#ORGANIZATION} charts.
+ * 
+ * @since 18.0
  */
 public class PlotOptionsOrganization extends AbstractPlotOptions {
 
@@ -438,6 +440,7 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     /**
      * @see #setLink(Link)
      * @return the link configuration
+     * @since 25.0
      */
     public Link getLink() {
         if (link == null) {
@@ -448,6 +451,8 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
 
     /**
      * Link styling options.
+     * 
+     * @since 25.0
      */
     public void setLink(Link link) {
         this.link = link;

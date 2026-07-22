@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,8 +23,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
-import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenListener;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -36,6 +33,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
  * <p>
  * Has a check box for selecting all items (cell values), and one check box per
  * unique cell value that can be found within the cells of the table column.
+ * 
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class ItemFilter extends Div implements SpreadsheetFilter {
@@ -48,9 +47,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     private ListDataProvider<String> filterOptionsProvider;
     private List<String> filterOptions = new ArrayList<>();
     private ArrayList<String> allCellValues;
-    private Collection<String> latestFilteredValues;
     private PopupButton popupButton;
-    private boolean firstUpdate = true;
     private boolean cancelValueChangeUpdate;
     private SpreadsheetFilterTable filterTable;
     private Set<Integer> filteredRows;
@@ -77,7 +74,6 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
         allCellValues = new ArrayList<>();
         filteredRows = new HashSet<>();
-        latestFilteredValues = new LinkedHashSet<>();
         initComponents();
         updateOptions();
     }
@@ -103,43 +99,11 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     }
 
     /**
-     * Initializes pop-up close listener for verifying that filter selections
-     * match with what is currently shown.
+     * Initializes the pop-up open listener that refreshes the filter options
+     * whenever the pop-up is opened.
      */
     protected void initPopupButtonListeners() {
 
-        popupButton.addPopupCloseListener(new PopupCloseListener() {
-
-            @Override
-            public void onPopupClose(PopupCloseEvent event) {
-                // need to check that the filter wasn't left a different state
-                // than what is displayed, like in case when allItems and all
-                // options were left unchecked.
-                if (!allItems.getValue()) {
-                    Collection<String> currentValue = filterCheckbox.getValue();
-                    cancelValueChangeUpdate = true;
-                    if (currentValue.isEmpty()) {
-                        if (latestFilteredValues.isEmpty()
-                                || latestFilteredValues
-                                        .containsAll(allCellValues)) {
-                            allItems.setIndeterminate(false);
-                            allItems.setValue(true);
-                            filterCheckbox
-                                    .setValue(new HashSet<>(allCellValues));
-                        } else {
-                            filterCheckbox.setValue(
-                                    new HashSet<>(latestFilteredValues));
-                        }
-                    } else {
-                        if (currentValue.containsAll(allCellValues)) {
-                            allItems.setIndeterminate(false);
-                            allItems.setValue(true);
-                        }
-                    }
-                    cancelValueChangeUpdate = false;
-                }
-            }
-        });
         popupButton.addPopupOpenListener(new PopupOpenListener() {
 
             @Override
@@ -151,7 +115,12 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
     /**
      * Creates the "Select All" filter component.
+     *
+     * @deprecated The "Select All" checkbox will be removed in Vaadin 26. It
+     *             will be replaced with dedicated "Select All" and "Clear"
+     *             buttons.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected void initAllItemsCheckbox() {
         allItems = new Checkbox("(Select All)", true);
         allItems.addValueChangeListener(event -> {
@@ -163,6 +132,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                     updateFilteredItems(allCellValues);
                 } else {
                     filterCheckbox.setValue(Collections.emptySet());
+                    updateFilteredItems(Collections.emptySet());
                 }
                 cancelValueChangeUpdate = false;
             }
@@ -178,31 +148,21 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         filterCheckbox.setItems(filterOptionsProvider);
         filterCheckbox.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         filterCheckbox.addValueChangeListener(event -> {
-            if (firstUpdate) {
-                firstUpdate = false;
-            } else {
-                if (!cancelValueChangeUpdate) {
-                    Collection<String> value = filterCheckbox.getValue();
-                    // value should not be updated when options are empty and
-                    // all
-                    // items is unchecked - just as in Excel
-                    if (!value.isEmpty()) {
-                        updateFilteredItems(value);
-                        cancelValueChangeUpdate = true;
-                        if (value.containsAll(allCellValues)) {
-                            allItems.setIndeterminate(false);
-                            if (!allItems.getValue()) {
-                                allItems.setValue(true);
-                            }
-                        } else {
-                            if (allItems.getValue()) {
-                                allItems.setValue(false);
-                                allItems.setIndeterminate(true);
-                            }
-                        }
-                        cancelValueChangeUpdate = false;
-                    }
+            if (!cancelValueChangeUpdate) {
+                Collection<String> value = filterCheckbox.getValue();
+                updateFilteredItems(value);
+                cancelValueChangeUpdate = true;
+                if (value.containsAll(allCellValues)) {
+                    allItems.setIndeterminate(false);
+                    allItems.setValue(true);
+                } else if (value.isEmpty()) {
+                    allItems.setIndeterminate(false);
+                    allItems.setValue(false);
+                } else {
+                    allItems.setValue(false);
+                    allItems.setIndeterminate(true);
                 }
+                cancelValueChangeUpdate = false;
             }
         });
     }
@@ -239,15 +199,26 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
             Collections.sort(filterOptions, byString);
         }
 
+        // Hide "Select All" when there are no values to control, i.e. all of
+        // this column's values are hidden by other columns' filters.
+        allItems.setVisible(!allCellValues.isEmpty());
+
         Set<String> visibleValues = getVisibleValues();
         cancelValueChangeUpdate = true;
-        allItems.setIndeterminate(!visibleValues.containsAll(allCellValues));
-        allItems.setValue(visibleValues.containsAll(allCellValues));
-        cancelValueChangeUpdate = false;
+        if (visibleValues.containsAll(allCellValues)) {
+            allItems.setIndeterminate(false);
+            allItems.setValue(true);
+        } else if (visibleValues.isEmpty()) {
+            allItems.setIndeterminate(false);
+            allItems.setValue(false);
+        } else {
+            allItems.setValue(false);
+            allItems.setIndeterminate(true);
+        }
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox.setItems(filterOptionsProvider);
-        firstUpdate = true;
         filterCheckbox.setValue(visibleValues);
+        cancelValueChangeUpdate = false;
     }
 
     /**
@@ -310,7 +281,6 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                 filteredRows.add(r);
             }
         }
-        latestFilteredValues = new ArrayList<>(visibleValues);
 
         filterTable.onFiltersUpdated();
     }

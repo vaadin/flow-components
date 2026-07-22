@@ -26,6 +26,7 @@ import com.vaadin.flow.data.provider.SortOrder;
  *
  * @param <T>
  *            the grid type
+ * @since 1.0
  */
 public class GridSortOrder<T> extends SortOrder<Column<T>> {
 

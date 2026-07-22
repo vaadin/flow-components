@@ -39,17 +39,11 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonSerializer;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
-@Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.2.0-rc2")
-@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
-@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
-@JsModule("./gridProConnector.js")
 /**
  * Grid Pro is an extension of the Grid component that provides inline editing
  * with full keyboard navigation.
@@ -59,7 +53,13 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid bean type
  *
+ * @since 1.0
  */
+@Tag("vaadin-grid-pro")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.3.0-alpha6")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
+@JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
+@JsModule("./gridProConnector.js")
 public class GridPro<E> extends Grid<E> {
 
     /**
@@ -105,8 +105,6 @@ public class GridPro<E> extends Grid<E> {
     }
 
     private void setup() {
-        addDataGenerator(this::generateCellEditableData);
-
         addItemPropertyChangedListener(e -> {
             if (e.getItem() == null) {
                 return;
@@ -151,7 +149,7 @@ public class GridPro<E> extends Grid<E> {
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
                 UI.getCurrentOrThrow().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.selectAll($0, $1, $2)",
+                        "window.Vaadin.Flow.gridProConnector.handleCustomEditorValueUpdate($0, $1, $2)",
                         column.getEditorField().getElement(), itemKey,
                         this.getElement());
             }
@@ -187,11 +185,6 @@ public class GridPro<E> extends Grid<E> {
     /**
      * Server-side component for the {@code <vaadin-grid-edit-column>} element.
      *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
-     *
      * @param <T>
      *            type of the underlying grid this column is compatible with
      */
@@ -219,9 +212,18 @@ public class GridPro<E> extends Grid<E> {
                 Renderer<T> renderer) {
             super(grid, columnId, renderer);
 
+            addDataGenerator(this::generateCellEditableData);
+
             addAttachListener(e -> this.getElement().executeJs(
                     "window.Vaadin.Flow.gridProConnector.initCellEditableProvider($0)",
                     this.getElement()));
+        }
+
+        private void generateCellEditableData(T item, ObjectNode jsonObject) {
+            if (cellEditableProvider != null) {
+                jsonObject.withObjectProperty("cellEditable")
+                        .put(getInternalId(), cellEditableProvider.test(item));
+            }
         }
 
         /**
@@ -368,6 +370,7 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
+     * @since 2.0
      */
     public EditColumnConfigurator<E> addEditColumn(
             ValueProvider<E, ?> valueProvider, Renderer<E> renderer) {
@@ -403,6 +406,7 @@ public class GridPro<E> extends Grid<E> {
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
+     * @since 2.0
      */
     public <V extends Comparable<? super V>> EditColumnConfigurator<E> addEditColumn(
             ValueProvider<E, V> valueProvider, String... sortingProperties) {
@@ -472,6 +476,7 @@ public class GridPro<E> extends Grid<E> {
      *            when <code>true</code>, after moving to next or previous
      *            editable cell using Tab / Shift+Tab, it will be focused
      *            without edit mode
+     * @since 2.0
      */
     public void setSingleCellEdit(boolean singleCellEdit) {
         getElement().setProperty("singleCellEdit", singleCellEdit);
@@ -483,6 +488,7 @@ public class GridPro<E> extends Grid<E> {
      * using Tab / Shift+Tab, it will be focused without edit mode.
      *
      * @return singleCellEdit value
+     * @since 2.0
      */
     public boolean getSingleCellEdit() {
         return getElement().getProperty("singleCellEdit", false);
@@ -496,6 +502,7 @@ public class GridPro<E> extends Grid<E> {
      * @param editOnClick
      *            when <code>true</code>, cell edit mode gets activated on a
      *            single click instead of the default double click
+     * @since 19.0
      */
     public void setEditOnClick(boolean editOnClick) {
         getElement().setProperty("editOnClick", editOnClick);
@@ -507,6 +514,7 @@ public class GridPro<E> extends Grid<E> {
      * instead of the default double click.
      *
      * @return editOnClick value
+     * @since 19.0
      */
     @Synchronize("edit-on-click-changed")
     public boolean getEditOnClick() {
@@ -531,34 +539,12 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
-    private void generateCellEditableData(E item, ObjectNode jsonObject) {
-        // Get edit columns with cell editable providers
-        List<EditColumn<E>> editColumns = getColumns().stream()
-                .filter(column -> column instanceof EditColumn<E> editColumn
-                        && editColumn.cellEditableProvider != null)
-                .map(column -> (EditColumn<E>) column).toList();
-
-        // Don't generate any data if there are no columns with cell editable
-        // providers, assuming that all cells are editable
-        if (editColumns.isEmpty()) {
-            return;
-        }
-
-        // Generate data for each column
-        ObjectNode cellEditableData = JacksonUtils.createObjectNode();
-        editColumns.forEach(column -> {
-            boolean cellEditable = column.cellEditableProvider.test(item);
-            cellEditableData.put(column.getInternalId(), cellEditable);
-        });
-
-        jsonObject.set("cellEditable", cellEditableData);
-    }
-
     /**
      * Event fired when the user starts to edit an existing item.
      *
      * @param <E>
      *            the bean type
+     * @since 2.0
      */
     @DomEvent("cell-edit-started")
     public static class CellEditStartedEvent<E>
@@ -580,6 +566,7 @@ public class GridPro<E> extends Grid<E> {
          *            represented in Grid
          * @param path
          *            item subproperty that was changed
+         * @since 25.0
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
                 @EventData("event.detail.item") ObjectNode item,
@@ -616,6 +603,7 @@ public class GridPro<E> extends Grid<E> {
      * @param listener
      *            a listener to be notified
      * @return a handle that can be used to unregister the listener
+     * @since 2.0
      */
     public Registration addCellEditStartedListener(
             ComponentEventListener<CellEditStartedEvent<E>> listener) {
@@ -650,6 +638,7 @@ public class GridPro<E> extends Grid<E> {
          *            represented in Grid
          * @param path
          *            item subproperty that was changed
+         * @since 25.0
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
                 @EventData("event.detail.item") ObjectNode item,
@@ -802,6 +791,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param variants
      *            theme variants to add
+     * @since 23.1
      */
     public void addThemeVariants(GridProVariant... variants) {
         getThemeNames()
@@ -814,6 +804,7 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param variants
      *            theme variants to remove
+     * @since 23.1
      */
     public void removeThemeVariants(GridProVariant... variants) {
         getThemeNames().removeAll(

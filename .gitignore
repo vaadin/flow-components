@@ -31,14 +31,12 @@ node_modules
 !/package-lock.json
 pnpm*
 .npmrc
-.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated
 **/frontend/index.html
 **/frontend/*.tsx
 dev-bundle
-prod.bundle
 .vaadin-node-tasks.lock
 
 # Claude Code

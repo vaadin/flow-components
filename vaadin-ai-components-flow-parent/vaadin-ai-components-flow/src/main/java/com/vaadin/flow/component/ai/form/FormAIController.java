@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.form;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
@@ -44,7 +47,6 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -58,8 +60,10 @@ import tools.jackson.databind.JsonNode;
  *
  * <pre>
  * var controller = new FormAIController(formLayout, binder);
- * controller.describe(discountField, "Discount as a percentage, not an amount")
- *         .ignore(internalReferenceField);
+ * controller
+ *         .describeField(discountField,
+ *                 "Discount as a percentage, not an amount")
+ *         .ignoreField(internalReferenceField);
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .build();
@@ -74,33 +78,35 @@ import tools.jackson.databind.JsonNode;
  *
  * <p>
  * <b>Per-field configuration:</b> use the chained
- * {@link #describe(HasValue, String) describe}, {@link #ignore(HasValue)
- * ignore}, and {@link #valueOptions(ValueOptions) valueOptions} methods.
- * {@code valueOptions} takes a {@link ValueOptions} built via
+ * {@link #describeField(HasValue, String) describeField},
+ * {@link #ignoreField(HasValue) ignoreField}, and
+ * {@link #fieldValueOptions(ValueOptions) fieldValueOptions} methods.
+ * {@code fieldValueOptions} takes a {@link ValueOptions} built via
  * {@link ValueOptions#forField(HasValue) forField} — the compiler picks the
  * {@link ValueOptions#forField(MultiSelect) MultiSelect overload} automatically
- * for fields statically typed as {@link MultiSelect}. For fields whose value
- * type is anything other than {@link String}, the
- * {@link #valueOptions(ValueOptions, Function) two-argument overload} also
- * accepts a label-to-value converter, which the controller applies per label;
- * for multi-select fields the resolved elements are then aggregated into a
- * {@link LinkedHashSet} before {@link HasValue#setValue}.
+ * for fields statically typed as {@link MultiSelect}. The controller resolves a
+ * chosen label back to one of the registered items via the registration's
+ * item-label generator; for multi-select fields the resolved elements are
+ * aggregated into a {@link LinkedHashSet} before {@link HasValue#setValue}.
+ * LLM-facing labels are derived from the field's
+ * {@code setItemLabelGenerator(...)} by default; see {@link ValueOptions} for
+ * the full resolution chain.
  * </p>
  *
  * <p>
- * <b>Hiding field values:</b> {@link #setValuesHidden(boolean)} keeps the
+ * <b>Hiding field values:</b> {@link #setFieldValuesHidden(boolean)} keeps the
  * current value of every field private while still letting the LLM see and fill
  * the fields — useful when the form may already hold data the AI should not
  * read (for example personal data the user typed in). To hide a single field
  * entirely, so the LLM does not even learn it exists, use
- * {@link #ignore(HasValue)}.
+ * {@link #ignoreField(HasValue)}.
  * </p>
  *
  * <p>
  * <b>How the LLM understands fields:</b> everything the LLM knows about a field
  * comes from the field's label, its helper text, and the
- * {@link #describe(HasValue, String)} hint. Make sure every field carries a
- * meaningful label, or add a {@code describe(...)} hint for fields whose
+ * {@link #describeField(HasValue, String)} hint. Make sure every field carries
+ * a meaningful label, or add a {@code describeField(...)} hint for fields whose
  * purpose is not evident from the label alone.
  * </p>
  *
@@ -111,11 +117,11 @@ import tools.jackson.databind.JsonNode;
  * {@code bindInstanceFields(this)}, or {@code @PropertyId}) the property name
  * is used as a default field description, so the LLM can recognize what the
  * field means even when it has no label. The default only applies when no
- * explicit {@link #describe(HasValue, String)} has been registered; calling
- * {@code describe(...)} always wins. Lambda-bound bindings carry no property
- * name and contribute no default. Second, the binder drives validation of the
- * values the LLM writes, including bean-level cross-field rules — see
- * <b>Validation</b> below.
+ * explicit {@link #describeField(HasValue, String)} has been registered;
+ * calling {@code describeField(...)} always wins. Lambda-bound bindings carry
+ * no property name and contribute no default. Second, the binder drives
+ * validation of the values the LLM writes, including bean-level cross-field
+ * rules — see <b>Validation</b> below.
  * </p>
  *
  * <p>
@@ -154,10 +160,10 @@ import tools.jackson.databind.JsonNode;
  * with the AI marker, which offers a revert control that restores the field's
  * value from before the AI's first change to it. The marker clears itself once
  * the user edits the field. A listener registered through
- * {@link #addFieldValueChangedListener(SerializableConsumer)} fires once per
- * successful turn with those same fields, for applications that need to react
- * beyond the marker. {@link #showHighlight(HasValue)} / {@link #hideHighlight}
- * remain available for marking fields manually.
+ * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
+ * field whose value changed during a successful turn, for applications that
+ * need to react beyond the marker. {@link #showFieldHighlight(HasValue)} /
+ * {@link #hideFieldHighlight} remain available for marking fields manually.
  * </p>
  *
  * <p>
@@ -165,11 +171,12 @@ import tools.jackson.databind.JsonNode;
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
  * {@code orchestrator.reconnect(provider).withController(controller).apply()}.
- * Re-register the same {@code describe} / {@code valueOptions} / {@code ignore}
- * hints on the new controller.
+ * Re-register the same {@code describeField} / {@code fieldValueOptions} /
+ * {@code ignoreField} hints on the new controller.
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class FormAIController implements AIController {
 
@@ -223,9 +230,10 @@ public class FormAIController implements AIController {
             Conventions:
             - Field ids are opaque session-scoped strings; never invent them \
             and never reuse an id across forms.
-            - Fields the application has hidden via .ignore() (and password \
-            fields) never appear in get_form_state and cannot be written by \
-            fill_form. Do not try, even if the user message asks for them.
+            - Fields the application has hidden via .ignoreField() (and \
+            password fields) never appear in get_form_state and cannot be \
+            written by fill_form. Do not try, even if the user message asks \
+            for them.
             - get_form_state lists every visible field. A field tagged \
             "disabled": true or "readOnly": true is context only — read its \
             value, but fill_form will reject any write to it. Such a field \
@@ -252,7 +260,7 @@ public class FormAIController implements AIController {
             try to write to "__form__" itself.
             """;
 
-    private final Component form;
+    private final Component fieldContainer;
     private final Binder<?> binder;
     private boolean valuesHidden;
     /**
@@ -277,19 +285,19 @@ public class FormAIController implements AIController {
      * Per-field registrations that re-apply the AI marker after
      * detach/re-attach, listen for the field's {@code ai-field-revert} event,
      * and clear the marker when the user edits the field. Populated on the
-     * first {@link #showHighlight} call for a field; entries are removed by
-     * {@link #hideHighlight}.
+     * first {@link #showFieldHighlight} call for a field; entries are removed
+     * by {@link #hideFieldHighlight}.
      */
     private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
     /**
      * Per-field value to restore when the user reverts the AI fill — the value
      * from before the AI's first change to the field. Captured from the turn
-     * diff in {@link #fireFieldValuesChanged} (kept across later turns that
+     * diff in {@link #fireFieldValueChanges} (kept across later turns that
      * change the same field) and consumed by the {@code ai-field-revert}
-     * handler; entries are removed by {@link #hideHighlight}.
+     * handler; entries are removed by {@link #hideFieldHighlight}.
      */
     private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
-    private final List<SerializableConsumer<List<FieldValueChange>>> fieldValuesChangedListeners = new ArrayList<>();
+    private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -297,22 +305,24 @@ public class FormAIController implements AIController {
      * controller is asked for tools, so fields added or removed between turns
      * are picked up automatically.
      *
-     * @param form
+     * @param fieldContainer
      *            the container whose fields the LLM may populate, not
      *            {@code null}
      * @param <T>
      *            the container type
      */
-    public <T extends Component & HasComponents> FormAIController(T form) {
-        Objects.requireNonNull(form, "Form must not be null");
-        this.form = form;
+    public <T extends Component & HasComponents> FormAIController(
+            T fieldContainer) {
+        Objects.requireNonNull(fieldContainer,
+                "Field container must not be null");
+        this.fieldContainer = fieldContainer;
         this.binder = null;
     }
 
     /**
      * Creates a new form AI controller for the given container and binder. For
      * every named binding on the binder, the bean property name is used as a
-     * default {@link #describe(HasValue, String) description} when the
+     * default {@link #describeField(HasValue, String) description} when the
      * developer has not registered one explicitly; lambda-bound bindings carry
      * no property name and contribute no default. The binder also drives
      * validation of the values the LLM writes: bound fields are validated
@@ -320,7 +330,7 @@ public class FormAIController implements AIController {
      * bean-level cross-field validators run as well when a bean is set. See the
      * class-level documentation for details.
      *
-     * @param form
+     * @param fieldContainer
      *            the container whose fields the LLM may populate, not
      *            {@code null}
      * @param binder
@@ -330,13 +340,14 @@ public class FormAIController implements AIController {
      * @param <T>
      *            the container type
      * @throws NullPointerException
-     *             if {@code form} or {@code binder} is {@code null}
+     *             if {@code fieldContainer} or {@code binder} is {@code null}
      */
-    public <T extends Component & HasComponents> FormAIController(T form,
-            Binder<?> binder) {
-        Objects.requireNonNull(form, "Form must not be null");
+    public <T extends Component & HasComponents> FormAIController(
+            T fieldContainer, Binder<?> binder) {
+        Objects.requireNonNull(fieldContainer,
+                "Field container must not be null");
         Objects.requireNonNull(binder, "Binder must not be null");
-        this.form = form;
+        this.fieldContainer = fieldContainer;
         this.binder = binder;
     }
 
@@ -353,96 +364,52 @@ public class FormAIController implements AIController {
      *            the description text, not {@code null}
      * @return this controller, for chaining
      */
-    public FormAIController describe(HasValue<?, ?> field, String description) {
+    public FormAIController describeField(HasValue<?, ?> field,
+            String description) {
         Objects.requireNonNull(description, "Description must not be null");
         hintsFor(field).description = description;
         return this;
     }
 
     /**
-     * Registers a known set of labels for a {@link String}-typed field. The
-     * labels are presented to the LLM as the field's choices. No converter is
-     * needed — the chosen label is itself the value written to the field. For
-     * any non-{@link String} value type, use
-     * {@link #valueOptions(ValueOptions, Function) the two-argument overload}
-     * to supply a converter; this is enforced at compile time.
+     * Registers a known set of items for a field. The LLM sees one label per
+     * item; when it picks a label, the controller walks the registration's
+     * items, applies the item-label generator per item, and returns the first
+     * whose label matches. The label-generator chain is documented on
+     * {@link ValueOptions}.
      * <p>
-     * For {@link MultiSelect MultiSelect} fields the controller wraps the
-     * chosen labels into a {@link LinkedHashSet} before
+     * Items that share a label resolve to the first in registration order; a
+     * fixed-options registration logs a warning when this happens. Labels that
+     * match no item are rejected back to the LLM with a reason it can correct
+     * on the next turn. For {@link MultiSelect MultiSelect} fields the resolved
+     * items are wrapped into a {@link LinkedHashSet} before
      * {@link HasValue#setValue}. Later calls for the same field overwrite
      * earlier ones.
      *
      * @param config
      *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
+     *            its item source set via either
      *            {@link ValueOptions#options(Collection)} or
      *            {@link ValueOptions#options(BiFunction)}
+     * @param <V>
+     *            the item type — the field's value type for single-value
+     *            fields, the per-element type for multi-select
      * @return this controller, for chaining
      * @throws NullPointerException
      *             if {@code config} is {@code null}
      * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
+     *             if the registration has no item source set; if the developer
      *             routed a {@code MultiSelect} field through the single-value
      *             {@code forField} overload (upcast reference); or if the
      *             field's value type is a Collection but the field does not
      *             implement {@link MultiSelect}
      */
-    public FormAIController valueOptions(ValueOptions<String> config) {
+    public <V> FormAIController fieldValueOptions(ValueOptions<V> config) {
         Objects.requireNonNull(config, "Value options must not be null");
-        return applyValueOptions(config, Function.identity());
+        return applyValueOptions(config);
     }
 
-    /**
-     * Registers a known set of labels for a field, paired with a converter that
-     * resolves a chosen label to the field's value type. When the LLM picks a
-     * label, the controller calls {@code toValue} on it and writes the result
-     * to the field. If {@code toValue} returns {@code null} or throws — for
-     * example because the LLM picked a label the converter does not recognize —
-     * the write is rejected back to the LLM with a reason and the model can
-     * correct on the next turn.
-     * <p>
-     * A typical converter delegates to a service or repository that looks the
-     * domain object up by its display name, for example
-     * {@code label -> projectService.findByName(label)} for a
-     * {@code ComboBox<Project>}. For {@link MultiSelect MultiSelect} fields the
-     * converter runs once per chosen label and the controller wraps the
-     * resolved elements into a {@link LinkedHashSet} before
-     * {@link HasValue#setValue}.
-     * <p>
-     * Later calls for the same field overwrite earlier ones. Use
-     * {@link #valueOptions(ValueOptions) the single-argument overload} for
-     * {@link String}-typed fields; the converter is implicit there.
-     *
-     * @param config
-     *            the field's options registration, not {@code null}; must have
-     *            its label source set via either
-     *            {@link ValueOptions#options(Collection)} or
-     *            {@link ValueOptions#options(BiFunction)}
-     * @param toValue
-     *            converts a chosen label to one element of the field's value
-     *            type, not {@code null}
-     * @param <V>
-     *            the per-label item type — the field's value type for
-     *            single-value fields, the per-element type for multi-select
-     * @return this controller, for chaining
-     * @throws NullPointerException
-     *             if {@code config} or {@code toValue} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the registration has no label source set; if the developer
-     *             routed a {@code MultiSelect} field through the single-value
-     *             {@code forField} overload (upcast reference); or if the
-     *             field's value type is a Collection but the field does not
-     *             implement {@link MultiSelect}
-     */
-    public <V> FormAIController valueOptions(ValueOptions<V> config,
-            Function<String, V> toValue) {
-        Objects.requireNonNull(config, "Value options must not be null");
-        Objects.requireNonNull(toValue, "Value converter must not be null");
-        return applyValueOptions(config, toValue);
-    }
-
-    private FormAIController applyValueOptions(ValueOptions<?> config,
-            Function<String, ?> toValue) {
+    private FormAIController applyValueOptions(ValueOptions<?> config) {
         var fixed = config.fixedOptions();
         var query = config.query();
         if ((fixed == null) == (query == null)) {
@@ -450,41 +417,161 @@ public class FormAIController implements AIController {
                     "ValueOptions requires options(...) "
                             + "(fixed Collection or query BiFunction)");
         }
-        // The single-value forField overload accepts MultiSelect fields whose
-        // static reference is upcast to HasValue. Reject so the typed
-        // MultiSelect overload remains the only path for multi-select
-        // registrations and toValue stays per-item rather than Set-returning.
-        var isMultiSelect = config.field() instanceof MultiSelect;
+        // forField(HasValue) accepts MultiSelect fields whose static reference
+        // is upcast. Reject so the typed MultiSelect overload is the only
+        // entry for multi-select registrations.
+        var field = config.field();
+        var isMultiSelect = field instanceof MultiSelect;
         if (!config.isMulti() && isMultiSelect) {
             throw new IllegalArgumentException(
                     "Field implements MultiSelect — declare the reference as "
                             + "MultiSelect so the MultiSelect-typed forField "
-                            + "overload picks up, and toValue can return one "
-                            + "item rather than a Set");
+                            + "overload picks up");
         }
-        // Collection-valued fields must implement MultiSelect — otherwise we
-        // have no defined aggregation for per-label converter results.
-        // field.getEmptyValue() is the runtime signal: non-MultiSelect fields
-        // whose empty value is a Collection are the case we reject.
-        if (!isMultiSelect
-                && config.field().getEmptyValue() instanceof Collection) {
+        // Collection-valued fields must implement MultiSelect — otherwise
+        // there is no defined aggregation for the resolved items.
+        if (!isMultiSelect && field.getEmptyValue() instanceof Collection) {
             throw new IllegalArgumentException(
                     "Field's value type is a Collection but the field does "
                             + "not implement MultiSelect. Collection-valued "
                             + "fields must implement MultiSelect to be "
-                            + "registered via valueOptions(...).");
+                            + "registered via fieldValueOptions(...).");
         }
-        var hints = hintsFor(config.field());
-        hints.valueOptionsToValue = toValue;
+        var hints = hintsFor(field);
+        var explicit = config.itemLabelGenerator();
         if (fixed != null) {
-            hints.valueOptionsQuery = (filter, limit) -> filterAndLimit(fixed,
-                    filter, limit);
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            List<Object> items = (List) fixed;
             hints.fixedOptions = true;
+            hints.valueOptionsTurnSetup = () -> rebindFixedOptions(hints, field,
+                    explicit, items);
+            hints.valueOptionsTurnSetup.run();
+            warnOnDuplicateLabels(items, hints.itemLabelGenerator);
         } else {
-            hints.valueOptionsQuery = query;
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            BiFunction<String, Integer, List<Object>> rawQuery = (BiFunction) query;
             hints.fixedOptions = false;
+            hints.valueOptionsTurnSetup = () -> rebindQueryOptions(hints, field,
+                    explicit, rawQuery);
+            hints.valueOptionsTurnSetup.run();
         }
         return this;
+    }
+
+    /**
+     * Rebuilds the fixed-options bindings on {@code hints} from the original
+     * item list and the current state of {@code field} / {@code explicit}.
+     * Invoked at registration and again on every {@link #onRequest()} so the
+     * labeler captured in {@link FormFieldHints#itemLabelGenerator} reflects
+     * the field's current {@code setItemLabelGenerator(...)}.
+     */
+    private static void rebindFixedOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            List<Object> items) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>(items.size());
+        for (var item : items) {
+            map.putIfAbsent(labeler.apply(item), item);
+        }
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> filterLabels(map.keySet(),
+                filter, limit);
+    }
+
+    /**
+     * Rebuilds the query-options bindings on {@code hints} and resets the
+     * observed-items map. The wrapped query callback dedupes by label as
+     * batches arrive (first item per label wins) so repeated overlapping
+     * queries within the same turn don't inflate the map.
+     */
+    private static void rebindQueryOptions(FormFieldHints hints,
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
+            BiFunction<String, Integer, List<Object>> rawQuery) {
+        var labeler = resolveItemLabeler(field, explicit);
+        hints.itemLabelGenerator = labeler;
+        var map = new LinkedHashMap<String, Object>();
+        hints.valueOptionsItems = map;
+        hints.valueOptionsQuery = (filter, limit) -> {
+            var batch = rawQuery.apply(filter, limit);
+            var labels = new ArrayList<String>(batch.size());
+            for (var item : batch) {
+                var label = labeler.apply(item);
+                labels.add(label);
+                map.putIfAbsent(label, item);
+            }
+            return labels;
+        };
+    }
+
+    /**
+     * Logs a warning when two or more items in a fixed-options registration
+     * render to the same label. Resolution under
+     * {@link FormFieldHints#valueOptionsItems} keeps only the first-per-label
+     * (the Map's {@code putIfAbsent} semantic), so duplicates are recoverable
+     * but ambiguous — a unique
+     * {@link ValueOptions#itemLabelGenerator(ItemLabelGenerator)} is the
+     * unambiguous fix. Fires once at registration; a labeler swap between turns
+     * that introduces new duplicates does not re-warn.
+     */
+    private static void warnOnDuplicateLabels(List<Object> items,
+            Function<Object, String> labeler) {
+        var seen = new HashSet<String>();
+        var duplicates = new LinkedHashSet<String>();
+        for (var item : items) {
+            var label = labeler.apply(item);
+            if (!seen.add(label)) {
+                duplicates.add(label);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            LOGGER.warn(
+                    "ValueOptions registration contains items with duplicate "
+                            + "labels {}; the first item per label will win on "
+                            + "resolution. Supply a unique itemLabelGenerator "
+                            + "to disambiguate.",
+                    duplicates);
+        }
+    }
+
+    /**
+     * Resolves the V-to-label function for one valueOptions registration.
+     * Priority: an explicit {@link ItemLabelGenerator} on the registration,
+     * otherwise the field's own {@code getItemLabelGenerator()} (via
+     * {@link FormValueConverter#renderItem}, which also covers the
+     * {@link String#valueOf} fallback). Called once per turn at
+     * {@link #onRequest()} so a swap on the field between turns is picked up.
+     */
+    private static Function<Object, String> resolveItemLabeler(
+            HasValue<?, ?> field, ItemLabelGenerator<?> explicit) {
+        if (explicit != null) {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            ItemLabelGenerator<Object> typed = (ItemLabelGenerator) explicit;
+            return item -> applyItemLabeler(typed, item);
+        }
+        return item -> FormValueConverter.renderItem(field, item);
+    }
+
+    /**
+     * Applies an explicit per-item label generator, falling back to
+     * {@link String#valueOf(Object)} for {@code null} items, {@code null}
+     * labels, and labelers that throw. Mirrors the safety guarantees of
+     * {@link FormValueConverter#renderItem} so a misbehaving label generator
+     * cannot collapse the whole tool call.
+     */
+    private static String applyItemLabeler(ItemLabelGenerator<Object> labeler,
+            Object item) {
+        if (item == null) {
+            return "";
+        }
+        try {
+            var label = labeler.apply(item);
+            return label != null ? label : String.valueOf(item);
+        } catch (Exception ex) {
+            LOGGER.warn("Item label generator threw for {}", item.getClass(),
+                    ex);
+            return String.valueOf(item);
+        }
     }
 
     /**
@@ -505,7 +592,7 @@ public class FormAIController implements AIController {
      *            the field to hide, not {@code null}
      * @return this controller, for chaining
      */
-    public FormAIController ignore(HasValue<?, ?> field) {
+    public FormAIController ignoreField(HasValue<?, ?> field) {
         hintsFor(field).ignored = true;
         return this;
     }
@@ -522,7 +609,7 @@ public class FormAIController implements AIController {
      * {@code enum} labels are still sent, since the LLM needs them to fill the
      * field. For choice fields whose option labels are themselves sensitive, or
      * to hide a single field's value or content entirely, use
-     * {@link #ignore(HasValue)}.
+     * {@link #ignoreField(HasValue)}.
      * <p>
      * Values can still reach the LLM through validation rejection messages,
      * which are sent as-is. A field stays fillable while its value is hidden,
@@ -536,7 +623,7 @@ public class FormAIController implements AIController {
      *            send values as usual
      * @return this controller, for chaining
      */
-    public FormAIController setValuesHidden(boolean valuesHidden) {
+    public FormAIController setFieldValuesHidden(boolean valuesHidden) {
         this.valuesHidden = valuesHidden;
         return this;
     }
@@ -547,35 +634,39 @@ public class FormAIController implements AIController {
      *
      * @return {@code true} when every field's value is hidden, {@code false}
      *         when values are sent
-     * @see #setValuesHidden(boolean)
+     * @see #setFieldValuesHidden(boolean)
      */
-    public boolean isValuesHidden() {
+    public boolean isFieldValuesHidden() {
         return valuesHidden;
     }
 
     /**
-     * Registers a listener that is invoked once per successful turn with the
-     * fields whose value differs from what was read at the start of the turn.
+     * Registers a listener that is invoked once per field whose value changed
+     * during a successful AI turn. The listener fires once per changed field,
+     * in document order, after every field's post-turn value has been applied.
      * Comparison is by {@link Objects#equals(Object, Object)} so multi-select
      * sets, dates, and other value-objects work naturally.
      * <p>
-     * Multiple listeners are supported and fire in registration order. If one
-     * listener throws, the exception is logged and the remaining listeners
-     * still fire.
+     * Multiple listeners are supported. For each changed field, every listener
+     * fires in registration order before the next field's event is dispatched.
+     * If one listener throws, the exception is logged and the remaining
+     * listeners still fire — both for that change and for subsequent changes in
+     * the same turn.
      * <p>
-     * Only non-ignored fields are tracked, and only changed fields appear in
-     * the list. A field's pre-turn value is captured regardless of its current
-     * visibility, so a value cascaded into a freshly-revealed field is reported
-     * with the field's real pre-turn value rather than a spurious {@code null}.
-     * The listener is not called when the turn ended in error or when no field
-     * changed. The list iterates in document order; modifying it has no effect
-     * on the controller.
+     * Only non-ignored fields are tracked, and only fields whose value differs
+     * at end-of-turn produce events. A field's pre-turn value is captured
+     * regardless of its current visibility, so a value cascaded into a
+     * freshly-revealed field is reported with the field's real pre-turn value
+     * rather than a spurious {@code null}. A field added to the form during the
+     * turn is compared against its {@link HasValue#getEmptyValue() empty
+     * value}. No events fire when the turn ended in error.
      * <p>
-     * The listener runs on the UI thread with the session lock held, so it can
-     * update components and call {@link #showHighlight} /
-     * {@link #hideHighlight} directly without {@code ui.access(...)}. Changed
-     * fields are already highlighted automatically, so the listener is for
-     * extra application-specific reactions rather than for driving the marker.
+     * Listeners run on the UI thread with the session lock held, so they can
+     * update components and call {@link #showFieldHighlight} /
+     * {@link #hideFieldHighlight} directly without {@code ui.access(...)}.
+     * Changed fields are already highlighted automatically, so the listener is
+     * for extra application-specific reactions rather than for driving the
+     * marker.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -583,22 +674,22 @@ public class FormAIController implements AIController {
      * @throws NullPointerException
      *             if {@code listener} is {@code null}
      */
-    public Registration addFieldValueChangedListener(
-            SerializableConsumer<List<FieldValueChange>> listener) {
+    public Registration addFieldValueChangeListener(
+            FieldValueChangeListener listener) {
         Objects.requireNonNull(listener, "Listener must not be null");
-        fieldValuesChangedListeners.add(listener);
-        return () -> fieldValuesChangedListeners.remove(listener);
+        fieldValueChangeListeners.add(listener);
+        return () -> fieldValueChangeListeners.remove(listener);
     }
 
     /**
      * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
      * component: it shows an "AI" badge and a popover that explains the fill
      * and offers a revert control. Repeated calls keep exactly one marker on
-     * the field. Call {@link #hideHighlight} to clear it. The field can be any
-     * {@link HasValue} {@link Component}, in or out of this controller's form,
-     * and each field's marker state is independent of the others.
+     * the field. Call {@link #hideFieldHighlight} to clear it. The field can be
+     * any {@link HasValue} {@link Component}, in or out of this controller's
+     * form, and each field's marker state is independent of the others.
      * <p>
-     * The first {@code showHighlight} call on a field registers three
+     * The first {@code showFieldHighlight} call on a field registers three
      * listeners: an attach listener that re-applies the marker every time the
      * field re-enters the DOM (so it survives detach/re-attach); a listener for
      * the marker's {@code ai-field-revert} event that restores the field's
@@ -607,9 +698,9 @@ public class FormAIController implements AIController {
      * does not linger over a value the user changed (the AI's own writes during
      * a fill turn are excluded). The value restored on revert is the one
      * captured from before the AI's first change to the field (see
-     * {@link #addFieldValueChangedListener}); when no such value is known the
+     * {@link #addFieldValueChangeListener}); when no such value is known the
      * revert only clears the marker. All three listeners are removed by
-     * {@link #hideHighlight}.
+     * {@link #hideFieldHighlight}.
      *
      * @param field
      *            the field to mark, not {@code null}; must be a
@@ -619,7 +710,7 @@ public class FormAIController implements AIController {
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public void showHighlight(HasValue<?, ?> field) {
+    public void showFieldHighlight(HasValue<?, ?> field) {
         var component = requireFieldComponent(field);
         var element = component.getElement();
         highlightedFields.computeIfAbsent(field, ignored -> {
@@ -633,7 +724,7 @@ public class FormAIController implements AIController {
             // filling flag.
             var valueChange = field.addValueChangeListener(event -> {
                 if (!filling) {
-                    hideHighlight(field);
+                    hideFieldHighlight(field);
                 }
             });
             return () -> {
@@ -647,12 +738,12 @@ public class FormAIController implements AIController {
 
     /**
      * Clears any marker previously applied to the field via
-     * {@link #showHighlight}. A no-op when no marker is currently shown. The
-     * field can be any {@link HasValue} {@link Component}, in or out of this
-     * controller's form, and clearing one field's marker has no effect on
+     * {@link #showFieldHighlight}. A no-op when no marker is currently shown.
+     * The field can be any {@link HasValue} {@link Component}, in or out of
+     * this controller's form, and clearing one field's marker has no effect on
      * others. The re-attach and revert listeners registered by
-     * {@link #showHighlight} are removed, so the marker does not come back if
-     * the field leaves and returns to the DOM after this call.
+     * {@link #showFieldHighlight} are removed, so the marker does not come back
+     * if the field leaves and returns to the DOM after this call.
      *
      * @param field
      *            the field to clear the marker from, not {@code null}; must be
@@ -662,7 +753,7 @@ public class FormAIController implements AIController {
      * @throws IllegalArgumentException
      *             if {@code field} is not a {@link Component}
      */
-    public void hideHighlight(HasValue<?, ?> field) {
+    public void hideFieldHighlight(HasValue<?, ?> field) {
         var element = requireFieldComponent(field).getElement();
         var registration = highlightedFields.remove(field);
         if (registration != null) {
@@ -686,7 +777,7 @@ public class FormAIController implements AIController {
         // Clear the marker first. This removes the auto-hide value-change
         // listener, so restoring the value below doesn't re-enter through it,
         // and drops the revert entry — capture it beforehand.
-        hideHighlight(field);
+        hideFieldHighlight(field);
         if (hasValue) {
             restoreValue(field, value);
         }
@@ -769,8 +860,21 @@ public class FormAIController implements AIController {
         // are picked up.
         attachIds();
         seedDescriptionsFromBinder();
+        refreshValueOptionsBindings();
         snapshotPreTurnValues();
         startWorking();
+    }
+
+    /**
+     * Re-runs each value-options registration's setup at the start of a turn.
+     * Captures the current item-label generator from the field so a swap
+     * between turns is reflected, repopulates the fixed-options map from its
+     * immutable list, and clears the query-options map so each turn starts with
+     * a fresh cache.
+     */
+    private void refreshValueOptionsBindings() {
+        hintsById.values().stream().map(hints -> hints.valueOptionsTurnSetup)
+                .filter(Objects::nonNull).forEach(Runnable::run);
     }
 
     @Override
@@ -781,7 +885,7 @@ public class FormAIController implements AIController {
             // working to marked. Runs regardless of success or failure so the
             // fields never stay locked for the user.
             stopWorking();
-            fireFieldValuesChanged(error);
+            fireFieldValueChanges(error);
         } finally {
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the highlight pass) count as AI writes rather
@@ -794,7 +898,7 @@ public class FormAIController implements AIController {
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
      * after diff that drives the automatic highlight and
-     * {@link #addFieldValueChangedListener}. Always taken, since every turn
+     * {@link #addFieldValueChangeListener}. Always taken, since every turn
      * highlights the fields it changed.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
@@ -809,28 +913,42 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Builds the change list from the pre-turn snapshot and the post-turn value
-     * of every known field, then highlights each changed field and invokes
-     * every registered listener if anything changed. The post-turn walk picks
-     * up fields that were hidden (or absent) at turn start but became visible /
-     * were added during the turn, so visibility cascades report their value
-     * changes correctly. On error the snapshot is discarded and nothing is
-     * highlighted or reported — the application learns about errors through the
-     * orchestrator's response listener instead. A throwing listener is logged
-     * and otherwise ignored so subsequent listeners still fire and the rest of
-     * the response lifecycle still runs.
+     * Walks the pre-turn snapshot against the post-turn value of every known
+     * field, highlights each changed field with the AI marker, and fires one
+     * {@link FieldValueChangeEvent} per changed field, in document order. The
+     * post-turn walk picks up fields that were hidden (or absent) at turn start
+     * but became visible / were added during the turn, so visibility cascades
+     * report their value changes correctly. A field with no snapshot entry
+     * (added mid-turn) compares against its empty value, so adding a field that
+     * keeps its empty value does not produce an event.
+     * <p>
+     * The diff is materialised before any listener runs, so a listener that
+     * writes to a tracked field cannot retroactively change the
+     * {@code newValue} another field's event carries. The listener set is also
+     * snapshotted once per turn, so adding or removing listeners mid-dispatch
+     * (including a listener removing itself) affects only subsequent turns, not
+     * the rest of the current turn.
+     * <p>
+     * On error the snapshot is discarded and nothing is highlighted or reported
+     * — the application learns about errors through the orchestrator's response
+     * listener instead. A throwing listener is logged and otherwise ignored so
+     * subsequent listeners still fire, subsequent change events in the same
+     * turn still fire, and the rest of the response lifecycle still runs.
      */
-    private void fireFieldValuesChanged(Throwable error) {
+    private void fireFieldValueChanges(Throwable error) {
         if (preTurnValues.isEmpty() || error != null) {
             preTurnValues.clear();
             return;
         }
-        var changes = new ArrayList<FieldValueChange>();
+        var events = new ArrayList<FieldValueChangeEvent>();
         for (var field : collectKnownFields()) {
-            var oldValue = preTurnValues.get(field);
+            var oldValue = preTurnValues.containsKey(field)
+                    ? preTurnValues.get(field)
+                    : field.getEmptyValue();
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
-                changes.add(new FieldValueChange(field, oldValue, newValue));
+                events.add(new FieldValueChangeEvent(this, field, oldValue,
+                        newValue));
                 // Remember the value from before the AI's first change to this
                 // field so a later revert restores it. putIfAbsent keeps the
                 // earliest captured value when the AI changes the same field
@@ -840,21 +958,23 @@ public class FormAIController implements AIController {
             }
         }
         preTurnValues.clear();
-        if (changes.isEmpty()) {
+        if (events.isEmpty()) {
             return;
         }
         // Highlight every changed field automatically, so applications get the
-        // AI marker without driving showHighlight from a listener themselves.
-        changes.forEach(change -> showHighlight(change.field()));
-        // Snapshot the list before iterating so a listener that adds or
-        // removes listeners (its own Registration included) doesn't break
-        // the dispatch.
-        for (var listener : List.copyOf(fieldValuesChangedListeners)) {
-            try {
-                listener.accept(changes);
-            } catch (Exception ex) {
-                LOGGER.warn("Field-values-changed listener threw an exception",
-                        ex);
+        // AI marker without driving showFieldHighlight from a listener
+        // themselves.
+        events.forEach(event -> showFieldHighlight(event.getField()));
+        var snapshot = List.copyOf(fieldValueChangeListeners);
+        for (var event : events) {
+            for (var listener : snapshot) {
+                try {
+                    listener.onFieldValueChange(event);
+                } catch (Exception ex) {
+                    LOGGER.warn(
+                            "Field-value-change listener threw an exception",
+                            ex);
+                }
             }
         }
     }
@@ -863,7 +983,7 @@ public class FormAIController implements AIController {
      * Walks the binder's property names and defaults {@code hints.description}
      * for any bound field that does not already have an explicit description.
      * Called at the start of every turn so bindings added or removed between
-     * turns are reflected; an explicit {@link #describe(HasValue, String)}
+     * turns are reflected; an explicit {@link #describeField(HasValue, String)}
      * always wins because the seeding only fills in nulls. Safe to call when
      * the controller was built without a binder — {@link BinderReflection}
      * returns an empty map for a {@code null} binder.
@@ -891,14 +1011,14 @@ public class FormAIController implements AIController {
      * state: a shimmer plus a client-side read-only guard so the user cannot
      * type into a field the AI is about to overwrite. The read-only guard is
      * applied on the client only — it never changes the field's server-side
-     * read-only state, so it is purely a UX measure and does not affect what the
-     * LLM sees. Fields that are disabled or already read-only are skipped: the
-     * AI cannot write them, so they are not "worked on" and their read-only
+     * read-only state, so it is purely a UX measure and does not affect what
+     * the LLM sees. Fields that are disabled or already read-only are skipped:
+     * the AI cannot write them, so they are not "worked on" and their read-only
      * state must not be touched. Each affected field also gets an attach
-     * listener that re-applies the state when the field re-enters the DOM, so it
-     * survives a detach/re-attach mid-turn, mirroring the marker's own re-apply
-     * behaviour. Tracks the affected fields so {@link #stopWorking()} clears
-     * exactly these at turn end.
+     * listener that re-applies the state when the field re-enters the DOM, so
+     * it survives a detach/re-attach mid-turn, mirroring the marker's own
+     * re-apply behaviour. Tracks the affected fields so {@link #stopWorking()}
+     * clears exactly these at turn end.
      */
     private void startWorking() {
         stopWorking();
@@ -932,14 +1052,14 @@ public class FormAIController implements AIController {
     /**
      * Returns every {@link HasValue} in the form tree that the controller
      * tracks — i.e. all discovered fields minus those hidden via
-     * {@link #ignore(HasValue)}. Visibility and enabled state are NOT filtered,
-     * so this is the right set for the snapshot + diff used by
-     * {@link #addFieldValueChangedListener}: a field hidden at turn start may
-     * be revealed during the turn, and a value cascaded into it should compare
+     * {@link #ignoreField(HasValue)}. Visibility and enabled state are NOT
+     * filtered, so this is the right set for the snapshot + diff used by
+     * {@link #addFieldValueChangeListener}: a field hidden at turn start may be
+     * revealed during the turn, and a value cascaded into it should compare
      * against its real pre-turn value rather than {@code null}.
      */
     private List<HasValue<?, ?>> collectKnownFields() {
-        return FormFieldDiscovery.collectFields(form).stream()
+        return FormFieldDiscovery.collectFields(fieldContainer).stream()
                 .filter(field -> !isIgnored(field)).toList();
     }
 
@@ -1026,7 +1146,7 @@ public class FormAIController implements AIController {
      * across removals, re-additions, and discovery walks.
      */
     private void attachIds() {
-        FormFieldDiscovery.collectFields(form)
+        FormFieldDiscovery.collectFields(fieldContainer)
                 .forEach(FormAIController::getOrCreateId);
     }
 
@@ -1043,13 +1163,13 @@ public class FormAIController implements AIController {
         return id;
     }
 
-    private static List<String> filterAndLimit(List<String> source,
+    private static List<String> filterLabels(Collection<String> labels,
             String filter, int limit) {
-        var stream = source.stream();
+        var stream = labels.stream();
         if (filter != null && !filter.isEmpty()) {
             var needle = filter.toLowerCase(Locale.ROOT);
-            stream = stream
-                    .filter(o -> o.toLowerCase(Locale.ROOT).contains(needle));
+            stream = stream.filter(
+                    label -> label.toLowerCase(Locale.ROOT).contains(needle));
         }
         return stream.limit(limit).toList();
     }
@@ -1114,9 +1234,10 @@ public class FormAIController implements AIController {
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
-            var ui = form.getUI().orElseThrow(() -> new IllegalStateException(
-                    "fill_form invoked on a controller whose form is not "
-                            + "attached to a UI"));
+            var ui = fieldContainer.getUI()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "fill_form invoked on a controller whose form is not "
+                                    + "attached to a UI"));
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {

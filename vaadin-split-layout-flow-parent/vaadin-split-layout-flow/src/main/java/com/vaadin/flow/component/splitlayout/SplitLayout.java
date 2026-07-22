@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -41,9 +42,10 @@ import com.vaadin.flow.shared.Registration;
  * handle between them.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/split-layout", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/split-layout", version = "25.3.0-alpha6")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -53,6 +55,7 @@ public class SplitLayout extends Component
     private Component secondaryComponent;
     private StateTree.ExecutionRegistration updateStylesRegistration;
     private Double splitterPosition;
+    private SplitLayoutI18n i18n;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -73,6 +76,7 @@ public class SplitLayout extends Component
      *
      * @param orientation
      *            the orientation set to the layout
+     * @since 23.1
      */
     public SplitLayout(Orientation orientation) {
         setOrientation(orientation);
@@ -82,10 +86,11 @@ public class SplitLayout extends Component
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
-            setPrimaryStyle("flex",
-                    String.format("1 1 %s", e.primaryComponentFlexBasis));
-            setSecondaryStyle("flex",
-                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+            setInnerComponentStyle("flex",
+                    String.format("1 1 %s", e.primaryComponentFlexBasis), true);
+            setInnerComponentStyle("flex",
+                    String.format("1 1 %s", e.secondaryComponentFlexBasis),
+                    false);
         });
     }
 
@@ -113,6 +118,7 @@ public class SplitLayout extends Component
      *            the component set to the secondary split
      * @param orientation
      *            the orientation set to the layout
+     * @since 23.1
      */
     public SplitLayout(Component primaryComponent, Component secondaryComponent,
             Orientation orientation) {
@@ -213,6 +219,7 @@ public class SplitLayout extends Component
      * of the {@link SplitterDragEndEvent}.
      *
      * @return the splitter position, may be null
+     * @since 24.2
      */
     public Double getSplitterPosition() {
         return splitterPosition;
@@ -257,8 +264,10 @@ public class SplitLayout extends Component
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
-        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
+        setInnerComponentStyle("flex", String.format("1 1 %s%%", primary),
+                true);
+        setInnerComponentStyle("flex", String.format("1 1 %s%%", secondary),
+                false);
     }
 
     /**
@@ -268,7 +277,10 @@ public class SplitLayout extends Component
      *            name of the style to set
      * @param value
      *            the value to set
+     * @deprecated since 25.3, use {@link #getPrimaryComponent()} and set styles
+     *             on the primary component directly instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setPrimaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, true);
     }
@@ -280,7 +292,10 @@ public class SplitLayout extends Component
      *            name of the style to set
      * @param value
      *            the value to set
+     * @deprecated since 25.3, use {@link #getSecondaryComponent()} and set
+     *             styles on the secondary component directly instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setSecondaryStyle(String styleName, String value) {
         setInnerComponentStyle(styleName, value, false);
     }
@@ -338,6 +353,9 @@ public class SplitLayout extends Component
         secondaryComponent = null;
     }
 
+    /**
+     * @since 25.0
+     */
     @DomEvent("splitter-dragend")
     public static class SplitterDragEndEvent
             extends ComponentEvent<SplitLayout> {
@@ -365,6 +383,7 @@ public class SplitLayout extends Component
      * @param listener
      *            the listener to add
      * @return a registration for removing the listener
+     * @since 25.0
      */
     public Registration addSplitterDragEndListener(
             ComponentEventListener<SplitterDragEndEvent> listener) {
@@ -419,5 +438,38 @@ public class SplitLayout extends Component
 
     private double round(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(SplitLayoutI18n)}.
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 25.3
+     */
+    public SplitLayoutI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component. It enables you
+     * to customize and translate the accessible labels used in the split
+     * layout.
+     * <p>
+     * Note: updating the object properties after setting the i18n will not
+     * update the component. To make the changes effective, you need to set the
+     * updated object again.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.3
+     */
+    public void setI18n(SplitLayoutI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 }

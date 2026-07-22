@@ -33,6 +33,7 @@ import com.vaadin.flow.component.ComponentEventListener;
  *            the menu-item type
  * @param <S>
  *            the sub menu type
+ * @since 2.0
  */
 public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         implements Serializable {
@@ -78,6 +79,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @since 24.8
      */
     public void addComponent(Component... components) {
         getMenuManager().addComponent(components);
@@ -151,6 +153,8 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Adds a separator between items.
+     * 
+     * @since 24.8
      */
     public void addSeparator() {
         getMenuManager().addSeparator();

@@ -44,9 +44,10 @@ import com.vaadin.flow.signals.Signal;
  * optional prefix component (typically an icon) can be shown before the text.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 @Tag("vaadin-breadcrumbs-item")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.3.0-alpha6")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
 public class BreadcrumbsItem extends Component
         implements HasText, HasEnabled, HasPrefix {
@@ -233,8 +234,14 @@ public class BreadcrumbsItem extends Component
      * @param path
      *            the path to link to, or {@code null} to remove the path and
      *            render the item as the current page (a non-link)
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      *
      * @see #setPath(Class)
+     * @see #setUnsafePath(String)
      */
     public void setPath(String path) {
         if (path != null && !UrlUtil.isSafeUrl(path)) {

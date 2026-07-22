@@ -59,9 +59,10 @@ import tools.jackson.databind.node.ArrayNode;
  *
  * @author Vaadin Ltd
  *
+ * @since 1.0
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.2.0-rc2")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.3.0-alpha6")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -248,6 +249,7 @@ public class RichTextEditor
      * is not considered as content.
      *
      * @return {@code true} if considered empty; {@code false} if not
+     * @since 24.6.6
      */
     @Override
     public boolean isEmpty() {
@@ -574,6 +576,7 @@ public class RichTextEditor
          * Gets the translated word for {@code color}
          *
          * @return the translated word for color
+         * @since 24.5
          */
         public String getColor() {
             return color;
@@ -585,6 +588,7 @@ public class RichTextEditor
          * @param color
          *            the translated word for color
          * @return this instance for method chaining
+         * @since 24.5
          */
         public RichTextEditorI18n setColor(String color) {
             this.color = color;
@@ -595,6 +599,7 @@ public class RichTextEditor
          * Gets the translated word for {@code background}
          *
          * @return the translated word for background
+         * @since 24.5
          */
         public String getBackground() {
             return background;
@@ -606,6 +611,7 @@ public class RichTextEditor
          * @param background
          *            the translated word for background
          * @return this instance for method chaining
+         * @since 24.5
          */
         public RichTextEditorI18n setBackground(String background) {
             this.background = background;
@@ -690,6 +696,7 @@ public class RichTextEditor
          * @param outdent
          *            the translated word for outdent
          * @return this instance for method chaining
+         * @since 25.0
          */
         public RichTextEditorI18n setOutdent(String outdent) {
             this.outdent = outdent;
@@ -700,6 +707,7 @@ public class RichTextEditor
          * Gets the translated word for {@code outdent}
          *
          * @return the translated word for outdent
+         * @since 25.0
          */
         public String getOutdent() {
             return outdent;
@@ -711,6 +719,7 @@ public class RichTextEditor
          * @param indent
          *            the translated word for indent
          * @return this instance for method chaining
+         * @since 25.0
          */
         public RichTextEditorI18n setIndent(String indent) {
             this.indent = indent;
@@ -721,6 +730,7 @@ public class RichTextEditor
          * Gets the translated word for {@code indent}
          *
          * @return the translated word for indent
+         * @since 25.0
          */
         public String getIndent() {
             return indent;
@@ -937,6 +947,7 @@ public class RichTextEditor
      * {@link #setValue(String)}.
      *
      * @return an instance of {@code HasValue}
+     * @since 2.1
      */
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
         if (asHtml == null) {
@@ -951,6 +962,7 @@ public class RichTextEditor
      * used for binding the value with {@link Binder}.
      *
      * @return an instance of {@code HasValue}
+     * @since 23.3
      */
     public HasValue<ValueChangeEvent<String>, String> asDelta() {
         if (asDelta == null) {

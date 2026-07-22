@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,42 +177,37 @@ final class FormValueConverter {
 
     /**
      * Converts a JSON node into a typed value suitable for
-     * {@link HasValue#setValue}. Returns the field's empty value when the JSON
-     * node is {@code null} or a JSON {@code null}. Throws
-     * {@link RejectedValueException} when the JSON shape doesn't match the
-     * field's type, or when the registered {@code valueOptions} cannot resolve
-     * a label.
+     * {@link HasValue#setValue}. Returns the field's empty value for
+     * {@code null} or JSON {@code null}; throws {@link RejectedValueException}
+     * when the JSON shape doesn't match the field's type, or when a registered
+     * {@code fieldValueOptions} cannot resolve a label.
      * <p>
-     * <b>Selection and {@code valueOptions} routing:</b> when a field has a
-     * {@code valueOptionsToValue} registered, the LLM sees the field as an
-     * {@code enum} or {@code queryable} string in {@code get_form_state} and
-     * picks one or more labels. The label-to-value resolution happens here so
-     * the resulting object matches the field's value type before
-     * {@link HasValue#setValue} sees it. Multi-select fields expect a JSON
-     * array of labels; single-select and other label-routed fields expect a
-     * single string. A selection field without a {@code valueOptions}
-     * registration falls back to matching the supplied label(s) against the
-     * field's own in-memory items (an eager {@code setItems(...)}), which carry
-     * the same labels {@code get_form_state} advertised; only a field that has
-     * neither a {@code valueOptions} registration nor items is rejected with a
-     * curated reason naming the missing registration.
+     * For selection fields, resolution tries the registration's observed items
+     * first (matching the LLM-supplied label against
+     * {@link FormFieldHints#itemLabelGenerator} per item), then falls back to
+     * the field's own in-memory items (an eager {@code setItems(...)}). A
+     * selection field with no item source is rejected with a curated reason
+     * naming the missing registration. Multi-select fields expect a JSON array
+     * of labels; single-select and other label-routed fields expect a single
+     * string.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
             return field.field().getEmptyValue();
         }
-        // Multi-select takes an array of labels and applies toValue per
-        // element; handled before the valueOptions check so the array shape
-        // is enforced even on fields whose value type is itself a String set.
+        // Multi-select takes an array of labels; handled before the
+        // fieldValueOptions check so the array shape is enforced even on
+        // fields whose value type is itself a String set.
         if (field.type() == FormFieldType.MULTI_SELECT) {
             return convertMultiSelect(field, value);
         }
-        // Once valueOptions is registered the LLM picks a label, regardless
-        // of the field's underlying value type — type-driven parsing would
-        // hand setValue a raw String and the field would reject it.
+        // Once fieldValueOptions is registered the LLM picks a label,
+        // regardless of the field's underlying value type — type-driven
+        // parsing would hand setValue a raw String and the field would reject
+        // it.
         var hints = field.hints();
-        if (hints != null && hints.valueOptionsToValue != null) {
-            return convertSingleLabel(value, hints.valueOptionsToValue);
+        if (hints != null && hints.valueOptionsItems != null) {
+            return convertSingleLabelFromObservedItems(value, hints);
         }
         return switch (field.type()) {
         case STRING, EMAIL -> convertString(value);
@@ -232,12 +226,12 @@ final class FormValueConverter {
 
     /**
      * Fallback resolver for a SINGLE_SELECT field that has no
-     * {@code valueOptions(...)} registered: matches the LLM-supplied label
+     * {@code fieldValueOptions(...)} registered: matches the LLM-supplied label
      * against the field's in-memory items via {@link #renderItem}. This is the
      * inverse of the schema path that emits the same items as an {@code enum}
      * array — both sides agree on the label set, so the LLM can write through
      * an eager {@code setItems(...)} field without the developer wiring up
-     * {@code valueOptions(...)} too.
+     * {@code fieldValueOptions(...)} too.
      */
     private static Object convertSingleSelectFromItems(
             FormFieldDescriptor field, JsonNode value) {
@@ -247,25 +241,34 @@ final class FormValueConverter {
         }
         var items = listDataProviderItems(field.field());
         if (items.isEmpty()) {
-            // No items and no valueOptions — the field has no option source at
-            // all. Point the developer at the missing wiring rather than the
-            // missing match, since the model couldn't have picked any label.
+            // No items and no fieldValueOptions — the field has no option
+            // source at all. Point the developer at the missing wiring rather
+            // than the missing match, since the model couldn't have picked any
+            // label.
             throw new RejectedValueException(
                     "Selection field has no value options registered — register "
-                            + "options via FormAIController.valueOptions(...) "
-                            + "or call setItems(...) so the AI knows what to "
-                            + "pick.");
+                            + "options via "
+                            + "FormAIController.fieldValueOptions(...) or call "
+                            + "setItems(...) so the AI knows what to pick.");
         }
         return resolveLabelAgainstItems(field.field(), value.asString(), items);
     }
 
-    private static Object convertSingleLabel(JsonNode value,
-            Function<String, ?> toValue) {
+    /**
+     * Resolves one LLM-supplied label against the items the registration has
+     * seen. Walks {@link FormFieldHints#valueOptionsItems} and returns the
+     * first item whose label (via {@link FormFieldHints#itemLabelGenerator})
+     * matches. An empty observed-items list is the query-mode "registered but
+     * never queried" case and produces a rejection that nudges the LLM to call
+     * {@code query_field_options} first.
+     */
+    private static Object convertSingleLabelFromObservedItems(JsonNode value,
+            FormFieldHints hints) {
         if (!value.isString()) {
             throw new RejectedValueException(
                     "Expected string label, got " + value);
         }
-        return resolveLabel(value.asString(), toValue);
+        return resolveLabelAgainstObservedItems(value.asString(), hints);
     }
 
     private static Object convertMultiSelect(FormFieldDescriptor field,
@@ -281,28 +284,50 @@ final class FormValueConverter {
             return field.field().getEmptyValue();
         }
         var hints = field.hints();
-        var toValue = hints != null ? hints.valueOptionsToValue : null;
-        if (toValue == null) {
-            return convertMultiSelectFromItems(field, value);
-        }
-        var result = new LinkedHashSet<>();
-        for (var node : value) {
-            if (!node.isString()) {
-                throw new RejectedValueException(
-                        "Expected string label, got " + node);
+        if (hints != null && hints.valueOptionsItems != null) {
+            var result = new LinkedHashSet<>();
+            for (var node : value) {
+                if (!node.isString()) {
+                    throw new RejectedValueException(
+                            "Expected string label, got " + node);
+                }
+                result.add(resolveLabelAgainstObservedItems(node.asString(),
+                        hints));
             }
-            result.add(resolveLabel(node.asString(), toValue));
+            return result;
         }
-        return result;
+        return convertMultiSelectFromItems(field, value);
+    }
+
+    /**
+     * Returns the item that was indexed under the LLM-supplied label in
+     * {@link FormFieldHints#valueOptionsItems}. An empty map is the query-mode
+     * "not queried yet this turn" case and is called out with a hint at
+     * {@code query_field_options}, since that's the only way the LLM could have
+     * reached this point without seeing options.
+     */
+    private static Object resolveLabelAgainstObservedItems(String label,
+            FormFieldHints hints) {
+        var item = hints.valueOptionsItems.get(label);
+        if (item != null) {
+            return item;
+        }
+        if (hints.valueOptionsItems.isEmpty()) {
+            throw new RejectedValueException("No matching option for label: "
+                    + label
+                    + " (call query_field_options first to load the field's options)");
+        }
+        throw new RejectedValueException(
+                "No matching option for label: " + label);
     }
 
     /**
      * Fallback resolver for a MULTI_SELECT field that has no
-     * {@code valueOptions(...)} registered: matches each LLM-supplied label
-     * against the field's in-memory items via {@link #renderItem}. Mirrors
-     * {@link #convertSingleSelectFromItems} so eager-items
+     * {@code fieldValueOptions(...)} registered: matches each LLM-supplied
+     * label against the field's in-memory items via {@link #renderItem}.
+     * Mirrors {@link #convertSingleSelectFromItems} so eager-items
      * {@code MultiSelectComboBox<T>} and {@code CheckboxGroup<T>} are writable
-     * without the developer wiring up {@code valueOptions(...)} too.
+     * without the developer wiring up {@code fieldValueOptions(...)} too.
      */
     private static Object convertMultiSelectFromItems(FormFieldDescriptor field,
             JsonNode value) {
@@ -311,7 +336,7 @@ final class FormValueConverter {
             throw new RejectedValueException(
                     "Multi-select field has no value options registered — "
                             + "register options via "
-                            + "FormAIController.valueOptions(...) or call "
+                            + "FormAIController.fieldValueOptions(...) or call "
                             + "setItems(...) so the AI knows what to pick.");
         }
         var result = new LinkedHashSet<>();
@@ -341,30 +366,6 @@ final class FormValueConverter {
         }
         throw new RejectedValueException(
                 "No matching option for label: " + label);
-    }
-
-    /**
-     * Resolves one LLM-supplied label via the application's
-     * {@code valueOptionsToValue}. Wraps the application's throw and the
-     * application's {@code null} return into curated rejection reasons — both
-     * surface back to the LLM verbatim through the {@code rejected} block, so
-     * the message must not leak third-party detail.
-     */
-    private static Object resolveLabel(String label,
-            Function<String, ?> toValue) {
-        Object resolved;
-        try {
-            resolved = toValue.apply(label);
-        } catch (RuntimeException ex) {
-            LOGGER.debug("valueOptionsToValue threw for label {}", label, ex);
-            throw new RejectedValueException(
-                    "Could not resolve label '" + label + "' to a value.");
-        }
-        if (resolved == null) {
-            throw new RejectedValueException(
-                    "No matching option for label: " + label);
-        }
-        return resolved;
     }
 
     private static String convertString(JsonNode value) {

@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Plot options for {@link ChartType#TIMELINE} charts.
+ * 
+ * @since 18.0
  */
 public class PlotOptionsTimeline extends AbstractPlotOptions {
 

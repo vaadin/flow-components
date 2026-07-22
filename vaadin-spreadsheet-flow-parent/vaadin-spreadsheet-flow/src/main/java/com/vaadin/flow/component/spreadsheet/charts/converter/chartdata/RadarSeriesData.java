@@ -11,6 +11,9 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.AreaSeriesDataWriter;
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.RadarSeriesWriter;
 
+/**
+ * @since 24.0
+ */
 public class RadarSeriesData extends AreaSeriesData {
 
     @Override

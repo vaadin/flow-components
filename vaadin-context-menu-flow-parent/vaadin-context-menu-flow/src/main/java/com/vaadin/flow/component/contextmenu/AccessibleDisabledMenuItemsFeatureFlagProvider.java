@@ -20,13 +20,16 @@ import java.util.List;
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlagProvider;
 
+/**
+ * @since 25.2
+ */
 public class AccessibleDisabledMenuItemsFeatureFlagProvider
         implements FeatureFlagProvider {
 
     public static final Feature ACCESSIBLE_DISABLED_MENU_ITEMS = new Feature(
             "Accessible disabled menu items", "accessibleDisabledMenuItems",
-            "https://github.com/vaadin/web-components/issues/10415", true,
-            null);
+            "https://vaadin.com/docs/latest/components/context-menu#disabled-menu-items",
+            true, null);
 
     @Override
     public List<Feature> getFeatures() {

@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * The name of a symbol to use for the border around the {@link DataLabels} or
  * {@link Tooltip}.
+ * 
+ * @since 6.0.1
  */
 public enum Shape implements ChartEnum {
 

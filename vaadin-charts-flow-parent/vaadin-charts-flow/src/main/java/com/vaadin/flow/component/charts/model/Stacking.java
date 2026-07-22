@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * Whether to stack the values of each series on top of each other. Possible
  * values are null to disable, NORMAL to stack by value or PERCENT. Defaults to
  * null.
+ * 
+ * @since 6.0.1
  */
 public enum Stacking implements ChartEnum {
 

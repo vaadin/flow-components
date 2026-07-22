@@ -25,6 +25,7 @@ import com.vaadin.flow.shared.util.SharedUtil;
  *
  * @param <E>
  *            the bean type
+ * @since 1.0
  */
 public class CrudGrid<E> extends Grid<E> {
 
@@ -73,7 +74,7 @@ public class CrudGrid<E> extends Grid<E> {
         getColumns().forEach(column -> {
             final TextField field = new TextField();
             field.getElement().setAttribute("crud-role", "Search");
-            field.getElement().setAttribute("aria-label", "Filter by "
+            field.setAriaLabel("Filter by "
                     + SharedUtil.propertyIdToHumanFriendly(column.getKey()));
 
             field.addValueChangeListener(event -> {
