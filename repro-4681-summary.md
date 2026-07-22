@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![List box selection cleared after item change in listener](https://raw.githubusercontent.com/vaadin/flow-components/21d20a141b7ade2da21c445bffc20e4138d128ad/repro-4681.png) — embeds inline.
+- **Screenshot** (static bug): ![List box selection cleared after item change in listener](https://raw.githubusercontent.com/vaadin/flow-components/f8c9bbc0d14cedbe06b3a667a70e53f7f37edd17/repro-4681.png) — embeds inline.
 
 ## Observed behavior
 
@@ -62,11 +62,11 @@ ms.setSelectionPreservationMode(SelectionPreservationMode.PRESERVE_EXISTING);
 
 For any non-refresh `DataChangeEvent`, `ListBoxBase.handleDataChange` unconditionally calls `clear()` (resetting the value) before `rebuild()`. Single-select `ListBox` has no way to opt out:
 
-https://github.com/vaadin/flow-components/blob/21d20a141b7ade2da21c445bffc20e4138d128ad/vaadin-list-box-flow-parent/vaadin-list-box-flow/src/main/java/com/vaadin/flow/component/listbox/ListBoxBase.java#L130-L137
+https://github.com/vaadin/flow-components/blob/f8c9bbc0d14cedbe06b3a667a70e53f7f37edd17/vaadin-list-box-flow-parent/vaadin-list-box-flow/src/main/java/com/vaadin/flow/component/listbox/ListBoxBase.java#L130-L137
 
 `MultiSelectListBox` overrides this via a `SelectionPreservationHandler`, but its default is `DISCARD` → `onDiscard()` → `clear()`, so default behavior still clears:
 
-https://github.com/vaadin/flow-components/blob/21d20a141b7ade2da21c445bffc20e4138d128ad/vaadin-list-box-flow-parent/vaadin-list-box-flow/src/main/java/com/vaadin/flow/component/listbox/MultiSelectListBox.java#L69-L100
+https://github.com/vaadin/flow-components/blob/f8c9bbc0d14cedbe06b3a667a70e53f7f37edd17/vaadin-list-box-flow-parent/vaadin-list-box-flow/src/main/java/com/vaadin/flow/component/listbox/MultiSelectListBox.java#L69-L100
 
 ## Notes
 
