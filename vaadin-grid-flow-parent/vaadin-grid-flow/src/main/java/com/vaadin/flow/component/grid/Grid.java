@@ -4152,7 +4152,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         initConnector();
         updateClientSorterDirections();
         updateClientSelectionMode();
-        setViewportRange(0, getPageSize());
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -5283,8 +5282,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void scrollToIndex(int rowIndex) {
         setViewportRangeByIndex(rowIndex);
 
-        scheduleScrollExecution(() -> getElement()
-                .callJsFunction("scrollToIndex", rowIndex));
+        scheduleScrollExecution(
+                () -> getElement().callJsFunction("scrollToIndex", rowIndex));
     }
 
     private void setViewportRangeByIndex(int rowIndex) {
@@ -5344,8 +5343,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         setViewportRangeByIndex(itemIndex);
 
-        scheduleScrollExecution(() -> getElement().callJsFunction(
-                "$connector.scrollToItem", itemKey, itemIndex));
+        scheduleScrollExecution(() -> getElement()
+                .callJsFunction("$connector.scrollToItem", itemKey, itemIndex));
     }
 
     /**
