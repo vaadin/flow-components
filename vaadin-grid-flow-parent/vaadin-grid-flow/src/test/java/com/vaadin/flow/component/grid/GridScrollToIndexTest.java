@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,38 +45,50 @@ class GridScrollToIndexTest {
 
     @Test
     void scrollToStart_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(0);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("0-50", getViewportRange(grid));
     }
 
     @Test
     void scrollToEnd_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(950);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("950-1000", getViewportRange(grid));
     }
 
     @Test
     void scrollToStartOfPage_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(500);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     void scrollToSecondIndexOfPage_preloadOnePage() {
+        ui.add(grid);
         grid.scrollToIndex(501);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
     void scrollToSecondLastIndexOfPage_preloadTwoPages() {
+        ui.add(grid);
         grid.scrollToIndex(499);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("450-550", getViewportRange(grid));
     }
 
     @Test
     void smallPageSize_scrollToIndex_preloadMultiplePages() {
         grid.setPageSize(5);
+        ui.add(grid);
         grid.scrollToIndex(499);
+        ui.fakeClientCommunication();
         Assertions.assertEquals("495-540", getViewportRange(grid));
     }
 
@@ -131,6 +144,26 @@ class GridScrollToIndexTest {
         ui.add(grid);
         ui.fakeClientCommunication();
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
+    }
+
+    @Test
+    void scrollToIndex_afterAttach_viewportRangePreloaded() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        ui.add(grid);
+        grid.scrollToIndex(500);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("500-550", getViewportRange(grid));
+    }
+
+    @Test
+    void scrollToIndex_beforeAttach_thenAttach_viewportRangePreloaded() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        grid.scrollToIndex(500);
+        ui.add(grid);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
     @Test
