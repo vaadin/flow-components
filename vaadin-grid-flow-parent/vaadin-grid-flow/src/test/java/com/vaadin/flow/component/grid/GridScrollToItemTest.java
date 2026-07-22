@@ -53,6 +53,7 @@ class GridScrollToItemTest {
 
         ui.add(grid);
         grid.scrollToItem(items.get(500));
+        ui.fakeClientCommunication();
         Assertions.assertEquals("500-550", getViewportRange(grid));
     }
 
