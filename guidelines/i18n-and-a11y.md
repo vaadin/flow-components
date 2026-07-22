@@ -1,14 +1,14 @@
 # I18n & Accessibility
 
-Most accessibility lives in the web component (see
-[Design → Universal behavioural requirements](02-design.md#universal-behavioural-requirements)).
-The Flow wrapper only exposes its i18n and labelling APIs to Java and propagates
-state (disabled, invalid, required) through mixins.
+Most internationalization and accessibility behavior lives in the web component.
+The Flow wrapper only exposes its i18n and labelling APIs to Java and
+propagates state (disabled, invalid, required) through mixins.
 
 ## I18n
 
-Add a `{Component}I18n` class when the component renders user-visible text of its
-own — a Jackson-serialisable POJO mapping the web component's `i18n` property.
+Add a `{Component}I18n` class when the component renders user-visible text of
+its own — a Jackson-serialisable POJO mapping the web component's `i18n`
+property.
 
 ```java
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,8 +26,10 @@ public class ExampleI18n implements Serializable {
 - `implements Serializable` (including nested classes).
 - `@JsonInclude(NON_NULL)` so unset strings aren't sent and don't overwrite
   web-component defaults.
+- Exclude properties that are not used by the web component (e.g. server-side
+  error message), using Jackson annotations
 - Jackson annotations and databind types come from different packages (see
-  [Repository](01-repository.md#technology-stack)) — mixing them silently fails.
+  [Repository](repository.md#technology-stack)) — mixing them silently fails.
 - Setters may return `this` — the one sanctioned fluent style in the Flow API.
 
 Push it to the element via `JacksonUtils`:
@@ -40,9 +42,6 @@ public void setI18n(ExampleI18n i18n) {
 }
 ```
 
-Add a `{Component}I18nTest` covering the getter/setter round-trip, absent JSON
-keys for unset fields, and the element push.
-
 ## Accessibility
 
 - If the web component exposes `aria-label` / `aria-labelledby`, implement
@@ -52,6 +51,6 @@ keys for unset fields, and the element push.
 - Implement `HasEnabled`; the web component owns the dimmed visuals and
   interaction blocking.
 - Keyboard shortcuts: `Focusable.addFocusShortcut`,
-  `ClickNotifier.addClickShortcut`, or `Shortcuts.addShortcutListener`. Keep them
-  consistent with the web component; the Flow side usually doesn't override
-  keyboard semantics.
+  `ClickNotifier.addClickShortcut`, or `Shortcuts.addShortcutListener`. Keep
+  them consistent with the web component; the Flow side usually doesn't
+  override keyboard semantics.

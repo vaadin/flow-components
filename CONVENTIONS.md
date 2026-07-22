@@ -1,8 +1,6 @@
 # Conventions
 
-## API
-
-### Public API
+## Public API
 
 New public API should use naming / terminology that matches established equivalents from sibling component modules. When multiple options exist prefer the more common or more recently added one.
 
@@ -16,17 +14,7 @@ Pair String CSS-size setters with a `(float, Unit)` overload, reuse `HasSize.get
 
 When a component sets a custom attribute that does not map to the web component API, prefer an all-lowercase (hyphenated) name.
 
-### Deprecation
-
-Pair `@Deprecated` annotations with a matching `@deprecated` Javadoc tag. The annotation must carry `since` in major.minor form (e.g. "25.0", not "25.0.0"). The version can be determined from the project version in the root POM.
-
-When deprecating API, ensure there is a concrete replacement API in place and cite it from the `@deprecated` tag via `{@link ...}`. The exception is when an API turns out to be broken, in which case the tag should mention that the API is not supported.
-
-Deprecations must not change the member's behavior and test coverage for the deprecated member must be preserved.
-
-When the intent is to deprecate a mixin interface, ensure to cover all methods of it.
-
-### Internal API
+## Internal API
 
 Class members that facilitate internal logic should have minimum Java visibility. Prefer private for class-internal, package-private for cross-class access in the same package, or protected only when there is a need to override from a class in a different package. If the member must be protected or public, add a 'For internal use only. May be renamed or removed in a future release.' note in the Javadoc.
 
@@ -36,21 +24,9 @@ Internal helper and utils classes should have a 'For internal use only. May be r
 
 When adding helper classes to the vaadin-flow-components-base module (e.g. utils, controllers), place them in the `shared.internal` sub-package to indicate these are considered to be internal and not part of the public API.
 
-### JavaDoc
+## Component Implementation
 
-JavaDoc should describe the public contract and behavior, not internal implementation details on how the behavior is achieved.
-
-JavaDoc should address readers in second person as "you", not in third person such as "allows developers to...".
-
-JavaDoc should wrap literal values that are not referenced anywhere in a symbol (e.g. `true`, `false`, a constant string) in `{@code}`. Use `{@link}` if there is a symbol to reference.
-
-A JavaDoc for a property should state what the default value is.
-
-JavaDoc for component events and methods for registering such event listeners should state in which scenario the event fires, not which web component event the event maps to.
-
-When a component setter overrides state set by a different setter (e.g. `setTitleText` overrides `setTitleComponent`), the JavaDoc should mention the interaction.
-
-## Client-side Integration
+Every component and every data object it exposes is `Serializable`.
 
 When a Flow component calls client-side JavaScript, always call through the component's element (`getElement()`) instead of calling the JS through the UI or the Page. The exception is if the call happens in a static context where no component / element instance is available.
 
@@ -72,11 +48,45 @@ When serializing I18N objects to the client-side, strip all properties that the 
 
 I18N objects must not have default values. Their properties should be left unset / null to ensure the web component's defaults are used instead.
 
+When a component registers listeners to a component that was passed to it (e.g. adding attach listener to a target component reference), the listeners must be removed via their `Registration` when the component is replaced (e.g. setting a new target component). This does not apply when a component manages the full lifecycle of nested / internal components, as we can assume that no other place holds references to those and listeners can be garbage collected together with the components.
+
+When a component implements a mixin interface such as `HasComponents` and overrides its mutation methods to attach a side effect, ensure that all methods of the interface are covered.
+
+Never derive a stable / unique identifier from an Element's `nodeId` (`getElement().getNode().getId()`). `nodeId` is -1 until the node is attached. Prefer an attachment-independent identifier such as a UUID instead.
+
+Prefer the `SlotUtil` helper to assign or query child components in web component slots instead of hand-rolling logic, except when the use case is not covered by the helper.
+
+Avoid accessing `UI.getCurrent`, prefer to access the UI via a component's `getUI` or via an event if it provides the UI (e.g. `AttachEvent`). `UI.getCurrent` should be used as a last resort if there is no component instance available from which to access the UI. Prefer `UI.getCurrentOrThrow()` if the code should fail without a UI.
+
 ## Security
 
 Do not synchronize client-side property changes to the server (e.g. with `@Synchronize`) when users can never modify the property through the component's UI to ensure server-side state can not be tampered with. For example, users can not directly modify the validation state or visibility of a component, thus those should never synchronize. Compared to that, users can toggle the opened state of a details component, which is fine to synchronize.
 
 When adding custom logic to handle client-side values (e.g. presentation-to-model parser, `hasValidValue` or `setModelValue` override), prefer to ignore invalid values and fall back to the existing server-side value instead of throwing an exception. If someone tampers with the component through client-side scripting it should not fill the server logs with exceptions.
+
+## Deprecation
+
+Pair `@Deprecated` annotations with a matching `@deprecated` Javadoc tag. The annotation must carry `since` in major.minor form (e.g. "25.0", not "25.0.0"). The version can be determined from the project version in the root POM.
+
+When deprecating API, ensure there is a concrete replacement API in place and cite it from the `@deprecated` tag via `{@link ...}`. The exception is when an API turns out to be broken, in which case the tag should mention that the API is not supported.
+
+Deprecations must not change the member's behavior and test coverage for the deprecated member must be preserved.
+
+When the intent is to deprecate a mixin interface, ensure to cover all methods of it.
+
+## JavaDoc
+
+JavaDoc should describe the public contract and behavior, not internal implementation details on how the behavior is achieved.
+
+JavaDoc should address readers in second person as "you", not in third person such as "allows developers to...".
+
+JavaDoc should wrap literal values that are not referenced anywhere in a symbol (e.g. `true`, `false`, a constant string) in `{@code}`. Use `{@link}` if there is a symbol to reference.
+
+A JavaDoc for a property should state what the default value is.
+
+JavaDoc for component events and methods for registering such event listeners should state in which scenario the event fires, not which web component event the event maps to.
+
+When a component setter overrides state set by a different setter (e.g. `setTitleText` overrides `setTitleComponent`), the JavaDoc should mention the interaction.
 
 ## Testing
 
@@ -136,16 +146,6 @@ Keep POM dependencies minimal, only add what is really needed by the respective 
 
 Components and integration test fixtures must not use `Label` or `NativeLabel` just to display text. Labels must only be used when they are associated with an input.
 
-When a component registers listeners to a component that was passed to it (e.g. adding attach listener to a target component reference), the listeners must be removed via their `Registration` when the component is replaced (e.g. setting a new target component). This does not apply when a component manages the full lifecycle of nested / internal components, as we can assume that no other place holds references to those and listeners can be garbage collected together with the components.
-
-When a component implements a mixin interface such as `HasComponents` and overrides its mutation methods to attach a side effect, ensure that all methods of the interface are covered.
-
 To distinguish an in-memory data provider from a lazy / backend data provider, use `DataProvider.isInMemory()` instead of relying on instanceof checks.
-
-Never derive a stable / unique identifier from an Element's `nodeId` (`getElement().getNode().getId()`). `nodeId` is -1 until the node is attached. Prefer an attachment-independent identifier such as a UUID instead.
-
-Prefer the `SlotUtil` helper to assign or query child components in web component slots instead of hand-rolling logic, except when the use case is not covered by the helper.
-
-Avoid accessing `UI.getCurrent`, prefer to access the UI via a component's `getUI` or via an event if it provides the UI (e.g. `AttachEvent`). `UI.getCurrent` should be used as a last resort if there is no component instance available from which to access the UI. Prefer `UI.getCurrentOrThrow()` if the code should fail without a UI.
 
 When implementing a new feature flag, duplicate the setup from an existing component that uses it ( SPI provider, exception class, checking feature flag in `onAttach`). There is no need to extract common helpers as the code is trivial.
