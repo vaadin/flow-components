@@ -302,10 +302,10 @@ class FormAIControllerTest {
     class FieldLocking {
 
         // The user-interaction guard during a turn is applied on the client
-        // only (the field's `readonly` property, toggled with the "AI is
-        // working" highlight — see the Highlight tests). The controller must
-        // never change the field's server-side read-only state, so these tests
-        // assert that invariant via isReadOnly().
+        // only, by the web component as part of the "AI is working" state —
+        // see the Highlight tests. The controller must never change the
+        // field's server-side read-only state, so these tests assert that
+        // invariant via isReadOnly().
 
         @Test
         void onRequestDoesNotChangeServerReadOnlyState() {
@@ -1972,11 +1972,11 @@ class FormAIControllerTest {
         }
 
         @Test
-        void turnStartShimmersAndClientLocksEditableFields() {
+        void turnStartAppliesWorkingStateToEditableFields() {
             // Every editable field enters the "AI is working" state at turn
-            // start: the shimmer plus a client-side read-only guard, applied in
-            // the same script, regardless of whether the AI ends up changing
-            // it.
+            // start, regardless of whether the AI ends up changing it. The
+            // shimmer and the client-side read-only guard are the web
+            // component's responsibility, so the script only delegates.
             var changed = new TestField();
             var untouched = new TestField();
             var form = new Div(changed, untouched);
@@ -1987,15 +1987,11 @@ class FormAIControllerTest {
             var dump = drainPendingJs();
 
             for (var field : List.of(changed, untouched)) {
-                var start = scriptsOn(dump, field).stream()
-                        .filter(Highlight::isWorkingStartScript).findFirst();
-                Assertions.assertTrue(start.isPresent(),
+                Assertions.assertTrue(
+                        scriptsOn(dump, field).stream()
+                                .anyMatch(Highlight::isWorkingStartScript),
                         "Every editable field must enter the working state at "
                                 + "turn start");
-                Assertions.assertTrue(locksReadonly(start.get()),
-                        "The working-state script must also set the field "
-                                + "read-only on the client; got: "
-                                + start.get());
             }
             // The server-side read-only state is never touched.
             Assertions.assertFalse(changed.isReadOnly());
@@ -2035,10 +2031,10 @@ class FormAIControllerTest {
         }
 
         @Test
-        void turnEndClearsWorkingStateAndClientLock() {
-            // The working state is removed when the turn ends — shimmer and the
-            // client read-only guard, in the same script — on changed and
-            // unchanged fields alike.
+        void turnEndClearsWorkingState() {
+            // The working state — shimmer and the client read-only guard — is
+            // removed when the turn ends, on changed and unchanged fields
+            // alike.
             var changed = new TestField();
             var untouched = new TestField();
             var form = new Div(changed, untouched);
@@ -2051,13 +2047,10 @@ class FormAIControllerTest {
             var dump = drainPendingJs();
 
             for (var field : List.of(changed, untouched)) {
-                var stop = scriptsOn(dump, field).stream()
-                        .filter(Highlight::isWorkingStopScript).findFirst();
-                Assertions.assertTrue(stop.isPresent(),
+                Assertions.assertTrue(
+                        scriptsOn(dump, field).stream()
+                                .anyMatch(Highlight::isWorkingStopScript),
                         "Each field's working state must be cleared at turn end");
-                Assertions.assertTrue(unlocksReadonly(stop.get()),
-                        "The clear script must also release the client "
-                                + "read-only guard; got: " + stop.get());
             }
         }
 
@@ -2320,31 +2313,21 @@ class FormAIControllerTest {
         // string. The canonical mark/unmark tests (above) pin the exact JS
         // contract; these helpers are for follow-on tests that only need to
         // distinguish the two. "unmark" contains "mark", so match the leading
-        // dot to tell them apart. The working-shimmer script also calls unmark
-        // (to adopt the stylesheet), so exclude any ai-working script here.
+        // dot to tell them apart.
         private static boolean isShowScript(String script) {
-            return script.contains(".mark(") && !script.contains("ai-working");
+            return script.contains(".mark(");
         }
 
         private static boolean isHideScript(String script) {
-            return script.contains(".unmark(")
-                    && !script.contains("ai-working");
+            return script.contains(".unmark(");
         }
 
         private static boolean isWorkingStartScript(String script) {
-            return script.contains(".add('ai-working')");
+            return script.contains(".startWorking(");
         }
 
         private static boolean isWorkingStopScript(String script) {
-            return script.contains(".remove('ai-working')");
-        }
-
-        private static boolean locksReadonly(String script) {
-            return script.contains("readonly = true");
-        }
-
-        private static boolean unlocksReadonly(String script) {
-            return script.contains("readonly = false");
+            return script.contains(".stopWorking(");
         }
 
         // Dispatch the marker's revert event server-side so tests can drive

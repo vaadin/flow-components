@@ -54,44 +54,24 @@ final class FormFieldMarker {
     }
 
     /**
-     * Marks the field as being worked on by the AI: shows the "AI is working"
-     * shimmer (via the {@code ai-working} class the web component styles) and
-     * makes the field read-only on the client so the user cannot edit a value
-     * the AI is about to overwrite. The read-only state is set on the client
-     * only — it is a UX guard, not a server-side state change — and the field's
-     * own inputs are updated too for a {@code vaadin-custom-field}, which does
-     * not propagate {@code readonly} to them. The shimmer animation lives in
-     * the marker's stylesheet, which is adopted into the DOM only by
-     * {@code mark} / {@code unmark}; calling {@code unmark} on a field that has
-     * no marker yet adopts the stylesheet without other effect, so it is
-     * invoked only when no marker is present (a marked field keeps its badge
-     * through the working state).
+     * Marks the field as being worked on by the AI. The web component shows the
+     * "AI is working" shimmer and applies a client-side read-only guard so the
+     * user cannot edit a value the AI is about to overwrite. The guard is a
+     * client-only UX measure — the field's server-side read-only state is never
+     * touched.
      */
     static void startWorking(Element field) {
         field.executeJs(
-                """
-                        if (!this.querySelector('vaadin-ai-field-marker')) {
-                          customElements.get('vaadin-ai-field-marker').unmark(this);
-                        }
-                        this.classList.add('ai-working');
-                        this.readonly = true;
-                        if (this.localName === 'vaadin-custom-field') {
-                          (this.inputs ?? []).forEach((input) => { input.readonly = true; });
-                        }""");
+                "customElements.get('vaadin-ai-field-marker').startWorking(this)");
     }
 
     /**
-     * Clears the "AI is working" state set by {@link #startWorking}: removes
-     * the shimmer and the client-side read-only guard, leaving any AI marker
-     * the fill applied in place.
+     * Clears the "AI is working" state set by {@link #startWorking}: the web
+     * component removes the shimmer and restores the field's client-side
+     * read-only state, leaving any AI marker the fill applied in place.
      */
     static void stopWorking(Element field) {
         field.executeJs(
-                """
-                        this.classList.remove('ai-working');
-                        this.readonly = false;
-                        if (this.localName === 'vaadin-custom-field') {
-                          (this.inputs ?? []).forEach((input) => { input.readonly = false; });
-                        }""");
+                "customElements.get('vaadin-ai-field-marker').stopWorking(this)");
     }
 }
