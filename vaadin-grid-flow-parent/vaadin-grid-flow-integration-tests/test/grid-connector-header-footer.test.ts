@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
+import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { init, setRootItems, getHeaderCellContent, getFooterCellContent } from './shared.js';
 import type { FlowGrid } from './shared.js';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 
-class FlowElement extends HTMLElement {
+class TestElement extends HTMLElement {
   connectSpy = sinon.spy();
   disconnectSpy = sinon.spy();
 
@@ -18,7 +18,7 @@ class FlowElement extends HTMLElement {
   }
 }
 
-customElements.define('flow-element', FlowElement);
+customElements.define('test-element', TestElement);
 
 describe('grid connector - header and footer renderers', () => {
   let grid: FlowGrid;
@@ -82,7 +82,7 @@ describe('grid connector - header and footer renderers', () => {
     });
 
     it('should not detach node content when renderer runs again', async () => {
-      const content = document.createElement('flow-element') as FlowElement;
+      const content = document.createElement('test-element') as TestElement;
       grid.$connector.setHeaderRenderer(column, { content });
       await nextFrame();
 
@@ -187,7 +187,7 @@ describe('grid connector - header and footer renderers', () => {
     });
 
     it('should not detach node content when renderer runs again', async () => {
-      const content = document.createElement('flow-element') as FlowElement;
+      const content = document.createElement('test-element') as TestElement;
       grid.$connector.setFooterRenderer(column, { content });
       await nextFrame();
 
