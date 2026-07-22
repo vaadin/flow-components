@@ -1,8 +1,24 @@
 import { expect } from 'chai';
-import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
+import sinon from 'sinon';
+import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { init, setRootItems, getHeaderCellContent, getFooterCellContent } from './shared.js';
 import type { FlowGrid } from './shared.js';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
+
+class FlowElement extends HTMLElement {
+  connectSpy = sinon.spy();
+  disconnectSpy = sinon.spy();
+
+  connectedCallback() {
+    this.connectSpy();
+  }
+
+  disconnectedCallback() {
+    this.disconnectSpy();
+  }
+}
+
+customElements.define('flow-element', FlowElement);
 
 describe('grid connector - header and footer renderers', () => {
   let grid: FlowGrid;
@@ -65,6 +81,19 @@ describe('grid connector - header and footer renderers', () => {
       expect(column.headerRenderer).to.be.null;
     });
 
+    it('should not detach node content when renderer runs again', async () => {
+      const content = document.createElement('flow-element') as FlowElement;
+      grid.$connector.setHeaderRenderer(column, { content });
+      await nextFrame();
+
+      grid.requestContentUpdate();
+      await nextFrame();
+
+      expect(getHeaderCellContent(column).contains(content)).to.be.true;
+      expect(content.connectSpy).to.be.calledOnce;
+      expect(content.disconnectSpy).to.not.be.called;
+    });
+
     describe('sorter', () => {
       it('should render sorter', async () => {
         grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
@@ -93,15 +122,26 @@ describe('grid connector - header and footer renderers', () => {
         expect(sorter.contains(span)).to.be.true;
       });
 
-      it('should reuse sorter element when renderer runs again', async () => {
+      it('should reuse sorter element when renderer runs with different root', async () => {
+        grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
+        await nextFrame();
+        const sorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
+
+        const div = document.createElement('div');
+        column.headerRenderer!(div, column);
+        expect(div.querySelector('vaadin-grid-sorter')!).to.equal(sorter);
+      });
+
+      it('should not detach sorter when renderer runs again', async () => {
         grid.$connector.setHeaderRenderer(column, { content: 'Name', showSorter: true, sorterPath: 'name' });
         await nextFrame();
 
-        const oldSorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
-        grid.requestContentUpdate();
-        const newSorter = getHeaderCellContent(column).querySelector('vaadin-grid-sorter')!;
+        const mutationSpy = sinon.spy();
+        new MutationObserver(mutationSpy).observe(getHeaderCellContent(column), { childList: true });
 
-        expect(newSorter).to.equal(oldSorter);
+        grid.requestContentUpdate();
+        await nextFrame();
+        expect(mutationSpy).to.not.be.called;
       });
     });
   });
@@ -144,6 +184,19 @@ describe('grid connector - header and footer renderers', () => {
 
       expect(getFooterCellContent(column).textContent).to.equal('');
       expect(column.footerRenderer).to.be.null;
+    });
+
+    it('should not detach node content when renderer runs again', async () => {
+      const content = document.createElement('flow-element') as FlowElement;
+      grid.$connector.setFooterRenderer(column, { content });
+      await nextFrame();
+
+      grid.requestContentUpdate();
+      await nextFrame();
+
+      expect(getFooterCellContent(column).contains(content)).to.be.true;
+      expect(content.connectSpy).to.be.calledOnce;
+      expect(content.disconnectSpy).to.not.be.called;
     });
   });
 });

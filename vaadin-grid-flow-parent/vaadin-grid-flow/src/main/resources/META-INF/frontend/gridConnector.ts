@@ -10,7 +10,11 @@ function isRangeEqual(range1, range2) {
 
 function renderContent(root, content) {
   if (content instanceof Node) {
-    root.appendChild(content);
+    // Skip if the content is already in place: re-appending would detach
+    // and reattach it, making header components lose state such as focus.
+    if (content.parentNode !== root) {
+      root.appendChild(content);
+    }
   } else {
     root.textContent = content;
   }
@@ -431,7 +435,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       if (showSorter) {
         sorter ??= document.createElement('vaadin-grid-sorter');
         sorter.setAttribute('path', sorterPath);
-        root.appendChild(sorter);
+        if (sorter.parentNode !== root) {
+          root.appendChild(sorter);
+        }
 
         // Use sorter as content root
         contentRoot = sorter;
