@@ -18,6 +18,9 @@ package com.vaadin.flow.component.ai.form;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Bridges {@link FormAIController#showFieldHighlight} /
@@ -42,6 +45,48 @@ final class FormFieldMarker {
     static void mark(Element field) {
         field.executeJs(
                 "customElements.get('vaadin-ai-field-marker').mark(this)");
+    }
+
+    /**
+     * Annotates the field as AI-filled using the given texts. Idempotent on the
+     * client — repeated calls keep a single annotation on the field and refresh
+     * its texts. Texts left {@code null}, or a {@code null} {@code i18n}
+     * altogether, fall back to the web component's built-in defaults.
+     */
+    static void mark(Element field, FieldMarkerI18n i18n) {
+        var options = toMarkOptions(i18n);
+        if (options == null) {
+            mark(field);
+        } else {
+            field.executeJs(
+                    "customElements.get('vaadin-ai-field-marker').mark(this, $0)",
+                    options);
+        }
+    }
+
+    /**
+     * @return the texts set on {@code i18n} as the options object the web
+     *         component's {@code mark} accepts, or {@code null} when there is
+     *         no text to pass
+     */
+    private static ObjectNode toMarkOptions(FieldMarkerI18n i18n) {
+        if (i18n == null) {
+            return null;
+        }
+        var options = JacksonUtils.createObjectNode();
+        if (i18n.getMessage() != null) {
+            options.put("message", i18n.getMessage());
+        }
+        if (i18n.getRevertText() != null) {
+            options.put("revertText", i18n.getRevertText());
+        }
+        if (i18n.getBadgeLabel() != null) {
+            options.put("badgeLabel", i18n.getBadgeLabel());
+        }
+        if (i18n.getBadgeTooltip() != null) {
+            options.put("badgeTooltip", i18n.getBadgeTooltip());
+        }
+        return options.isEmpty() ? null : options;
     }
 
     /**

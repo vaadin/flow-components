@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.tests;
 import java.util.Map;
 
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Anchor;
@@ -74,6 +75,15 @@ public class FormFieldMarkerPage extends VerticalLayout {
         // The controller highlights every field it changes automatically; no
         // showFieldHighlight wiring is needed.
         var controller = new FormAIController(form);
+
+        // Replace the built-in English texts so the markers applied by the
+        // simulated fill show localized content in the badge, tooltip and
+        // popover.
+        controller.setFieldMarkerI18n(new FieldMarkerI18n()
+                .setMessage("Tekoäly täytti tämän kentän.")
+                .setRevertText("Kumoa").setBadgeLabel("Tekoälyn täyttämä arvo")
+                .setBadgeTooltip(
+                        "Tekoälyn täyttämä arvo.\nAvaa tiedot napsauttamalla"));
 
         Map<HasValue<?, String>, String> filled = Map.of(name, "Ada Lovelace",
                 email, "ada@example.com", company, "Analytical Engines Ltd.",

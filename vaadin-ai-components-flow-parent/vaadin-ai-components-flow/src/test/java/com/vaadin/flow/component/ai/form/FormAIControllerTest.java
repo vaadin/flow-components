@@ -58,6 +58,8 @@ import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.ObjectNode;
+
 /**
  * Tests covering {@link FormAIController}'s construction, container traversal,
  * field-locking lifecycle, and hint-registration API. Tool-output specifics for
@@ -1697,6 +1699,118 @@ class FormAIControllerTest {
         }
 
         @Test
+        void showFieldHighlightPassesI18nTexts() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setMessage("Tekoäly täytti tämän kentän")
+                            .setRevertText("Kumoa")
+                            .setBadgeLabel("Tekoälyn täyttämä arvo")
+                            .setBadgeTooltip("Avaa tiedot"));
+
+            controller.showFieldHighlight(field);
+            var dump = drainPendingJs();
+
+            var script = scriptsOn(dump, field).getFirst();
+            Assertions.assertTrue(script.contains(
+                    "customElements.get('vaadin-ai-field-marker').mark(this, $0)"),
+                    "Script must pass the texts to mark; got: " + script);
+            var options = markOptionsIn(dump, field);
+            Assertions.assertEquals("Tekoäly täytti tämän kentän",
+                    options.get("message").asString());
+            Assertions.assertEquals("Kumoa",
+                    options.get("revertText").asString());
+            Assertions.assertEquals("Tekoälyn täyttämä arvo",
+                    options.get("badgeLabel").asString());
+            Assertions.assertEquals("Avaa tiedot",
+                    options.get("badgeTooltip").asString());
+        }
+
+        @Test
+        void fieldMarkerI18nOmitsUnsetTexts() {
+            // A text left null falls back to the web component's default, so
+            // it must not appear in the options at all.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form).setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Vain viesti"));
+
+            controller.showFieldHighlight(field);
+            var options = markOptionsIn(drainPendingJs(), field);
+
+            Assertions.assertEquals("Vain viesti",
+                    options.get("message").asString());
+            for (var key : List.of("revertText", "badgeLabel",
+                    "badgeTooltip")) {
+                Assertions.assertFalse(options.has(key),
+                        "Unset text must be omitted from the options: " + key);
+            }
+        }
+
+        @Test
+        void emptyFieldMarkerI18nQueuesPlainMark() {
+            // An i18n object with no texts set is equivalent to none at all.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n());
+
+            controller.showFieldHighlight(field);
+            var scripts = pendingJsOn(field);
+
+            Assertions.assertTrue(scripts.getFirst().contains(
+                    "customElements.get('vaadin-ai-field-marker').mark(this)"),
+                    "Empty i18n must not add an options argument; got: "
+                            + scripts.getFirst());
+        }
+
+        @Test
+        void autoHighlightUsesI18nTexts() {
+            // The automatic highlighting of AI-changed fields must carry the
+            // configured texts, not just explicit showFieldHighlight calls.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form).setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Tekoälyn täyttämä"));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            var options = markOptionsIn(drainPendingJs(), field);
+
+            Assertions.assertEquals("Tekoälyn täyttämä",
+                    options.get("message").asString());
+        }
+
+        @Test
+        void reattachReappliesMarkerWithCurrentI18nTexts() {
+            // The re-apply attach listener reads the i18n at fire time, so a
+            // marker re-applied after a detach/re-attach picks up texts set
+            // after the highlight was first shown.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+            drainPendingJs();
+
+            controller.setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Päivitetty viesti"));
+            form.remove(field);
+            form.add(field);
+            var options = markOptionsIn(drainPendingJs(), field);
+
+            Assertions.assertEquals("Päivitetty viesti",
+                    options.get("message").asString());
+        }
+
+        @Test
         void showFieldHighlightTwiceQueuesIdenticalScripts() {
             // mark() is idempotent on the client, so repeated calls collapse
             // to a single marker. The Java side simply queues the same script
@@ -2360,6 +2474,22 @@ class FormAIControllerTest {
                     .filter(p -> p.getInvocation().getParameters()
                             .contains(target.getElement()))
                     .map(p -> p.getInvocation().getExpression()).toList();
+        }
+
+        /**
+         * @return the options object passed to the target's queued mark script,
+         *         or {@code null} when no mark script carries one
+         */
+        private static ObjectNode markOptionsIn(
+                List<PendingJavaScriptInvocation> dump, HasElement target) {
+            return dump.stream()
+                    .filter(p -> p.getInvocation().getParameters()
+                            .contains(target.getElement()))
+                    .filter(p -> isShowScript(
+                            p.getInvocation().getExpression()))
+                    .flatMap(p -> p.getInvocation().getParameters().stream())
+                    .filter(ObjectNode.class::isInstance)
+                    .map(ObjectNode.class::cast).findFirst().orElse(null);
         }
     }
 

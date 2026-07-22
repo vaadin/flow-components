@@ -298,6 +298,7 @@ public class FormAIController implements AIController {
      */
     private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
+    private FieldMarkerI18n fieldMarkerI18n;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -682,12 +683,44 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Sets the texts shown by the AI field highlight — the "AI" badge, its
+     * tooltip, and the popover with the revert control — replacing the built-in
+     * English defaults. The texts apply whenever this controller shows or
+     * re-applies a highlight, including the automatic highlighting of fields
+     * the AI changed during a fill turn, so set them before the first turn to
+     * localize every marker the controller produces. A highlight that is
+     * already visible keeps its texts until it is shown again. Texts left
+     * {@code null} fall back to the built-in defaults.
+     *
+     * @param i18n
+     *            the texts to use, or {@code null} to restore the built-in
+     *            defaults
+     * @return this controller, for chaining
+     */
+    public FormAIController setFieldMarkerI18n(FieldMarkerI18n i18n) {
+        this.fieldMarkerI18n = i18n;
+        return this;
+    }
+
+    /**
+     * Returns the texts shown by the AI field highlight.
+     *
+     * @return the configured texts, or {@code null} when the built-in defaults
+     *         are used
+     * @see #setFieldMarkerI18n(FieldMarkerI18n)
+     */
+    public FieldMarkerI18n getFieldMarkerI18n() {
+        return fieldMarkerI18n;
+    }
+
+    /**
      * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
      * component: it shows an "AI" badge and a popover that explains the fill
      * and offers a revert control. Repeated calls keep exactly one marker on
      * the field. Call {@link #hideFieldHighlight} to clear it. The field can be
      * any {@link HasValue} {@link Component}, in or out of this controller's
-     * form, and each field's marker state is independent of the others.
+     * form, and each field's marker state is independent of the others. The
+     * marker's texts can be localized via {@link #setFieldMarkerI18n}.
      * <p>
      * The first {@code showFieldHighlight} call on a field registers three
      * listeners: an attach listener that re-applies the marker every time the
@@ -714,8 +747,8 @@ public class FormAIController implements AIController {
         var component = requireFieldComponent(field);
         var element = component.getElement();
         highlightedFields.computeIfAbsent(field, ignored -> {
-            var attach = component
-                    .addAttachListener(event -> FormFieldMarker.mark(element));
+            var attach = component.addAttachListener(
+                    event -> FormFieldMarker.mark(element, fieldMarkerI18n));
             var revert = element.addEventListener("ai-field-revert",
                     event -> revertField(field));
             // Clear the marker as soon as the user edits the field — a stale
@@ -733,7 +766,7 @@ public class FormAIController implements AIController {
                 valueChange.remove();
             };
         });
-        FormFieldMarker.mark(element);
+        FormFieldMarker.mark(element, fieldMarkerI18n);
     }
 
     /**
