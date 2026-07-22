@@ -10,8 +10,6 @@ function isRangeEqual(range1, range2) {
 
 function renderContent(root, content) {
   if (content instanceof Node) {
-    // Skip if the content is already in place: re-appending would detach
-    // and reattach it, making header components lose state such as focus.
     if (content.parentNode !== root) {
       root.appendChild(content);
     }
