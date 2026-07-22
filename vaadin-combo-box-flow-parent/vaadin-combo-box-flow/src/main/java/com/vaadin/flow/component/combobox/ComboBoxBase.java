@@ -1246,7 +1246,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Use this method when none of the {@code setItems} methods are applicable,
      * e.g. when having a data provider with filter that cannot be transformed
      * to {@code DataProvider<T, Void>}.
-     * 
+     *
      * @since 24.2
      */
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
@@ -1426,7 +1426,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 23.2.12
      */
     protected void validate() {
