@@ -115,6 +115,14 @@
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
         <surefire.argLine/>
+
+        <!--
+          Ensures modules that do not declare this POM as parent
+          (like flow-bom) are updated as well when using versions:set
+          to change the project version
+        -->
+        <processAllModules>true</processAllModules>
+
     </properties>
     <dependencyManagement>
         <dependencies>
