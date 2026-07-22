@@ -4113,6 +4113,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
+        setViewportRange(0, getPageSize());
         if (dataProviderChangeRegistration != null) {
             dataProviderChangeRegistration.remove();
             dataProviderChangeRegistration = null;
