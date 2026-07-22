@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![MenuBar renders empty after detach + refresh + reattach](https://raw.githubusercontent.com/vaadin/flow-components/COMMIT_SHA/repro-3920.png) — embeds inline.
+- **Screenshot** (static bug): ![MenuBar renders empty after detach + refresh + reattach](https://raw.githubusercontent.com/vaadin/flow-components/1ee850245b3e338152479de6100934f00cdc57a6/repro-3920.png) — embeds inline.
 
 ## Observed behavior
 
@@ -78,11 +78,11 @@ public class Repro3920View extends Div {
 
 `updateButtons()` sets `updateScheduled = true` and only resets it to `false` inside a `beforeClientResponse` callback. If the MenuBar is detached before that callback runs (and, with `@PreserveOnRefresh`, the pending callback is dropped when the UI is recreated on refresh), the flag stays `true`. On reattach, `updateButtons()` early-returns and never re-generates the items:
 
-https://github.com/vaadin/flow-components/blob/COMMIT_SHA/vaadin-menu-bar-flow-parent/vaadin-menu-bar-flow/src/main/java/com/vaadin/flow/component/menubar/MenuBar.java#L454-L467
+https://github.com/vaadin/flow-components/blob/1ee850245b3e338152479de6100934f00cdc57a6/vaadin-menu-bar-flow-parent/vaadin-menu-bar-flow/src/main/java/com/vaadin/flow/component/menubar/MenuBar.java#L454-L467
 
 `MenuItemsArrayGenerator.generate()` uses the identical pattern and the same stuck-flag exposure:
 
-https://github.com/vaadin/flow-components/blob/COMMIT_SHA/vaadin-context-menu-flow-parent/vaadin-context-menu-flow/src/main/java/com/vaadin/flow/component/contextmenu/MenuItemsArrayGenerator.java#L56-L70
+https://github.com/vaadin/flow-components/blob/1ee850245b3e338152479de6100934f00cdc57a6/vaadin-context-menu-flow-parent/vaadin-context-menu-flow/src/main/java/com/vaadin/flow/component/contextmenu/MenuItemsArrayGenerator.java#L56-L70
 
 The reporter's suggested fix — resetting both flags to `false` in `onDetach` — is not present in the current code.
 
