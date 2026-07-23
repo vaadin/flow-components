@@ -42,6 +42,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
     private Number overshoot;
     private Number opacity;
     private String _fn_pointDescriptionFormatter;
+    private String radius;
+    private String innerRadius;
     private Boolean rounded;
     private Boolean selected;
     private Boolean showCheckbox;
@@ -114,6 +116,46 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      */
     public void setBorderRadius(String borderRadius) {
         this.borderRadius = borderRadius;
+    }
+
+    /**
+     * @see #setRadius(String)
+     * @since 25.3
+     */
+    public String getRadius() {
+        return radius;
+    }
+
+    /**
+     * The outer radius for points in the solid gauge. Can be given as a number
+     * (pixels) or a percentage string, like for example 100%, relative to the
+     * pane size.
+     *
+     * @param radius
+     * @since 25.3
+     */
+    public void setRadius(String radius) {
+        this.radius = radius;
+    }
+
+    /**
+     * @see #setInnerRadius(String)
+     * @since 25.3
+     */
+    public String getInnerRadius() {
+        return innerRadius;
+    }
+
+    /**
+     * The inner radius for points in the solid gauge. Can be given as a number
+     * (pixels) or a percentage string, like for example 60%, relative to the
+     * pane size.
+     *
+     * @param innerRadius
+     * @since 25.3
+     */
+    public void setInnerRadius(String innerRadius) {
+        this.innerRadius = innerRadius;
     }
 
     /**

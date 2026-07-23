@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.charts.model.style;
 
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
+import com.vaadin.flow.component.charts.model.TextAlign;
 
 /**
  * Style options for CSS styling
@@ -26,6 +27,7 @@ public class Style extends AbstractConfigurationObject {
     private StylePosition position;
     private String lineHeight;
     private String textShadow;
+    private TextAlign textAlign;
 
     /**
      * @see #setColor(Color)
@@ -167,5 +169,24 @@ public class Style extends AbstractConfigurationObject {
      */
     public void setTextShadow(String textShadow) {
         this.textShadow = textShadow;
+    }
+
+    /**
+     * @see #setTextAlign(TextAlign)
+     * @since 25.3
+     */
+    public TextAlign getTextAlign() {
+        return textAlign;
+    }
+
+    /**
+     * Sets how the text is aligned, one of {@link TextAlign#LEFT},
+     * {@link TextAlign#CENTER} or {@link TextAlign#RIGHT}.
+     *
+     * @param textAlign
+     * @since 25.3
+     */
+    public void setTextAlign(TextAlign textAlign) {
+        this.textAlign = textAlign;
     }
 }
