@@ -4976,8 +4976,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * here. The function is executed for each item in the Grid during data
      * generation. Return a {@link String} to be appended to the row as {@code
      * type} data.
-     * <p>
-     * Note that IE11 only supports data type "text"
      *
      * @param type
      *            Type of the generated data. The generated value will be
@@ -5114,8 +5112,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * visible viewport and all the items outside of it, even if selected, are
      * excluded. Use this method to override the default drag data and the
      * number shown in drag image on selection drag.
-     * <p>
-     * Note that IE11 only supports data type "text"
      *
      * @param draggedItemsCount
      *            The number shown in the drag image on selection drag. Only
