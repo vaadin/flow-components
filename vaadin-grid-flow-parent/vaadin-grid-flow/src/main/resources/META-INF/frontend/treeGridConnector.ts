@@ -1,5 +1,10 @@
-// @ts-nocheck
 import './gridConnector.ts';
+
+/** An item sent by the server-side data communicator */
+interface TreeItem {
+  level?: number;
+  expanded?: boolean;
+}
 
 /**
  * treeGridConnector is a communication layer between TreeGrid's flow component
@@ -26,15 +31,15 @@ import './gridConnector.ts';
  * parameter of $server.setViewportRangeByIndexPath, which defines how many items to
  * include above and below the target item in the range.
  */
-window.Vaadin.Flow.treeGridConnector = {};
-window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
+(window as any).Vaadin.Flow.treeGridConnector = {};
+(window as any).Vaadin.Flow.treeGridConnector.initLazy = function (grid: any) {
   if (grid.$connector) {
     return;
   }
 
-  window.Vaadin.Flow.gridConnector.initLazy(grid);
+  (window as any).Vaadin.Flow.gridConnector.initLazy(grid);
 
-  grid._dataProviderController._shouldLoadCachePage = function (cache, page) {
+  grid._dataProviderController._shouldLoadCachePage = function (cache: unknown, page: number) {
     // `$server.setViewportRangeByIndexPath` sends a preloaded viewport range based on
     // the provided index path and `padding` parameter. Applying the new range clears
     // the old range, which is still visible because the actual scroll happens only
@@ -44,7 +49,7 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     return !grid.__pendingScrollToIndexes;
   };
 
-  grid.scrollToIndex = async function (...indexes) {
+  grid.scrollToIndex = async function (...indexes: number[]) {
     grid.__pendingScrollToIndexes = indexes;
 
     if (!grid.clientHeight || !grid._columnTree || grid._dataProviderController.isLoading()) {
@@ -61,21 +66,21 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     return flatIndex;
   };
 
-  grid.__getRowLevel = function (row) {
+  grid.__getRowLevel = function (row: { _item?: TreeItem }) {
     return row._item?.level ?? 0;
   };
 
-  grid._isExpanded = function (item) {
+  grid._isExpanded = function (item: TreeItem | undefined) {
     return !!item?.expanded;
   };
 
-  grid.expandItem = function (item) {
+  grid.expandItem = function (item: TreeItem | undefined) {
     if (item !== undefined) {
       grid.$server.updateExpandedState(grid.getItemId(item), true);
     }
   };
 
-  grid.collapseItem = function (item) {
+  grid.collapseItem = function (item: TreeItem | undefined) {
     if (item !== undefined) {
       grid.$server.updateExpandedState(grid.getItemId(item), false);
     }

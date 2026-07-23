@@ -1,14 +1,8 @@
-// The imported modules may not have resolvable types depending on the compilation
-// context (e.g. the @vaadin npm packages are not installed at the repository root),
-// so suppress the possible resolution errors with @ts-ignore.
-// @ts-ignore
+/// <reference path="./vaadin-types.d.ts" />
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
-// @ts-ignore
 import { timeOut } from '@vaadin/component-base/src/async.js';
-// @ts-ignore
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
-// @ts-ignore
-import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
+import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 
 /** An inclusive range of item indexes: [start, end] */
 type ItemRange = [start: number, end: number];

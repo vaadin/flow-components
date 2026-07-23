@@ -2,7 +2,7 @@ import './env-setup.js';
 import '@vaadin/grid/src/all-imports.js';
 import '../frontend/generated/jar-resources/gridConnector.ts';
 import '../frontend/generated/jar-resources/treeGridConnector.ts';
-import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
+import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.ts';
 import sinon from 'sinon';
 import type { Grid } from '@vaadin/grid';
 import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
