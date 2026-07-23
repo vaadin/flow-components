@@ -47,7 +47,6 @@ public class SolidGaugeMultipleKPI extends AbstractChartExample {
         chart.setHeight("500px");
 
         Configuration configuration = chart.getConfiguration();
-        configuration.getChart().setHeight("110%");
         configuration.setTitle("Multiple KPI gauge");
 
         // Full-circle pane with three concentric tracks
