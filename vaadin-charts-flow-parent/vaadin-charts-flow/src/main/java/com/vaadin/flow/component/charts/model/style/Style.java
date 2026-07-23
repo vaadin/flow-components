@@ -182,6 +182,8 @@ public class Style extends AbstractConfigurationObject {
     /**
      * Sets how the text is aligned, one of {@link TextAlign#LEFT},
      * {@link TextAlign#CENTER} or {@link TextAlign#RIGHT}.
+     * <p>
+     * Defaults to: undefined
      *
      * @param textAlign
      * @since 25.3

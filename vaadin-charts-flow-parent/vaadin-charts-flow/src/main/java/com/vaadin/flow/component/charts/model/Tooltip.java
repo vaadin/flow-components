@@ -663,6 +663,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * {@link #setPosition(Position)} instead of following the mouse or the
      * hovered point. Useful for charts like solid gauges where the tooltip
      * should stay in a fixed spot.
+     * <p>
+     * Defaults to: false
      *
      * @param fixed
      * @since 25.3
@@ -682,6 +684,8 @@ public class Tooltip extends AbstractConfigurationObject {
     /**
      * The position of the tooltip when {@link #setFixed(Boolean)} is true.
      * Supports {@code align}, {@code verticalAlign}, {@code x} and {@code y}.
+     * <p>
+     * Defaults to: undefined
      *
      * @param position
      * @since 25.3

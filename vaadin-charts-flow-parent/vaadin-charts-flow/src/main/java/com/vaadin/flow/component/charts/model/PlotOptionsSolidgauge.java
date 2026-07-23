@@ -130,6 +130,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * The outer radius for points in the solid gauge. Can be given as a number
      * (pixels) or a percentage string, like for example 100%, relative to the
      * pane size.
+     * <p>
+     * Defaults to: 100%
      *
      * @param radius
      * @since 25.3
@@ -150,6 +152,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * The inner radius for points in the solid gauge. Can be given as a number
      * (pixels) or a percentage string, like for example 60%, relative to the
      * pane size.
+     * <p>
+     * Defaults to: 60%
      *
      * @param innerRadius
      * @since 25.3
