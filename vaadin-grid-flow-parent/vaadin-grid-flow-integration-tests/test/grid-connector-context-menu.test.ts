@@ -44,7 +44,7 @@ describe('grid connector - context menu', () => {
     let detail: { key: string, columnId: string };
     // The detail is resolved while the source event is still being dispatched
     grid.addEventListener('contextmenu', (e) => {
-      detail = grid.getContextMenuBeforeOpenDetail({ detail: { sourceEvent: e } });
+      detail = grid.getContextMenuBeforeOpenDetail(new CustomEvent('contextmenu', { detail: { sourceEvent: e } }));
     });
     getBodyCellContent(grid, 0, 1)!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, composed: true }));
 

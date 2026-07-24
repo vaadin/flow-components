@@ -1,14 +1,16 @@
-// @ts-nocheck
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
-import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
+import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
+import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
+import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
+import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid/vaadin-grid-types.js';
 
-function isRangeEqual(range1, range2) {
+function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
 }
 
-function renderContent(root, content) {
+function renderContent(root: HTMLElement, content: Node | string) {
   if (content instanceof Node) {
     if (content.parentNode !== root) {
       root.appendChild(content);
@@ -18,8 +20,7 @@ function renderContent(root, content) {
   }
 }
 
-window.Vaadin.Flow.gridConnector = {};
-window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
+function initLazy(grid: FlowGrid) {
   // Check whether the connector was already initialized for the grid
   if (grid.$connector) {
     return;
@@ -28,18 +29,18 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   const dataProviderController = grid._dataProviderController;
 
   const requestDebouncerDelay = 150;
-  let requestDebouncer;
-  let requestedRange = null;
+  let requestDebouncer: Debouncer | null = null;
+  let requestedRange: ItemRange | null = null;
 
-  let selectedKeys = {};
-  let selectionMode = 'SINGLE';
+  let selectedKeys: Record<string, Item> = {};
+  let selectionMode: SelectionMode = 'SINGLE';
 
   let sorterDirectionsSetFromServer = false;
 
   grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
-  grid.$connector = {};
+  grid.$connector = {} as GridConnector;
 
   grid.$connector.hasRootRequestQueue = () => {
     const { pendingRequests } = dataProviderController.rootCache;
@@ -102,7 +103,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.selectedItems = updatedSelectedItems;
   };
 
-  function onItemActivate(event) {
+  function onItemActivate(event: GridCellActivateEvent<Item>) {
     const { item } = event.detail.model;
     // The row model can hold a stale item while its data is being loaded, so
     // skip activation unless the item is actually loaded in the data cache
@@ -283,7 +284,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   let preventRowUpdatesActive = 0;
 
-  function preventRowUpdates(callback) {
+  function preventRowUpdates(callback: () => void) {
     try {
       preventRowUpdatesActive++;
       callback();
@@ -342,7 +343,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
-    const items = rootCache.items.slice(index, index + length).filter(Boolean);
+    const items = rootCache.items.slice(index, index + length).filter((item): item is Item => !!item);
     if (items.length === 0) {
       return;
     }
@@ -426,13 +427,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // The renderer can run multiple times, e.g. when the grid re-creates
     // header cells. The sorter is cached between runs: re-creating it would
     // reset its direction and fire a sorters-changed round-trip to the server.
-    let sorter;
+    let sorter: GridSorter | undefined;
 
     column.headerRenderer = (root) => {
-      let contentRoot = root;
+      let contentRoot: HTMLElement = root;
       if (showSorter) {
         sorter ??= document.createElement('vaadin-grid-sorter');
-        sorter.setAttribute('path', sorterPath);
+        sorter.setAttribute('path', sorterPath!);
         if (sorter.parentNode !== root) {
           root.appendChild(sorter);
         }
@@ -531,11 +532,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     );
   });
 
-  grid.addEventListener('column-reorder', (e) => {
+  grid.addEventListener('column-reorder', () => {
     const columns = grid._columnTree
-      .at(-1)
+      .at(-1)!
       .filter((c) => c._flowId)
-      .sort((a, b) => a._order - b._order)
+      .sort((a, b) => (a._order ?? 0) - (b._order ?? 0))
       .map((c) => c._flowId);
 
     grid.dispatchEvent(
@@ -547,8 +548,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.addEventListener('cell-focus', (e) => {
     const eventContext = grid.getEventContext(e);
+    const { section } = eventContext;
 
-    if (!['header', 'body', 'footer'].includes(eventContext.section)) {
+    if (!section || section === 'details') {
       return;
     }
 
@@ -557,21 +559,21 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         detail: {
           itemKey: eventContext.item?.key ?? null,
           internalColumnId: eventContext.column?._flowId ?? null,
-          section: eventContext.section
+          section
         }
       })
     );
   });
 
-  function _fireClickEvent(event, eventName) {
+  function _fireClickEvent(event: MouseEvent & { itemKey?: string; internalColumnId?: string }, eventName: string) {
     // Click event was handled by the component inside grid, do nothing.
     if (event.defaultPrevented) {
       return;
     }
 
-    const path = event.composedPath();
+    const path = event.composedPath() as Element[];
     const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
-    const cell = path[idx];
+    const cell = path[idx] as (Element & { _focusButton?: Element }) | undefined;
     const content = path.slice(0, idx);
 
     // Do not fire item click event if the click originated inside a Vaadin overlay
@@ -609,16 +611,17 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   }
 
-  grid.cellPartNameGenerator = function (column, { item }) {
+  grid.cellPartNameGenerator = (column, { item }) => {
     const { part } = item;
     if (part) {
-      return [part.row, column ? part[column._flowId] : null].filter(Boolean).join(' ');
+      return [part.row, column ? part[column._flowId!] : null].filter(Boolean).join(' ');
     }
+    return '';
   };
 
-  grid.dropFilter = ({ item }) => item && !item.dropDisabled;
+  grid.dropFilter = ({ item }) => !!item && !item.dropDisabled;
 
-  grid.dragFilter = ({ item }) => item && !item.dragDisabled;
+  grid.dragFilter = ({ item }) => !!item && !item.dragDisabled;
 
   grid.addEventListener('grid-dragstart', (e) => {
     const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
@@ -629,17 +632,18 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
       } else {
         (grid.__dragDataTypes || []).forEach((type) => {
-          setDragData(type, draggedItems.map((item) => item.dragData[type]).join('\n'));
+          setDragData(type, draggedItems.map((item) => item.dragData![type]).join('\n'));
         });
       }
 
-      if (grid.__selectionDraggedItemsCount > 1) {
-        setDraggedItemsCount(grid.__selectionDraggedItemsCount);
+      const draggedItemsCount = grid.__selectionDraggedItemsCount ?? 0;
+      if (draggedItemsCount > 1) {
+        setDraggedItemsCount(draggedItemsCount);
       }
     } else {
       // Dragging just one (non-selected) item
       (grid.__dragDataTypes || []).forEach((type) => {
-        setDragData(type, draggedItems[0].dragData[type]);
+        setDragData(type, draggedItems[0].dragData![type]);
       });
     }
   });
@@ -653,7 +657,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return item?.detailsOpened ?? false;
   };
 
-  function isRowFullyInViewport(row) {
+  function isRowFullyInViewport(row: HTMLElement) {
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();
@@ -672,4 +676,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     grid.scrollToIndex(...args);
   };
-};
+}
+
+window.Vaadin.Flow.gridConnector = { initLazy };
