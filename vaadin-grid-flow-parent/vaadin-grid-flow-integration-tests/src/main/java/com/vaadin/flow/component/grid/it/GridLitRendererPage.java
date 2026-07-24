@@ -119,8 +119,7 @@ public class GridLitRendererPage extends Div {
                 .withProperty("address", Person::getAddress))
                 .setHeader("Address");
 
-        // You can set events handlers associated with the template. The syntax
-        // follows the Polymer convention "on-event", such as "on-click".
+        // You can set events handlers associated with the template.
         grid.addColumn(LitRenderer.<Person> of(
                 "<button @click=${handleUpdate}>Update</button><button @click=${handleRemove}>Remove</button>")
                 .withFunction("handleUpdate", person -> {
