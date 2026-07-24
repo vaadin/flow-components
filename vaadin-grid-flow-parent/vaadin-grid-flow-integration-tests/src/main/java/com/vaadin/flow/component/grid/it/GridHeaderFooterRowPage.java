@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.FooterRow;
@@ -27,6 +28,8 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.bean.PeopleGenerator;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
@@ -179,6 +182,67 @@ public class GridHeaderFooterRowPage extends Div {
                 "removeAllHeaderRows", event -> grid2.removeAllHeaderRows());
         removeAllHeaderRows.setId("remove-all-header-rows");
         add(removeAllHeaderRows);
+
+        getElement().appendChild(new Element("hr"));
+        createGridWithHeaderAndFooterRows();
+        createHeaderAndFooterUsingComponents();
+    }
+
+    private void createGridWithHeaderAndFooterRows() {
+        List<Person> people = new PeopleGenerator().generatePeople(500);
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(people);
+
+        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("Name").setComparator((p1, p2) -> p1.getFirstName()
+                        .compareToIgnoreCase(p2.getFirstName()));
+        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader("Age");
+        Column<Person> streetColumn = grid
+                .addColumn(person -> person.getAddress().getStreet())
+                .setHeader("Street");
+        Column<Person> postalCodeColumn = grid
+                .addColumn(person -> person.getAddress().getPostalCode())
+                .setHeader("Postal Code");
+
+        HeaderRow topRow = grid.prependHeaderRow();
+        topRow.join(nameColumn, ageColumn).setText("Basic Information");
+        topRow.join(streetColumn, postalCodeColumn)
+                .setText("Address Information");
+
+        grid.appendFooterRow().getCell(nameColumn)
+                .setText("Total: " + people.size() + " people");
+        grid.setId("grid-with-header-and-footer-rows");
+        add(grid);
+    }
+
+    private void createHeaderAndFooterUsingComponents() {
+        List<Person> people = new PeopleGenerator().generatePeople(500);
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(people);
+
+        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader(new Span("Name")).setComparator((p1, p2) -> p1
+                        .getFirstName().compareToIgnoreCase(p2.getFirstName()));
+        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader(new Span("Age"));
+        Column<Person> streetColumn = grid
+                .addColumn(person -> person.getAddress().getStreet())
+                .setHeader(new Span("Street"));
+        Column<Person> postalCodeColumn = grid
+                .addColumn(person -> person.getAddress().getPostalCode())
+                .setHeader(new Span("Postal Code"));
+
+        HeaderRow topRow = grid.prependHeaderRow();
+        topRow.join(nameColumn, ageColumn)
+                .setComponent(new Span("Basic Information"));
+        topRow.join(streetColumn, postalCodeColumn)
+                .setComponent(new Span("Address Information"));
+
+        grid.appendFooterRow().getCell(nameColumn)
+                .setComponent(new Span("Total: " + people.size() + " people"));
+        grid.setId("grid-header-with-components");
+        add(grid);
     }
 
 }
