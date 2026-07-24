@@ -42,7 +42,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 1.0
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value = "@vaadin/login", version = "25.2.5")
+@NpmPackage(value = "@vaadin/login", version = "25.2.6")
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin implements HasStyle {
 
