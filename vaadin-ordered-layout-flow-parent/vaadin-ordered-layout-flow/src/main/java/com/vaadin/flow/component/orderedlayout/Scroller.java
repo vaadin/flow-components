@@ -38,7 +38,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @since 3.1
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/scroller", version = "25.2.5")
+@NpmPackage(value = "@vaadin/scroller", version = "25.2.6")
 @JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements Focusable<Scroller>, HasSize,
         HasStyle, HasThemeVariant<ScrollerVariant> {
