@@ -8,14 +8,6 @@
 - **Jackson 3** for JSON — databind from `tools.jackson.*`, annotations from
   `com.fasterxml.jackson.annotation.*` (they stayed in the legacy package).
 
-## Ground rules
-
-- Components and the data objects they expose are `Serializable`, and JSON is
-  built with Jackson (`JacksonUtils`) — see
-  [Design → Universal behavioural requirements](02-design.md#universal-behavioural-requirements).
-- Connectors and `executeJs` calls run in `attach`, not the constructor — see
-  [Composition](07-composition.md).
-
 ## Module structure
 
 Each component is a parent Maven module with three children:
@@ -36,7 +28,8 @@ vaadin-{component}-flow-parent/
 Copy the layout from `vaadin-button-flow-parent` (the reference small
 component). The integration-tests module sits under a `default` profile, so it
 builds during development but is excluded from releases. Add the new parent
-module to the top-level aggregator pom.
+module to the top-level aggregator pom. Also add published modules (main
+component, TestBench element) to the `flow-components-bom`.
 
 ## Naming
 
@@ -50,8 +43,7 @@ module to the top-level aggregator pom.
 | TestBench element | `{Component}Element`                    | `ButtonElement`                  |
 | Web component tag | `vaadin-{component}`                    | `vaadin-date-picker`             |
 
-Test classes: `{Component}Test`, `{Component}SignalTest`,
-`{Component}VariantTest`, `{Component}SerializableTest`, `{Component}I18nTest`
+Test classes: `{Component}Test`, `{Component}SignalTest`, `{Component}SerializableTest`, `{Component}I18nTest`
 (unit); `{Component}IT` + `{Component}Page` (integration). Use the `.tests`
 package for both unit and integration tests — `.test` is legacy, avoid it.
 `{Component}View` exists in legacy ITs; prefer `{Component}Page` for new ones.
@@ -67,7 +59,7 @@ point.
 
 ## Copyright headers
 
-Every `.java`, `.js`, `.xml`, and `.properties` file carries a license header,
+Every `.java`, `.js`, `.ts` file carries a license header, automatically
 applied by `mvn spotless:apply`. Most components use the Apache 2.0 header;
 commercial components (Grid Pro, Charts, Spreadsheet, Dashboard, Board, CRUD,
 Map, Rich Text Editor, …) use the Vaadin Commercial License header instead.

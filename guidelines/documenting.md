@@ -9,17 +9,13 @@ errors surface).
 
 ## Method Javadoc
 
-- Describe WHAT it does and WHY a caller uses it — not how it works internally.
-- Mention side-effects (DOM updates, re-rendering) and document exceptions
-  (`@throws …`).
+- Describe WHAT it does and WHY a caller uses it — not how it works
+  internally.
+- Mention side-effects: DOM updates, re-rendering, clearing state previously set
+  by a different method / overload.
+- Document exceptions (`@throws …`).
 - For boolean parameters, say what `true` vs `false` does.
 - Cross-link related methods with `{@link …}`.
-
-## @since and @deprecated
-
-- `@since` on every new public class and method.
-- `@deprecated` with a `{@link}` / `@see` pointing to the replacement.
-  Deprecated APIs stay at least one major version before removal.
 
 ## README.md
 

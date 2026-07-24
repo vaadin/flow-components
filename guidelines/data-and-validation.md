@@ -11,11 +11,11 @@ match the data model:
 - `HasDataView<T, F, V>` — general data view.
 
 Lazy components use a `DataCommunicator<T>` to track client-cached items and
-serve pages on demand (e.g. `ComboBoxDataCommunicator`), usually bridged by a JS
-connector (see [Composition](07-composition.md)).
+serve pages on demand (e.g. `ComboBoxDataCommunicator`), usually bridged by a
+JS connector (see [Connectors](component-implementation.md#connectors-javascript-glue)).
 
-Expose the standard `setItems` family, each returning the specific data view so
-callers can chain item-level operations:
+Expose the standard `setItems` family, each returning the specific data view
+so callers can chain item-level operations:
 
 ```java
 ExampleListDataView<T> setItems(T... items);
@@ -27,14 +27,14 @@ ExampleLazyDataView<T> setItems(FetchCallback<T, F> fetch, CountCallback<T, F> c
 
 ## Validation
 
-- **Simple state.** `HasValidationProperties` gives `setInvalid` / `isInvalid` /
-  `setErrorMessage` backed by element properties.
-- **Automatic vs manual.** Field components validate on value change. Both modes
-  MUST work: `setManualValidation(true)` hands full control to the application,
-  which then sets `invalid` and the error message itself.
+- **Simple state.** `HasValidationProperties` gives `setInvalid` / `isInvalid`
+  / `setErrorMessage` backed by element properties.
+- **Automatic vs manual.** Field components validate on value change. Both
+  modes MUST work: `setManualValidation(true)` hands full control to the
+  application, which then sets `invalid` and the error message itself.
 - **ValidationController.** Complex fields use
-  `com.vaadin.flow.component.shared.internal.ValidationController` to coordinate
-  built-in constraints, application validators, and the current mode — follow
-  `ComboBoxBase`, `Select`, `DatePicker`.
+  `com.vaadin.flow.component.shared.internal.ValidationController` to
+  coordinate built-in constraints, application validators, and the current
+  mode — follow `ComboBoxBase`, `Select`, `DatePicker`.
 - **Binder.** Implementing `HasValidator<V>` lets `Binder` pick up the default
   validator automatically.
