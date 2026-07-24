@@ -41,7 +41,7 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
    *
    * @override
    */
-  protected _defaultHeaderRenderer(root: HTMLElement, _column: GridColumn) {
+  _defaultHeaderRenderer(root: HTMLElement, _column: GridColumn) {
     super._defaultHeaderRenderer(root, _column);
     const checkbox = root.firstElementChild;
     if (checkbox) {
