@@ -70,6 +70,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     private static final String PROP_DISABLED = "disabled";
     private static final String PROP_ERROR = "error";
     private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
+    private static final String PROP_HEADING_LEVEL = "headingLevel";
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
@@ -227,6 +228,36 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      */
     public boolean isForgotPasswordButtonVisible() {
         return !getElement().getProperty(PROP_NO_FORGOT_PASSWORD, false);
+    }
+
+    /**
+     * Gets the root heading level ({@code aria-level}) of the heading
+     * hierarchy.
+     *
+     * @return the heading level
+     * @see #setHeadingLevel(int)
+     * @since 25.3
+     */
+    public int getHeadingLevel() {
+        return getElement().getProperty(PROP_HEADING_LEVEL, 1);
+    }
+
+    /**
+     * Sets the root heading level ({@code aria-level}) for the heading
+     * hierarchy, exposing the headings at the level that matches the
+     * surrounding page structure. Child headings automatically increment from
+     * this base level: a standalone login form renders its title at the given
+     * level, whereas the form inside the overlay uses the next level down, as
+     * the base level is used by the overlay's own title.
+     * <p>
+     * The default heading level is {@code 1}.
+     *
+     * @param headingLevel
+     *            the heading level
+     * @since 25.3
+     */
+    public void setHeadingLevel(int headingLevel) {
+        getElement().setProperty(PROP_HEADING_LEVEL, headingLevel);
     }
 
     /**

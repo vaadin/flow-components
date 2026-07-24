@@ -143,4 +143,17 @@ class LoginOverlayTest {
         Assertions.assertFalse(overlay.isError(),
                 "Expected error status being reset by default listener");
     }
+
+    @Test
+    void headingLevel() {
+        final LoginOverlay overlay = new LoginOverlay();
+
+        Assertions.assertEquals(1, overlay.getHeadingLevel());
+
+        overlay.setHeadingLevel(3);
+
+        Assertions.assertEquals(3, overlay.getHeadingLevel());
+        Assertions.assertEquals(3.0,
+                overlay.getElement().getProperty("headingLevel", 0.0));
+    }
 }
