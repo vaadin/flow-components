@@ -2,9 +2,19 @@ import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
+import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
+import type { GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
-import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid/vaadin-grid-types.js';
+import type {
+  FlowDataProviderController,
+  FlowGrid,
+  Item,
+  ItemRange,
+  SelectionMode
+} from './vaadin-grid/vaadin-grid-types.js';
+
+const requestDebouncerDelay = 150;
 
 function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
@@ -20,39 +30,48 @@ function renderContent(root: HTMLElement, content: Node | string) {
   }
 }
 
-function initLazy(grid: FlowGrid) {
-  // Check whether the connector was already initialized for the grid
-  if (grid.$connector) {
-    return;
+/**
+ * gridConnector is a communication layer between Grid's flow component
+ * (server-side) and web component (client-side).
+ */
+export class GridConnector {
+  private readonly grid: FlowGrid;
+  private readonly dataProviderController: FlowDataProviderController;
+
+  private requestDebouncer: Debouncer | null = null;
+  private requestedRange: ItemRange | null = null;
+
+  private selectedKeys: Record<string, Item> = {};
+  private selectionMode: SelectionMode = 'SINGLE';
+
+  private sorterDirectionsSetFromServer = false;
+
+  private preventRowUpdatesActive = 0;
+
+  constructor(grid: FlowGrid) {
+    this.grid = grid;
+    this.dataProviderController = grid._dataProviderController;
+
+    grid.size = 0; // To avoid NaN here and there before we get proper data
+    grid.itemIdPath = 'key';
+
+    this.patchGrid();
+    this.addGridEventListeners();
   }
 
-  const dataProviderController = grid._dataProviderController;
+  hasRootRequestQueue(): boolean {
+    const { pendingRequests } = this.dataProviderController.rootCache;
+    return Object.keys(pendingRequests).length > 0 || !!this.requestDebouncer?.isActive();
+  }
 
-  const requestDebouncerDelay = 150;
-  let requestDebouncer: Debouncer | null = null;
-  let requestedRange: ItemRange | null = null;
+  doSelection(items: (Item | null)[], userOriginated?: boolean): void {
+    const { grid } = this;
 
-  let selectedKeys: Record<string, Item> = {};
-  let selectionMode: SelectionMode = 'SINGLE';
-
-  let sorterDirectionsSetFromServer = false;
-
-  grid.size = 0; // To avoid NaN here and there before we get proper data
-  grid.itemIdPath = 'key';
-
-  grid.$connector = {} as GridConnector;
-
-  grid.$connector.hasRootRequestQueue = () => {
-    const { pendingRequests } = dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!requestDebouncer?.isActive();
-  };
-
-  grid.$connector.doSelection = function (items, userOriginated) {
-    if (selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
+    if (this.selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
-    if (selectionMode === 'SINGLE') {
-      selectedKeys = {};
+    if (this.selectionMode === 'SINGLE') {
+      this.selectedKeys = {};
     }
 
     let selectedItemsChanged = false;
@@ -60,7 +79,7 @@ function initLazy(grid: FlowGrid) {
       const selectable = !userOriginated || grid.isItemSelectable(item);
       selectedItemsChanged = selectedItemsChanged || selectable;
       if (item && selectable) {
-        selectedKeys[item.key] = item;
+        this.selectedKeys[item.key] = item;
         item.selected = true;
         if (userOriginated) {
           grid.$server.select(item.key);
@@ -69,12 +88,14 @@ function initLazy(grid: FlowGrid) {
     });
 
     if (selectedItemsChanged) {
-      grid.selectedItems = Object.values(selectedKeys);
+      grid.selectedItems = Object.values(this.selectedKeys);
     }
-  };
+  }
 
-  grid.$connector.doDeselection = function (items, userOriginated) {
-    if (selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
+  doDeselection(items: Item[], userOriginated?: boolean): void {
+    const { grid } = this;
+
+    if (this.selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
 
@@ -93,7 +114,7 @@ function initLazy(grid: FlowGrid) {
         }
       }
       if (itemToDeselect) {
-        delete selectedKeys[itemToDeselect.key];
+        delete this.selectedKeys[itemToDeselect.key];
         delete itemToDeselect.selected;
         if (userOriginated) {
           grid.$server.deselect(itemToDeselect.key);
@@ -101,44 +122,18 @@ function initLazy(grid: FlowGrid) {
       }
     }
     grid.selectedItems = updatedSelectedItems;
-  };
-
-  function onItemActivate(event: GridCellActivateEvent<Item>) {
-    const { item } = event.detail.model;
-    // The row model can hold a stale item while its data is being loaded, so
-    // skip activation unless the item is actually loaded in the data cache
-    if (!dataProviderController.getItemContext(item)) {
-      return;
-    }
-
-    if (selectionMode === 'SINGLE') {
-      if (!selectedKeys[item.key]) {
-        grid.$connector.doSelection([item], true);
-      } else if (!grid.__deselectDisallowed) {
-        grid.$connector.doDeselection([item], true);
-      }
-    }
-
-    if (!grid.__disallowDetailsOnClick) {
-      if (!item.detailsOpened) {
-        grid.$server.setDetailsVisible(item.key);
-      } else {
-        grid.$server.setDetailsVisible(null);
-      }
-    }
   }
 
-  grid.addEventListener('cell-activate', onItemActivate);
-  grid.addEventListener('row-activate', onItemActivate);
-
-  grid.$connector.getRenderedRange = function () {
-    const renderedRows = grid._getRenderedRows();
+  getRenderedRange(): ItemRange {
+    const renderedRows = this.grid._getRenderedRows();
     return [renderedRows.at(0)?.index ?? 0, renderedRows.at(-1)?.index ?? 0];
-  };
+  }
 
-  grid.$connector.getFetchRange = function () {
+  getFetchRange(): ItemRange {
+    const { grid } = this;
+
     // Get the range of currently rendered rows
-    let range = grid.$connector.getRenderedRange();
+    let range = this.getRenderedRange();
 
     // Expand the range in both directions to add a buffer, e.g. a rendered
     // range of [100, 120] becomes [80, 140]
@@ -152,21 +147,21 @@ function initLazy(grid: FlowGrid) {
     range[1] = (Math.floor(range[1] / grid.pageSize) + 1) * grid.pageSize - 1;
 
     return range;
-  };
+  }
 
-  grid.$connector.fetchCurrentRange = async () => {
-    const range = grid.$connector.getFetchRange();
+  async fetchCurrentRange(): Promise<void> {
+    const range = this.getFetchRange();
 
-    if (isRangeEqual(range, requestedRange)) {
+    if (isRangeEqual(range, this.requestedRange)) {
       // Skip duplicate requests for the same range.
       return;
     }
 
-    requestedRange = range;
+    this.requestedRange = range;
 
     // The range is inclusive while the server expects a length, hence + 1,
     // e.g. a range of [50, 149] results in a length of 100
-    await grid.$server.setViewportRange(range[0], range[1] - range[0] + 1);
+    await this.grid.$server.setViewportRange(range[0], range[1] - range[0] + 1);
 
     // Resolve any pending callbacks in case the server responded with no new
     // data and $connector.confirm wasn't called because the server assumes all
@@ -174,15 +169,16 @@ function initLazy(grid: FlowGrid) {
     // scrolling quickly back and forth so that the grid returns to a position
     // whose data has already been delivered and is cached. In that case,
     // resolving the callbacks lets the grid exit the loading state correctly.
-    grid.$connector.resolvePendingCallbacks();
-  };
+    this.resolvePendingCallbacks();
+  }
 
-  grid.$connector.resolvePendingCallbacks = () => {
-    const { rootCache } = dataProviderController;
+  resolvePendingCallbacks(): void {
+    const { grid } = this;
+    const { rootCache } = this.dataProviderController;
 
     grid._hasData = true;
 
-    preventRowUpdates(() => {
+    this.preventRowUpdates(() => {
       Object.values(rootCache.pendingRequests).forEach((callback) => {
         // Set a flag so the grid re-checks all rendered rows after all callbacks
         // are resolved, and requests any that are still missing, not just the ones
@@ -200,53 +196,15 @@ function initLazy(grid: FlowGrid) {
     // debouncer (if any) to avoid sending a server request that is no longer
     // needed.
     if (Object.values(rootCache.pendingRequests).length === 0) {
-      requestDebouncer?.cancel();
-      requestedRange = null;
+      this.requestDebouncer?.cancel();
+      this.requestedRange = null;
     }
-  };
+  }
 
-  // The grid requests a page only when a row from that page gets rendered,
-  // which is too late to keep up while scrolling and leads to blank rows.
-  // To load data ahead of rendering, request the fetch range (rendered
-  // rows + buffer) on every virtualizer update while scrolling.
-  grid.__updateVirtualizerElement = function (...args) {
-    Object.getPrototypeOf(this).__updateVirtualizerElement.call(this, ...args);
+  setSorterDirections(directions: { column: string; direction: GridSorterDirection }[]): void {
+    const { grid } = this;
 
-    if (grid.$.scroller.hasAttribute('scrolling')) {
-      const fetchRange = grid.$connector.getFetchRange();
-      dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
-      dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
-    }
-  };
-
-  grid.dataProvider = function (params, callback) {
-    if (params.pageSize !== grid.pageSize) {
-      throw 'Invalid pageSize';
-    }
-
-    // size is controlled by the server (data communicator), so if the
-    // size is zero, we know that there is no data to fetch.
-    // This also prevents an empty grid getting stuck in a loading state.
-    // The connector does not cache empty pages, so if the grid requests
-    // data again, there would be no cache entry, causing a request to
-    // the server. However, the data communicator will never respond,
-    // as it assumes that the data is already cached.
-    if (grid.size === 0) {
-      callback([], 0);
-      return;
-    }
-
-    requestDebouncer = Debouncer.debounce(
-      requestDebouncer,
-      timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
-      () => {
-        grid.$connector.fetchCurrentRange();
-      }
-    );
-  };
-
-  grid.$connector.setSorterDirections = function (directions) {
-    sorterDirectionsSetFromServer = true;
+    this.sorterDirectionsSetFromServer = true;
     setTimeout(() => {
       try {
         // Sorters for hidden columns are removed from DOM but stored in the web component.
@@ -277,54 +235,35 @@ function initLazy(grid: FlowGrid) {
         // and therefore didn't notify the grid about their direction change.
         grid.__applySorters();
       } finally {
-        sorterDirectionsSetFromServer = false;
+        this.sorterDirectionsSetFromServer = false;
       }
     });
-  };
-
-  let preventRowUpdatesActive = 0;
-
-  function preventRowUpdates(callback: () => void) {
-    try {
-      preventRowUpdatesActive++;
-      callback();
-    } finally {
-      preventRowUpdatesActive--;
-    }
   }
 
-  grid.__updateRow = function (row, ...args) {
-    if (preventRowUpdatesActive !== 0) {
-      return;
-    }
-
-    Object.getPrototypeOf(this).__updateRow.call(this, row, ...args);
-  };
-
-  grid.$connector.set = function (startIndex, items) {
-    const { rootCache } = dataProviderController;
+  set(startIndex: number, items: Item[]): void {
+    const { rootCache } = this.dataProviderController;
     items.forEach((item, i) => {
       rootCache.items[startIndex + i] = item;
     });
 
-    preventRowUpdates(() => {
-      grid.$connector.doSelection(items.filter((item) => item.selected));
-      grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
+    this.preventRowUpdates(() => {
+      this.doSelection(items.filter((item) => item.selected));
+      this.doDeselection(items.filter((item) => !item.selected && this.selectedKeys[item.key]));
     });
 
-    grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
-  };
+    this.grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
+  }
 
   /**
    * Updates the given items for a non-hierarchical grid.
    *
    * @param updatedItems the updated items array
    */
-  grid.$connector.updateFlatData = function (updatedItems) {
-    const { rootCache } = dataProviderController;
+  updateFlatData(updatedItems: Item[]): void {
+    const { rootCache } = this.dataProviderController;
 
     updatedItems.forEach((item) => {
-      const itemContext = dataProviderController.getItemContext(item);
+      const itemContext = this.dataProviderController.getItemContext(item);
       if (!itemContext) {
         return;
       }
@@ -332,12 +271,13 @@ function initLazy(grid: FlowGrid) {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
-      grid.__updateVisibleRows(index, index);
+      this.grid.__updateVisibleRows(index, index);
     });
-  };
+  }
 
-  grid.$connector.clear = function (index, length) {
-    const { rootCache } = dataProviderController;
+  clear(index: number, length: number): void {
+    const { grid } = this;
+    const { rootCache } = this.dataProviderController;
 
     if (index % grid.pageSize !== 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
@@ -348,75 +288,50 @@ function initLazy(grid: FlowGrid) {
       return;
     }
 
-    preventRowUpdates(() => {
-      grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
+    this.preventRowUpdates(() => {
+      this.doDeselection(items.filter((item) => this.selectedKeys[item.key]));
     });
 
     rootCache.items.fill(undefined, index, index + length);
 
     grid.__updateVisibleRows(index, index + length - 1);
-  };
+  }
 
-  grid.$connector.reset = function () {
-    dataProviderController.clearCache();
-    requestedRange = null;
-    requestDebouncer?.cancel();
-    grid.__updateVisibleRows();
-  };
+  reset(): void {
+    this.dataProviderController.clearCache();
+    this.requestedRange = null;
+    this.requestDebouncer?.cancel();
+    this.grid.__updateVisibleRows();
+  }
 
-  grid.$connector.updateSize = (newSize) => (grid.size = newSize);
+  updateSize(size: number): void {
+    this.grid.size = size;
+  }
 
-  grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
+  updateUniqueItemIdPath(path: string): void {
+    this.grid.itemIdPath = path;
+  }
 
-  grid.$connector.confirm = function (id) {
+  confirm(id: number): void {
     // We're done applying changes from this batch, resolve pending
     // callbacks
-    grid.$connector.resolvePendingCallbacks();
+    this.resolvePendingCallbacks();
 
     // Let server know we're done
-    grid.$server.confirmUpdate(id);
-  };
+    this.grid.$server.confirmUpdate(id);
+  }
 
-  grid.$connector.setSelectionMode = function (mode) {
-    selectionMode = mode;
-    selectedKeys = {};
-    grid.selectedItems = [];
-    grid.__a11yUpdateMutiSelectable();
-  };
+  setSelectionMode(mode: SelectionMode): void {
+    this.selectionMode = mode;
+    this.selectedKeys = {};
+    this.grid.selectedItems = [];
+    this.grid.__a11yUpdateMutiSelectable();
+  }
 
-  grid.__a11yUpdateRowSelected = function (row, selected) {
-    if (selectionMode === 'NONE') {
-      [row, ...row.children].forEach((el) => el.removeAttribute('aria-selected'));
-      return;
-    }
-
-    Object.getPrototypeOf(this).__a11yUpdateRowSelected.call(this, row, selected);
-  };
-
-  /*
-   * Manage aria-multiselectable attribute depending on the selection mode.
-   * see more: https://github.com/vaadin/web-components/issues/1536
-   * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
-   */
-  grid.__a11yUpdateMutiSelectable = function () {
-    if (!grid.$) {
-      return;
-    }
-
-    switch (selectionMode) {
-      case 'SINGLE':
-        grid.$.table.setAttribute('aria-multiselectable', 'false');
-        break;
-      case 'MULTI':
-        grid.$.table.setAttribute('aria-multiselectable', 'true');
-        break;
-      default:
-        grid.$.table.removeAttribute('aria-multiselectable');
-    }
-  };
-  grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
-
-  grid.$connector.setHeaderRenderer = function (column, options) {
+  setHeaderRenderer(
+    column: GridColumn<Item>,
+    options: { content: Node | string | null; showSorter?: boolean; sorterPath?: string }
+  ): void {
     const { content, showSorter, sorterPath } = options;
 
     if (content === null) {
@@ -444,43 +359,9 @@ function initLazy(grid: FlowGrid) {
 
       renderContent(contentRoot, content);
     };
-  };
+  }
 
-  // This method is overridden to prevent the grid web component from
-  // automatically excluding columns from sorting when they get hidden.
-  // In Flow, it's the developer's responsibility to remove the column
-  // from the backend sort order when the column gets hidden.
-  grid._getActiveSorters = function () {
-    return this._sorters.filter((sorter) => sorter.direction);
-  };
-
-  grid.__applySorters = function (...args) {
-    const sorters = grid._mapSorters();
-    const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
-
-    // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
-    // method in the mixin will skip calling clearCache().
-    //
-    // In Flow Grid's case, we never want to clear the cache eagerly when the sorter elements
-    // change due to one of the following reasons:
-    //
-    // 1. Sorted by user: The items in the new sort order need to be fetched from the server,
-    // and we want to avoid a heavy re-render before the updated items have actually been fetched.
-    //
-    // 2. Sorted programmatically on the server: The items in the new sort order have already
-    // been fetched and applied to the grid. The sorter element states are updated programmatically
-    // to reflect the new sort order, but there's no need to re-render the grid rows.
-    grid._previousSorters = sorters;
-
-    // Call the original __applySorters method in vaadin-grid-sort-mixin
-    Object.getPrototypeOf(this).__applySorters.call(this, ...args);
-
-    if (sortersChanged && !sorterDirectionsSetFromServer) {
-      grid.$server.sortersChanged(sorters);
-    }
-  };
-
-  grid.$connector.setFooterRenderer = function (column, options) {
+  setFooterRenderer(column: GridColumn<Item>, options: { content: Node | string | null }): void {
     const { content } = options;
 
     if (content === null) {
@@ -489,88 +370,305 @@ function initLazy(grid: FlowGrid) {
     }
 
     column.footerRenderer = (root) => renderContent(root, content);
-  };
+  }
 
-  grid.addEventListener('vaadin-context-menu-before-open', function (e) {
-    const { key, columnId } = e.detail;
-    grid.$server.updateContextMenuTargetItem(key, columnId);
-  });
+  scrollToItem(itemKey: string, ...args: number[]): void {
+    const { grid } = this;
 
-  grid.getContextMenuBeforeOpenDetail = function (event) {
-    // For `contextmenu` events, we need to access the source event,
-    // when using open on click we just use the click event itself
-    const sourceEvent = event.detail.sourceEvent || event;
-    const eventContext = grid.getEventContext(sourceEvent);
-    const key = eventContext.item?.key || '';
-    const columnId = eventContext.column?.id || '';
-    return { key, columnId };
-  };
-
-  grid.preventContextMenu = function (event) {
-    const isLeftClick = event.type === 'click';
-    const { column } = grid.getEventContext(event);
-
-    return isLeftClick && column instanceof GridFlowSelectionColumn;
-  };
-
-  grid.addEventListener('click', (e) => _fireClickEvent(e, 'item-click'));
-  grid.addEventListener('dblclick', (e) => _fireClickEvent(e, 'item-double-click'));
-
-  grid.addEventListener('column-resize', (e) => {
-    const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
-
-    cols.forEach((col) => {
-      col.dispatchEvent(new CustomEvent('column-drag-resize'));
+    const targetRow = grid._getRenderedRows().find((row) => {
+      const { item } = grid.__getRowModel(row);
+      return grid.getItemId(item) === itemKey;
     });
-
-    grid.dispatchEvent(
-      new CustomEvent('column-drag-resize', {
-        detail: {
-          resizedColumnKey: e.detail.resizedColumn._flowId
-        }
-      })
-    );
-  });
-
-  grid.addEventListener('column-reorder', () => {
-    const columns = grid._columnTree
-      .at(-1)!
-      .filter((c) => c._flowId)
-      .sort((a, b) => (a._order ?? 0) - (b._order ?? 0))
-      .map((c) => c._flowId);
-
-    grid.dispatchEvent(
-      new CustomEvent('column-reorder-all-columns', {
-        detail: { columns }
-      })
-    );
-  });
-
-  grid.addEventListener('cell-focus', (e) => {
-    const eventContext = grid.getEventContext(e);
-    const { section } = eventContext;
-
-    if (!section || section === 'details') {
+    if (targetRow && this.isRowFullyInViewport(targetRow)) {
       return;
     }
 
-    grid.dispatchEvent(
-      new CustomEvent('grid-cell-focus', {
-        detail: {
-          itemKey: eventContext.item?.key ?? null,
-          internalColumnId: eventContext.column?._flowId ?? null,
-          section
-        }
-      })
-    );
-  });
+    grid.scrollToIndex(...args);
+  }
 
-  function _fireClickEvent(event: MouseEvent & { itemKey?: string; internalColumnId?: string }, eventName: string) {
+  /**
+   * Overrides and extends the grid's methods and properties to integrate with
+   * the server-side data communicator and selection state.
+   */
+  private patchGrid(): void {
+    const { grid } = this;
+
+    // The grid requests a page only when a row from that page gets rendered,
+    // which is too late to keep up while scrolling and leads to blank rows.
+    // To load data ahead of rendering, request the fetch range (rendered
+    // rows + buffer) on every virtualizer update while scrolling.
+    grid.__updateVirtualizerElement = (...args) => {
+      Object.getPrototypeOf(grid).__updateVirtualizerElement.call(grid, ...args);
+
+      if (grid.$.scroller.hasAttribute('scrolling')) {
+        const fetchRange = this.getFetchRange();
+        this.dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
+        this.dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
+      }
+    };
+
+    grid.dataProvider = (params, callback) => {
+      if (params.pageSize !== grid.pageSize) {
+        throw 'Invalid pageSize';
+      }
+
+      // size is controlled by the server (data communicator), so if the
+      // size is zero, we know that there is no data to fetch.
+      // This also prevents an empty grid getting stuck in a loading state.
+      // The connector does not cache empty pages, so if the grid requests
+      // data again, there would be no cache entry, causing a request to
+      // the server. However, the data communicator will never respond,
+      // as it assumes that the data is already cached.
+      if (grid.size === 0) {
+        callback([], 0);
+        return;
+      }
+
+      this.requestDebouncer = Debouncer.debounce(
+        this.requestDebouncer,
+        timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
+        () => {
+          this.fetchCurrentRange();
+        }
+      );
+    };
+
+    grid.__updateRow = (row, ...args) => {
+      if (this.preventRowUpdatesActive !== 0) {
+        return;
+      }
+
+      Object.getPrototypeOf(grid).__updateRow.call(grid, row, ...args);
+    };
+
+    grid.__a11yUpdateRowSelected = (row, selected) => {
+      if (this.selectionMode === 'NONE') {
+        [row, ...row.children].forEach((el) => el.removeAttribute('aria-selected'));
+        return;
+      }
+
+      Object.getPrototypeOf(grid).__a11yUpdateRowSelected.call(grid, row, selected);
+    };
+
+    /*
+     * Manage aria-multiselectable attribute depending on the selection mode.
+     * see more: https://github.com/vaadin/web-components/issues/1536
+     * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+     */
+    grid.__a11yUpdateMutiSelectable = () => {
+      if (!grid.$) {
+        return;
+      }
+
+      switch (this.selectionMode) {
+        case 'SINGLE':
+          grid.$.table.setAttribute('aria-multiselectable', 'false');
+          break;
+        case 'MULTI':
+          grid.$.table.setAttribute('aria-multiselectable', 'true');
+          break;
+        default:
+          grid.$.table.removeAttribute('aria-multiselectable');
+      }
+    };
+    grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
+
+    // This method is overridden to prevent the grid web component from
+    // automatically excluding columns from sorting when they get hidden.
+    // In Flow, it's the developer's responsibility to remove the column
+    // from the backend sort order when the column gets hidden.
+    grid._getActiveSorters = () => {
+      return grid._sorters.filter((sorter) => sorter.direction);
+    };
+
+    grid.__applySorters = (...args) => {
+      const sorters = grid._mapSorters();
+      const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
+
+      // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
+      // method in the mixin will skip calling clearCache().
+      //
+      // In Flow Grid's case, we never want to clear the cache eagerly when the sorter elements
+      // change due to one of the following reasons:
+      //
+      // 1. Sorted by user: The items in the new sort order need to be fetched from the server,
+      // and we want to avoid a heavy re-render before the updated items have actually been fetched.
+      //
+      // 2. Sorted programmatically on the server: The items in the new sort order have already
+      // been fetched and applied to the grid. The sorter element states are updated programmatically
+      // to reflect the new sort order, but there's no need to re-render the grid rows.
+      grid._previousSorters = sorters;
+
+      // Call the original __applySorters method in vaadin-grid-sort-mixin
+      Object.getPrototypeOf(grid).__applySorters.call(grid, ...args);
+
+      if (sortersChanged && !this.sorterDirectionsSetFromServer) {
+        grid.$server.sortersChanged(sorters);
+      }
+    };
+
+    grid.getContextMenuBeforeOpenDetail = (event) => {
+      // For `contextmenu` events, we need to access the source event,
+      // when using open on click we just use the click event itself
+      const sourceEvent = event.detail.sourceEvent || event;
+      const eventContext = grid.getEventContext(sourceEvent);
+      const key = eventContext.item?.key || '';
+      const columnId = eventContext.column?.id || '';
+      return { key, columnId };
+    };
+
+    grid.preventContextMenu = (event) => {
+      const isLeftClick = event.type === 'click';
+      const { column } = grid.getEventContext(event);
+
+      return isLeftClick && column instanceof GridFlowSelectionColumn;
+    };
+
+    grid.cellPartNameGenerator = (column, { item }) => {
+      const { part } = item;
+      if (part) {
+        return [part.row, column ? part[column._flowId!] : null].filter(Boolean).join(' ');
+      }
+      return '';
+    };
+
+    grid.dropFilter = ({ item }) => !!item && !item.dropDisabled;
+
+    grid.dragFilter = ({ item }) => !!item && !item.dragDisabled;
+
+    grid.isItemSelectable = (item) => {
+      // If there is no selectable data, assume the item is selectable
+      return item?.selectable === undefined || item.selectable;
+    };
+
+    grid._isDetailsOpened = (item) => {
+      return item?.detailsOpened ?? false;
+    };
+  }
+
+  private addGridEventListeners(): void {
+    const { grid } = this;
+
+    grid.addEventListener('cell-activate', (e) => this.onItemActivate(e));
+    grid.addEventListener('row-activate', (e) => this.onItemActivate(e));
+
+    grid.addEventListener('vaadin-context-menu-before-open', (e) => {
+      const { key, columnId } = e.detail;
+      grid.$server.updateContextMenuTargetItem(key, columnId);
+    });
+
+    grid.addEventListener('click', (e) => this.fireClickEvent(e, 'item-click'));
+    grid.addEventListener('dblclick', (e) => this.fireClickEvent(e, 'item-double-click'));
+
+    grid.addEventListener('column-resize', (e) => {
+      const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
+
+      cols.forEach((col) => {
+        col.dispatchEvent(new CustomEvent('column-drag-resize'));
+      });
+
+      grid.dispatchEvent(
+        new CustomEvent('column-drag-resize', {
+          detail: {
+            resizedColumnKey: e.detail.resizedColumn._flowId
+          }
+        })
+      );
+    });
+
+    grid.addEventListener('column-reorder', () => {
+      const columns = grid._columnTree
+        .at(-1)!
+        .filter((c) => c._flowId)
+        .sort((a, b) => (a._order ?? 0) - (b._order ?? 0))
+        .map((c) => c._flowId);
+
+      grid.dispatchEvent(
+        new CustomEvent('column-reorder-all-columns', {
+          detail: { columns }
+        })
+      );
+    });
+
+    grid.addEventListener('cell-focus', (e) => {
+      const eventContext = grid.getEventContext(e);
+      const { section } = eventContext;
+
+      if (!section || section === 'details') {
+        return;
+      }
+
+      grid.dispatchEvent(
+        new CustomEvent('grid-cell-focus', {
+          detail: {
+            itemKey: eventContext.item?.key ?? null,
+            internalColumnId: eventContext.column?._flowId ?? null,
+            section
+          }
+        })
+      );
+    });
+
+    grid.addEventListener('grid-dragstart', (e) => {
+      const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
+
+      if (grid._isSelected(draggedItems[0])) {
+        // Dragging selected (possibly multiple) items
+        if (grid.__selectionDragData) {
+          Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
+        } else {
+          (grid.__dragDataTypes || []).forEach((type) => {
+            setDragData(type, draggedItems.map((item) => item.dragData![type]).join('\n'));
+          });
+        }
+
+        const draggedItemsCount = grid.__selectionDraggedItemsCount ?? 0;
+        if (draggedItemsCount > 1) {
+          setDraggedItemsCount(draggedItemsCount);
+        }
+      } else {
+        // Dragging just one (non-selected) item
+        (grid.__dragDataTypes || []).forEach((type) => {
+          setDragData(type, draggedItems[0].dragData![type]);
+        });
+      }
+    });
+  }
+
+  private onItemActivate(event: GridCellActivateEvent<Item>): void {
+    const { grid } = this;
+    const { item } = event.detail.model;
+
+    // The row model can hold a stale item while its data is being loaded, so
+    // skip activation unless the item is actually loaded in the data cache
+    if (!this.dataProviderController.getItemContext(item)) {
+      return;
+    }
+
+    if (this.selectionMode === 'SINGLE') {
+      if (!this.selectedKeys[item.key]) {
+        this.doSelection([item], true);
+      } else if (!grid.__deselectDisallowed) {
+        this.doDeselection([item], true);
+      }
+    }
+
+    if (!grid.__disallowDetailsOnClick) {
+      if (!item.detailsOpened) {
+        grid.$server.setDetailsVisible(item.key);
+      } else {
+        grid.$server.setDetailsVisible(null);
+      }
+    }
+  }
+
+  private fireClickEvent(event: MouseEvent & { itemKey?: string; internalColumnId?: string }, eventName: string): void {
     // Click event was handled by the component inside grid, do nothing.
     if (event.defaultPrevented) {
       return;
     }
 
+    const { grid } = this;
     const path = event.composedPath() as Element[];
     const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
     const cell = path[idx] as (Element & { _focusButton?: Element }) | undefined;
@@ -611,71 +709,32 @@ function initLazy(grid: FlowGrid) {
     }
   }
 
-  grid.cellPartNameGenerator = (column, { item }) => {
-    const { part } = item;
-    if (part) {
-      return [part.row, column ? part[column._flowId!] : null].filter(Boolean).join(' ');
+  private preventRowUpdates(callback: () => void): void {
+    try {
+      this.preventRowUpdatesActive++;
+      callback();
+    } finally {
+      this.preventRowUpdatesActive--;
     }
-    return '';
-  };
+  }
 
-  grid.dropFilter = ({ item }) => !!item && !item.dropDisabled;
-
-  grid.dragFilter = ({ item }) => !!item && !item.dragDisabled;
-
-  grid.addEventListener('grid-dragstart', (e) => {
-    const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
-
-    if (grid._isSelected(draggedItems[0])) {
-      // Dragging selected (possibly multiple) items
-      if (grid.__selectionDragData) {
-        Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
-      } else {
-        (grid.__dragDataTypes || []).forEach((type) => {
-          setDragData(type, draggedItems.map((item) => item.dragData![type]).join('\n'));
-        });
-      }
-
-      const draggedItemsCount = grid.__selectionDraggedItemsCount ?? 0;
-      if (draggedItemsCount > 1) {
-        setDraggedItemsCount(draggedItemsCount);
-      }
-    } else {
-      // Dragging just one (non-selected) item
-      (grid.__dragDataTypes || []).forEach((type) => {
-        setDragData(type, draggedItems[0].dragData![type]);
-      });
-    }
-  });
-
-  grid.isItemSelectable = (item) => {
-    // If there is no selectable data, assume the item is selectable
-    return item?.selectable === undefined || item.selectable;
-  };
-
-  grid._isDetailsOpened = function (item) {
-    return item?.detailsOpened ?? false;
-  };
-
-  function isRowFullyInViewport(row: HTMLElement) {
+  private isRowFullyInViewport(row: HTMLElement): boolean {
+    const { grid } = this;
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();
     const footerRect = grid.$.footer.getBoundingClientRect();
     return rowRect.top >= tableRect.top + headerRect.height && rowRect.bottom <= tableRect.bottom - footerRect.height;
   }
+}
 
-  grid.$connector.scrollToItem = function (itemKey, ...args) {
-    const targetRow = grid._getRenderedRows().find((row) => {
-      const { item } = grid.__getRowModel(row);
-      return grid.getItemId(item) === itemKey;
-    });
-    if (targetRow && isRowFullyInViewport(targetRow)) {
-      return;
-    }
+function initLazy(grid: FlowGrid) {
+  // Check whether the connector was already initialized for the grid
+  if (grid.$connector) {
+    return;
+  }
 
-    grid.scrollToIndex(...args);
-  };
+  grid.$connector = new GridConnector(grid);
 }
 
 window.Vaadin.Flow.gridConnector = { initLazy };
