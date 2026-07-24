@@ -4,7 +4,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
 import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
-import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid-types.js';
+import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid/vaadin-grid-types.js';
 
 function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];

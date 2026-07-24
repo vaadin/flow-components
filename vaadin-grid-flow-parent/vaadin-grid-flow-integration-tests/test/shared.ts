@@ -14,7 +14,7 @@ import type {
   GridConnector as ConnectorGridConnector,
   GridServer as ConnectorGridServer,
   Item as ConnectorItem
-} from '../frontend/generated/jar-resources/vaadin-grid-types.js';
+} from '../frontend/generated/jar-resources/vaadin-grid/vaadin-grid-types.js';
 
 export type GridServer = {
   [K in keyof ConnectorGridServer]: ConnectorGridServer[K] & sinon.SinonSpy;

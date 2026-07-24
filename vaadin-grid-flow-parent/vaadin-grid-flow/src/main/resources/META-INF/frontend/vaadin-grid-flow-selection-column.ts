@@ -2,7 +2,7 @@ import '@vaadin/checkbox/src/vaadin-checkbox.js';
 import '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridSelectionColumnBaseMixin } from '@vaadin/grid/src/vaadin-grid-selection-column-base-mixin.js';
-import type { GridServer, Item } from './vaadin-grid-types.js';
+import type { GridServer, Item } from './vaadin-grid/vaadin-grid-types.js';
 
 export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin<Item, typeof GridColumn>(GridColumn) {
   declare $server: GridServer;
