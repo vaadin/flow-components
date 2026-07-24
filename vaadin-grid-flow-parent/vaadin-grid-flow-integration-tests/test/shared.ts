@@ -9,70 +9,41 @@ import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
 import type {} from '@web/test-runner-mocha';
 import type {} from 'sinon-chai';
-
-export type GridConnector = {
-  updateFlatData: (updatedItems: Item[]) => void;
-  initLazy: (grid: Grid) => void;
-  updateSize: (size: number) => void;
-  updateUniqueItemIdPath: (path: string) => void;
-  hasRootRequestQueue: () => boolean;
-  set: (index: number, items: any[]) => void;
-  confirm: (index: number) => void;
-  setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
-  reset: () => void;
-  doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
-  doDeselection: (items: Item[], userOriginated: boolean) => void;
-  clear: (index: number, length: number) => void;
-  setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
-  getRenderedRange: () => [number, number];
-  setHeaderRenderer: (column: GridColumn, options: { content: Node | string | null, showSorter?: boolean, sorterPath?: string }) => void;
-  setFooterRenderer: (column: GridColumn, options: { content: Node | string | null }) => void;
-  scrollToItem: (itemKey: string, index: number) => void;
-};
+import type {
+  FlowGrid as ConnectorFlowGrid,
+  GridConnector as ConnectorGridConnector,
+  GridServer as ConnectorGridServer,
+  Item as ConnectorItem
+} from '../frontend/generated/jar-resources/vaadin-grid-types.js';
 
 export type GridServer = {
-  confirmUpdate: ((index: number) => void) & sinon.SinonSpy;
-  select: ((key: string) => void) & sinon.SinonSpy;
-  selectAll: () => void & sinon.SinonSpy;
-  deselect: ((key: string) => void) & sinon.SinonSpy;
-  deselectAll: () => void & sinon.SinonSpy;
-  setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
-  updateExpandedState: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
-  setViewportRange: ((firstIndex: number, size: number) => Promise<void>) & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
-  sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
-  setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
-  updateContextMenuTargetItem: ((key: string, columnId: string) => void) & sinon.SinonSpy;
+  [K in keyof ConnectorGridServer]: ConnectorGridServer[K] & sinon.SinonSpy;
+} & {
+  setViewportRange: ConnectorGridServer['setViewportRange'] & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
 };
 
-export type Item = {
-  key: string;
+export type Item = ConnectorItem & {
   name?: string;
-  price?: number,
+  price?: number;
   children?: boolean;
-  selectable?: boolean;
-  selected?: boolean;
-  expanded?: boolean;
-  detailsOpened?: boolean;
   style?: Record<string, string>;
-  part?: Record<string, string>;
-  dragData?: Record<string, string>;
-  dragDisabled?: boolean;
-  dropDisabled?: boolean;
 };
 
-export type FlowGrid = Grid<Item> & {
+// The connector API retyped with the test Item, so that tests can pass item
+// literals with test-specific properties without excess property errors
+export type GridConnector = Omit<ConnectorGridConnector, 'doSelection' | 'doDeselection' | 'set' | 'updateFlatData'> & {
+  doSelection(items: (Item | null)[], userOriginated?: boolean): void;
+  doDeselection(items: Item[], userOriginated?: boolean): void;
+  set(startIndex: number, items: Item[]): void;
+  updateFlatData(updatedItems: Item[]): void;
+};
+
+export type FlowGrid = {
   $connector: GridConnector;
   $server: GridServer;
-  __deselectDisallowed: boolean;
-  __disallowDetailsOnClick: boolean;
-  __dragDataTypes?: string[];
-  __selectionDragData?: Record<string, string>;
-  __selectionDraggedItemsCount?: number;
+} & ConnectorFlowGrid & {
   _flatSize: number;
-  __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
-  preventContextMenu: (event: Event) => boolean;
-  getContextMenuBeforeOpenDetail: (event: { detail: { sourceEvent?: Event } }) => { key: string, columnId: string };
 };
 
 export type FlowGridSorter = GridSorter & {
@@ -84,23 +55,18 @@ export type FlowGridSelectionColumn = GridColumn & {
   $server: GridServer;
 };
 
-type Vaadin = {
-  Flow: {
-    gridConnector: GridConnector;
-    treeGridConnector: GridConnector;
-  };
-};
-
-const Vaadin = window.Vaadin as Vaadin;
-export const gridConnector = Vaadin.Flow.gridConnector;
-export const treeGridConnector = Vaadin.Flow.treeGridConnector;
+export const gridConnector = window.Vaadin.Flow.gridConnector;
+export const treeGridConnector = window.Vaadin.Flow.treeGridConnector;
 
 export const GRID_CONNECTOR_ROOT_REQUEST_DELAY = 150;
 
 /**
  * Initializes the grid connector and the grid server mock.
  */
-export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector): void {
+export function init(
+  grid: FlowGrid,
+  connector: { initLazy(grid: ConnectorFlowGrid): void } = gridConnector
+): void {
   grid.$server = {
     confirmUpdate: sinon.spy(),
     select: sinon.spy(),
@@ -114,12 +80,13 @@ export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector):
       grid.$server.setViewportRange.promise = promise;
       return promise;
     }),
+    setViewportRangeByIndexPath: sinon.spy(),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
     updateContextMenuTargetItem: sinon.spy(),
   };
 
-  gridConnector.initLazy(grid);
+  connector.initLazy(grid);
 
   grid.$connector.reset();
 }

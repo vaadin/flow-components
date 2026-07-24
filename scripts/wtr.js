@@ -86,6 +86,17 @@ async function runTests() {
         stdio: 'inherit'
       });
 
+      // Type-check the component module's frontend files if it has a tsconfig.
+      // Run after the Flow build so the IT module's node_modules, which the
+      // tsconfig resolves the @vaadin package types from, is populated.
+      if (fs.existsSync(`${module}/${id}/tsconfig.json`)) {
+        console.log(`Type-checking frontend files in ${module}/${id}`);
+        execSync(`npx tsc -p ../${id}/tsconfig.json`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      }
+
       // Install Playwright Chromium
       execSync(`npx playwright install chromium`, {
         cwd: itFolder,

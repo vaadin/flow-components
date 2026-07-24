@@ -3,8 +3,8 @@ import { timeOut } from '@vaadin/component-base/src/async.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
-import type { GridCellPartNameGenerator } from '@vaadin/grid/src/vaadin-grid-styling-mixin.js';
-import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode, SorterDirection } from './vaadin-types.js';
+import type { GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid-types.js';
 
 function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
@@ -245,7 +245,7 @@ function initLazy(grid: FlowGrid) {
     );
   };
 
-  grid.$connector.setSorterDirections = function (directions: { column: string; direction: SorterDirection }[]) {
+  grid.$connector.setSorterDirections = function (directions: { column: string; direction: GridSorterDirection }[]) {
     sorterDirectionsSetFromServer = true;
     setTimeout(() => {
       try {
@@ -550,7 +550,7 @@ function initLazy(grid: FlowGrid) {
     const eventContext = grid.getEventContext(e);
     const { section } = eventContext;
 
-    if (!section || !(['header', 'body', 'footer'] as string[]).includes(section)) {
+    if (!section || section === 'details') {
       return;
     }
 
@@ -611,16 +611,13 @@ function initLazy(grid: FlowGrid) {
     }
   }
 
-  // The generator may return undefined for items that have no part names,
-  // which the public GridCellPartNameGenerator type does not allow, hence
-  // the cast.
-  grid.cellPartNameGenerator = ((column, { item }) => {
+  grid.cellPartNameGenerator = (column, { item }) => {
     const { part } = item;
     if (part) {
       return [part.row, column ? part[column._flowId!] : null].filter(Boolean).join(' ');
     }
-    return undefined;
-  }) as GridCellPartNameGenerator<Item>;
+    return '';
+  };
 
   grid.dropFilter = ({ item }) => !!item && !item.dropDisabled;
 

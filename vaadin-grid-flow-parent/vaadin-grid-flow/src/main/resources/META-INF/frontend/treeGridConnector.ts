@@ -1,5 +1,5 @@
 import './gridConnector.ts';
-import type { FlowTreeGrid } from './vaadin-types.js';
+import type { FlowTreeGrid } from './vaadin-grid-types.js';
 
 /**
  * treeGridConnector is a communication layer between TreeGrid's flow component

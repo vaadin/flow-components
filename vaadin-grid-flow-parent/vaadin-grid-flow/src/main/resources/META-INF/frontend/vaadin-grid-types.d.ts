@@ -5,7 +5,9 @@
 import type { Grid, GridDefaultItem } from '@vaadin/grid/src/vaadin-grid.js';
 import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
+import type { GridSorterDefinition, GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent, GridItemModel } from '@vaadin/grid/src/vaadin-grid-mixin.js';
+import type { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
 
 /** An item sent by the server-side data communicator */
 export interface Item {
@@ -26,14 +28,6 @@ export type ItemRange = [start: number, end: number];
 
 export type SelectionMode = 'SINGLE' | 'MULTI' | 'NONE';
 
-export type SorterDirection = 'asc' | 'desc' | null;
-
-/** A sorter state sent to the server */
-export interface ServerSorter {
-  path: string;
-  direction: SorterDirection;
-}
-
 /** A row element in the grid body */
 export type FlowGridRow = HTMLTableRowElement & {
   index: number;
@@ -51,7 +45,7 @@ export interface GridServer {
   setShiftKeyDown(shiftKeyDown: boolean): void;
   setViewportRange(firstIndex: number, size: number): Promise<void>;
   setViewportRangeByIndexPath(indexes: number[], padding: number): Promise<number>;
-  sortersChanged(sorters: ServerSorter[]): void;
+  sortersChanged(sorters: GridSorterDefinition[]): void;
   updateContextMenuTargetItem(key: string, columnId: string): void;
   updateExpandedState(key: unknown, expanded: boolean): void;
 }
@@ -73,7 +67,7 @@ export interface GridConnector {
   updateUniqueItemIdPath(path: string): void;
   confirm(id: number): void;
   setSelectionMode(mode: SelectionMode): void;
-  setSorterDirections(directions: { column: string; direction: SorterDirection }[]): void;
+  setSorterDirections(directions: { column: string; direction: GridSorterDirection }[]): void;
   setHeaderRenderer(
     column: GridColumn<Item>,
     options: { content: Node | string | null; showSorter?: boolean; sorterPath?: string }
@@ -82,18 +76,13 @@ export interface GridConnector {
   scrollToItem(itemKey: string, ...args: number[]): void;
 }
 
-/** The controller managing the grid's data cache */
-export interface DataProviderController {
-  rootCache: {
-    pendingRequests: Record<string, (items: Item[], size?: number) => void>;
-    items: (Item | undefined)[];
-  };
-  getItemContext(item: Item): { index: number } | undefined;
-  ensureFlatIndexLoaded(index: number): void;
-  clearCache(): void;
-  isLoading(): boolean;
-  _shouldLoadCachePage: (cache: unknown, page: number) => boolean;
-}
+/**
+ * The controller managing the grid's data cache. The item type is
+ * `Item | undefined` because the connector fills the cache sparsely.
+ */
+export type FlowDataProviderController = DataProviderController<Item | undefined, Record<string, unknown>> & {
+  _shouldLoadCachePage(cache: unknown, page: number): boolean;
+};
 
 /**
  * The private/protected @vaadin/grid API and the Flow-specific API that the
@@ -109,9 +98,9 @@ export interface FlowGridInternals {
   __selectionDragData?: Record<string, string>;
   __selectionDraggedItemsCount?: number;
   _columnTree: GridColumn<Item>[][];
-  _dataProviderController: DataProviderController;
+  _dataProviderController: FlowDataProviderController;
   _hasData: boolean;
-  _previousSorters: ServerSorter[];
+  _previousSorters: GridSorterDefinition[];
   _shouldLoadAllRenderedRowsAfterPageLoad: boolean;
   _sorters: GridSorter[];
   __a11yUpdateMutiSelectable(): void;
@@ -128,7 +117,7 @@ export interface FlowGridInternals {
   _isDetailsOpened(item: Item | undefined): boolean;
   _isSelected(item: Item): boolean;
   isItemSelectable(item: Item | null | undefined): boolean;
-  _mapSorters(): ServerSorter[];
+  _mapSorters(): GridSorterDefinition[];
   getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): { key: string; columnId: string };
   preventContextMenu(event: MouseEvent): boolean;
 }
