@@ -18,12 +18,16 @@ package com.vaadin.flow.component.grid.it;
 import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
 import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
 
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -56,6 +60,33 @@ public class GridFilteringIT extends AbstractComponentIT {
                 .toString().equals("3"));
 
         waitUntil(driver -> !grid.hasAttribute("loading"));
+    }
+
+    @Test
+    public void gridWithHeaderFilters_headerCellsRenderFilterFields_filteringUpdatesRows() {
+        open();
+
+        GridElement grid = $(GridElement.class).id("grid-with-filters");
+        scrollToElement(grid);
+
+        IntStream.range(0, 4).forEach(i -> {
+            GridTHTDElement headerCell = grid.getHeaderCell(i);
+            assertRenderedHeaderCell(headerCell, "<vaadin-text-field", false);
+        });
+
+        grid.findElement(By.tagName("vaadin-text-field")).sendKeys("6");
+        waitUntil(driver -> grid.getCell(0, 0).getText().contains("Person 6"));
+    }
+
+    private void assertRenderedHeaderCell(GridTHTDElement headerCell,
+            String text, boolean withSorter) {
+        String html = headerCell.getInnerHTML();
+        if (withSorter) {
+            Assert.assertTrue(html.contains("<vaadin-grid-sorter"));
+        } else {
+            Assert.assertFalse(html.contains("<vaadin-grid-sorter"));
+        }
+        Assert.assertTrue(html.contains(text));
     }
 
     @Test // for https://github.com/vaadin/flow/issues/9988
