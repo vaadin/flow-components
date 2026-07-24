@@ -78,6 +78,21 @@ public class GridFilteringIT extends AbstractComponentIT {
         waitUntil(driver -> grid.getCell(0, 0).getText().contains("Person 6"));
     }
 
+    @Test
+    public void gridWithHeaderFilters_scrollToEnd_filter_rowsUpdated() {
+        open();
+
+        GridElement grid = $(GridElement.class).id("grid-with-filters");
+        scrollToElement(grid);
+
+        // Scroll to the end of the eager ListDataProvider grid, then filter the
+        // "Name" column and assert the viewport re-renders to the single match
+        grid.scrollToRow(grid.getRowCount() - 1);
+        grid.findElement(By.tagName("vaadin-text-field")).sendKeys("100");
+        waitUntil(driver -> grid.getRowCount() == 1);
+        Assert.assertEquals("Person 100", grid.getCell(0, 0).getText());
+    }
+
     private void assertRenderedHeaderCell(GridTHTDElement headerCell,
             String text, boolean withSorter) {
         String html = headerCell.getInnerHTML();
