@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +28,16 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.bean.PeopleGenerator;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
@@ -65,6 +72,46 @@ public class GridFilteringPage extends Div {
         add(field, grid);
 
         createLazyLoadingAndFilterableGrid();
+        createGridWithHeaderFilters();
+    }
+
+    private void createGridWithHeaderFilters() {
+        Grid<Person> grid = new Grid<>();
+        ListDataProvider<Person> dataProvider = new ListDataProvider<>(
+                new PeopleGenerator().generatePeople(500));
+        grid.setItems(dataProvider);
+
+        List<ValueProvider<Person, String>> valueProviders = new ArrayList<>();
+        valueProviders.add(Person::getFirstName);
+        valueProviders.add(person -> String.valueOf(person.getAge()));
+        valueProviders.add(person -> person.getAddress().getStreet());
+        valueProviders.add(
+                person -> String.valueOf(person.getAddress().getPostalCode()));
+
+        Iterator<ValueProvider<Person, String>> iterator = valueProviders
+                .iterator();
+        grid.addColumn(iterator.next()).setHeader("Name");
+        grid.addColumn(iterator.next()).setHeader("Age");
+        grid.addColumn(iterator.next()).setHeader("Street");
+        grid.addColumn(iterator.next()).setHeader("Postal Code");
+
+        HeaderRow filterRow = grid.appendHeaderRow();
+
+        Iterator<ValueProvider<Person, String>> iterator2 = valueProviders
+                .iterator();
+        grid.getColumns().forEach(column -> {
+            TextField field = new TextField();
+            ValueProvider<Person, String> valueProvider = iterator2.next();
+            field.addValueChangeListener(event -> dataProvider.addFilter(
+                    person -> valueProvider.apply(person).toLowerCase()
+                            .contains(field.getValue().toLowerCase())));
+            field.setValueChangeMode(ValueChangeMode.EAGER);
+            filterRow.getCell(column).setComponent(field);
+            field.setSizeFull();
+            field.setPlaceholder("Filter");
+        });
+        grid.setId("grid-with-filters");
+        add(grid);
     }
 
     private void createLazyLoadingAndFilterableGrid() {
