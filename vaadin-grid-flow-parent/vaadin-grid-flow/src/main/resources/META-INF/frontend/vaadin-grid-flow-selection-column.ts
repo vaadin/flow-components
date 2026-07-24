@@ -1,15 +1,11 @@
-/// <reference path="./vaadin-types.d.ts" />
 import '@vaadin/checkbox/src/vaadin-checkbox.js';
 import '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridSelectionColumnBaseMixin } from '@vaadin/grid/src/vaadin-grid-selection-column-base-mixin.js';
+import type { GridServer, Item } from './vaadin-types.js';
 
-export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
-  declare $server: {
-    selectAll(): void;
-    deselectAll(): void;
-    setShiftKeyDown(shiftKeyDown: boolean): void;
-  };
+export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin<Item, typeof GridColumn>(GridColumn) {
+  declare $server: GridServer;
 
   static get is() {
     return 'vaadin-grid-flow-selection-column';
@@ -81,7 +77,7 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
    * @protected
    * @override
    */
-  protected _selectItem(item: unknown) {
+  protected _selectItem(item: Item) {
     this.$server.setShiftKeyDown(this._shiftKeyDown);
     this._grid.$connector.doSelection([item], true);
   }
@@ -94,7 +90,7 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
    * @protected
    * @override
    */
-  protected _deselectItem(item: unknown) {
+  protected _deselectItem(item: Item) {
     this.$server.setShiftKeyDown(this._shiftKeyDown);
     this._grid.$connector.doDeselection([item], true);
     // Optimistically update select all state

@@ -1,10 +1,5 @@
 import './gridConnector.ts';
-
-/** An item sent by the server-side data communicator */
-interface TreeItem {
-  level?: number;
-  expanded?: boolean;
-}
+import type { FlowTreeGrid } from './vaadin-types.js';
 
 /**
  * treeGridConnector is a communication layer between TreeGrid's flow component
@@ -31,15 +26,14 @@ interface TreeItem {
  * parameter of $server.setViewportRangeByIndexPath, which defines how many items to
  * include above and below the target item in the range.
  */
-(window as any).Vaadin.Flow.treeGridConnector = {};
-(window as any).Vaadin.Flow.treeGridConnector.initLazy = function (grid: any) {
+function initLazy(grid: FlowTreeGrid) {
   if (grid.$connector) {
     return;
   }
 
-  (window as any).Vaadin.Flow.gridConnector.initLazy(grid);
+  window.Vaadin.Flow.gridConnector.initLazy(grid);
 
-  grid._dataProviderController._shouldLoadCachePage = function (cache: unknown, page: number) {
+  grid._dataProviderController._shouldLoadCachePage = function (cache, page) {
     // `$server.setViewportRangeByIndexPath` sends a preloaded viewport range based on
     // the provided index path and `padding` parameter. Applying the new range clears
     // the old range, which is still visible because the actual scroll happens only
@@ -66,23 +60,25 @@ interface TreeItem {
     return flatIndex;
   };
 
-  grid.__getRowLevel = function (row: { _item?: TreeItem }) {
+  grid.__getRowLevel = function (row) {
     return row._item?.level ?? 0;
   };
 
-  grid._isExpanded = function (item: TreeItem | undefined) {
+  grid._isExpanded = function (item) {
     return !!item?.expanded;
   };
 
-  grid.expandItem = function (item: TreeItem | undefined) {
+  grid.expandItem = function (item) {
     if (item !== undefined) {
       grid.$server.updateExpandedState(grid.getItemId(item), true);
     }
   };
 
-  grid.collapseItem = function (item: TreeItem | undefined) {
+  grid.collapseItem = function (item) {
     if (item !== undefined) {
       grid.$server.updateExpandedState(grid.getItemId(item), false);
     }
   };
-};
+}
+
+window.Vaadin.Flow.treeGridConnector = { initLazy };

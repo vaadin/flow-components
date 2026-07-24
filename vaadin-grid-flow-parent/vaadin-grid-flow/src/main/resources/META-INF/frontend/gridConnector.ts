@@ -2,25 +2,9 @@ import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
-
-/** An inclusive range of item indexes: [start, end] */
-type ItemRange = [start: number, end: number];
-
-type SelectionMode = 'SINGLE' | 'MULTI' | 'NONE';
-
-type SorterDirection = 'asc' | 'desc' | null;
-
-/** An item sent by the server-side data communicator */
-interface Item {
-  key: string;
-  selected?: boolean;
-  selectable?: boolean;
-  detailsOpened?: boolean;
-  part?: Record<string, string>;
-  dragData?: Record<string, string>;
-  dragDisabled?: boolean;
-  dropDisabled?: boolean;
-}
+import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
+import type { GridCellPartNameGenerator } from '@vaadin/grid/src/vaadin-grid-styling-mixin.js';
+import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode, SorterDirection } from './vaadin-types.js';
 
 function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
   return range1?.[0] === range2?.[0] && range1?.[1] === range2?.[1];
@@ -36,8 +20,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
   }
 }
 
-(window as any).Vaadin.Flow.gridConnector = {};
-(window as any).Vaadin.Flow.gridConnector.initLazy = (grid: any) => {
+function initLazy(grid: FlowGrid) {
   // Check whether the connector was already initialized for the grid
   if (grid.$connector) {
     return;
@@ -57,14 +40,14 @@ function renderContent(root: HTMLElement, content: Node | string) {
   grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
-  grid.$connector = {};
+  grid.$connector = {} as GridConnector;
 
   grid.$connector.hasRootRequestQueue = () => {
     const { pendingRequests } = dataProviderController.rootCache;
     return Object.keys(pendingRequests).length > 0 || !!requestDebouncer?.isActive();
   };
 
-  grid.$connector.doSelection = function (items: (Item | null)[], userOriginated?: boolean) {
+  grid.$connector.doSelection = function (items, userOriginated) {
     if (selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
@@ -90,7 +73,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     }
   };
 
-  grid.$connector.doDeselection = function (items: Item[], userOriginated?: boolean) {
+  grid.$connector.doDeselection = function (items, userOriginated) {
     if (selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
@@ -200,7 +183,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     grid._hasData = true;
 
     preventRowUpdates(() => {
-      Object.values(rootCache.pendingRequests).forEach((callback: any) => {
+      Object.values(rootCache.pendingRequests).forEach((callback) => {
         // Set a flag so the grid re-checks all rendered rows after all callbacks
         // are resolved, and requests any that are still missing, not just the ones
         // covered by this resolved callback.
@@ -236,7 +219,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     }
   };
 
-  grid.dataProvider = function (params: { pageSize: number }, callback: (items: Item[], size?: number) => void) {
+  grid.dataProvider = function (params, callback) {
     if (params.pageSize !== grid.pageSize) {
       throw 'Invalid pageSize';
     }
@@ -270,7 +253,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
         // We need to ensure that all the sorters are reset when using `grid.sort(null)`.
         const sorters = [...new Set([...grid.querySelectorAll('vaadin-grid-sorter'), ...grid._sorters])];
 
-        sorters.forEach((sorter: any) => {
+        sorters.forEach((sorter) => {
           sorter.direction = null;
         });
 
@@ -282,7 +265,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
           directions = directions.reverse();
         }
         directions.forEach(({ column, direction }) => {
-          sorters.forEach((sorter: any) => {
+          sorters.forEach((sorter) => {
             if (sorter.getAttribute('path') === column) {
               sorter.direction = direction;
             }
@@ -318,7 +301,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     Object.getPrototypeOf(this).__updateRow.call(this, row, ...args);
   };
 
-  grid.$connector.set = function (startIndex: number, items: Item[]) {
+  grid.$connector.set = function (startIndex, items) {
     const { rootCache } = dataProviderController;
     items.forEach((item, i) => {
       rootCache.items[startIndex + i] = item;
@@ -337,7 +320,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
    *
    * @param updatedItems the updated items array
    */
-  grid.$connector.updateFlatData = function (updatedItems: Item[]) {
+  grid.$connector.updateFlatData = function (updatedItems) {
     const { rootCache } = dataProviderController;
 
     updatedItems.forEach((item) => {
@@ -353,20 +336,20 @@ function renderContent(root: HTMLElement, content: Node | string) {
     });
   };
 
-  grid.$connector.clear = function (index: number, length: number) {
+  grid.$connector.clear = function (index, length) {
     const { rootCache } = dataProviderController;
 
     if (index % grid.pageSize !== 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
-    const items = rootCache.items.slice(index, index + length).filter(Boolean);
+    const items = rootCache.items.slice(index, index + length).filter((item): item is Item => !!item);
     if (items.length === 0) {
       return;
     }
 
     preventRowUpdates(() => {
-      grid.$connector.doDeselection(items.filter((item: Item) => selectedKeys[item.key]));
+      grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
     });
 
     rootCache.items.fill(undefined, index, index + length);
@@ -381,11 +364,11 @@ function renderContent(root: HTMLElement, content: Node | string) {
     grid.__updateVisibleRows();
   };
 
-  grid.$connector.updateSize = (newSize: number) => (grid.size = newSize);
+  grid.$connector.updateSize = (newSize) => (grid.size = newSize);
 
-  grid.$connector.updateUniqueItemIdPath = (path: string) => (grid.itemIdPath = path);
+  grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
-  grid.$connector.confirm = function (id: number) {
+  grid.$connector.confirm = function (id) {
     // We're done applying changes from this batch, resolve pending
     // callbacks
     grid.$connector.resolvePendingCallbacks();
@@ -394,7 +377,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     grid.$server.confirmUpdate(id);
   };
 
-  grid.$connector.setSelectionMode = function (mode: SelectionMode) {
+  grid.$connector.setSelectionMode = function (mode) {
     selectionMode = mode;
     selectedKeys = {};
     grid.selectedItems = [];
@@ -433,10 +416,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
   };
   grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
 
-  grid.$connector.setHeaderRenderer = function (
-    column: any,
-    options: { content: Node | string | null; showSorter?: boolean; sorterPath?: string }
-  ) {
+  grid.$connector.setHeaderRenderer = function (column, options) {
     const { content, showSorter, sorterPath } = options;
 
     if (content === null) {
@@ -447,10 +427,10 @@ function renderContent(root: HTMLElement, content: Node | string) {
     // The renderer can run multiple times, e.g. when the grid re-creates
     // header cells. The sorter is cached between runs: re-creating it would
     // reset its direction and fire a sorters-changed round-trip to the server.
-    let sorter: HTMLElement | undefined;
+    let sorter: GridSorter | undefined;
 
     column.headerRenderer = (root: HTMLElement) => {
-      let contentRoot = root;
+      let contentRoot: HTMLElement = root;
       if (showSorter) {
         sorter ??= document.createElement('vaadin-grid-sorter');
         sorter.setAttribute('path', sorterPath!);
@@ -471,7 +451,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
   // In Flow, it's the developer's responsibility to remove the column
   // from the backend sort order when the column gets hidden.
   grid._getActiveSorters = function () {
-    return this._sorters.filter((sorter: any) => sorter.direction);
+    return this._sorters.filter((sorter) => sorter.direction);
   };
 
   grid.__applySorters = function (...args: unknown[]) {
@@ -500,7 +480,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
     }
   };
 
-  grid.$connector.setFooterRenderer = function (column: any, options: { content: Node | string | null }) {
+  grid.$connector.setFooterRenderer = function (column, options) {
     const { content } = options;
 
     if (content === null) {
@@ -511,12 +491,12 @@ function renderContent(root: HTMLElement, content: Node | string) {
     column.footerRenderer = (root: HTMLElement) => renderContent(root, content);
   };
 
-  grid.addEventListener('vaadin-context-menu-before-open', function (e: CustomEvent) {
+  grid.addEventListener('vaadin-context-menu-before-open', function (e) {
     const { key, columnId } = e.detail;
     grid.$server.updateContextMenuTargetItem(key, columnId);
   });
 
-  grid.getContextMenuBeforeOpenDetail = function (event: CustomEvent) {
+  grid.getContextMenuBeforeOpenDetail = function (event) {
     // For `contextmenu` events, we need to access the source event,
     // when using open on click we just use the click event itself
     const sourceEvent = event.detail.sourceEvent || event;
@@ -536,10 +516,10 @@ function renderContent(root: HTMLElement, content: Node | string) {
   grid.addEventListener('click', (e: MouseEvent) => _fireClickEvent(e, 'item-click'));
   grid.addEventListener('dblclick', (e: MouseEvent) => _fireClickEvent(e, 'item-double-click'));
 
-  grid.addEventListener('column-resize', (e: CustomEvent) => {
-    const cols = grid._getColumnsInOrder().filter((col: any) => !col.hidden);
+  grid.addEventListener('column-resize', (e) => {
+    const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
 
-    cols.forEach((col: any) => {
+    cols.forEach((col) => {
       col.dispatchEvent(new CustomEvent('column-drag-resize'));
     });
 
@@ -552,12 +532,12 @@ function renderContent(root: HTMLElement, content: Node | string) {
     );
   });
 
-  grid.addEventListener('column-reorder', (e: CustomEvent) => {
+  grid.addEventListener('column-reorder', () => {
     const columns = grid._columnTree
-      .at(-1)
-      .filter((c: any) => c._flowId)
-      .sort((a: any, b: any) => a._order - b._order)
-      .map((c: any) => c._flowId);
+      .at(-1)!
+      .filter((c) => c._flowId)
+      .sort((a, b) => (a._order ?? 0) - (b._order ?? 0))
+      .map((c) => c._flowId);
 
     grid.dispatchEvent(
       new CustomEvent('column-reorder-all-columns', {
@@ -566,10 +546,11 @@ function renderContent(root: HTMLElement, content: Node | string) {
     );
   });
 
-  grid.addEventListener('cell-focus', (e: CustomEvent) => {
+  grid.addEventListener('cell-focus', (e) => {
     const eventContext = grid.getEventContext(e);
+    const { section } = eventContext;
 
-    if (!['header', 'body', 'footer'].includes(eventContext.section)) {
+    if (!section || !(['header', 'body', 'footer'] as string[]).includes(section)) {
       return;
     }
 
@@ -578,7 +559,7 @@ function renderContent(root: HTMLElement, content: Node | string) {
         detail: {
           itemKey: eventContext.item?.key ?? null,
           internalColumnId: eventContext.column?._flowId ?? null,
-          section: eventContext.section
+          section
         }
       })
     );
@@ -630,19 +611,22 @@ function renderContent(root: HTMLElement, content: Node | string) {
     }
   }
 
-  grid.cellPartNameGenerator = function (column: any, { item }: { item: Item }) {
+  // The generator may return undefined for items that have no part names,
+  // which the public GridCellPartNameGenerator type does not allow, hence
+  // the cast.
+  grid.cellPartNameGenerator = ((column, { item }) => {
     const { part } = item;
     if (part) {
-      return [part.row, column ? part[column._flowId] : null].filter(Boolean).join(' ');
+      return [part.row, column ? part[column._flowId!] : null].filter(Boolean).join(' ');
     }
     return undefined;
-  };
+  }) as GridCellPartNameGenerator<Item>;
 
-  grid.dropFilter = ({ item }: { item?: Item }) => item && !item.dropDisabled;
+  grid.dropFilter = ({ item }) => !!item && !item.dropDisabled;
 
-  grid.dragFilter = ({ item }: { item?: Item }) => item && !item.dragDisabled;
+  grid.dragFilter = ({ item }) => !!item && !item.dragDisabled;
 
-  grid.addEventListener('grid-dragstart', (e: CustomEvent) => {
+  grid.addEventListener('grid-dragstart', (e) => {
     const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
 
     if (grid._isSelected(draggedItems[0])) {
@@ -650,28 +634,29 @@ function renderContent(root: HTMLElement, content: Node | string) {
       if (grid.__selectionDragData) {
         Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
       } else {
-        (grid.__dragDataTypes || []).forEach((type: string) => {
-          setDragData(type, draggedItems.map((item: Item) => item.dragData![type]).join('\n'));
+        (grid.__dragDataTypes || []).forEach((type) => {
+          setDragData(type, draggedItems.map((item) => item.dragData![type]).join('\n'));
         });
       }
 
-      if (grid.__selectionDraggedItemsCount > 1) {
-        setDraggedItemsCount(grid.__selectionDraggedItemsCount);
+      const draggedItemsCount = grid.__selectionDraggedItemsCount ?? 0;
+      if (draggedItemsCount > 1) {
+        setDraggedItemsCount(draggedItemsCount);
       }
     } else {
       // Dragging just one (non-selected) item
-      (grid.__dragDataTypes || []).forEach((type: string) => {
-        setDragData(type, draggedItems[0].dragData[type]);
+      (grid.__dragDataTypes || []).forEach((type) => {
+        setDragData(type, draggedItems[0].dragData![type]);
       });
     }
   });
 
-  grid.isItemSelectable = (item: Item | undefined) => {
+  grid.isItemSelectable = (item: Item | null | undefined) => {
     // If there is no selectable data, assume the item is selectable
     return item?.selectable === undefined || item.selectable;
   };
 
-  grid._isDetailsOpened = function (item: Item | undefined) {
+  grid._isDetailsOpened = function (item) {
     return item?.detailsOpened ?? false;
   };
 
@@ -683,8 +668,8 @@ function renderContent(root: HTMLElement, content: Node | string) {
     return rowRect.top >= tableRect.top + headerRect.height && rowRect.bottom <= tableRect.bottom - footerRect.height;
   }
 
-  grid.$connector.scrollToItem = function (itemKey: string, ...args: number[]) {
-    const targetRow = grid._getRenderedRows().find((row: HTMLElement) => {
+  grid.$connector.scrollToItem = function (itemKey, ...args) {
+    const targetRow = grid._getRenderedRows().find((row) => {
       const { item } = grid.__getRowModel(row);
       return grid.getItemId(item) === itemKey;
     });
@@ -694,4 +679,6 @@ function renderContent(root: HTMLElement, content: Node | string) {
 
     grid.scrollToIndex(...args);
   };
-};
+}
+
+window.Vaadin.Flow.gridConnector = { initLazy };
