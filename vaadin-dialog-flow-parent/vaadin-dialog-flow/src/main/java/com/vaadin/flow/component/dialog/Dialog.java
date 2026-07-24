@@ -80,7 +80,7 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.1.8")
+@NpmPackage(value = "@vaadin/dialog", version = "25.1.9")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 @ModalRoot
