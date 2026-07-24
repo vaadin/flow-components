@@ -15,15 +15,21 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.bean.PeopleGenerator;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
@@ -42,6 +48,7 @@ public class GridLitRendererPage extends Div {
                 .setEditorComponent(new Span("Editor component"));
         grid.getEditor().setBinder(new Binder<>());
         setLitRenderer(grid);
+        grid.setId("lit-renderer-grid");
         add(grid);
 
         NativeButton componentRendererButton = new NativeButton(
@@ -78,6 +85,56 @@ public class GridLitRendererPage extends Div {
 
         add(componentRendererButton, litRendererButton, toggleEditButton,
                 toggleAttachedButton);
+
+        createLitRendererColumns();
+    }
+
+    private void createLitRendererColumns() {
+        // Only the first rows are exercised by the tests, so a small data set
+        // keeps the page light
+        List<Person> people = new ArrayList<>(
+                new PeopleGenerator().generatePeople(50));
+
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(people);
+
+        // You can use the index variable to print the row index (0 based)
+        grid.addColumn(LitRenderer.of("${index}")).setHeader("#");
+
+        // You can set any property by using `withProperty`, including
+        // properties not present on the original bean.
+        grid.addColumn(LitRenderer.<Person> of(
+                "<div title='${item.firstName}'>${item.firstName}<br><small>${item.yearsOld}</small></div>")
+                .withProperty("firstName", Person::getFirstName)
+                .withProperty("yearsOld",
+                        person -> person.getAge() > 1
+                                ? person.getAge() + " years old"
+                                : person.getAge() + " year old"))
+                .setHeader("Person");
+
+        // You can also set complex objects directly. Internal properties of the
+        // bean are accessible in the template.
+        grid.addColumn(LitRenderer.<Person> of(
+                "<div>${item.address.street}, number ${item.address.number}<br><small>${item.address.postalCode}</small></div>")
+                .withProperty("address", Person::getAddress))
+                .setHeader("Address");
+
+        // You can set events handlers associated with the template.
+        grid.addColumn(LitRenderer.<Person> of(
+                "<button @click=${handleUpdate}>Update</button><button @click=${handleRemove}>Remove</button>")
+                .withFunction("handleUpdate", person -> {
+                    person.setFirstName(person.getFirstName() + " Updated");
+                    grid.getDataProvider().refreshItem(person);
+                }).withFunction("handleRemove", person -> {
+                    ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
+                            .getDataProvider();
+                    dataProvider.getItems().remove(person);
+                    dataProvider.refreshAll();
+                })).setHeader("Actions");
+
+        grid.setSelectionMode(SelectionMode.NONE);
+        grid.setId("template-renderer");
+        add(grid);
     }
 
     private void setLitRenderer(Grid<Integer> grid) {
