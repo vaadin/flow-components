@@ -77,7 +77,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void openPopup_firstPageLoaded() {
         stringBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, stringBox);
         assertRendered(stringBox, "Item 10");
@@ -172,7 +172,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void customPageSize_correctAmountOfItemsRequested() {
         pagesizeBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded.",
                 180, pagesizeBox);
@@ -346,7 +346,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         Assert.assertEquals("0", lazySizeRequestCountSpan.getText());
 
         callbackBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
         assertRendered(callbackBox, "Item 0");
@@ -357,7 +357,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         callbackBox.openPopup();
         scrollToItem(callbackBox, 60);
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
         assertRendered(callbackBox, "Item 60");
@@ -367,7 +367,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void comboBoxInATemplate_worksWithLazyLoading() {
         templateBox.openPopup();
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, templateBox);
         assertRendered(templateBox, "Item 8");
@@ -378,7 +378,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox.openPopup();
         scrollToItem(templateBox, 50);
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 templateBox);
         assertRendered(templateBox, "Item 50");
