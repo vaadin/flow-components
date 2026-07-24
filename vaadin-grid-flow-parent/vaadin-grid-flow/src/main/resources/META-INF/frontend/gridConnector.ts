@@ -3,7 +3,7 @@ import { timeOut } from '@vaadin/component-base/src/async.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
-import type { GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
 import type { FlowGrid, GridConnector, Item, ItemRange, SelectionMode } from './vaadin-grid-types.js';
 
 function isRangeEqual(range1: ItemRange | null, range2: ItemRange | null) {
@@ -103,7 +103,7 @@ function initLazy(grid: FlowGrid) {
     grid.selectedItems = updatedSelectedItems;
   };
 
-  function onItemActivate(event: CustomEvent<{ model: { item: Item } }>) {
+  function onItemActivate(event: GridCellActivateEvent<Item>) {
     const { item } = event.detail.model;
     // The row model can hold a stale item while its data is being loaded, so
     // skip activation unless the item is actually loaded in the data cache
@@ -131,12 +131,12 @@ function initLazy(grid: FlowGrid) {
   grid.addEventListener('cell-activate', onItemActivate);
   grid.addEventListener('row-activate', onItemActivate);
 
-  grid.$connector.getRenderedRange = function (): ItemRange {
+  grid.$connector.getRenderedRange = function () {
     const renderedRows = grid._getRenderedRows();
     return [renderedRows.at(0)?.index ?? 0, renderedRows.at(-1)?.index ?? 0];
   };
 
-  grid.$connector.getFetchRange = function (): ItemRange {
+  grid.$connector.getFetchRange = function () {
     // Get the range of currently rendered rows
     let range = grid.$connector.getRenderedRange();
 
@@ -209,7 +209,7 @@ function initLazy(grid: FlowGrid) {
   // which is too late to keep up while scrolling and leads to blank rows.
   // To load data ahead of rendering, request the fetch range (rendered
   // rows + buffer) on every virtualizer update while scrolling.
-  grid.__updateVirtualizerElement = function (...args: unknown[]) {
+  grid.__updateVirtualizerElement = function (...args) {
     Object.getPrototypeOf(this).__updateVirtualizerElement.call(this, ...args);
 
     if (grid.$.scroller.hasAttribute('scrolling')) {
@@ -245,7 +245,7 @@ function initLazy(grid: FlowGrid) {
     );
   };
 
-  grid.$connector.setSorterDirections = function (directions: { column: string; direction: GridSorterDirection }[]) {
+  grid.$connector.setSorterDirections = function (directions) {
     sorterDirectionsSetFromServer = true;
     setTimeout(() => {
       try {
@@ -293,7 +293,7 @@ function initLazy(grid: FlowGrid) {
     }
   }
 
-  grid.__updateRow = function (row: HTMLElement, ...args: unknown[]) {
+  grid.__updateRow = function (row, ...args) {
     if (preventRowUpdatesActive !== 0) {
       return;
     }
@@ -384,7 +384,7 @@ function initLazy(grid: FlowGrid) {
     grid.__a11yUpdateMutiSelectable();
   };
 
-  grid.__a11yUpdateRowSelected = function (row: HTMLElement, selected: boolean) {
+  grid.__a11yUpdateRowSelected = function (row, selected) {
     if (selectionMode === 'NONE') {
       [row, ...row.children].forEach((el) => el.removeAttribute('aria-selected'));
       return;
@@ -429,7 +429,7 @@ function initLazy(grid: FlowGrid) {
     // reset its direction and fire a sorters-changed round-trip to the server.
     let sorter: GridSorter | undefined;
 
-    column.headerRenderer = (root: HTMLElement) => {
+    column.headerRenderer = (root) => {
       let contentRoot: HTMLElement = root;
       if (showSorter) {
         sorter ??= document.createElement('vaadin-grid-sorter');
@@ -454,7 +454,7 @@ function initLazy(grid: FlowGrid) {
     return this._sorters.filter((sorter) => sorter.direction);
   };
 
-  grid.__applySorters = function (...args: unknown[]) {
+  grid.__applySorters = function (...args) {
     const sorters = grid._mapSorters();
     const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
 
@@ -488,7 +488,7 @@ function initLazy(grid: FlowGrid) {
       return;
     }
 
-    column.footerRenderer = (root: HTMLElement) => renderContent(root, content);
+    column.footerRenderer = (root) => renderContent(root, content);
   };
 
   grid.addEventListener('vaadin-context-menu-before-open', function (e) {
@@ -506,15 +506,15 @@ function initLazy(grid: FlowGrid) {
     return { key, columnId };
   };
 
-  grid.preventContextMenu = function (event: MouseEvent) {
+  grid.preventContextMenu = function (event) {
     const isLeftClick = event.type === 'click';
     const { column } = grid.getEventContext(event);
 
     return isLeftClick && column instanceof GridFlowSelectionColumn;
   };
 
-  grid.addEventListener('click', (e: MouseEvent) => _fireClickEvent(e, 'item-click'));
-  grid.addEventListener('dblclick', (e: MouseEvent) => _fireClickEvent(e, 'item-double-click'));
+  grid.addEventListener('click', (e) => _fireClickEvent(e, 'item-click'));
+  grid.addEventListener('dblclick', (e) => _fireClickEvent(e, 'item-double-click'));
 
   grid.addEventListener('column-resize', (e) => {
     const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
@@ -648,7 +648,7 @@ function initLazy(grid: FlowGrid) {
     }
   });
 
-  grid.isItemSelectable = (item: Item | null | undefined) => {
+  grid.isItemSelectable = (item) => {
     // If there is no selectable data, assume the item is selectable
     return item?.selectable === undefined || item.selectable;
   };

@@ -43,7 +43,7 @@ function initLazy(grid: FlowTreeGrid) {
     return !grid.__pendingScrollToIndexes;
   };
 
-  grid.scrollToIndex = async function (...indexes: number[]) {
+  grid.scrollToIndex = async function (...indexes) {
     grid.__pendingScrollToIndexes = indexes;
 
     if (!grid.clientHeight || !grid._columnTree || grid._dataProviderController.isLoading()) {
