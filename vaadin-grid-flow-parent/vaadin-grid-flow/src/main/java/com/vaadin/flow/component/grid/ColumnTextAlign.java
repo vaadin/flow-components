@@ -22,6 +22,7 @@ package com.vaadin.flow.component.grid;
  *
  * @see ColumnBase#setTextAlign(ColumnTextAlign)
  *
+ * @since 2.1
  */
 public enum ColumnTextAlign {
 

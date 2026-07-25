@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 22.0
+ */
 public class Inactive extends AbstractConfigurationObject {
 
     private Boolean animation;
@@ -70,6 +73,8 @@ public class Inactive extends AbstractConfigurationObject {
      * Pixel width of the graph line.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 25.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;

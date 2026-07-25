@@ -10,6 +10,8 @@ package com.vaadin.flow.component.map.configuration.source;
 
 /**
  * Abstract base class for map sources providing tiled map data from a URL
+ * 
+ * @since 23.0
  */
 public abstract class UrlTileSource extends TileSource {
 
@@ -38,6 +40,9 @@ public abstract class UrlTileSource extends TileSource {
         markAsDirty();
     }
 
+    /**
+     * @since 23.1
+     */
     protected static abstract class Options extends TileSource.Options {
         private String url;
 

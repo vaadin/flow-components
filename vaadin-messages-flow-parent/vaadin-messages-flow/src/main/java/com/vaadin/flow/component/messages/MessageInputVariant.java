@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-message-input} component.
+ * 
+ * @since 25.0
  */
 public enum MessageInputVariant implements ThemeVariant {
     AURA_ICON_BUTTON("icon-button");

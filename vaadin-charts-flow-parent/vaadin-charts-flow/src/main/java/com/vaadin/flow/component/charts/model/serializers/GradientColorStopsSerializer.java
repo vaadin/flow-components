@@ -16,6 +16,9 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.module.SimpleModule;
 
+/**
+ * @since 18.0
+ */
 public class GradientColorStopsSerializer
         extends ValueSerializer<GradientColor.Stop> {
 

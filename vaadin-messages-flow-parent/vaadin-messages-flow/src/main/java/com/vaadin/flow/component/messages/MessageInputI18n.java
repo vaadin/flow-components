@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @see MessageInput#setI18n(MessageInputI18n)
  *
  * @author Vaadin Ltd.
+ * @since 14.7
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MessageInputI18n implements Serializable {

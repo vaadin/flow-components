@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * See <a class="internal" href="#Axis">the Axis object</a> for programmatic
  * access to the axis.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class XAxis extends Axis {
 
@@ -126,6 +128,8 @@ public class XAxis extends Axis {
     /**
      * When using an alternate grid color, a band is painted across the plot
      * area between every other grid line.
+     * 
+     * @since 18.0
      */
     public void setAlternateGridColor(Color alternateGridColor) {
         this.alternateGridColor = alternateGridColor;
@@ -367,6 +371,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setGridLineColor(Color)
+     * @since 18.0
      */
     public Color getGridLineColor() {
         return gridLineColor;
@@ -385,6 +390,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #e6e6e6
+     * 
+     * @since 18.0
      */
     public void setGridLineColor(Color gridLineColor) {
         this.gridLineColor = gridLineColor;
@@ -392,6 +399,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setGridLineDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getGridLineDashStyle() {
         return gridLineDashStyle;
@@ -404,6 +412,8 @@ public class XAxis extends Axis {
      * >this demonstration</a>.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setGridLineDashStyle(DashStyle gridLineDashStyle) {
         this.gridLineDashStyle = gridLineDashStyle;
@@ -411,6 +421,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setGridLineWidth(Number)
+     * @since 18.0
      */
     public Number getGridLineWidth() {
         return gridLineWidth;
@@ -429,6 +440,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setGridLineWidth(Number gridLineWidth) {
         this.gridLineWidth = gridLineWidth;
@@ -484,6 +497,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -503,6 +517,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #ccd6eb
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -510,6 +526,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -529,6 +546,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -646,6 +665,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorGridLineColor(Color)
+     * @since 18.0
      */
     public Color getMinorGridLineColor() {
         return minorGridLineColor;
@@ -665,6 +685,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #f2f2f2
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineColor(Color minorGridLineColor) {
         this.minorGridLineColor = minorGridLineColor;
@@ -672,6 +694,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorGridLineDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getMinorGridLineDashStyle() {
         return minorGridLineDashStyle;
@@ -684,6 +707,8 @@ public class XAxis extends Axis {
      * >this demonstration</a>.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle) {
         this.minorGridLineDashStyle = minorGridLineDashStyle;
@@ -691,6 +716,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorGridLineWidth(Number)
+     * @since 18.0
      */
     public Number getMinorGridLineWidth() {
         return minorGridLineWidth;
@@ -709,6 +735,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineWidth(Number minorGridLineWidth) {
         this.minorGridLineWidth = minorGridLineWidth;
@@ -716,6 +744,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorTickColor(Color)
+     * @since 18.0
      */
     public Color getMinorTickColor() {
         return minorTickColor;
@@ -725,6 +754,8 @@ public class XAxis extends Axis {
      * Color for the minor tick marks.
      * <p>
      * Defaults to: #999999
+     * 
+     * @since 18.0
      */
     public void setMinorTickColor(Color minorTickColor) {
         this.minorTickColor = minorTickColor;
@@ -800,6 +831,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorTickWidth(Number)
+     * @since 18.0
      */
     public Number getMinorTickWidth() {
         return minorTickWidth;
@@ -809,6 +841,8 @@ public class XAxis extends Axis {
      * The pixel width of the minor tick mark.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setMinorTickWidth(Number minorTickWidth) {
         this.minorTickWidth = minorTickWidth;
@@ -1124,6 +1158,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setTickColor(Color)
+     * @since 18.0
      */
     public Color getTickColor() {
         return tickColor;
@@ -1142,6 +1177,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #ccd6eb
+     * 
+     * @since 18.0
      */
     public void setTickColor(Color tickColor) {
         this.tickColor = tickColor;
@@ -1267,6 +1304,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setTickWidth(Number)
+     * @since 18.0
      */
     public Number getTickWidth() {
         return tickWidth;
@@ -1285,6 +1323,8 @@ public class XAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setTickWidth(Number tickWidth) {
         this.tickWidth = tickWidth;
@@ -1527,6 +1567,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setCurrentDateIndicator(PlotLine)
+     * @since 24.7
      */
     public PlotLine getCurrentDateIndicator() {
         return currentDateIndicator;
@@ -1537,6 +1578,7 @@ public class XAxis extends Axis {
      * current date and time.
      *
      * @param currentDateIndicator
+     * @since 24.7
      */
     public void setCurrentDateIndicator(Boolean currentDateIndicator) {
         if (currentDateIndicator) {
@@ -1551,6 +1593,7 @@ public class XAxis extends Axis {
      * current date and time.
      *
      * @param currentDateIndicator
+     * @since 24.7
      */
     public void setCurrentDateIndicator(PlotLine currentDateIndicator) {
         this.currentDateIndicator = currentDateIndicator;
@@ -1558,6 +1601,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setGrid(AxisGrid)
+     * @since 24.7
      */
     public AxisGrid getGrid() {
         return grid;
@@ -1565,6 +1609,8 @@ public class XAxis extends Axis {
 
     /**
      * Set grid options for the axis labels. Relevant only for Highcharts Gantt.
+     * 
+     * @since 24.7
      */
     public void setGrid(AxisGrid grid) {
         this.grid = grid;
@@ -1572,6 +1618,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setAlignTicks(Boolean)
+     * @since 24.7
      */
     public Boolean getAlignTicks() {
         return alignTicks;
@@ -1588,6 +1635,7 @@ public class XAxis extends Axis {
      * Defaults to true.
      *
      * @param alignTicks
+     * @since 24.7
      */
     public void setAlignTicks(Boolean alignTicks) {
         this.alignTicks = alignTicks;
@@ -1595,6 +1643,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMargin(Number)
+     * @since 24.7
      */
     public Number getMargin() {
         return margin;
@@ -1606,6 +1655,7 @@ public class XAxis extends Axis {
      * axes.
      *
      * @param margin
+     * @since 24.7
      */
     public void setMargin(Number margin) {
         this.margin = margin;
@@ -1613,6 +1663,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMaxRange(Number)
+     * @since 24.7
      */
     public Number getMaxRange() {
         return maxRange;
@@ -1623,6 +1674,7 @@ public class XAxis extends Axis {
      * {@link #setMinRange(Number)}
      *
      * @param maxRange
+     * @since 24.7
      */
     public void setMaxRange(Number maxRange) {
         this.maxRange = maxRange;
@@ -1630,6 +1682,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setPanningEnabled(Boolean)
+     * @since 24.7
      */
     public Boolean getPanningEnabled() {
         return panningEnabled;
@@ -1640,6 +1693,7 @@ public class XAxis extends Axis {
      * disable panning on an individual axis. Defaults to true.
      *
      * @param panningEnabled
+     * @since 24.7
      */
     public void setPanningEnabled(Boolean panningEnabled) {
         this.panningEnabled = panningEnabled;
@@ -1647,6 +1701,7 @@ public class XAxis extends Axis {
 
     /**
      * @see #setMinorTicks(Boolean)
+     * @since 24.7
      */
     public Boolean getMinorTicks() {
         return minorTicks;
@@ -1661,6 +1716,7 @@ public class XAxis extends Axis {
      * Defaults to false.
      *
      * @param minorTicks
+     * @since 24.7
      */
     public void setMinorTicks(Boolean minorTicks) {
         this.minorTicks = minorTicks;

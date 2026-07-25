@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Positioning options for Breadcrumbs navigation.
+ * 
+ * @since 25.0
  */
 public class BreadcrumbsPosition extends AbstractConfigurationObject {
     private String align;

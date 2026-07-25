@@ -78,6 +78,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
  * data.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFactory implements Serializable {

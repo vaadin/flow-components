@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * DataSeriesItem that can hold also Z value. Used in e.g. bubble charts.
+ * 
+ * @since 6.0.1
  */
 public class DataSeriesItem3d extends DataSeriesItem {
 

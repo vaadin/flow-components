@@ -28,8 +28,9 @@ import com.vaadin.flow.signals.Signal;
  *
  * @author Vaadin Ltd
  * @see VaadinIcon
+ * @since 1.0
  */
-@NpmPackage(value = "@vaadin/icons", version = "25.2.0")
+@NpmPackage(value = "@vaadin/icons", version = "25.3.0-alpha6")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 
@@ -76,6 +77,7 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @param icon
      *            the icon name
+     * @since 2.1
      */
     public Icon(String icon) {
         setIcon(icon);
@@ -114,6 +116,7 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @param icon
      *            the icon name
+     * @since 24.4
      */
     public void setIcon(String icon) {
         if (icon.contains(":")) {
@@ -133,6 +136,7 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @param icon
      *            the icon name
+     * @since 24.4
      */
     public void setIcon(VaadinIcon icon) {
         setIcon(VAADIN_ICON_COLLECTION_NAME, normalizeIcon(icon));
@@ -170,6 +174,7 @@ public class Icon extends AbstractIcon<Icon> {
      * Gets the full icon name, including the collection.
      *
      * @return the icon name or {@code null} if no icon is set
+     * @since 24.4
      */
     public String getIcon() {
         return getElement().getAttribute(ICON_ATTRIBUTE_NAME);
@@ -194,6 +199,7 @@ public class Icon extends AbstractIcon<Icon> {
      *            the icon collection
      * @param icon
      *            the icon name
+     * @since 24.4
      */
     public void setIcon(String collection, String icon) {
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
@@ -204,6 +210,7 @@ public class Icon extends AbstractIcon<Icon> {
      *
      * @return the collection of the icon or {@code null} if no collection is
      *         set
+     * @since 24.4
      */
     public String getCollection() {
         String icon = getIcon();

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -433,23 +434,8 @@ class CardTest {
     }
 
     @Test
-    void ariaRoleEmptyByDefault() {
-        Assertions.assertTrue(card.getAriaRole().isEmpty());
-    }
-
-    @Test
-    void setAriaRole_ariaRoleUpdated() {
-        var ariaRole = "custom-role";
-        card.setAriaRole(ariaRole);
-        Assertions.assertTrue(card.getAriaRole().isPresent());
-        Assertions.assertEquals(ariaRole, card.getAriaRole().get());
-    }
-
-    @Test
-    void setAriaRoleNull_ariaRoleUpdated() {
-        card.setAriaRole("custom-role");
-        card.setAriaRole(null);
-        Assertions.assertTrue(card.getAriaRole().isEmpty());
+    void implementsHasAriaRole() {
+        Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Card.class));
     }
 
     @Test

@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 
+/**
+ * @since 23.1
+ */
 public interface SpreadsheetClientRpc {
 
     void updateBottomRightCellValues(ArrayList<CellData> cellData);

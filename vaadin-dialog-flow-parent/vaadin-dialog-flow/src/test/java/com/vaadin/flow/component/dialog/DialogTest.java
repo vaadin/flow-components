@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -226,16 +227,18 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
         Assertions.assertEquals("dialog", dialog.getRole());
         Assertions.assertEquals("dialog", dialog.getOverlayRole());
         Assertions.assertEquals("dialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_getOverlayRole() {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
@@ -243,10 +246,11 @@ class DialogTest {
         Assertions.assertEquals("alertdialog", dialog.getRole());
         Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_null_throws() {
         Dialog dialog = new Dialog();
         Assertions.assertThrows(NullPointerException.class,
@@ -254,6 +258,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_getRole() {
         Dialog dialog = new Dialog();
         dialog.setRole("alertdialog");
@@ -261,14 +266,20 @@ class DialogTest {
         Assertions.assertEquals("alertdialog", dialog.getRole());
         Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_null_throws() {
         Dialog dialog = new Dialog();
         Assertions.assertThrows(NullPointerException.class,
                 () -> dialog.setRole(null));
+    }
+
+    @Test
+    void implementsHasAriaRole() {
+        Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Dialog.class));
     }
 
     private void addDivAtIndex(int index) {

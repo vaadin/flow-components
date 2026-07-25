@@ -248,6 +248,32 @@ class GridSortingTest {
     }
 
     @Test
+    void sortersChanged_forRemovedColumn_sorterIgnored() {
+        // A sortersChanged call can reference a column that was removed on the
+        // server between the client emitting the event and the server handling
+        // it. Such stale sorters should be ignored, not throw.
+        ArrayNode sortersArray = JacksonUtils.createArrayNode();
+        sortersArray.add(createSortObject(getColumnId(nameColumn), "asc"));
+        sortersArray.add(createSortObject("non-existent-column", "desc"));
+        callSortersChanged(sortersArray);
+
+        assertSortOrdersEquals(GridSortOrder.asc(nameColumn).build(),
+                testSortListener.events.get(0).getSortOrder());
+    }
+
+    @Test
+    void sortersChanged_onlyRemovedColumn_sortCleared() {
+        setTestSorting();
+
+        ArrayNode sortersArray = JacksonUtils.createArrayNode();
+        sortersArray.add(createSortObject("non-existent-column", "asc"));
+        callSortersChanged(sortersArray);
+
+        assertSortOrdersEquals(List.of(),
+                testSortListener.events.get(1).getSortOrder());
+    }
+
+    @Test
     void template_renderer_non_comparable_property() {
         Column<Person> column = grid.addColumn(LitRenderer.<Person> of("")
                 .withProperty("address", Person::getAddress))

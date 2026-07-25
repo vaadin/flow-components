@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Event triggered when data was added to the series.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public class DataAddedEvent extends AbstractSeriesItemEvent {

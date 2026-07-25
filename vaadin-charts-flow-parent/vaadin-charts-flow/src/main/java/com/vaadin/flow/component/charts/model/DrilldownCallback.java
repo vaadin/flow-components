@@ -21,6 +21,8 @@ import java.io.Serializable;
  * <p/>
  * To enable async drilldown for a series item use
  * {@link DataSeries#addItemWithDrilldown(com.vaadin.flow.component.charts.model.DataSeriesItem)}
+ * 
+ * @since 18.0
  */
 public interface DrilldownCallback extends Serializable {
 

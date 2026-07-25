@@ -18,6 +18,7 @@ import com.vaadin.flow.component.charts.themes.LumoLightTheme;
  * theme your Charts.
  *
  * @see LumoLightTheme
+ * @since 18.0
  */
 public class Theme extends AbstractConfigurationObject {
     private Color[] colors;

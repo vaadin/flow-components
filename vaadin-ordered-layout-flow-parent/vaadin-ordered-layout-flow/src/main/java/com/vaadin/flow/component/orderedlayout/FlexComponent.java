@@ -25,6 +25,8 @@ import com.vaadin.flow.component.HasStyle;
 
 /**
  * A component which implements Flexbox.
+ * 
+ * @since 1.0
  */
 public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
 
@@ -294,6 +296,7 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
      *            components
      * @param components
      *            the components to apply the flex shrink property
+     * @since 24.0
      */
     default public void setFlexShrink(double flexShrink,
             HasElement... components) {
@@ -315,6 +318,7 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
      * @param component
      *            the component to read the flex shrink property from
      * @return the flex shrink property, or 1 if none was set
+     * @since 24.0
      */
     default public double getFlexShrink(HasElement component) {
         String ratio = component.getElement().getStyle()

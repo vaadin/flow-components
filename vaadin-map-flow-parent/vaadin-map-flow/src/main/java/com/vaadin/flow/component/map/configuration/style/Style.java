@@ -18,6 +18,8 @@ import com.vaadin.flow.component.map.configuration.Feature;
 
 /**
  * Defines how to visually represent a {@link Feature}
+ * 
+ * @since 23.0
  */
 public class Style extends AbstractConfigurationObject {
 
@@ -73,6 +75,7 @@ public class Style extends AbstractConfigurationObject {
      * used instead.
      *
      * @return the text style, or {@code null} if no text style is defined
+     * @since 24.1
      */
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
@@ -88,6 +91,7 @@ public class Style extends AbstractConfigurationObject {
      *
      * @param textStyle
      *            the new text style, or {@code null}
+     * @since 24.1
      */
     public void setTextStyle(TextStyle textStyle) {
         removeChild(this.textStyle);

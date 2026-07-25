@@ -12,6 +12,8 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
  * Abstract base class for drawing image-based features
+ * 
+ * @since 23.0
  */
 public abstract class ImageStyle extends AbstractConfigurationObject {
 
@@ -35,6 +37,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @param opacity
      *            the new opacity
+     * @since 24.0
      */
     public void setOpacity(double opacity) {
         this.opacity = opacity;
@@ -71,6 +74,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @param rotation
      *            the new rotation
+     * @since 24.0
      */
     public void setRotation(double rotation) {
         this.rotation = rotation;
@@ -91,6 +95,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @param scale
      *            the new scaling
+     * @since 24.0
      */
     public void setScale(double scale) {
         this.scale = scale;
@@ -104,6 +109,9 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
         scale = options.scale;
     }
 
+    /**
+     * @since 23.1
+     */
     protected static abstract class Options {
         private double opacity = 1;
         private boolean rotateWithView = false;
@@ -112,6 +120,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
         /**
          * @see ImageStyle#getOpacity()
+         * @since 24.0
          */
         public void setOpacity(double opacity) {
             this.opacity = opacity;
@@ -126,6 +135,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
         /**
          * @see ImageStyle#getRotation()
+         * @since 24.0
          */
         public void setRotation(double rotation) {
             this.rotation = rotation;
@@ -133,6 +143,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
 
         /**
          * @see ImageStyle#getScale()
+         * @since 24.0
          */
         public void setScale(double scale) {
             this.scale = scale;

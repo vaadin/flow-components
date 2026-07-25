@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 24.7
+ */
 public class GuideBoxDefaultState extends AbstractConfigurationObject {
 
     private String className;

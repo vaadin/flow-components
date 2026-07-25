@@ -24,6 +24,8 @@ import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
  * a {@link FeatureLayer} which exposes the same API as this source. Clustering
  * can be enabled in a feature layer using
  * {@link FeatureLayer#setClusteringEnabled(boolean)}.
+ * 
+ * @since 25.0
  */
 public class ClusterSource extends VectorSource {
     private int distance = 50;

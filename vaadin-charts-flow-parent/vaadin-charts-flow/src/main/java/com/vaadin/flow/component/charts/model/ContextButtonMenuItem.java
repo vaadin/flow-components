@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public class ContextButtonMenuItem extends AbstractConfigurationObject {
 
     private String text;

@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.Chart;
 
 /**
  * Fired after a chart is redrawn
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-redraw")
 public class ChartRedrawEvent extends ComponentEvent<Chart> {

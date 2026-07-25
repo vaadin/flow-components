@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Label that can be positioned anywhere in the chart area
+ * 
+ * @since 24.0
  */
 public class AnnotationItemLabel extends AbstractConfigurationObject {
 

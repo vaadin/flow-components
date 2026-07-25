@@ -21,7 +21,7 @@ import java.lang.reflect.Modifier;
  * Vaadin and should not be used by application developers. Subject to change at
  * any time.
  *
- * @since 6.2
+ * @since 23.1
  */
 public class ReflectTools implements Serializable {
 
@@ -189,7 +189,6 @@ public class ReflectTools implements Serializable {
     }
 
     /**
-     * @since 7.4
      */
     public static Class<?> convertPrimitiveType(Class<?> type) {
         // Gets the return type from get method
@@ -226,8 +225,6 @@ public class ReflectTools implements Serializable {
      * @param b
      *            another class to get the base type for, not <code>null</code>
      * @return the most specific base class, not <code>null</code>
-     *
-     * @since 8.0
      */
     public static Class<?> findCommonBaseType(Class<?> a, Class<?> b) {
         if (a.isInterface()) {
@@ -261,7 +258,6 @@ public class ReflectTools implements Serializable {
      * @param cls
      *            the class to instantiate
      * @return an instance of the class
-     * @since 8.1.1
      */
     public static <T> T createInstance(Class<T> cls) {
         checkClassAccessibility(cls);
@@ -326,7 +322,6 @@ public class ReflectTools implements Serializable {
      * @return the first non-synthetic method
      * @throws IllegalStateException
      *             if the specified class does not have found method
-     * @since 8.2
      */
     public static Method getMethod(Class<?> listenerClass) {
         for (Method m : listenerClass.getDeclaredMethods()) {

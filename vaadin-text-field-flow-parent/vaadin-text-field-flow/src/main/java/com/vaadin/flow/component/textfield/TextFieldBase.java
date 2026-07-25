@@ -46,6 +46,7 @@ import com.vaadin.flow.function.SerializableFunction;
  *            Type of the component that extends from this class
  * @param <TValue>
  *            Type of the value of the extending component
+ * @since 24.0
  */
 public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
@@ -168,6 +169,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * @param required
      *            {@code true} to make the field required, {@code false}
      *            otherwise
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -179,6 +181,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {

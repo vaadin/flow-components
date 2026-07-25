@@ -28,6 +28,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of items in grid
+ * @since 1.0
  */
 public interface GridSingleSelectionModel<T>
         extends GridSelectionModel<T>, SelectionModel.Single<Grid<T>, T> {

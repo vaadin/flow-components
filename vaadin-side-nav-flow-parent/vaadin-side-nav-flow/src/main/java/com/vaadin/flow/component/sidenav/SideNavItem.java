@@ -57,9 +57,10 @@ import tools.jackson.databind.node.ArrayNode;
  * {@link SideNavItem} instance via {@link #addItem(SideNavItem...)}.
  *
  * @author Vaadin Ltd
+ * @since 24.1
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.2.0")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.3.0-alpha6")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {
@@ -126,6 +127,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the type of the URL parameter
      * @param <C>
      *            the type of the view
+     * @since 24.7
      */
     public <T, C extends Component & HasUrlParameter<T>> SideNavItem(
             String label, Class<? extends C> view, T parameter) {
@@ -142,6 +144,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the route parameters
      * @param view
      *            the view to link to
+     * @since 24.2
      */
     public SideNavItem(String label, Class<? extends Component> view,
             RouteParameters routeParameters) {
@@ -201,6 +204,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the route parameters
      * @param prefixComponent
      *            the prefixComponent for the item (usually an icon)
+     * @since 24.2
      */
     public SideNavItem(String label, Class<? extends Component> view,
             RouteParameters routeParameters, Component prefixComponent) {
@@ -258,8 +262,14 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            The path to link to. Set to null to disable navigation for
      *            this item.
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      *
      * @see SideNavItem#setPath(Class)
+     * @see #setUnsafePath(String)
      */
     public void setPath(String path) {
         if (path != null && !UrlUtil.isSafeUrl(path)) {
@@ -284,6 +294,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            The path to link to. Set to null to disable navigation for
      *            this item.
+     * @since 25.2
      */
     public void setUnsafePath(String path) {
         doSetPath(path);
@@ -340,6 +351,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *            the type of the URL parameter
      * @param <C>
      *            the type of the view
+     * @since 24.7
      */
     public <T, C extends Component & HasUrlParameter<T>> void setPath(
             Class<? extends C> view, T parameter) {
@@ -365,6 +377,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @see SideNavItem#setPath(String)
      * @see SideNavItem#setPathAliases(Set)
+     * @since 24.2
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
@@ -398,6 +411,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param queryParameters
      *            the query parameters object, or {@code null} to remove
      *            existing query parameters
+     * @since 24.2
      */
     public void setQueryParameters(QueryParameters queryParameters) {
         this.queryParameters = queryParameters;
@@ -409,6 +423,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * Gets the path aliases for this item.
      *
      * @return the path aliases for this item, empty if none
+     * @since 24.2
      */
     public Set<String> getPathAliases() {
         ArrayNode pathAliases = (ArrayNode) getElement()
@@ -429,6 +444,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @param pathAliases
      *            the path aliases to set to this item
+     * @since 24.2
      */
     public void setPathAliases(Set<String> pathAliases) {
         if (pathAliases == null || pathAliases.isEmpty()) {
@@ -448,6 +464,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * Gets the target of this item.
      *
      * @return the target of this item
+     * @since 24.4
      */
     public String getTarget() {
         return getElement().getProperty("target");
@@ -471,6 +488,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @param target
      *            the target of this item
+     * @since 24.4
      */
     public void setTarget(String target) {
         if (target == null) {
@@ -485,6 +503,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @return true if this item also matches nested paths / routes, false
      *         otherwise
+     * @since 24.5
      */
     public boolean isMatchNested() {
         return getElement().getProperty("matchNested", false);
@@ -503,6 +522,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @param value
      *            true to also match nested paths / routes, false otherwise
+     * @since 24.5
      */
     public void setMatchNested(boolean value) {
         getElement().setProperty("matchNested", value);
@@ -511,6 +531,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
     /**
      * @return true if this item should be ignored by the Vaadin router and
      *         behave like a regular anchor.
+     * @since 24.4
      */
     public boolean isRouterIgnore() {
         return getElement().getProperty("routerIgnore", false);
@@ -525,6 +546,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param ignore
      *            true if this item should not be intercepted by the single-page
      *            web application routing mechanism in Vaadin.
+     * @since 24.4
      */
     public void setRouterIgnore(boolean ignore) {
         getElement().setProperty("routerIgnore", ignore);
@@ -540,6 +562,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param openInNewBrowserTab
      *            true if the target URL should be opened in a new browser tab,
      *            false otherwise
+     * @since 24.4
      */
     public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
         setTarget(openInNewBrowserTab ? "_blank" : null);
@@ -550,6 +573,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      *
      * @return true if the target URL should be opened in a new browser tab,
      *         false otherwise
+     * @since 24.4
      */
     public boolean isOpenInNewBrowserTab() {
         return "_blank".equals(getTarget());

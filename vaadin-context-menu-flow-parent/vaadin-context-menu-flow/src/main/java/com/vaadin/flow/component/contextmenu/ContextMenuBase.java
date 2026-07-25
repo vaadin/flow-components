@@ -53,11 +53,12 @@ import tools.jackson.databind.node.ObjectNode;
  *            the sub menu type
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.2.0")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.0")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha6")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
@@ -238,6 +239,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param tooltipText
      *            the tooltip text for the created menu item
      * @return the created menu item
+     * @since 25.2
      */
     public I addItem(String text, String tooltipText) {
         return getMenuManager().addItem(text, tooltipText);
@@ -252,6 +254,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param tooltipText
      *            the tooltip text for the created menu item
      * @return the created menu item
+     * @since 25.2
      */
     public I addItem(Component component, String tooltipText) {
         return getMenuManager().addItem(component, tooltipText);
@@ -267,6 +270,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @since 24.8
      */
     public void addComponent(Component... components) {
         getMenuManager().addComponent(components);
@@ -282,6 +286,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @since 24.8
      */
     public void addComponent(Collection<Component> components) {
         if (components == null) {
@@ -318,6 +323,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the index, where the component will be added
      * @param component
      *            the component to add
+     * @since 1.1
      */
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
@@ -331,6 +337,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *
      * @param component
      *            the component to add
+     * @since 24.8
      */
     public void addComponentAsFirst(Component component) {
         getMenuManager().addComponentAtIndex(0, component);
@@ -338,6 +345,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds a separator between items.
+     * 
+     * @since 24.8
      */
     public void addSeparator() {
         getMenuManager().addSeparator();
@@ -384,6 +393,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * {@code opened-changed} event is sent when the opened state changes.
+     * 
+     * @since 23.3
      */
     public static class OpenedChangeEvent<TComponent extends ContextMenuBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -417,6 +428,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Gets the menu manager.
      *
      * @return the menu manager
+     * @since 2.0
      */
     protected MenuManager<C, I, S> getMenuManager() {
         if (menuManager == null) {
@@ -432,6 +444,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param contentReset
      *            callback to reset the menu content
      * @return a new menu manager instance
+     * @since 2.0
      */
     protected abstract MenuManager<C, I, S> createMenuManager(
             SerializableRunnable contentReset);
@@ -455,6 +468,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *
      * @return {@code true} if the context menu should be opened, {@code false}
      *         otherwise.
+     * @since 25.0
      */
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         return true;

@@ -51,9 +51,10 @@ import com.vaadin.flow.shared.Registration;
  * {@code VerticalLayout}, instead of adding them directly to the TabSheet.
  *
  * @author Vaadin Ltd.
+ * @since 23.3
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "25.2.0")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.3.0-alpha6")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -260,6 +261,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * Gets the number of tabs.
      *
      * @return the number of tabs
+     * @since 24.5
      */
     public int getTabCount() {
         return tabs.getTabCount();
@@ -288,7 +290,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * @return the index of the tab or -1 if the tab is not added
      */
     public int getIndexOf(Tab tab) {
-        return tabs.indexOf(tab);
+        return tabs.getIndexOf(tab);
     }
 
     /**
@@ -299,6 +301,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * @return The tab instance associated with the given component, or
      *         <code>null</code> if the {@link TabSheet} does not contain the
      *         component.
+     * @since 24.1
      */
     public Tab getTab(Component content) {
         Objects.requireNonNull(content,
@@ -317,6 +320,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * @return The component instance associated with the given tab, or
      *         <code>null</code> if the {@link TabSheet} does not contain the
      *         tab.
+     * @since 24.1
      */
     public Component getComponent(Tab tab) {
         Objects.requireNonNull(tab,

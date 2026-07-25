@@ -21,6 +21,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * >styled mode</a>, the dial is styled with the
  * <code>.highcharts-gauge-series .highcharts-dial</code> rule.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Dial extends AbstractConfigurationObject {
 
@@ -38,6 +40,7 @@ public class Dial extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -47,6 +50,8 @@ public class Dial extends AbstractConfigurationObject {
      * The background or fill color of the gauge's dial.
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -88,6 +93,7 @@ public class Dial extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -99,6 +105,8 @@ public class Dial extends AbstractConfigurationObject {
      * color.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -106,6 +114,7 @@ public class Dial extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -115,6 +124,8 @@ public class Dial extends AbstractConfigurationObject {
      * The width of the gauge dial border in pixels.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;

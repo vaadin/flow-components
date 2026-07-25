@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * chart. The label will be placed on top of positive columns and below negative
  * columns. In case of an inverted column chart or a bar chart the label is
  * placed to the right of positive bars and to the left of negative bars.
+ * 
+ * @since 6.0.1
  */
 public class StackLabels extends AbstractConfigurationObject {
 
@@ -114,6 +116,7 @@ public class StackLabels extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -137,6 +140,8 @@ public class StackLabels extends AbstractConfigurationObject {
      * Defaults to: { "color": "#000000", "fontSize": "11px", "fontWeight":
      * "bold", "textShadow": "1px 1px contrast, -1px -1px contrast, -1px 1px
      * contrast, 1px -1px contrast" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

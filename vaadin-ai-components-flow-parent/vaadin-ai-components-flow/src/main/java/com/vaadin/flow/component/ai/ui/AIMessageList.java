@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  *
  * @author Vaadin Ltd
  * @see AIMessage
+ * @since 25.1
  */
 public interface AIMessageList extends Serializable {
 

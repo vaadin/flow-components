@@ -16,6 +16,8 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Defines the default assets that the Map component provides
+ * 
+ * @since 23.0
  */
 public class Assets {
     public static final ImageAsset PIN = new ImageAsset("pin.png",

@@ -38,6 +38,7 @@ import tools.jackson.databind.node.ObjectNode;
  *            The Grid bean type.
  * @author Vaadin Ltd.
  * @see Grid#addDropListener(GridDropListener)
+ * @since 4.0
  */
 @SuppressWarnings("serial")
 @DomEvent("grid-drop")
@@ -62,6 +63,7 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
      *            Drop location from {@code detail.dropLocation}.
      * @param dragData
      *            Drag data from {@code detail.dragData}.
+     * @since 25.0
      */
     public GridDropEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail.dropTargetItem") ObjectNode item,

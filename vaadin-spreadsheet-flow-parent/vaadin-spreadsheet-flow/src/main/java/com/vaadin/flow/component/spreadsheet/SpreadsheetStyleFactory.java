@@ -45,6 +45,7 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * This class handles converting Apache POI CellStyles to CSS styles.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetStyleFactory implements Serializable {

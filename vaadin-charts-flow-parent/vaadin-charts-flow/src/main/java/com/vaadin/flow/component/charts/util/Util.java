@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.util;
 
 import java.time.Instant;
 
+/**
+ * @since 6.0.1
+ */
 public class Util {
 
     /**

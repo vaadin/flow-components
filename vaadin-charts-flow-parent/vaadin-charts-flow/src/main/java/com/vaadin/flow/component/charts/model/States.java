@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public class States extends AbstractConfigurationObject {
 
     private Hover hover;
@@ -57,6 +60,7 @@ public class States extends AbstractConfigurationObject {
 
     /**
      * @see #setInactive(Inactive)
+     * @since 22.0
      */
     public Inactive getInactive() {
         if (inactive == null) {
@@ -71,6 +75,7 @@ public class States extends AbstractConfigurationObject {
      * Note: Inactive style is not applied to <code>Marker</code>.
      *
      * @see #setHover(Hover)
+     * @since 22.0
      */
     public void setInactive(Inactive inactive) {
         this.inactive = inactive;

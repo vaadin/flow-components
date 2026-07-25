@@ -19,6 +19,8 @@ package com.vaadin.flow.component.ai.common;
  * Supported content type categories for attachments.
  * <p>
  * Intended only for internal use and can be removed in the future.
+ * 
+ * @since 25.1
  */
 public enum AttachmentContentType {
     /** Image content types (image/*). */

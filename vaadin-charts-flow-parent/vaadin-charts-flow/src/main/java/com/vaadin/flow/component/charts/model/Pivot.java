@@ -21,6 +21,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * >styled mode</a>, the pivot is styled with the
  * <code>.highcharts-gauge-series .highcharts-pivot</code> rule.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Pivot extends AbstractConfigurationObject {
 
@@ -34,6 +36,7 @@ public class Pivot extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -43,6 +46,8 @@ public class Pivot extends AbstractConfigurationObject {
      * The background color or fill of the pivot.
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -50,6 +55,7 @@ public class Pivot extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -60,6 +66,8 @@ public class Pivot extends AbstractConfigurationObject {
      * borderWidth must also be set to something other than the default 0.
      * <p>
      * Defaults to: #cccccc
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -67,6 +75,7 @@ public class Pivot extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -76,6 +85,8 @@ public class Pivot extends AbstractConfigurationObject {
      * The border or stroke width of the pivot.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;

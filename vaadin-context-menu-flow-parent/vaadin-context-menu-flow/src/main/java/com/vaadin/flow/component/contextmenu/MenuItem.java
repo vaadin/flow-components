@@ -26,6 +26,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * methods.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @SuppressWarnings("serial")
 public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
@@ -60,6 +61,8 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * <pre>
      * com.vaadin.experimental.accessibleDisabledMenuItems = true
      * </pre>
+     * 
+     * @since 25.2
      */
     @Override
     public void setEnabled(boolean enabled) {

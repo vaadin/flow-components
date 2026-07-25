@@ -31,6 +31,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of the row/item being edited
+ * @since 2.1
  */
 public interface Editor<T> extends Serializable {
 
@@ -116,6 +117,7 @@ public interface Editor<T> extends Serializable {
      *
      * @throws UnsupportedOperationException
      *             thrown if trying to close editor in buffered mode
+     * @since 3.0
      */
     void closeEditor();
 

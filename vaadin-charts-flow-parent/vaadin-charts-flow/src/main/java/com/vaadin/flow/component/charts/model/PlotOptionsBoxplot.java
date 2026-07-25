@@ -20,6 +20,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * five-number summaries: the smallest observation (sample minimum), lower
  * quartile (Q1), median (Q2), upper quartile (Q3), and largest observation
  * (sample maximum).
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
@@ -139,6 +141,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -149,6 +152,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -156,6 +161,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -180,6 +186,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -223,6 +231,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -235,6 +244,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>high</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -242,6 +253,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -256,6 +268,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -267,6 +281,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -281,6 +296,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -364,6 +380,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setEdgeColor(Color)
+     * @since 18.0
      */
     public Color getEdgeColor() {
         return edgeColor;
@@ -373,6 +390,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * 3D columns only. The color of the edges. Similar to
      * <code>borderColor</code>, except it defaults to the same color as the
      * column.
+     * 
+     * @since 18.0
      */
     public void setEdgeColor(Color edgeColor) {
         this.edgeColor = edgeColor;
@@ -439,6 +458,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -448,6 +468,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * The fill color of the box.
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
@@ -594,6 +616,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -607,6 +630,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * <code>null</code>, the lineWidth also applies to these lines.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -649,6 +674,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setMedianColor(Color)
+     * @since 18.0
      */
     public Color getMedianColor() {
         return medianColor;
@@ -659,6 +685,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * color applies.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setMedianColor(Color medianColor) {
         this.medianColor = medianColor;
@@ -683,6 +711,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -693,6 +722,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -700,6 +731,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -709,6 +741,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -963,6 +997,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setStemColor(Color)
+     * @since 18.0
      */
     public Color getStemColor() {
         return stemColor;
@@ -973,6 +1008,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * whiskers. If <code>null</code>, the series color is used.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setStemColor(Color stemColor) {
         this.stemColor = stemColor;
@@ -980,6 +1017,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setStemDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getStemDashStyle() {
         return stemDashStyle;
@@ -990,6 +1028,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * the whiskers.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setStemDashStyle(DashStyle stemDashStyle) {
         this.stemDashStyle = stemDashStyle;
@@ -997,6 +1037,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setStemWidth(Number)
+     * @since 18.0
      */
     public Number getStemWidth() {
         return stemWidth;
@@ -1008,6 +1049,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * <a href="#plotOptions.boxplot.lineWidth">lineWidth</a> option.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setStemWidth(Number stemWidth) {
         this.stemWidth = stemWidth;
@@ -1094,6 +1137,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setWhiskerColor(Color)
+     * @since 18.0
      */
     public Color getWhiskerColor() {
         return whiskerColor;
@@ -1104,6 +1148,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * values. When <code>null</code>, the general series color is used.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setWhiskerColor(Color whiskerColor) {
         this.whiskerColor = whiskerColor;
@@ -1129,6 +1175,7 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 
     /**
      * @see #setWhiskerWidth(Number)
+     * @since 18.0
      */
     public Number getWhiskerWidth() {
         return whiskerWidth;
@@ -1140,6 +1187,8 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
      * <a href="#plotOptions.boxplot.lineWidth">lineWidth</a> applies.
      * <p>
      * Defaults to: 2
+     * 
+     * @since 18.0
      */
     public void setWhiskerWidth(Number whiskerWidth) {
         this.whiskerWidth = whiskerWidth;

@@ -23,6 +23,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Abstract
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.BubbleSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class BubbleSeriesReader
         extends AbstractSeriesReader<CTBubbleSer, BubbleSeriesData> {
 

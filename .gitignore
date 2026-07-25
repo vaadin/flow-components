@@ -21,6 +21,7 @@ pom.xml.bak
 types.d.ts
 tsconfig.json
 !**/test/tsconfig.json
+!vaadin-grid-flow-parent/vaadin-grid-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts
@@ -31,7 +32,6 @@ node_modules
 !/package-lock.json
 pnpm*
 .npmrc
-.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated

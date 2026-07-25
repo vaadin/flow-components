@@ -19,6 +19,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializer for {@link PaneList}
  *
+ * @since 6.0.1
  */
 public class PaneListSerializer extends ValueSerializer<PaneList> {
 

@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * Options for the tooltip that appears when the user hovers over a series or
  * point.
+ * 
+ * @since 6.0.1
  */
 public class Tooltip extends AbstractConfigurationObject {
 
@@ -47,6 +49,8 @@ public class Tooltip extends AbstractConfigurationObject {
     private String xDateFormat;
     private Number changeDecimals;
     private Boolean outside;
+    private Boolean fixed;
+    private Position position;
 
     public Tooltip() {
     }
@@ -70,6 +74,7 @@ public class Tooltip extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -88,6 +93,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * </p>
      * <p>
      * Defaults to: rgba(247,247,247,0.85)
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -95,6 +102,7 @@ public class Tooltip extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -105,6 +113,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * the color of the corresponding series or point.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -497,6 +507,7 @@ public class Tooltip extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -511,6 +522,8 @@ public class Tooltip extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "color": "#333333", "cursor": "default", "fontSize":
      * "12px", "pointerEvents": "none", "whiteSpace": "nowrap" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;
@@ -616,6 +629,7 @@ public class Tooltip extends AbstractConfigurationObject {
 
     /**
      * @see #setOutside(Boolean)
+     * @since 18.0
      */
     public Boolean getOutside() {
         return outside;
@@ -629,8 +643,54 @@ public class Tooltip extends AbstractConfigurationObject {
      * area. For small charts, this may result in clipping or overlapping. When
      * true, a separate SVG element is created and overlaid on the page,
      * allowing the tooltip to be aligned inside the page itself.
+     * 
+     * @since 18.0
      */
     public void setOutside(Boolean outside) {
         this.outside = outside;
+    }
+
+    /**
+     * @see #setFixed(Boolean)
+     * @since 25.3
+     */
+    public Boolean getFixed() {
+        return fixed;
+    }
+
+    /**
+     * When true, the tooltip is fixed to a position given by
+     * {@link #setPosition(Position)} instead of following the mouse or the
+     * hovered point. Useful for charts like solid gauges where the tooltip
+     * should stay in a fixed spot.
+     * <p>
+     * Defaults to: false
+     *
+     * @param fixed
+     * @since 25.3
+     */
+    public void setFixed(Boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    /**
+     * @see #setPosition(Position)
+     * @since 25.3
+     */
+    public Position getPosition() {
+        return position;
+    }
+
+    /**
+     * The position of the tooltip when {@link #setFixed(Boolean)} is true.
+     * Supports {@code align}, {@code verticalAlign}, {@code x} and {@code y}.
+     * <p>
+     * Defaults to: undefined
+     *
+     * @param position
+     * @since 25.3
+     */
+    public void setPosition(Position position) {
+        this.position = position;
     }
 }

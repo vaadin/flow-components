@@ -13,6 +13,11 @@ function init(target) {
       }
       e.preventDefault();
       e.stopPropagation();
+      // The menu is opened later, after a server round-trip, when the event has
+      // finished dispatching and `composedPath()` returns an empty array. Capture
+      // the composed path now so the menu can resolve the target inside a shadow
+      // root (e.g. a grid cell) instead of the retargeted host.
+      e.__composedPath = e.composedPath();
       this.$contextMenuTargetConnector.openEvent = e;
       let detail = {};
       if (target.getContextMenuBeforeOpenDetail) {

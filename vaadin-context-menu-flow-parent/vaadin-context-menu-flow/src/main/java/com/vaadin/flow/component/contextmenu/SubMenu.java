@@ -27,6 +27,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * only if content has been added inside it.
  *
  * @author Vaadin Ltd.
+ * @since 2.0
  */
 public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
         implements HasMenuItems {
@@ -59,6 +60,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      * @param tooltipText
      *            the tooltip text for the new item
      * @return the added {@link MenuItem} component
+     * @since 25.2
      */
     public MenuItem addItem(String text, String tooltipText) {
         return getMenuManager().addItem(text, tooltipText);
@@ -74,6 +76,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      * @param tooltipText
      *            the tooltip text for the new item
      * @return the added {@link MenuItem} component
+     * @since 25.2
      */
     public MenuItem addItem(Component component, String tooltipText) {
         return getMenuManager().addItem(component, tooltipText);
@@ -91,6 +94,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
      * @return the added {@link MenuItem} component
+     * @since 25.2
      */
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
@@ -110,6 +114,7 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
      * @return the added {@link MenuItem} component
+     * @since 25.2
      */
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
  * Base class for map controls, such as zoom and attribution controls.
+ * 
+ * @since 25.1
  */
 public abstract class Control extends AbstractConfigurationObject {
     private boolean visible = false;

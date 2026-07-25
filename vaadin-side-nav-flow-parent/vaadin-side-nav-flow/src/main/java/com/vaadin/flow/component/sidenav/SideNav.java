@@ -38,9 +38,10 @@ import com.vaadin.flow.internal.JacksonUtils;
  * {@link SideNavItem} instances.
  *
  * @author Vaadin Ltd
+ * @since 24.1
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.2.0")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.3.0-alpha6")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component implements HasSideNavItems, HasSize,
         HasStyle, HasThemeVariant<SideNavVariant> {
@@ -158,6 +159,7 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
      * expanded.
      *
      * @return true if parent items for the item should be expanded
+     * @since 25.0
      */
     public boolean isAutoExpand() {
         return !getElement().getProperty("noAutoExpand", false);
@@ -171,6 +173,7 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
      * @param autoExpand
      *            true if parent items for the item should be expanded, false
      *            otherwise
+     * @since 25.0
      */
     public void setAutoExpand(boolean autoExpand) {
         getElement().setProperty("noAutoExpand", !autoExpand);
@@ -183,6 +186,7 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
      * update the component if not set again using {@link #setI18n(SideNavI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.2
      */
     public SideNavI18n getI18n() {
         return i18n;
@@ -195,6 +199,7 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.2
      */
     public void setI18n(SideNavI18n i18n) {
         Objects.requireNonNull(i18n,
@@ -205,6 +210,8 @@ public class SideNav extends Component implements HasSideNavItems, HasSize,
 
     /**
      * The internationalization properties for {@link SideNav}.
+     * 
+     * @since 24.2
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SideNavI18n implements Serializable {

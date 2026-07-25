@@ -11,7 +11,7 @@ package com.vaadin.flow.component.spreadsheet.shared;
 /**
  * Defines how the client should interpret textual values.
  *
- * @since 8.0
+ * @since 23.1
  */
 public enum ContentMode {
     /**

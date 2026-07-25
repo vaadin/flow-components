@@ -32,9 +32,10 @@ import com.vaadin.flow.signals.Signal;
  * source as input and renders the corresponding HTML.
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.2.0")
+@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-alpha6")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
@@ -66,6 +67,7 @@ public class Markdown extends Component implements HasSize {
      * @param contentSignal
      *            the signal providing the markdown content
      * @see #bindContent(Signal)
+     * @since 25.3
      */
     public Markdown(Signal<String> contentSignal) {
         bindContent(contentSignal);
@@ -112,6 +114,7 @@ public class Markdown extends Component implements HasSize {
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
+     * @since 25.3
      */
     public SignalBinding<String> bindContent(Signal<String> contentSignal) {
         return contentSupport.bind(contentSignal);

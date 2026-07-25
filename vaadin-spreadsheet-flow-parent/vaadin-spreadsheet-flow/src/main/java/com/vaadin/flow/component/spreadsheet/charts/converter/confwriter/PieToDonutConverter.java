@@ -15,6 +15,9 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.PieSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class PieToDonutConverter {
 
     private static final double DONUT_GAP_BETWEEN_RINGS = 0.02;

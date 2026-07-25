@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 24.7
+ */
 @SuppressWarnings("unused")
 public class DragHandle extends AbstractConfigurationObject {
 

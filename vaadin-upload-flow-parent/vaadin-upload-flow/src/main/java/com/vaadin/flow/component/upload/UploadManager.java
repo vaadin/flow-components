@@ -70,6 +70,7 @@ import com.vaadin.flow.shared.Registration;
  * </pre>
  *
  * @author Vaadin Ltd.
+ * @since 25.1
  */
 public class UploadManager implements Serializable {
 
@@ -530,7 +531,7 @@ public class UploadManager implements Serializable {
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.2.0")
+    @NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha6")
     static class Connector extends Component {
     }
 

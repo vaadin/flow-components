@@ -26,6 +26,8 @@ import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
  * <p>
  * Technically this is a {@link Feature} that uses a {@link Point} geometry for
  * representation.
+ * 
+ * @since 23.0
  */
 public abstract class PointBasedFeature extends Feature {
     protected PointBasedFeature() {

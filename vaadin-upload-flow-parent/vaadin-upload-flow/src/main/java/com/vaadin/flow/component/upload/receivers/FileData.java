@@ -21,6 +21,8 @@ import java.io.Serializable;
 
 /**
  * Class containing file information for upload.
+ * 
+ * @since 1.0
  */
 @Deprecated(since = "24.8", forRemoval = true)
 public class FileData implements Serializable {
@@ -78,6 +80,7 @@ public class FileData implements Serializable {
      *             if outputBuffer is null
      * @throws UnsupportedOperationException
      *             if outputBuffer is not an {@link UploadOutputStream}
+     * @since 19.0
      */
     public File getFile() {
         if (outputBuffer == null) {

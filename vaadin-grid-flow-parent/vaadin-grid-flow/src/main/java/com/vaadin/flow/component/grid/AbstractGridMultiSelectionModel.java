@@ -57,6 +57,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid type
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public abstract class AbstractGridMultiSelectionModel<T>
         extends AbstractGridExtension<T> implements GridMultiSelectionModel<T> {
@@ -192,6 +193,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      *
      * @return An unmodifiable view of the selected item ids. Updates in the
      *         selection may or may not be directly reflected in the Set.
+     * @since 23.2
      */
     protected Set<Object> getSelectedItemIds() {
         return Collections.unmodifiableSet(this.selected.keySet());

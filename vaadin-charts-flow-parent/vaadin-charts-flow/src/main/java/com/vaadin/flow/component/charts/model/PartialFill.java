@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * PartialFill configuration object to be used in {@link PlotOptionsXrange}.
  * Typically used to visualize how much of a task is performed.
+ * 
+ * @since 18.0
  */
 public class PartialFill extends AbstractConfigurationObject {
 

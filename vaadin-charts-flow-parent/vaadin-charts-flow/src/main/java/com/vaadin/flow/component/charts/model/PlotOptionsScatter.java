@@ -15,6 +15,9 @@ import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public class PlotOptionsScatter extends PointOptions {
 
     private Boolean allowPointSelect;
@@ -146,6 +149,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -156,6 +160,8 @@ public class PlotOptionsScatter extends PointOptions {
      * Note that lipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -163,6 +169,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -187,6 +194,8 @@ public class PlotOptionsScatter extends PointOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -212,6 +221,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -226,6 +236,7 @@ public class PlotOptionsScatter extends PointOptions {
      * Defaults to <code>y</code>.
      *
      * @param colorKey
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -233,6 +244,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -247,6 +259,8 @@ public class PlotOptionsScatter extends PointOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -293,6 +307,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -318,6 +333,8 @@ public class PlotOptionsScatter extends PointOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -507,6 +524,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -516,6 +534,8 @@ public class PlotOptionsScatter extends PointOptions {
      * The width of the line connecting the data points.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -571,6 +591,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -581,6 +602,8 @@ public class PlotOptionsScatter extends PointOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -588,6 +611,7 @@ public class PlotOptionsScatter extends PointOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -596,6 +620,8 @@ public class PlotOptionsScatter extends PointOptions {
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

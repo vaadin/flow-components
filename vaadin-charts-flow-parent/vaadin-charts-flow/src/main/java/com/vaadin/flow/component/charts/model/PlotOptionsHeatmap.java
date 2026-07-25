@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * The colors of each heat map point is usually determined by its value and
  * controlled by settings on the <a href="#colorAxis">colorAxis</a>.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
@@ -130,6 +132,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -148,6 +151,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * </p>
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -171,6 +176,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -189,6 +195,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -210,6 +218,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -220,6 +229,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -227,6 +238,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -239,6 +251,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * pulled from the <a href="#colors">options.colors</a> array.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -282,6 +296,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -294,6 +309,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>value</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -301,6 +318,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -315,6 +333,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -326,6 +346,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -340,6 +361,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -641,6 +663,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -650,6 +673,8 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

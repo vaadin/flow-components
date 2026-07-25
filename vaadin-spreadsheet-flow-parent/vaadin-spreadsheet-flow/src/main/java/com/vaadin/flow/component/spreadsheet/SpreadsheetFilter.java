@@ -25,6 +25,7 @@ import java.util.Set;
  * {@link SpreadsheetFilterTable#onFiltersUpdated()} should be called.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 public interface SpreadsheetFilter extends Serializable {
 

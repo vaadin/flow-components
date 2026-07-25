@@ -32,10 +32,11 @@ import com.vaadin.flow.signals.Signal;
  * @see DashboardWidget
  *
  * @author Vaadin Ltd
+ * @since 24.6
  */
 @Tag("vaadin-dashboard-section")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-section.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.2.0")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-alpha6")
 public class DashboardSection extends Component implements HasWidgets {
 
     private final List<DashboardWidget> widgets = new ArrayList<>();
@@ -205,6 +206,7 @@ public class DashboardSection extends Component implements HasWidgets {
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
