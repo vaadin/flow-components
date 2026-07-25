@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GridI18n implements Serializable {
     private String selectAll;
+    private String selectAllUnavailable;
     private String selectRow;
     private String sorter;
 
@@ -54,6 +55,35 @@ public class GridI18n implements Serializable {
      */
     public GridI18n setSelectAll(String selectAll) {
         this.selectAll = selectAll;
+        return this;
+    }
+
+    /**
+     * Gets the accessible name announced for the selection column header cell
+     * when the select all checkbox is hidden (e.g. a data provider is used or
+     * conditional selection is enabled), rendered as a screen-reader-only label
+     * in the cell.
+     *
+     * @return the accessible name for the header cell when select all is
+     *         unavailable
+     */
+    public String getSelectAllUnavailable() {
+        return selectAllUnavailable;
+    }
+
+    /**
+     * Sets the accessible name announced for the selection column header cell
+     * when the select all checkbox is hidden (e.g. a data provider is used or
+     * conditional selection is enabled), rendered as a screen-reader-only label
+     * in the cell.
+     *
+     * @param selectAllUnavailable
+     *            the accessible name for the header cell when select all is
+     *            unavailable
+     * @return this instance for method chaining
+     */
+    public GridI18n setSelectAllUnavailable(String selectAllUnavailable) {
+        this.selectAllUnavailable = selectAllUnavailable;
         return this;
     }
 

@@ -16,11 +16,9 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -45,8 +43,6 @@ import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.dom.ElementDetachEvent;
-import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableFunction;
@@ -82,9 +78,8 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha6")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("./flow-component-renderer.js")
 @ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant>, HasAriaRole {
@@ -110,11 +105,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        // Needs to be updated on each
-        // attach, as element depends on node id which is subject to change if
-        // the dialog is transferred to another UI, e.g. due to
-        // @PreserveOnRefresh
-        getElement().getNode().addAttachListener(this::attachComponentRenderer);
+        // Dimensions are applied via executeJs, which does not persist across
+        // reattach (e.g. when the dialog is transferred to another UI due to
+        // @PreserveOnRefresh), so they must be re-applied on each attach.
+        getElement().getNode().addAttachListener(this::reapplyDimensions);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
@@ -202,7 +196,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `resize` event is sent when the user finishes resizing the dialog.
-     * 
+     *
      * @since 3.1
      */
     @DomEvent("resize")
@@ -266,7 +260,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `dragged` event is sent when the user finishes dragging the dialog.
-     * 
+     *
      * @since 24.6
      */
     @DomEvent("dragged")
@@ -308,7 +302,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * which, when closing the dialog, is before the closing animation has
      * finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
-     * 
+     *
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
@@ -327,7 +321,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Event that is fired after the dialog's closing animation has finished.
      * Can be used to remove a dialog from the UI afterward.
-     * 
+     *
      * @since 25.0
      */
     @DomEvent("closed")
@@ -570,20 +564,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Adds the given components into this dialog.
-     *
-     * @param components
-     *            the components to add
-     * @since 24.0
-     */
-    @Override
-    public void add(Collection<Component> components) {
-        HasComponents.super.add(components);
-
-        updateVirtualChildNodeIds();
-    }
-
-    /**
      * Adds the given component into this dialog at the given index.
      *
      * @param index
@@ -594,17 +574,53 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        HasComponents.super.addComponentAtIndex(index, component);
+        Objects.requireNonNull(component, "Component should not be null");
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "Cannot add a component with a negative index");
+        }
 
-        updateVirtualChildNodeIds();
+        // getChildren() returns only the main content; the header/footer live
+        // in separate slotted wrappers. Translate the content index to the
+        // matching element index so the wrappers do not offset the position.
+        var children = getChildren().toList();
+        if (index > children.size()) {
+            throw new IllegalArgumentException(
+                    "Cannot add a component at index " + index
+                            + ", there are only " + children.size()
+                            + " content components");
+        }
+        if (index == children.size()) {
+            getElement().appendChild(component.getElement());
+        } else {
+            getElement().insertChild(
+                    getElement().indexOfChild(children.get(index).getElement()),
+                    component.getElement());
+        }
+    }
+
+    private boolean isHeaderFooterWrapper(Element element) {
+        return (dialogHeader != null && dialogHeader.root.equals(element))
+                || (dialogFooter != null && dialogFooter.root.equals(element));
+    }
+
+    @Override
+    public Stream<Component> getChildren() {
+        // Collect into a list so the returned stream is a snapshot, matching
+        // Component.getChildren() and staying safe when callers such as
+        // removeAll() remove children while iterating.
+        return getElement().getChildren()
+                .filter(element -> !isHeaderFooterWrapper(element))
+                .flatMap(element -> element.getComponent().stream()).toList()
+                .stream();
     }
 
     @Override
     public void removeAll() {
-        // HasComponents.removeAll triggers a special RPC call that clears the
-        // innerHTML of the dialog element. This results in removing the content
-        // elements created by the web component for slotting contents into its
-        // overlay. To avoid this, we manually remove all children instead.
+        // HasComponents.removeAll would clear all children of the dialog
+        // element, including the slotted header/footer wrappers. getChildren()
+        // returns only the main content, so removing those preserves the
+        // header/footer.
         getChildren().forEach(this::remove);
     }
 
@@ -927,148 +943,108 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Class for adding and removing components to the header part of a dialog.
-     * 
+     *
      * @since 23.1
      */
     final public static class DialogHeader extends DialogHeaderFooter {
         private DialogHeader(Dialog dialog) {
-            super("headerRenderer", dialog);
+            super("header-content", dialog);
         }
     }
 
     /**
      * Class for adding and removing components to the footer part of a dialog.
-     * 
+     *
      * @since 23.1
      */
     final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
-            super("footerRenderer", dialog);
+            super("footer", dialog);
         }
     }
 
     /**
      * This class defines the common behavior for adding/removing components to
-     * the header and footer parts. It also creates the root element where the
-     * components will be attached to as well as the renderer function used by
-     * the dialog.
+     * the header and footer parts. Components are added to a root wrapper
+     * element that is slotted into the dialog's {@code header-content} /
+     * {@code footer} slot.
      */
     abstract static class DialogHeaderFooter implements HasComponents {
         protected final Element root;
-        private final String rendererFunction;
         private final Component dialog;
-        boolean rendererCreated = false;
 
-        protected DialogHeaderFooter(String rendererFunction,
-                Component dialog) {
-            this.rendererFunction = rendererFunction;
+        protected DialogHeaderFooter(String slotName, Component dialog) {
             this.dialog = dialog;
             root = new Element("div");
+            root.setAttribute("slot", slotName);
             root.getStyle().set("display", "contents");
         }
 
         @Override
         public void add(Component... components) {
             HasComponents.super.add(components);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void add(Collection<Component> components) {
             HasComponents.super.add(components);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void add(String text) {
             HasComponents.super.add(text);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void remove(Component... components) {
             HasComponents.super.remove(components);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void remove(Collection<Component> components) {
             HasComponents.super.remove(components);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void removeAll() {
             HasComponents.super.removeAll();
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void addComponentAtIndex(int index, Component component) {
             HasComponents.super.addComponentAtIndex(index, component);
-            updateRendererState();
+            updateSlotState();
         }
 
         @Override
         public void addComponentAsFirst(Component component) {
             HasComponents.super.addComponentAsFirst(component);
-            updateRendererState();
+            updateSlotState();
         }
 
-        private void updateRendererState() {
+        /**
+         * Attaches or detaches the slotted root wrapper based on whether it has
+         * any children.
+         * <p>
+         * The wrapper uses {@code display: contents} and is itself the node
+         * assigned to the {@code header-content} / {@code footer} slot. The web
+         * component sets the {@code has-header} / {@code has-footer} state
+         * attribute whenever the slot has an assigned node, so the wrapper must
+         * be removed from the DOM (not just cleared) when it becomes empty.
+         * Otherwise the header/footer part would stay visible without content.
+         */
+        private void updateSlotState() {
             if (root.getChildCount() == 0) {
-                removeRenderer();
-            } else if (!isRendererCreated()) {
-                initRenderer();
+                root.removeFromParent();
+            } else if (root.getParent() == null) {
+                dialog.getElement().appendChild(root);
             }
-        }
-
-        /**
-         * Method called to create the renderer function using
-         * {@link #rendererFunction} as the property name.
-         */
-        void initRenderer() {
-            if (root.getChildCount() == 0) {
-                return;
-            }
-            if (!dialog.getElement().equals(root.getParent())) {
-                dialog.getElement().appendVirtualChild(root);
-            }
-            dialog.getElement().executeJs("this." + rendererFunction
-                    + " = (root) => {" + "if (root.firstChild) { "
-                    + "   return;" + "}" + "root.appendChild($0);" + "}", root);
-            setRendererCreated(true);
-        }
-
-        private void removeRenderer() {
-            dialog.getElement()
-                    .executeJs("this." + rendererFunction + " = null;");
-            setRendererCreated(false);
-        }
-
-        /**
-         * Gets whether the renderer function exists or not
-         *
-         * @return the renderer function state
-         */
-        boolean isRendererCreated() {
-            return rendererCreated;
-        }
-
-        /**
-         * Sets the renderer function creation state. To avoid making a
-         * JavaScript execution to get the information from the client, this is
-         * done on the server by setting it to <code>true</code> on
-         * {@link #initRenderer()} and to <code>false</code> when the last child
-         * is removed in {@link #remove(Component...)} or when an auto attached
-         * dialog is closed.
-         *
-         * @param rendererCreated
-         *            {@code true} if the renderer function has been created,
-         *            {@code false} otherwise
-         */
-        void setRendererCreated(boolean rendererCreated) {
-            this.rendererCreated = rendererCreated;
         }
 
         @Override
@@ -1237,60 +1213,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
-    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    // Must not use lambda here as that would break serialization. See
-    // https://github.com/vaadin/flow-components/issues/5597
-    private ElementDetachListener childDetachListener = new ElementDetachListener() {
-        @Override
-        public void onDetach(ElementDetachEvent e) {
-            var child = e.getSource();
-            var childDetachedFromContainer = !getElement().getChildren()
-                    .anyMatch(containerChild -> Objects.equals(child,
-                            containerChild));
-
-            if (childDetachedFromContainer) {
-                // The child was removed from the dialog
-
-                // Remove the registration for the child detach listener
-                childDetachListenerMap.get(child).remove();
-                childDetachListenerMap.remove(child);
-
-                updateVirtualChildNodeIds();
-            }
-        }
-    };
-
-    /**
-     * Updates the virtualChildNodeIds property of the dialog element.
-     * <p>
-     * This method is called whenever the dialog's child components change.
-     * <p>
-     * Also calls {@code requestContentUpdate} on the dialog element to trigger
-     * the content update.
-     */
-    private void updateVirtualChildNodeIds() {
-        // Add detach listeners (child may be removed with removeFromParent())
-        getElement().getChildren().forEach(child -> {
-            if (!childDetachListenerMap.containsKey(child)) {
-                childDetachListenerMap.put(child,
-                        child.addDetachListener(childDetachListener));
-            }
-        });
-
-        this.getElement().setPropertyList("virtualChildNodeIds",
-                getElement().getChildren()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
-
-        this.getElement().callJsFunction("requestContentUpdate");
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        initHeaderFooterRenderer();
-        updateVirtualChildNodeIds();
         registerClientCloseHandler();
         applyModality();
     }
@@ -1382,32 +1308,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 ariaLabel == null ? "" : ariaLabel);
     }
 
-    private void initHeaderFooterRenderer() {
-        if (dialogHeader != null) {
-            dialogHeader.setRendererCreated(false);
-            dialogHeader.initRenderer();
-        }
-        if (dialogFooter != null) {
-            dialogFooter.setRendererCreated(false);
-            dialogFooter.initRenderer();
-        }
-    }
-
     private void setDimension(String dimension, String value) {
         getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
                 dimension, value);
     }
 
-    private void attachComponentRenderer() {
-        this.getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-
-        String appId = UI.getCurrentOrThrow().getInternals().getAppId();
-
-        getElement().executeJs(
-                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
-                appId);
-
+    private void reapplyDimensions() {
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);

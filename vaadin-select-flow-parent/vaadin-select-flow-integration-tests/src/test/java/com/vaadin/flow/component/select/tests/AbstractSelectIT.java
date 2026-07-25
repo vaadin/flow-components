@@ -164,15 +164,16 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         }
 
         void noItemSelected() {
-            try {
-                SelectElement.ItemElement selectedItem = selectElement
-                        .getSelectedItem();
-                Assert.fail(
-                        "Expected nothing to be selected, but selection was: "
-                                + selectedItem.getText());
-            } catch (NoSuchElementException nsee) {
-                // expected
-            }
+            SelectElement.ItemElement selectedItem = selectElement
+                    .getSelectedItem();
+            Assert.assertNull(
+                    "Expected nothing to be selected, but selection was: "
+                            + (selectedItem == null ? null
+                                    : selectedItem.getText()),
+                    selectedItem);
+            Assert.assertEquals(
+                    "Expected empty selected text when nothing is selected", "",
+                    selectElement.getSelectedText());
         }
 
         void emptySelectionItemSelected() {

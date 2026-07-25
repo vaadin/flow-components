@@ -29,7 +29,7 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * Tests for the HorizontalLayout.
  */
-@TestPath("vaadin-ordered-layout")
+@TestPath("vaadin-ordered-layout/horizontal-layout")
 public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
     @Before

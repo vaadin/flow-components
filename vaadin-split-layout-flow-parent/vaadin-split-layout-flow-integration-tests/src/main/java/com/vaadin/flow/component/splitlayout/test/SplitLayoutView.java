@@ -97,9 +97,8 @@ public class SplitLayoutView extends Div {
         layout.addToPrimary(new Span("First content component"));
         layout.addToSecondary(new Span("Second content component"));
 
-        layout.setPrimaryStyle("minWidth", "100px");
-        layout.setPrimaryStyle("maxWidth", "150px");
-        layout.setPrimaryStyle("background", "salmon");
+        layout.getPrimaryComponent().getStyle().set("minWidth", "100px")
+                .set("maxWidth", "150px").set("background", "salmon");
 
         layout.getPrimaryComponent().setId("min-max-first-component");
         setMinHeightForLayout(layout);

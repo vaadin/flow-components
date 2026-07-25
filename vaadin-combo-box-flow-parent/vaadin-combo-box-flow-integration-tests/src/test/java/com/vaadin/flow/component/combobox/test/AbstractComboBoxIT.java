@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -60,6 +61,28 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
             ComboBoxElement comboBox) {
         Assert.assertEquals(message, expectedCount,
                 getLoadedItems(comboBox).size());
+    }
+
+    /**
+     * Waits until the number of loaded items matches the expected count. Items
+     * are loaded asynchronously after opening the overlay or changing the page
+     * size, so asserting the count without waiting is prone to timing issues.
+     */
+    protected void waitForLoadedItemsCount(String message, int expectedCount,
+            ComboBoxElement comboBox) {
+        waitForLoadedItemsCount(message, count -> count == expectedCount,
+                comboBox);
+    }
+
+    protected void waitForLoadedItemsCount(String message,
+            IntPredicate expectedCount, ComboBoxElement comboBox) {
+        try {
+            waitUntil(driver -> expectedCount
+                    .test(getLoadedItems(comboBox).size()));
+        } catch (TimeoutException e) {
+            Assert.fail(message + " Loaded items count: "
+                    + getLoadedItems(comboBox).size());
+        }
     }
 
     // Gets all the loaded json items, but they are not necessarily rendered
