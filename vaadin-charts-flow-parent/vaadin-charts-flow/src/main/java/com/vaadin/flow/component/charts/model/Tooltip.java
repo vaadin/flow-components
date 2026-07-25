@@ -49,6 +49,8 @@ public class Tooltip extends AbstractConfigurationObject {
     private String xDateFormat;
     private Number changeDecimals;
     private Boolean outside;
+    private Boolean fixed;
+    private Position position;
 
     public Tooltip() {
     }
@@ -646,5 +648,49 @@ public class Tooltip extends AbstractConfigurationObject {
      */
     public void setOutside(Boolean outside) {
         this.outside = outside;
+    }
+
+    /**
+     * @see #setFixed(Boolean)
+     * @since 25.3
+     */
+    public Boolean getFixed() {
+        return fixed;
+    }
+
+    /**
+     * When true, the tooltip is fixed to a position given by
+     * {@link #setPosition(Position)} instead of following the mouse or the
+     * hovered point. Useful for charts like solid gauges where the tooltip
+     * should stay in a fixed spot.
+     * <p>
+     * Defaults to: false
+     *
+     * @param fixed
+     * @since 25.3
+     */
+    public void setFixed(Boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    /**
+     * @see #setPosition(Position)
+     * @since 25.3
+     */
+    public Position getPosition() {
+        return position;
+    }
+
+    /**
+     * The position of the tooltip when {@link #setFixed(Boolean)} is true.
+     * Supports {@code align}, {@code verticalAlign}, {@code x} and {@code y}.
+     * <p>
+     * Defaults to: undefined
+     *
+     * @param position
+     * @since 25.3
+     */
+    public void setPosition(Position position) {
+        this.position = position;
     }
 }

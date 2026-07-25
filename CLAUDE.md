@@ -57,6 +57,12 @@ Shared modules used across components:
   - Located in `vaadin-{component}-flow-integration-tests/test/*.test.ts` (only some components have them)
   - Always run through `node scripts/wtr.js` (see below) — do not invoke `npx web-test-runner` directly, the script prepares the frontend bundle first
 
+## Guidelines & Conventions
+
+Always read `CONVENTIONS.md` in full when **authoring** or **reviewing** code — it is the canonical list of checkable conventions.
+
+Design and implementation guidelines live in `guidelines/`. Read the chapters mapped in `guidelines/overview.md` selectively for the topics your work touches.
+
 ## Development Commands
 
 ### Building and Testing
@@ -102,7 +108,7 @@ node scripts/wtr.js {component} --files {file-or-glob}
 ### Code Quality
 
 ```sh
-# Format code
+# Format code, must be run before every commit
 mvn spotless:apply
 
 # Run checkstyle validation

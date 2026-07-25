@@ -60,7 +60,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 24.1
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.3.0-alpha6")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {
@@ -262,8 +262,14 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            The path to link to. Set to null to disable navigation for
      *            this item.
+     * @throws IllegalArgumentException
+     *             if {@code path} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafePath(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
      *
      * @see SideNavItem#setPath(Class)
+     * @see #setUnsafePath(String)
      */
     public void setPath(String path) {
         if (path != null && !UrlUtil.isSafeUrl(path)) {

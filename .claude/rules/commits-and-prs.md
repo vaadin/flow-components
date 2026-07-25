@@ -1,5 +1,7 @@
 # Git commits
 
+Always run the spotless formatter before committing.
+
 Write commit messages terse and exact, no fluff.
 
 ## Subject line

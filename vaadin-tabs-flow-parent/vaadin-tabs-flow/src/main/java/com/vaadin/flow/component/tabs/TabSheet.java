@@ -54,7 +54,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 23.3
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "25.3.0-alpha2")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.3.0-alpha6")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -290,7 +290,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      * @return the index of the tab or -1 if the tab is not added
      */
     public int getIndexOf(Tab tab) {
-        return tabs.indexOf(tab);
+        return tabs.getIndexOf(tab);
     }
 
     /**

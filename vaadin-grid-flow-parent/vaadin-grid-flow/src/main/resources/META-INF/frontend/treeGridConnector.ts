@@ -1,5 +1,5 @@
-// @ts-nocheck
 import './gridConnector.ts';
+import type { FlowTreeGrid } from './vaadin-grid/vaadin-grid-types.js';
 
 /**
  * treeGridConnector is a communication layer between TreeGrid's flow component
@@ -26,8 +26,7 @@ import './gridConnector.ts';
  * parameter of $server.setViewportRangeByIndexPath, which defines how many items to
  * include above and below the target item in the range.
  */
-window.Vaadin.Flow.treeGridConnector = {};
-window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
+function initLazy(grid: FlowTreeGrid) {
   if (grid.$connector) {
     return;
   }
@@ -80,4 +79,6 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
       grid.$server.updateExpandedState(grid.getItemId(item), false);
     }
   };
-};
+}
+
+window.Vaadin.Flow.treeGridConnector = { initLazy };
