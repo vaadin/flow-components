@@ -216,6 +216,19 @@ class GridColumnTest {
     }
 
     @Test
+    void setTextAlign_textAlignPropertyUpdated() {
+        Grid<Person> grid = new Grid<>();
+        Column<Person> nameColumn = grid.addColumn(Person::getName);
+
+        for (ColumnTextAlign textAlign : ColumnTextAlign.values()) {
+            nameColumn.setTextAlign(textAlign);
+            Assertions.assertEquals(textAlign.getPropertyValue(),
+                    nameColumn.getElement().getProperty("textAlign"));
+            Assertions.assertEquals(textAlign, nameColumn.getTextAlign());
+        }
+    }
+
+    @Test
     void setTextAlignToNull_defaultTextAlign() {
         Grid<Person> grid = new Grid<>();
 

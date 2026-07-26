@@ -26,7 +26,48 @@ package com.vaadin.flow.component.grid;
  */
 public enum ColumnTextAlign {
 
-    START("start"), CENTER("center"), END("end");
+    /**
+     * Aligns the content to the start of the cell, which is the left side in
+     * left-to-right and the right side in right-to-left layout direction.
+     */
+    START("start"),
+
+    /**
+     * Aligns the content to the center of the cell.
+     */
+    CENTER("center"),
+
+    /**
+     * Aligns the content to the end of the cell, which is the right side in
+     * left-to-right and the left side in right-to-left layout direction.
+     */
+    END("end"),
+
+    /**
+     * Aligns the content to the left side of the cell in both left-to-right and
+     * right-to-left layout direction.
+     *
+     * @since 25.3
+     */
+    LEFT("left"),
+
+    /**
+     * Aligns the content to the right side of the cell in both left-to-right
+     * and right-to-left layout direction. Use this instead of
+     * {@link ColumnTextAlign#END} for content that should stay right-aligned in
+     * right-to-left layout direction, such as numbers.
+     *
+     * @since 25.3
+     */
+    RIGHT("right"),
+
+    /**
+     * Stretches the content lines of the cell so that they fill the width of
+     * the cell, except for the last line.
+     *
+     * @since 25.3
+     */
+    JUSTIFY("justify");
 
     private final String propertyValue;
 
@@ -45,17 +86,12 @@ public enum ColumnTextAlign {
      *         <code>null</code>
      */
     public static ColumnTextAlign fromPropertyValue(String propertyValue) {
-        if (propertyValue == null) {
-            return START;
+        for (ColumnTextAlign textAlign : values()) {
+            if (textAlign.getPropertyValue().equals(propertyValue)) {
+                return textAlign;
+            }
         }
-        switch (propertyValue) {
-        case "center":
-            return CENTER;
-        case "end":
-            return END;
-        default:
-            return START;
-        }
+        return START;
     }
 
     /**
