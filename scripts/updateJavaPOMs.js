@@ -97,6 +97,10 @@ async function consolidatePomParent() {
     const modules = js.project.modules[0].module;
 
     renameComponent(modules, name);
+    // add pro module if module exists
+    if (fs.existsSync(`${mod}/${name}-pro-flow/pom.xml`)) {
+      modules.push(`${name}-pro-flow`);
+    }
     // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
       modules.push(`${name}-testbench`);
