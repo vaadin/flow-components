@@ -26,6 +26,13 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
  */
 public final class AIComponentsProLicenseChecker {
 
+    // The check is triggered from the controllers instead of a
+    // BaseLicenseCheckerServiceInitListener implementation because this
+    // artifact is part of the commercial platform bundle: a service init
+    // listener would check the license of every application that has the
+    // artifact on the classpath, including those that never use a controller.
+    // Vaadin Spreadsheet checks the license lazily for the same reason.
+
     static final String PRODUCT_NAME = "vaadin-ai-components-pro";
 
     private static final AtomicBoolean licenseChecked = new AtomicBoolean();
@@ -46,10 +53,13 @@ public final class AIComponentsProLicenseChecker {
             return;
         }
         if (licenseChecked.compareAndSet(false, true)) {
+            // Using a null BuildType to allow trial licensing builds, as
+            // BaseLicenseCheckerServiceInitListener does. The variable is
+            // defined to avoid method signature ambiguity.
+            BuildType buildType = null;
             try {
                 LicenseChecker.checkLicense(PRODUCT_NAME, getVersion(),
-                        Capabilities.of(Capability.PRE_TRIAL),
-                        BuildType.DEVELOPMENT);
+                        Capabilities.of(Capability.PRE_TRIAL), buildType);
             } catch (RuntimeException e) {
                 licenseChecked.set(false);
                 throw e;
