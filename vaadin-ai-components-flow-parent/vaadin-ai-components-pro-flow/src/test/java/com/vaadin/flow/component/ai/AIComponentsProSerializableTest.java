@@ -35,7 +35,7 @@ class AIComponentsProSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
                 // Static utility class performing the development-mode
                 // license check — not a runtime component
-                "com\\.vaadin\\.flow\\.component\\.ai\\.pro\\.AIComponentsProLicenseChecker",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.pro\\.AIComponentsProLicense",
                 // GridAIController — intentionally not serializable; restored
                 // via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridAIController(\\$\\d+)?",

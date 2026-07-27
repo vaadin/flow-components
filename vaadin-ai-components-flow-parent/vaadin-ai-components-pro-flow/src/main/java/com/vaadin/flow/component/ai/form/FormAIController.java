@@ -37,7 +37,7 @@ import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.pro.AIComponentsProLicenseChecker;
+import com.vaadin.flow.component.ai.pro.AIComponentsProLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -171,6 +171,10 @@ public class FormAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAIController.class);
 
+    static {
+        AIComponentsProLicense.check();
+    }
+
     /**
      * Key under which a field's opaque id is stored on the field component via
      * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
@@ -278,7 +282,6 @@ public class FormAIController implements AIController {
      */
     public <T extends Component & HasComponents> FormAIController(
             T fieldContainer) {
-        AIComponentsProLicenseChecker.checkLicense();
         Objects.requireNonNull(fieldContainer,
                 "Field container must not be null");
         this.fieldContainer = fieldContainer;
@@ -310,7 +313,6 @@ public class FormAIController implements AIController {
      */
     public <T extends Component & HasComponents> FormAIController(
             T fieldContainer, Binder<?> binder) {
-        AIComponentsProLicenseChecker.checkLicense();
         Objects.requireNonNull(fieldContainer,
                 "Field container must not be null");
         Objects.requireNonNull(binder, "Binder must not be null");

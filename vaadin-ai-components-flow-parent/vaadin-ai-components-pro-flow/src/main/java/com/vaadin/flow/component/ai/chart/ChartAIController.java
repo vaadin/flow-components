@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.pro.AIComponentsProLicenseChecker;
+import com.vaadin.flow.component.ai.pro.AIComponentsProLicense;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -109,6 +109,10 @@ public class ChartAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAIController.class);
 
+    static {
+        AIComponentsProLicense.check();
+    }
+
     private static final String CHART_ID = "chart";
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
@@ -149,7 +153,6 @@ public class ChartAIController implements AIController {
      *            {@code null}
      */
     public ChartAIController(Chart chart, DatabaseProvider databaseProvider) {
-        AIComponentsProLicenseChecker.checkLicense();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.pro.AIComponentsProLicenseChecker;
+import com.vaadin.flow.component.ai.pro.AIComponentsProLicense;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -104,6 +104,10 @@ public class GridAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAIController.class);
 
+    static {
+        AIComponentsProLicense.check();
+    }
+
     private static final String GRID_ID = "grid";
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_grid_instructions";
@@ -142,7 +146,6 @@ public class GridAIController implements AIController {
      */
     public GridAIController(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider) {
-        AIComponentsProLicenseChecker.checkLicense();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "DatabaseProvider must not be null");
