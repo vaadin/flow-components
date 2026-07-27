@@ -53,21 +53,11 @@ public enum ColumnTextAlign {
 
     /**
      * Aligns the content to the right side of the cell in both left-to-right
-     * and right-to-left layout direction. Use this instead of
-     * {@link ColumnTextAlign#END} for content that should stay right-aligned in
-     * right-to-left layout direction, such as numbers.
+     * and right-to-left layout direction.
      *
      * @since 25.3
      */
-    RIGHT("right"),
-
-    /**
-     * Stretches the content lines of the cell so that they fill the width of
-     * the cell, except for the last line.
-     *
-     * @since 25.3
-     */
-    JUSTIFY("justify");
+    RIGHT("right");
 
     private final String propertyValue;
 
