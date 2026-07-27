@@ -39,6 +39,16 @@ function dependsOn(pomXml, artifactId) {
   );
 }
 
+// Collect the published component module poms of a parent module: the main
+// `-flow` module and any additional ones, such as `-pro-flow`
+function readComponentPoms(parentModule) {
+  return fs
+    .readdirSync(parentModule, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /-flow$/.test(entry.name))
+    .map((entry) => `${parentModule}/${entry.name}/pom.xml`)
+    .filter((pomPath) => fs.existsSync(pomPath));
+}
+
 // Map changed file paths to component names. Returns null (= full
 // validation) if any file is outside a component parent module.
 function componentsFromChangedFiles(changedFiles) {
@@ -53,8 +63,8 @@ function componentsFromChangedFiles(changedFiles) {
   return [...components];
 }
 
-// Recursively add components whose main module depends on one of the
-// given components
+// Recursively add components whose modules depend on one of the given
+// components
 function addDependentComponents(components) {
   const parentModules = readParentModules();
   const result = [...components];
@@ -66,11 +76,10 @@ function addDependentComponents(components) {
       if (result.includes(componentName)) {
         continue;
       }
-      const pomPath = `${parentModule}/vaadin-${componentName}-flow/pom.xml`;
-      if (!fs.existsSync(pomPath)) {
-        continue;
-      }
-      if (dependsOn(fs.readFileSync(pomPath, 'utf8'), artifactId)) {
+      const dependent = readComponentPoms(parentModule).some((pomPath) =>
+        dependsOn(fs.readFileSync(pomPath, 'utf8'), artifactId)
+      );
+      if (dependent) {
         result.push(componentName);
         queue.push(componentName);
       }
