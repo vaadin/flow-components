@@ -730,7 +730,7 @@ export class GridConnector {
 
 function initLazy(grid: FlowGrid) {
   // Init the connector only once for the grid
-  grid.$connector ||= new GridConnector(grid);
+  grid.$connector ??= new GridConnector(grid);
 }
 
 window.Vaadin.Flow.gridConnector = { initLazy };
