@@ -35,43 +35,43 @@ function renderContent(root: HTMLElement, content: Node | string) {
  * (server-side) and web component (client-side).
  */
 export class GridConnector {
-  private readonly grid: FlowGrid;
-  private readonly dataProviderController: FlowDataProviderController;
+  readonly #grid: FlowGrid;
+  readonly #dataProviderController: FlowDataProviderController;
 
-  private requestDebouncer: Debouncer | null = null;
-  private requestedRange: ItemRange | null = null;
+  #requestDebouncer: Debouncer | null = null;
+  #requestedRange: ItemRange | null = null;
 
-  private selectedKeys: Record<string, Item> = {};
-  private selectionMode: SelectionMode = 'SINGLE';
+  #selectedKeys: Record<string, Item> = {};
+  #selectionMode: SelectionMode = 'SINGLE';
 
-  private sorterDirectionsSetFromServer = false;
+  #sorterDirectionsSetFromServer = false;
 
-  private preventRowUpdatesActive = 0;
+  #preventRowUpdatesActive = 0;
 
   constructor(grid: FlowGrid) {
-    this.grid = grid;
-    this.dataProviderController = grid._dataProviderController;
+    this.#grid = grid;
+    this.#dataProviderController = grid._dataProviderController;
 
     grid.size = 0; // To avoid NaN here and there before we get proper data
     grid.itemIdPath = 'key';
 
-    this.patchGrid();
-    this.addGridEventListeners();
+    this.#patchGrid();
+    this.#addGridEventListeners();
   }
 
   hasRootRequestQueue(): boolean {
-    const { pendingRequests } = this.dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!this.requestDebouncer?.isActive();
+    const { pendingRequests } = this.#dataProviderController.rootCache;
+    return Object.keys(pendingRequests).length > 0 || !!this.#requestDebouncer?.isActive();
   }
 
   doSelection(items: (Item | null)[], userOriginated?: boolean): void {
-    const { grid } = this;
+    const grid = this.#grid;
 
-    if (this.selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
+    if (this.#selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
-    if (this.selectionMode === 'SINGLE') {
-      this.selectedKeys = {};
+    if (this.#selectionMode === 'SINGLE') {
+      this.#selectedKeys = {};
     }
 
     let selectedItemsChanged = false;
@@ -79,7 +79,7 @@ export class GridConnector {
       const selectable = !userOriginated || grid.isItemSelectable(item);
       selectedItemsChanged = selectedItemsChanged || selectable;
       if (item && selectable) {
-        this.selectedKeys[item.key] = item;
+        this.#selectedKeys[item.key] = item;
         item.selected = true;
         if (userOriginated) {
           grid.$server.select(item.key);
@@ -88,14 +88,14 @@ export class GridConnector {
     });
 
     if (selectedItemsChanged) {
-      grid.selectedItems = Object.values(this.selectedKeys);
+      grid.selectedItems = Object.values(this.#selectedKeys);
     }
   }
 
   doDeselection(items: Item[], userOriginated?: boolean): void {
-    const { grid } = this;
+    const grid = this.#grid;
 
-    if (this.selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
+    if (this.#selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
       return;
     }
 
@@ -114,7 +114,7 @@ export class GridConnector {
         }
       }
       if (itemToDeselect) {
-        delete this.selectedKeys[itemToDeselect.key];
+        delete this.#selectedKeys[itemToDeselect.key];
         delete itemToDeselect.selected;
         if (userOriginated) {
           grid.$server.deselect(itemToDeselect.key);
@@ -125,12 +125,12 @@ export class GridConnector {
   }
 
   getRenderedRange(): ItemRange {
-    const renderedRows = this.grid._getRenderedRows();
+    const renderedRows = this.#grid._getRenderedRows();
     return [renderedRows.at(0)?.index ?? 0, renderedRows.at(-1)?.index ?? 0];
   }
 
   getFetchRange(): ItemRange {
-    const { grid } = this;
+    const grid = this.#grid;
 
     // Get the range of currently rendered rows
     let range = this.getRenderedRange();
@@ -152,16 +152,16 @@ export class GridConnector {
   async fetchCurrentRange(): Promise<void> {
     const range = this.getFetchRange();
 
-    if (isRangeEqual(range, this.requestedRange)) {
+    if (isRangeEqual(range, this.#requestedRange)) {
       // Skip duplicate requests for the same range.
       return;
     }
 
-    this.requestedRange = range;
+    this.#requestedRange = range;
 
     // The range is inclusive while the server expects a length, hence + 1,
     // e.g. a range of [50, 149] results in a length of 100
-    await this.grid.$server.setViewportRange(range[0], range[1] - range[0] + 1);
+    await this.#grid.$server.setViewportRange(range[0], range[1] - range[0] + 1);
 
     // Resolve any pending callbacks in case the server responded with no new
     // data and $connector.confirm wasn't called because the server assumes all
@@ -173,12 +173,12 @@ export class GridConnector {
   }
 
   resolvePendingCallbacks(): void {
-    const { grid } = this;
-    const { rootCache } = this.dataProviderController;
+    const grid = this.#grid;
+    const { rootCache } = this.#dataProviderController;
 
     grid._hasData = true;
 
-    this.preventRowUpdates(() => {
+    this.#preventRowUpdates(() => {
       Object.values(rootCache.pendingRequests).forEach((callback) => {
         // Set a flag so the grid re-checks all rendered rows after all callbacks
         // are resolved, and requests any that are still missing, not just the ones
@@ -196,15 +196,15 @@ export class GridConnector {
     // debouncer (if any) to avoid sending a server request that is no longer
     // needed.
     if (Object.values(rootCache.pendingRequests).length === 0) {
-      this.requestDebouncer?.cancel();
-      this.requestedRange = null;
+      this.#requestDebouncer?.cancel();
+      this.#requestedRange = null;
     }
   }
 
   setSorterDirections(directions: { column: string; direction: GridSorterDirection }[]): void {
-    const { grid } = this;
+    const grid = this.#grid;
 
-    this.sorterDirectionsSetFromServer = true;
+    this.#sorterDirectionsSetFromServer = true;
     setTimeout(() => {
       try {
         // Sorters for hidden columns are removed from DOM but stored in the web component.
@@ -235,23 +235,23 @@ export class GridConnector {
         // and therefore didn't notify the grid about their direction change.
         grid.__applySorters();
       } finally {
-        this.sorterDirectionsSetFromServer = false;
+        this.#sorterDirectionsSetFromServer = false;
       }
     });
   }
 
   set(startIndex: number, items: Item[]): void {
-    const { rootCache } = this.dataProviderController;
+    const { rootCache } = this.#dataProviderController;
     items.forEach((item, i) => {
       rootCache.items[startIndex + i] = item;
     });
 
-    this.preventRowUpdates(() => {
+    this.#preventRowUpdates(() => {
       this.doSelection(items.filter((item) => item.selected));
-      this.doDeselection(items.filter((item) => !item.selected && this.selectedKeys[item.key]));
+      this.doDeselection(items.filter((item) => !item.selected && this.#selectedKeys[item.key]));
     });
 
-    this.grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
+    this.#grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
   }
 
   /**
@@ -260,10 +260,10 @@ export class GridConnector {
    * @param updatedItems the updated items array
    */
   updateFlatData(updatedItems: Item[]): void {
-    const { rootCache } = this.dataProviderController;
+    const { rootCache } = this.#dataProviderController;
 
     updatedItems.forEach((item) => {
-      const itemContext = this.dataProviderController.getItemContext(item);
+      const itemContext = this.#dataProviderController.getItemContext(item);
       if (!itemContext) {
         return;
       }
@@ -271,13 +271,13 @@ export class GridConnector {
       const { index } = itemContext;
       rootCache.items[index] = item;
 
-      this.grid.__updateVisibleRows(index, index);
+      this.#grid.__updateVisibleRows(index, index);
     });
   }
 
   clear(index: number, length: number): void {
-    const { grid } = this;
-    const { rootCache } = this.dataProviderController;
+    const grid = this.#grid;
+    const { rootCache } = this.#dataProviderController;
 
     if (index % grid.pageSize !== 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
@@ -288,8 +288,8 @@ export class GridConnector {
       return;
     }
 
-    this.preventRowUpdates(() => {
-      this.doDeselection(items.filter((item) => this.selectedKeys[item.key]));
+    this.#preventRowUpdates(() => {
+      this.doDeselection(items.filter((item) => this.#selectedKeys[item.key]));
     });
 
     rootCache.items.fill(undefined, index, index + length);
@@ -298,18 +298,18 @@ export class GridConnector {
   }
 
   reset(): void {
-    this.dataProviderController.clearCache();
-    this.requestedRange = null;
-    this.requestDebouncer?.cancel();
-    this.grid.__updateVisibleRows();
+    this.#dataProviderController.clearCache();
+    this.#requestedRange = null;
+    this.#requestDebouncer?.cancel();
+    this.#grid.__updateVisibleRows();
   }
 
   updateSize(size: number): void {
-    this.grid.size = size;
+    this.#grid.size = size;
   }
 
   updateUniqueItemIdPath(path: string): void {
-    this.grid.itemIdPath = path;
+    this.#grid.itemIdPath = path;
   }
 
   confirm(id: number): void {
@@ -318,14 +318,14 @@ export class GridConnector {
     this.resolvePendingCallbacks();
 
     // Let server know we're done
-    this.grid.$server.confirmUpdate(id);
+    this.#grid.$server.confirmUpdate(id);
   }
 
   setSelectionMode(mode: SelectionMode): void {
-    this.selectionMode = mode;
-    this.selectedKeys = {};
-    this.grid.selectedItems = [];
-    this.grid.__a11yUpdateMutiSelectable();
+    this.#selectionMode = mode;
+    this.#selectedKeys = {};
+    this.#grid.selectedItems = [];
+    this.#grid.__a11yUpdateMutiSelectable();
   }
 
   setHeaderRenderer(
@@ -373,13 +373,13 @@ export class GridConnector {
   }
 
   scrollToItem(itemKey: string, ...args: number[]): void {
-    const { grid } = this;
+    const grid = this.#grid;
 
     const targetRow = grid._getRenderedRows().find((row) => {
       const { item } = grid.__getRowModel(row);
       return grid.getItemId(item) === itemKey;
     });
-    if (targetRow && this.isRowFullyInViewport(targetRow)) {
+    if (targetRow && this.#isRowFullyInViewport(targetRow)) {
       return;
     }
 
@@ -390,8 +390,8 @@ export class GridConnector {
    * Overrides and extends the grid's methods and properties to integrate with
    * the server-side data communicator and selection state.
    */
-  private patchGrid(): void {
-    const { grid } = this;
+  #patchGrid(): void {
+    const grid = this.#grid;
 
     // The grid requests a page only when a row from that page gets rendered,
     // which is too late to keep up while scrolling and leads to blank rows.
@@ -402,8 +402,8 @@ export class GridConnector {
 
       if (grid.$.scroller.hasAttribute('scrolling')) {
         const fetchRange = this.getFetchRange();
-        this.dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
-        this.dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
+        this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
+        this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
       }
     };
 
@@ -424,8 +424,8 @@ export class GridConnector {
         return;
       }
 
-      this.requestDebouncer = Debouncer.debounce(
-        this.requestDebouncer,
+      this.#requestDebouncer = Debouncer.debounce(
+        this.#requestDebouncer,
         timeOut.after(grid._hasData ? requestDebouncerDelay : 0),
         () => {
           this.fetchCurrentRange();
@@ -434,7 +434,7 @@ export class GridConnector {
     };
 
     grid.__updateRow = (row, ...args) => {
-      if (this.preventRowUpdatesActive !== 0) {
+      if (this.#preventRowUpdatesActive !== 0) {
         return;
       }
 
@@ -442,7 +442,7 @@ export class GridConnector {
     };
 
     grid.__a11yUpdateRowSelected = (row, selected) => {
-      if (this.selectionMode === 'NONE') {
+      if (this.#selectionMode === 'NONE') {
         [row, ...row.children].forEach((el) => el.removeAttribute('aria-selected'));
         return;
       }
@@ -460,7 +460,7 @@ export class GridConnector {
         return;
       }
 
-      switch (this.selectionMode) {
+      switch (this.#selectionMode) {
         case 'SINGLE':
           grid.$.table.setAttribute('aria-multiselectable', 'false');
           break;
@@ -502,7 +502,7 @@ export class GridConnector {
       // Call the original __applySorters method in vaadin-grid-sort-mixin
       Object.getPrototypeOf(grid).__applySorters.call(grid, ...args);
 
-      if (sortersChanged && !this.sorterDirectionsSetFromServer) {
+      if (sortersChanged && !this.#sorterDirectionsSetFromServer) {
         grid.$server.sortersChanged(sorters);
       }
     };
@@ -546,19 +546,19 @@ export class GridConnector {
     };
   }
 
-  private addGridEventListeners(): void {
-    const { grid } = this;
+  #addGridEventListeners(): void {
+    const grid = this.#grid;
 
-    grid.addEventListener('cell-activate', (e) => this.onItemActivate(e));
-    grid.addEventListener('row-activate', (e) => this.onItemActivate(e));
+    grid.addEventListener('cell-activate', (e) => this.#onItemActivate(e));
+    grid.addEventListener('row-activate', (e) => this.#onItemActivate(e));
 
     grid.addEventListener('vaadin-context-menu-before-open', (e) => {
       const { key, columnId } = e.detail;
       grid.$server.updateContextMenuTargetItem(key, columnId);
     });
 
-    grid.addEventListener('click', (e) => this.fireClickEvent(e, 'item-click'));
-    grid.addEventListener('dblclick', (e) => this.fireClickEvent(e, 'item-double-click'));
+    grid.addEventListener('click', (e) => this.#fireClickEvent(e, 'item-click'));
+    grid.addEventListener('dblclick', (e) => this.#fireClickEvent(e, 'item-double-click'));
 
     grid.addEventListener('column-resize', (e) => {
       const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
@@ -635,18 +635,18 @@ export class GridConnector {
     });
   }
 
-  private onItemActivate(event: GridCellActivateEvent<Item>): void {
-    const { grid } = this;
+  #onItemActivate(event: GridCellActivateEvent<Item>): void {
+    const grid = this.#grid;
     const { item } = event.detail.model;
 
     // The row model can hold a stale item while its data is being loaded, so
     // skip activation unless the item is actually loaded in the data cache
-    if (!this.dataProviderController.getItemContext(item)) {
+    if (!this.#dataProviderController.getItemContext(item)) {
       return;
     }
 
-    if (this.selectionMode === 'SINGLE') {
-      if (!this.selectedKeys[item.key]) {
+    if (this.#selectionMode === 'SINGLE') {
+      if (!this.#selectedKeys[item.key]) {
         this.doSelection([item], true);
       } else if (!grid.__deselectDisallowed) {
         this.doDeselection([item], true);
@@ -662,13 +662,13 @@ export class GridConnector {
     }
   }
 
-  private fireClickEvent(event: MouseEvent & { itemKey?: string; internalColumnId?: string }, eventName: string): void {
+  #fireClickEvent(event: MouseEvent & { itemKey?: string; internalColumnId?: string }, eventName: string): void {
     // Click event was handled by the component inside grid, do nothing.
     if (event.defaultPrevented) {
       return;
     }
 
-    const { grid } = this;
+    const grid = this.#grid;
     const path = event.composedPath() as Element[];
     const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
     const cell = path[idx] as (Element & { _focusButton?: Element }) | undefined;
@@ -709,17 +709,17 @@ export class GridConnector {
     }
   }
 
-  private preventRowUpdates(callback: () => void): void {
+  #preventRowUpdates(callback: () => void): void {
     try {
-      this.preventRowUpdatesActive++;
+      this.#preventRowUpdatesActive++;
       callback();
     } finally {
-      this.preventRowUpdatesActive--;
+      this.#preventRowUpdatesActive--;
     }
   }
 
-  private isRowFullyInViewport(row: HTMLElement): boolean {
-    const { grid } = this;
+  #isRowFullyInViewport(row: HTMLElement): boolean {
+    const grid = this.#grid;
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();
