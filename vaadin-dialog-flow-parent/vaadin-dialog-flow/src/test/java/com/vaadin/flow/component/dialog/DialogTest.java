@@ -225,6 +225,24 @@ class DialogTest {
     }
 
     @Test
+    void setAutofocus_isAutofocus() {
+        Dialog dialog = new Dialog();
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(false);
+        Assertions.assertFalse(dialog.isAutofocus());
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(true);
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+    }
+
+    @Test
     @SuppressWarnings("deprecation")
     void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
