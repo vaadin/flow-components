@@ -59,7 +59,7 @@ function runTests() {
       });
 
       // Install Playwright Chromium
-      execSync(`npx playwright install chromium`, {
+      execSync(`npx playwright install-deps chromium`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
