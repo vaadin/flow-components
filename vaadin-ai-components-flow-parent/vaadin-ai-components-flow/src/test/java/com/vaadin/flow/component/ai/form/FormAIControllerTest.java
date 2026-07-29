@@ -140,10 +140,7 @@ class FormAIControllerTest {
                     ".ignoreField()", "SAME turn", "newly-appeared",
                     // bean-level cross-field rejections key on the "__form__"
                     // sentinel id, not a real field id.
-                    "__form__", "cross-field",
-                    // ambiguity-handling is conditional on a per-field
-                    // description directive.
-                    "user", "pick", "multiple")) {
+                    "__form__", "cross-field")) {
                 Assertions.assertTrue(description.contains(anchor),
                         "Workflow description must mention '" + anchor
                                 + "', got: " + description);
