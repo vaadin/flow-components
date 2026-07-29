@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.internal.HtmlUtils;
 
@@ -31,8 +32,7 @@ import com.vaadin.flow.internal.HtmlUtils;
  * @param <T>
  *            the subclass type
  */
-abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
-        implements ColumnBase<T> {
+abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component {
 
     protected final Grid<?> grid;
     private boolean headerRenderingScheduled;
@@ -68,6 +68,165 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      */
     public Grid<?> getGrid() {
         return grid;
+    }
+
+    /**
+     * When set to {@code true}, the column is user-resizable. By default this
+     * is set to {@code false}.
+     *
+     * @param resizable
+     *            whether to allow user resizing of this column
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setResizable(boolean resizable) {
+        getElement().setProperty("resizable", resizable);
+        return (T) this;
+    }
+
+    /**
+     * Gets whether this column is user-resizable.
+     *
+     * @return whether this column is user-resizable
+     */
+    @Synchronize("resizable-changed")
+    public boolean isResizable() {
+        return getElement().getProperty("resizable", false);
+    }
+
+    /**
+     * Sets this column's frozen state.
+     * <p>
+     * <strong>Note:</strong> Columns are frozen in-place, freeze columns from
+     * left to right for a consistent outcome.
+     *
+     * @param frozen
+     *            whether to freeze or unfreeze this column
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setFrozen(boolean frozen) {
+        getElement().setProperty("frozen", frozen);
+        return (T) this;
+    }
+
+    /**
+     * Gets the this column's frozen state.
+     *
+     * @return whether this column is frozen
+     */
+    @Synchronize("frozen-changed")
+    public boolean isFrozen() {
+        return getElement().getProperty("frozen", false);
+    }
+
+    /**
+     * Sets this column's frozen state.
+     * <p>
+     * <strong>Note:</strong> Columns are frozen in-place, freeze columns from
+     * right to left for a consistent outcome.
+     *
+     * @param frozenToEnd
+     *            whether to freeze or unfreeze this column
+     * @return this column, for method chaining
+     * @since 23.1
+     */
+    @SuppressWarnings("unchecked")
+    public T setFrozenToEnd(boolean frozenToEnd) {
+        getElement().setProperty("frozenToEnd", frozenToEnd);
+        return (T) this;
+    }
+
+    /**
+     * Gets the this column's frozen state.
+     *
+     * @return whether this column is frozen to end
+     * @since 23.1
+     */
+    @Synchronize("frozen-to-end-changed")
+    public boolean isFrozenToEnd() {
+        return getElement().getProperty("frozenToEnd", false);
+    }
+
+    /**
+     * Sets the column text align.
+     *
+     * @param textAlign
+     *            the text alignment of the column. Setting it to
+     *            <code>null</code> resets the alignment to the default value
+     *            {@link ColumnTextAlign#START}.
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setTextAlign(ColumnTextAlign textAlign) {
+        getElement().setProperty("textAlign",
+                textAlign == null ? null : textAlign.getPropertyValue());
+
+        // Propagate text align to parent columns
+        if (getElement().getParent() != null) {
+            getElement().getParent().getComponent()
+                    .filter(parent -> parent instanceof AbstractColumn<?>
+                            && parent.getChildren().count() == 1)
+                    .map(AbstractColumn.class::cast)
+                    .ifPresent(parent -> parent.setTextAlign(textAlign));
+        }
+
+        return (T) this;
+    }
+
+    /**
+     * Gets the column text align. The default is {@link ColumnTextAlign#START}.
+     *
+     * @return the column text align, not <code>null</code>
+     */
+    @Synchronize("text-align-changed")
+    public ColumnTextAlign getTextAlign() {
+        return ColumnTextAlign
+                .fromPropertyValue(getElement().getProperty("textAlign"));
+    }
+
+    /**
+     * Sets a custom part name for the header cell.
+     *
+     * @param headerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setHeaderPartName(String headerPartName) {
+        getElement().setProperty("headerPartName", headerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the header cell.
+     *
+     * @return the part name
+     */
+    public String getHeaderPartName() {
+        return getElement().getProperty("headerPartName");
+    }
+
+    /**
+     * Sets a custom part name for the footer cell.
+     *
+     * @param footerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setFooterPartName(String footerPartName) {
+        getElement().setProperty("footerPartName", footerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the footer cell.
+     *
+     * @return the part name
+     */
+    public String getFooterPartName() {
+        return getElement().getProperty("footerPartName");
     }
 
     private void scheduleHeaderRendering() {
