@@ -25,7 +25,9 @@ vite.generated.ts
 /vite.config.ts
 node_modules
 .driver
-package*json
+**/package*json
+!/package.json
+!/package-lock.json
 pnpm*
 .npmrc
 .pnpmfile.cjs

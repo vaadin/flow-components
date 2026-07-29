@@ -98,9 +98,9 @@ function generateHistoryItems() {
 // === Maven Execution ===
 
 function runMvn(module, modeKey, args, message, onOutput) {
-  const command = `mvn ${args.join(' ')}`;
+  const command = `mvn -B -ntp ${args.join(' ')}`;
   args = [...args, '-Dstyle.color=always'];
-  console.log(`\n${message}\n`);
+  console.log(`\n${message}\n${command}\n`);
 
   const mvn = spawn('mvn', args, { stdio: ['inherit', 'pipe', 'pipe'] });
 

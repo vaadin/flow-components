@@ -157,6 +157,10 @@ cmd="node scripts/mergeITs.js "`echo $elements`
 tcLog "Merge IT modules - $cmd"
 $cmd || tcStatus 1 "Merging ITs failed"
 
+## Pre-compile merged ITs to avoid incremental compilation issues
+tcLog "Pre-compiling merged ITs"
+(cd integration-tests && mvn compile test-compile $args -DskipUnitTests) || tcStatus 1 "Merged ITs compilation failed"
+
 ## Compute variable to run tests
 [ -n "$TBLICENSE" ] && args="$args -Dvaadin.testbench.developer.license=$TBLICENSE"
 [ -n "$TBHUB" ] && args="$args -Dtest.use.hub=true -Dcom.vaadin.testbench.Parameters.hubHostname=$TBHUB"
@@ -197,7 +201,7 @@ then
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn $verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -DskipUnitTests"
+  cmd="mvn $verify -Drun-it -Drelease -Dvaadin.productionMode -Dvaadin.force.production.build=true -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -DskipUnitTests"
   tcLog "Running merged ITs - mvn $verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
