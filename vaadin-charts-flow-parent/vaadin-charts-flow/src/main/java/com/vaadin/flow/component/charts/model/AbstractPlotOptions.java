@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class AbstractPlotOptions extends AbstractConfigurationObject {
 
     public ChartType getChartType() {

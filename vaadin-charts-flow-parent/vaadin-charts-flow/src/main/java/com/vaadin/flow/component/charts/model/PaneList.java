@@ -13,6 +13,8 @@ import java.util.List;
 
 /**
  * Pane Container to allow multiple Panes
+ * 
+ * @since 6.0.1
  */
 public class PaneList extends AbstractConfigurationObject {
     private final List<Pane> paneList = new ArrayList<>();

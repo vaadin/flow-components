@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This is needed because internally POI only handles formulas with '.' as the
  * decimal separator, and ',' as the argument separator.
+ * 
+ * @since 23.1
  */
 public class FormulaFormatter implements Serializable {
 

@@ -21,6 +21,8 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * <p>
  * This interface has been created because the POI implementations differ quite
  * a lot.
+ * 
+ * @since 23.1
  */
 public interface ColorConverter extends Serializable {
 

@@ -13,6 +13,9 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 import tools.jackson.databind.annotation.JsonSerialize;
 
+/**
+ * @since 6.0.1
+ */
 public class Labels extends AbstractConfigurationObject {
 
     private HorizontalAlign align;
@@ -238,6 +241,7 @@ public class Labels extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -262,6 +266,8 @@ public class Labels extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "color": "#666666", "cursor": "default", "fontSize":
      * "11px" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 /**
  * Helper class to store and transfer mouse event details.
+ * 
+ * @since 6.0.1
  */
 public class MouseEventDetails implements Serializable {
 

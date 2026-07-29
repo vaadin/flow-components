@@ -43,6 +43,7 @@ import com.vaadin.flow.shared.Registration;
  *            the type of the output component
  * @param <SOURCE>
  *            the type of the input model object
+ * @since 22.0
  */
 @JsModule("./flow-component-renderer.js")
 public class ComponentRenderer<COMPONENT extends Component, SOURCE>

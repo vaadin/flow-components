@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.ButtonTheme;
 /**
  * The button that appears after a selection zoom, allowing the user to reset
  * zoom.
+ * 
+ * @since 6.0.1
  */
 public class ResetZoomButton extends AbstractConfigurationObject {
 

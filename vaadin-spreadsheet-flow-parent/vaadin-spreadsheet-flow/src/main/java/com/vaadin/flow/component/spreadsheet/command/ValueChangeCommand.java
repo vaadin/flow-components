@@ -16,7 +16,7 @@ import org.apache.poi.ss.util.CellReference;
  * Common interface for all Spreadsheet commands that change cell values.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public interface ValueChangeCommand extends Command {
 

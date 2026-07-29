@@ -12,6 +12,9 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class AreaOptions extends AbstractPlotOptions {
 
     public static final String LINECAP_ROUND = "round";
@@ -73,11 +76,14 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
@@ -95,6 +101,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public abstract String getColorKey();
 
@@ -103,6 +110,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * <code>colorAxis</code> is used. Requires to set <code>min</code> and
      * <code>max</code> if some custom point property is used or if
      * approximation for data grouping is set to <code>'sum'</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setColorKey(String colorKey);
 
@@ -118,6 +127,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getCrisp();
 
@@ -127,6 +137,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * densely packed columns, this leads to visible difference in column widths
      * or distance between columns. In these cases, setting crisp to false may
      * look better, even though each column is rendered blurry.
+     * 
+     * @since 18.0
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -172,6 +184,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public abstract DashStyle getDashStyle();
 
@@ -193,6 +206,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * <li>LongDashDot</li>
      * <li>LongDashDotDot</li>
      * </ul>
+     * 
+     * @since 18.0
      */
     public abstract void setDashStyle(DashStyle dashStyle);
 
@@ -224,17 +239,21 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public abstract Color getFillColor();
 
     /**
      * Fill color or gradient for the area. When <code>null</code>, the series'
      * <code>color</code> is used with the series' <code>fillOpacity</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setFillColor(Color fillColor);
 
     /**
      * @see #setFillOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getFillOpacity();
 
@@ -243,6 +262,8 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
      * Instead, you should define the opacity in the <code>fillColor</code> with
      * an rgba color definition.
+     * 
+     * @since 18.0
      */
     public abstract void setFillOpacity(Number fillOpacity);
 
@@ -309,6 +330,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public abstract Color getLineColor();
 
@@ -317,16 +339,21 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * <code>color</code> of the series, but the lineColor setting allows
      * setting a separate color for the line without altering the
      * <code>fillColor</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setLineColor(Color lineColor);
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public abstract Number getLineWidth();
 
     /**
      * Pixel with of the graph line.
+     * 
+     * @since 18.0
      */
     public abstract void setLineWidth(Number lineWidth);
 
@@ -355,32 +382,41 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public abstract Color getNegativeColor();
 
     /**
      * The color for the parts of the graph or points that are below the
      * threshold.
+     * 
+     * @since 18.0
      */
     public abstract void setNegativeColor(Color negativeColor);
 
     /**
      * @see #setNegativeFillColor(Color)
+     * @since 18.0
      */
     public abstract Color getNegativeFillColor();
 
     /**
      * A separate color for the negative part of the area.
+     * 
+     * @since 18.0
      */
     public abstract void setNegativeFillColor(Color negativeFillColor);
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 

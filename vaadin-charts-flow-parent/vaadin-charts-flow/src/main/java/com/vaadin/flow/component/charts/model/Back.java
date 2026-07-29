@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Defines the back panel of the frame around 3D charts.
+ * 
+ * @since 6.0.1
  */
 public class Back extends AbstractConfigurationObject {
 

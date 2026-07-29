@@ -24,6 +24,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>.highcharts-crosshair</code>, <code>.highcharts-crosshair-thin</code>
  * or <code>.highcharts-xaxis-category</code> classes.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Crosshair extends AbstractConfigurationObject {
 
@@ -54,6 +56,7 @@ public class Crosshair extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -63,6 +66,8 @@ public class Crosshair extends AbstractConfigurationObject {
      * The color of the crosshair. Defaults to <code>#cccccc</code> for numeric
      * and datetime axes, and <code>rgba(204,214,235,0.25)</code> for category
      * axes, where the crosshair by default highlights the whole category.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -70,6 +75,7 @@ public class Crosshair extends AbstractConfigurationObject {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -81,6 +87,8 @@ public class Crosshair extends AbstractConfigurationObject {
      * values.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -105,6 +113,7 @@ public class Crosshair extends AbstractConfigurationObject {
 
     /**
      * @see #setWidth(Number)
+     * @since 18.0
      */
     public Number getWidth() {
         return width;
@@ -113,6 +122,8 @@ public class Crosshair extends AbstractConfigurationObject {
     /**
      * The pixel width of the crosshair. Defaults to 1 for numeric or datetime
      * axes, and for one category width for category axes.
+     * 
+     * @since 18.0
      */
     public void setWidth(Number width) {
         this.width = width;

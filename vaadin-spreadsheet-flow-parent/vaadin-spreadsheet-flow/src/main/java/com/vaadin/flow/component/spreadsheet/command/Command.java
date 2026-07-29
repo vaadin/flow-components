@@ -17,7 +17,7 @@ import org.apache.poi.ss.util.CellReference;
  * Common interface for all Spreadsheet commands.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public interface Command extends Serializable {
     /**

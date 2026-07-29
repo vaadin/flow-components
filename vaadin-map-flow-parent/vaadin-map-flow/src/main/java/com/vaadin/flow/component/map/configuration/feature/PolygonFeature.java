@@ -28,6 +28,8 @@ import com.vaadin.flow.component.map.configuration.style.Style;
  * <p>
  * Technically this is a {@link Feature} that uses a {@link Polygon} geometry
  * for representation.
+ * 
+ * @since 24.8
  */
 public class PolygonFeature extends Feature {
     /**

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-checkbox} component.
+ *
+ * @since 25.0
  */
 public enum CheckboxVariant implements ThemeVariant {
     /**
@@ -36,9 +38,11 @@ public enum CheckboxVariant implements ThemeVariant {
     /**
      * @deprecated This variant is not working and will be removed in the next
      *             major.
+     * @since 25.1
      */
     @Deprecated(since = "25.2", forRemoval = true)
     HELPER_ABOVE("helper-above-field"),
+    AURA_REVERSE("reverse"),
     AURA_SMALL("small");
 
     private final String variant;

@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 /**
  * Interface for all marker symbols
+ * 
+ * @since 6.0.1
  */
 public interface MarkerSymbol extends Serializable {
 

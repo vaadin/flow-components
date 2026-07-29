@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * Listener for attachment click events.
+ * 
+ * @since 25.1
  */
 @FunctionalInterface
 public interface AttachmentClickListener extends Serializable {

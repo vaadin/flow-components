@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 24.7
+ */
 @SuppressWarnings("unused")
 public class DragDrop extends AbstractConfigurationObject {
 

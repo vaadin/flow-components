@@ -20,6 +20,7 @@ import com.vaadin.flow.component.EventData;
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemResizeModeChangedListener(ComponentEventListener)
+ * @since 24.6
  */
 @DomEvent("dashboard-item-resize-mode-changed")
 public class DashboardItemResizeModeChangedEvent

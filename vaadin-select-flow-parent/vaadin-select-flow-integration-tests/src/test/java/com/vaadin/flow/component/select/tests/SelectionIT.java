@@ -26,6 +26,11 @@ import com.vaadin.flow.testutil.TestPath;
 public class SelectionIT extends AbstractSelectIT {
 
     @Test
+    public void testSelection_nothingSelected_getSelectedTextReturnsEmptyString() {
+        verify.noItemSelected();
+    }
+
+    @Test
     public void testSelection_userSelection_firesValueChangeEvent() {
         for (int i = 0; i < getInitialNumberOfItems(); i++) {
             selectElement.selectItemByIndex(i);

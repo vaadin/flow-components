@@ -240,8 +240,59 @@ public class DialogHeaderFooterIT extends AbstractDialogIT {
         assertDialogNotContains(DialogHeaderFooterPage.ANOTHER_FOOTER_CONTENT);
     }
 
+    @Test
+    public void openedDialogWithHeaderContent_hasHeaderAttributeSet() {
+        clickButton(ADD_HEADER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+
+        assertStateAttribute("has-header", true);
+    }
+
+    @Test
+    public void openedDialogWithHeaderContents_removeAll_hasHeaderAttributeRemoved() {
+        clickButton(ADD_HEADER_CONTENT_BUTTON);
+        clickButton(ADD_SECOND_HEADER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+        assertStateAttribute("has-header", true);
+
+        clickButton(MOVE_BUTTONS_BUTTON);
+        clickButton(REMOVE_ALL_HEADER_CONTENTS_BUTTON);
+
+        assertStateAttribute("has-header", false);
+    }
+
+    @Test
+    public void openedDialogWithFooterContent_hasFooterAttributeSet() {
+        clickButton(ADD_FOOTER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+
+        assertStateAttribute("has-footer", true);
+    }
+
+    @Test
+    public void openedDialogWithFooterContents_removeAll_hasFooterAttributeRemoved() {
+        clickButton(ADD_FOOTER_CONTENT_BUTTON);
+        clickButton(ADD_SECOND_FOOTER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyOpened();
+        assertStateAttribute("has-footer", true);
+
+        clickButton(MOVE_BUTTONS_BUTTON);
+        clickButton(REMOVE_ALL_FOOTER_CONTENTS_BUTTON);
+
+        assertStateAttribute("has-footer", false);
+    }
+
     private void clickButton(String id) {
         findElement(By.id(id)).click();
+    }
+
+    private void assertStateAttribute(String attribute, boolean present) {
+        waitUntil(driver -> (getDialog()
+                .getDomAttribute(attribute) != null) == present);
     }
 
     private void assertDialogContains(String text) {

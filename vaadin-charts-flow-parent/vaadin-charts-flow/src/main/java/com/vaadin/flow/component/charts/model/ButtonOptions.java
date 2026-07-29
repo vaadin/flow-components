@@ -22,6 +22,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>.highcharts-contextbutton</code> and
  * <code>.highcharts-button-symbol</code> class.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class ButtonOptions extends AbstractConfigurationObject {
 
@@ -96,6 +98,7 @@ public class ButtonOptions extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolFill(Color)
+     * @since 18.0
      */
     public Color getSymbolFill() {
         return symbolFill;
@@ -105,6 +108,8 @@ public class ButtonOptions extends AbstractConfigurationObject {
      * Fill color for the symbol within the button.
      * <p>
      * Defaults to: #666666
+     * 
+     * @since 18.0
      */
     public void setSymbolFill(Color symbolFill) {
         this.symbolFill = symbolFill;
@@ -128,6 +133,7 @@ public class ButtonOptions extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolStroke(Color)
+     * @since 18.0
      */
     public Color getSymbolStroke() {
         return symbolStroke;
@@ -137,6 +143,8 @@ public class ButtonOptions extends AbstractConfigurationObject {
      * The color of the symbol's stroke or line.
      * <p>
      * Defaults to: #666666
+     * 
+     * @since 18.0
      */
     public void setSymbolStroke(Color symbolStroke) {
         this.symbolStroke = symbolStroke;

@@ -12,6 +12,9 @@ import java.util.List;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 24.7
+ */
 @SuppressWarnings("unused")
 public class AxisGrid extends AbstractConfigurationObject {
 

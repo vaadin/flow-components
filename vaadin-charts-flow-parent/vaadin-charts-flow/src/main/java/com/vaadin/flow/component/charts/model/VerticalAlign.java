@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Alignment of the title relative to the axis values and more generically
  * vertical alignment.
+ * 
+ * @since 6.0.1
  */
 public enum VerticalAlign implements ChartEnum {
     BOTTOM("bottom"), LOW("low"), MIDDLE("middle"), HIGH("high"), TOP("top");

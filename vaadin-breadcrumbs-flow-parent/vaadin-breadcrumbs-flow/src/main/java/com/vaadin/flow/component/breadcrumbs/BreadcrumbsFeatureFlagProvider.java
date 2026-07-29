@@ -25,6 +25,7 @@ import com.vaadin.experimental.FeatureFlagProvider;
  * {@link Breadcrumbs} component.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public class BreadcrumbsFeatureFlagProvider implements FeatureFlagProvider {
 

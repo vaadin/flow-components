@@ -27,6 +27,7 @@ import java.util.Objects;
  *            the end value of the range
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public record IntegerRangeSliderValue(Integer start,
         Integer end) implements Range<Integer> {

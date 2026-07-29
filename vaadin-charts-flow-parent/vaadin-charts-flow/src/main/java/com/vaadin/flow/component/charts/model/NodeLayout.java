@@ -12,6 +12,7 @@ import java.util.Locale;
 
 /**
  * @see Node#setLayout(NodeLayout)
+ * @since 18.0
  */
 public enum NodeLayout implements ChartEnum {
     NORMAL, HANGING;

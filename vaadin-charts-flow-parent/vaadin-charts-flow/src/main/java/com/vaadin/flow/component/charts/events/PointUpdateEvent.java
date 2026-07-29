@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointUpdateEvent class stores data for update events on the points of the
  * chart
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-update")
 public class PointUpdateEvent extends ComponentEvent<Chart> implements HasItem {

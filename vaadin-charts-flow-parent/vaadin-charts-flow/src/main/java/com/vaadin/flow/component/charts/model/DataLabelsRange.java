@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
  * <code>xLow</code>, <code>xHigh</code>, <code>yLow</code> and
  * <code>yHigh</code> options to allow the higher and lower data label sets
  * individually.
+ * 
+ * @since 6.0.1
  */
 public class DataLabelsRange extends AbstractDataLabels {
 
@@ -93,6 +95,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -101,6 +104,8 @@ public class DataLabelsRange extends AbstractDataLabels {
     /**
      * The background color or gradient for the data label. Defaults to
      * <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -108,6 +113,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -115,6 +121,8 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * The border color for the data label. Defaults to <code>undefined</code>.
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -122,6 +130,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setBorderRadius(Number)
+     * @since 18.0
      */
     public Number getBorderRadius() {
         return borderRadius;
@@ -131,6 +140,8 @@ public class DataLabelsRange extends AbstractDataLabels {
      * The border radius in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderRadius(Number borderRadius) {
         this.borderRadius = borderRadius;
@@ -138,6 +149,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -147,6 +159,8 @@ public class DataLabelsRange extends AbstractDataLabels {
      * The border width in pixels for the data label.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -174,6 +188,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -181,6 +196,8 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * The text color for the data labels. Defaults to <code>null</code>.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -376,6 +393,7 @@ public class DataLabelsRange extends AbstractDataLabels {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -398,6 +416,8 @@ public class DataLabelsRange extends AbstractDataLabels {
      * <p>
      * Defaults to: {"color": "contrast", "fontSize": "11px", "fontWeight":
      * "bold", "textOutline": "1px contrast" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-side-nav} component.
+ * 
+ * @since 25.0
  */
 public enum SideNavVariant implements ThemeVariant {
     AURA_FILLED("filled");

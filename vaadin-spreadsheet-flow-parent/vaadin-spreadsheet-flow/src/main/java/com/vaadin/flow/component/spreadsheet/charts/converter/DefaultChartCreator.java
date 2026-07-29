@@ -21,6 +21,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.ChartDa
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.SelectListeningDataSeries;
 import com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader.XSSFChartReader;
 
+/**
+ * @since 24.0
+ */
 public class DefaultChartCreator implements ChartCreator {
 
     private ChartDataToVaadinConfigWriter chartDataToVaadinConfigWriter;

@@ -39,6 +39,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @param <T>
  *            the date type
+ * @since 22.0
  */
 public class ComponentDataGenerator<T>
         extends AbstractComponentDataGenerator<T> {

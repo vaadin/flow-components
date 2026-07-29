@@ -17,6 +17,8 @@ import java.util.Arrays;
 
 /**
  * Utility class for formatting cell values
+ * 
+ * @since 23.1
  */
 public class CellValueFormatter implements Serializable {
 

@@ -17,6 +17,7 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  *
+ * @since 6.0.1
  */
 public class PlotOptionsCandlestick extends OhlcOptions {
 
@@ -154,6 +155,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -164,6 +166,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -171,6 +175,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setColorByPoint(Boolean)
+     * @since 18.0
      */
     public Boolean getColorByPoint() {
         return colorByPoint;
@@ -188,6 +193,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * <code>highcharts-color-{n}</code>.
      * <p>
      * Defaults to <code>false</code>.
+     * 
+     * @since 18.0
      */
     public void setColorByPoint(Boolean colorByPoint) {
         this.colorByPoint = colorByPoint;
@@ -195,6 +202,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -219,6 +227,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -244,6 +254,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -256,6 +267,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>close</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -263,6 +276,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -277,6 +291,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -288,6 +304,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -302,6 +319,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -601,6 +619,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -619,6 +638,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * </p>
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -626,6 +647,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -645,6 +667,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -734,6 +758,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -743,6 +768,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -750,6 +777,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -760,6 +788,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -1166,6 +1196,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setUpColor(Color)
+     * @since 18.0
      */
     public Color getUpColor() {
         return upColor;
@@ -1184,6 +1215,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * </p>
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setUpColor(Color upColor) {
         this.upColor = upColor;
@@ -1191,6 +1224,7 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 
     /**
      * @see #setUpLineColor(Color)
+     * @since 18.0
      */
     public Color getUpLineColor() {
         return upLineColor;
@@ -1201,6 +1235,8 @@ public class PlotOptionsCandlestick extends OhlcOptions {
      * the general <code>lineColor</code> setting.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setUpLineColor(Color upLineColor) {
         this.upLineColor = upLineColor;

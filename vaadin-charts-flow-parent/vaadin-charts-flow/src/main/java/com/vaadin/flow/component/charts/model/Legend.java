@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * The legend is a box containing a symbol and name for each series item or
  * point item in the chart.
+ * 
+ * @since 6.0.1
  */
 public class Legend extends AbstractConfigurationObject {
 
@@ -84,6 +86,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setBackgroundColor(Color)
+     * @since 18.0
      */
     public Color getBackgroundColor() {
         return backgroundColor;
@@ -91,6 +94,8 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * The background color of the legend.
+     * 
+     * @since 18.0
      */
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -98,6 +103,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -107,6 +113,8 @@ public class Legend extends AbstractConfigurationObject {
      * The color of the drawn border around the legend.
      * <p>
      * Defaults to: #999999
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -130,6 +138,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -139,6 +148,8 @@ public class Legend extends AbstractConfigurationObject {
      * The width of the drawn border around the legend.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -200,6 +211,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setItemHiddenStyle(Style)
+     * @since 18.0
      */
     public Style getItemHiddenStyle() {
         if (itemHiddenStyle == null) {
@@ -215,6 +227,8 @@ public class Legend extends AbstractConfigurationObject {
      * overridden here.
      * <p>
      * Defaults to: { "color": "#cccccc" }
+     * 
+     * @since 18.0
      */
     public void setItemHiddenStyle(Style itemHiddenStyle) {
         this.itemHiddenStyle = itemHiddenStyle;
@@ -222,6 +236,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setItemHoverStyle(Style)
+     * @since 18.0
      */
     public Style getItemHoverStyle() {
         if (itemHoverStyle == null) {
@@ -236,6 +251,8 @@ public class Legend extends AbstractConfigurationObject {
      * inherited from <code>style</code> unless overridden here.
      * <p>
      * Defaults to: { "color": "#000000" }
+     * 
+     * @since 18.0
      */
     public void setItemHoverStyle(Style itemHoverStyle) {
         this.itemHoverStyle = itemHoverStyle;
@@ -275,6 +292,7 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setItemStyle(Style)
+     * @since 18.0
      */
     public Style getItemStyle() {
         if (itemStyle == null) {
@@ -292,6 +310,8 @@ public class Legend extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "color": "#333333", "cursor": "pointer", "fontSize":
      * "12px", "fontWeight": "bold", "textOverflow": "ellipsis" }
+     * 
+     * @since 18.0
      */
     public void setItemStyle(Style itemStyle) {
         this.itemStyle = itemStyle;

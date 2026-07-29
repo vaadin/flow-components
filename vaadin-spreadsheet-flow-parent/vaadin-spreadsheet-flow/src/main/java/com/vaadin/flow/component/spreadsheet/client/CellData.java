@@ -12,6 +12,9 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+/**
+ * @since 23.1
+ */
 @SuppressWarnings("serial")
 public class CellData implements Serializable {
 

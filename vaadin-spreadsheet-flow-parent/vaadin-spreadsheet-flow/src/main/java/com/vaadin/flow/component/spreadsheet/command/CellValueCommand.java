@@ -26,7 +26,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
  * Command for changing the value of one or more cells.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class CellValueCommand extends SpreadsheetCommand

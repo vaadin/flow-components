@@ -29,6 +29,7 @@ import com.vaadin.flow.component.EventData;
  *
  * @see Grid#addItemClickListener(com.vaadin.flow.component.ComponentEventListener)
  *
+ * @since 2.1
  */
 @DomEvent("item-click")
 public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
@@ -79,6 +80,7 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *            <code>true</code> if the meta key was down when the event was
      *            fired, <code>false</code> otherwise
      *
+     * @since 4.1
      */
     public ItemClickEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail.itemKey") String itemKey,
@@ -113,6 +115,7 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *
      * @return the clicked column or {@code null} if it was the multi-selection
      *         column.
+     * @since 4.1
      */
     public Grid.Column<T> getColumn() {
         return column;

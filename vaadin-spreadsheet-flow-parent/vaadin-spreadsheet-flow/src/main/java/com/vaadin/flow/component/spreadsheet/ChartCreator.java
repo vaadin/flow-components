@@ -14,6 +14,9 @@ import org.apache.poi.xssf.usermodel.XSSFChart;
 
 import com.vaadin.flow.component.Component;
 
+/**
+ * @since 23.1
+ */
 public interface ChartCreator extends Serializable {
 
     /**

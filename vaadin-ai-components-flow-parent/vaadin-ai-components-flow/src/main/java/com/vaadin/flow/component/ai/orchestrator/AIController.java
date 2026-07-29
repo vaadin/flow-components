@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
  * </p>
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public interface AIController {
 

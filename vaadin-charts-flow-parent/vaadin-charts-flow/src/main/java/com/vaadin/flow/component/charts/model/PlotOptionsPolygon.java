@@ -20,6 +20,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * coordinate system. A fill is applied with the <code>color</code> option, and
  * stroke is applied through <code>lineWidth</code> and <code>lineColor</code>
  * options. Requires the <code>highcharts-more.js</code> file.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsPolygon extends AbstractPlotOptions {
 
@@ -149,6 +151,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -159,6 +162,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -166,6 +171,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -190,6 +196,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -215,6 +223,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -227,6 +236,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -234,6 +245,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -248,6 +260,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -294,6 +308,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -319,6 +334,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * </ul>
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -479,6 +496,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -488,6 +506,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * The width of the line connecting the data points.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -543,6 +563,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -553,6 +574,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -560,6 +583,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -569,6 +593,8 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

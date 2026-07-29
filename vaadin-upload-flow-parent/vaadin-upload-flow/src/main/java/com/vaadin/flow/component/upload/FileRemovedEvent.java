@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * Sent when a file selected for upload is removed.
  *
  * @author Vaadin Ltd.
+ * @since 24.4
  */
 public class FileRemovedEvent extends ComponentEvent<Upload> {
 

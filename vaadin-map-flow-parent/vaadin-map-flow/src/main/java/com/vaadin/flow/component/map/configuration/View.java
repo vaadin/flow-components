@@ -17,6 +17,8 @@ import com.vaadin.flow.component.map.configuration.source.Source;
 /**
  * Represents a map's viewport, responsible for changing properties like center
  * and zoom level
+ * 
+ * @since 23.0
  */
 public class View extends AbstractConfigurationObject {
 
@@ -107,6 +109,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param rotation
      *            the rotation in radians format
+     * @since 24.0
      */
     public void setRotation(double rotation) {
         this.rotation = rotation;
@@ -135,6 +138,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param zoom
      *            new zoom level
+     * @since 24.0
      */
     public void setZoom(double zoom) {
         this.zoom = zoom;
@@ -145,6 +149,7 @@ public class View extends AbstractConfigurationObject {
      * Gets the minimum zoom level that the view allows. Defaults to {@code 0}.
      *
      * @return the minimum zoom level
+     * @since 25.3
      */
     public double getMinZoom() {
         return minZoom;
@@ -156,6 +161,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param minZoom
      *            the new minimum zoom level
+     * @since 25.3
      */
     public void setMinZoom(double minZoom) {
         this.minZoom = minZoom;
@@ -166,6 +172,7 @@ public class View extends AbstractConfigurationObject {
      * Gets the maximum zoom level that the view allows. Defaults to {@code 28}.
      *
      * @return the maximum zoom level
+     * @since 25.3
      */
     public double getMaxZoom() {
         return maxZoom;
@@ -177,6 +184,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param maxZoom
      *            the new maximum zoom level
+     * @since 25.3
      */
     public void setMaxZoom(double maxZoom) {
         this.maxZoom = maxZoom;
@@ -221,6 +229,7 @@ public class View extends AbstractConfigurationObject {
      *            the updated zoom level
      * @param extent
      *            the updated extent
+     * @since 24.0
      */
     public void updateInternalViewState(Coordinate center, double rotation,
             double zoom, Extent extent) {

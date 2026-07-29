@@ -175,7 +175,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js" tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/spreadsheet-export.js"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js" tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/spreadsheet-export.js"/>
                             </target>
                         </configuration>
                     </execution>

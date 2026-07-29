@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * A HTML label that can be positioned anywhere in the chart area.
+ * 
+ * @since 18.0
  */
 public class Items extends AbstractConfigurationObject {
 

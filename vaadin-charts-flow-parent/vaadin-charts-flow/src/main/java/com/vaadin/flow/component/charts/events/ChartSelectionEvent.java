@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.Dimension;
 /**
  * The ChartSelectionEvent class stores information on selection events on the
  * chart's area.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-selection")
 public class ChartSelectionEvent extends ComponentEvent<Chart> {

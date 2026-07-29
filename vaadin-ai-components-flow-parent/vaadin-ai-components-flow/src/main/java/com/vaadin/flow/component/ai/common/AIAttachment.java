@@ -33,6 +33,7 @@ import java.util.Objects;
  * @param data
  *            the raw file data, not {@code null}
  * @author Vaadin Ltd
+ * @since 25.1
  */
 public record AIAttachment(String name, String mimeType,
         byte[] data) implements Serializable {

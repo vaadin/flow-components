@@ -37,6 +37,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @param <SOURCE>
  *            the object model type
  * @see Grid#addColumn(ValueProvider)
+ * @since 3.0
  */
 public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
 

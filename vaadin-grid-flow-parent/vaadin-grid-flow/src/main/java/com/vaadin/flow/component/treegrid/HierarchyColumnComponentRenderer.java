@@ -28,6 +28,7 @@ import com.vaadin.flow.function.ValueProvider;
  *            the type of the output component
  * @param <SOURCE>
  *            the type of the input model object
+ * @since 5.1
  */
 public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURCE>
         extends ComponentRenderer<COMPONENT, SOURCE> {

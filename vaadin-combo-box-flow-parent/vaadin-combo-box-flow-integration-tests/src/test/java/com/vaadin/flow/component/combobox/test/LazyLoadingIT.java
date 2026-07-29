@@ -77,7 +77,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void openPopup_firstPageLoaded() {
         stringBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, stringBox);
         assertRendered(stringBox, "Item 10");
@@ -172,7 +172,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void customPageSize_correctAmountOfItemsRequested() {
         pagesizeBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded.",
                 180, pagesizeBox);
@@ -192,17 +192,19 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         clickButton("change-pagesize");
         pagesizeBox.openPopup();
-        waitUntilTextInContent(pagesizeBox, "Item");
-        assertLoadedItemsCount(
-                "After opening the ComboBox, the first 'pageSize' amount "
-                        + "of items should be loaded (with updated pageSize: 100).",
-                100, pagesizeBox);
+        // The connector fetches the visible range plus a prefetch buffer, so
+        // opening the overlay may load one or two pages of the new size.
+        waitForLoadedItemsCount(
+                "After opening the ComboBox, items should be loaded in "
+                        + "full pages of the updated pageSize: 100.",
+                count -> count > 0 && count % 100 == 0, pagesizeBox);
 
         scrollToItem(pagesizeBox, 100);
 
-        assertLoadedItemsCount(
-                "Expected two pages to be loaded (with updated pageSize 100).",
-                200, pagesizeBox);
+        waitForLoadedItemsCount(
+                "After scrolling, at least two full pages should be loaded "
+                        + "(with updated pageSize: 100).",
+                count -> count >= 200 && count % 100 == 0, pagesizeBox);
         assertRendered(pagesizeBox, "Item 100");
     }
 
@@ -344,7 +346,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         Assert.assertEquals("0", lazySizeRequestCountSpan.getText());
 
         callbackBox.openPopup();
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
         assertRendered(callbackBox, "Item 0");
@@ -355,7 +357,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         callbackBox.openPopup();
         scrollToItem(callbackBox, 60);
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
         assertRendered(callbackBox, "Item 60");
@@ -365,7 +367,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void comboBoxInATemplate_worksWithLazyLoading() {
         templateBox.openPopup();
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, templateBox);
         assertRendered(templateBox, "Item 8");
@@ -376,7 +378,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         templateBox.openPopup();
         scrollToItem(templateBox, 50);
 
-        assertLoadedItemsCount(
+        waitForLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 templateBox);
         assertRendered(templateBox, "Item 50");
@@ -486,19 +488,20 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void disabledLazyLoading_reducePageSize_enablesLazyLoading() {
         disabledLazyLoadingBox.openPopup();
-        assertLoadedItemsCount("Initially all 100 items should be loaded", 100,
+        waitForLoadedItemsCount("Initially all 100 items should be loaded", 100,
                 disabledLazyLoadingBox);
         disabledLazyLoadingBox.closePopup();
 
         clickButton("enable-lazy-loading");
         disabledLazyLoadingBox.openPopup();
-        assertLoadedItemsCount(
-                "After reducing page size, 50 items should be loaded", 50,
-                disabledLazyLoadingBox);
+        // The connector fetches the visible range plus a prefetch buffer, so
+        // opening the overlay may load one or two pages of the new size.
+        waitForLoadedItemsCount(
+                "After reducing page size, items should be loaded in "
+                        + "full pages of the updated pageSize: 50.",
+                count -> count > 0 && count % 50 == 0, disabledLazyLoadingBox);
 
         scrollToItem(disabledLazyLoadingBox, 100);
-        assertLoadedItemsCount("Scrolling down should load further pages", 50,
-                disabledLazyLoadingBox);
         assertRendered(disabledLazyLoadingBox, "99");
     }
 

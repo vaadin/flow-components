@@ -56,6 +56,7 @@ import tools.jackson.databind.node.ObjectNode;
  * {@link Configuration} object.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class ChartConfigurationParser implements Serializable {
 

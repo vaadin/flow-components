@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Contains coordinates for {@link AnnotationItemLabel}
+ * 
+ * @since 24.0
  */
 public class AnnotationItemLabelPoint extends AbstractConfigurationObject {
 

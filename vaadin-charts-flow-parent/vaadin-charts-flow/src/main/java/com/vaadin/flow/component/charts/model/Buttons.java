@@ -13,6 +13,8 @@ package com.vaadin.flow.component.charts.model;
  * default buttons listed here, custom buttons can be added. See
  * <a href="#navigation.buttonOptions">navigation.buttonOptions</a> for general
  * options.
+ * 
+ * @since 6.0.1
  */
 public class Buttons extends AbstractConfigurationObject {
 

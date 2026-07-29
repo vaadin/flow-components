@@ -15,6 +15,8 @@ import tools.jackson.databind.SerializationContext;
 
 /**
  * Serializer for {@link Title}
+ * 
+ * @since 6.0.1
  */
 public class TitleBeanSerializer extends BeanSerializationDelegate<Title> {
 

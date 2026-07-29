@@ -26,6 +26,7 @@ import tools.jackson.databind.JsonNode;
  * {@link DatabaseProvider}.
  *
  * @author Vaadin Ltd
+ * @since 25.2
  */
 public final class DatabaseProviderAITools {
 
