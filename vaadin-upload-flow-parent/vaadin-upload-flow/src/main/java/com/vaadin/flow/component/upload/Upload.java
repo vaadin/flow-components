@@ -45,9 +45,7 @@ import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
-import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
-import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -132,7 +130,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
 
-        setUploadHandler(new FailFastUploadHandler());
+        setUploadHandler(new UploadHelper.FailFastUploadHandler());
 
         final String filesUploading = "element.files.some(file => file.uploading)";
         DomEventListener allFinishedListener = e -> {
@@ -380,22 +378,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             checkNoReceiverSet("setAcceptedMimeTypes");
             checkNoDeprecatedFileTypes("setAcceptedMimeTypes");
         }
-        if (mimeTypes == null || mimeTypes.length == 0) {
-            acceptedMimeTypes = List.of();
-        } else {
-            for (var mimeType : mimeTypes) {
-                if (mimeType == null || mimeType.isBlank()) {
-                    throw new IllegalArgumentException(
-                            "MIME types cannot contain null or blank values");
-                }
-                if (!mimeType.contains("/")) {
-                    throw new IllegalArgumentException(
-                            "MIME type must contain a ‘/’ character: "
-                                    + mimeType);
-                }
-            }
-            acceptedMimeTypes = List.of(mimeTypes);
-        }
+        acceptedMimeTypes = UploadHelper.validateMimeTypes(mimeTypes);
         updateAcceptProperty();
     }
 
@@ -449,21 +432,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             checkNoReceiverSet("setAcceptedFileExtensions");
             checkNoDeprecatedFileTypes("setAcceptedFileExtensions");
         }
-        if (extensions == null || extensions.length == 0) {
-            acceptedFileExtensions = List.of();
-        } else {
-            for (var ext : extensions) {
-                if (ext == null || ext.isBlank()) {
-                    throw new IllegalArgumentException(
-                            "File extensions cannot contain null or blank values");
-                }
-                if (!ext.startsWith(".")) {
-                    throw new IllegalArgumentException(
-                            "File extension must start with ‘.’: " + ext);
-                }
-            }
-            acceptedFileExtensions = List.of(extensions);
-        }
+        acceptedFileExtensions = UploadHelper
+                .validateFileExtensions(extensions);
         updateAcceptProperty();
     }
 
@@ -559,11 +529,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * configured MIME types and file extensions.
      */
     private void updateAcceptProperty() {
-        var accept = Stream
-                .concat(acceptedMimeTypes.stream(),
-                        acceptedFileExtensions.stream())
-                .collect(Collectors.joining(","));
-        getElement().setProperty("accept", accept);
+        getElement().setProperty("accept", UploadHelper
+                .formatAcceptValue(acceptedMimeTypes, acceptedFileExtensions));
     }
 
     /**
@@ -985,28 +952,16 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * @since 25.0
      */
     public void setUploadHandler(UploadHandler handler, String targetName) {
-        Objects.requireNonNull(handler, "UploadHandler cannot be null");
-        Objects.requireNonNull(targetName, "The target name cannot be null");
-        if (targetName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "The target name cannot be blank");
-        }
-        if (!(handler instanceof FailFastUploadHandler)) {
+        var elementStreamResource = UploadHelper.createTargetResource(handler,
+                getElement(), targetName, () -> acceptedMimeTypes,
+                () -> acceptedFileExtensions);
+        var failFast = handler instanceof UploadHelper.FailFastUploadHandler;
+        if (!failFast) {
             handlerExplicitlyConfigured = true;
         }
-        var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
-                handler, () -> acceptedMimeTypes, () -> acceptedFileExtensions);
-        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                validatingHandler, this.getElement()) {
-            @Override
-            public String getName() {
-                return targetName;
-            }
-        };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
-        if (!hasListener(UploadStartEvent.class)
-                && !(handler instanceof FailFastUploadHandler)) {
+        if (!hasListener(UploadStartEvent.class) && !failFast) {
             addListener(UploadStartEvent.class, event -> startUpload());
             addListener(UploadCompleteEvent.class, event -> endUpload());
         }
@@ -1171,17 +1126,4 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         return handlerExplicitlyConfigured;
     }
 
-    /**
-     * An internal implementation of the UploadHandler interface that just
-     * reminds the developer that UploadHandler must be set to Upload. Upload
-     * event listeners are not registered for this handler.
-     */
-    private static final class FailFastUploadHandler implements UploadHandler {
-        @Override
-        public void handleUploadRequest(UploadEvent event) {
-            throw new IllegalStateException(
-                    "Upload cannot be performed without a upload handler set. "
-                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
-        }
-    }
 }
