@@ -2484,10 +2484,29 @@ public class Spreadsheet extends Component
      * Updates the content of the cells that have been marked for update with
      * {@link #markCellAsUpdated(Cell, boolean)}.
      * <p>
-     * Does NOT update custom components (editors / always visible) for the
-     * cells. For that, use {@link #reloadVisibleCellContents()}
+     * Also reloads custom components, reusing the editors already shown so
+     * their state survives the update. Use
+     * {@link #updateMarkedCellsRecreatingEditors()} when the cells behind the
+     * editors move.
      */
     void updateMarkedCells() {
+        updateMarkedCells(false);
+    }
+
+    /**
+     * Updates the content of the cells that have been marked for update, like
+     * {@link #updateMarkedCells()}, but discards the custom editors currently
+     * shown and asks {@link SpreadsheetComponentFactory} for new ones.
+     * <p>
+     * Only for updates that move cells, such as inserting or deleting rows:
+     * editors are cached per cell, so one left in place would end up on the
+     * wrong cell.
+     */
+    void updateMarkedCellsRecreatingEditors() {
+        updateMarkedCells(true);
+    }
+
+    private void updateMarkedCells(boolean recreateEditors) {
         // update conditional formatting in case styling has changed. New values
         // are fetched in ValueManager (below).
         conditionalFormatter.createConditionalFormatterRules();
@@ -2502,7 +2521,7 @@ public class Spreadsheet extends Component
         loadCellComments();
 
         // update custom components, editors
-        reloadVisibleCellContents();
+        reloadVisibleCellContents(recreateEditors);
     }
 
     /**
@@ -2916,7 +2935,8 @@ public class Spreadsheet extends Component
         }
         styler.loadCustomBorderStylesToState();
 
-        updateMarkedCells(); // deleted and formula cells and style selectors
+        // deleted and formula cells and style selectors
+        updateMarkedCellsRecreatingEditors();
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn); // shifted area values
         updateMergedRegions();
@@ -3142,7 +3162,7 @@ public class Spreadsheet extends Component
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
         }
-        updateMarkedCells();
+        updateMarkedCellsRecreatingEditors();
         CellReference selectedCellReference = getSelectedCellReference();
         if (selectedCellReference.getRow() >= startRow
                 && selectedCellReference.getRow() <= endRow) {
@@ -3625,9 +3645,23 @@ public class Spreadsheet extends Component
      * contents. This forces reload of all: custom components (always visible
      * and editors) from {@link SpreadsheetComponentFactory}, hyperlinks, cells'
      * comments and cells' contents. Also updates styles for the visible area.
+     * <p>
+     * Any state entered into a custom editor is lost, as the editors are
+     * replaced with new instances from the factory.
      */
     public void reloadVisibleCellContents() {
-        loadCustomComponents(true);
+        reloadVisibleCellContents(true);
+    }
+
+    /**
+     * Reloads the currently viewed cell contents.
+     *
+     * @param recreateEditors
+     *            {@code true} to ask the factory for new editors, {@code false}
+     *            to keep the existing ones so their state survives
+     */
+    private void reloadVisibleCellContents(boolean recreateEditors) {
+        loadCustomComponents(recreateEditors);
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn);
     }
@@ -3797,10 +3831,9 @@ public class Spreadsheet extends Component
      * cell.
      */
     protected void loadCustomEditorOnSelectedCell() {
-        // Guard against reentrancy: if user code in onCustomEditorDisplayed
-        // calls refreshCells() -> updateMarkedCells() ->
-        // reloadVisibleCellContents() -> loadCells() ->
-        // loadCustomEditorOnSelectedCell(), skip the recursive call.
+        // Guard against reentrancy: onCustomEditorDisplayed that changes the
+        // selection or the component factory ends up back here, so skip the
+        // nested call instead of firing the callback again.
         if (insideCustomEditorCallback) {
             return;
         }

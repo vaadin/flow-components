@@ -369,6 +369,44 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                         .getInputElementValue());
     }
 
+    /**
+     * Returns the name of the slot the given cell's editor is assigned to. A
+     * cell knows only this name, not the editor itself, so editor lookups start
+     * here.
+     *
+     * @param cellAddress
+     *            address of the cell, e.g. "B2"
+     * @return the slot name, or {@code null} if the cell renders no editor
+     */
+    protected String getEditorSlotName(String cellAddress) {
+        var slots = getSpreadsheet().getCellAt(cellAddress)
+                .findElements(By.tagName("slot"));
+        return slots.isEmpty() ? null : slots.get(0).getDomAttribute("name");
+    }
+
+    /**
+     * Returns the custom editor rendered in the given cell, or {@code null} if
+     * the cell renders none.
+     *
+     * @param <T>
+     *            element type of the editor
+     * @param cellAddress
+     *            address of the cell, e.g. "B2"
+     * @param editorType
+     *            e.g. {@code ComboBoxElement.class}
+     * @return the editor element, or {@code null} if there is none
+     */
+    protected <T extends TestBenchElement> T getCellEditor(String cellAddress,
+            Class<T> editorType) {
+        String slotName = getEditorSlotName(cellAddress);
+        if (slotName == null) {
+            return null;
+        }
+        var editors = getSpreadsheet().$(editorType).attribute("slot", slotName)
+                .all();
+        return editors.isEmpty() ? null : editors.get(0);
+    }
+
     public void assertNoErrorIndicatorDetected() {
         Assert.assertTrue("Error indicator detected when there should be none.",
                 findElements(By.className("v-errorindicator")).isEmpty());

@@ -3555,6 +3555,23 @@ public class SheetWidget extends Panel {
                 && customWidgetMap.containsKey(getSelectedCellKey());
     }
 
+    /**
+     * Returns whether the given cell renders a custom editor inside the cell
+     * itself, in which case the cell contents must not be overwritten.
+     *
+     * @param cellKey
+     *            the key of the cell to check
+     * @return {@code true} if the cell renders a custom editor
+     */
+    private boolean hasCustomEditorInCell(String cellKey) {
+        if (isShowCustomEditorOnFocus()) {
+            return false;
+        }
+        SpreadsheetCustomEditorFactory factory = getSheetHandler()
+                .getCustomEditorFactory();
+        return factory != null && factory.hasCustomEditor(cellKey);
+    }
+
     public void showCustomWidgets(HashMap<String, Widget> newWidgetMap) {
         if (customWidgetMap != null) {
             for (Widget w : customWidgetMap.values()) {
@@ -4464,7 +4481,7 @@ public class SheetWidget extends Panel {
                         }
                     }
 
-                    if (!(hasCustomEditor && !isShowCustomEditorOnFocus())) {
+                    if (!hasCustomEditor || isShowCustomEditorOnFocus()) {
                         cell.setValue(cd.value, cd.cellStyle, cd.textColor,
                                 cd.needsMeasure);
                         cell.markAsOverflowDirty();
@@ -5507,7 +5524,12 @@ public class SheetWidget extends Panel {
 
     public void updateSelectedCellValue(String value) {
         Cell selectedCell = getSelectedCell();
-        if (isSelectedCellRendered() && selectedCell != null) {
+        // Writing a value replaces the cell contents, removing any custom
+        // editor in it. The commit is deferred (see
+        // SpreadsheetWidget.doDeferredCellValueCommit) and resolves its target
+        // from the selection, which by then may have moved onto an editor cell.
+        if (isSelectedCellRendered() && selectedCell != null
+                && !hasCustomEditorInCell(getSelectedCellKey())) {
             selectedCell.setValue(value);
         }
 

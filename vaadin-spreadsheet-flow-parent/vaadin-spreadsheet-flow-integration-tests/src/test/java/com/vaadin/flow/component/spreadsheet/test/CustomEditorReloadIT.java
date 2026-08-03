@@ -11,12 +11,12 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.component.spreadsheet.tests.CustomEditorReloadPage;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -33,78 +33,134 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
     @Test
     public void editorSelected_scrolledAwayAndBack_callbackNotRefiredAndValuePreserved() {
         selectEditorCellB2();
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         getSpreadsheet().scroll(5000);
         getCommandExecutor().waitForVaadin();
         getSpreadsheet().scroll(0);
         getCommandExecutor().waitForVaadin();
-        waitUntil(driver -> !getSpreadsheet()
-                .findElements(By.tagName("vaadin-combo-box")).isEmpty());
+        waitUntil(driver -> getEditorElementCount() > 0);
 
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
     }
 
     @Test
     public void editorSelected_columnSelected_callbackNotRefiredAndValuePreserved() {
         selectEditorCellB2();
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         selectColumn("B");
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
     }
 
     @Test
     public void editorSelected_rangeSelected_callbackNotRefiredAndValuePreserved() {
         selectEditorCellB2();
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         selectCell("B5", false, true);
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
     }
 
     @Test
     public void editorSelected_rowResized_callbackNotRefiredAndValuePreserved() {
         selectEditorCellB2();
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         resizeRow(2);
 
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
     }
 
     @Test
     public void editorSelected_columnResized_callbackNotRefiredAndValuePreserved() {
         selectEditorCellB2();
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         resizeColumn("B");
 
-        Assert.assertEquals("1", getCallbackCount());
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
+    }
+
+    @Test
+    public void editorSelected_otherCellValueCommitted_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        assertEditorIntact();
+        int initialEditorCount = getEditorElementCount();
+
+        // Committing a plain cell runs the internal updateMarkedCells refresh,
+        // which must reuse the cached editors instead of wiping them.
+        setCellValue("A4", "committed");
+        getCommandExecutor().waitForVaadin();
+
+        assertEditorIntact();
+        Assert.assertEquals(initialEditorCount, getEditorElementCount());
+    }
+
+    @Test
+    public void editorValueSet_applicationRefreshedEditedCell_callbackNotRefiredAndValuePreserved() {
+        selectEditorCellB2();
+        assertEditorIntact();
+
+        // Picking a value makes the page call refreshCells, as in issue #9180.
+        // That refresh must not recreate the editor, or the picked value is
+        // replaced by whatever onCustomEditorDisplayed sets.
+        getEditor("B2").selectByText("Cherry");
+        getCommandExecutor().waitForVaadin();
+
+        assertEditorIntact("Cherry");
+    }
+
+    @Test
+    public void plainCellEditorOpened_editorCellSelected_editorStillShown() {
+        // Open the built-in inline editor on a plain cell, then select a cell
+        // that has a custom editor. That editor must still be rendered.
+        getInlineEditor("B5");
+        getCommandExecutor().waitForVaadin();
+
+        clickCell("B2");
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertNotNull("Custom editor disappeared from B2",
+                getEditor("B2"));
+        // Not enough that it exists: the reported symptom was wiped text.
+        assertEditorIntact();
     }
 
     @Test
     public void editorSelected_visibleContentsReloaded_editorRecreated() {
         selectEditorCellB2();
-        Assert.assertEquals("Banana", getComboBoxValue("B2"));
+        assertEditorIntact();
 
         clickReload();
         getCommandExecutor().waitForVaadin();
-        Assert.assertEquals("", getComboBoxValue("B2"));
+        // The explicit reload recreates the editors from the factory without
+        // re-firing onCustomEditorDisplayed, so the fresh editor is empty.
+        assertEditorIntact("");
+    }
+
+    /**
+     * Asserts B2 still holds the value onCustomEditorDisplayed wrote, i.e. the
+     * editor was reused rather than replaced.
+     */
+    private void assertEditorIntact() {
+        assertEditorIntact(CustomEditorReloadPage.CALLBACK_VALUE);
+    }
+
+    /**
+     * Asserts that B2 shows the given editor value and that
+     * onCustomEditorDisplayed has fired exactly once, i.e. only for the initial
+     * selection of B2.
+     */
+    private void assertEditorIntact(String expectedValue) {
+        Assert.assertEquals("Unexpected editor value in B2", expectedValue,
+                getComboBoxValue("B2"));
+        Assert.assertEquals("Unexpected onCustomEditorDisplayed call count",
+                "1", getCallbackCount());
     }
 
     private void selectEditorCellB2() {
@@ -135,21 +191,20 @@ public class CustomEditorReloadIT extends AbstractSpreadsheetIT {
         return $(TestBenchElement.class).id("callbackCount").getText();
     }
 
+    private int getEditorElementCount() {
+        return getSpreadsheet().$(ComboBoxElement.class).all().size();
+    }
+
     private void clickReload() {
         $("vaadin-button").id("reloadBtn").click();
     }
 
+    private ComboBoxElement getEditor(String cellAddress) {
+        return getCellEditor(cellAddress, ComboBoxElement.class);
+    }
+
     private String getComboBoxValue(String cellAddress) {
-        var cell = getSpreadsheet().getCellAt(cellAddress);
-        try {
-            var slotName = cell.findElement(By.tagName("slot"))
-                    .getDomAttribute("name");
-            return getSpreadsheet()
-                    .findElement(By.cssSelector("[slot='" + slotName + "']"))
-                    .findElement(By.cssSelector("input"))
-                    .getDomProperty("value");
-        } catch (NoSuchElementException e) {
-            return null;
-        }
+        var editor = getEditor(cellAddress);
+        return editor == null ? null : editor.getInputElementValue();
     }
 }

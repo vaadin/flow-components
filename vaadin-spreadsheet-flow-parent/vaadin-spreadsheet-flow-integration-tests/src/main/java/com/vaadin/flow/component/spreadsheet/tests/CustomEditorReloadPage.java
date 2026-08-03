@@ -27,6 +27,9 @@ public class CustomEditorReloadPage extends VerticalLayout {
 
     static final String[] FRUITS = { "Apple", "Banana", "Cherry" };
 
+    /** Value {@code onCustomEditorDisplayed} writes into the editor. */
+    public static final String CALLBACK_VALUE = "Banana";
+
     private int callbackCount;
     private final Span callbackCounter = new Span("0");
     private final Spreadsheet spreadsheet = new Spreadsheet();
@@ -68,6 +71,18 @@ public class CustomEditorReloadPage extends VerticalLayout {
                 ComboBox<String> comboBox = new ComboBox<>();
                 comboBox.setItems(FRUITS);
                 comboBox.setWidthFull();
+                // Mirrors the reproducer in issue #9180: write the picked value
+                // into the cell and refresh it. Client-side changes only, so
+                // the callback's own setValue below does not trigger a refresh
+                // and the callback count stays deterministic.
+                comboBox.addValueChangeListener(event -> {
+                    if (!event.isFromClient()) {
+                        return;
+                    }
+                    Cell editedCell = spreadsheet.createCell(rowIndex,
+                            columnIndex, event.getValue());
+                    spreadsheet.refreshCells(editedCell);
+                });
                 return comboBox;
             }
             return null;
@@ -82,7 +97,7 @@ public class CustomEditorReloadPage extends VerticalLayout {
             if (customEditor instanceof ComboBox<?> comboBox) {
                 @SuppressWarnings("unchecked")
                 ComboBox<String> typed = (ComboBox<String>) comboBox;
-                typed.setValue(FRUITS[columnIndex % FRUITS.length]);
+                typed.setValue(CALLBACK_VALUE);
             }
         }
     }
