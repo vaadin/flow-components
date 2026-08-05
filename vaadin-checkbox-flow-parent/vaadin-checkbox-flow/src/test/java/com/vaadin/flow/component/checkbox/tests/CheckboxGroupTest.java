@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -626,6 +627,28 @@ class CheckboxGroupTest {
 
         group.setAriaLabelledBy((String) null);
         Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(CheckboxGroup.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        group.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                group.getAriaDescribedBy().get());
+
+        group.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(group.getAriaDescribedBy().isEmpty());
     }
 
     @Test

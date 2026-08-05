@@ -31,6 +31,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -495,6 +496,28 @@ class RadioButtonGroupTest {
 
         group.setAriaLabelledBy((String) null);
         Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(HasAriaDescription.class
+                .isAssignableFrom(RadioButtonGroup.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                group.getAriaDescribedBy().get());
+
+        group.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(group.getAriaDescribedBy().isEmpty());
     }
 
     @Test

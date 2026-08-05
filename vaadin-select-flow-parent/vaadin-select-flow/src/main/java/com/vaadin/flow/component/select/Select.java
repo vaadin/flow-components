@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasPlaceholder;
@@ -112,7 +113,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/select", version = "25.3.0-alpha8")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
-        implements Focusable<Select<T>>, HasAriaLabel,
+        implements Focusable<Select<T>>, HasAriaDescription, HasAriaLabel,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
         HasListDataView<T, SelectListDataView<T>>, HasPrefix,
@@ -576,6 +577,23 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**
