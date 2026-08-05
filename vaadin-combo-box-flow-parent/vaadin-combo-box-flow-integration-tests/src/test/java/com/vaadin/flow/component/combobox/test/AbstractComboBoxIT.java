@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -134,14 +133,13 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     // There's more items loaded though.
     protected List<String> getOverlayContents(ComboBoxElement comboBox) {
         return getItemElements(comboBox).stream().map(this::getItemLabel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     protected List<String> getNonEmptyOverlayContents(
             ComboBoxElement comboBox) {
         return getOverlayContents(comboBox).stream()
-                .filter(rendered -> !rendered.isEmpty())
-                .collect(Collectors.toList());
+                .filter(rendered -> !rendered.isEmpty()).toList();
     }
 
     protected String getItemLabel(TestBenchElement itemElement) {
@@ -151,8 +149,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
     protected List<TestBenchElement> getItemElements(ComboBoxElement comboBox) {
         return getScroller(comboBox).$("vaadin-combo-box-item").all().stream()
-                .filter(element -> !element.hasAttribute("hidden"))
-                .collect(Collectors.toList());
+                .filter(element -> !element.hasAttribute("hidden")).toList();
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {

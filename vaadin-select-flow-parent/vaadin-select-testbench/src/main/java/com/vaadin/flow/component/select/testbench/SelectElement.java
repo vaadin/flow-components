@@ -17,7 +17,6 @@ package com.vaadin.flow.component.select.testbench;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
@@ -86,7 +85,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     public List<ItemElement> getItems() {
-        return getItemsStream().collect(Collectors.toList());
+        return getItemsStream().toList();
     }
 
     @Override

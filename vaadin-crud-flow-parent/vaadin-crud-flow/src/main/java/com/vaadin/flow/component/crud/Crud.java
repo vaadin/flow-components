@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -655,7 +654,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
     private static List<String> variantNames(CrudVariant... variants) {
         return Arrays.stream(variants).map(CrudVariant::getVariantName)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

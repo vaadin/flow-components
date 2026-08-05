@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.it;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -95,7 +94,7 @@ public class GridMultiSelectionColumnPage extends Div {
     private void createInMemoryGrid() {
         Grid<String> grid = new Grid<>();
         grid.setItems(IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+                .toList());
         setUp(grid);
         grid.setId(IN_MEMORY_GRID_ID);
         add(new H2("In-memory grid"), grid);
@@ -143,7 +142,7 @@ public class GridMultiSelectionColumnPage extends Div {
     private void createBasicGridFromSingleToMultiBeforeAttached() {
         Grid<String> grid = new Grid<>();
         grid.setItems(IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+                .toList());
         setUp(grid);
         grid.setId("in-testing-multi-selection-mode-grid");
         add(new H2("in-testing-multi-selection-mode-grid"), grid);
@@ -156,7 +155,7 @@ public class GridMultiSelectionColumnPage extends Div {
     private void createBasicGridFromMultiToSingleBeforeAttached() {
         Grid<String> grid = new Grid<>();
         grid.setItems(IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+                .toList());
         setUp(grid);
         grid.setId("in-testing-multi-selection-mode-grid-single");
         add(new H2("in-testing-multi-selection-mode-grid-single"), grid);
@@ -169,7 +168,7 @@ public class GridMultiSelectionColumnPage extends Div {
     private void setAutoWidthIsTrueOfSelectionColumn() {
         Grid<String> grid = new Grid<>();
         grid.setItems(IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+                .toList());
         setUp(grid);
         grid.setId("set-auto-width-true");
         add(new H2("In-set-auto-width-true"), grid);
@@ -181,8 +180,8 @@ public class GridMultiSelectionColumnPage extends Div {
     private void createBasicGridMultiAllRowsSelected() {
         Grid<String> grid = new Grid<>();
         grid.setId(MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
-        grid.setItems(IntStream.range(0, 2).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+        grid.setItems(
+                IntStream.range(0, 2).mapToObj(Integer::toString).toList());
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
@@ -203,8 +202,8 @@ public class GridMultiSelectionColumnPage extends Div {
     private void createBasicGridMultiOneRowDeSelected() {
         Grid<String> grid = new Grid<>();
         grid.setId(MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID);
-        grid.setItems(IntStream.range(0, 2).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+        grid.setItems(
+                IntStream.range(0, 2).mapToObj(Integer::toString).toList());
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);

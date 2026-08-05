@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -39,8 +38,7 @@ public class GridLitRendererPage extends Div {
 
     public GridLitRendererPage() {
         Grid<Integer> grid = new Grid<>();
-        grid.setItems(
-                IntStream.range(0, 1000).boxed().collect(Collectors.toList()));
+        grid.setItems(IntStream.range(0, 1000).boxed().toList());
         grid.addColumn(LitRenderer
                 .<Integer> of(
                         "<span id=\"item-${index}\">Lit: ${item.name}</span>")

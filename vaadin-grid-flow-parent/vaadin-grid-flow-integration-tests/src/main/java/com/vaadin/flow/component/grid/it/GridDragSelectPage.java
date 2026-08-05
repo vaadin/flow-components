@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -30,8 +29,8 @@ import com.vaadin.flow.router.Route;
 public class GridDragSelectPage extends VerticalLayout {
     public GridDragSelectPage() {
         Grid<String> grid = new Grid<>();
-        grid.setItems(IntStream.range(0, 100).mapToObj(Integer::toString)
-                .collect(Collectors.toList()));
+        grid.setItems(
+                IntStream.range(0, 100).mapToObj(Integer::toString).toList());
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);

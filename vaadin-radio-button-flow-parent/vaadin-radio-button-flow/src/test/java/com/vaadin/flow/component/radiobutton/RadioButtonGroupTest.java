@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -164,8 +163,7 @@ class RadioButtonGroupTest {
         group.addValueChangeListener(events::add);
 
         List<String> keys = group.getChildren().map(Component::getElement)
-                .map(element -> element.getProperty("value"))
-                .collect(Collectors.toList());
+                .map(element -> element.getProperty("value")).toList();
         String enabledKey = keys.get(0);
         String disabledKey = keys.get(1);
 
@@ -189,8 +187,7 @@ class RadioButtonGroupTest {
         group.setItemEnabledProvider("enabled"::equals);
 
         List<RadioButton<String>> children = group.getChildren()
-                .map(child -> (RadioButton<String>) child)
-                .collect(Collectors.toList());
+                .map(child -> (RadioButton<String>) child).toList();
 
         Assertions.assertTrue(children.get(0).isEnabled());
         Assertions.assertFalse(children.get(1).isEnabled());
@@ -244,8 +241,7 @@ class RadioButtonGroupTest {
         dataView.refreshItem(item1);
         dataView.refreshItem(item2);
 
-        List<Component> components = group.getChildren()
-                .collect(Collectors.toList());
+        List<Component> components = group.getChildren().toList();
         RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components
                 .get(0);
         RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components
@@ -271,8 +267,7 @@ class RadioButtonGroupTest {
         item2.setName("bar");
         dataView.refreshItem(item2);
 
-        List<Component> components = group.getChildren()
-                .collect(Collectors.toList());
+        List<Component> components = group.getChildren().toList();
         RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components
                 .get(0);
         RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components

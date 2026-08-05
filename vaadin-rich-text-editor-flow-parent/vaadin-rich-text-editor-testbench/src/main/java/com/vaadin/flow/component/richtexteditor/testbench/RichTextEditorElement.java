@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.richtexteditor.testbench;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -28,8 +27,7 @@ public class RichTextEditorElement extends TestBenchElement {
         List<TestBenchElement> buttonTooltips = toolbar
                 .$("button + vaadin-tooltip").all();
         return buttonTooltips.stream()
-                .map(tooltip -> tooltip.getProperty("text"))
-                .collect(Collectors.toList());
+                .map(tooltip -> tooltip.getProperty("text")).toList();
     }
 
 }

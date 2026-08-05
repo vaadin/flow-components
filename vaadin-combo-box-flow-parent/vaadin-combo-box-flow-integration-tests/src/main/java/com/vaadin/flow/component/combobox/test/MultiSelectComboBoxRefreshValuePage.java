@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -30,8 +29,7 @@ public class MultiSelectComboBoxRefreshValuePage extends Div {
         MultiSelectComboBox<TestBean> comboBox = new MultiSelectComboBox<>(
                 "Items");
         List<TestBean> items = IntStream.range(0, 100)
-                .mapToObj(i -> new TestBean("Item " + (i + 1)))
-                .collect(Collectors.toList());
+                .mapToObj(i -> new TestBean("Item " + (i + 1))).toList();
         comboBox.setItems(items);
         comboBox.setItemLabelGenerator(TestBean::getName);
         // Make component wider, so that we can fit multiple chips

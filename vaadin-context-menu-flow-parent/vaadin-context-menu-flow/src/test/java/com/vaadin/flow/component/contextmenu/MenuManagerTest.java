@@ -17,7 +17,6 @@ package com.vaadin.flow.component.contextmenu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -168,8 +167,7 @@ class MenuManagerTest {
 
         manager.addComponent(component1, component2);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertEquals(2, children.size());
         Assertions.assertEquals(component1, children.get(0));
@@ -200,8 +198,7 @@ class MenuManagerTest {
 
         manager.remove(component1, component2);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertTrue(children.isEmpty());
 
@@ -232,8 +229,7 @@ class MenuManagerTest {
 
         manager.removeAll();
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertTrue(children.isEmpty());
 
@@ -253,8 +249,7 @@ class MenuManagerTest {
         manager.addComponent(component1, component2);
         manager.addComponentAtIndex(1, component3);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertEquals(3, children.size());
         Assertions.assertEquals(component1, children.get(0));

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -217,9 +216,8 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @since 23.1
      */
     public void addThemeVariants(CustomFieldVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(CustomFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(Stream.of(variants)
+                .map(CustomFieldVariant::getVariantName).toList());
     }
 
     /**
@@ -230,8 +228,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @since 23.1
      */
     public void removeThemeVariants(CustomFieldVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(CustomFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(CustomFieldVariant::getVariantName).toList());
     }
 }

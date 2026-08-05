@@ -11,7 +11,6 @@ package com.vaadin.flow.component.gridpro;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -794,9 +793,8 @@ public class GridPro<E> extends Grid<E> {
      * @since 23.1
      */
     public void addThemeVariants(GridProVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(GridProVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(Stream.of(variants)
+                .map(GridProVariant::getVariantName).toList());
     }
 
     /**
@@ -807,8 +805,7 @@ public class GridPro<E> extends Grid<E> {
      * @since 23.1
      */
     public void removeThemeVariants(GridProVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(GridProVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(GridProVariant::getVariantName).toList());
     }
 }

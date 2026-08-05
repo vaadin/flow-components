@@ -17,7 +17,6 @@ package com.vaadin.flow.component.virtuallist.tests;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.html.Div;
@@ -34,7 +33,7 @@ public class VirtualListScrollToPage extends Div
 
     public VirtualListScrollToPage() {
         List<String> items = IntStream.rangeClosed(1, 1000)
-                .mapToObj(String::valueOf).collect(Collectors.toList());
+                .mapToObj(String::valueOf).toList();
 
         virtualList = new VirtualList<>();
         virtualList.setItems(items);

@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -645,8 +644,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
         this.getElement().setPropertyList("virtualChildNodeIds",
                 getElement().getChildren()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
+                        .map(element -> element.getNode().getId()).toList());
 
         this.getElement().callJsFunction("requestContentUpdate");
     }

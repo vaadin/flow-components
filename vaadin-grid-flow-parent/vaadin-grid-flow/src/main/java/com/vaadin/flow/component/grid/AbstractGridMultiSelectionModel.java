@@ -478,8 +478,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return Stream.empty();
         }
         List<T> children = dataProvider
-                .fetchChildren(new HierarchicalQuery<>(null, parent))
-                .collect(Collectors.toList());
+                .fetchChildren(new HierarchicalQuery<>(null, parent)).toList();
         if (children.isEmpty()) {
             return Stream.empty();
         }
@@ -503,7 +502,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Map<Object, T> addedItemsMap = mapItemsById(addedItems);
         Map<Object, T> removedItemsMap = mapItemsById(removedItems);
         addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
-                .collect(Collectors.toList()).forEach(key -> {
+                .toList().forEach(key -> {
                     addedItemsMap.remove(key);
                     removedItemsMap.remove(key);
                 });

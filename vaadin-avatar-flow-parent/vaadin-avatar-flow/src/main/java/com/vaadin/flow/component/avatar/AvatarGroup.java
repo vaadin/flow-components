@@ -660,7 +660,7 @@ public class AvatarGroup extends Component
      */
     public void add(AvatarGroupItem... items) {
         setItems(Stream.concat(this.items.stream(), Arrays.stream(items))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     /**
@@ -673,8 +673,7 @@ public class AvatarGroup extends Component
         List<AvatarGroupItem> itemsToRemove = Arrays.asList(items);
 
         setItems(this.items.stream()
-                .filter(item -> !itemsToRemove.contains(item))
-                .collect(Collectors.toList()));
+                .filter(item -> !itemsToRemove.contains(item)).toList());
     }
 
     /**
@@ -714,8 +713,8 @@ public class AvatarGroup extends Component
     public <S extends Signal<AvatarGroupItem>> SignalBinding<Collection<AvatarGroupItem>> bindItems(
             Signal<List<S>> itemsSignal) {
         Objects.requireNonNull(itemsSignal, "Signal cannot be null");
-        return itemsSupport.bind(() -> itemsSignal.get().stream()
-                .map(Signal::get).collect(Collectors.toList()));
+        return itemsSupport.bind(
+                () -> itemsSignal.get().stream().map(Signal::get).toList());
     }
 
     /**

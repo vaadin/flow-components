@@ -23,7 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -119,7 +118,7 @@ public class GridFilteringPage extends Div {
         grid.addColumn(ValueProvider.identity()).setHeader("Items");
 
         final List<String> items = IntStream.range(0, 1000)
-                .mapToObj(item -> "Item " + item).collect(Collectors.toList());
+                .mapToObj(item -> "Item " + item).toList();
 
         TextField filterField = new TextField("Search Item");
         filterField.setId(GRID_FILTER_ID);
@@ -141,7 +140,7 @@ public class GridFilteringPage extends Div {
 
     private Collection<String> findAnyMatching(Optional<String> filter) {
         if (filter.isPresent()) {
-            return filter(filter).collect(Collectors.toList());
+            return filter(filter).toList();
         }
         return Collections.emptyList();
     }

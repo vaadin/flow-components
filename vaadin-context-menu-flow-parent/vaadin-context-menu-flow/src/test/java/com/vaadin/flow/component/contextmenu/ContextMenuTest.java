@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,32 +48,31 @@ class ContextMenuTest {
 
         contextMenu.addComponent(span1, span2);
 
-        List<Component> children = contextMenu.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = contextMenu.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
 
         contextMenu.addComponent(span3);
-        children = contextMenu.getChildren().collect(Collectors.toList());
+        children = contextMenu.getChildren().toList();
         Assertions.assertEquals(3, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
         Assertions.assertTrue(children.contains(span3));
 
         contextMenu.remove(span2);
-        children = contextMenu.getChildren().collect(Collectors.toList());
+        children = contextMenu.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span3));
 
         contextMenu.remove(span1);
-        children = contextMenu.getChildren().collect(Collectors.toList());
+        children = contextMenu.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         Assertions.assertTrue(children.contains(span3));
 
         contextMenu.removeAll();
-        children = contextMenu.getChildren().collect(Collectors.toList());
+        children = contextMenu.getChildren().toList();
         Assertions.assertEquals(0, children.size());
     }
 
@@ -100,8 +98,7 @@ class ContextMenuTest {
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.addItem("foo",
                 (ComponentEventListener<ClickEvent<MenuItem>>) null);
-        List<Component> children = contextMenu.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = contextMenu.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         assertComponentIsMenuItem(children.get(0), "foo");
     }
@@ -142,8 +139,7 @@ class ContextMenuTest {
         Span span2 = new Span("bar");
         contextMenu.addComponent(span2);
 
-        List<Component> children = contextMenu.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = contextMenu.getChildren().toList();
         Assertions.assertEquals(4, children.size());
 
         Assertions.assertEquals(item1, children.get(0));
