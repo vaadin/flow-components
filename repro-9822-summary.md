@@ -13,8 +13,10 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT), `@vaadin/master-detail-layout` + `@vaadin/multi-select-combo-box` 25.3.0-alpha8
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![MultiSelectComboBox dropdown open over the detail drawer, then a single backdrop click closes the whole drawer](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-9822-before.png) — embeds inline.
-- **Demo video** (motion bug): n/a — two screenshots (`repro-9822-before.png`, `repro-9822-after.png`) on the branch show the before/after state.
+- **Screenshot** (static bug): ![MultiSelectComboBox dropdown open over the detail drawer, then a single backdrop click closes the whole drawer](https://raw.githubusercontent.com/vaadin/flow-components/700001e926dde15660f7b3fdab037d7bf2705eb6/repro-9822-before.png) — embeds inline.
+  After the single backdrop click — the drawer is gone and the backdrop listener has run:
+  ![After one backdrop click: backdrop clicks 1, detail none](https://raw.githubusercontent.com/vaadin/flow-components/700001e926dde15660f7b3fdab037d7bf2705eb6/repro-9822-after.png)
+- **Demo video** (motion bug): n/a — the two screenshots above show the before/after state.
 
 ## Observed behavior
 
