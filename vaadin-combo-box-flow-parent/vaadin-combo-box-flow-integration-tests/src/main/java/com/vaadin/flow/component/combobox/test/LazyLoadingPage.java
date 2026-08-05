@@ -303,7 +303,8 @@ public class LazyLoadingPage extends Div {
 
     public static List<String> generateStrings(int count) {
         List<String> items = IntStream.range(0, count)
-                .mapToObj(i -> "Item " + i).toList();
+                .mapToObj(i -> "Item " + i)
+                .collect(Collectors.toCollection(ArrayList::new));
         return items;
     }
 
