@@ -15,33 +15,48 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIRule;
 
+@RunWith(Parameterized.class)
 public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     @Rule
     public MockUIRule ui = new MockUIRule();
+
+    @Parameterized.Parameters(name = "{0}")
+    public static HierarchyFormat[] hierarchyFormats() {
+        return HierarchyFormat.values();
+    }
+
+    @Parameterized.Parameter
+    public HierarchyFormat hierarchyFormat;
 
     private TreeGrid<String> treeGrid;
 
     @Before
     public void setup() {
+        TreeData<String> treeData = new TreeData<>();
+        treeData.addRootItems("Item 0", "Item 1");
+        treeData.addItems("Item 0", "Item 0-0", "Item 0-1");
+        treeData.addItems("Item 0-0", "Item 0-0-0");
+
         treeGrid = new TreeGrid<>();
-        // Data provider with only two root items, we don't need any nested
-        // items for the test cases (so far)
-        treeGrid.setItems(Arrays.asList("foo", "bar"),
-                root -> Collections.emptyList());
+        treeGrid.setDataProvider(
+                new TreeDataProvider<>(treeData, hierarchyFormat));
         treeGrid.setSelectionMode(Grid.SelectionMode.MULTI);
 
         ui.add(treeGrid);
@@ -52,15 +67,18 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // select first
-        treeGrid.getSelectionModel().select("foo");
+        treeGrid.getSelectionModel().select("Item 0");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
-        // select second, which equals all selected
+        // select remaining, which equals all selected
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
-        treeGrid.getSelectionModel().select("bar");
+        treeGrid.getSelectionModel().select("Item 0-0");
+        treeGrid.getSelectionModel().select("Item 0-0-0");
+        treeGrid.getSelectionModel().select("Item 0-1");
+        treeGrid.getSelectionModel().select("Item 1");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
@@ -71,15 +89,18 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
         // select first
-        treeGrid.getSelectionModel().selectFromClient("foo");
+        treeGrid.getSelectionModel().selectFromClient("Item 0");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
-        // select second, which equals all selected
+        // select remaining, which equals all selected
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
-        treeGrid.getSelectionModel().selectFromClient("bar");
+        treeGrid.getSelectionModel().selectFromClient("Item 0-0");
+        treeGrid.getSelectionModel().selectFromClient("Item 0-0-0");
+        treeGrid.getSelectionModel().selectFromClient("Item 0-1");
+        treeGrid.getSelectionModel().selectFromClient("Item 1");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
@@ -97,13 +118,16 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
-        treeGrid.getSelectionModel().deselect("foo");
+        treeGrid.getSelectionModel().deselect("Item 0");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
-        // deselect second, which equals none selected
-        treeGrid.getSelectionModel().deselect("bar");
+        // deselect remaining, which equals none selected
+        treeGrid.getSelectionModel().deselect("Item 0-0");
+        treeGrid.getSelectionModel().deselect("Item 0-0-0");
+        treeGrid.getSelectionModel().deselect("Item 0-1");
+        treeGrid.getSelectionModel().deselect("Item 1");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
@@ -121,13 +145,16 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
-        treeGrid.getSelectionModel().deselectFromClient("foo");
+        treeGrid.getSelectionModel().deselectFromClient("Item 0");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
-        // deselect second, which equals none selected
-        treeGrid.getSelectionModel().deselectFromClient("bar");
+        // deselect remaining, which equals none selected
+        treeGrid.getSelectionModel().deselectFromClient("Item 0-0");
+        treeGrid.getSelectionModel().deselectFromClient("Item 0-0-0");
+        treeGrid.getSelectionModel().deselectFromClient("Item 0-1");
+        treeGrid.getSelectionModel().deselectFromClient("Item 1");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
@@ -186,20 +213,21 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         // Select all
         // with hierarchical data provider we can not detect whether all are
         // selected, so should still be indeterminate
-        treeGrid.asMultiSelect().updateSelection(Set.of("foo", "bar"),
-                Set.of());
+        treeGrid.asMultiSelect().updateSelection(Set.of("Item 0", "Item 0-0",
+                "Item 0-0-0", "Item 0-1", "Item 1"), Set.of());
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect single
-        treeGrid.asMultiSelect().updateSelection(Set.of(), Set.of("foo"));
+        treeGrid.asMultiSelect().updateSelection(Set.of(), Set.of("Item 0"));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
-        // Deselect all
-        treeGrid.asMultiSelect().updateSelection(Set.of(), Set.of("bar"));
+        // Deselect remaining, which equals none selected
+        treeGrid.asMultiSelect().updateSelection(Set.of(),
+                Set.of("Item 0-0", "Item 0-0-0", "Item 0-1", "Item 1"));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
