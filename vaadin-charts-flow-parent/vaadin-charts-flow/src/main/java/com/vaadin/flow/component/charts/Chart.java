@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -664,9 +663,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * @since 23.1
      */
     public void addThemeVariants(ChartVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(ChartVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(
+                Stream.of(variants).map(ChartVariant::getVariantName).toList());
     }
 
     /**
@@ -677,9 +675,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * @since 23.1
      */
     public void removeThemeVariants(ChartVariant... variants) {
-        getThemeNames()
-                .removeAll(Stream.of(variants).map(ChartVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ChartVariant::getVariantName).toList());
     }
 
     /*

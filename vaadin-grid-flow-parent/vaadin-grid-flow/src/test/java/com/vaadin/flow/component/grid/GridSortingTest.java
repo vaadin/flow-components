@@ -408,7 +408,7 @@ class GridSortingTest {
         Random random = new Random(0);
         return IntStream.range(1, 500)
                 .mapToObj(index -> createPerson(index, random))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private static Person createPerson(int index, Random random) {

@@ -36,7 +36,7 @@ import com.vaadin.flow.router.Route;
 public class DragAndDropGridPage extends Div {
 
     private List<String> items = IntStream.range(0, 5).mapToObj(String::valueOf)
-            .collect(Collectors.toList());
+            .toList();
     private Grid<String> grid = new Grid<>();
 
     public DragAndDropGridPage() {

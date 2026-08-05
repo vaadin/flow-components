@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -262,18 +261,17 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.select("Two");
         comboBox.select("Four");
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));
         comboBox.clear();
 
         Set<String> linkedHashSetValue = new LinkedHashSet<>(
-                Arrays.asList("Eight", "Two", "Four").stream()
-                        .collect(Collectors.toList()));
+                Arrays.asList("Eight", "Two", "Four").stream().toList());
         comboBox.setValue(linkedHashSetValue);
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));
@@ -281,7 +279,7 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         comboBox.select("Eight", "Two", "Four");
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));

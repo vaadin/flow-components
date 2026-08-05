@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -294,8 +293,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
             items = (List<ITEM>) getDataProvider()
-                    .fetch(DataViewUtils.getQuery(this))
-                    .collect(Collectors.toList());
+                    .fetch(DataViewUtils.getQuery(this)).toList();
             items.stream().map(this::createItemComponent).forEach(component -> {
                 add(component);
                 itemCounter.incrementAndGet();
@@ -358,8 +356,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @SuppressWarnings("unchecked")
     List<VaadinItem<ITEM>> getItemComponents() {
         return getChildren().filter(VaadinItem.class::isInstance)
-                .map(component -> (VaadinItem<ITEM>) component)
-                .collect(Collectors.toList());
+                .map(component -> (VaadinItem<ITEM>) component).toList();
     }
 
     /**

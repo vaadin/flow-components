@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.jupiter.api.Assertions;
@@ -248,8 +247,7 @@ class FilterTableTest {
     }
 
     private List<Component> getPopupButtonChildren(int column) {
-        return getPopupButton(column).getContent().getChildren()
-                .collect(Collectors.toList());
+        return getPopupButton(column).getContent().getChildren().toList();
     }
 
     private PopupButton getPopupButton(int column) {

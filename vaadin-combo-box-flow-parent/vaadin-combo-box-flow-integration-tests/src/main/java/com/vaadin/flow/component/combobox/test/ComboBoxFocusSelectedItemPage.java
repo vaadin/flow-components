@@ -17,7 +17,6 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -34,7 +33,7 @@ public class ComboBoxFocusSelectedItemPage extends Div {
 
     private static final int ITEM_COUNT = 10000;
     private static final List<String> ALL_ITEMS = IntStream.range(0, ITEM_COUNT)
-            .mapToObj(i -> "Item " + i).collect(Collectors.toList());
+            .mapToObj(i -> "Item " + i).toList();
 
     private static final String LAZY_WITH_PROVIDER = "lazy-with-provider";
     private static final String IN_MEMORY = "in-memory";

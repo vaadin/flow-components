@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -326,13 +327,14 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     protected List<Column<?>> getBottomChildColumns() {
         List<Column<?>> columnChildren = getChildren()
                 .filter(child -> child instanceof Column<?>)
-                .map(child -> (Column<?>) child).collect(Collectors.toList());
+                .map(child -> (Column<?>) child)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         columnChildren.addAll(
                 getChildren().filter(child -> child instanceof ColumnGroup)
                         .flatMap(child -> ((ColumnGroup) child)
                                 .getBottomChildColumns().stream())
-                        .collect(Collectors.toList()));
+                        .toList());
         return columnChildren;
     }
 }

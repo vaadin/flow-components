@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -651,9 +650,8 @@ class SelectTest {
 
         Assertions.assertEquals("<span slot=\"prefix\">prefix1</span>", select
                 .getChildren().findFirst().get().getElement().getOuterHTML());
-        Assertions.assertEquals("<span slot=\"prefix\">prefix2</span>",
-                select.getChildren().collect(Collectors.toList()).get(1)
-                        .getElement().getOuterHTML());
+        Assertions.assertEquals("<span slot=\"prefix\">prefix2</span>", select
+                .getChildren().toList().get(1).getElement().getOuterHTML());
 
         select.remove(span);
 

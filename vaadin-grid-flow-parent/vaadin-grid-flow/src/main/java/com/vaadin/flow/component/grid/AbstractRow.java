@@ -126,7 +126,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         this.layer = layer;
         this.cellCtor = cellCtor;
         cells = layer.getColumns().stream().map(cellCtor)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -227,8 +227,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      *             if it's not possible to join the given cells
      */
     public CELL join(Column<?>... columns) {
-        return join(Arrays.stream(columns).map(this::getCell)
-                .collect(Collectors.toList()));
+        return join(Arrays.stream(columns).map(this::getCell).toList());
     }
 
     /**
@@ -297,7 +296,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
         List<CELL> sortedCells = cells.stream().sorted((c1, c2) -> Integer
                 .compare(this.cells.indexOf(c1), this.cells.indexOf(c2)))
-                .collect(Collectors.toList());
+                .toList();
 
         int cellInsertIndex = this.cells.indexOf(sortedCells.get(0));
         IntStream.range(0, sortedCells.size()).forEach(i -> {
@@ -308,11 +307,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         });
 
         List<AbstractColumn<?>> columnsToJoin = sortedCells.stream()
-                .map(CELL::getColumn).collect(Collectors.toList());
+                .<AbstractColumn<?>> map(CELL::getColumn).toList();
 
         List<Column<?>> bottomColumnsToJoin = columnsToJoin.stream()
-                .flatMap(col -> col.getBottomChildColumns().stream())
-                .collect(Collectors.toList());
+                .flatMap(col -> col.getBottomChildColumns().stream()).toList();
 
         List<ColumnLayer> layers = grid.getColumnLayers();
 
@@ -354,7 +352,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
             List<AbstractColumn<?>> joinedColumns = possibleParentLayer
                     .getColumns().stream().filter(col -> ((ColumnGroup) col)
                             .getChildColumns().size() > 1)
-                    .collect(Collectors.toList());
+                    .toList();
             boolean otherColumnsJoined = joinedColumns.stream()
                     .flatMap(col -> col.getBottomChildColumns().stream())
                     .anyMatch(col -> !bottomColumnsToJoin.contains(col));
@@ -386,8 +384,8 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
         layer.getColumns().removeAll(columnsToJoin);
         CELL keeper = this.cells.get(elementInsertIndex);
-        this.cells.removeAll(cellsToJoin.stream().filter(cell -> cell != keeper)
-                .collect(Collectors.toList()));
+        this.cells.removeAll(
+                cellsToJoin.stream().filter(cell -> cell != keeper).toList());
 
         return this.cells.get(cellInsertIndex);
     }
@@ -403,7 +401,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         List<AbstractColumn<?>> childColumns = lowerLayer.getColumns().stream()
                 .filter(col -> bottomColumnsToJoin
                         .containsAll(col.getBottomChildColumns()))
-                .collect(Collectors.toList());
+                .toList();
 
         List<AbstractColumn<?>> newColumns = new ArrayList<AbstractColumn<?>>();
         Iterator<AbstractColumn<?>> leftColumns = layer.getColumns().stream()

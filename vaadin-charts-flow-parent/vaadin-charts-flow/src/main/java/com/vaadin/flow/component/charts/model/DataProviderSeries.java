@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.HashMap;
@@ -234,7 +233,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
                                         ? Optional.ofNullable(
                                                 entry.getValue().apply(item))
                                         : Optional.empty())))
-                .collect(toList());
+                .toList();
     }
 
     /**

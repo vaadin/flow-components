@@ -12,7 +12,6 @@ import java.text.DateFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,7 +61,7 @@ public class GlobalOptionsIT extends AbstractChartIT {
         List<WebElement> axisLabels = container.findElements(
                 By.cssSelector(".highcharts-xaxis-labels > text"));
         List<String> actual = axisLabels.stream().map(WebElement::getText)
-                .collect(Collectors.toList());
+                .toList();
         List<String> expected = Arrays
                 .asList(new DateFormatSymbols(locale).getShortWeekdays());
         Assert.assertTrue(expected.containsAll(actual));

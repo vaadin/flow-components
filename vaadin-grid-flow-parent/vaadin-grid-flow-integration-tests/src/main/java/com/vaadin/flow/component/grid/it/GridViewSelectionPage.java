@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -49,11 +48,9 @@ public class GridViewSelectionPage extends LegacyTestView {
 
         grid.asMultiSelect().addSelectionListener(event -> {
             List<Person> previousSelectionSorted = event.getOldValue().stream()
-                    .sorted(Comparator.comparingLong(Person::getId))
-                    .collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(Person::getId)).toList();
             List<Person> newSelectionSorted = event.getValue().stream()
-                    .sorted(Comparator.comparingLong(Person::getId))
-                    .collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(Person::getId)).toList();
 
             messageDiv.setText(String.format(
                     "Selection changed from %s to %s, selection is from client: %s",

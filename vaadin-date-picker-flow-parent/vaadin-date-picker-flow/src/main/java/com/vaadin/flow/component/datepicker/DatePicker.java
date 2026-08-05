@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -1379,7 +1378,7 @@ public class DatePicker
                 this.dateFormats = new ArrayList<>();
                 this.dateFormats.add(primaryFormat);
                 this.dateFormats.addAll(Stream.of(additionalParsingFormats)
-                        .filter(Objects::nonNull).collect(Collectors.toList()));
+                        .filter(Objects::nonNull).toList());
             }
 
             return this;

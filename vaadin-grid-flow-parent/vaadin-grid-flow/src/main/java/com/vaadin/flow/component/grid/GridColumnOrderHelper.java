@@ -76,7 +76,7 @@ class GridColumnOrderHelper<T> {
 
         // sanity test passed. Reorder the columns.
         final List<String> newOrderIDs = columns.stream()
-                .map(Grid.Column::getInternalId).collect(Collectors.toList());
+                .map(Grid.Column::getInternalId).toList();
         final GraphNodeLeafCache nodeLeafCache = new GraphNodeLeafCache();
         // first run a dry run, to check whether the column ordering is possible
         // without actually performing the DOM reorder.

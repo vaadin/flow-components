@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -111,7 +110,7 @@ public class GridUpdateDataProviderIT extends AbstractComponentIT {
         data.add("fooba");
         data.add("foobar");
         Collection<String> lengths = data.stream().map(String::length)
-                .map(Object::toString).collect(Collectors.toList());
+                .map(Object::toString).toList();
         data.addAll(lengths);
         findElements(By.tagName("vaadin-grid-cell-content"))
                 .forEach(cell -> data.remove(cell.getText()));

@@ -17,7 +17,6 @@ package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -48,8 +47,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public List<MonthCalendarElement> getVisibleMonthCalendars() {
             return this.$("vaadin-month-calendar").all().stream()
-                    .map(el -> el.wrap(MonthCalendarElement.class))
-                    .collect(Collectors.toList());
+                    .map(el -> el.wrap(MonthCalendarElement.class)).toList();
         }
 
         /**

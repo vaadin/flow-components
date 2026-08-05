@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,7 +37,7 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
         comboBox.sendKeys(Keys.ARROW_DOWN);
 
         List<String> items = comboBox.$("vaadin-combo-box-item").all().stream()
-                .map(WebElement::getText).collect(Collectors.toList());
+                .map(WebElement::getText).toList();
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,
                 items.size());

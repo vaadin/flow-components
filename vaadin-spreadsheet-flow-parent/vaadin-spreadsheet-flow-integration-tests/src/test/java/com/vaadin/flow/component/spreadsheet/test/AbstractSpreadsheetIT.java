@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.Assert;
@@ -187,8 +186,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 By.className("namedrangebox"))
                 .findElements(By.tagName("option"));
 
-        return options.stream().map(WebElement::getText)
-                .collect(Collectors.toList());
+        return options.stream().map(WebElement::getText).toList();
     }
 
     public void selectNamedRange(String name) {
@@ -661,6 +659,6 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 // we always have this error
                 .filter(logEntry -> !logEntry.getMessage()
                         .contains("favicon.ico"))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

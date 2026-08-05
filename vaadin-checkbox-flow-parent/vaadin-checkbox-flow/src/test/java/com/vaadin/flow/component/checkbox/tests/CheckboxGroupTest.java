@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -134,8 +133,7 @@ class CheckboxGroupTest {
         group.addValueChangeListener(events::add);
 
         List<String> keys = group.getChildren().map(Component::getElement)
-                .map(element -> element.getProperty("value"))
-                .collect(Collectors.toList());
+                .map(element -> element.getProperty("value")).toList();
         String enabledKey = keys.get(0);
         String disabledKey = keys.get(1);
 
@@ -216,7 +214,7 @@ class CheckboxGroupTest {
         checkboxGroup.setItems("Foo", "Bar");
 
         List<Checkbox> checkboxes = checkboxGroup.getChildren()
-                .map(Checkbox.class::cast).collect(Collectors.toList());
+                .map(Checkbox.class::cast).toList();
 
         checkboxGroup.select("Foo");
         Assertions.assertTrue(checkboxes.get(0).getValue());
@@ -588,8 +586,7 @@ class CheckboxGroupTest {
 
     private void assertCheckboxLabels(CheckboxGroup<Wrapper> checkboxGroup,
             String firstLabel, String secondLabel) {
-        List<Component> components = checkboxGroup.getChildren()
-                .collect(Collectors.toList());
+        List<Component> components = checkboxGroup.getChildren().toList();
         Assertions.assertEquals(2, components.size());
         Assertions.assertEquals(firstLabel,
                 ((Checkbox) components.get(0)).getLabel());

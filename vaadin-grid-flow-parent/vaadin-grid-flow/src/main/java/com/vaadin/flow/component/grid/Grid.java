@@ -2691,7 +2691,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public List<HeaderRow> getHeaderRows() {
         List<HeaderRow> rows = columnLayers.stream()
                 .filter(ColumnLayer::isHeaderRow).map(ColumnLayer::asHeaderRow)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         Collections.reverse(rows);
         return rows;
     }
@@ -2703,7 +2703,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public List<FooterRow> getFooterRows() {
         return columnLayers.stream().filter(ColumnLayer::isFooterRow)
-                .map(ColumnLayer::asFooterRow).collect(Collectors.toList());
+                .map(ColumnLayer::asFooterRow).toList();
     }
 
     /**
@@ -2714,8 +2714,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 2.0
      */
     public void addThemeVariants(GridVariant... variants) {
-        getThemeNames().addAll(Stream.of(variants)
-                .map(GridVariant::getVariantName).collect(Collectors.toList()));
+        getThemeNames().addAll(
+                Stream.of(variants).map(GridVariant::getVariantName).toList());
     }
 
     /**
@@ -2726,8 +2726,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 2.0
      */
     public void removeThemeVariants(GridVariant... variants) {
-        getThemeNames().removeAll(Stream.of(variants)
-                .map(GridVariant::getVariantName).collect(Collectors.toList()));
+        getThemeNames().removeAll(
+                Stream.of(variants).map(GridVariant::getVariantName).toList());
     }
 
     /**
@@ -3605,8 +3605,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return getElement().getChildren().map(element -> element.getComponent())
                 .filter(component -> component.isPresent()
                         && component.get() instanceof ColumnBase<?>)
-                .map(component -> (ColumnBase<?>) component.get())
-                .collect(Collectors.toList());
+                .<ColumnBase<?>> map(
+                        component -> (ColumnBase<?>) component.get())
+                .toList();
     }
 
     /**

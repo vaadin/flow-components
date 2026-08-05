@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.listbox.test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -147,7 +146,7 @@ public class ListBoxViewDemoPage extends Div {
             item.setName(name);
             item.setStock((int) (Math.random() * 5) + 1);
             return item;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public static class Item {

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,14 +36,14 @@ public class PeopleGenerator extends BeanGenerator {
     public List<Person> generatePeople(int amount) {
         return IntStream.range(0, amount)
                 .mapToObj(index -> createPerson(index + 1))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<PersonWithLevel> generatePeopleWithLevels(int amount,
             int level) {
         return IntStream.range(0, amount)
                 .mapToObj(index -> createPersonWithLevel(index + 1, level))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private PersonWithLevel createPersonWithLevel(int index, int level) {
