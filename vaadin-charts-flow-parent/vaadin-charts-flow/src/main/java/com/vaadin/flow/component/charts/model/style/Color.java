@@ -15,6 +15,7 @@ import java.io.Serializable;
  *
  * @see GradientColor
  * @see SolidColor
+ * @see PatternColor
  * @since 6.0.1
  */
 public interface Color extends Serializable {
