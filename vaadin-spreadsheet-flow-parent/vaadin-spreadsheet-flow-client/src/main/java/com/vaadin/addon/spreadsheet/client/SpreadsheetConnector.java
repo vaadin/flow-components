@@ -400,7 +400,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             StateChangeEvent stateChangeEvent) {
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
-        if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
+        boolean componentMapChanged = stateChangeEvent
+                .hasPropertyChanged("componentIDtoCellKeysMap");
+        boolean editorMapChanged = stateChangeEvent
+                .hasPropertyChanged("cellKeysToEditorIdMap");
+        boolean showOnFocusChanged = stateChangeEvent
+                .hasPropertyChanged("showCustomEditorOnFocus");
+        if (componentMapChanged) {
             HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
             HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
@@ -414,22 +420,17 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
-            if (!state.showCustomEditorOnFocus) {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
         }
-        if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
+        if (editorMapChanged) {
             setupCustomEditors();
-            if (!state.showCustomEditorOnFocus) {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
         }
-        if (stateChangeEvent.hasPropertyChanged("showCustomEditorOnFocus")) {
-            if (state.showCustomEditorOnFocus) {
-                widget.removeCellCustomEditors(getCustomEditors());
-            } else {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
+        // Mount the editors once, after the factory has been set up, however
+        // many of the properties above changed in this round trip
+        if (showOnFocusChanged && state.showCustomEditorOnFocus) {
+            widget.removeCellCustomEditors(getCustomEditors());
+        } else if ((componentMapChanged || editorMapChanged
+                || showOnFocusChanged) && !state.showCustomEditorOnFocus) {
+            widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
