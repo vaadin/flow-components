@@ -192,6 +192,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void isFocusTrap_trueByDefault() {
         Dialog dialog = new Dialog();
         Assertions.assertTrue(dialog.isFocusTrap(),
@@ -202,6 +203,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeDisabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -213,6 +215,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
