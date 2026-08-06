@@ -160,11 +160,14 @@ import tools.jackson.databind.JsonNode;
  * every field whose value changed during the turn is highlighted automatically
  * with the AI marker, which offers a revert control that restores the field's
  * value from before the AI's first change to it. The marker clears itself once
- * the user edits the field. A listener registered through
+ * the user edits the field. The automatic highlighting can be turned off with
+ * {@link #setAutoHighlightEnabled(boolean)}, leaving
+ * {@link #showFieldHighlight(HasValue)} / {@link #hideFieldHighlight} to mark
+ * fields on the application's terms. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
- * field whose value changed during a successful turn, for applications that
- * need to react beyond the marker. {@link #showFieldHighlight(HasValue)} /
- * {@link #hideFieldHighlight} remain available for marking fields manually.
+ * field whose value changed during a successful turn, both for applications
+ * that need to react beyond the marker and as the hook for driving the marker
+ * themselves once the automatic highlighting is off.
  * </p>
  *
  * <p>
@@ -304,6 +307,7 @@ public class FormAIController implements AIController {
     private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
     private FieldMarkerI18n fieldMarkerI18n;
+    private boolean autoHighlightEnabled = true;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -672,7 +676,9 @@ public class FormAIController implements AIController {
      * {@link #hideFieldHighlight} directly without {@code ui.access(...)}.
      * Changed fields are already highlighted automatically, so the listener is
      * for extra application-specific reactions rather than for driving the
-     * marker.
+     * marker — unless the automatic highlighting is turned off with
+     * {@link #setAutoHighlightEnabled(boolean)}, in which case this is the hook
+     * for deciding which of the turn's changes to mark.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -716,6 +722,49 @@ public class FormAIController implements AIController {
      */
     public FieldMarkerI18n getFieldMarkerI18n() {
         return fieldMarkerI18n;
+    }
+
+    /**
+     * Controls whether every field whose value the AI changed during a turn is
+     * highlighted automatically when the turn ends. Defaults to {@code true}.
+     * Set to {@code false} to decide per field which changes to mark, typically
+     * from a {@link #addFieldValueChangeListener(FieldValueChangeListener)
+     * field value change listener} calling
+     * {@link #showFieldHighlight(HasValue)}.
+     * <p>
+     * Only the automatic highlighting is affected. {@link #showFieldHighlight}
+     * / {@link #hideFieldHighlight} keep working, and a marker shown either way
+     * offers the same revert control, restoring the field's value from before
+     * the AI's first change to it. The "AI is working" state shown while a turn
+     * runs — the shimmer and the client-side guard against editing a field the
+     * AI is about to overwrite — is not affected either: it applies to every
+     * writable field regardless of this setting.
+     * <p>
+     * Turning it off does not clear markers already shown; the fields marked by
+     * earlier turns stay marked until the user edits or reverts them, or the
+     * application hides them.
+     *
+     * @param autoHighlightEnabled
+     *            {@code true} to highlight changed fields automatically,
+     *            {@code false} to leave them unmarked
+     * @return this controller, for chaining
+     */
+    public FormAIController setAutoHighlightEnabled(
+            boolean autoHighlightEnabled) {
+        this.autoHighlightEnabled = autoHighlightEnabled;
+        return this;
+    }
+
+    /**
+     * Returns whether fields changed by the AI are highlighted automatically at
+     * the end of a turn.
+     *
+     * @return {@code true} when changed fields are highlighted automatically,
+     *         {@code false} when they are left unmarked
+     * @see #setAutoHighlightEnabled(boolean)
+     */
+    public boolean isAutoHighlightEnabled() {
+        return autoHighlightEnabled;
     }
 
     /**
@@ -920,7 +969,10 @@ public class FormAIController implements AIController {
             // themselves. Marking before clearing the working state lets a
             // changed field transition straight from working to marked, and
             // tells stopWorking() which markers to keep.
-            changes.forEach(change -> showFieldHighlight(change.getField()));
+            if (autoHighlightEnabled) {
+                changes.forEach(
+                        change -> showFieldHighlight(change.getField()));
+            }
             // Runs regardless of success or failure so the fields never stay
             // locked for the user.
             stopWorking();
@@ -937,8 +989,9 @@ public class FormAIController implements AIController {
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
      * after diff that drives the automatic highlight and
-     * {@link #addFieldValueChangeListener}. Always taken, since every turn
-     * highlights the fields it changed.
+     * {@link #addFieldValueChangeListener}. Always taken, even with neither in
+     * play: the diff also captures each field's pre-fill value for a later
+     * revert, which a manual {@link #showFieldHighlight} call relies on.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
      * that's revealed during the turn can still be compared against a real
