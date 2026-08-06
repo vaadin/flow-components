@@ -17,6 +17,8 @@ package com.vaadin.flow.component.ai.form;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The texts shown by the marker the {@link FormAIController} applies to the
  * fields the AI filled: the "AI" badge, its tooltip, and the popover that
@@ -24,8 +26,10 @@ import java.io.Serializable;
  * any text left {@code null} falls back to the built-in English default.
  *
  * @author Vaadin Ltd
+ * @since 25.3
  * @see FormAIController#setFieldMarkerI18n(FieldMarkerI18n)
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldMarkerI18n implements Serializable {
 
     private String message;
@@ -45,7 +49,7 @@ public class FieldMarkerI18n implements Serializable {
 
     /**
      * Sets the message shown in the popover explaining the AI fill. The message
-     * is also announced to screen readers when a field is highlighted.
+     * is also announced to screen readers when a field is marked.
      *
      * @param message
      *            the popover message, or {@code null} to use the built-in
