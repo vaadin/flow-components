@@ -18,11 +18,10 @@ package com.vaadin.flow.component.ai.form;
 import java.io.Serializable;
 
 /**
- * The texts shown by the AI field highlight applied via
- * {@link FormAIController#showFieldHighlight}: the "AI" badge, its tooltip, and
- * the popover that explains the AI fill and offers a revert control. Use to
- * localize the highlight; any text left {@code null} falls back to the built-in
- * English default.
+ * The texts shown by the marker the {@link FormAIController} applies to the
+ * fields the AI filled: the "AI" badge, its tooltip, and the popover that
+ * explains the AI fill and offers a revert control. Use to localize the marker;
+ * any text left {@code null} falls back to the built-in English default.
  *
  * @author Vaadin Ltd
  * @see FormAIController#setFieldMarkerI18n(FieldMarkerI18n)

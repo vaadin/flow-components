@@ -25,9 +25,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Bridges {@link FormAIController#showFieldHighlight} /
- * {@link FormAIController#hideFieldHighlight} to the
- * {@code vaadin-ai-field-marker} web component, which annotates a field as
+ * Bridges the {@link FormAIController}'s marking of the fields the AI filled to
+ * the {@code vaadin-ai-field-marker} web component, which annotates a field as
  * AI-filled and offers a popover to review and revert the value. It also
  * toggles the field's "AI is working" shimmer ({@link #setWorking}) shown while
  * a fill is in progress. The annotations on this class load the web component
