@@ -41,6 +41,7 @@ public enum TestFixtures {
     CustomEditorShared(CustomEditorSharedFixture.class),
     CustomEditorRow(CustomEditorRowFixture.class),
     CustomEditorSelect(CustomEditorSelectFixture.class),
+    CustomEditorDelayedCallback(CustomEditorDelayedCallbackFixture.class),
     Styles(StylesFixture.class),
     LockCell(LockCellFixture.class),
     LockSheet(LockSheetFixture.class),
