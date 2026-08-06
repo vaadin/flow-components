@@ -370,6 +370,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                 getCellValue(address)));
     }
 
+    @Test
     public void customEditorShared_persistsValuesCorrectly() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.CustomEditorShared);
