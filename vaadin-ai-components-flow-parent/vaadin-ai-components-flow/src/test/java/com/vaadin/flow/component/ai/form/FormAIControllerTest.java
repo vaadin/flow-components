@@ -44,6 +44,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
+import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
@@ -2072,6 +2073,27 @@ class FormAIControllerTest {
         }
 
         @Test
+        void turnStartClearsStaleWorkingStateFromUnwritableField() {
+            // A turn that never reaches onResponse (a dropped connection)
+            // leaves the working state applied. If the field is no longer
+            // writable when the next turn starts, that turn skips it — so the
+            // stale shimmer has to be cleared up front rather than left to
+            // linger over a field nothing is working on.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest(); // turn 1 starts and never completes
+            field.setVisible(false);
+            controller.onRequest(); // turn 2 starts
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "A new turn must clear the working state left behind by an "
+                            + "unfinished one");
+        }
+
+        @Test
         void revertDuringTurnKeepsMarkerForWorkingState() {
             // The badge is hidden while the AI works, but a revert event can
             // still arrive from the client just as a turn starts. Clearing the
@@ -2128,6 +2150,34 @@ class FormAIControllerTest {
             Assertions.assertEquals(1, markersOn(changed).size());
             Assertions.assertEquals(List.of(), markersOn(untouched),
                     "An unchanged field must not be highlighted");
+        }
+
+        @Test
+        void fieldRevealedDuringTurnIsMarked() {
+            // A field hidden at turn start gets no working state, so nothing
+            // has put a marker on it yet. When the AI reveals and fills it
+            // during the turn — the cascade case — the turn-end marking is
+            // what has to add one.
+            var trigger = new TestField();
+            var revealed = new TestField();
+            revealed.setVisible(false);
+            var form = new Div(trigger, revealed);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+
+            Assertions.assertEquals(List.of(), markersOn(revealed),
+                    "A hidden field must not enter the working state");
+
+            trigger.setValue("business");
+            revealed.setVisible(true);
+            revealed.setValue("cascaded");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, markersOn(revealed).size(),
+                    "A field revealed and filled during the turn must be "
+                            + "marked at turn end");
         }
 
         @Test
@@ -2240,6 +2290,82 @@ class FormAIControllerTest {
                     "Revert must restore the value from before the AI's first "
                             + "change, not the most recent turn's pre-turn "
                             + "value");
+        }
+
+        @Test
+        void revertAfterUserEditRestoresValueFromBeforeTheLaterFill() {
+            // Clearing the marker must drop the field's revert value with it.
+            // Otherwise the next fill keeps the stale one and revert jumps back
+            // past a value the user typed themselves.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first ai value");
+            controller.onResponse(null);
+
+            field.setValue("user typed"); // clears the marker
+
+            controller.onRequest();
+            field.setValue("second ai value");
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertEquals("user typed", field.getValue(),
+                    "Revert must restore the value from before the latest "
+                            + "fill, not one the user has since replaced");
+        }
+
+        @Test
+        void revertClearsMarkerWhenValueAlreadyEqualsThePreFillValue() {
+            // The AI changed the field and then changed it back on a later
+            // turn, so restoring the pre-fill value writes what the field
+            // already holds and fires no value-change event. Revert must clear
+            // the marker on its own rather than relying on that event.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("detour");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("original"); // the AI puts the original value back
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertEquals("original", field.getValue());
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Revert must clear the marker even when restoring the "
+                            + "pre-fill value changes nothing");
+        }
+
+        @Test
+        void revertClearsFieldWhosePreFillValueWasNull() {
+            // Some fields reject setValue(null), so a null pre-fill value is
+            // restored by clearing the field. DoubleField starts out null.
+            var field = new DoubleField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue(42.0);
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertNull(field.getValue(),
+                    "Revert must restore a null pre-fill value by clearing the "
+                            + "field");
         }
 
         @Test
