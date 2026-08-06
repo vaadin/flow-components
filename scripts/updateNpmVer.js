@@ -11,7 +11,7 @@
 const fs = require('fs');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const replace = require('replace-in-file');
+const { replaceInFile } = require('replace-in-file');
 const {getAnnotations, computeVersionToUpdate} = require('./lib/versions.js');
 
 let exclude=[];
@@ -26,7 +26,7 @@ async function updateFiles(moduleData){
         to: updatedNpm,
       };
       try {
-        const results = await replace(options)
+        const results = await replaceInFile(options)
         console.log('\x1b[33m', "Updated "+ moduleData.package + " from version " +
                     moduleData.version + " to " + moduleData.updatedVersion);
       }
