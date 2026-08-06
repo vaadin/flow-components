@@ -1663,84 +1663,27 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showFieldHighlightAddsMarkerToField() {
+        void turnAfterUserEditRemarksField() {
+            // A mark-clear-remark sequence: the AI fills the field, the user
+            // edits it away, and a later turn fills it again. The field must
+            // end up marked by exactly one marker.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("ai");
+            controller.onResponse(null);
+            field.setValue("user edit"); // clears the marker
+
+            controller.onRequest();
+            field.setValue("ai again");
+            controller.onResponse(null);
 
             Assertions.assertEquals(1, markersOn(field).size(),
-                    "showFieldHighlight must add exactly one marker element to "
-                            + "the field");
-            Assertions.assertFalse(isWorking(field),
-                    "A marker added outside a turn must not be in the working "
-                            + "state");
-        }
-
-        @Test
-        void hideFieldHighlightRemovesMarkerFromField() {
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.showFieldHighlight(field);
-            controller.hideFieldHighlight(field);
-
-            Assertions.assertEquals(List.of(), markersOn(field),
-                    "hideFieldHighlight must remove the field's marker");
-        }
-
-        @Test
-        void hideFieldHighlightWithoutMarkerLeavesFieldUntouched() {
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.hideFieldHighlight(field);
-
-            Assertions.assertEquals(List.of(), markersOn(field),
-                    "Hiding a highlight that was never shown must not add "
-                            + "anything to the field");
-        }
-
-        @Test
-        void showFieldHighlightTwiceKeepsOneMarker() {
-            // The mark is the marker element itself, so a repeated show must
-            // reuse it rather than stack a second annotation on the field.
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.showFieldHighlight(field);
-            controller.showFieldHighlight(field);
-
-            Assertions.assertEquals(1, markersOn(field).size(),
-                    "Repeated showFieldHighlight calls must converge on a "
-                            + "single marker");
-        }
-
-        @Test
-        void showThenHideThenShowLeavesFieldMarked() {
-            // A flash-clear-reshow sequence (e.g. an application clearing the
-            // highlight on user focus and re-applying it on the next turn) must
-            // end with the field marked by exactly one marker.
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.showFieldHighlight(field);
-            controller.hideFieldHighlight(field);
-            controller.showFieldHighlight(field);
-
-            Assertions.assertEquals(1, markersOn(field).size(),
-                    "Show after hide must leave the field marked by exactly "
-                            + "one marker");
+                    "A turn after the marker was cleared must leave the field "
+                            + "marked by exactly one marker");
         }
 
         @Test
@@ -1753,7 +1696,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
             form.remove(field);
             form.add(field);
 
@@ -1763,22 +1708,24 @@ class FormAIControllerTest {
         }
 
         @Test
-        void markerDoesNotReturnAfterHide() {
-            // hide removes the marker for good; a later detach/re-attach must
-            // not bring the highlight back.
+        void markerDoesNotReturnAfterUserEdit() {
+            // A user edit removes the marker for good; a later detach/re-attach
+            // must not bring it back.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
-            controller.hideFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            field.setValue("user edit");
             form.remove(field);
             form.add(field);
 
             Assertions.assertEquals(List.of(), markersOn(field),
-                    "After hide, a detach/re-attach must not bring the marker "
-                            + "back");
+                    "After the marker is cleared, a detach/re-attach must not "
+                            + "bring it back");
         }
 
         @Test
@@ -1792,7 +1739,9 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
 
             Assertions.assertEquals(List.of(inner),
                     field.getChildren().toList(),
@@ -1812,35 +1761,13 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
 
             Assertions.assertTrue(i18nOn(field).isEmpty(),
                     "An unconfigured controller must set no texts; got: "
                             + i18nOn(field));
-        }
-
-        @Test
-        void showFieldHighlightPassesI18nTexts() {
-            var field = new TestField();
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form)
-                    .setFieldMarkerI18n(new FieldMarkerI18n()
-                            .setMessage("Tekoäly täytti tämän kentän")
-                            .setRevert("Kumoa")
-                            .setBadgeLabel("Tekoälyn täyttämä arvo")
-                            .setBadgeTooltip("Avaa tiedot"));
-
-            controller.showFieldHighlight(field);
-            var i18n = i18nOn(field);
-
-            Assertions.assertEquals("Tekoäly täytti tämän kentän",
-                    i18n.get("message").asString());
-            Assertions.assertEquals("Kumoa", i18n.get("revert").asString());
-            Assertions.assertEquals("Tekoälyn täyttämä arvo",
-                    i18n.get("badgeLabel").asString());
-            Assertions.assertEquals("Avaa tiedot",
-                    i18n.get("badgeTooltip").asString());
         }
 
         @Test
@@ -1853,7 +1780,9 @@ class FormAIControllerTest {
             var controller = new FormAIController(form).setFieldMarkerI18n(
                     new FieldMarkerI18n().setMessage("Vain viesti"));
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
             var i18n = i18nOn(field);
 
             Assertions.assertEquals("Vain viesti",
@@ -1875,129 +1804,84 @@ class FormAIControllerTest {
             var controller = new FormAIController(form)
                     .setFieldMarkerI18n(new FieldMarkerI18n());
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
 
             Assertions.assertTrue(i18nOn(field).isEmpty(),
                     "An empty i18n must set no texts; got: " + i18nOn(field));
         }
 
         @Test
-        void autoHighlightUsesI18nTexts() {
-            // The automatic highlighting of AI-changed fields must carry the
-            // configured texts, not just explicit showFieldHighlight calls.
+        void markerCarriesConfiguredI18nTexts() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
-            var controller = new FormAIController(form).setFieldMarkerI18n(
-                    new FieldMarkerI18n().setMessage("Tekoälyn täyttämä"));
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setMessage("Tekoäly täytti tämän kentän")
+                            .setRevert("Kumoa")
+                            .setBadgeLabel("Tekoälyn täyttämä arvo")
+                            .setBadgeTooltip("Avaa tiedot"));
 
             controller.onRequest();
             field.setValue("filled");
             controller.onResponse(null);
+            var i18n = i18nOn(field);
 
-            Assertions.assertEquals("Tekoälyn täyttämä",
-                    i18nOn(field).get("message").asString());
+            Assertions.assertEquals("Tekoäly täytti tämän kentän",
+                    i18n.get("message").asString());
+            Assertions.assertEquals("Kumoa", i18n.get("revert").asString());
+            Assertions.assertEquals("Tekoälyn täyttämä arvo",
+                    i18n.get("badgeLabel").asString());
+            Assertions.assertEquals("Avaa tiedot",
+                    i18n.get("badgeTooltip").asString());
         }
 
         @Test
-        void showFieldHighlightRefreshesI18nTexts() {
-            // Texts set after a highlight was first shown reach the field on
-            // the next show, without the marker being replaced.
+        void i18nTextsAreRefreshedOnLaterTurns() {
+            // Texts set after a field was first marked reach it when the next
+            // turn marks it again, without the marker being replaced.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
             controller.setFieldMarkerI18n(
                     new FieldMarkerI18n().setMessage("Päivitetty viesti"));
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("second");
+            controller.onResponse(null);
 
+            Assertions.assertEquals(1, markersOn(field).size());
             Assertions.assertEquals("Päivitetty viesti",
                     i18nOn(field).get("message").asString());
         }
 
         @Test
-        void nullFieldThrows() {
-            // Message is asserted, not just the exception type: without an
-            // explicit null guard, the IllegalArgumentException branch would
-            // incidentally NPE on field.getClass(), accidentally satisfying a
-            // type-only assertion.
-            var controller = new FormAIController(new Div());
-
-            var showNpe = Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.showFieldHighlight(null));
-            Assertions.assertEquals("Field must not be null",
-                    showNpe.getMessage());
-            var hideNpe = Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.hideFieldHighlight(null));
-            Assertions.assertEquals("Field must not be null",
-                    hideNpe.getMessage());
-        }
-
-        @Test
-        void nonComponentFieldThrows() {
-            var controller = new FormAIController(new Div());
-            var nonComponent = new NonComponentField();
-
-            Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.showFieldHighlight(nonComponent));
-            Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> controller.hideFieldHighlight(nonComponent));
-        }
-
-        @Test
-        void highlightWorksForFieldOutsideTheControllerForm() {
-            // Controller's form intentionally does not contain `outsideField`.
-            // Pins the contract that showFieldHighlight / hideFieldHighlight
-            // operate on any HasValue Component, regardless of form membership.
-            var formField = new TestField();
-            var outsideField = new TestField();
-            var formDiv = new Div(formField);
-            var siblingDiv = new Div(outsideField);
-            ui.add(formDiv);
-            ui.add(siblingDiv);
-            var controller = new FormAIController(formDiv);
-
-            controller.showFieldHighlight(outsideField);
-
-            Assertions.assertEquals(1, markersOn(outsideField).size(),
-                    "showFieldHighlight must mark the field even when it is "
-                            + "outside the controller's form");
-        }
-
-        @Test
-        void highlightOnOneFieldLeavesSiblingsUnmarked() {
-            var highlighted = new TestField();
-            var untouched = new TestField();
-            var form = new Div(highlighted, untouched);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.showFieldHighlight(highlighted);
-
-            Assertions.assertEquals(1, markersOn(highlighted).size());
-            Assertions.assertEquals(List.of(), markersOn(untouched),
-                    "Highlighting one field must not mark unrelated fields");
-        }
-
-        @Test
-        void hideFieldHighlightLeavesOtherHighlightedFieldsAlone() {
-            // Pin behavioural independence: with two fields already
-            // highlighted, hiding one must leave the other marked.
+        void userEditClearsOnlyThatFieldsMarker() {
+            // Pin behavioural independence: with two fields marked by the same
+            // turn, editing one must leave the other marked.
             var keep = new TestField();
-            var clear = new TestField();
-            var form = new Div(keep, clear);
+            var edited = new TestField();
+            var form = new Div(keep, edited);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(keep);
-            controller.showFieldHighlight(clear);
-            controller.hideFieldHighlight(clear);
+            controller.onRequest();
+            keep.setValue("filled");
+            edited.setValue("filled");
+            controller.onResponse(null);
+
+            edited.setValue("user edit");
 
             Assertions.assertEquals(1, markersOn(keep).size(),
-                    "Hiding one field's highlight must leave the other marked");
-            Assertions.assertEquals(List.of(), markersOn(clear));
+                    "Clearing one field's marker must leave the other marked");
+            Assertions.assertEquals(List.of(), markersOn(edited));
         }
 
         @Test
@@ -2136,7 +2020,10 @@ class FormAIControllerTest {
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
             controller.onRequest();
             controller.onResponse(new RuntimeException("boom"));
 
@@ -2185,33 +2072,30 @@ class FormAIControllerTest {
         }
 
         @Test
-        void hideDuringTurnKeepsMarkerForWorkingState() {
-            // Clearing a highlight mid-turn must not take the shimmer with it —
-            // the marker carries both. The marker goes at turn end instead.
+        void revertDuringTurnKeepsMarkerForWorkingState() {
+            // The badge is hidden while the AI works, but a revert event can
+            // still arrive from the client just as a turn starts. Clearing the
+            // mark must not take the shimmer with it — the marker carries both.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
             controller.onRequest();
-            controller.hideFieldHighlight(field);
-
-            Assertions.assertTrue(isWorking(field),
-                    "Hiding the highlight mid-turn must keep the working "
-                            + "state");
-
+            field.setValue("filled");
             controller.onResponse(null);
 
-            Assertions.assertEquals(List.of(), markersOn(field),
-                    "The marker kept for the working state must go at turn "
-                            + "end");
+            controller.onRequest();
+            fireRevert(field);
+
+            Assertions.assertTrue(isWorking(field),
+                    "Clearing the mark mid-turn must keep the working state");
         }
 
         @Test
         void changedFieldIsHighlightedAutomatically() {
-            // A turn that changes a field marks it without any
-            // showFieldHighlight wiring on the application's side.
+            // A turn that changes a field marks it without any wiring on the
+            // application's side.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
@@ -2359,26 +2243,6 @@ class FormAIControllerTest {
         }
 
         @Test
-        void revertWithoutTrackedValueOnlyClearsMarker() {
-            // showFieldHighlight outside a turn captures no revert value, so
-            // revert must leave the value alone and only clear the marker.
-            var field = new TestField();
-            field.setValue("current");
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.showFieldHighlight(field);
-
-            fireRevert(field);
-
-            Assertions.assertEquals("current", field.getValue(),
-                    "With no tracked value, revert must not change the value");
-            Assertions.assertEquals(List.of(), markersOn(field),
-                    "Revert must still clear the marker");
-        }
-
-        @Test
         void autoHighlightDefaultsToEnabled() {
             var form = new Div(new TestField());
             ui.add(form);
@@ -2436,60 +2300,6 @@ class FormAIControllerTest {
             Assertions.assertEquals(List.of(), markersOn(field),
                     "The marker that only carried the working state must go at "
                             + "turn end");
-        }
-
-        @Test
-        void autoHighlightOffStillAllowsManualHighlight() {
-            // The intended opt-out workflow: decide per change which fields to
-            // mark, from a field value change listener.
-            var marked = new TestField();
-            var unmarked = new TestField();
-            var form = new Div(marked, unmarked);
-            ui.add(form);
-            var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
-            controller.addFieldValueChangeListener(event -> {
-                if (event.getField() == marked) {
-                    controller.showFieldHighlight(event.getField());
-                }
-            });
-
-            controller.onRequest();
-            marked.setValue("filled");
-            unmarked.setValue("also filled");
-            controller.onResponse(null);
-
-            Assertions.assertEquals(1, markersOn(marked).size(),
-                    "A field the application marks itself must end up marked");
-            Assertions.assertEquals(List.of(), markersOn(unmarked),
-                    "A changed field the application left alone must stay "
-                            + "unmarked");
-        }
-
-        @Test
-        void autoHighlightOffStillTracksRevertValue() {
-            // The pre-fill value is captured from the turn diff, not from the
-            // automatic highlighting, so a marker the application shows itself
-            // offers the same revert as an automatic one.
-            var field = new TestField();
-            field.setValue("old");
-            var form = new Div(field);
-            ui.add(form);
-            var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
-
-            controller.onRequest();
-            field.setValue("new");
-            controller.onResponse(null);
-            controller.showFieldHighlight(field);
-
-            fireRevert(field);
-
-            Assertions.assertEquals("old", field.getValue(),
-                    "Revert must restore the pre-fill value even though the "
-                            + "field was marked manually");
-            Assertions.assertEquals(List.of(), markersOn(field),
-                    "Revert must clear the manually shown marker");
         }
 
         @Test

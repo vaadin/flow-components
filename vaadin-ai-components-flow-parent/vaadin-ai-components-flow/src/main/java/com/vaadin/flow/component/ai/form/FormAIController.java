@@ -160,14 +160,12 @@ import tools.jackson.databind.JsonNode;
  * every field whose value changed during the turn is highlighted automatically
  * with the AI marker, which offers a revert control that restores the field's
  * value from before the AI's first change to it. The marker clears itself once
- * the user edits the field. The automatic highlighting can be turned off with
- * {@link #setAutoHighlightEnabled(boolean)}, leaving
- * {@link #showFieldHighlight(HasValue)} / {@link #hideFieldHighlight} to mark
- * fields on the application's terms. A listener registered through
+ * the user edits the field. Marking is the controller's own doing end to end;
+ * an application that does not want it turns it off with
+ * {@link #setAutoHighlightEnabled(boolean)}. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
- * field whose value changed during a successful turn, both for applications
- * that need to react beyond the marker and as the hook for driving the marker
- * themselves once the automatic highlighting is off.
+ * field whose value changed during a successful turn, for applications that
+ * need to react to the AI's edits beyond the marker.
  * </p>
  *
  * <p>
@@ -284,25 +282,25 @@ public class FormAIController implements AIController {
      * guard) for the current turn, mapped to their marker element. Tracked so
      * {@link #onResponse} clears exactly the ones {@link #onRequest} set even
      * if the active field set changed during the turn, and so
-     * {@link #hideFieldHighlight} knows to leave a marker that the working
-     * state still needs.
+     * {@link #unmarkField} knows to leave a marker that the working state still
+     * needs.
      */
     private final Map<HasValue<?, ?>, Element> workingFields = new LinkedHashMap<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     /**
      * Per-field registrations that listen for the field's
      * {@code ai-field-revert} event and clear the marker when the user edits
-     * the field. Populated on the first {@link #showFieldHighlight} call for a
-     * field; entries are removed by {@link #hideFieldHighlight}. The map's key
-     * set is also the record of which fields are currently marked.
+     * the field. Populated by {@link #markField}; entries are removed by
+     * {@link #unmarkField}. The map's key set is also the record of which
+     * fields are currently marked.
      */
-    private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
+    private final Map<HasValue<?, ?>, Registration> markedFields = new HashMap<>();
     /**
      * Per-field value to restore when the user reverts the AI fill — the value
-     * from before the AI's first change to the field. Captured from the turn
-     * diff in {@link #fireFieldValueChanges} (kept across later turns that
-     * change the same field) and consumed by the {@code ai-field-revert}
-     * handler; entries are removed by {@link #hideFieldHighlight}.
+     * from before the AI's first change to the field. Captured alongside the
+     * mark in {@link #markChangedField} (kept across later turns that change
+     * the same field) and consumed by the {@code ai-field-revert} handler;
+     * entries are removed by {@link #unmarkField}.
      */
     private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
@@ -672,13 +670,10 @@ public class FormAIController implements AIController {
      * value}. No events fire when the turn ended in error.
      * <p>
      * Listeners run on the UI thread with the session lock held, so they can
-     * update components and call {@link #showFieldHighlight} /
-     * {@link #hideFieldHighlight} directly without {@code ui.access(...)}.
-     * Changed fields are already highlighted automatically, so the listener is
-     * for extra application-specific reactions rather than for driving the
-     * marker — unless the automatic highlighting is turned off with
-     * {@link #setAutoHighlightEnabled(boolean)}, in which case this is the hook
-     * for deciding which of the turn's changes to mark.
+     * update components directly without {@code ui.access(...)}. Marking the
+     * changed fields is not the listener's job — the controller has already
+     * done it by the time the listener runs — so this is for
+     * application-specific reactions to the AI's edits.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -694,14 +689,13 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Sets the texts shown by the AI field highlight — the "AI" badge, its
+     * Sets the texts shown by the AI field marker — the "AI" badge, its
      * tooltip, and the popover with the revert control — replacing the built-in
-     * English defaults. The texts apply whenever this controller shows or
-     * re-applies a highlight, including the automatic highlighting of fields
-     * the AI changed during a fill turn, so set them before the first turn to
-     * localize every marker the controller produces. A highlight that is
-     * already visible keeps its texts until it is shown again. Texts left
-     * {@code null} fall back to the built-in defaults.
+     * English defaults. The texts are applied to every marker the controller
+     * puts on a field, so set them before the first turn to localize them all.
+     * A marker already on a field keeps its texts until the controller marks
+     * that field again. Texts left {@code null} fall back to the built-in
+     * defaults.
      *
      * @param i18n
      *            the texts to use, or {@code null} to restore the built-in
@@ -714,7 +708,7 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Returns the texts shown by the AI field highlight.
+     * Returns the texts shown by the AI field marker.
      *
      * @return the configured texts, or {@code null} when the built-in defaults
      *         are used
@@ -726,27 +720,23 @@ public class FormAIController implements AIController {
 
     /**
      * Controls whether every field whose value the AI changed during a turn is
-     * highlighted automatically when the turn ends. Defaults to {@code true}.
-     * Set to {@code false} to decide per field which changes to mark, typically
-     * from a {@link #addFieldValueChangeListener(FieldValueChangeListener)
-     * field value change listener} calling
-     * {@link #showFieldHighlight(HasValue)}.
+     * marked when the turn ends — an "AI" badge with a popover explaining the
+     * fill and offering a revert control. Defaults to {@code true}. Set to
+     * {@code false} for a form that should carry no trace of the AI's edits.
      * <p>
-     * Only the automatic highlighting is affected. {@link #showFieldHighlight}
-     * / {@link #hideFieldHighlight} keep working, and a marker shown either way
-     * offers the same revert control, restoring the field's value from before
-     * the AI's first change to it. The "AI is working" state shown while a turn
+     * Only the mark is affected. The "AI is working" state shown while a turn
      * runs — the shimmer and the client-side guard against editing a field the
-     * AI is about to overwrite — is not affected either: it applies to every
-     * writable field regardless of this setting.
+     * AI is about to overwrite — applies to every writable field regardless of
+     * this setting, and
+     * {@link #addFieldValueChangeListener(FieldValueChangeListener) change
+     * events} still report what the AI wrote.
      * <p>
-     * Turning it off does not clear markers already shown; the fields marked by
-     * earlier turns stay marked until the user edits or reverts them, or the
-     * application hides them.
+     * Turning it off does not clear marks already shown; fields marked by
+     * earlier turns stay marked until the user edits or reverts them.
      *
      * @param autoHighlightEnabled
-     *            {@code true} to highlight changed fields automatically,
-     *            {@code false} to leave them unmarked
+     *            {@code true} to mark changed fields, {@code false} to leave
+     *            them unmarked
      * @return this controller, for chaining
      */
     public FormAIController setAutoHighlightEnabled(
@@ -771,43 +761,31 @@ public class FormAIController implements AIController {
      * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
      * component: it shows an "AI" badge and a popover that explains the fill
      * and offers a revert control. Repeated calls keep exactly one marker on
-     * the field. Call {@link #hideFieldHighlight} to clear it. The field can be
-     * any {@link HasValue} {@link Component}, in or out of this controller's
-     * form, and each field's marker state is independent of the others. The
-     * marker's texts can be localized via {@link #setFieldMarkerI18n}. The
-     * marker survives detaching and re-attaching the field.
+     * the field, and each field's marker state is independent of the others.
+     * The marker survives detaching and re-attaching the field, and picks up
+     * the texts configured through {@link #setFieldMarkerI18n} every time it is
+     * applied.
      * <p>
-     * The first {@code showFieldHighlight} call on a field registers two
-     * listeners: a listener for the marker's {@code ai-field-revert} event that
-     * restores the field's pre-fill value and clears the marker, and a
-     * value-change listener that clears the marker as soon as the user edits
-     * the field, so a stale cue does not linger over a value the user changed
-     * (the AI's own writes during a fill turn are excluded). The value restored
-     * on revert is the one captured from before the AI's first change to the
-     * field (see {@link #addFieldValueChangeListener}); when no such value is
-     * known the revert only clears the marker. Both listeners are removed by
-     * {@link #hideFieldHighlight}.
+     * The first call for a field registers two listeners: one for the marker's
+     * {@code ai-field-revert} event that restores the field's pre-fill value
+     * and clears the marker, and a value-change listener that clears the marker
+     * as soon as the user edits the field, so a stale cue does not linger over
+     * a value the user changed (the AI's own writes during a fill turn are
+     * excluded via the {@code filling} flag). Both are removed by
+     * {@link #unmarkField}.
      *
      * @param field
-     *            the field to mark, not {@code null}; must be a
+     *            the field to mark, a discovered field and therefore always a
      *            {@link Component}
-     * @throws NullPointerException
-     *             if {@code field} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
      */
-    public void showFieldHighlight(HasValue<?, ?> field) {
-        var element = requireFieldComponent(field).getElement();
-        highlightedFields.computeIfAbsent(field, ignored -> {
+    private void markField(HasValue<?, ?> field) {
+        var element = ((Component) field).getElement();
+        markedFields.computeIfAbsent(field, ignored -> {
             var revert = element.addEventListener("ai-field-revert",
                     event -> revertField(field));
-            // Clear the marker as soon as the user edits the field — a stale
-            // "AI filled this" cue must not linger over a value the user has
-            // changed. The AI's own writes during a turn are excluded via the
-            // filling flag.
             var valueChange = field.addValueChangeListener(event -> {
                 if (!filling) {
-                    hideFieldHighlight(field);
+                    unmarkField(field);
                 }
             });
             return Registration.combine(revert, valueChange);
@@ -816,24 +794,15 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Clears any marker previously applied to the field via
-     * {@link #showFieldHighlight}. A no-op when no marker is currently shown.
-     * The field can be any {@link HasValue} {@link Component}, in or out of
-     * this controller's form, and clearing one field's marker has no effect on
-     * others. The listeners registered by {@link #showFieldHighlight} are
-     * removed as well.
+     * Clears the field's marker along with the listeners and the revert value
+     * {@link #markField} recorded for it. A no-op when the field is not marked.
      *
      * @param field
-     *            the field to clear the marker from, not {@code null}; must be
-     *            a {@link Component}
-     * @throws NullPointerException
-     *             if {@code field} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
+     *            the field to clear the marker from, a discovered field and
+     *            therefore always a {@link Component}
      */
-    public void hideFieldHighlight(HasValue<?, ?> field) {
-        var element = requireFieldComponent(field).getElement();
-        var registration = highlightedFields.remove(field);
+    private void unmarkField(HasValue<?, ?> field) {
+        var registration = markedFields.remove(field);
         if (registration != null) {
             registration.remove();
         }
@@ -842,14 +811,16 @@ public class FormAIController implements AIController {
         // the shimmer; the badge is hidden for the duration anyway, and
         // stopWorking() drops the marker at turn end.
         if (!workingFields.containsKey(field)) {
-            FormFieldMarker.remove(element);
+            FormFieldMarker.remove(((Component) field).getElement());
         }
     }
 
     /**
-     * Restores the field's pre-fill value (when known) and clears its marker.
-     * Invoked by the {@code ai-field-revert} event the marker fires when the
-     * user activates the revert control.
+     * Restores the field's pre-fill value and clears its marker. Invoked by the
+     * {@code ai-field-revert} event the marker fires when the user activates
+     * the revert control. A marker always comes with a revert value; the
+     * {@code containsKey} check only keeps an event that arrives without one
+     * from clearing the field.
      *
      * @param field
      *            the field to revert, not {@code null}
@@ -860,7 +831,7 @@ public class FormAIController implements AIController {
         // Clear the marker first. This removes the auto-hide value-change
         // listener, so restoring the value below doesn't re-enter through it,
         // and drops the revert entry — capture it beforehand.
-        hideFieldHighlight(field);
+        unmarkField(field);
         if (hasValue) {
             restoreValue(field, value);
         }
@@ -880,15 +851,6 @@ public class FormAIController implements AIController {
         } else {
             field.setValue(value);
         }
-    }
-
-    private static Component requireFieldComponent(HasValue<?, ?> field) {
-        Objects.requireNonNull(field, "Field must not be null");
-        if (!(field instanceof Component component)) {
-            throw new IllegalArgumentException(
-                    "Field must be a Component: " + field.getClass().getName());
-        }
-        return component;
     }
 
     @Override
@@ -964,14 +926,11 @@ public class FormAIController implements AIController {
     public void onResponse(Throwable error) {
         try {
             var changes = collectFieldValueChanges(error);
-            // Highlight every changed field automatically, so applications get
-            // the AI marker without driving showFieldHighlight from a listener
-            // themselves. Marking before clearing the working state lets a
-            // changed field transition straight from working to marked, and
-            // tells stopWorking() which markers to keep.
+            // Marking before clearing the working state lets a changed field
+            // transition straight from working to marked, and tells
+            // stopWorking() which markers to keep.
             if (autoHighlightEnabled) {
-                changes.forEach(
-                        change -> showFieldHighlight(change.getField()));
+                changes.forEach(this::markChangedField);
             }
             // Runs regardless of success or failure so the fields never stay
             // locked for the user.
@@ -990,8 +949,8 @@ public class FormAIController implements AIController {
      * snapshot is consulted in {@link #onResponse} to compute the before /
      * after diff that drives the automatic highlight and
      * {@link #addFieldValueChangeListener}. Always taken, even with neither in
-     * play: the diff also captures each field's pre-fill value for a later
-     * revert, which a manual {@link #showFieldHighlight} call relies on.
+     * play, since the marker's revert control restores the pre-fill value the
+     * diff carries.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
      * that's revealed during the turn can still be compared against a real
@@ -1039,16 +998,22 @@ public class FormAIController implements AIController {
             if (!Objects.equals(oldValue, newValue)) {
                 events.add(new FieldValueChangeEvent(this, field, oldValue,
                         newValue));
-                // Remember the value from before the AI's first change to this
-                // field so a later revert restores it. putIfAbsent keeps the
-                // earliest captured value when the AI changes the same field
-                // across more than one turn — the field stays highlighted from
-                // the first change, so its revert entry is already present.
-                revertValues.putIfAbsent(field, oldValue);
             }
         }
         preTurnValues.clear();
         return events;
+    }
+
+    /**
+     * Marks the field the change belongs to and remembers the value from before
+     * the AI's first change to it, so the marker's revert control can restore
+     * it. {@code putIfAbsent} keeps the earliest captured value when the AI
+     * changes the same field across more than one turn — the field stays marked
+     * from the first change, so its revert entry is already present.
+     */
+    private void markChangedField(FieldValueChangeEvent change) {
+        revertValues.putIfAbsent(change.getField(), change.getOldValue());
+        markField(change.getField());
     }
 
     /**
@@ -1139,7 +1104,7 @@ public class FormAIController implements AIController {
     private void stopWorking() {
         for (var entry : workingFields.entrySet()) {
             var element = entry.getValue();
-            if (highlightedFields.containsKey(entry.getKey())) {
+            if (markedFields.containsKey(entry.getKey())) {
                 FormFieldMarker.setWorking(element, false);
             } else {
                 FormFieldMarker.remove(element);
