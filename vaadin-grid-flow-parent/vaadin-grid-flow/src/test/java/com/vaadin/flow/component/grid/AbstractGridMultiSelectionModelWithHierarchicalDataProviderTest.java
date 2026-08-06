@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.dom.Element;
 
 public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
@@ -125,6 +126,39 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     }
 
     @Test
+    public void selectAll_selectsAllItemsIncludingDescendants() {
+        treeGrid.setTreeData(createTreeData());
+
+        ((GridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .selectAll();
+
+        Assert.assertEquals(Set.of("Item 0", "Item 0-0", "Item 0-0-0",
+                "Item 0-1", "Item 1"), treeGrid.getSelectedItems());
+    }
+
+    @Test
+    public void selectAll_updatesCheckboxStates() {
+        Element columnElement = getGridSelectionColumn(treeGrid).getElement();
+
+        ((GridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    @Test
+    public void clientSelectAll_selectsAllItemsIncludingDescendants() {
+        treeGrid.setTreeData(createTreeData());
+
+        ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .clientSelectAll();
+
+        Assert.assertEquals(Set.of("Item 0", "Item 0-0", "Item 0-0-0",
+                "Item 0-1", "Item 1"), treeGrid.getSelectedItems());
+    }
+
+    @Test
     public void clientSelectAll_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
@@ -194,6 +228,14 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    private TreeData<String> createTreeData() {
+        TreeData<String> treeData = new TreeData<>();
+        treeData.addRootItems("Item 0", "Item 1");
+        treeData.addItems("Item 0", "Item 0-0", "Item 0-1");
+        treeData.addItems("Item 0-0", "Item 0-0-0");
+        return treeData;
     }
 
     private <T> GridSelectionColumn getGridSelectionColumn(Grid<T> grid) {
