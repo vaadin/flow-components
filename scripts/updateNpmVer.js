@@ -2,10 +2,22 @@
 /**
  * Update the NpmPackage annotation for all modules in the project
  * by checking versions published in npm repository.
- * By using `--exclude <component>,<component>`, the certain package update will be skipped
+ *
+ * By default every annotation is bumped to the latest published npm version
+ * for its major.minor. By using `--exclude <component>,<component>`, the
+ * certain package update will be skipped.
+ *
+ * With `--version <npm-version>` every annotation is instead pinned to that
+ * exact version - typically a web-components *feature snapshot* published by
+ * the `publishFeatureSnapshot.sh` script under an immutable `<base>-dev.<hash>`
+ * version. Only packages that actually publish that version are updated;
+ * packages outside the web-components monorepo (which never got the snapshot)
+ * are left untouched. Revert with the regular latest bump once released.
+ *
  * Example
  *   ./scripts/updateNpmVer.js
  *   ./scripts/updateNpmVer.js --exclude button,text-field
+ *   ./scripts/updateNpmVer.js --version 25.1.0-dev.a1b2c3d
  */
 
 const fs = require('fs');
@@ -14,10 +26,15 @@ const exec = util.promisify(require('child_process').exec);
 const {getAnnotations, computeVersionToUpdate} = require('./lib/versions.js');
 
 let exclude=[];
+let fixedVersion='';
 
 async function updateFiles(moduleData){
   if(moduleData.annotation.length>0){
-    if (moduleData.version != moduleData.updatedVersion){
+    if (!moduleData.updatedVersion){
+      // Fixed-version mode: the package does not publish the requested version.
+      console.log('\x1b[90m%s\x1b[0m', "skip " + moduleData.package +
+                  ": no '" + fixedVersion + "' version published");
+    } else if (moduleData.version != moduleData.updatedVersion){
       updatedNpm = moduleData.annotation.replace(moduleData.version, moduleData.updatedVersion)
       let options = {
         files: moduleData.path,
@@ -46,37 +63,39 @@ async function run(cmd) {
 }
 
 /**
- * Allow exclude certain component package update, use ',' as separator
+ * Parse arguments:
+ *   --exclude <component>,<component>  skip these packages (',' as separator)
+ *   --version <npm-version>            pin every package to this exact version
  */
-function excludeComponents() {
-  for (i = 2;process.argv[i]; i++) {
+function parseArgs() {
+  for (let i = 2; process.argv[i]; i++) {
     switch(process.argv[i]) {
       case '--exclude':
-        components = process.argv[++i]
+        exclude = process.argv[++i].split(',').map(c => '@vaadin/'.concat(c));
+        break;
+      case '--version':
+        fixedVersion = process.argv[++i];
         break;
       }
   }
-  exclude=components.split(',');
-  packageBase='@vaadin/';
-  for(j = 0; j < exclude.length; j++){
-	  exclude[j] = packageBase.concat(exclude[j]);
-  }
-  return exclude;
 }
 
 async function main() {
-  console.log("Updating the NpmPackage annotation.")
-  const annotations = await getAnnotations();
+  parseArgs();
 
-  if (process.argv.length > 2) {
-    exclude = excludeComponents();
+  if (fixedVersion) {
+    console.log("Pinning the NpmPackage annotations to '" + fixedVersion + "'.");
+  } else {
+    console.log("Updating the NpmPackage annotation to the latest npm version.");
   }
+
+  const annotations = await getAnnotations();
 
   for (i = 0; i < annotations.length; i++) {
     if (exclude.includes(annotations[i].package)) {
       console.log('\x1b[33m', "skip updating " + annotations[i].package + " package");
     } else {
-      await computeVersionToUpdate(annotations[i]);
+      await computeVersionToUpdate(annotations[i], fixedVersion);
       await updateFiles(annotations[i]);
     }
   }
