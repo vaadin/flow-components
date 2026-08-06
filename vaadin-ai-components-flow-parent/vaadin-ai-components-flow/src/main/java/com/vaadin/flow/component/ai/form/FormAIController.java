@@ -147,7 +147,7 @@ import tools.jackson.databind.JsonNode;
  * server-side read-only state is never changed, so it does not affect what the
  * LLM sees or writes, and a field's application-set read-only state is left
  * untouched. The guard is applied and cleared together with the "AI is working"
- * highlight (see below), so it is released when the turn ends, successfully or
+ * state (see below), so it is released when the turn ends, successfully or
  * otherwise. Applications should avoid toggling a field's server-side read-only
  * state during a fill turn: a field switched to read-only mid-turn keeps the
  * client guard cleared at turn end, which can briefly leave the client editable
@@ -155,14 +155,14 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
- * <b>Change tracking and highlight:</b> while a turn runs, every visible field
- * shows an "AI is working" shimmer; when the turn ends the shimmer clears and
- * every field whose value changed during the turn is highlighted automatically
+ * <b>Change tracking and field marker:</b> while a turn runs, every visible
+ * field shows an "AI is working" shimmer; when the turn ends the shimmer clears
+ * and every field whose value changed during the turn is marked automatically
  * with the AI marker, which offers a revert control that restores the field's
  * value from before the AI's first change to it. The marker clears itself once
  * the user edits the field. Marking is the controller's own doing end to end;
  * an application that does not want it turns it off with
- * {@link #setAutoHighlightEnabled(boolean)}. A listener registered through
+ * {@link #setFieldMarkerEnabled(boolean)}. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
  * field whose value changed during a successful turn, for applications that
  * need to react to the AI's edits beyond the marker.
@@ -305,7 +305,7 @@ public class FormAIController implements AIController {
     private final Map<HasValue<?, ?>, Object> revertValues = new HashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
     private FieldMarkerI18n fieldMarkerI18n;
-    private boolean autoHighlightEnabled = true;
+    private boolean fieldMarkerEnabled = true;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -734,27 +734,26 @@ public class FormAIController implements AIController {
      * Turning it off does not clear marks already shown; fields marked by
      * earlier turns stay marked until the user edits or reverts them.
      *
-     * @param autoHighlightEnabled
+     * @param fieldMarkerEnabled
      *            {@code true} to mark changed fields, {@code false} to leave
      *            them unmarked
      * @return this controller, for chaining
      */
-    public FormAIController setAutoHighlightEnabled(
-            boolean autoHighlightEnabled) {
-        this.autoHighlightEnabled = autoHighlightEnabled;
+    public FormAIController setFieldMarkerEnabled(boolean fieldMarkerEnabled) {
+        this.fieldMarkerEnabled = fieldMarkerEnabled;
         return this;
     }
 
     /**
-     * Returns whether fields changed by the AI are highlighted automatically at
-     * the end of a turn.
+     * Returns whether fields changed by the AI are marked automatically at the
+     * end of a turn.
      *
-     * @return {@code true} when changed fields are highlighted automatically,
+     * @return {@code true} when changed fields are marked automatically,
      *         {@code false} when they are left unmarked
-     * @see #setAutoHighlightEnabled(boolean)
+     * @see #setFieldMarkerEnabled(boolean)
      */
-    public boolean isAutoHighlightEnabled() {
-        return autoHighlightEnabled;
+    public boolean isFieldMarkerEnabled() {
+        return fieldMarkerEnabled;
     }
 
     /**
@@ -929,7 +928,7 @@ public class FormAIController implements AIController {
             // Marking before clearing the working state lets a changed field
             // transition straight from working to marked, and tells
             // stopWorking() which markers to keep.
-            if (autoHighlightEnabled) {
+            if (fieldMarkerEnabled) {
                 changes.forEach(this::markChangedField);
             }
             // Runs regardless of success or failure so the fields never stay
@@ -938,7 +937,7 @@ public class FormAIController implements AIController {
             fireFieldValueChanges(changes);
         } finally {
             // Clear last, so any field writes still happening as part of the
-            // turn (cascades, the highlight pass) count as AI writes rather
+            // turn (cascades, the marking pass) count as AI writes rather
             // than user edits that would clear the marker.
             filling = false;
         }
@@ -947,7 +946,7 @@ public class FormAIController implements AIController {
     /**
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
-     * after diff that drives the automatic highlight and
+     * after diff that drives the automatic field marker and
      * {@link #addFieldValueChangeListener}. Always taken, even with neither in
      * play, since the marker's revert control restores the pre-fill value the
      * diff carries.
