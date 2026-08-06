@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
@@ -367,6 +368,113 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         Assert.assertEquals("Fixture not loaded correctly", fixture.toString(),
                 $(ComboBoxElement.class).id("fixtureSelect")
                         .getInputElementValue());
+    }
+
+    /**
+     * State of the input element inside the custom editor rendered in a cell.
+     *
+     * @param value
+     *            the text shown in the input
+     * @param selectionStart
+     *            start of the text selection
+     * @param selectionEnd
+     *            end of the text selection
+     * @param focused
+     *            whether the input holds the focus
+     */
+    public record EditorInputState(String value, int selectionStart,
+            int selectionEnd, boolean focused) {
+
+        /**
+         * Returns whether the whole text is selected, which is what
+         * {@code inputElement.select()} produces.
+         *
+         * @return {@code true} if the text is non-empty and fully selected
+         */
+        public boolean isFullySelected() {
+            return !value.isEmpty() && selectionStart == 0
+                    && selectionEnd == value.length();
+        }
+    }
+
+    /**
+     * Returns the name of the slot the given cell's editor is assigned to. A
+     * cell knows only this name, not the editor itself, so editor lookups start
+     * here.
+     *
+     * @param cellAddress
+     *            address of the cell, e.g. "B2"
+     * @return the slot name, or {@code null} if the cell renders no editor
+     */
+    private String getEditorSlotName(String cellAddress) {
+        var slots = getSpreadsheet().getCellAt(cellAddress)
+                .findElements(By.tagName("slot"));
+        return slots.isEmpty() ? null : slots.get(0).getDomAttribute("name");
+    }
+
+    /**
+     * Returns the custom editor rendered in the given cell, or {@code null} if
+     * the cell renders none.
+     *
+     * @param <T>
+     *            element type of the editor
+     * @param cellAddress
+     *            address of the cell, e.g. "B2"
+     * @param editorType
+     *            e.g. {@code ComboBoxElement.class}
+     * @return the editor element, or {@code null} if there is none
+     */
+    protected <T extends TestBenchElement> T getCellEditor(String cellAddress,
+            Class<T> editorType) {
+        String slotName = getEditorSlotName(cellAddress);
+        if (slotName == null) {
+            return null;
+        }
+        var editors = getSpreadsheet().$(editorType).attribute("slot", slotName)
+                .all();
+        return editors.isEmpty() ? null : editors.get(0);
+    }
+
+    /**
+     * Returns the input state of the custom editor rendered in the given cell,
+     * or {@code null} if the cell renders no editor.
+     *
+     * @param cellAddress
+     *            address of the cell, e.g. "B2"
+     * @return the editor's input state, or {@code null} if there is none
+     */
+    @SuppressWarnings("unchecked")
+    public EditorInputState getEditorInputState(String cellAddress) {
+        String slotName = getEditorSlotName(cellAddress);
+        if (slotName == null) {
+            return null;
+        }
+        Object raw = executeScript("""
+                const editor = arguments[0].querySelector(
+                        '[slot="' + arguments[1] + '"]');
+                if (!editor || !editor.inputElement) return null;
+                const i = editor.inputElement;
+                // document.activeElement stops at a shadow host, so descend.
+                let active = document.activeElement;
+                while (active && active.shadowRoot
+                        && active.shadowRoot.activeElement) {
+                  active = active.shadowRoot.activeElement;
+                }
+                return {
+                  value: i.value == null ? '' : i.value,
+                  selectionStart: i.selectionStart,
+                  selectionEnd: i.selectionEnd,
+                  focused: active === i
+                };
+                """, getSpreadsheet(), slotName);
+        if (raw == null) {
+            return null;
+        }
+        Map<String, Object> state = (Map<String, Object>) raw;
+        return new EditorInputState(String.valueOf(state.get("value")),
+                ((Number) state.get("selectionStart")).intValue(),
+                ((Number) state.get("selectionEnd")).intValue(),
+                Boolean.TRUE.equals(state.get("focused")));
     }
 
     public void assertNoErrorIndicatorDetected() {
