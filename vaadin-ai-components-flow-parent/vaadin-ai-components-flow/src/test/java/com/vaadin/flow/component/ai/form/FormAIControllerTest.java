@@ -39,7 +39,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
@@ -49,12 +48,16 @@ import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyId;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Tests covering {@link FormAIController}'s construction, container traversal,
@@ -299,8 +302,14 @@ class FormAIControllerTest {
     @Nested
     class FieldLocking {
 
+        // The user-interaction guard during a turn is applied on the client
+        // only, by the web component as part of the "AI is working" state —
+        // see the Highlight tests. The controller must never change the
+        // field's server-side read-only state, so these tests assert that
+        // invariant via isReadOnly().
+
         @Test
-        void onRequestLocksAllDiscoveredFields() {
+        void onRequestDoesNotChangeServerReadOnlyState() {
             var a = new TestField();
             var b = new TestField();
             var nested = new TestField();
@@ -309,13 +318,14 @@ class FormAIControllerTest {
 
             controller.onRequest();
 
-            Assertions.assertTrue(a.isReadOnly());
-            Assertions.assertTrue(b.isReadOnly());
-            Assertions.assertTrue(nested.isReadOnly());
+            Assertions.assertFalse(a.isReadOnly(),
+                    "The controller must not flip server-side read-only");
+            Assertions.assertFalse(b.isReadOnly());
+            Assertions.assertFalse(nested.isReadOnly());
         }
 
         @Test
-        void onResponseReleasesLockedFieldsOnSuccess() {
+        void onResponseLeavesServerReadOnlyUntouched() {
             var a = new TestField();
             var b = new TestField();
             var controller = new FormAIController(new Div(a, b));
@@ -328,135 +338,23 @@ class FormAIControllerTest {
         }
 
         @Test
-        void onResponseReleasesLockedFieldsOnFailure() {
-            var a = new TestField();
-            var b = new TestField();
-            var controller = new FormAIController(new Div(a, b));
-
-            controller.onRequest();
-            controller.onResponse(new RuntimeException("boom"));
-
-            Assertions.assertFalse(a.isReadOnly());
-            Assertions.assertFalse(b.isReadOnly());
-        }
-
-        @Test
-        void ignoredFieldsAreNotLocked() {
-            var visible = new TestField();
-            var hidden = new TestField();
-            var controller = new FormAIController(new Div(visible, hidden));
-            controller.ignoreField(hidden);
-
-            controller.onRequest();
-
-            Assertions.assertTrue(visible.isReadOnly());
-            Assertions.assertFalse(hidden.isReadOnly(),
-                    "Ignored fields must not be locked during a fill");
-        }
-
-        @Test
-        void preexistingReadOnlyFieldsStayReadOnlyAfterRelease() {
-            // A field the application put into read-only state before the
-            // turn started must remain read-only after the turn ends —
-            // unlocking should only revert fields the controller itself
-            // locked.
+        void applicationReadOnlyIsPreservedAcrossTurn() {
+            // A field the application set read-only must stay read-only: the
+            // controller never touches the server-side state, so there is no
+            // unlock to clobber it.
             var editable = new TestField();
-            var preReadOnly = new TestField();
-            preReadOnly.setReadOnly(true);
+            var appReadOnly = new TestField();
+            appReadOnly.setReadOnly(true);
             var controller = new FormAIController(
-                    new Div(editable, preReadOnly));
+                    new Div(editable, appReadOnly));
 
             controller.onRequest();
-            Assertions.assertTrue(editable.isReadOnly());
-            Assertions.assertTrue(preReadOnly.isReadOnly());
-
             controller.onResponse(null);
+
             Assertions.assertFalse(editable.isReadOnly());
-            Assertions.assertTrue(preReadOnly.isReadOnly(),
-                    "A field that was already read-only before the fill "
-                            + "must remain read-only after the fill ends");
-        }
-
-        @Test
-        void describedFieldIsLocked() {
-            // describeField() registers a hint but does not ignore the field;
-            // the controller must distinguish "has a hint entry" from "is
-            // ignored". If they collapse, every described or
-            // fieldValueOptions-bound field would silently escape locking.
-            var described = new TestField();
-            var controller = new FormAIController(new Div(described));
-            controller.describeField(described, "the merchant name");
-
-            controller.onRequest();
-
-            Assertions.assertTrue(described.isReadOnly(),
-                    "A field with a description hint but no ignoreField() call "
-                            + "must still be locked during a fill");
-        }
-
-        @Test
-        void appReadOnlyBetweenTurnsSurvivesNextRelease() {
-            // The application may legitimately switch a field to
-            // read-only between turns. The next turn's unlock must only
-            // release fields locked by *that* turn — leftover tracking
-            // from a previous turn would clobber the app's state.
-            var field = new TestField();
-            var controller = new FormAIController(new Div(field));
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            field.setReadOnly(true);
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            Assertions.assertTrue(field.isReadOnly(),
-                    "A field the application set read-only between turns "
-                            + "must stay read-only after a subsequent fill "
-                            + "releases its own locks");
-        }
-
-        @Test
-        void fieldAddedBetweenTurnsIsLockedOnNextRequest() {
-            var initial = new TestField();
-            var form = new Div(initial);
-            var controller = new FormAIController(form);
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            var added = new TestField();
-            form.add(added);
-
-            controller.onRequest();
-
-            Assertions.assertTrue(initial.isReadOnly());
-            Assertions.assertTrue(added.isReadOnly(),
-                    "Fields added between turns must be locked on the next "
-                            + "request");
-        }
-
-        @Test
-        void fieldIgnoredBetweenTurnsIsNotLockedOnNextRequest() {
-            // The application may flag a field as ignored after the
-            // controller has been wired up — e.g., a feature toggle hides
-            // PII from the AI. The next turn must respect that. Today this
-            // works only because discovery re-evaluates each request; if
-            // anyone caches the active set "for performance", this
-            // regression slips through.
-            var field = new TestField();
-            var controller = new FormAIController(new Div(field));
-
-            controller.onRequest();
-            controller.onResponse(null);
-
-            controller.ignoreField(field);
-            controller.onRequest();
-
-            Assertions.assertFalse(field.isReadOnly(),
-                    "A field ignored after a previous turn must not be "
-                            + "locked by the next turn");
+            Assertions.assertTrue(appReadOnly.isReadOnly(),
+                    "An application-set read-only field must be left "
+                            + "untouched across a turn");
         }
     }
 
@@ -1746,12 +1644,14 @@ class FormAIControllerTest {
     @Nested
     class Highlight {
 
-        // Field-highlighter integration is exercised through the JS
-        // invocations the controller queues on the field's element. We
-        // assert on the queued script text rather than DOM side effects
-        // because the real visual change happens in the web component, on
-        // the client. Tests use a minimal UI so executeJs lands in the
-        // pending-invocation list.
+        // Marker integration is exercised through the marker element the
+        // controller appends to the field. We assert on that element — its
+        // presence and its properties — rather than on DOM side effects,
+        // because the real visual change happens in the web component, on the
+        // client. Tests use a minimal UI so the fields live in a real state
+        // tree.
+
+        private static final String MARKER_TAG = "vaadin-ai-field-marker";
 
         private UI ui;
 
@@ -1763,67 +1663,54 @@ class FormAIControllerTest {
         }
 
         @Test
-        void showFieldHighlightQueuesAddUserWithSingleAIUser() {
+        void showFieldHighlightAddsMarkerToField() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.showFieldHighlight(field);
-            var invocations = drainPendingJs();
-            var scripts = scriptsOn(invocations, field);
 
-            Assertions.assertEquals(1, scripts.size(),
-                    "showFieldHighlight must queue exactly one script; got: "
-                            + scripts);
-            var script = scripts.getFirst();
-            Assertions.assertTrue(script.contains(
-                    "customElements.get('vaadin-field-highlighter').addUser")
-                    && script.contains("'AI'"),
-                    "Script must invoke the field-highlighter addUser with "
-                            + "the AI user; got: " + script);
-            Assertions.assertTrue(
-                    paramsOn(invocations, field).stream()
-                            .anyMatch(p -> p instanceof String s
-                                    && s.startsWith("vaadin-ai-")),
-                    "addUser must be parameterised with a vaadin-ai- prefixed "
-                            + "UUID so it cannot collide with other users on "
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "showFieldHighlight must add exactly one marker element to "
                             + "the field");
+            Assertions.assertFalse(isWorking(field),
+                    "A marker added outside a turn must not be in the working "
+                            + "state");
         }
 
         @Test
-        void hideFieldHighlightQueuesRemoveUserWithControllerId() {
+        void hideFieldHighlightRemovesMarkerFromField() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+            controller.hideFieldHighlight(field);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "hideFieldHighlight must remove the field's marker");
+        }
+
+        @Test
+        void hideFieldHighlightWithoutMarkerLeavesFieldUntouched() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.hideFieldHighlight(field);
-            var invocations = drainPendingJs();
-            var scripts = scriptsOn(invocations, field);
 
-            Assertions.assertEquals(1, scripts.size(),
-                    "hideFieldHighlight must queue exactly one script; got: "
-                            + scripts);
-            var script = scripts.getFirst();
-            Assertions.assertTrue(script.contains(
-                    "customElements.get('vaadin-field-highlighter').removeUser"),
-                    "Script must invoke removeUser keyed by the controller's "
-                            + "AI user id; got: " + script);
-            Assertions.assertTrue(
-                    paramsOn(invocations, field).stream()
-                            .anyMatch(p -> p instanceof String s
-                                    && s.startsWith("vaadin-ai-")),
-                    "removeUser must be parameterised with the controller's "
-                            + "vaadin-ai- prefixed UUID so it removes only the "
-                            + "AI user and leaves other users untouched");
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Hiding a highlight that was never shown must not add "
+                            + "anything to the field");
         }
 
         @Test
-        void showFieldHighlightTwiceQueuesIdenticalScripts() {
-            // The web component dedups by user id, so repeated addUser with
-            // the same id collapses to one entry on the client. The Java
-            // side simply queues the same script twice.
+        void showFieldHighlightTwiceKeepsOneMarker() {
+            // The mark is the marker element itself, so a repeated show must
+            // reuse it rather than stack a second annotation on the field.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
@@ -1831,23 +1718,17 @@ class FormAIControllerTest {
 
             controller.showFieldHighlight(field);
             controller.showFieldHighlight(field);
-            var scripts = pendingJsOn(field);
 
-            Assertions.assertEquals(2, scripts.size(),
-                    "Each showFieldHighlight call queues its own script; got: "
-                            + scripts);
-            Assertions.assertEquals(scripts.get(0), scripts.get(1),
-                    "Both invocations must produce identical scripts so the "
-                            + "client converges on a single highlighted user");
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "Repeated showFieldHighlight calls must converge on a "
+                            + "single marker");
         }
 
         @Test
-        void showThenHideThenShowQueuesThreeScriptsInOrder() {
-            // A flash-clear-reshow sequence (e.g. an application clearing
-            // the highlight on user focus and re-applying it on the next
-            // turn) must enqueue the three scripts in the call order. Pins
-            // that hide doesn't swallow or collapse a subsequent show, and
-            // that the show-script appears at both endpoints.
+        void showThenHideThenShowLeavesFieldMarked() {
+            // A flash-clear-reshow sequence (e.g. an application clearing the
+            // highlight on user focus and re-applying it on the next turn) must
+            // end with the field marked by exactly one marker.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
@@ -1856,17 +1737,184 @@ class FormAIControllerTest {
             controller.showFieldHighlight(field);
             controller.hideFieldHighlight(field);
             controller.showFieldHighlight(field);
-            var scripts = pendingJsOn(field);
 
-            Assertions.assertEquals(3, scripts.size(),
-                    "Each call enqueues its own script; got: " + scripts);
-            Assertions.assertTrue(isShowScript(scripts.get(0)),
-                    "First script must be the show; got: " + scripts.get(0));
-            Assertions.assertTrue(isHideScript(scripts.get(1)),
-                    "Middle script must be the hide; got: " + scripts.get(1));
-            Assertions.assertTrue(isShowScript(scripts.get(2)),
-                    "Third script must be the show again; got: "
-                            + scripts.get(2));
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "Show after hide must leave the field marked by exactly "
+                            + "one marker");
+        }
+
+        @Test
+        void markerSurvivesReattach() {
+            // The marker lives in the field's element hierarchy, so Flow
+            // re-creates it on the client when the field re-enters the DOM —
+            // the user does not lose the visual cue.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+            form.remove(field);
+            form.add(field);
+
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "A detach/re-attach must leave exactly one marker on the "
+                            + "field");
+        }
+
+        @Test
+        void markerDoesNotReturnAfterHide() {
+            // hide removes the marker for good; a later detach/re-attach must
+            // not bring the highlight back.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+            controller.hideFieldHighlight(field);
+            form.remove(field);
+            form.add(field);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "After hide, a detach/re-attach must not bring the marker "
+                            + "back");
+        }
+
+        @Test
+        void markerIsNotAComponentChildOfTheField() {
+            // The marker is a plain element, so a composite field's own child
+            // components — and the controller's field discovery — must not see
+            // it.
+            var inner = new TestField();
+            var field = new CompositeField(inner);
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+
+            Assertions.assertEquals(List.of(inner),
+                    field.getChildren().toList(),
+                    "The marker must not appear among the field's child "
+                            + "components");
+            Assertions.assertEquals(List.of(field),
+                    FormFieldDiscovery.collectFields(form),
+                    "The marker must not be discovered as a field");
+        }
+
+        @Test
+        void defaultI18nCarriesNoTexts() {
+            // With no texts configured, the marker carries none either, so the
+            // web component applies its built-in defaults.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+
+            Assertions.assertTrue(i18nOn(field).isEmpty(),
+                    "An unconfigured controller must set no texts; got: "
+                            + i18nOn(field));
+        }
+
+        @Test
+        void showFieldHighlightPassesI18nTexts() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setMessage("Tekoäly täytti tämän kentän")
+                            .setRevert("Kumoa")
+                            .setBadgeLabel("Tekoälyn täyttämä arvo")
+                            .setBadgeTooltip("Avaa tiedot"));
+
+            controller.showFieldHighlight(field);
+            var i18n = i18nOn(field);
+
+            Assertions.assertEquals("Tekoäly täytti tämän kentän",
+                    i18n.get("message").asString());
+            Assertions.assertEquals("Kumoa", i18n.get("revert").asString());
+            Assertions.assertEquals("Tekoälyn täyttämä arvo",
+                    i18n.get("badgeLabel").asString());
+            Assertions.assertEquals("Avaa tiedot",
+                    i18n.get("badgeTooltip").asString());
+        }
+
+        @Test
+        void fieldMarkerI18nOmitsUnsetTexts() {
+            // A text left null falls back to the web component's default, so
+            // it must not appear in the marker's texts at all.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form).setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Vain viesti"));
+
+            controller.showFieldHighlight(field);
+            var i18n = i18nOn(field);
+
+            Assertions.assertEquals("Vain viesti",
+                    i18n.get("message").asString());
+            for (var key : List.of("revert", "badgeLabel", "badgeTooltip")) {
+                Assertions.assertFalse(i18n.has(key),
+                        "Unset text must be omitted from the marker: " + key);
+            }
+        }
+
+        @Test
+        void emptyFieldMarkerI18nCarriesNoTexts() {
+            // An i18n object with no texts set is equivalent to none at all:
+            // the marker carries no texts, so the web component falls back to
+            // its defaults for every one of them.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n());
+
+            controller.showFieldHighlight(field);
+
+            Assertions.assertTrue(i18nOn(field).isEmpty(),
+                    "An empty i18n must set no texts; got: " + i18nOn(field));
+        }
+
+        @Test
+        void autoHighlightUsesI18nTexts() {
+            // The automatic highlighting of AI-changed fields must carry the
+            // configured texts, not just explicit showFieldHighlight calls.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form).setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Tekoälyn täyttämä"));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("Tekoälyn täyttämä",
+                    i18nOn(field).get("message").asString());
+        }
+
+        @Test
+        void showFieldHighlightRefreshesI18nTexts() {
+            // Texts set after a highlight was first shown reach the field on
+            // the next show, without the marker being replaced.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.showFieldHighlight(field);
+            controller.setFieldMarkerI18n(
+                    new FieldMarkerI18n().setMessage("Päivitetty viesti"));
+            controller.showFieldHighlight(field);
+
+            Assertions.assertEquals("Päivitetty viesti",
+                    i18nOn(field).get("message").asString());
         }
 
         @Test
@@ -1902,8 +1950,7 @@ class FormAIControllerTest {
         void highlightWorksForFieldOutsideTheControllerForm() {
             // Controller's form intentionally does not contain `outsideField`.
             // Pins the contract that showFieldHighlight / hideFieldHighlight
-            // operate on
-            // any HasValue Component, regardless of form membership.
+            // operate on any HasValue Component, regardless of form membership.
             var formField = new TestField();
             var outsideField = new TestField();
             var formDiv = new Div(formField);
@@ -1913,19 +1960,14 @@ class FormAIControllerTest {
             var controller = new FormAIController(formDiv);
 
             controller.showFieldHighlight(outsideField);
-            var scripts = pendingJsOn(outsideField);
 
-            Assertions.assertEquals(1, scripts.size(),
-                    "showFieldHighlight must queue a script even when the field "
-                            + "is outside the controller's form; got: "
-                            + scripts);
-            Assertions.assertTrue(isShowScript(scripts.getFirst()));
+            Assertions.assertEquals(1, markersOn(outsideField).size(),
+                    "showFieldHighlight must mark the field even when it is "
+                            + "outside the controller's form");
         }
 
         @Test
-        void highlightOnOneFieldDoesNotEmitJsForAnother() {
-            // Two fields, only one is highlighted. The other field must not
-            // receive any field-highlighter script.
+        void highlightOnOneFieldLeavesSiblingsUnmarked() {
             var highlighted = new TestField();
             var untouched = new TestField();
             var form = new Div(highlighted, untouched);
@@ -1934,37 +1976,15 @@ class FormAIControllerTest {
 
             controller.showFieldHighlight(highlighted);
 
-            var dump = drainPendingJs();
-            Assertions.assertEquals(1, scriptsOn(dump, highlighted).size());
-            Assertions.assertEquals(0, scriptsOn(dump, untouched).size(),
-                    "Highlighting one field must not enqueue scripts on "
-                            + "unrelated fields");
-        }
-
-        @Test
-        void hideFieldHighlightOnOneFieldDoesNotEmitJsForAnother() {
-            // Sibling-independence check on the clearing path: hiding one
-            // field's highlight must leave another field's script queue
-            // untouched.
-            var cleared = new TestField();
-            var untouched = new TestField();
-            var form = new Div(cleared, untouched);
-            ui.add(form);
-            var controller = new FormAIController(form);
-
-            controller.hideFieldHighlight(cleared);
-
-            var dump = drainPendingJs();
-            Assertions.assertEquals(1, scriptsOn(dump, cleared).size());
-            Assertions.assertEquals(0, scriptsOn(dump, untouched).size());
+            Assertions.assertEquals(1, markersOn(highlighted).size());
+            Assertions.assertEquals(List.of(), markersOn(untouched),
+                    "Highlighting one field must not mark unrelated fields");
         }
 
         @Test
         void hideFieldHighlightLeavesOtherHighlightedFieldsAlone() {
             // Pin behavioural independence: with two fields already
-            // highlighted, hiding one must only emit the clear-script on the
-            // hidden field. The other field's queue keeps its show-script
-            // and gains nothing — its client-side state stays highlighted.
+            // highlighted, hiding one must leave the other marked.
             var keep = new TestField();
             var clear = new TestField();
             var form = new Div(keep, clear);
@@ -1975,171 +1995,431 @@ class FormAIControllerTest {
             controller.showFieldHighlight(clear);
             controller.hideFieldHighlight(clear);
 
-            var dump = drainPendingJs();
-            var keepScripts = scriptsOn(dump, keep);
-            var clearScripts = scriptsOn(dump, clear);
-
-            Assertions.assertEquals(1, keepScripts.size(),
-                    "keep field should keep only its show script when "
-                            + "another field is hidden; got: " + keepScripts);
-            Assertions.assertTrue(isShowScript(keepScripts.getFirst()),
-                    "keep field's queued script should be the show; got: "
-                            + keepScripts.getFirst());
-            Assertions.assertEquals(2, clearScripts.size(),
-                    "cleared field receives show then hide; got: "
-                            + clearScripts);
-            Assertions.assertTrue(isShowScript(clearScripts.get(0)),
-                    "First script on cleared field is the show; got: "
-                            + clearScripts.get(0));
-            Assertions.assertTrue(isHideScript(clearScripts.get(1)),
-                    "Last script on cleared field is the hide; got: "
-                            + clearScripts.get(1));
+            Assertions.assertEquals(1, markersOn(keep).size(),
+                    "Hiding one field's highlight must leave the other marked");
+            Assertions.assertEquals(List.of(), markersOn(clear));
         }
 
         @Test
-        void showFieldHighlightReappliesOnReattach() {
-            // Detach drops the client-side highlight; the controller's
-            // attach listener must re-issue addUser on the next attach so
-            // the user does not lose the visual cue.
+        void turnStartAppliesWorkingStateToEditableFields() {
+            // Every editable field enters the "AI is working" state at turn
+            // start, regardless of whether the AI ends up changing it. The
+            // shimmer and the client-side read-only guard are the web
+            // component's responsibility, so the controller only sets the
+            // state.
+            var changed = new TestField();
+            var untouched = new TestField();
+            var form = new Div(changed, untouched);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+
+            for (var field : List.of(changed, untouched)) {
+                Assertions.assertTrue(isWorking(field),
+                        "Every editable field must enter the working state at "
+                                + "turn start");
+            }
+            // The server-side read-only state is never touched.
+            Assertions.assertFalse(changed.isReadOnly());
+            Assertions.assertFalse(untouched.isReadOnly());
+        }
+
+        @Test
+        void turnStartSkipsFieldsTheAiCannotWrite() {
+            // Disabled, application-read-only and ignored fields are not
+            // "worked on" — the AI cannot write them — so they get no working
+            // state and, crucially, their read-only guard is never toggled.
+            var editable = new TestField();
+            var disabled = new TestField();
+            disabled.setEnabled(false);
+            var appReadOnly = new TestField();
+            appReadOnly.setReadOnly(true);
+            var ignored = new TestField();
+            var form = new Div(editable, disabled, appReadOnly, ignored);
+            ui.add(form);
+            var controller = new FormAIController(form);
+            controller.ignoreField(ignored);
+
+            controller.onRequest();
+
+            Assertions.assertTrue(isWorking(editable));
+            for (var field : List.of(disabled, appReadOnly, ignored)) {
+                Assertions.assertEquals(List.of(), markersOn(field),
+                        "A field the AI cannot write must not enter the "
+                                + "working state; offending field: " + field);
+            }
+        }
+
+        @Test
+        void turnEndClearsWorkingStateFromChangedField() {
+            // The working state — shimmer and the client read-only guard — is
+            // removed when the turn ends, leaving the mark visible.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "A changed field must stay marked after the turn");
+            Assertions.assertFalse(isWorking(field),
+                    "A changed field's working state must be cleared at turn "
+                            + "end");
+        }
+
+        @Test
+        void turnEndRemovesWorkingMarkerFromUnchangedField() {
+            // The marker on an unchanged field only carried the working state,
+            // so it goes away with it rather than leaving a mark on a value the
+            // AI never touched.
+            var field = new TestField();
+            field.setValue("kept");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "An unchanged field must be left without a marker");
+        }
+
+        @Test
+        void turnEndKeepsExistingMarkOnUnchangedField() {
+            // A field marked by an earlier turn keeps its mark through a turn
+            // that does not change it: the working state only hid the badge,
+            // and clearing the state brings it back.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            controller.onResponse(null); // second turn changes nothing
+
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "A turn that changes nothing must not clear an existing "
+                            + "mark");
+            Assertions.assertFalse(isWorking(field));
+        }
+
+        @Test
+        void workingStateClearedEvenWhenTurnFails() {
+            // A failed turn must not strand the shimmer on the form.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            controller.onResponse(new RuntimeException("boom"));
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "The working state must clear even when the turn fails");
+        }
+
+        @Test
+        void failedTurnLeavesExistingMarkIntact() {
+            // The working state hides an existing mark; a failed turn must
+            // bring it back rather than drop it.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.showFieldHighlight(field);
-            drainPendingJs();
+            controller.onRequest();
+            controller.onResponse(new RuntimeException("boom"));
 
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "A failed turn must leave an existing mark in place");
+            Assertions.assertFalse(isWorking(field),
+                    "A failed turn must clear the working state so the mark "
+                            + "shows again");
+        }
+
+        @Test
+        void workingStateSurvivesReattach() {
+            // Detaching a field mid-turn must not drop the working state: the
+            // marker carrying it comes back with the field.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest(); // turn in progress, working state applied
             form.remove(field);
             form.add(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
-                    .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
-                    "Re-attach must re-issue exactly one addUser script; "
-                            + "got: " + addUserScripts);
+            Assertions.assertTrue(isWorking(field),
+                    "A detach/re-attach during a turn must keep the working "
+                            + "state");
         }
 
         @Test
-        void hideFieldHighlightCancelsReapplyOnReattach() {
-            // hide removes the attach listener as well as queueing
-            // removeUser; a subsequent detach/re-attach must not bring the
-            // highlight back.
+        void workingStateDoesNotReturnAfterTurnEnd() {
+            // Once the turn has ended, a detach/re-attach must not bring the
+            // working state back.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            controller.onResponse(null);
+            form.remove(field);
+            form.add(field);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "After the turn ends, a detach/re-attach must not bring "
+                            + "the working state back");
+        }
+
+        @Test
+        void hideDuringTurnKeepsMarkerForWorkingState() {
+            // Clearing a highlight mid-turn must not take the shimmer with it —
+            // the marker carries both. The marker goes at turn end instead.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
             controller.showFieldHighlight(field);
+            controller.onRequest();
             controller.hideFieldHighlight(field);
-            drainPendingJs();
 
-            form.remove(field);
-            form.add(field);
+            Assertions.assertTrue(isWorking(field),
+                    "Hiding the highlight mid-turn must keep the working "
+                            + "state");
 
-            var addUserScripts = pendingJsOn(field).stream()
-                    .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(0, addUserScripts.size(),
-                    "After hide, re-attach must not re-issue addUser; got: "
-                            + addUserScripts);
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "The marker kept for the working state must go at turn "
+                            + "end");
         }
 
         @Test
-        void repeatedShowDoesNotStackReapplyListeners() {
-            // Two showFieldHighlight calls must register exactly one attach
-            // listener. Otherwise re-attach would queue duplicate addUser
-            // scripts and leak listeners across the field's lifetime.
+        void changedFieldIsHighlightedAutomatically() {
+            // A turn that changes a field marks it without any
+            // showFieldHighlight wiring on the application's side.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
-            controller.showFieldHighlight(field);
-            controller.showFieldHighlight(field);
-            drainPendingJs();
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
 
-            form.remove(field);
-            form.add(field);
-
-            var addUserScripts = pendingJsOn(field).stream()
-                    .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
-                    "Repeated show calls must collapse to one attach "
-                            + "listener; re-attach must re-issue addUser "
-                            + "exactly once; got: " + addUserScripts);
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "A field changed during a turn must be highlighted "
+                            + "automatically");
         }
 
         @Test
-        void showFieldHighlightAfterHideReinstallsReapply() {
-            // show → hide → show on the same field must end with a working
-            // attach listener again, because hide removed the previous one
-            // and the second show installs a fresh registration.
+        void unchangedFieldIsNotHighlighted() {
+            // A turn that changes one field must not mark its untouched
+            // sibling.
+            var changed = new TestField();
+            var untouched = new TestField();
+            untouched.setValue("kept");
+            var form = new Div(changed, untouched);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            changed.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, markersOn(changed).size());
+            Assertions.assertEquals(List.of(), markersOn(untouched),
+                    "An unchanged field must not be highlighted");
+        }
+
+        @Test
+        void userEditAfterTurnClearsTheMarker() {
+            // A turn highlights the field; a subsequent user edit must clear
+            // the marker so a stale "AI filled this" cue doesn't linger.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form);
 
+            controller.onRequest();
+            field.setValue("ai");
+            controller.onResponse(null);
+
+            field.setValue("edited by user");
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Editing a highlighted field must clear the marker");
+        }
+
+        @Test
+        void aiWritesDuringTurnDoNotClearTheMarker() {
+            // The AI may change an already-highlighted field again on a later
+            // turn. Those in-turn writes must not trip the auto-hide listener.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("second"); // AI write while a turn is in progress
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, markersOn(field).size(),
+                    "An AI write during a turn must not clear the marker");
+        }
+
+        @Test
+        void userEditAfterMarkerClearedKeepsFieldUnmarked() {
+            // Once the marker is cleared by a user edit, its value-change
+            // listener is gone, so further edits neither re-clear nor re-mark.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("ai");
+            controller.onResponse(null);
+            field.setValue("first edit"); // clears the marker
+
+            field.setValue("second edit");
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Editing after the marker was cleared must leave the field "
+                            + "unmarked");
+            Assertions.assertEquals("second edit", field.getValue());
+        }
+
+        @Test
+        void revertEventRestoresPreTurnValueAndClearsMarker() {
+            // A turn that changes a field highlights it automatically. The
+            // marker's ai-field-revert event must then restore the field's
+            // pre-turn value and clear the marker.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            field.setValue("old");
+            controller.onRequest();
+            field.setValue("new");
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertEquals("old", field.getValue(),
+                    "Revert must restore the field's pre-turn value");
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Revert must clear the marker");
+        }
+
+        @Test
+        void revertRestoresValueFromBeforeFirstAiChangeAcrossTurns() {
+            // The AI may change the same field over several turns. Revert must
+            // restore the value from before the FIRST change, not the value the
+            // field held at the start of the most recent turn.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("second");
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertEquals("original", field.getValue(),
+                    "Revert must restore the value from before the AI's first "
+                            + "change, not the most recent turn's pre-turn "
+                            + "value");
+        }
+
+        @Test
+        void revertWithoutTrackedValueOnlyClearsMarker() {
+            // showFieldHighlight outside a turn captures no revert value, so
+            // revert must leave the value alone and only clear the marker.
+            var field = new TestField();
+            field.setValue("current");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
             controller.showFieldHighlight(field);
-            controller.hideFieldHighlight(field);
-            controller.showFieldHighlight(field);
-            drainPendingJs();
 
-            form.remove(field);
-            form.add(field);
+            fireRevert(field);
 
-            var addUserScripts = pendingJsOn(field).stream()
-                    .filter(Highlight::isShowScript).toList();
-            Assertions.assertEquals(1, addUserScripts.size(),
-                    "Show after hide must reinstall the re-apply listener; "
-                            + "re-attach must re-issue addUser exactly once; "
-                            + "got: " + addUserScripts);
+            Assertions.assertEquals("current", field.getValue(),
+                    "With no tracked value, revert must not change the value");
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "Revert must still clear the marker");
         }
 
-        // Tie the JS-shape check to the conceptual operation so call
-        // sites read as "is this a show / hide?" instead of grepping the
-        // raw JS string. The canonical add/remove-user test (above) pins
-        // the exact JS contract; these helpers are for follow-on tests
-        // that only need to distinguish show from hide.
-        private static boolean isShowScript(String script) {
-            return script.contains("addUser");
+        // Dispatch the marker's revert event server-side so tests can drive
+        // the revert path without a real client.
+        private static void fireRevert(Component field) {
+            var element = field.getElement();
+            element.getNode().getFeature(ElementListenerMap.class)
+                    .fireEvent(new DomEvent(element, "ai-field-revert",
+                            JacksonUtils.createObjectNode()));
         }
 
-        private static boolean isHideScript(String script) {
-            return script.contains("removeUser");
+        /**
+         * @return the field's marker elements — normally at most one; the list
+         *         form lets a test pin that no second marker is ever stacked on
+         *         a field
+         */
+        private static List<Element> markersOn(Component field) {
+            return field.getElement().getChildren()
+                    .filter(child -> MARKER_TAG.equals(child.getTag()))
+                    .toList();
         }
 
-        private List<String> pendingJsOn(HasElement target) {
-            return scriptsOn(drainPendingJs(), target);
+        private static Element requireMarkerOn(Component field) {
+            var markers = markersOn(field);
+            Assertions.assertEquals(1, markers.size(),
+                    "Expected exactly one marker on the field; got: "
+                            + markers);
+            return markers.getFirst();
         }
 
-        // Use when more than one target is inspected from the same dump —
-        // dumpPendingJavaScriptInvocations is destructive, so per-target
-        // filtering must happen against a single drained list.
-        private List<PendingJavaScriptInvocation> drainPendingJs() {
-            ui.getInternals().getStateTree()
-                    .runExecutionsBeforeClientResponse();
-            ui.getInternals().getStateTree().collectChanges(ignore -> {
-            });
-            return ui.getInternals().dumpPendingJavaScriptInvocations();
+        /**
+         * @return whether the field's marker is in the "AI is working" state;
+         *         {@code false} when the field has no marker
+         */
+        private static boolean isWorking(Component field) {
+            return markersOn(field).stream()
+                    .anyMatch(marker -> marker.getProperty("working", false));
         }
 
-        private static List<String> scriptsOn(
-                List<PendingJavaScriptInvocation> dump, HasElement target) {
-            return dump.stream()
-                    .filter(p -> p.getInvocation().getParameters()
-                            .contains(target.getElement()))
-                    .map(p -> p.getInvocation().getExpression()).toList();
-        }
-
-        // Flattened parameter list for every invocation targeted at `target`.
-        // Used to assert on the values bound to $0, $1, ... in the queued
-        // script expressions.
-        private static List<Object> paramsOn(
-                List<PendingJavaScriptInvocation> dump, HasElement target) {
-            return dump.stream()
-                    .filter(p -> p.getInvocation().getParameters()
-                            .contains(target.getElement()))
-                    .flatMap(p -> p.getInvocation().getParameters().stream())
-                    .map(p -> (Object) p).toList();
+        /**
+         * @return the texts set on the field's marker
+         */
+        private static ObjectNode i18nOn(Component field) {
+            return (ObjectNode) requireMarkerOn(field).getPropertyRaw("i18n");
         }
     }
 
