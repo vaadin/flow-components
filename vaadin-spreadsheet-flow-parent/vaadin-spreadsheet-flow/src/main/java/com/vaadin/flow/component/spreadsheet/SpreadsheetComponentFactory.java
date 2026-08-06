@@ -105,6 +105,13 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * <p>
      * For merged regions, this method is only called for the first cell of the
      * merged region.
+     * <p>
+     * The returned editor is kept for that cell, so this method is not called
+     * again while the cell keeps showing it. That preserves what the user has
+     * entered into the editor when the cell is updated. An editor chosen from
+     * the cell's value is therefore not replaced when the value changes; call
+     * {@link Spreadsheet#reloadVisibleCellContents()} to have the editors asked
+     * for again.
      *
      * @param cell
      *            Cell that should display the custom editor or
