@@ -202,10 +202,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     public void selectAll() {
         updateSelection(
-                (Set<T>) getGrid().getDataCommunicator().getDataProvider()
-                        .fetch(getGrid().getDataCommunicator().buildQuery(0,
-                                Integer.MAX_VALUE))
-                        .collect(Collectors.toSet()),
+                fetchAllItems()
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
@@ -373,32 +371,29 @@ public abstract class AbstractGridMultiSelectionModel<T>
             // ignore event if the checkBox was meant to be hidden
             return;
         }
-        Stream<T> allItemsStream;
-        DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator()
-                .getDataProvider();
-        if (dataProvider instanceof HierarchicalDataProvider) {
-            allItemsStream = fetchAllHierarchical(
-                    (HierarchicalDataProvider<T, ?>) dataProvider);
-        } else {
-            allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator()
-                    .buildQuery(0, Integer.MAX_VALUE));
-        }
-        doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
+        doUpdateSelection(
+                fetchAllItems()
+                        .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     /**
-     * Fetch all items from the given hierarchical data provider.
+     * Fetch all items from the data provider. For hierarchical data providers,
+     * this includes all descendant items.
      *
-     * @param dataProvider
-     *            the data provider to fetch from
      * @return all items in the data provider
      */
-    private Stream<T> fetchAllHierarchical(
-            HierarchicalDataProvider<T, ?> dataProvider) {
-        return fetchAllDescendants(null, dataProvider);
+    private Stream<T> fetchAllItems() {
+        DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator()
+                .getDataProvider();
+        if (dataProvider instanceof HierarchicalDataProvider) {
+            return fetchAllDescendants(null,
+                    (HierarchicalDataProvider<T, ?>) dataProvider);
+        }
+        return dataProvider.fetch(getGrid().getDataCommunicator().buildQuery(0,
+                Integer.MAX_VALUE));
     }
 
     /**
