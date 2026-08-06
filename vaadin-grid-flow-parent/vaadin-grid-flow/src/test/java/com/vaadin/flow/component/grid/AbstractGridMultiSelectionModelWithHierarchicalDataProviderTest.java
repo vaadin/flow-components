@@ -161,6 +161,35 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     }
 
     @Test
+    public void selectAll_selectsAllItemsIncludingDescendants() {
+        ((GridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .selectAll();
+
+        Assert.assertEquals(Set.of("Item 0", "Item 0-0", "Item 0-0-0",
+                "Item 0-1", "Item 1"), treeGrid.getSelectedItems());
+    }
+
+    @Test
+    public void selectAll_updatesCheckboxStates() {
+        Element columnElement = getGridSelectionColumn(treeGrid).getElement();
+
+        ((GridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .selectAll();
+        Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
+        Assert.assertFalse(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    @Test
+    public void clientSelectAll_selectsAllItemsIncludingDescendants() {
+        ((AbstractGridMultiSelectionModel<String>) treeGrid.getSelectionModel())
+                .clientSelectAll();
+
+        Assert.assertEquals(Set.of("Item 0", "Item 0-0", "Item 0-0-0",
+                "Item 0-1", "Item 1"), treeGrid.getSelectedItems());
+    }
+
+    @Test
     public void clientSelectAll_updatesCheckboxStates() {
         Element columnElement = getGridSelectionColumn(treeGrid).getElement();
 
