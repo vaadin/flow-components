@@ -48,7 +48,7 @@ import tools.jackson.databind.node.ObjectNode;
  * inject the badge into — stays inert on the client, so a non-Vaadin field
  * never shows a marker.
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha8")
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 
@@ -109,20 +109,7 @@ final class FormFieldMarker {
      *         back to its defaults for them
      */
     private static ObjectNode toI18nJson(FieldMarkerI18n i18n) {
-        var json = JacksonUtils.createObjectNode();
-        if (i18n == null) {
-            return json;
-        }
-        putIfSet(json, "message", i18n.getMessage());
-        putIfSet(json, "revert", i18n.getRevert());
-        putIfSet(json, "badgeLabel", i18n.getBadgeLabel());
-        putIfSet(json, "badgeTooltip", i18n.getBadgeTooltip());
-        return json;
-    }
-
-    private static void putIfSet(ObjectNode json, String key, String value) {
-        if (value != null) {
-            json.put(key, value);
-        }
+        return i18n == null ? JacksonUtils.createObjectNode()
+                : JacksonUtils.beanToJson(i18n);
     }
 }

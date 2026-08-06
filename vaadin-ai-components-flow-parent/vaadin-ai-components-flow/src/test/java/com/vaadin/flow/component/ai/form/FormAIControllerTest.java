@@ -305,7 +305,7 @@ class FormAIControllerTest {
 
         // The user-interaction guard during a turn is applied on the client
         // only, by the web component as part of the "AI is working" state —
-        // see the Highlight tests. The controller must never change the
+        // see the FieldMarker tests. The controller must never change the
         // field's server-side read-only state, so these tests assert that
         // invariant via isReadOnly().
 
@@ -1160,7 +1160,7 @@ class FormAIControllerTest {
         void clearingAValueToNullProducesEvent() {
             // Inverse of nullPreTurnValueIsReportedFaithfully: pre-turn
             // non-null → post-turn null must surface as a change so
-            // applications can react (e.g. clear the highlight).
+            // applications can react (e.g. clear the marker).
             var field = new FormTestFields.DateField();
             field.setValue(LocalDate.of(2026, 1, 1));
             var controller = new FormAIController(new Div(field));
@@ -1643,7 +1643,7 @@ class FormAIControllerTest {
     }
 
     @Nested
-    class Highlight {
+    class FieldMarker {
 
         // Marker integration is exercised through the marker element the
         // controller appends to the field. We assert on that element — its
@@ -2115,7 +2115,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void changedFieldIsHighlightedAutomatically() {
+        void changedFieldIsMarkedAutomatically() {
             // A turn that changes a field marks it without any wiring on the
             // application's side.
             var field = new TestField();
@@ -2128,12 +2128,12 @@ class FormAIControllerTest {
             controller.onResponse(null);
 
             Assertions.assertEquals(1, markersOn(field).size(),
-                    "A field changed during a turn must be highlighted "
+                    "A field changed during a turn must be marked "
                             + "automatically");
         }
 
         @Test
-        void unchangedFieldIsNotHighlighted() {
+        void unchangedFieldIsNotMarked() {
             // A turn that changes one field must not mark its untouched
             // sibling.
             var changed = new TestField();
@@ -2149,7 +2149,7 @@ class FormAIControllerTest {
 
             Assertions.assertEquals(1, markersOn(changed).size());
             Assertions.assertEquals(List.of(), markersOn(untouched),
-                    "An unchanged field must not be highlighted");
+                    "An unchanged field must not be marked");
         }
 
         @Test
@@ -2182,7 +2182,7 @@ class FormAIControllerTest {
 
         @Test
         void userEditAfterTurnClearsTheMarker() {
-            // A turn highlights the field; a subsequent user edit must clear
+            // A turn marks the field; a subsequent user edit must clear
             // the marker so a stale "AI filled this" cue doesn't linger.
             var field = new TestField();
             var form = new Div(field);
@@ -2196,12 +2196,12 @@ class FormAIControllerTest {
             field.setValue("edited by user");
 
             Assertions.assertEquals(List.of(), markersOn(field),
-                    "Editing a highlighted field must clear the marker");
+                    "Editing a marked field must clear the marker");
         }
 
         @Test
         void aiWritesDuringTurnDoNotClearTheMarker() {
-            // The AI may change an already-highlighted field again on a later
+            // The AI may change an already-marked field again on a later
             // turn. Those in-turn writes must not trip the auto-hide listener.
             var field = new TestField();
             var form = new Div(field);
@@ -2244,7 +2244,7 @@ class FormAIControllerTest {
 
         @Test
         void revertEventRestoresPreTurnValueAndClearsMarker() {
-            // A turn that changes a field highlights it automatically. The
+            // A turn that changes a field marks it automatically. The
             // marker's ai-field-revert event must then restore the field's
             // pre-turn value and clear the marker.
             var field = new TestField();
@@ -2369,41 +2369,41 @@ class FormAIControllerTest {
         }
 
         @Test
-        void autoHighlightDefaultsToEnabled() {
+        void fieldMarkerDefaultsToEnabled() {
             var form = new Div(new TestField());
             ui.add(form);
             var controller = new FormAIController(form);
 
-            Assertions.assertTrue(controller.isAutoHighlightEnabled(),
-                    "Automatic highlighting must be on by default");
+            Assertions.assertTrue(controller.isFieldMarkerEnabled(),
+                    "Automatic marking must be on by default");
 
-            controller.setAutoHighlightEnabled(false);
+            controller.setFieldMarkerEnabled(false);
 
-            Assertions.assertFalse(controller.isAutoHighlightEnabled(),
+            Assertions.assertFalse(controller.isFieldMarkerEnabled(),
                     "The opt-out must be reflected by the getter");
         }
 
         @Test
-        void autoHighlightOffLeavesChangedFieldUnmarked() {
+        void fieldMarkerOffLeavesChangedFieldUnmarked() {
             // The opt-out for applications that mark the AI's edits themselves,
             // or not at all.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
+                    .setFieldMarkerEnabled(false);
 
             controller.onRequest();
             field.setValue("filled");
             controller.onResponse(null);
 
             Assertions.assertEquals(List.of(), markersOn(field),
-                    "With automatic highlighting off, a changed field must be "
+                    "With automatic marking off, a changed field must be "
                             + "left unmarked");
         }
 
         @Test
-        void autoHighlightOffKeepsWorkingState() {
+        void fieldMarkerOffKeepsWorkingState() {
             // The opt-out covers the persistent mark only. The working state —
             // shimmer and the client read-only guard — still protects the user
             // from typing into a field the AI is about to overwrite, and still
@@ -2412,13 +2412,13 @@ class FormAIControllerTest {
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
+                    .setFieldMarkerEnabled(false);
 
             controller.onRequest();
 
             Assertions.assertTrue(isWorking(field),
                     "The working state must apply regardless of the automatic "
-                            + "highlighting setting");
+                            + "marking setting");
 
             field.setValue("filled");
             controller.onResponse(null);
@@ -2429,8 +2429,8 @@ class FormAIControllerTest {
         }
 
         @Test
-        void autoHighlightOffKeepsMarkFromEarlierTurn() {
-            // Turning the automatic highlighting off does not retract marks
+        void fieldMarkerOffKeepsMarkFromEarlierTurn() {
+            // Turning the automatic marking off does not retract marks
             // already shown, and a later turn's working state must hand them
             // back rather than drop them.
             var field = new TestField();
@@ -2442,7 +2442,7 @@ class FormAIControllerTest {
             field.setValue("first");
             controller.onResponse(null);
 
-            controller.setAutoHighlightEnabled(false);
+            controller.setFieldMarkerEnabled(false);
             controller.onRequest();
             field.setValue("second");
             controller.onResponse(null);
@@ -2454,36 +2454,36 @@ class FormAIControllerTest {
         }
 
         @Test
-        void reEnablingAutoHighlightMarksLaterTurns() {
+        void reEnablingFieldMarkerMarksLaterTurns() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
+                    .setFieldMarkerEnabled(false);
 
             controller.onRequest();
             field.setValue("unmarked");
             controller.onResponse(null);
 
-            controller.setAutoHighlightEnabled(true);
+            controller.setFieldMarkerEnabled(true);
             controller.onRequest();
             field.setValue("marked");
             controller.onResponse(null);
 
             Assertions.assertEquals(1, markersOn(field).size(),
-                    "Re-enabling automatic highlighting must mark the changes "
+                    "Re-enabling automatic marking must mark the changes "
                             + "of subsequent turns");
         }
 
         @Test
-        void autoHighlightOffStillFiresFieldValueChangeListener() {
+        void fieldMarkerOffStillFiresFieldValueChangeListener() {
             // The change events are independent of the marker, so an
             // application that opts out still learns what the AI changed.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setAutoHighlightEnabled(false);
+                    .setFieldMarkerEnabled(false);
             var events = new ArrayList<FieldValueChangeEvent>();
             controller.addFieldValueChangeListener(events::add);
 
@@ -2493,7 +2493,7 @@ class FormAIControllerTest {
 
             Assertions.assertEquals(1, events.size(),
                     "The change listener must fire regardless of the automatic "
-                            + "highlighting setting");
+                            + "marking setting");
             Assertions.assertSame(field, events.get(0).getField());
             Assertions.assertEquals("filled", events.get(0).getNewValue());
         }
