@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ main (25.3-SNAPSHOT, b28844221d)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (playwright-cli, synthetic touch events replaying the Android Chrome long-press sequence)
-- **Screenshot:** ![Context menu opened by long-press, before the drag that throws](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-1732-menu-open.png)
+- **Screenshot:** ![Context menu opened by long-press, before the drag that throws](https://raw.githubusercontent.com/vaadin/flow-components/9dcb256b8f0fff2fb7e0314d87e2ce3e18bce53d/repro-1732-menu-open.png)
 - **Demo video:** `repro-1732.webm` (on the branch; drag into the comment for inline playback)
 
 ## Observed behavior
