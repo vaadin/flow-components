@@ -14,8 +14,8 @@
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (playwright-cli)
 - **Screenshot:** steady vs. mid-blink (same open dropdown, 1 second apart):
-  ![Dropdown with 20 items in steady state](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-1037-steady.png)
-  ![Same dropdown empty with loading spinner during refreshAll](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-1037-blink.png)
+  ![Dropdown with 20 items in steady state](https://raw.githubusercontent.com/vaadin/flow-components/ca9e92fe2726e6868dc3dc51257c990053727df9/repro-1037-steady.png)
+  ![Same dropdown empty with loading spinner during refreshAll](https://raw.githubusercontent.com/vaadin/flow-components/ca9e92fe2726e6868dc3dc51257c990053727df9/repro-1037-blink.png)
 - **Demo video:** `repro-1037.webm` (on the branch; drag into the comment for inline playback)
 
 ## Observed behavior
