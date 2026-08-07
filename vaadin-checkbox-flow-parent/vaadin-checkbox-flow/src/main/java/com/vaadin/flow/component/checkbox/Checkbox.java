@@ -25,6 +25,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -85,8 +86,9 @@ import com.vaadin.flow.signals.Signal;
 @NpmPackage(value = "@vaadin/checkbox", version = "25.3.0-alpha8")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
-        implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
-        HasValidationProperties, HasValidator<Boolean>,
+        implements ClickNotifier<Checkbox>, Focusable<Checkbox>,
+        HasAriaDescription, HasAriaLabel, HasValidationProperties,
+        HasValidator<Boolean>,
         InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>,
         HasThemeVariant<CheckboxVariant> {
 
@@ -320,6 +322,23 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**

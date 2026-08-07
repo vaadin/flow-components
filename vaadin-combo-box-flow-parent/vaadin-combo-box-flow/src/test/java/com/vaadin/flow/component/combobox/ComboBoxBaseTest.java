@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasPlaceholder;
@@ -75,6 +76,14 @@ abstract class ComboBoxBaseTest {
                 HasAriaLabel.class.isAssignableFrom(
                         createComboBox(String.class).getClass()),
                 "ComboBox should support setting aria-label and aria-labelledby");
+    }
+
+    @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting aria-describedby");
     }
 
     @Test
@@ -374,5 +383,21 @@ abstract class ComboBoxBaseTest {
 
         comboBox.setAriaLabelledBy((String) null);
         Assertions.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+
+        comboBox.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                comboBox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                comboBox.getAriaDescribedBy().get());
+
+        comboBox.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                comboBox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(comboBox.getAriaDescribedBy().isEmpty());
     }
 }

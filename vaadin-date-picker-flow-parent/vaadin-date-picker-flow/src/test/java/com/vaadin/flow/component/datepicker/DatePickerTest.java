@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
@@ -320,6 +321,29 @@ class DatePickerTest {
 
         datePicker.setAriaLabelledBy((String) null);
         Assertions.assertTrue(datePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(DatePicker.class),
+                "Date picker should support aria-describedby");
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id", datePicker.getElement()
+                .getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                datePicker.getAriaDescribedBy().get());
+
+        datePicker.setAriaDescribedBy((String) null);
+        Assertions.assertNull(datePicker.getElement()
+                .getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(datePicker.getAriaDescribedBy().isEmpty());
     }
 
     @Test

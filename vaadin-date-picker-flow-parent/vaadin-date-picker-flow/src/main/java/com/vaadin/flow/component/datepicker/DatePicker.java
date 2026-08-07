@@ -37,6 +37,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
@@ -134,8 +135,8 @@ import tools.jackson.databind.node.ObjectNode;
 @NpmPackage(value = "date-fns", version = "4.1.0")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
-        implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton,
+        implements Focusable<DatePicker>, HasAllowedCharPattern,
+        HasAriaDescription, HasAriaLabel, HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
         HasPrefix, HasThemeVariant<DatePickerVariant>, HasValidationProperties,
         HasValidator<LocalDate>, HasPlaceholder {
@@ -570,6 +571,23 @@ public class DatePicker
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     @Override
