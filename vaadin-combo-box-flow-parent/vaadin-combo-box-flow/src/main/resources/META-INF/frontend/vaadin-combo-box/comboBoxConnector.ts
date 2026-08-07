@@ -1,23 +1,28 @@
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
 import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
+import type {
+  ComboBoxDataProviderCallback,
+  ComboBoxDataProviderParams
+} from '@vaadin/combo-box/src/vaadin-combo-box-data-provider-mixin.js';
+import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
 
 /**
  * comboBoxConnector is a communication layer between ComboBox's flow component
  * (server-side) and web component (client-side).
  */
 export class ComboBoxConnector {
-  #comboBox;
-  #placeholder = new window.Vaadin.ComboBoxPlaceholder();
+  readonly #comboBox: FlowComboBox;
+  readonly #placeholder = new window.Vaadin.ComboBoxPlaceholder();
 
-  #cache = {};
+  #cache: Record<number, Item[]> = {};
 
   #lastTypedFilter = '';
-  #lastRequestedRange = [-1, -1];
+  #lastRequestedRange: ItemRange = [-1, -1];
   #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
 
-  constructor(comboBox) {
+  constructor(comboBox: FlowComboBox) {
     this.#comboBox = comboBox;
 
     // Prevent setting the custom value as the 'value'-prop automatically
@@ -30,7 +35,7 @@ export class ComboBoxConnector {
     comboBox.dataProvider = (params, callback) => this.#loadPage(params, callback);
   }
 
-  clear(start, length) {
+  clear(start: number, length: number): void {
     const comboBox = this.#comboBox;
     const { pageSize } = comboBox;
     const firstPage = Math.floor(start / pageSize);
@@ -40,14 +45,16 @@ export class ComboBoxConnector {
       delete this.#cache[page];
     }
 
+    const filteredItems = comboBox.filteredItems ?? [];
     for (let index = firstPage * pageSize; index < lastPage * pageSize; index++) {
-      if (comboBox.filteredItems[index]) {
-        comboBox.filteredItems[index] = this.#placeholder;
+      if (filteredItems[index]) {
+        // The placeholder stands in for an item that is being loaded
+        filteredItems[index] = this.#placeholder as Item;
       }
     }
   }
 
-  set(index, items, filter) {
+  set(index: number, items: Item[], filter: string): void {
     const comboBox = this.#comboBox;
 
     if (filter !== this.#lastTypedFilter) {
@@ -77,16 +84,16 @@ export class ComboBoxConnector {
     }
   }
 
-  updateData(items) {
+  updateData(items: Item[]): void {
     const comboBox = this.#comboBox;
-    const itemsMap = new Map(items.map((item) => [item.key, item]));
+    const itemsMap = new Map<string, Item>(items.map((item) => [item.key, item]));
 
-    comboBox.filteredItems = comboBox.filteredItems.map((item) => {
+    comboBox.filteredItems = comboBox.filteredItems?.map((item) => {
       return itemsMap.get(item.key) || item;
     });
   }
 
-  updateSize(newSize) {
+  updateSize(newSize: number): void {
     const comboBox = this.#comboBox;
 
     if (!comboBox._clientSideFilter) {
@@ -102,7 +109,7 @@ export class ComboBoxConnector {
     }
   }
 
-  reset() {
+  reset(): void {
     const comboBox = this.#comboBox;
 
     comboBox._filterDebouncer?.cancel();
@@ -113,7 +120,7 @@ export class ComboBoxConnector {
     comboBox.clearCache();
   }
 
-  confirm(id, filter) {
+  confirm(id: number, filter: string): void {
     const comboBox = this.#comboBox;
 
     if (filter !== this.#lastTypedFilter) {
@@ -123,7 +130,8 @@ export class ComboBoxConnector {
     // We're done applying changes from this batch, resolve pending
     // callbacks
     const { pendingRequests } = comboBox.__dataProviderController.rootCache;
-    Object.entries(pendingRequests).forEach(([page, callback]) => {
+    Object.entries(pendingRequests).forEach(([key, callback]) => {
+      const page = Number(key);
       const items = this.#cache[page];
 
       if (comboBox._clientSideFilter && items) {
@@ -139,7 +147,7 @@ export class ComboBoxConnector {
     comboBox.$server.confirmUpdate(id);
   }
 
-  #loadPage(params, callback) {
+  #loadPage(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<Item>): void {
     const comboBox = this.#comboBox;
 
     if (params.pageSize != comboBox.pageSize) {
@@ -194,16 +202,17 @@ export class ComboBoxConnector {
    * Asks the server for the pages around the viewport, so that scrolling has
    * data ready ahead of rendering.
    */
-  #requestPage(page, filter) {
+  #requestPage(page: number, filter: string): void {
     const comboBox = this.#comboBox;
 
     const viewportRange = this.#getViewportRange();
     const buffer = viewportRange[1] - viewportRange[0];
-    const sizeLimit = Number.isFinite(comboBox.size) ? comboBox.size : Number.POSITIVE_INFINITY;
+    const { size } = comboBox;
+    const sizeLimit = size !== undefined && Number.isFinite(size) ? size : Number.POSITIVE_INFINITY;
     viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
     viewportRange[1] = Math.min(viewportRange[1] + buffer, sizeLimit - 1);
 
-    let viewportPageRange = [
+    let viewportPageRange: ItemRange = [
       Math.floor(viewportRange[0] / comboBox.pageSize),
       Math.floor(viewportRange[1] / comboBox.pageSize)
     ];
@@ -230,7 +239,7 @@ export class ComboBoxConnector {
   }
 
   /** The range of item indexes currently rendered in the dropdown */
-  #getViewportRange() {
+  #getViewportRange(): ItemRange {
     const comboBox = this.#comboBox;
 
     const indices = Array.from(comboBox._scroller?.children ?? [])
@@ -243,11 +252,9 @@ export class ComboBoxConnector {
     return [indices[0], indices[indices.length - 1]];
   }
 
-  #matchesFilter(item, filter) {
+  #matchesFilter(item: Item, filter: string): boolean {
     filter = filter ? filter.toString().toLowerCase() : '';
-    return (
-      this.#comboBox._getItemLabel(item, this.#comboBox.itemLabelPath).toString().toLowerCase().indexOf(filter) > -1
-    );
+    return this.#comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
   }
 
   /**
@@ -256,7 +263,7 @@ export class ComboBoxConnector {
    * The filter used is the one from combobox, not the lastFilter stored since
    * that may not reflect user's input.
    */
-  #performClientSideFilter(page, filter, callback) {
+  #performClientSideFilter(page: Item[], filter: string, callback: ComboBoxDataProviderCallback<Item>): void {
     let filteredItems = page;
 
     if (filter) {
@@ -267,7 +274,7 @@ export class ComboBoxConnector {
   }
 }
 
-function initLazy(comboBox) {
+function initLazy(comboBox: FlowComboBox): void {
   // Init the connector only once for the combo box
   comboBox.$connector ??= new ComboBoxConnector(comboBox);
 }
