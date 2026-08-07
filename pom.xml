@@ -73,7 +73,7 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.3-SNAPSHOT</flow.version>
+        <flow.version>25.3.24053-preserve-scroll-on-children-clear-SNAPSHOT</flow.version>
         <testbench.version>25.2.1</testbench.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
