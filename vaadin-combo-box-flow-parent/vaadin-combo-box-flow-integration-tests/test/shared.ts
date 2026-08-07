@@ -1,39 +1,35 @@
 import './env-setup.js';
-import { ComboBox } from '@vaadin/combo-box';
-import { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
-import '../frontend/generated/jar-resources/comboBoxConnector.js';
+import '../frontend/generated/jar-resources/vaadin-combo-box/comboBoxConnector.ts';
 import * as sinon from 'sinon';
+import type {
+  ComboBoxConnector as ConnectorComboBoxConnector,
+  ComboBoxServer as ConnectorComboBoxServer,
+  FlowComboBox as ConnectorFlowComboBox,
+  Item as ConnectorItem
+} from '../frontend/generated/jar-resources/vaadin-combo-box/vaadin-combo-box-types.js';
 
-export type ComboBoxConnector = {
-  initLazy: (comboBox: ComboBox) => void;
-  reset: () => void;
-  set: (index: number, items: unknown[], filter: string) => void;
-  confirm: (id: number, filter: string) => void;
+export type Item = ConnectorItem & {
+  label?: string;
 };
 
 export type ComboBoxServer = {
-  setViewportRange: sinon.SinonSpy;
-  confirmUpdate: sinon.SinonSpy;
-  resetDataCommunicator: sinon.SinonSpy;
+  [K in keyof ConnectorComboBoxServer]: ConnectorComboBoxServer[K] & sinon.SinonSpy;
 };
 
-export type FlowComboBox = ComboBox & {
+// The connector API retyped with the test Item, so that tests can pass item
+// literals with test-specific properties without excess property errors
+export type ComboBoxConnector = Omit<ConnectorComboBoxConnector, 'filter' | 'set' | 'updateData'> & {
+  filter(item: Item, filter: string): boolean;
+  set(index: number, items: Item[], filter: string): void;
+  updateData(items: Item[]): void;
+};
+
+export type FlowComboBox = ConnectorFlowComboBox & {
   $connector: ComboBoxConnector;
   $server: ComboBoxServer;
-  _filterTimeout: number;
-  _filterDebouncer: unknown;
-  __dataProviderController: DataProviderController<unknown, Record<string, unknown>>;
 };
 
-type Vaadin = {
-  Flow: {
-    comboBoxConnector: ComboBoxConnector;
-  };
-};
-
-const Vaadin = window.Vaadin as Vaadin;
-
-export const comboBoxConnector = Vaadin.Flow.comboBoxConnector;
+export const comboBoxConnector = window.Vaadin.Flow.comboBoxConnector;
 
 export function init(comboBox: FlowComboBox): void {
   comboBox.$server = {

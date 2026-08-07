@@ -101,7 +101,7 @@ import tools.jackson.databind.node.ObjectNode;
 @NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0-alpha8")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./comboBoxConnector.js")
+@JsModule("./vaadin-combo-box/comboBoxConnector.ts")
 public class MultiSelectComboBox<TItem>
         extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
         implements MultiSelect<MultiSelectComboBox<TItem>, TItem>,
