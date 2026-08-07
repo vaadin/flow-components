@@ -187,6 +187,111 @@ function parseLog(log) {
   return commits;
 }
 
+// Lines that must never reach the release notes (template noise, AI refs)
+function isNoise(line) {
+  return /^- \[[ xX]\]/.test(line)
+    || /^🤖/.test(line)
+    || /generated with .*claude/i.test(line)
+    || /i have read the contribution guide/i.test(line);
+}
+// A line starting a non-prose markdown block (list, table, code fence, quote)
+function isBlockStart(line) {
+  return /^[-*+]\s/.test(line) || /^\d+\.\s/.test(line)
+    || /^\|/.test(line) || /^```/.test(line) || /^>/.test(line);
+}
+function isHeading(line) {
+  return /^#{1,6}\s/.test(line);
+}
+// A standalone footer reference (e.g. "Fixes #123", "Part of #9489").
+// Prose that merely starts with such a keyword (e.g. "Follow-up to #9333. When a
+// Spreadsheet...") is not treated as a footer.
+function isFooter(line) {
+  const m = /^(fixes|closes|resolves|related to|connected to|part of|follow-up to|warranty)\b[:\s]*(.*)$/i.exec(line);
+  if (!m) return false;
+  const rest = m[2]
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/#?\d[\w/-]*/g, '')
+    .replace(/[#.,;:]/g, '')
+    .trim();
+  return rest.length < 12;
+}
+function isSeparator(line) {
+  return /^([-*_])\1{2,}$/.test(line);
+}
+// Whether any real content (prose, list, table, code, non-template heading)
+// remains after the captured first paragraph
+function hasMoreContent(lines, from) {
+  for (let i = from; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || isNoise(line) || isFooter(line) || isSeparator(line)) continue;
+    if (isHeading(line)) {
+      if (/^#{1,6}\s*(type of change|checklist|how.*tested|note)\b/i.test(line)) continue;
+      return true;
+    }
+    return true;
+  }
+  return false;
+}
+function isListItem(line) {
+  return /^[-*+]\s+/.test(line) || /^\d+\.\s+/.test(line);
+}
+// Push a list item (lines[start]) plus its wrapped continuation lines into para.
+// Returns the index of the line that stopped the capture.
+function collectListItem(lines, start, para) {
+  const m = /^[-*+]\s+(.*)$/.exec(lines[start].trim()) || /^\d+\.\s+(.*)$/.exec(lines[start].trim());
+  para.push(m[1]);
+  let j = start + 1;
+  for (; j < lines.length; j++) {
+    const next = lines[j].trim();
+    if (!next || isBlockStart(next) || isHeading(next) || isFooter(next) || isNoise(next) || isSeparator(next)) {
+      break;
+    }
+    para.push(next);
+  }
+  return j;
+}
+// Extract the first cleaned paragraph of the Description/Summary section.
+// Returns { text, truncated } where truncated marks that more content was cut.
+function extractDescription(rawBody) {
+  const lines = rawBody.replace(/<!--[\s\S]*?-->/g, ' ').split('\n');
+  let i = 0;
+  const headingIdx = lines.findIndex(l => /^\s*#{1,6}\s*(description|summary)\b/i.test(l));
+  if (headingIdx >= 0) {
+    i = headingIdx + 1;
+  }
+  const para = [];
+  let started = false, truncated = false;
+  for (; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!started) {
+      if (!line || isNoise(line) || isSeparator(line) || isHeading(line)) continue;
+      if (isListItem(line)) {
+        // First content is a list item: capture it plus its continuation
+        truncated = hasMoreContent(lines, collectListItem(lines, i, para));
+        break;
+      }
+      if (isBlockStart(line) || isFooter(line)) {
+        truncated = hasMoreContent(lines, i);
+        break;
+      }
+      started = true;
+      para.push(line);
+      continue;
+    }
+    if (!line || isHeading(line) || isBlockStart(line) || isFooter(line) || isSeparator(line) || isNoise(line)) {
+      // Lead-in like "This PR:" followed by a list: pull in the first item
+      if (isListItem(line) && /:$/.test(para[para.length - 1] || '')) {
+        truncated = hasMoreContent(lines, collectListItem(lines, i, para));
+        break;
+      }
+      truncated = hasMoreContent(lines, line && !isNoise(line) && !isSeparator(line) ? i : i + 1);
+      break;
+    }
+    para.push(line);
+  }
+  return { text: para.join(' ').trim(), truncated };
+}
+
 // Parse body part of a commit and extract squashed commits, nesting them
 // to the commit JS object passed as argument
 function parseBody(commit) {
@@ -226,7 +331,7 @@ function parseBody(commit) {
     }
     result = /^(fixes|fix|related-to|connected-to|warranty):? +(.+)$/i.exec(line);
     if (result) {
-      commit.footers.fixes.push(...result[2].split(/[, ]+/));
+      commit.footers.fixes.push(...result[2].split(/[, ]+/).filter(s => /\d/.test(s)));
       nestedCommit = undefined;
       return;
     }
@@ -243,6 +348,13 @@ function parseBody(commit) {
     });
     commit.footers['web-component'] = wc;
   }
+  const desc = extractDescription(commit.originalBody);
+  commit.descText = desc.text;
+  commit.descTruncated = desc.truncated;
+  commit.commits.forEach(c => {
+    c.descText = extractDescription(c.body).text;
+    c.descTruncated = false;
+  });
 }
 
 // return absolute link to GH given a path
@@ -299,8 +411,22 @@ function logCommit(c, withComponents) {
     const components = getComponents(c);
     components && (log += `. ${components}`);
   }
-  c.body && (log += `\n\n        _${c.body}_`);
+  if (c.descText) {
+    let desc = c.descText;
+    if (c.descTruncated) {
+      const pr = (/\(#(\d+)\)/.exec(c.title) || [])[1];
+      const url = createGHLink(`flow-components/${pr ? `pull/${pr}` : `commit/${c.commit}`}`);
+      desc += ` [(more)](${url})`;
+    }
+    log += `\n\n        ${desc}`;
+  }
   console.log(log);
+}
+
+// render a single consolidated bullet for all Web-Component version bumps
+function logWebComponentBumps(commits) {
+  const links = commits.map(c => createLink('commit', c.commit.substring(0, 7), '⧉')).join(' ');
+  console.log(`    - Increase Web-Component version (${links})`);
 }
 
 // log a set of commits, and group by types
@@ -314,7 +440,10 @@ function logCommitsByType(commits) {
   Object.keys(keyName).forEach(k => {
     if (byType[k]) {
       console.log(`\n - **${keyName[k]}**:`);
-      byType[k].forEach(c => logCommit(c));
+      const bumps = byType[k].filter(c => c.title.includes('Increase Web-Component version'));
+      const rest = byType[k].filter(c => !c.title.includes('Increase Web-Component version'));
+      bumps.length && logWebComponentBumps(bumps);
+      rest.forEach(c => logCommit(c));
     }
   });
 }
