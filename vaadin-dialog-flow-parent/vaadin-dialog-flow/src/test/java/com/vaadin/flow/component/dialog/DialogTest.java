@@ -192,6 +192,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void isFocusTrap_trueByDefault() {
         Dialog dialog = new Dialog();
         Assertions.assertTrue(dialog.isFocusTrap(),
@@ -202,6 +203,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeDisabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -213,6 +215,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -222,6 +225,24 @@ class DialogTest {
         Assertions.assertFalse(
                 dialog.getElement().getProperty("noFocusTrap", false),
                 "noFocusTrap property is false when focus trap is enabled");
+    }
+
+    @Test
+    void setAutofocus_isAutofocus() {
+        Dialog dialog = new Dialog();
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(false);
+        Assertions.assertFalse(dialog.isAutofocus());
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(true);
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
     }
 
     @Test
