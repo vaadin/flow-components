@@ -13,7 +13,7 @@
 - **Reproduced on:** `vaadin/flow-components` @ `main` (25.3-SNAPSHOT, Flow 25.3-SNAPSHOT)
 - **Present on main?:** yes (partially — see Observed behavior)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![Escape pressed with notification on top: only the dialog's shortcut fired, notification stays open](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-6857.png) — embeds inline.
+- **Screenshot** (static bug): ![Escape pressed with notification on top: only the dialog's shortcut fired, notification stays open](https://raw.githubusercontent.com/vaadin/flow-components/29e9596092d295fa136bf48a3d3d74db30743537/repro-6857.png) — embeds inline.
 
 ## Observed behavior
 
