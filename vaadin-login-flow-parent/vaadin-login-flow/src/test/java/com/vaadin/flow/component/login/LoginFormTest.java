@@ -201,4 +201,17 @@ class LoginFormTest {
 
         Assertions.assertEquals("javascript:alert(1)", form.getAction());
     }
+
+    @Test
+    void headingLevel() {
+        final LoginForm form = new LoginForm();
+
+        Assertions.assertEquals(1, form.getHeadingLevel());
+
+        form.setHeadingLevel(3);
+
+        Assertions.assertEquals(3, form.getHeadingLevel());
+        Assertions.assertEquals(3.0,
+                form.getElement().getProperty("headingLevel", 0.0));
+    }
 }
