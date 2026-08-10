@@ -327,6 +327,84 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_confidenceEnvelopeUnwrapsValueWhenConfidenceEnabled() {
+        // With confidence reporting on, a value may arrive wrapped in an
+        // envelope. The plain value inside must land in the field through the
+        // regular conversion, with no rejection.
+        var field = new TestField();
+        var controller = controllerFor(field).setFieldConfidenceEnabled(true);
+
+        var result = fillFormResult(controller,
+                payload(field, "{\"value\":\"Acme\",\"confidence\":\"high\"}"));
+
+        Assertions.assertEquals("Acme", field.getValue());
+        Assertions.assertTrue(success(result), "Result: " + result);
+    }
+
+    @Test
+    void fillForm_confidenceEnvelopeNullValueClearsField() {
+        // The envelope's "value" goes through the regular conversion, so an
+        // explicit null inside it clears the field like a plain null does.
+        var field = new TestField();
+        field.setValue("previous");
+        var controller = controllerFor(field).setFieldConfidenceEnabled(true);
+
+        fillFormPayload(controller,
+                payload(field, "{\"value\":null,\"confidence\":\"low\"}"));
+
+        Assertions.assertEquals("", field.getValue());
+    }
+
+    @Test
+    void fillForm_unknownConfidenceLevelStillWritesValue() {
+        // Confidence is best effort and never blocks a fill: a level outside
+        // high/medium/low is dropped while the value is still written.
+        var field = new TestField();
+        var controller = controllerFor(field).setFieldConfidenceEnabled(true);
+
+        var result = fillFormResult(controller, payload(field,
+                "{\"value\":\"Acme\",\"confidence\":\"certain\"}"));
+
+        Assertions.assertEquals("Acme", field.getValue());
+        Assertions.assertTrue(success(result), "Result: " + result);
+    }
+
+    @Test
+    void fillForm_envelopeRejectedWhenConfidenceReportingOff() {
+        // With confidence reporting off the LLM was never asked for the
+        // envelope shape, so an object is not unwrapped: it goes to the
+        // converter as-is and is rejected like any other bad value.
+        var field = new TestField();
+        field.setValue("previous");
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller,
+                payload(field, "{\"value\":\"Acme\",\"confidence\":\"high\"}"));
+
+        Assertions.assertEquals("previous", field.getValue(),
+                "An envelope must not be unwrapped while confidence "
+                        + "reporting is off");
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_objectWithoutValueKeyRejectedEvenWhenConfidenceEnabled() {
+        // Only an object carrying the required "value" key is an envelope.
+        // Anything else is a malformed value and is rejected the usual way.
+        var field = new TestField();
+        field.setValue("previous");
+        var controller = controllerFor(field).setFieldConfidenceEnabled(true);
+
+        var result = fillFormResult(controller,
+                payload(field, "{\"confidence\":\"high\"}"));
+
+        Assertions.assertEquals("previous", field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
     void fillForm_typeMismatchLeavesFieldOnPreviousValue() {
         // Payload sends a JSON string to a NUMBER field. The converter
         // throws RejectedValueException; the controller catches it, logs at
@@ -2179,6 +2257,11 @@ class FillFormToolTest {
                 throw new AssertionError(
                         "queryFieldOptions must not be called from "
                                 + "fill_form execute()");
+            }
+
+            @Override
+            public String confidenceInstructions() {
+                return "";
             }
 
             @Override

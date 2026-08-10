@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import com.vaadin.flow.component.dependency.JsModule;
@@ -92,6 +93,22 @@ final class FormFieldMarker {
      */
     static void setWorking(Element field, boolean working) {
         find(field).ifPresent(marker -> marker.setProperty("working", working));
+    }
+
+    /**
+     * Sets the confidence level the field's marker shows as an indicator in the
+     * field's helper text section, or clears the indicator when
+     * {@code confidence} is {@code null}. A no-op when the field has no marker.
+     */
+    static void setConfidence(Element field, ConfidenceLevel confidence) {
+        find(field).ifPresent(marker -> {
+            if (confidence == null) {
+                marker.removeProperty("confidence");
+            } else {
+                marker.setProperty("confidence",
+                        confidence.name().toLowerCase(Locale.ROOT));
+            }
+        });
     }
 
     /**

@@ -169,6 +169,13 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
+ * <b>Confidence levels:</b> with {@link #setFieldConfidenceEnabled(boolean)}
+ * on, the LLM also reports, per value it fills, how sure it was about the value
+ * — high, medium or low — and the field marker shows the reported level as an
+ * indicator in the field's helper text section. Off by default.
+ * </p>
+ *
+ * <p>
  * <b>Serialization:</b> the controller is not serialized with the orchestrator.
  * After deserialization, create a new controller against the same form (and
  * binder, if any) and call
@@ -306,6 +313,23 @@ public class FormAIController implements AIController {
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
+    private boolean fieldConfidenceEnabled;
+    /**
+     * The confidence level the LLM reported per field during the current turn,
+     * tied to the field value it was reported with. Populated by the fill tool
+     * as values land, consumed by the turn-end marking pass, and cleared when
+     * the turn ends.
+     */
+    private final Map<HasValue<?, ?>, ReportedConfidence> reportedConfidences = new HashMap<>();
+
+    /**
+     * One field's reported confidence together with the field value it
+     * describes. The value is captured from the field right after the write so
+     * any normalisation the field applied in {@code setValue} is what the
+     * marking pass compares against.
+     */
+    private record ReportedConfidence(Object value, ConfidenceLevel level) {
+    }
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -757,6 +781,50 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Controls whether the LLM is asked to report, along with each value it
+     * fills, how sure it was about the value: {@code high} when the value is
+     * written in the source and copied as it is, {@code medium} when the value
+     * follows from the source but needed some interpretation, and {@code low}
+     * when the source is unclear or the value is a guess. The field marker
+     * shows the reported level as an indicator in the field's helper text
+     * section, so a level only shows while the marker is enabled (see
+     * {@link #setFieldMarkerEnabled(boolean)}); the indicator texts can be
+     * localized with {@link #setFieldMarkerI18n(FieldMarkerI18n)}. Defaults to
+     * {@code false}.
+     * <p>
+     * Off by default because asking for confidence costs extra output tokens on
+     * every fill, so an application that does not show the levels should not
+     * pay for them. It can be switched on or off at any time.
+     * <p>
+     * The level is best effort and never blocks a fill: a value reported with a
+     * malformed level is still written, just without one. The model may also
+     * leave the level out when it cannot judge it — for example for a value
+     * taken from the chat prompt — in which case the field shows no indicator.
+     *
+     * @param fieldConfidenceEnabled
+     *            {@code true} to ask the LLM for confidence levels and show
+     *            them on the fields it filled, {@code false} to not
+     * @return this controller, for chaining
+     */
+    public FormAIController setFieldConfidenceEnabled(
+            boolean fieldConfidenceEnabled) {
+        this.fieldConfidenceEnabled = fieldConfidenceEnabled;
+        return this;
+    }
+
+    /**
+     * Returns whether the LLM is asked to report a confidence level for each
+     * value it fills.
+     *
+     * @return {@code true} when confidence levels are requested and shown,
+     *         {@code false} otherwise
+     * @see #setFieldConfidenceEnabled(boolean)
+     */
+    public boolean isFieldConfidenceEnabled() {
+        return fieldConfidenceEnabled;
+    }
+
+    /**
      * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
      * component: it shows an "AI" badge and a popover that explains the fill
      * and offers a revert control. Repeated calls keep exactly one marker on
@@ -900,6 +968,7 @@ public class FormAIController implements AIController {
     @Override
     public void onRequest() {
         filling = true;
+        reportedConfidences.clear();
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
@@ -936,6 +1005,7 @@ public class FormAIController implements AIController {
             stopWorking();
             fireFieldValueChanges(changes);
         } finally {
+            reportedConfidences.clear();
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the marking pass) count as AI writes rather
             // than user edits that would clear the marker.
@@ -1013,6 +1083,45 @@ public class FormAIController implements AIController {
     private void markChangedField(FieldValueChangeEvent change) {
         revertValues.putIfAbsent(change.getField(), change.getOldValue());
         markField(change.getField());
+        FormFieldMarker.setConfidence(
+                ((Component) change.getField()).getElement(),
+                reportedConfidenceFor(change));
+    }
+
+    /**
+     * Returns the confidence level to show on the changed field's marker, or
+     * {@code null} when none applies. The level is dropped when the field's
+     * post-turn value is no longer the one it was reported with — a
+     * value-change cascade or the application overwrote the field during the
+     * turn — so the marker never annotates a value the LLM did not judge. A
+     * {@code null} also clears the level a marker kept from an earlier turn,
+     * since it described a value this turn replaced.
+     */
+    private ConfidenceLevel reportedConfidenceFor(
+            FieldValueChangeEvent change) {
+        var reported = reportedConfidences.get(change.getField());
+        if (reported == null
+                || !Objects.equals(reported.value(), change.getNewValue())) {
+            return null;
+        }
+        return reported.level();
+    }
+
+    /**
+     * Records the confidence level the LLM reported with a successful write,
+     * tied to the value the field holds right after the write (so any
+     * normalisation the field applied in {@code setValue} is what the marking
+     * pass compares against). A write without a level clears an earlier one, so
+     * the level shown always belongs to the field's latest write.
+     */
+    private void recordConfidence(HasValue<?, ?> field,
+            ConfidenceLevel confidence) {
+        if (confidence == null) {
+            reportedConfidences.remove(field);
+        } else {
+            reportedConfidences.put(field,
+                    new ReportedConfidence(field.getValue(), confidence));
+        }
     }
 
     /**
@@ -1255,6 +1364,44 @@ public class FormAIController implements AIController {
         return "Field is read-only and cannot be filled.";
     }
 
+    /**
+     * Whether the given {@code fill_form} value is a confidence-reporting
+     * envelope — a JSON object carrying the required {@code value} key. Only
+     * consulted when confidence reporting is on; plain values and every other
+     * shape pass through the regular conversion untouched.
+     */
+    private static boolean isConfidenceEnvelope(JsonNode value) {
+        return value != null && value.isObject() && value.has("value");
+    }
+
+    /**
+     * Parses the confidence level from the envelope's {@code confidence} entry.
+     * Best effort: an absent, non-string, or unknown level is dropped (and
+     * logged) rather than blocking the write — the level exists to help review
+     * a fill, so it must never stop one.
+     */
+    private static ConfidenceLevel parseConfidence(JsonNode node,
+            String fieldId) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        if (node.isString()) {
+            try {
+                return ConfidenceLevel
+                        .valueOf(node.asString().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                LOGGER.debug(
+                        "Dropping unknown confidence level '{}' "
+                                + "reported for field {}",
+                        node.asString(), fieldId);
+                return null;
+            }
+        }
+        LOGGER.debug("Dropping non-string confidence level reported for "
+                + "field {}", fieldId);
+        return null;
+    }
+
     private final class ToolCallbacks implements FormAITools.Callbacks {
 
         @Override
@@ -1284,6 +1431,28 @@ public class FormAIController implements AIController {
             }
             return new ArrayList<>(
                     hints.valueOptionsQuery.apply(filter, limit));
+        }
+
+        @Override
+        public String confidenceInstructions() {
+            if (!fieldConfidenceEnabled) {
+                return "";
+            }
+            return """
+                    \s\
+                    Confidence reporting is on. Wrap each value in an \
+                    object instead of sending it plainly: {"value": <the \
+                    value as you would otherwise send it>, "confidence": \
+                    <level>}. "value" is required; plain values stay \
+                    valid. "confidence" is "high" when the value is \
+                    written in the source and copied as it is; "medium" \
+                    when the value follows from the source but needed \
+                    some interpretation: fields combined, units \
+                    converted, or one candidate chosen over another; \
+                    "low" when the source is unclear, or the value is a \
+                    guess. Leave "confidence" out when you cannot judge \
+                    it, such as for a value taken from the chat prompt. \
+                    Never invent a confidence level.""";
         }
 
         @Override
@@ -1404,6 +1573,12 @@ public class FormAIController implements AIController {
          * not run here — it happens in a single pass after every value is
          * written (see {@code doFill}). Only write failures (a rejected
          * conversion or a field that refuses the value) are recorded.
+         * <p>
+         * When confidence reporting is on, the value may arrive wrapped in a
+         * confidence-reporting envelope. The plain value inside goes through
+         * the regular conversion, and the reported level is recorded on a
+         * successful write so the turn-end marking pass can show it. A bad
+         * level never blocks the value (see {@code parseConfidence}).
          *
          * @return {@code true} when the value was written and is eligible for
          *         the post-write validation pass, {@code false} when a write
@@ -1412,9 +1587,16 @@ public class FormAIController implements AIController {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private boolean applyValue(FormFieldDescriptor field, JsonNode value,
                 List<RejectedEntry> rejected) {
+            var payload = value;
+            ConfidenceLevel confidence = null;
+            if (fieldConfidenceEnabled && isConfidenceEnvelope(value)) {
+                payload = value.get("value");
+                confidence = parseConfidence(value.get("confidence"),
+                        field.id());
+            }
             Object converted;
             try {
-                converted = FormValueConverter.convert(field, value);
+                converted = FormValueConverter.convert(field, payload);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());
@@ -1445,6 +1627,7 @@ public class FormAIController implements AIController {
                         "Field rejected the value."));
                 return false;
             }
+            recordConfidence(raw, confidence);
             return true;
         }
 

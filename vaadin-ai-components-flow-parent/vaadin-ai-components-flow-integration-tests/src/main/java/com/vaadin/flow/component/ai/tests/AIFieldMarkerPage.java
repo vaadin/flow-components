@@ -15,19 +15,28 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.List;
+
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test page for the AI field marker that {@link FormAIController} applies to
  * the fields it fills. Drives one AI turn in two steps, each its own server
  * round trip, so that both halves of the turn are observable without push or
  * background threads: "start-turn" puts the fields into the "AI is working"
- * state, "finish-turn" writes the values and marks the fields that changed.
+ * state, "finish-turn" writes the values and marks the fields that changed. The
+ * "confidence-turn" button instead runs a whole turn at once, writing the
+ * values through the controller's {@code fill_form} tool wrapped in the
+ * confidence-reporting envelope, so the confidence indicators show.
  * <p>
  * The controller is configured with {@link FieldMarkerI18n} texts that differ
  * from the web component's defaults, so a test can tell the texts sent by the
@@ -42,6 +51,8 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String REVERT = "Undo this value";
     static final String BADGE_LABEL = "Value provided by AI";
     static final String BADGE_TOOLTIP = "This value came from the AI.";
+    static final String CONFIDENCE_HIGH_TEXT = "Copied from the source";
+    static final String CONFIDENCE_LOW_TEXT = "Guessed value";
 
     static final String NAME_VALUE = "Ada Lovelace";
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
@@ -67,9 +78,13 @@ public class AIFieldMarkerPage extends VerticalLayout {
         form.setId("form");
 
         var controller = new FormAIController(form);
+        controller.setFieldConfidenceEnabled(true);
         controller.setFieldMarkerI18n(new FieldMarkerI18n().setMessage(MESSAGE)
                 .setRevert(REVERT).setBadgeLabel(BADGE_LABEL)
-                .setBadgeTooltip(BADGE_TOOLTIP));
+                .setBadgeTooltip(BADGE_TOOLTIP)
+                .setConfidence(new FieldMarkerI18n.Confidence()
+                        .setHigh(CONFIDENCE_HIGH_TEXT)
+                        .setLow(CONFIDENCE_LOW_TEXT)));
 
         var startTurn = new NativeButton("Start turn",
                 event -> controller.onRequest());
@@ -83,6 +98,51 @@ public class AIFieldMarkerPage extends VerticalLayout {
         });
         finishTurn.setId("finish-turn");
 
-        add(form, startTurn, finishTurn);
+        var confidenceTurn = new NativeButton("Confidence turn",
+                event -> runConfidenceTurn(controller));
+        confidenceTurn.setId("confidence-turn");
+
+        add(form, startTurn, finishTurn, confidenceTurn);
+    }
+
+    /**
+     * Runs one AI turn whose values go through the {@code fill_form} tool the
+     * way the LLM sends them with confidence reporting on: each value wrapped
+     * in an envelope carrying a confidence level. The field ids are resolved
+     * from the {@code get_form_state} tool output, like the LLM resolves them.
+     */
+    private static void runConfidenceTurn(FormAIController controller) {
+        controller.onRequest();
+        var tools = controller.getTools();
+        var state = JacksonUtils
+                .readTree(findTool(tools, "get_form_state").execute(null));
+        var values = JacksonUtils.createObjectNode();
+        values.putObject(fieldId(state, "Name")).put("value", NAME_VALUE)
+                .put("confidence", "high");
+        values.putObject(fieldId(state, "Company")).put("value", COMPANY_VALUE)
+                .put("confidence", "low");
+        var arguments = JacksonUtils.createObjectNode();
+        arguments.set("values", values);
+        findTool(tools, "fill_form").execute(arguments);
+        controller.onResponse(null);
+    }
+
+    private static LLMProvider.ToolSpec findTool(
+            List<LLMProvider.ToolSpec> tools, String name) {
+        return tools.stream().filter(tool -> name.equals(tool.getName()))
+                .findFirst().orElseThrow();
+    }
+
+    /**
+     * @return the id of the form-state field whose description carries the
+     *         given label
+     */
+    private static String fieldId(JsonNode state, String label) {
+        for (var field : state.get("fields")) {
+            if (field.path("description").asString("").contains(label)) {
+                return field.get("id").asString();
+            }
+        }
+        throw new IllegalStateException("No field labeled " + label);
     }
 }

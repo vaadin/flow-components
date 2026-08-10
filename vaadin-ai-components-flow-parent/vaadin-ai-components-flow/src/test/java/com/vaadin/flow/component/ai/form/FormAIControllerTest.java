@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 import org.slf4j.event.Level;
 
@@ -57,7 +58,9 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.MockUIExtension;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -1840,6 +1843,32 @@ class FormAIControllerTest {
         }
 
         @Test
+        void fieldMarkerI18nCarriesConfidenceTexts() {
+            // The confidence texts nest under the "confidence" key of the web
+            // component's i18n object, one text per level; a level left null
+            // is omitted so the web component's default applies to it.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setConfidence(new FieldMarkerI18n.Confidence()
+                                    .setLow("Arvaus").setHigh("Varma")));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            var confidence = i18nOn(field).get("confidence");
+
+            Assertions.assertNotNull(confidence,
+                    "Configured confidence texts must reach the marker");
+            Assertions.assertEquals("Arvaus", confidence.get("low").asString());
+            Assertions.assertEquals("Varma", confidence.get("high").asString());
+            Assertions.assertFalse(confidence.has("medium"),
+                    "An unset level text must be omitted from the marker");
+        }
+
+        @Test
         void i18nTextsAreRefreshedOnLaterTurns() {
             // Texts set after a field was first marked reach it when the next
             // turn marks it again, without the marker being replaced.
@@ -2540,6 +2569,207 @@ class FormAIControllerTest {
          */
         private static ObjectNode i18nOn(Component field) {
             return (ObjectNode) requireMarkerOn(field).getPropertyRaw("i18n");
+        }
+    }
+
+    /**
+     * Confidence levels enter through the {@code fill_form} tool — the envelope
+     * is part of the tool payload contract — so these tests drive fills the way
+     * the LLM would rather than calling {@code setValue} directly.
+     * {@link MockUIExtension} provides the synchronous {@code ui.access()} the
+     * fill's UI-thread hop requires. Assertions are made against the marker
+     * element's {@code confidence} property; the indicator itself is rendered
+     * by the web component on the client.
+     */
+    @Nested
+    class FieldConfidence {
+
+        private static final String MARKER_TAG = "vaadin-ai-field-marker";
+
+        @RegisterExtension
+        MockUIExtension ui = new MockUIExtension();
+
+        @Test
+        void fieldConfidenceDefaultsToDisabled() {
+            var controller = new FormAIController(new Div());
+
+            Assertions.assertFalse(controller.isFieldConfidenceEnabled());
+            Assertions.assertTrue(controller.setFieldConfidenceEnabled(true)
+                    .isFieldConfidenceEnabled());
+        }
+
+        @Test
+        void fillFormDescriptionCarriesEnvelopeInstructionsOnlyWhenEnabled() {
+            var controller = new FormAIController(new Div());
+            var defaultDescription = findTool(controller.getTools(),
+                    "fill_form").getDescription();
+
+            controller.setFieldConfidenceEnabled(true);
+            var enabledDescription = findTool(controller.getTools(),
+                    "fill_form").getDescription();
+
+            Assertions.assertFalse(defaultDescription.contains("confidence"),
+                    "The default description must not mention the envelope");
+            Assertions.assertTrue(
+                    enabledDescription.startsWith(defaultDescription),
+                    "The addendum must extend the default description so the "
+                            + "rest of the tool contract stays untouched");
+            Assertions.assertTrue(enabledDescription.contains("\"confidence\""),
+                    "Got: " + enabledDescription);
+        }
+
+        @Test
+        void changedFieldMarkerCarriesReportedLevel() {
+            var field = new TestField();
+            var controller = controller(field);
+
+            controller.onRequest();
+            fill(controller, field,
+                    "{\"value\":\"Acme\",\"confidence\":\"high\"}");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("high", confidenceOn(field));
+        }
+
+        @Test
+        void eachFieldShowsItsOwnLevel() {
+            var sure = new TestField();
+            var guessed = new TestField();
+            var controller = controller(sure, guessed);
+
+            controller.onRequest();
+            var values = JacksonUtils.createObjectNode();
+            values.set(idOf(sure),
+                    json("{\"value\":\"a\",\"confidence\":\"high\"}"));
+            values.set(idOf(guessed),
+                    json("{\"value\":\"b\",\"confidence\":\"low\"}"));
+            fillAll(controller, values);
+            controller.onResponse(null);
+
+            Assertions.assertEquals("high", confidenceOn(sure));
+            Assertions.assertEquals("low", confidenceOn(guessed));
+        }
+
+        @Test
+        void plainValueShowsNoLevel() {
+            // The model leaves the envelope out when it cannot judge the
+            // value; the field is marked but shows no indicator.
+            var field = new TestField();
+            var controller = controller(field);
+
+            controller.onRequest();
+            fill(controller, field, "\"Acme\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(confidenceOn(field));
+        }
+
+        @Test
+        void unknownLevelShowsNoLevel() {
+            // A level outside high/medium/low is dropped while the value is
+            // still written, so the field is marked but shows no indicator.
+            var field = new TestField();
+            var controller = controller(field);
+
+            controller.onRequest();
+            fill(controller, field,
+                    "{\"value\":\"Acme\",\"confidence\":\"certain\"}");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("Acme", field.getValue());
+            Assertions.assertNull(confidenceOn(field));
+        }
+
+        @Test
+        void laterTurnWithoutLevelClearsShownLevel() {
+            // The level describes the value it was reported with. A later
+            // turn that replaces the value without a level must clear the
+            // stale one from the persisting marker.
+            var field = new TestField();
+            var controller = controller(field);
+
+            controller.onRequest();
+            fill(controller, field,
+                    "{\"value\":\"first\",\"confidence\":\"low\"}");
+            controller.onResponse(null);
+            Assertions.assertEquals("low", confidenceOn(field));
+
+            controller.onRequest();
+            fill(controller, field, "\"second\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(confidenceOn(field));
+        }
+
+        @Test
+        void levelDroppedWhenValueChangesAgainDuringTurn() {
+            // A cascade (or the application) may overwrite the field after
+            // the LLM's write but before the turn ends. The reported level
+            // described the LLM's value, not the final one, so it must not
+            // be shown.
+            var field = new TestField();
+            var controller = controller(field);
+
+            controller.onRequest();
+            fill(controller, field,
+                    "{\"value\":\"llm value\",\"confidence\":\"high\"}");
+            field.setValue("cascaded value");
+            controller.onResponse(null);
+
+            Assertions.assertNull(confidenceOn(field));
+        }
+
+        @Test
+        void unchangedFieldKeepsItsLevelAcrossTurns() {
+            // A field the later turn did not change keeps the marker and the
+            // level from the turn that filled it.
+            var filled = new TestField();
+            var other = new TestField();
+            var controller = controller(filled, other);
+
+            controller.onRequest();
+            fill(controller, filled,
+                    "{\"value\":\"kept\",\"confidence\":\"medium\"}");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fill(controller, other, "\"changed\"");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("medium", confidenceOn(filled));
+        }
+
+        private FormAIController controller(Component... fields) {
+            var form = new Div(fields);
+            ui.add(form);
+            return new FormAIController(form).setFieldConfidenceEnabled(true);
+        }
+
+        /** Drives {@code fill_form} with one field's value, LLM style. */
+        private static void fill(FormAIController controller,
+                HasValue<?, ?> field, String jsonValue) {
+            fillAll(controller,
+                    json("{\"" + idOf(field) + "\":" + jsonValue + "}"));
+        }
+
+        private static void fillAll(FormAIController controller,
+                JsonNode values) {
+            var arguments = JacksonUtils.createObjectNode();
+            arguments.set("values", values);
+            findTool(controller.getTools(), "fill_form").execute(arguments);
+        }
+
+        /**
+         * @return the {@code confidence} property of the field's marker, or
+         *         {@code null} when the marker shows no level
+         */
+        private static String confidenceOn(Component field) {
+            var markers = field.getElement().getChildren()
+                    .filter(child -> MARKER_TAG.equals(child.getTag()))
+                    .toList();
+            Assertions.assertEquals(1, markers.size(),
+                    "Expected exactly one marker on the field");
+            return markers.getFirst().getProperty("confidence");
         }
     }
 

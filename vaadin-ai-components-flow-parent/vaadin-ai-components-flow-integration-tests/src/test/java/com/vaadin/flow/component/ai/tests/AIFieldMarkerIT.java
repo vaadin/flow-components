@@ -96,6 +96,24 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void confidenceTurn_fieldsShowReportedConfidenceIndicators() {
+        $("button").id("confidence-turn").click();
+
+        waitUntil(
+                driver -> "high".equals(name.getDomAttribute("ai-confidence")));
+        waitUntil(driver -> "low"
+                .equals(company.getDomAttribute("ai-confidence")));
+
+        Assert.assertEquals(AIFieldMarkerPage.CONFIDENCE_HIGH_TEXT,
+                indicatorOf(name).getText());
+        Assert.assertEquals(AIFieldMarkerPage.CONFIDENCE_LOW_TEXT,
+                indicatorOf(company).getText());
+        Assert.assertFalse(
+                "A field with no reported level must show no indicator",
+                unchanged.hasAttribute("ai-confidence"));
+    }
+
+    @Test
     public void revertFromPopover_restoresValueOnServer() {
         runTurn();
 
@@ -127,6 +145,14 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     private TestBenchElement waitForMarker(TestBenchElement field) {
         waitUntil(driver -> !field.$(MARKER).all().isEmpty());
         return field.$(MARKER).first();
+    }
+
+    /**
+     * @return the confidence indicator the marker rendered into the field's
+     *         helper text section
+     */
+    private TestBenchElement indicatorOf(TestBenchElement field) {
+        return field.$("span").withClassName("confidence").first();
     }
 
     private TestBenchElement revertButtonOf(TestBenchElement marker) {
