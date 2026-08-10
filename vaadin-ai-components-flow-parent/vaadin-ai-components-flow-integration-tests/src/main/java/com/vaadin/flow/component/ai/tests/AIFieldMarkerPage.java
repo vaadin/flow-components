@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import java.util.List;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -25,18 +26,20 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.communication.PushMode;
 
 import tools.jackson.databind.JsonNode;
 
 /**
  * Test page for the AI field marker that {@link FormAIController} applies to
  * the fields it fills. Drives one AI turn in two steps, each its own server
- * round trip, so that both halves of the turn are observable without push or
- * background threads: "start-turn" puts the fields into the "AI is working"
- * state, "finish-turn" writes the values and marks the fields that changed. The
- * "confidence-turn" button instead runs a whole turn at once, writing the
- * values through the controller's {@code fill_form} tool wrapped in the
- * confidence-reporting envelope, so the confidence indicators show.
+ * round trip, so that both halves of the turn are observable: "start-turn" puts
+ * the fields into the "AI is working" state, "finish-turn" writes the values
+ * and marks the fields that changed. The "confidence-turn" button instead runs
+ * a whole turn at once, writing the values through the controller's
+ * {@code fill_form} tool wrapped in the confidence-reporting envelope, so the
+ * confidence indicators show. That turn runs on a background thread, so the
+ * page enables push for its own UI.
  * <p>
  * The controller is configured with {@link FieldMarkerI18n} texts that differ
  * from the web component's defaults, so a test can tell the texts sent by the
@@ -59,6 +62,8 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String UNCHANGED_VALUE = "Unchanged";
 
     public AIFieldMarkerPage() {
+        UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+
         var name = new TextField("Name");
         name.setId("name");
 
@@ -110,8 +115,16 @@ public class AIFieldMarkerPage extends VerticalLayout {
      * way the LLM sends them with confidence reporting on: each value wrapped
      * in an envelope carrying a confidence level. The field ids are resolved
      * from the {@code get_form_state} tool output, like the LLM resolves them.
+     * <p>
+     * {@code fill_form} hops through {@code ui.access} and blocks until the
+     * writes land, so it must not run on the UI thread that is handling the
+     * button click: the command would only be run once the click request
+     * releases the session lock, which never happens while the handler waits
+     * for it. The tool is therefore executed on a background thread, like a
+     * real LLM provider executes tools.
      */
     private static void runConfidenceTurn(FormAIController controller) {
+        var ui = UI.getCurrent();
         controller.onRequest();
         var tools = controller.getTools();
         var state = JacksonUtils
@@ -123,8 +136,10 @@ public class AIFieldMarkerPage extends VerticalLayout {
                 .put("confidence", "low");
         var arguments = JacksonUtils.createObjectNode();
         arguments.set("values", values);
-        findTool(tools, "fill_form").execute(arguments);
-        controller.onResponse(null);
+        new Thread(() -> {
+            findTool(tools, "fill_form").execute(arguments);
+            ui.access(() -> controller.onResponse(null));
+        }).start();
     }
 
     private static LLMProvider.ToolSpec findTool(
