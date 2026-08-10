@@ -1,7 +1,11 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
+import {
+  createDate,
+  extractDateParts,
+  parseDate as _parseDate
+} from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
 window.Vaadin.Flow.datepickerConnector = {};
 window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
@@ -173,6 +177,25 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
 
     // Merge new I18N settings with formatting and parsing functions
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
+  };
+
+  let disabledDatesSet = new Set(); // 'y-m-d' keys, 0-based month
+  let disabledWeekdaysSet = new Set(); // ISO weekday numbers 1..7
+
+  datepicker.$connector.setDateMetadataConfig = (config) => {
+    disabledDatesSet = new Set((config.disabledDates || []).map(([y, m, d]) => `${y}-${m}-${d}`));
+    disabledWeekdaysSet = new Set(config.disabledWeekdays || []);
+
+    // `isDateDisabled` is not reference-compared by the web component, so a fresh function is
+    // what makes the calendars recompute. Leave it `undefined` — its unset state — when there
+    // is nothing to check, which lets the month calendar skip a per-date call on every render.
+    datepicker.isDateDisabled =
+      disabledDatesSet.size === 0 && disabledWeekdaysSet.size === 0
+        ? undefined
+        : ({ year, month, day }) =>
+            disabledDatesSet.has(`${year}-${month}-${day}`) ||
+            // `createDate`, not `new Date(y, m, d)`, which maps years 0-99 to 1900+year.
+            disabledWeekdaysSet.has(createDate(year, month, day).getDay() || 7);
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));

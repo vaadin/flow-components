@@ -86,4 +86,67 @@ describe('date-picker connector', () => {
       });
     });
   });
+
+  describe('date metadata', () => {
+    function isDateDisabled(year: number, month: number, day: number): boolean {
+      return datePicker.isDateDisabled!({ year, month, day });
+    }
+
+    it('should not set isDateDisabled when no static rules are configured', () => {
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [], disabledWeekdays: [] });
+      expect(datePicker.isDateDisabled).to.be.undefined;
+    });
+
+    it('should disable dates from the fixed list', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [
+          [2024, 0, 2],
+          [2024, 0, 4]
+        ]
+      });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true;
+      expect(isDateDisabled(2024, 0, 4)).to.be.true;
+      expect(isDateDisabled(2024, 0, 3)).to.be.false;
+    });
+
+    it('should disable dates from the weekday list', () => {
+      // Monday = 1 and Sunday = 7, the latter being 0 in `Date.prototype.getDay()`.
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [1, 7] });
+      expect(isDateDisabled(2024, 0, 1)).to.be.true; // Monday
+      expect(isDateDisabled(2024, 0, 7)).to.be.true; // Sunday
+      expect(isDateDisabled(2024, 0, 8)).to.be.true; // Monday
+      expect(isDateDisabled(2024, 0, 6)).to.be.false; // Saturday
+      expect(isDateDisabled(2024, 0, 2)).to.be.false; // Tuesday
+    });
+
+    it('should compute weekdays correctly for years below 100', () => {
+      // Year 50 January 1st is a Saturday, while `new Date(50, 0, 1)` would map to
+      // 1950-01-01, which is a Sunday.
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [6] });
+      expect(isDateDisabled(50, 0, 1)).to.be.true;
+
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [7] });
+      expect(isDateDisabled(50, 0, 1)).to.be.false;
+    });
+
+    it('should replace isDateDisabled when the config changes', () => {
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 2]] });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true;
+
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 3]] });
+      expect(isDateDisabled(2024, 0, 3)).to.be.true;
+      expect(isDateDisabled(2024, 0, 2)).to.be.false;
+    });
+
+    it('should clear isDateDisabled when the config becomes empty', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [[2024, 0, 2]],
+        disabledWeekdays: [7]
+      });
+      expect(datePicker.isDateDisabled).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({});
+      expect(datePicker.isDateDisabled).to.be.undefined;
+    });
+  });
 });
