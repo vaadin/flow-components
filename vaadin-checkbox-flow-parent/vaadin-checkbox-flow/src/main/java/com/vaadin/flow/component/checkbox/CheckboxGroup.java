@@ -849,16 +849,10 @@ public class CheckboxGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Cache helper component before removal
-            Component helperComponent = getHelperComponent();
-
-            // Remove all known children (doesn't remove client-side-only
-            // children such as the label)
-            getChildren().forEach(this::remove);
-
-            // reinsert helper component
-            // see https://github.com/vaadin/vaadin-checkbox/issues/191
-            setHelperComponent(helperComponent);
+            // Remove children in the default slot
+            getChildren()
+                    .filter(child -> !child.getElement().hasAttribute("slot"))
+                    .forEach(this::remove);
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
 
@@ -1017,7 +1011,7 @@ public class CheckboxGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.0
      */
     protected void validate() {
@@ -1057,7 +1051,7 @@ public class CheckboxGroup<T>
 
     /**
      * The internationalization properties for {@link CheckboxGroup}.
-     * 
+     *
      * @since 24.5
      */
     public static class CheckboxGroupI18n implements Serializable {

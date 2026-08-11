@@ -698,16 +698,10 @@ public class RadioButtonGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Cache helper component before removal
-            Component helperComponent = getHelperComponent();
-
-            // Remove all known children (doesn't remove client-side-only
-            // children such as the label)
+            // Remove children in the default slot
             getChildren()
+                    .filter(child -> !child.getElement().hasAttribute("slot"))
                     .forEach(child -> child.getElement().removeFromParent());
-
-            // reinsert helper component
-            setHelperComponent(helperComponent);
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
             getDataProvider().fetch(DataViewUtils.getQuery(this))
@@ -931,7 +925,7 @@ public class RadioButtonGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.0
      */
     protected void validate() {
@@ -971,7 +965,7 @@ public class RadioButtonGroup<T>
 
     /**
      * The internationalization properties for {@link RadioButtonGroup}.
-     * 
+     *
      * @since 24.5
      */
     public static class RadioButtonGroupI18n implements Serializable {
