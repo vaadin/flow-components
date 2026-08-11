@@ -179,6 +179,19 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
   };
 
+  // STABLE reference — created once per connector, never reassigned. Assigning a new function
+  // to `dateMetadataProvider` clears the web component's cache and re-fetches every visible
+  // range, so the same function object is reused for every update.
+  const dateMetadataProvider = ({ start, end }) => {
+    if (!datepicker.$server) {
+      // Throwing lets the web component drop the months and retry on the next navigation,
+      // instead of caching "nothing is disabled" as authoritative.
+      throw new Error('Date metadata requested before the server connection was ready');
+    }
+    // Months are 0-based in both directions; the server adds the offset.
+    return datepicker.$server.requestDateMetadata(start.year, start.month, start.day, end.year, end.month, end.day);
+  };
+
   datepicker.$connector.setDateMetadataConfig = (config) => {
     // Keys are `year-month-day` with a 0-based month, matching what the web component
     // passes to `isDateDisabled`, so nothing has to be parsed or converted per date.
@@ -194,6 +207,8 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
         : ({ year, month, day }) =>
             (hasDisabledDates && disabledDates.has(`${year}-${month}-${day}`)) ||
             (hasDisabledWeekdays && disabledWeekdays.has(createDate(year, month, day).getDay() || 7));
+
+    datepicker.dateMetadataProvider = config.hasProvider ? dateMetadataProvider : null;
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
