@@ -71,6 +71,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -176,8 +177,6 @@ public class DatePicker
             .noneOf(DayOfWeek.class);
 
     private StateTree.ExecutionRegistration pendingDateMetadataUpdate;
-
-    private boolean pendingCacheClear;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
@@ -577,7 +576,7 @@ public class DatePicker
             dates.forEach(date -> disabledDates.add(Objects.requireNonNull(date,
                     "Disabled dates cannot contain null elements")));
         }
-        requestDateMetadataUpdate(false);
+        requestDateMetadataUpdate();
     }
 
     /**
@@ -621,7 +620,7 @@ public class DatePicker
                     .add(Objects.requireNonNull(weekday,
                             "Disabled weekdays cannot contain null elements")));
         }
-        requestDateMetadataUpdate(false);
+        requestDateMetadataUpdate();
     }
 
     /**
@@ -679,24 +678,14 @@ public class DatePicker
         return config;
     }
 
-    private void requestDateMetadataUpdate(boolean clearCache) {
-        pendingCacheClear |= clearCache;
-        getUI().ifPresent(ui -> {
-            if (pendingDateMetadataUpdate != null) {
-                pendingDateMetadataUpdate.remove();
-            }
-            pendingDateMetadataUpdate = ui.beforeClientResponse(this,
-                    context -> {
-                        pendingDateMetadataUpdate = null;
-                        getElement().callJsFunction(
-                                "$connector.setDateMetadataConfig",
-                                createDateMetadataConfig());
-                        if (pendingCacheClear) {
-                            pendingCacheClear = false;
-                            getElement().callJsFunction("clearCache");
-                        }
-                    });
-        });
+    private void requestDateMetadataUpdate() {
+        pendingDateMetadataUpdate = scheduleUpdate(pendingDateMetadataUpdate,
+                () -> {
+                    pendingDateMetadataUpdate = null;
+                    getElement().callJsFunction(
+                            "$connector.setDateMetadataConfig",
+                            createDateMetadataConfig());
+                });
     }
 
     /**
@@ -779,11 +768,8 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        // A fresh client element has an empty metadata cache, so a cache clear
-        // requested while detached is pointless and must not carry over.
-        pendingCacheClear = false;
         if (hasDateMetadataConfig()) {
-            requestDateMetadataUpdate(false);
+            requestDateMetadataUpdate();
         }
     }
 
@@ -819,15 +805,34 @@ public class DatePicker
     }
 
     private void requestI18nUpdate() {
-        getUI().ifPresent(ui -> {
-            if (pendingI18nUpdate != null) {
-                pendingI18nUpdate.remove();
-            }
-            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
-                pendingI18nUpdate = null;
-                executeI18nUpdate();
-            });
+        pendingI18nUpdate = scheduleUpdate(pendingI18nUpdate, () -> {
+            pendingI18nUpdate = null;
+            executeI18nUpdate();
         });
+    }
+
+    /**
+     * Schedules an update to run before the next client response, replacing the
+     * update of the same kind that has not run yet, if there is one. Does
+     * nothing if the component is not attached.
+     *
+     * @param pending
+     *            the registration of the update that has not run yet, or
+     *            {@code null} if there is none
+     * @param update
+     *            the update to run
+     * @return the registration of the scheduled update, or {@code pending} if
+     *         the component is not attached
+     */
+    private StateTree.ExecutionRegistration scheduleUpdate(
+            StateTree.ExecutionRegistration pending,
+            SerializableRunnable update) {
+        return getUI().map(ui -> {
+            if (pending != null) {
+                pending.remove();
+            }
+            return ui.beforeClientResponse(this, context -> update.run());
+        }).orElse(pending);
     }
 
     /**

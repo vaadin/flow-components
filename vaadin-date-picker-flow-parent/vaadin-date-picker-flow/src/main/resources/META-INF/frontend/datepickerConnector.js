@@ -179,23 +179,28 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
   };
 
-  let disabledDatesSet = new Set(); // 'y-m-d' keys, 0-based month
-  let disabledWeekdaysSet = new Set(); // ISO weekday numbers 1..7
-
   datepicker.$connector.setDateMetadataConfig = (config) => {
-    disabledDatesSet = new Set((config.disabledDates || []).map(([y, m, d]) => `${y}-${m}-${d}`));
-    disabledWeekdaysSet = new Set(config.disabledWeekdays || []);
+    // Keys are `year-month-day` with a 0-based month, matching what the web component
+    // passes to `isDateDisabled`, so nothing has to be parsed or converted per date.
+    const disabledDates = new Set((config.disabledDates || []).map(([y, m, d]) => `${y}-${m}-${d}`));
+    // ISO weekday numbers, 1..7.
+    const disabledWeekdays = new Set(config.disabledWeekdays || []);
+    const hasDisabledDates = disabledDates.size > 0;
+    const hasDisabledWeekdays = disabledWeekdays.size > 0;
 
     // `isDateDisabled` is not reference-compared by the web component, so a fresh function is
     // what makes the calendars recompute. Leave it `undefined` — its unset state — when there
     // is nothing to check, which lets the month calendar skip a per-date call on every render.
+    // The web component calls it for every cell on every render, so each check is guarded by
+    // whether it is configured at all: with only disabled dates set, no `Date` is allocated,
+    // and with only disabled weekdays set, no key string is built.
     datepicker.isDateDisabled =
-      disabledDatesSet.size === 0 && disabledWeekdaysSet.size === 0
+      !hasDisabledDates && !hasDisabledWeekdays
         ? undefined
         : ({ year, month, day }) =>
-            disabledDatesSet.has(`${year}-${month}-${day}`) ||
+            (hasDisabledDates && disabledDates.has(`${year}-${month}-${day}`)) ||
             // `createDate`, not `new Date(y, m, d)`, which maps years 0-99 to 1900+year.
-            disabledWeekdaysSet.has(createDate(year, month, day).getDay() || 7);
+            (hasDisabledWeekdays && disabledWeekdays.has(createDate(year, month, day).getDay() || 7));
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));

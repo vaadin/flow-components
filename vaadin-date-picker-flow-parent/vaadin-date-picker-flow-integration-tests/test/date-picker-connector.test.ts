@@ -119,6 +119,16 @@ describe('date-picker connector', () => {
       expect(isDateDisabled(2024, 0, 2)).to.be.false; // Tuesday
     });
 
+    it('should disable dates from the fixed list and the weekday list together', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [[2024, 0, 2]],
+        disabledWeekdays: [7]
+      });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true; // Tuesday, from the fixed list
+      expect(isDateDisabled(2024, 0, 7)).to.be.true; // Sunday, from the weekday list
+      expect(isDateDisabled(2024, 0, 3)).to.be.false; // Wednesday, neither
+    });
+
     it('should compute weekdays correctly for years below 100', () => {
       // Year 50 January 1st is a Saturday, while `new Date(50, 0, 1)` would map to
       // 1950-01-01, which is a Sunday.
