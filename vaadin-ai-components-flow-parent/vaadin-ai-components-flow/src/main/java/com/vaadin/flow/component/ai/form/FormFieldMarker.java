@@ -69,7 +69,12 @@ final class FormFieldMarker {
             field.appendChild(created);
             return created;
         });
-        marker.setPropertyJson("i18n", toI18nJson(i18n));
+        var json = toI18nJson(i18n);
+        // Re-applied every turn, so skip the write when the texts have not
+        // changed since the marker last got them.
+        if (!json.equals(marker.getPropertyRaw("i18n"))) {
+            marker.setPropertyJson("i18n", json);
+        }
     }
 
     /**
