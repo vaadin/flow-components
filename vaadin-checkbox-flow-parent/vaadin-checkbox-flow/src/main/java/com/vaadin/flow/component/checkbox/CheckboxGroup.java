@@ -849,9 +849,7 @@ public class CheckboxGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Remove children in the default slot (the checkboxes), keeping
-            // children in named slots such as the helper component or a
-            // custom label
+            // Remove children in the default slot
             getChildren()
                     .filter(child -> !child.getElement().hasAttribute("slot"))
                     .forEach(this::remove);

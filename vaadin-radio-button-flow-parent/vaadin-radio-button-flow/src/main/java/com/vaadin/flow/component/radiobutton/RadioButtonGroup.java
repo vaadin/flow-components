@@ -698,9 +698,7 @@ public class RadioButtonGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Remove children in the default slot (the radio buttons),
-            // keeping children in named slots such as the helper component
-            // or a custom label
+            // Remove children in the default slot
             getChildren()
                     .filter(child -> !child.getElement().hasAttribute("slot"))
                     .forEach(child -> child.getElement().removeFromParent());
