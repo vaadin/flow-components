@@ -946,10 +946,11 @@ public class FormAIController implements AIController {
     /**
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
-     * after diff that drives the automatic field marker and
-     * {@link #addFieldValueChangeListener}. Always taken, even with neither in
-     * play, since the marker's revert control restores the pre-fill value the
-     * diff carries.
+     * after diff that drives the automatic field marker (whose revert control
+     * restores the pre-fill value the diff carries) and
+     * {@link #addFieldValueChangeListener}. Skipped when neither can consume it
+     * — marking turned off and no listener registered — to avoid copying values
+     * that no one will read.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
      * that's revealed during the turn can still be compared against a real
@@ -957,6 +958,9 @@ public class FormAIController implements AIController {
      */
     private void snapshotPreTurnValues() {
         preTurnValues.clear();
+        if (!fieldMarkerEnabled && fieldValueChangeListeners.isEmpty()) {
+            return;
+        }
         for (var field : collectKnownFields()) {
             preTurnValues.put(field, field.getValue());
         }
