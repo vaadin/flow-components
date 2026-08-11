@@ -186,6 +186,35 @@ class CheckboxGroupTest {
     }
 
     @Test
+    void customComponentInLabelSlot_setItems_componentIsPreserved() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Div customLabel = new Div();
+        customLabel.getElement().setAttribute("slot", "label");
+        group.getElement().appendChild(customLabel.getElement());
+
+        group.setItems("foo", "bar");
+        group.setItems("foo", "baz");
+
+        Assertions.assertEquals(group.getElement(),
+                customLabel.getElement().getParent());
+        Assertions.assertEquals(2,
+                group.getChildren().filter(Checkbox.class::isInstance).count());
+    }
+
+    @Test
+    void helperComponent_setItems_helperComponentIsPreserved() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Div helper = new Div();
+        group.setHelperComponent(helper);
+
+        group.setItems("foo", "bar");
+
+        Assertions.assertEquals(helper, group.getHelperComponent());
+        Assertions.assertEquals(group.getElement(),
+                helper.getElement().getParent());
+    }
+
+    @Test
     void deselectAll_selectionIsReset() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("Foo", "Bar");

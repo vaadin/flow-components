@@ -698,16 +698,12 @@ public class RadioButtonGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Cache helper component before removal
-            Component helperComponent = getHelperComponent();
-
-            // Remove all known children (doesn't remove client-side-only
-            // children such as the label)
+            // Remove children in the default slot (the radio buttons),
+            // keeping children in named slots such as the helper component
+            // or a custom label
             getChildren()
+                    .filter(child -> !child.getElement().hasAttribute("slot"))
                     .forEach(child -> child.getElement().removeFromParent());
-
-            // reinsert helper component
-            setHelperComponent(helperComponent);
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
             getDataProvider().fetch(DataViewUtils.getQuery(this))
