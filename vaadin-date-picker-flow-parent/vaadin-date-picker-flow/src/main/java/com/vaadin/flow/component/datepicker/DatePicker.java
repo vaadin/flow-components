@@ -557,16 +557,12 @@ public class DatePicker
      * The dates combine with the disabled weekdays, as well as with the minimum
      * and maximum date: a date cannot be selected if any of these constraints
      * disables it. By default, no individual dates are disabled.
-     * <p>
-     * The set is evaluated in the browser, so it is sent there in full every
-     * time the configuration is updated, including on every attach. Use it for
-     * a small, fully known set of dates. For a large or changing set, use a
-     * date metadata provider instead, which only fetches what is shown.
      *
      * @param dates
      *            the dates that cannot be selected, or {@code null} to clear
-     *            the constraint. The collection must not contain {@code null}
-     *            elements.
+     *            the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
      * @see DatePickerI18n#setDisabledDateErrorMessage(String)
      * @since 25.3
      */
@@ -599,17 +595,12 @@ public class DatePicker
      * The weekdays combine with the individually disabled dates, as well as
      * with the minimum and maximum date: a date cannot be selected if any of
      * these constraints disables it. By default, no weekdays are disabled.
-     * <p>
-     * The set is evaluated in the browser, so it is sent there in full every
-     * time the configuration is updated, including on every attach. Use it for
-     * a small, fully known set of weekdays. For a large or changing set of
-     * dates, use a date metadata provider instead, which only fetches what is
-     * shown.
      *
      * @param weekdays
      *            the weekdays whose dates cannot be selected, or {@code null}
-     *            to clear the constraint. The collection must not contain
-     *            {@code null} elements.
+     *            to clear the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
      * @see DatePickerI18n#setDisabledDateErrorMessage(String)
      * @since 25.3
      */
