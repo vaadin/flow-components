@@ -2369,6 +2369,32 @@ class FormAIControllerTest {
         }
 
         @Test
+        void revertKeepsNullPreFillValueAcrossTurns() {
+            // A null pre-fill value must survive later turns like any other:
+            // the mark, not the stored value, is the record of "already
+            // captured", so a second turn must not replace null with its own
+            // pre-turn value.
+            var field = new DoubleField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue(42.0);
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue(43.0);
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertNull(field.getValue(),
+                    "Revert must restore the null pre-fill value even after "
+                            + "several turns changed the field");
+        }
+
+        @Test
         void fieldMarkerDefaultsToEnabled() {
             var form = new Div(new TestField());
             ui.add(form);
