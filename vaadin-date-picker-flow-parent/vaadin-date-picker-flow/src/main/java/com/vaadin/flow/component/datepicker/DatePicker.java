@@ -16,13 +16,19 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -65,11 +71,13 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
+import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -100,6 +108,8 @@ import tools.jackson.databind.node.ObjectNode;
  * <li>{@link #setRequiredIndicatorVisible(boolean)}
  * <li>{@link #setMin(LocalDate)}
  * <li>{@link #setMax(LocalDate)}
+ * <li>{@link #setDisabledDates(Collection)}
+ * <li>{@link #setDisabledWeekdays(Collection)}
  * </ul>
  * <p>
  * Error messages for unparsable input and constraints can be configured with
@@ -161,6 +171,13 @@ public class DatePicker
     private String fallbackParserErrorMessage = null;
     private boolean isFallbackParserRunning = false;
 
+    private final Set<LocalDate> disabledDates = new LinkedHashSet<>();
+
+    private final Set<DayOfWeek> disabledWeekdays = EnumSet
+            .noneOf(DayOfWeek.class);
+
+    private StateTree.ExecutionRegistration pendingDateMetadataUpdate;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<LocalDate> defaultValidator = (value, context) -> {
@@ -200,6 +217,11 @@ public class DatePicker
                 getMin());
         if (minResult.isError()) {
             return minResult;
+        }
+
+        if (value != null && isDateDisabled(value)) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DatePickerI18n::getDisabledDateErrorMessage));
         }
 
         return ValidationResult.ok();
@@ -516,6 +538,148 @@ public class DatePicker
     }
 
     /**
+     * Gets the individual dates that cannot be selected.
+     *
+     * @return an unmodifiable set of the dates that cannot be selected, empty
+     *         if none are set, never {@code null}
+     * @see #setDisabledDates(Collection)
+     * @since 25.3
+     */
+    public Set<LocalDate> getDisabledDates() {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(disabledDates));
+    }
+
+    /**
+     * Sets individual dates that cannot be selected. Such dates are displayed
+     * as disabled in the calendar overlay, and manual entry of one of them
+     * causes the component to invalidate.
+     * <p>
+     * The dates combine with the disabled weekdays, as well as with the minimum
+     * and maximum date: a date cannot be selected if any of these constraints
+     * disables it. By default, no individual dates are disabled.
+     *
+     * @param dates
+     *            the dates that cannot be selected, or {@code null} to clear
+     *            the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DatePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledDates(Collection<LocalDate> dates) {
+        disabledDates.clear();
+        if (dates != null) {
+            dates.forEach(date -> disabledDates.add(Objects.requireNonNull(date,
+                    "Disabled dates cannot contain null elements")));
+        }
+        requestDateMetadataUpdate();
+    }
+
+    /**
+     * Gets the weekdays whose dates cannot be selected.
+     *
+     * @return an unmodifiable set of the weekdays whose dates cannot be
+     *         selected, empty if none are set, never {@code null}
+     * @see #setDisabledWeekdays(Collection)
+     * @since 25.3
+     */
+    public Set<DayOfWeek> getDisabledWeekdays() {
+        return Collections.unmodifiableSet(EnumSet.copyOf(disabledWeekdays));
+    }
+
+    /**
+     * Sets the weekdays whose dates cannot be selected. Such dates are
+     * displayed as disabled in the calendar overlay, and manual entry of one of
+     * them causes the component to invalidate.
+     * <p>
+     * The weekdays combine with the individually disabled dates, as well as
+     * with the minimum and maximum date: a date cannot be selected if any of
+     * these constraints disables it. By default, no weekdays are disabled.
+     *
+     * @param weekdays
+     *            the weekdays whose dates cannot be selected, or {@code null}
+     *            to clear the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DatePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledWeekdays(Collection<DayOfWeek> weekdays) {
+        disabledWeekdays.clear();
+        if (weekdays != null) {
+            weekdays.forEach(weekday -> disabledWeekdays
+                    .add(Objects.requireNonNull(weekday,
+                            "Disabled weekdays cannot contain null elements")));
+        }
+        requestDateMetadataUpdate();
+    }
+
+    /**
+     * Gets whether the given date cannot be selected because it is one of the
+     * dates set with {@link #setDisabledDates(Collection)}, or falls on one of
+     * the weekdays set with {@link #setDisabledWeekdays(Collection)}.
+     * <p>
+     * The minimum and maximum date are not considered.
+     *
+     * @param date
+     *            the date to check, may be {@code null}
+     * @return {@code true} if the date cannot be selected, {@code false}
+     *         otherwise or if the date is {@code null}
+     * @since 25.3
+     */
+    public boolean isDateDisabled(LocalDate date) {
+        if (date == null) {
+            return false;
+        }
+        return disabledDates.contains(date)
+                || disabledWeekdays.contains(date.getDayOfWeek());
+    }
+
+    private boolean hasDateMetadataConfig() {
+        return !disabledDates.isEmpty() || !disabledWeekdays.isEmpty();
+    }
+
+    /**
+     * Creates the date metadata configuration that is pushed to the connector.
+     * <p>
+     * Months are zero-based in every direction on the wire, so the disabled
+     * dates are emitted as {@code [year, month, day]} triples with the month
+     * offset already applied. The disabled weekdays use ISO weekday numbers,
+     * where Monday is 1 and Sunday is 7.
+     *
+     * @return the date metadata configuration
+     */
+    ObjectNode createDateMetadataConfig() {
+        ObjectNode config = JacksonUtils.createObjectNode();
+
+        ArrayNode dates = JacksonUtils.createArrayNode();
+        disabledDates.forEach(date -> {
+            ArrayNode triple = JacksonUtils.createArrayNode();
+            triple.add(date.getYear());
+            triple.add(date.getMonthValue() - 1);
+            triple.add(date.getDayOfMonth());
+            dates.add(triple);
+        });
+        config.set("disabledDates", dates);
+
+        ArrayNode weekdays = JacksonUtils.createArrayNode();
+        disabledWeekdays.forEach(weekday -> weekdays.add(weekday.getValue()));
+        config.set("disabledWeekdays", weekdays);
+
+        return config;
+    }
+
+    private void requestDateMetadataUpdate() {
+        pendingDateMetadataUpdate = scheduleUpdate(pendingDateMetadataUpdate,
+                () -> {
+                    pendingDateMetadataUpdate = null;
+                    getElement().callJsFunction(
+                            "$connector.setDateMetadataConfig",
+                            createDateMetadataConfig());
+                });
+    }
+
+    /**
      * Set the Locale for the Date Picker. The displayed date will be matched to
      * the format used in that locale.
      * <p>
@@ -595,6 +759,9 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
+        if (hasDateMetadataConfig()) {
+            requestDateMetadataUpdate();
+        }
     }
 
     private void initConnector() {
@@ -629,15 +796,34 @@ public class DatePicker
     }
 
     private void requestI18nUpdate() {
-        getUI().ifPresent(ui -> {
-            if (pendingI18nUpdate != null) {
-                pendingI18nUpdate.remove();
-            }
-            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
-                pendingI18nUpdate = null;
-                executeI18nUpdate();
-            });
+        pendingI18nUpdate = scheduleUpdate(pendingI18nUpdate, () -> {
+            pendingI18nUpdate = null;
+            executeI18nUpdate();
         });
+    }
+
+    /**
+     * Schedules an update to run before the next client response, replacing the
+     * update of the same kind that has not run yet, if there is one. Does
+     * nothing if the component is not attached.
+     *
+     * @param pending
+     *            the registration of the update that has not run yet, or
+     *            {@code null} if there is none
+     * @param update
+     *            the update to run
+     * @return the registration of the scheduled update, or {@code pending} if
+     *         the component is not attached
+     */
+    private StateTree.ExecutionRegistration scheduleUpdate(
+            StateTree.ExecutionRegistration pending,
+            SerializableRunnable update) {
+        return getUI().map(ui -> {
+            if (pending != null) {
+                pending.remove();
+            }
+            return ui.beforeClientResponse(this, context -> update.run());
+        }).orElse(pending);
     }
 
     /**
@@ -1228,6 +1414,7 @@ public class DatePicker
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
+        private String disabledDateErrorMessage;
 
         /**
          * Gets the name of the months.
@@ -1636,6 +1823,38 @@ public class DatePicker
          */
         public DatePickerI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date is disabled.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DatePicker#setDisabledDates(Collection)
+         * @see DatePicker#setDisabledWeekdays(Collection)
+         * @since 25.3
+         */
+        @JsonIgnore // Not used in client side
+        public String getDisabledDateErrorMessage() {
+            return disabledDateErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date is disabled.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DatePicker#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DatePicker#setDisabledDates(Collection)
+         * @see DatePicker#setDisabledWeekdays(Collection)
+         * @since 25.3
+         */
+        public DatePickerI18n setDisabledDateErrorMessage(String errorMessage) {
+            disabledDateErrorMessage = errorMessage;
             return this;
         }
     }
