@@ -188,18 +188,11 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     const hasDisabledDates = disabledDates.size > 0;
     const hasDisabledWeekdays = disabledWeekdays.size > 0;
 
-    // `isDateDisabled` is not reference-compared by the web component, so a fresh function is
-    // what makes the calendars recompute. Leave it `undefined` — its unset state — when there
-    // is nothing to check, which lets the month calendar skip a per-date call on every render.
-    // The web component calls it for every cell on every render, so each check is guarded by
-    // whether it is configured at all: with only disabled dates set, no `Date` is allocated,
-    // and with only disabled weekdays set, no key string is built.
     datepicker.isDateDisabled =
       !hasDisabledDates && !hasDisabledWeekdays
         ? undefined
         : ({ year, month, day }) =>
             (hasDisabledDates && disabledDates.has(`${year}-${month}-${day}`)) ||
-            // `createDate`, not `new Date(y, m, d)`, which maps years 0-99 to 1900+year.
             (hasDisabledWeekdays && disabledWeekdays.has(createDate(year, month, day).getDay() || 7));
   };
 
