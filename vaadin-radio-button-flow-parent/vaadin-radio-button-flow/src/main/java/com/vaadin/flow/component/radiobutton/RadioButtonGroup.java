@@ -701,7 +701,7 @@ public class RadioButtonGroup<T>
             // Remove children in the default slot
             getChildren()
                     .filter(child -> !child.getElement().hasAttribute("slot"))
-                    .forEach(this::remove);
+                    .forEach(child -> child.getElement().removeFromParent());
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
             getDataProvider().fetch(DataViewUtils.getQuery(this))
