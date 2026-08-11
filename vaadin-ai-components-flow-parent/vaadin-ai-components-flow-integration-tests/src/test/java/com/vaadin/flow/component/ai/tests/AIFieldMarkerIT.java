@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -39,16 +40,16 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
 
     private static final String MARKER = "vaadin-ai-field-marker";
 
-    private TestBenchElement name;
-    private TestBenchElement company;
-    private TestBenchElement unchanged;
+    private TextFieldElement name;
+    private TextFieldElement company;
+    private TextFieldElement unchanged;
 
     @Before
     public void init() {
         open();
-        name = $("vaadin-text-field").id("name");
-        company = $("vaadin-text-field").id("company");
-        unchanged = $("vaadin-text-field").id("unchanged");
+        name = $(TextFieldElement.class).id("name");
+        company = $(TextFieldElement.class).id("company");
+        unchanged = $(TextFieldElement.class).id("unchanged");
     }
 
     @Test
@@ -105,8 +106,7 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         waitUntil(driver -> revert.isDisplayed());
         revert.click();
 
-        waitUntil(driver -> "Acme Inc."
-                .equals(company.getPropertyString("value")));
+        waitUntil(driver -> "Acme Inc.".equals(company.getValue()));
         waitUntil(driver -> company.$(MARKER).all().isEmpty());
     }
 
@@ -118,10 +118,10 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     private void runTurn() {
         $("button").id("start-turn").click();
         $("button").id("finish-turn").click();
-        waitUntil(driver -> AIFieldMarkerPage.NAME_VALUE
-                .equals(name.getPropertyString("value")));
+        waitUntil(
+                driver -> AIFieldMarkerPage.NAME_VALUE.equals(name.getValue()));
         waitUntil(driver -> AIFieldMarkerPage.COMPANY_VALUE
-                .equals(company.getPropertyString("value")));
+                .equals(company.getValue()));
     }
 
     private TestBenchElement waitForMarker(TestBenchElement field) {

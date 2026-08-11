@@ -689,6 +689,17 @@ public class FormAIController implements AIController {
     }
 
     /**
+     * Returns the texts shown by the AI field marker.
+     *
+     * @return the configured texts, or {@code null} when the built-in defaults
+     *         are used
+     * @see #setFieldMarkerI18n(FieldMarkerI18n)
+     */
+    public FieldMarkerI18n getFieldMarkerI18n() {
+        return fieldMarkerI18n;
+    }
+
+    /**
      * Sets the texts shown by the AI field marker — the "AI" badge, its
      * tooltip, and the popover with the revert control — replacing the built-in
      * English defaults. The texts are applied to every marker the controller
@@ -708,14 +719,15 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Returns the texts shown by the AI field marker.
+     * Returns whether fields changed by the AI are marked automatically at the
+     * end of a turn. Defaults to {@code true}.
      *
-     * @return the configured texts, or {@code null} when the built-in defaults
-     *         are used
-     * @see #setFieldMarkerI18n(FieldMarkerI18n)
+     * @return {@code true} when changed fields are marked automatically,
+     *         {@code false} when they are left unmarked
+     * @see #setFieldMarkerEnabled(boolean)
      */
-    public FieldMarkerI18n getFieldMarkerI18n() {
-        return fieldMarkerI18n;
+    public boolean isFieldMarkerEnabled() {
+        return fieldMarkerEnabled;
     }
 
     /**
@@ -742,18 +754,6 @@ public class FormAIController implements AIController {
     public FormAIController setFieldMarkerEnabled(boolean fieldMarkerEnabled) {
         this.fieldMarkerEnabled = fieldMarkerEnabled;
         return this;
-    }
-
-    /**
-     * Returns whether fields changed by the AI are marked automatically at the
-     * end of a turn.
-     *
-     * @return {@code true} when changed fields are marked automatically,
-     *         {@code false} when they are left unmarked
-     * @see #setFieldMarkerEnabled(boolean)
-     */
-    public boolean isFieldMarkerEnabled() {
-        return fieldMarkerEnabled;
     }
 
     /**
@@ -931,11 +931,11 @@ public class FormAIController implements AIController {
             if (fieldMarkerEnabled) {
                 changes.forEach(this::markChangedField);
             }
-            // Runs regardless of success or failure so the fields never stay
-            // locked for the user.
-            stopWorking();
             fireFieldValueChanges(changes);
         } finally {
+            // Runs regardless of success, failure, or an exception escaping
+            // the diff so the fields never stay locked for the user.
+            stopWorking();
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the marking pass) count as AI writes rather
             // than user edits that would clear the marker.
