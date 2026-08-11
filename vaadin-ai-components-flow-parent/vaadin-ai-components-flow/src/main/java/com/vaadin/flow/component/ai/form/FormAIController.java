@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,6 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -279,13 +279,12 @@ public class FormAIController implements AIController {
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     /**
      * Fields showing the "AI is working" state (shimmer + client-side read-only
-     * guard) for the current turn, mapped to their marker element. Tracked so
-     * {@link #onResponse} clears exactly the ones {@link #onRequest} set even
-     * if the active field set changed during the turn, and so
-     * {@link #unmarkField} knows to leave a marker that the working state still
-     * needs.
+     * guard) for the current turn. Tracked so {@link #onResponse} clears
+     * exactly the ones {@link #onRequest} set even if the active field set
+     * changed during the turn, and so {@link #unmarkField} knows to leave a
+     * marker that the working state still needs.
      */
-    private final Map<HasValue<?, ?>, Element> workingFields = new LinkedHashMap<>();
+    private final Set<HasValue<?, ?>> workingFields = new LinkedHashSet<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     /**
      * Per-field registrations that listen for the field's
@@ -809,7 +808,7 @@ public class FormAIController implements AIController {
         // A field in the "AI is working" state still needs its marker to carry
         // the shimmer; the badge is hidden for the duration anyway, and
         // stopWorking() drops the marker at turn end.
-        if (!workingFields.containsKey(field)) {
+        if (!workingFields.contains(field)) {
             FormFieldMarker.remove(((Component) field).getElement());
         }
     }
@@ -1093,7 +1092,7 @@ public class FormAIController implements AIController {
                 var element = component.getElement();
                 FormFieldMarker.add(element, fieldMarkerI18n);
                 FormFieldMarker.setWorking(element, true);
-                workingFields.put(field, element);
+                workingFields.add(field);
             }
         }
     }
@@ -1105,9 +1104,9 @@ public class FormAIController implements AIController {
      * is not loses the marker that only carried the state.
      */
     private void stopWorking() {
-        for (var entry : workingFields.entrySet()) {
-            var element = entry.getValue();
-            if (markedFields.containsKey(entry.getKey())) {
+        for (var field : workingFields) {
+            var element = ((Component) field).getElement();
+            if (markedFields.containsKey(field)) {
                 FormFieldMarker.setWorking(element, false);
             } else {
                 FormFieldMarker.remove(element);
