@@ -183,6 +183,8 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingDateMetadataUpdate;
 
+    private boolean pendingConfigUpdate;
+
     private boolean pendingCacheClear;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
@@ -584,7 +586,7 @@ public class DatePicker
             dates.forEach(date -> disabledDates.add(Objects.requireNonNull(date,
                     "Disabled dates cannot contain null elements")));
         }
-        requestDateMetadataUpdate(false);
+        requestConfigUpdate();
     }
 
     /**
@@ -624,7 +626,7 @@ public class DatePicker
                     .add(Objects.requireNonNull(weekday,
                             "Disabled weekdays cannot contain null elements")));
         }
-        requestDateMetadataUpdate(false);
+        requestConfigUpdate();
     }
 
     /**
@@ -667,7 +669,8 @@ public class DatePicker
      */
     public void setDateMetadataProvider(DateMetadataProvider provider) {
         dateMetadataProvider = provider;
-        requestDateMetadataUpdate(true);
+        requestConfigUpdate();
+        requestCacheClear();
     }
 
     /**
@@ -685,7 +688,7 @@ public class DatePicker
         if (dateMetadataProvider == null) {
             return;
         }
-        requestDateMetadataUpdate(true);
+        requestCacheClear();
         if (getValue() != null) {
             validate();
             fireValidationStatusChangeEvent();
@@ -819,14 +822,35 @@ public class DatePicker
         return config;
     }
 
-    private void requestDateMetadataUpdate(boolean clearCache) {
-        pendingCacheClear |= clearCache;
+    private void requestConfigUpdate() {
+        pendingConfigUpdate = true;
+        scheduleDateMetadataUpdate();
+    }
+
+    private void requestCacheClear() {
+        pendingCacheClear = true;
+        scheduleDateMetadataUpdate();
+    }
+
+    /**
+     * Schedules the pending date metadata work to run before the next client
+     * response. Both parts go through the same scheduled update, so that they
+     * keep their order and so that a config update requested in the same round
+     * trip is not replaced by a cache clear.
+     */
+    private void scheduleDateMetadataUpdate() {
         pendingDateMetadataUpdate = scheduleUpdate(pendingDateMetadataUpdate,
                 () -> {
                     pendingDateMetadataUpdate = null;
-                    getElement().callJsFunction(
-                            "$connector.setDateMetadataConfig",
-                            createDateMetadataConfig());
+                    // A cache clear on its own does not need the config, which
+                    // grows with the number of disabled dates, to be sent
+                    // again.
+                    if (pendingConfigUpdate) {
+                        pendingConfigUpdate = false;
+                        getElement().callJsFunction(
+                                "$connector.setDateMetadataConfig",
+                                createDateMetadataConfig());
+                    }
                     // The config has to be in place before the cache is dropped
                     // and refetched, so the order of the calls is load-bearing.
                     if (pendingCacheClear) {
@@ -916,11 +940,12 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        // A cache clear requested while detached must not carry over to a
-        // freshly created client element, whose cache is empty anyway.
+        // Work requested while detached must not carry over to a freshly
+        // created client element, which has no config and an empty cache.
+        pendingConfigUpdate = false;
         pendingCacheClear = false;
         if (hasDateMetadataConfig()) {
-            requestDateMetadataUpdate(false);
+            requestConfigUpdate();
         }
     }
 

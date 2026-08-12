@@ -108,6 +108,44 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
+    void refreshDateMetadata_configNotPushedAgain() {
+        picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
+        picker.setDateMetadataProvider(range -> List.of());
+        ui.add(picker);
+        ui.dumpPendingJavaScriptInvocations();
+
+        picker.refreshDateMetadata();
+
+        // A refresh does not change the config, so re-sending it would only
+        // repeat a payload that grows with the number of disabled dates
+        List<String> expressions = dumpInvocationExpressions();
+        Assertions.assertEquals(-1, indexOfExpression(expressions, SET_CONFIG));
+        Assertions.assertNotEquals(-1,
+                indexOfExpression(expressions, CLEAR_CACHE));
+    }
+
+    @Test
+    void setDisabledDatesThenRefresh_configPushedBeforeClearCache() {
+        picker.setDateMetadataProvider(range -> List.of());
+        ui.add(picker);
+        ui.dumpPendingJavaScriptInvocations();
+
+        // Both in one round trip: the config change must still be sent, and
+        // still before the cache is dropped
+        picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
+        picker.refreshDateMetadata();
+
+        List<String> expressions = dumpInvocationExpressions();
+        int configIndex = indexOfExpression(expressions, SET_CONFIG);
+        int clearCacheIndex = indexOfExpression(expressions, CLEAR_CACHE);
+
+        Assertions.assertNotEquals(-1, configIndex);
+        Assertions.assertNotEquals(-1, clearCacheIndex);
+        Assertions.assertTrue(configIndex < clearCacheIndex,
+                "The config must be pushed before the cache is cleared");
+    }
+
+    @Test
     void refreshDateMetadata_noProvider_noClientCalls() {
         ui.add(picker);
         ui.dumpPendingJavaScriptInvocations();
