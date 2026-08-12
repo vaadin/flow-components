@@ -1,5 +1,6 @@
 import {
   TEST_PM_TIME,
+  escapeRegExp,
   formatMilliseconds,
   parseMillisecondsIntoInteger,
   parseDigitsIntoInteger,
@@ -33,6 +34,8 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
 
     // 2. What is the separator ?
     const separator = getSeparator(locale);
+    // The separator can be a regexp special character, such as the dot used by fi-FI
+    const escapedSeparator = escapeRegExp(separator || '');
 
     const includeSeconds = function () {
       return timepicker.step && timepicker.step < 60;
@@ -89,7 +92,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
           .trim();
 
         // A regexp that allows to find the numbers with optional separator and continuing searching after it.
-        const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
+        const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + escapedSeparator + ')?', 'g');
 
         let hours = numbersRegExp.exec(numbersOnlyTimeString);
         if (hours) {

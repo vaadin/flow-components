@@ -100,6 +100,50 @@ describe('time-picker connector', () => {
     });
   });
 
+  describe('dot separator locale', () => {
+    beforeEach(() => {
+      timePicker.$connector.setLocale('fi-FI');
+    });
+
+    it('should format time using the dot separator', () => {
+      expect(timePicker.i18n.formatTime!({ hours: 13, minutes: 30, seconds: 0, milliseconds: 0 })).to.equal('13.30');
+    });
+
+    it('should parse time using the dot separator', () => {
+      expect(timePicker.i18n.parseTime!('13.30')).to.eql({
+        hours: 13,
+        minutes: 30,
+        seconds: 0,
+        milliseconds: 0
+      });
+    });
+
+    [
+      { text: '1234', hours: 12, minutes: 34 },
+      { text: '2359', hours: 23, minutes: 59 },
+      { text: '130', hours: 13, minutes: 0 }
+    ].forEach(({ text, hours, minutes }) => {
+      it(`should parse ${text} typed without a separator`, () => {
+        expect(timePicker.i18n.parseTime!(text)).to.eql({
+          hours,
+          minutes,
+          seconds: 0,
+          milliseconds: 0
+        });
+      });
+    });
+
+    it('should parse milliseconds using the dot separator', () => {
+      timePicker.step = 0.5;
+      expect(timePicker.i18n.parseTime!('2.03.04.555')).to.eql({
+        hours: 2,
+        minutes: 3,
+        seconds: 4,
+        milliseconds: 555
+      });
+    });
+  });
+
   describe('locale change', () => {
     beforeEach(async () => {
       timePicker.$connector.setLocale('de-DE');
