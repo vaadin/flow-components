@@ -15,30 +15,17 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import java.util.Set;
-
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-checkbox/helper")
 public class HelperPage extends Div {
 
     public HelperPage() {
-        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
-        Span span = new Span("Helper text");
-        checkboxGroup.setHelperComponent(span);
-
-        checkboxGroup.setItems("foo", "bar", "baz");
-        Binder<Bean> binder = new Binder<>();
-        binder.bind(checkboxGroup, bean -> bean.choices,
-                (bean, value) -> bean.choices = value);
-        binder.setBean(new Bean());
-
         CheckboxGroup<String> groupWithHelperGenerator = new CheckboxGroup<>();
         groupWithHelperGenerator.setItems("A", "B", "C");
         groupWithHelperGenerator
@@ -71,12 +58,8 @@ public class HelperPage extends Div {
                 e -> helperComponentCheckbox.setHelperComponent(null));
         emptyHelperComponent.setId("empty-helper-component");
 
-        add(checkboxGroup, groupWithHelperGenerator, clearItemHelperGenerator,
+        add(groupWithHelperGenerator, clearItemHelperGenerator,
                 helperTextCheckbox, helperComponentCheckbox, emptyHelperText,
                 emptyHelperComponent);
-    }
-
-    public static class Bean {
-        private Set<String> choices;
     }
 }

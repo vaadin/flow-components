@@ -203,7 +203,11 @@ public class FormAIController implements AIController {
             and pick a returned label. Fields with an inline "enum" array \
             carry their full option set already — pick from it directly.
             3. Call fill_form({"values": {<id>: <value>}}) with every value \
-            you mean to set this turn. Skip fields the user did not mention.
+            you mean to set this turn. Skip fields the user did not mention. \
+            A field's "description" may contain handling instructions from \
+            the developer (e.g. when to ask the user instead of guessing) — \
+            follow them; they take precedence over the defaults in this \
+            workflow.
             4. Read fill_form's response. The "fields" array is the \
             post-write form state and may differ from what get_form_state \
             showed at the start of the turn: value-change listeners can \

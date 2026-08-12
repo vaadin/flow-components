@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -206,8 +205,8 @@ class SVGGeneratorTest {
     @Test
     void exportWithLargeSeries() throws IOException, InterruptedException {
         Configuration configuration = new Configuration();
-        List<Number> data = IntStream.range(0, 100000).boxed()
-                .collect(Collectors.toList());
+        List<Number> data = IntStream.range(0, 100000)
+                .<Number> mapToObj(Integer::valueOf).toList();
         ListSeries series = new ListSeries(data);
         configuration.addSeries(series);
         svgGenerator.generate(configuration);

@@ -10,7 +10,6 @@ package com.vaadin.flow.component.board.internal;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -88,8 +87,7 @@ public class FunctionCallerTest {
         method.setAccessible(true);
         Stream<PendingJavaScriptInvocation> pendingJS = (Stream<PendingJavaScriptInvocation>) method
                 .invoke(internals);
-        List<PendingJavaScriptInvocation> invocations = pendingJS
-                .collect(Collectors.toList());
+        List<PendingJavaScriptInvocation> invocations = pendingJS.toList();
         Assertions.assertEquals(1, invocations.size());
         Assertions.assertEquals(expectedJS,
                 invocations.get(0).getInvocation().getExpression());

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,8 @@ import com.vaadin.flow.router.Route;
 public class DragAndDropGridGenericPage extends Div {
 
     private List<String> items = IntStream.range(0, 10)
-            .mapToObj(String::valueOf).collect(Collectors.toList());
+            .mapToObj(String::valueOf)
+            .collect(Collectors.toCollection(ArrayList::new));
     private Grid<String> grid = new Grid<>();
     private String draggedCard;
     private final Div dropbox;

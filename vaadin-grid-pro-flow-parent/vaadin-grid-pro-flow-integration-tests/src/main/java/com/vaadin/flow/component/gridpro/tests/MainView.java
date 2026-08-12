@@ -174,7 +174,7 @@ public class MainView extends VerticalLayout {
         Random random = new Random(0); // NOSONAR
         return IntStream.range(1, 500)
                 .mapToObj(index -> createPerson(index, random))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private static Person createPerson(int index, Random random) {
@@ -197,7 +197,7 @@ public class MainView extends VerticalLayout {
 
     private static List<City> createCityItems() {
         return IntStream.range(1, 500).mapToObj(index -> createCity(index))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static City createCity(int index) {

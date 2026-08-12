@@ -11,7 +11,6 @@ package com.vaadin.component.spreadsheet.client;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
@@ -33,6 +32,6 @@ public class SpreadsheetConnectorBundleLoaderFactory
         return super.getConnectorsForWidgetset(logger, typeOracle).stream()
                 .filter(c -> usedConnectors
                         .contains(c.getQualifiedSourceName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

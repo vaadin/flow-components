@@ -89,10 +89,10 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0-alpha7")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0-alpha9")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./comboBoxConnector.js")
+@JsModule("./vaadin-combo-box/comboBoxConnector.ts")
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 

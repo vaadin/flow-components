@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -199,7 +198,7 @@ public class SpreadsheetTable implements Serializable {
                     .map(filterColumn -> new CellReference(sheet.getSheetName(),
                             fullTableRegion.getFirstRow(),
                             (int) filterColumn.getColId(), true, true))
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 

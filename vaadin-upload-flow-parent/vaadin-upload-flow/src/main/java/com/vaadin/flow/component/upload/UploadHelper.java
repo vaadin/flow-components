@@ -19,9 +19,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -58,6 +63,137 @@ public class UploadHelper implements Serializable {
      */
     public static boolean hasUploadHandler(Upload upload) {
         return upload.isHandlerExplicitlyConfigured();
+    }
+
+    /**
+     * Validates the given MIME types and returns them as an immutable list.
+     * Each value must be non-null, non-blank and contain a {@code /} character.
+     *
+     * @param mimeTypes
+     *            the MIME types to validate, may be {@code null} or empty
+     * @return an immutable list of the given MIME types, or an empty list when
+     *         the input is {@code null} or empty
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not contain a {@code /}
+     *             character
+     */
+    static List<String> validateMimeTypes(String... mimeTypes) {
+        if (mimeTypes == null || mimeTypes.length == 0) {
+            return List.of();
+        }
+        for (var mimeType : mimeTypes) {
+            if (mimeType == null || mimeType.isBlank()) {
+                throw new IllegalArgumentException(
+                        "MIME types cannot contain null or blank values");
+            }
+            if (!mimeType.contains("/")) {
+                throw new IllegalArgumentException(
+                        "MIME type must contain a '/' character: " + mimeType);
+            }
+        }
+        return List.of(mimeTypes);
+    }
+
+    /**
+     * Validates the given file extensions and returns them as an immutable
+     * list. Each value must be non-null, non-blank and start with a dot.
+     *
+     * @param extensions
+     *            the file extensions to validate, may be {@code null} or empty
+     * @return an immutable list of the given file extensions, or an empty list
+     *         when the input is {@code null} or empty
+     * @throws IllegalArgumentException
+     *             if any value is null, blank, or does not start with a dot
+     */
+    static List<String> validateFileExtensions(String... extensions) {
+        if (extensions == null || extensions.length == 0) {
+            return List.of();
+        }
+        for (var ext : extensions) {
+            if (ext == null || ext.isBlank()) {
+                throw new IllegalArgumentException(
+                        "File extensions cannot contain null or blank values");
+            }
+            if (!ext.startsWith(".")) {
+                throw new IllegalArgumentException(
+                        "File extension must start with '.': " + ext);
+            }
+        }
+        return List.of(extensions);
+    }
+
+    /**
+     * Formats the client-side {@code accept} property value from the given MIME
+     * types and file extensions.
+     *
+     * @param mimeTypes
+     *            the accepted MIME types, not {@code null}
+     * @param extensions
+     *            the accepted file extensions, not {@code null}
+     * @return a comma-separated string of all values, empty when both lists are
+     *         empty
+     */
+    static String formatAcceptValue(List<String> mimeTypes,
+            List<String> extensions) {
+        return Stream.concat(mimeTypes.stream(), extensions.stream())
+                .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Creates the stream resource to set as the upload {@code target}
+     * attribute. Validates the handler and target name, wraps the handler with
+     * file type validation (see
+     * {@link #wrapHandlerWithFileTypeValidation(UploadHandler, SerializableSupplier, SerializableSupplier)})
+     * and uses the given target name as the last path segment of the generated
+     * upload URL.
+     *
+     * @param handler
+     *            the upload handler, not {@code null}
+     * @param ownerElement
+     *            the element owning the stream resource, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment); must not be blank
+     * @param mimeTypesSupplier
+     *            supplier for the current list of accepted MIME type patterns,
+     *            not {@code null}
+     * @param extensionsSupplier
+     *            supplier for the current list of accepted file extensions, not
+     *            {@code null}
+     * @return the stream resource to set as the {@code target} attribute
+     */
+    static StreamResourceRegistry.ElementStreamResource createTargetResource(
+            UploadHandler handler, Element ownerElement, String targetName,
+            SerializableSupplier<List<String>> mimeTypesSupplier,
+            SerializableSupplier<List<String>> extensionsSupplier) {
+        Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        Objects.requireNonNull(targetName, "The target name cannot be null");
+        if (targetName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "The target name cannot be blank");
+        }
+        var validatingHandler = wrapHandlerWithFileTypeValidation(handler,
+                mimeTypesSupplier, extensionsSupplier);
+        return new StreamResourceRegistry.ElementStreamResource(
+                validatingHandler, ownerElement) {
+            @Override
+            public String getName() {
+                return targetName;
+            }
+        };
+    }
+
+    /**
+     * An internal implementation of the UploadHandler interface that reminds
+     * the developer that an upload handler must be set. Upload event listeners
+     * are not registered for this handler.
+     */
+    static final class FailFastUploadHandler implements UploadHandler {
+        @Override
+        public void handleUploadRequest(UploadEvent event) {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without an upload handler set. "
+                            + "Please first set the upload handler with setUploadHandler()");
+        }
     }
 
     /**

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -165,6 +166,6 @@ public class ComboBoxListDataViewPage extends Div {
                 .mapToObj(index -> new Person(index, "Person " + index,
                         "lastName", index % 100, new Person.Address(),
                         "1234567890"))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

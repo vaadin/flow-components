@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -55,7 +54,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.3.0-alpha7")
+@NpmPackage(value = "@vaadin/message-list", version = "25.3.0-alpha9")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
@@ -204,7 +203,7 @@ public class MessageList extends Component
         return SignalBindingUtil.effectBinding(this, ITEMS_BINDING, itemsSignal,
                 signalItems -> {
                     var messageItems = signalItems.stream().map(Signal::get)
-                            .collect(Collectors.toList());
+                            .toList();
                     updateItems(messageItems);
                 });
     }

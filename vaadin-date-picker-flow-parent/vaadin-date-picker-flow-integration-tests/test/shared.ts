@@ -10,9 +10,17 @@ export type FlowDatePickerI18n = {
   referenceDate?: string;
 };
 
+export type FlowDatePickerDateMetadataConfig = {
+  /** Disabled dates as `[year, month, day]` triples, with a 0-based month. */
+  disabledDates?: [number, number, number][];
+  /** Disabled weekdays as ISO weekday numbers, Monday = 1 ... Sunday = 7. */
+  disabledWeekdays?: number[];
+};
+
 export type DatePickerConnector = {
   initLazy: (datePicker: DatePicker) => void;
   updateI18n: (locale: string, i18n: FlowDatePickerI18n) => void;
+  setDateMetadataConfig: (config: FlowDatePickerDateMetadataConfig) => void;
 };
 
 export type FlowDatePicker = DatePicker & {

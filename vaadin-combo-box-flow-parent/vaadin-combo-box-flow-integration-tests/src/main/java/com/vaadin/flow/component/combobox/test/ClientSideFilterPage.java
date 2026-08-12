@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -80,8 +79,7 @@ public class ClientSideFilterPage extends Div {
         inMemoryComboBox.setId(IN_MEMORY_COMBO_BOX);
         ComboBoxListDataView<String> listDataView = inMemoryComboBox
                 .setItems(IntStream.range(0, inMemoryComboBox.getPageSize() * 2)
-                        .mapToObj(i -> "Item " + i)
-                        .collect(Collectors.toList()));
+                        .mapToObj(i -> "Item " + i).toList());
         Span itemCountSpan = new Span("0");
         itemCountSpan.setId(IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID);
         this.add(itemCountSpan);

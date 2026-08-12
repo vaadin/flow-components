@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,7 +41,7 @@ public class ChangingDataSizePage extends Div {
         grid.addColumn(s -> s);
 
         items = IntStream.range(0, 133).mapToObj(idx -> "Item " + idx)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
 
         removeItems = new NativeButton("Remove 10 items from the DataProvider",
                 event -> {

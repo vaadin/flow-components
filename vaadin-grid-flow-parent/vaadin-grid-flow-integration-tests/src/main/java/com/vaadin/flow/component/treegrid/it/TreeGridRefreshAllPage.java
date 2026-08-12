@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.button.Button;
@@ -63,7 +62,7 @@ public class TreeGridRefreshAllPage extends Div {
 
         TreeData<String> treeData = new TreeData<>();
         List<String> rootItems = IntStream.iterate(1, i -> i + 1).limit(11)
-                .mapToObj(String::valueOf).collect(Collectors.toList());
+                .mapToObj(String::valueOf).toList();
         treeData.addRootItems(rootItems);
         rootItems.forEach(
                 rootItem -> treeData.addItem(rootItem, "item: " + rootItem));

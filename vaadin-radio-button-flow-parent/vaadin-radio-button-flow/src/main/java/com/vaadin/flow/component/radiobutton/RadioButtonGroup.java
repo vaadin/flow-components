@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.SignalPropertySupport;
@@ -104,11 +105,12 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.3.0-alpha7")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.3.0-alpha9")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
-        extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
-        HasAriaLabel, HasDataView<T, Void, RadioButtonGroupDataView<T>>,
+        extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
+        implements HasAriaDescription, HasAriaLabel,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>,
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
@@ -676,19 +678,30 @@ public class RadioButtonGroup<T>
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
+    }
+
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Cache helper component before removal
-            Component helperComponent = getHelperComponent();
-
-            // Remove all known children (doesn't remove client-side-only
-            // children such as the label)
+            // Remove children in the default slot
             getChildren()
+                    .filter(child -> !child.getElement().hasAttribute("slot"))
                     .forEach(child -> child.getElement().removeFromParent());
-
-            // reinsert helper component
-            setHelperComponent(helperComponent);
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
             getDataProvider().fetch(DataViewUtils.getQuery(this))
@@ -912,7 +925,7 @@ public class RadioButtonGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.0
      */
     protected void validate() {
@@ -952,7 +965,7 @@ public class RadioButtonGroup<T>
 
     /**
      * The internationalization properties for {@link RadioButtonGroup}.
-     * 
+     *
      * @since 24.5
      */
     public static class RadioButtonGroupI18n implements Serializable {

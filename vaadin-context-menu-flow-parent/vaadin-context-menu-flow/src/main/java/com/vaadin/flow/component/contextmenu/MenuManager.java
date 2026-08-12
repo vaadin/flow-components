@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -336,7 +335,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      */
     public List<I> getItems() {
         return getChildren().filter(itemType::isInstance).map(itemType::cast)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

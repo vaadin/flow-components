@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ import com.vaadin.flow.dom.Element;
  * @since 1.0
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/custom-field", version = "25.3.0-alpha7")
+@NpmPackage(value = "@vaadin/custom-field", version = "25.3.0-alpha9")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements Focusable<CustomField<T>>,
@@ -217,9 +216,8 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @since 23.1
      */
     public void addThemeVariants(CustomFieldVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(CustomFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(Stream.of(variants)
+                .map(CustomFieldVariant::getVariantName).toList());
     }
 
     /**
@@ -230,8 +228,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @since 23.1
      */
     public void removeThemeVariants(CustomFieldVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(CustomFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(CustomFieldVariant::getVariantName).toList());
     }
 }

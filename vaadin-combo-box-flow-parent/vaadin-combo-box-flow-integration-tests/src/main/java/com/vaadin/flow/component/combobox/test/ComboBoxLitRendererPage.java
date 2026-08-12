@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -31,8 +30,7 @@ public class ComboBoxLitRendererPage extends Div {
 
     public ComboBoxLitRendererPage() {
         ComboBox<Integer> combo = new ComboBox<>();
-        combo.setItems(
-                IntStream.range(0, 1000).boxed().collect(Collectors.toList()));
+        combo.setItems(IntStream.range(0, 1000).boxed().toList());
         setLitRenderer(combo);
         add(combo);
 

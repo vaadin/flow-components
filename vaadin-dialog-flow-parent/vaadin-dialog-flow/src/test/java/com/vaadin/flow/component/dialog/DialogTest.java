@@ -17,7 +17,6 @@ package com.vaadin.flow.component.dialog;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -54,32 +53,31 @@ class DialogTest {
         dialog.setWidth("200px");
         dialog.setHeight("100px");
 
-        List<Component> children = dialog.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = dialog.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
 
         dialog.add(span3);
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(3, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
         Assertions.assertTrue(children.contains(span3));
 
         dialog.remove(span2);
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span3));
 
         span1.getElement().removeFromParent();
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         Assertions.assertTrue(children.contains(span3));
 
         dialog.removeAll();
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(0, children.size());
 
         Assertions.assertEquals("200px", dialog.getWidth());
@@ -194,6 +192,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void isFocusTrap_trueByDefault() {
         Dialog dialog = new Dialog();
         Assertions.assertTrue(dialog.isFocusTrap(),
@@ -204,6 +203,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeDisabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -215,6 +215,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -224,6 +225,24 @@ class DialogTest {
         Assertions.assertFalse(
                 dialog.getElement().getProperty("noFocusTrap", false),
                 "noFocusTrap property is false when focus trap is enabled");
+    }
+
+    @Test
+    void setAutofocus_isAutofocus() {
+        Dialog dialog = new Dialog();
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(false);
+        Assertions.assertFalse(dialog.isAutofocus());
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(true);
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
     }
 
     @Test

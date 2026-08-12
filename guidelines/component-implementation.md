@@ -98,11 +98,12 @@ element for the same server-side instance after detach/re-attach. The
 connector must re-initialise each time; running it once in the constructor
 leaves the second client element without a connector.
 
-Typical connectors: `comboBoxConnector.js` (lazy `dataProvider` ↔
-`DataCommunicator`), `contextMenuConnector.js` / `menuBarConnector.js` (nested
-menu structure), `flow-component-renderer.js` (server components inside cells).
-These older connectors still sit directly under `META-INF/frontend/` — that
-placement is legacy; new files always go in a component-named subfolder.
+Typical connectors: `vaadin-combo-box/comboBoxConnector.ts` (lazy
+`dataProvider` ↔ `DataCommunicator`), `contextMenuConnector.js` /
+`menuBarConnector.js` (nested menu structure), `flow-component-renderer.js`
+(server components inside cells). Some older connectors still sit directly
+under `META-INF/frontend/` — that placement is legacy; new files always go in a
+component-named subfolder.
 
 ## Property synchronization & trust (security)
 

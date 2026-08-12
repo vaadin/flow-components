@@ -1,7 +1,11 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
+import {
+  createDate,
+  extractDateParts,
+  parseDate as _parseDate
+} from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
 window.Vaadin.Flow.datepickerConnector = {};
 window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
@@ -173,6 +177,23 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
 
     // Merge new I18N settings with formatting and parsing functions
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
+  };
+
+  datepicker.$connector.setDateMetadataConfig = (config) => {
+    // Keys are `year-month-day` with a 0-based month, matching what the web component
+    // passes to `isDateDisabled`, so nothing has to be parsed or converted per date.
+    const disabledDates = new Set((config.disabledDates || []).map(([y, m, d]) => `${y}-${m}-${d}`));
+    // ISO weekday numbers, 1..7.
+    const disabledWeekdays = new Set(config.disabledWeekdays || []);
+    const hasDisabledDates = disabledDates.size > 0;
+    const hasDisabledWeekdays = disabledWeekdays.size > 0;
+
+    datepicker.isDateDisabled =
+      !hasDisabledDates && !hasDisabledWeekdays
+        ? undefined
+        : ({ year, month, day }) =>
+            (hasDisabledDates && disabledDates.has(`${year}-${month}-${day}`)) ||
+            (hasDisabledWeekdays && disabledWeekdays.has(createDate(year, month, day).getDay() || 7));
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
