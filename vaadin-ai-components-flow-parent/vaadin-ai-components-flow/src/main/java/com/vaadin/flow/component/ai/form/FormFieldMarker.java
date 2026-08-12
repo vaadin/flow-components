@@ -110,6 +110,33 @@ final class FormFieldMarker {
     }
 
     /**
+     * Re-asserts a read-only state set on the field's server side while the "AI
+     * is working" read-only guard held the field. The guard keeps the
+     * client-side {@code readonly} at {@code true}, so Flow's client engine
+     * drops the server's own {@code readonly=true} write as a no-op — and when
+     * the guard lifts, the web component restores the pre-turn state over it.
+     * <p>
+     * The restore is not immediate: the web component holds the guard through a
+     * wind-down delay after the working state ends, and a plain re-assert would
+     * run before it and be overwritten. Re-appending the marker element is what
+     * defuses that: appending an attached node removes and re-inserts it, and
+     * on removal the web component completes a pending restore right away — its
+     * documented lifecycle, so a restore cannot overwrite state set after
+     * removal — while the re-insert re-marks the field. The re-assert then runs
+     * with no restore pending, so it always sticks. Runs in one synchronous
+     * script, so the marker never misses a frame and the swap cannot be
+     * observed visually.
+     */
+    static void forceClientReadOnly(Element field) {
+        field.executeJs("""
+                const marker = this.querySelector(':scope > %s');
+                if (marker) {
+                  this.append(marker);
+                }
+                this.readonly = true;""".formatted(TAG));
+    }
+
+    /**
      * @return the field's marker element, or an empty optional when the field
      *         has no marker
      */

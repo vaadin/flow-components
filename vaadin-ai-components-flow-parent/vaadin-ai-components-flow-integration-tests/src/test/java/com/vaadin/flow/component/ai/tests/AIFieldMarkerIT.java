@@ -43,6 +43,7 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     private TextFieldElement name;
     private TextFieldElement company;
     private TextFieldElement unchanged;
+    private TextFieldElement locked;
 
     @Before
     public void init() {
@@ -50,6 +51,7 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         name = $(TextFieldElement.class).id("name");
         company = $(TextFieldElement.class).id("company");
         unchanged = $(TextFieldElement.class).id("unchanged");
+        locked = $(TextFieldElement.class).id("locked");
     }
 
     @Test
@@ -94,6 +96,24 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         // client-side read-only state is restored slightly after the state
         // ends.
         waitUntil(driver -> !name.getPropertyBoolean("readonly"));
+    }
+
+    @Test
+    public void fieldSetReadOnlyMidTurn_staysReadOnlyOnClient() {
+        // The page makes the "locked" field read-only from a value-change
+        // listener reacting to one of the turn's writes. The working guard
+        // captured the field as editable at turn start; its restore must
+        // apply the read-only state set mid-turn instead of the captured one.
+        runTurn();
+
+        // The guard is restored in the same step that flushes the field's
+        // held-back value, so once the value has landed the restore has run.
+        waitUntil(driver -> AIFieldMarkerPage.LOCKED_VALUE
+                .equals(locked.getValue()));
+        Assert.assertTrue(
+                "A read-only state set by the server mid-turn must survive "
+                        + "the working guard's restore on the client",
+                locked.getPropertyBoolean("readonly"));
     }
 
     @Test

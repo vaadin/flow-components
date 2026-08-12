@@ -46,6 +46,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String NAME_VALUE = "Ada Lovelace";
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
     static final String UNCHANGED_VALUE = "Unchanged";
+    static final String LOCKED_VALUE = "CC-1024";
 
     public AIFieldMarkerPage() {
         var name = new TextField("Name");
@@ -63,7 +64,14 @@ public class AIFieldMarkerPage extends VerticalLayout {
         unchanged.setId("unchanged");
         unchanged.setValue(UNCHANGED_VALUE);
 
-        var form = new VerticalLayout(name, company, unchanged);
+        // Made read-only by the name field's value-change listener below —
+        // i.e. mid-turn, in reaction to one of the AI's writes. The client
+        // guard's restore must not lift a read-only state set this way.
+        var locked = new TextField("Cost center");
+        locked.setId("locked");
+        name.addValueChangeListener(event -> locked.setReadOnly(true));
+
+        var form = new VerticalLayout(name, company, unchanged, locked);
         form.setId("form");
 
         var controller = new FormAIController(form);
@@ -76,6 +84,9 @@ public class AIFieldMarkerPage extends VerticalLayout {
         startTurn.setId("start-turn");
 
         var finishTurn = new NativeButton("Finish turn", event -> {
+            // Written before name: once name's listener has made this field
+            // read-only, a real fill_form write to it would be rejected.
+            locked.setValue(LOCKED_VALUE);
             name.setValue(NAME_VALUE);
             company.setValue(COMPANY_VALUE);
             unchanged.setValue(UNCHANGED_VALUE);

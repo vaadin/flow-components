@@ -149,10 +149,9 @@ import tools.jackson.databind.JsonNode;
  * LLM sees or writes, and a field's application-set read-only state is left
  * untouched. The guard is applied and cleared together with the "AI is working"
  * state (see below), so it is released when the turn ends, successfully or
- * otherwise. Applications should avoid toggling a field's server-side read-only
- * state during a fill turn: a field switched to read-only mid-turn keeps the
- * client guard cleared at turn end, which can briefly leave the client editable
- * while the server treats the field as read-only.
+ * otherwise. A field switched to read-only on the server mid-turn — for example
+ * by a value-change listener reacting to one of the AI's writes — stays
+ * read-only on the client when the guard is released.
  * </p>
  *
  * <p>
@@ -1118,6 +1117,14 @@ public class FormAIController implements AIController {
                 FormFieldMarker.setWorking(element, false);
             } else {
                 FormFieldMarker.remove(element);
+            }
+            // A field made read-only on the server mid-turn — e.g. by a
+            // value-change listener reacting to one of the AI's writes —
+            // needs its client-side readonly re-asserted: the guard held it
+            // at true, so the server's own write was dropped as a no-op on
+            // the client and the guard's restore would lift it.
+            if (field.isReadOnly()) {
+                FormFieldMarker.forceClientReadOnly(element);
             }
         }
         workingFields.clear();
