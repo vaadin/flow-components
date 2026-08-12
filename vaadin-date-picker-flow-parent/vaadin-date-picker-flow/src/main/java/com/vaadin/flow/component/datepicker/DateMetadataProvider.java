@@ -49,8 +49,8 @@ public interface DateMetadataProvider extends Serializable {
      * @param range
      *            the range of dates to provide metadata for, covering whole
      *            months, never {@code null}
-     * @return the metadata entries for the dates that have metadata, or
-     *         {@code null} if none have
+     * @return the metadata entries for the dates that have metadata, or an
+     *         empty collection if none have
      */
     Collection<DateMetadata> getDateMetadata(DateRange range);
 }
