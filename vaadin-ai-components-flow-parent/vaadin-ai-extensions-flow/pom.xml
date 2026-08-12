@@ -6,10 +6,10 @@
         <artifactId>vaadin-ai-components-flow-parent</artifactId>
         <version>25.3-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-ai-components-pro-flow</artifactId>
+    <artifactId>vaadin-ai-extensions-flow</artifactId>
     <packaging>jar</packaging>
-    <name>Vaadin AI Components Pro</name>
-    <description>Vaadin AI Components Pro</description>
+    <name>Vaadin AI Extensions</name>
+    <description>Vaadin AI Extensions</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>
@@ -18,9 +18,9 @@
     </licenses>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
-        <osgi.export.package>com.vaadin.flow.component.ai.pro</osgi.export.package>
+        <osgi.export.package>com.vaadin.flow.component.ai.extensions</osgi.export.package>
         <osgi.export.package.additional>com.vaadin.flow.component.ai.chart,com.vaadin.flow.component.ai.form,com.vaadin.flow.component.ai.grid</osgi.export.package.additional>
-        <cvdlName>vaadin-ai-components-pro</cvdlName>
+        <cvdlName>vaadin-ai-extensions</cvdlName>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-ai-components-flow</artifactId>
+            <artifactId>vaadin-ai-core-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

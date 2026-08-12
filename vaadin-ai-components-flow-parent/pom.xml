@@ -11,8 +11,8 @@
     <name>Vaadin AI Components Parent</name>
     <description>Vaadin AI Components Parent</description>
     <modules>
-        <module>vaadin-ai-components-flow</module>
-        <module>vaadin-ai-components-pro-flow</module>
+        <module>vaadin-ai-core-flow</module>
+        <module>vaadin-ai-extensions-flow</module>
     </modules>
     <dependencies/>
     <profiles>

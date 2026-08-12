@@ -16,9 +16,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.pro.AIComponentsProLicense;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -110,7 +110,7 @@ public class ChartAIController implements AIController {
             .getLogger(ChartAIController.class);
 
     static {
-        AIComponentsProLicense.check();
+        AIExtensionsLicense.check();
     }
 
     private static final String CHART_ID = "chart";

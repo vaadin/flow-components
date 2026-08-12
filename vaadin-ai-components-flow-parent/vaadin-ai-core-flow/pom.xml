@@ -6,10 +6,10 @@
         <artifactId>vaadin-ai-components-flow-parent</artifactId>
         <version>25.3-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-ai-components-flow</artifactId>
+    <artifactId>vaadin-ai-core-flow</artifactId>
     <packaging>jar</packaging>
-    <name>Vaadin AI Components</name>
-    <description>Vaadin AI Components</description>
+    <name>Vaadin AI Core</name>
+    <description>Vaadin AI Core</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.component.ai</osgi.export.package>
         <osgi.export.package.additional>com.vaadin.flow.component.ai.common,com.vaadin.flow.component.ai.orchestrator,com.vaadin.flow.component.ai.provider,com.vaadin.flow.component.ai.ui</osgi.export.package.additional>

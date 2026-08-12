@@ -16,7 +16,7 @@ import com.vaadin.flow.testutil.ClassesSerializableTest;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
-class AIComponentsProSerializableTest extends ClassesSerializableTest {
+class AIExtensionsSerializableTest extends ClassesSerializableTest {
 
     @RegisterExtension
     EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
@@ -35,7 +35,7 @@ class AIComponentsProSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.ai\\.provider\\..*",
                 // Static utility class performing the development-mode
                 // license check — not a runtime component
-                "com\\.vaadin\\.flow\\.component\\.ai\\.pro\\.AIComponentsProLicense",
+                "com\\.vaadin\\.flow\\.component\\.ai\\.extensions\\.AIExtensionsLicense",
                 // GridAIController — intentionally not serializable; restored
                 // via reconnect()
                 "com\\.vaadin\\.flow\\.component\\.ai\\.grid\\.GridAIController(\\$\\d+)?",

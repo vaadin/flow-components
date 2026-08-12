@@ -6,7 +6,7 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.ai.pro;
+package com.vaadin.flow.component.ai.extensions;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -20,17 +20,17 @@ import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
 /**
- * Development-mode license check for the Vaadin AI Components Pro product,
- * called from the static initializer of each controller in this module.
+ * Development-mode license check for the Vaadin AI Extensions product, called
+ * from the static initializer of each controller in this module.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-public final class AIComponentsProLicense {
+public final class AIExtensionsLicense {
 
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(AIComponentsProLicense.class);
+            .getLogger(AIExtensionsLicense.class);
 
-    private AIComponentsProLicense() {
+    private AIExtensionsLicense() {
         // static-only class
     }
 
@@ -46,17 +46,17 @@ public final class AIComponentsProLicense {
         }
 
         var properties = new Properties();
-        try (var stream = AIComponentsProLicense.class
-                .getResourceAsStream("ai-components-pro.properties")) {
+        try (var stream = AIExtensionsLicense.class
+                .getResourceAsStream("ai-extensions.properties")) {
             properties.load(stream);
         } catch (IOException e) {
-            LOGGER.warn("Unable to read AI Components Pro properties file", e);
+            LOGGER.warn("Unable to read AI Extensions properties file", e);
             throw new ExceptionInInitializerError(e);
         }
 
         // A null build type allows trial licensing builds
-        LicenseChecker.checkLicenseFromStaticBlock("vaadin-ai-components-pro",
-                properties.getProperty("ai-components-pro.version"), null,
+        LicenseChecker.checkLicenseFromStaticBlock("vaadin-ai-extensions",
+                properties.getProperty("ai-extensions.version"), null,
                 Capabilities.of(Capability.PRE_TRIAL));
     }
 }
