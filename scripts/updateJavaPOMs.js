@@ -96,11 +96,15 @@ async function consolidatePomParent() {
   consolidate(template, `${mod}/pom.xml`, (js, org)  => {
     const modules = js.project.modules[0].module;
 
-    renameComponent(modules, name);
-    // add pro module if module exists
-    if (fs.existsSync(`${mod}/${name}-pro-flow/pom.xml`)) {
-      modules.push(`${name}-pro-flow`);
-    }
+    // list the published component modules present in the parent directory,
+    // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
+    modules.length = 0;
+    fs.readdirSync(mod, { withFileTypes: true })
+      .filter(entry => entry.isDirectory() && /-flow$/.test(entry.name))
+      .filter(entry => fs.existsSync(`${mod}/${entry.name}/pom.xml`))
+      .map(entry => entry.name)
+      .sort()
+      .forEach(moduleName => modules.push(moduleName));
     // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
       modules.push(`${name}-testbench`);
@@ -121,6 +125,11 @@ async function consolidatePomParent() {
 
 async function consolidatePomFlow() {
   const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
+  // skip components whose modules do not follow the `{name}-flow` naming,
+  // e.g. vaadin-ai-components-flow-parent
+  if (!fs.existsSync(`${mod}/${name}-flow/pom.xml`)) {
+    return;
+  }
   consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
     tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
     tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);

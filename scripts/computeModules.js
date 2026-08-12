@@ -40,13 +40,25 @@ function dependsOn(pomXml, artifactId) {
 }
 
 // Collect the published component module poms of a parent module: the main
-// `-flow` module and any additional ones, such as `-pro-flow`
+// `-flow` module and any additional ones, such as `vaadin-ai-extensions-flow`
 function readComponentPoms(parentModule) {
   return fs
     .readdirSync(parentModule, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && /-flow$/.test(entry.name))
     .map((entry) => `${parentModule}/${entry.name}/pom.xml`)
     .filter((pomPath) => fs.existsSync(pomPath));
+}
+
+// Collect the artifact ids of the published modules of a component. The
+// artifact id of each module matches its directory name.
+function readComponentArtifactIds(component) {
+  const parentModule = `vaadin-${component}-flow-parent`;
+  if (!fs.existsSync(parentModule)) {
+    return [`vaadin-${component}-flow`];
+  }
+  return readComponentPoms(parentModule).map(
+    (pomPath) => pomPath.split('/').at(-2)
+  );
 }
 
 // Map changed file paths to component names. Returns null (= full
@@ -70,15 +82,16 @@ function addDependentComponents(components) {
   const result = [...components];
   const queue = [...components];
   while (queue.length > 0) {
-    const artifactId = `vaadin-${queue.shift()}-flow`;
+    const artifactIds = readComponentArtifactIds(queue.shift());
     for (const parentModule of parentModules) {
       const componentName = parentModule.replace(/^vaadin-(.+)-flow-parent$/, '$1');
       if (result.includes(componentName)) {
         continue;
       }
-      const dependent = readComponentPoms(parentModule).some((pomPath) =>
-        dependsOn(fs.readFileSync(pomPath, 'utf8'), artifactId)
-      );
+      const dependent = readComponentPoms(parentModule).some((pomPath) => {
+        const pomXml = fs.readFileSync(pomPath, 'utf8');
+        return artifactIds.some((artifactId) => dependsOn(pomXml, artifactId));
+      });
       if (dependent) {
         result.push(componentName);
         queue.push(componentName);
