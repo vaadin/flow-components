@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -193,6 +192,14 @@ public class FormAIController implements AIController {
      */
     static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
+    /**
+     * Key under which a marked field's {@link FieldMark} is stored on the field
+     * component via {@link ComponentUtil#setData(Component, String, Object)}.
+     * Keeping the mark on the field itself, next to the marker element that
+     * shows it, ties its lifecycle to the field rather than to the controller.
+     */
+    private static final String FIELD_MARK_KEY = "vaadin.ai.form.fieldMark";
+
     private static final String INSTRUCTIONS_TOOL_NAME = "get_form_instructions";
 
     /**
@@ -278,20 +285,7 @@ public class FormAIController implements AIController {
      */
     private boolean filling;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
-    /**
-     * Fields showing the "AI is working" state (shimmer + client-side read-only
-     * guard) for the current turn. Tracked so {@link #onResponse} clears
-     * exactly the ones {@link #onRequest} set even if the active field set
-     * changed during the turn, and so {@link #unmarkField} knows to leave a
-     * marker that the working state still needs.
-     */
-    private final Set<HasValue<?, ?>> workingFields = new LinkedHashSet<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
-    /**
-     * The marked fields, each mapped to the state its mark carries. Populated
-     * by {@link #markField}; entries are removed by {@link #unmarkField}.
-     */
-    private final Map<HasValue<?, ?>, FieldMark> markedFields = new HashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
@@ -749,10 +743,21 @@ public class FormAIController implements AIController {
      * The state carried by a field's mark: the combined registration of the
      * marker's revert-event listener and the auto-hide value-change listener,
      * and the value the marker's revert control restores — the field's value
-     * from before the AI's first change to it.
+     * from before the AI's first change to it. Stored on the field component
+     * under {@link #FIELD_MARK_KEY}; its presence is what makes a field
+     * "marked".
      */
     private record FieldMark(Registration registration,
             Object revertValue) implements Serializable {
+    }
+
+    /**
+     * @return the state of the field's mark, or {@code null} when the field is
+     *         not marked
+     */
+    private static FieldMark getMark(HasValue<?, ?> field) {
+        return (FieldMark) ComponentUtil.getData((Component) field,
+                FIELD_MARK_KEY);
     }
 
     /**
@@ -781,8 +786,9 @@ public class FormAIController implements AIController {
      *            the field is already marked
      */
     private void markField(HasValue<?, ?> field, Object revertValue) {
-        var element = ((Component) field).getElement();
-        markedFields.computeIfAbsent(field, ignored -> {
+        var component = (Component) field;
+        var element = component.getElement();
+        if (getMark(field) == null) {
             var revert = element.addEventListener("ai-field-revert",
                     event -> revertField(field));
             var valueChange = field.addValueChangeListener(event -> {
@@ -790,9 +796,9 @@ public class FormAIController implements AIController {
                     unmarkField(field);
                 }
             });
-            return new FieldMark(Registration.combine(revert, valueChange),
-                    revertValue);
-        });
+            ComponentUtil.setData(component, FIELD_MARK_KEY, new FieldMark(
+                    Registration.combine(revert, valueChange), revertValue));
+        }
         FormFieldMarker.add(element, fieldMarkerI18n);
     }
 
@@ -805,15 +811,17 @@ public class FormAIController implements AIController {
      *            therefore always a {@link Component}
      */
     private void unmarkField(HasValue<?, ?> field) {
-        var mark = markedFields.remove(field);
+        var component = (Component) field;
+        var mark = getMark(field);
         if (mark != null) {
             mark.registration().remove();
+            ComponentUtil.setData(component, FIELD_MARK_KEY, null);
         }
         // A field in the "AI is working" state still needs its marker to carry
         // the shimmer; the badge is hidden for the duration anyway, and
         // stopWorking() drops the marker at turn end.
-        if (!workingFields.contains(field)) {
-            FormFieldMarker.remove(((Component) field).getElement());
+        if (!FormFieldMarker.isWorking(component.getElement())) {
+            FormFieldMarker.remove(component.getElement());
         }
     }
 
@@ -827,7 +835,7 @@ public class FormAIController implements AIController {
      *            the field to revert, not {@code null}
      */
     private void revertField(HasValue<?, ?> field) {
-        var mark = markedFields.get(field);
+        var mark = getMark(field);
         if (mark == null) {
             return;
         }
@@ -1070,8 +1078,7 @@ public class FormAIController implements AIController {
      * the AI cannot write them, so they are not "worked on" and their read-only
      * state must not be touched. The state is carried by the field's marker, so
      * a field that has none yet gets one; it stays hidden while the state is
-     * on. Tracks the affected fields so {@link #stopWorking()} clears exactly
-     * these at turn end.
+     * on.
      */
     private void startWorking() {
         stopWorking();
@@ -1083,27 +1090,30 @@ public class FormAIController implements AIController {
                 var element = component.getElement();
                 FormFieldMarker.add(element, fieldMarkerI18n);
                 FormFieldMarker.setWorking(element, true);
-                workingFields.add(field);
             }
         }
     }
 
     /**
      * Clears the "AI is working" state (shimmer + client-side read-only guard)
-     * from the fields {@link #startWorking()} set. A field that is marked keeps
-     * its marker, which becomes visible again as the state clears; a field that
-     * is not loses the marker that only carried the state.
+     * from every field in the form tree whose marker carries it — the fields
+     * {@link #startWorking()} set, found by walking the tree rather than
+     * tracked separately. A field that is marked keeps its marker, which
+     * becomes visible again as the state clears; a field that is not loses the
+     * marker that only carried the state.
      */
     private void stopWorking() {
-        for (var field : workingFields) {
+        for (var field : FormFieldDiscovery.collectFields(fieldContainer)) {
             var element = ((Component) field).getElement();
-            if (markedFields.containsKey(field)) {
+            if (!FormFieldMarker.isWorking(element)) {
+                continue;
+            }
+            if (getMark(field) != null) {
                 FormFieldMarker.setWorking(element, false);
             } else {
                 FormFieldMarker.remove(element);
             }
         }
-        workingFields.clear();
     }
 
     /**

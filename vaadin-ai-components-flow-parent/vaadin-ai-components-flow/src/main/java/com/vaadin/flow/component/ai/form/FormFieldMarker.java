@@ -100,6 +100,16 @@ final class FormFieldMarker {
     }
 
     /**
+     * @return whether the field's marker is in the "AI is working" state set
+     *         through {@link #setWorking(Element, boolean)}; {@code false} when
+     *         the field has no marker
+     */
+    static boolean isWorking(Element field) {
+        return find(field).map(marker -> marker.getProperty("working", false))
+                .orElse(false);
+    }
+
+    /**
      * @return the field's marker element, or an empty optional when the field
      *         has no marker
      */
