@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -285,6 +286,14 @@ public class FormAIController implements AIController {
      */
     private boolean filling;
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
+    /**
+     * Fields put into the "AI is working" state for the current turn. The state
+     * itself lives on each field's marker element, but turn-end cleanup cannot
+     * rely on walking the form tree alone: a field detached mid-turn is not
+     * reachable there, yet must still be cleared so it does not come back later
+     * with a stale shimmer. Cleared by {@link #stopWorking()}.
+     */
+    private final Set<HasValue<?, ?>> workingFields = new LinkedHashSet<>();
     private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
     private FieldMarkerI18n fieldMarkerI18n;
@@ -1078,7 +1087,8 @@ public class FormAIController implements AIController {
      * the AI cannot write them, so they are not "worked on" and their read-only
      * state must not be touched. The state is carried by the field's marker, so
      * a field that has none yet gets one; it stays hidden while the state is
-     * on.
+     * on. Tracks the affected fields so {@link #stopWorking()} clears exactly
+     * these at turn end, even the ones detached during the turn.
      */
     private void startWorking() {
         stopWorking();
@@ -1090,30 +1100,27 @@ public class FormAIController implements AIController {
                 var element = component.getElement();
                 FormFieldMarker.add(element, fieldMarkerI18n);
                 FormFieldMarker.setWorking(element, true);
+                workingFields.add(field);
             }
         }
     }
 
     /**
      * Clears the "AI is working" state (shimmer + client-side read-only guard)
-     * from every field in the form tree whose marker carries it — the fields
-     * {@link #startWorking()} set, found by walking the tree rather than
-     * tracked separately. A field that is marked keeps its marker, which
-     * becomes visible again as the state clears; a field that is not loses the
-     * marker that only carried the state.
+     * from the fields {@link #startWorking()} set. A field that is marked keeps
+     * its marker, which becomes visible again as the state clears; a field that
+     * is not loses the marker that only carried the state.
      */
     private void stopWorking() {
-        for (var field : FormFieldDiscovery.collectFields(fieldContainer)) {
+        for (var field : workingFields) {
             var element = ((Component) field).getElement();
-            if (!FormFieldMarker.isWorking(element)) {
-                continue;
-            }
             if (getMark(field) != null) {
                 FormFieldMarker.setWorking(element, false);
             } else {
                 FormFieldMarker.remove(element);
             }
         }
+        workingFields.clear();
     }
 
     /**

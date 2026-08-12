@@ -2073,6 +2073,27 @@ class FormAIControllerTest {
         }
 
         @Test
+        void workingStateClearedOnFieldRemovedMidTurn() {
+            // A field removed from the form mid-turn is out of reach of any
+            // form-tree walk when the turn ends, but its marker still carries
+            // the working state. Re-adding the field later must not bring back
+            // a stale shimmer over a field nothing is working on.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            form.remove(field);
+            controller.onResponse(null);
+            form.add(field);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "A field removed mid-turn must have its working state "
+                            + "cleared at turn end");
+        }
+
+        @Test
         void turnStartClearsStaleWorkingStateFromUnwritableField() {
             // A turn that never reaches onResponse (a dropped connection)
             // leaves the working state applied. If the field is no longer
