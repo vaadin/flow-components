@@ -651,11 +651,11 @@ public class DatePicker
      * as well as with the minimum and maximum date: a date cannot be selected
      * if any of these constraints disables it. By default, no provider is set.
      * <p>
-     * The provider is also called during server-side validation, with the whole
-     * month that contains the value, so that a disabled date cannot be
-     * committed even if the browser was never told about it. Setting a provider
-     * does not re-validate the current value. Call
-     * {@link #refreshDateMetadata()} when the data behind the provider changes.
+     * The provider is also called during server-side validation, with the date
+     * being validated, so that a disabled date cannot be committed even if the
+     * browser was never told about it. Setting a provider does not re-validate
+     * the current value. Call {@link #refreshDateMetadata()} when the data
+     * behind the provider changes.
      *
      * @param provider
      *            the date metadata provider, or {@code null} to remove the
@@ -697,7 +697,7 @@ public class DatePicker
      * weekdays set with {@link #setDisabledWeekdays(Collection)}, or is marked
      * as disabled by the provider set with
      * {@link #setDateMetadataProvider(DateMetadataProvider)}. The provider, if
-     * one is set, is called for the whole month that contains the date.
+     * one is set, is called for that date.
      * <p>
      * The minimum and maximum date are not considered.
      *
@@ -718,13 +718,8 @@ public class DatePicker
         if (dateMetadataProvider == null) {
             return false;
         }
-        // The provider's contract is that a range always covers whole months,
-        // so ask for the month holding the date rather than for the single day,
-        // then filter.
-        DateRange month = new DateRange(date.withDayOfMonth(1),
-                date.withDayOfMonth(date.lengthOfMonth()));
         Collection<DateMetadata> metadata = dateMetadataProvider
-                .getDateMetadata(month);
+                .getDateMetadata(new DateRange(date, date));
         return metadata != null
                 && metadata.stream().filter(Objects::nonNull).anyMatch(
                         entry -> entry.disabled() && date.equals(entry.date()));

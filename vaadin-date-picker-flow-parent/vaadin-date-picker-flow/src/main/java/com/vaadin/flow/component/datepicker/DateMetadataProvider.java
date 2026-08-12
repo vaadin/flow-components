@@ -22,10 +22,11 @@ import java.util.Collection;
  * A callback that provides metadata for a range of dates, for example to mark
  * dates as not selectable.
  * <p>
- * The callback runs on the server and is called with the range of dates the
- * calendar is about to show, which always covers whole months, so a single
- * query can answer for all of them. Return an entry only for the dates that
- * have metadata; dates that are not mentioned have none.
+ * The callback runs on the server. The calendar calls it with the range of
+ * dates it is about to show, which covers whole months, so a single query can
+ * answer for all of them. Server-side validation calls it with the single date
+ * being validated. Return an entry only for the dates that have metadata; dates
+ * that are not mentioned have none.
  * <p>
  * Until the callback has answered, the affected dates render in a loading state
  * but <b>stay selectable</b>, so a slow callback does not make the calendar

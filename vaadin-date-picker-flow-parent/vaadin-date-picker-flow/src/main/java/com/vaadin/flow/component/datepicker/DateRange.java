@@ -20,10 +20,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * A range of dates, inclusive on both ends. A range passed to a
- * {@link DateMetadataProvider} always covers whole months: {@code start} is the
- * first day of a month and {@code end} the last day of a month, so an
- * implementation can group its query by month.
+ * A range of dates, inclusive on both ends. A range of a single date has the
+ * same {@code start} and {@code end}.
  *
  * @param start
  *            the first date of the range, not {@code null}

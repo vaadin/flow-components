@@ -330,7 +330,7 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
-    void isDateDisabled_providerCalledWithWholeMonthRange() {
+    void isDateDisabled_providerCalledWithSingleDayRange() {
         AtomicReference<DateRange> capturedRange = new AtomicReference<>();
         picker.setDateMetadataProvider(range -> {
             capturedRange.set(range);
@@ -339,9 +339,9 @@ class DatePickerDateMetadataTest {
 
         picker.isDateDisabled(LocalDate.of(2023, 2, 15));
 
-        Assertions.assertEquals(LocalDate.of(2023, 2, 1),
+        Assertions.assertEquals(LocalDate.of(2023, 2, 15),
                 capturedRange.get().start());
-        Assertions.assertEquals(LocalDate.of(2023, 2, 28),
+        Assertions.assertEquals(LocalDate.of(2023, 2, 15),
                 capturedRange.get().end());
     }
 
