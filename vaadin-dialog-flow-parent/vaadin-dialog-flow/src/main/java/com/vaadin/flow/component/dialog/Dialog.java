@@ -78,7 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha9")
+@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
