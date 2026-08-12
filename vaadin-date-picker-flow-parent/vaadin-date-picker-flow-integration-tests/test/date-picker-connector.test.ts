@@ -202,8 +202,7 @@ describe('date-picker connector', () => {
     });
 
     it('should pad the ISO dates for years below 100', () => {
-      // The range is formatted from a date built in local time, so reading it back in UTC
-      // would shift it by a day, and a hand-rolled pad would not reach four digits here.
+      // An unpadded join would send "50-1-1", which the server cannot parse.
       const requestDateMetadata = sinon.stub().resolves([]);
       datePicker.$server = { requestDateMetadata };
       datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
