@@ -39,7 +39,7 @@ export type DatePickerServer = {
 
 export type FlowDatePicker = DatePicker & {
   $connector: DatePickerConnector;
-  // Optional, so that tests can cover the connector running before the server connection is ready.
+  // Assigned by Flow when the element is bound, and stubbed by the tests.
   $server?: DatePickerServer;
 };
 

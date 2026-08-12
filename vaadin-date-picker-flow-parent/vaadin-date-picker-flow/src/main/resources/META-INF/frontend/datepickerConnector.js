@@ -183,11 +183,6 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
   // to `dateMetadataProvider` clears the web component's cache and re-fetches every visible
   // range, so the same function object is reused for every update.
   const dateMetadataProvider = ({ start, end }) => {
-    if (!datepicker.$server) {
-      // Throwing lets the web component drop the months and retry on the next navigation,
-      // instead of caching "nothing is disabled" as authoritative.
-      throw new Error('Date metadata requested before the server connection was ready');
-    }
     // Months are 0-based in both directions; the server adds the offset.
     return datepicker.$server.requestDateMetadata(start.year, start.month, start.day, end.year, end.month, end.day);
   };

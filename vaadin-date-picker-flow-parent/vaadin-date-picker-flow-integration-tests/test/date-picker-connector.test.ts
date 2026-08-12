@@ -209,15 +209,5 @@ describe('date-picker connector', () => {
       const result = await datePicker.dateMetadataProvider!(RANGE);
       expect(result).to.equal(metadata);
     });
-
-    it('should reject the provider when $server is unavailable', () => {
-      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
-
-      // The connector throws synchronously, which the web component handles like a rejection:
-      // it drops the months and requests them again on the next navigation.
-      expect(() => datePicker.dateMetadataProvider!(RANGE)).to.throw(
-        'Date metadata requested before the server connection was ready'
-      );
-    });
   });
 });
