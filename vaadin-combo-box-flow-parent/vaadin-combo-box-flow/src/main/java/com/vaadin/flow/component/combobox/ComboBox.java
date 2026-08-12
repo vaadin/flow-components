@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0-alpha9")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0-alpha10")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")
