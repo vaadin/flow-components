@@ -194,8 +194,7 @@ class DatePickerDateMetadataTest {
     void requestDateMetadata_allowsInertAndDisabledUpdates()
             throws NoSuchMethodException {
         Method method = DatePicker.class.getDeclaredMethod(
-                "requestDateMetadata", int.class, int.class, int.class,
-                int.class, int.class, int.class);
+                "requestDateMetadata", String.class, String.class);
 
         // A request that the server drops never settles its promise on the
         // client, which leaves that month rendering as loading until
@@ -208,15 +207,14 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
-    void requestDateMetadata_acceptsZeroBasedMonths() {
+    void requestDateMetadata_parsesIsoDates() {
         AtomicReference<DateRange> capturedRange = new AtomicReference<>();
         picker.setDateMetadataProvider(range -> {
             capturedRange.set(range);
             return List.of();
         });
 
-        // Month 0 is January on the wire
-        picker.requestDateMetadata(2023, 0, 1, 2023, 0, 31);
+        picker.requestDateMetadata("2023-01-01", "2023-01-31");
 
         Assertions.assertEquals(LocalDate.of(2023, 1, 1),
                 capturedRange.get().start());
@@ -229,7 +227,8 @@ class DatePickerDateMetadataTest {
         picker.setDateMetadataProvider(range -> List
                 .of(new DateMetadata(LocalDate.of(2023, 1, 10), true)));
 
-        ArrayNode entries = picker.requestDateMetadata(2023, 0, 1, 2023, 0, 31);
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
 
         Assertions.assertEquals(1, entries.size());
         JsonNode entry = entries.get(0);
@@ -246,7 +245,8 @@ class DatePickerDateMetadataTest {
                 new DateMetadata(LocalDate.of(2023, 1, 10), false),
                 new DateMetadata(LocalDate.of(2023, 1, 11), true)));
 
-        ArrayNode entries = picker.requestDateMetadata(2023, 0, 1, 2023, 0, 31);
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
 
         Assertions.assertEquals(1, entries.size());
         Assertions.assertEquals(11, entries.get(0).get("day").intValue());
@@ -256,14 +256,16 @@ class DatePickerDateMetadataTest {
     void requestDateMetadata_providerReturnsNull_returnsEmptyArray() {
         picker.setDateMetadataProvider(range -> null);
 
-        ArrayNode entries = picker.requestDateMetadata(2023, 0, 1, 2023, 0, 31);
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
 
         Assertions.assertEquals(0, entries.size());
     }
 
     @Test
     void requestDateMetadata_noProvider_returnsEmptyArray() {
-        ArrayNode entries = picker.requestDateMetadata(2023, 0, 1, 2023, 0, 31);
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
 
         Assertions.assertEquals(0, entries.size());
     }
@@ -277,7 +279,7 @@ class DatePickerDateMetadataTest {
         });
 
         // A whole year, so a per-date callback would show up as many calls
-        picker.requestDateMetadata(2023, 0, 1, 2023, 11, 31);
+        picker.requestDateMetadata("2023-01-01", "2023-12-31");
 
         Assertions.assertEquals(1, calls.get());
     }

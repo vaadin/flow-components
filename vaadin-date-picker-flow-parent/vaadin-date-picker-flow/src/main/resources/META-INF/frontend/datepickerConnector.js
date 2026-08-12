@@ -4,6 +4,7 @@ import dateFnsIsValid from 'date-fns/isValid';
 import {
   createDate,
   extractDateParts,
+  formatISODate,
   parseDate as _parseDate
 } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
@@ -179,12 +180,16 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
   };
 
+  // `createDate` builds a date at midnight in local time, so it has to be read back with
+  // `formatISODate`, which uses the local components too. `formatUTCISODate` would shift the
+  // date by a day. Both handle years outside 0000-9999 with the extended ISO 8601 format.
+  const toISODate = ({ year, month, day }) => formatISODate(createDate(year, month, day));
+
   // STABLE reference — created once per connector, never reassigned. Assigning a new function
   // to `dateMetadataProvider` clears the web component's cache and re-fetches every visible
   // range, so the same function object is reused for every update.
   const dateMetadataProvider = ({ start, end }) => {
-    // Months are 0-based in both directions; the server adds the offset.
-    return datepicker.$server.requestDateMetadata(start.year, start.month, start.day, end.year, end.month, end.day);
+    return datepicker.$server.requestDateMetadata(toISODate(start), toISODate(end));
   };
 
   datepicker.$connector.setDateMetadataConfig = (config) => {

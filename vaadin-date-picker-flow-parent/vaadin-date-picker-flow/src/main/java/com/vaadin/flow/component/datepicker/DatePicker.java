@@ -731,38 +731,31 @@ public class DatePicker
     }
 
     /**
-     * Provides the date metadata for the given range of dates. Months are
-     * zero-based in both directions, matching what the web component uses.
+     * Provides the date metadata for the given range of dates. The range is
+     * given as ISO 8601 dates, the same format as the value and the minimum and
+     * maximum date. The entries are returned with the year, month and day as
+     * separate numbers, and a zero-based month, which is the shape the web
+     * component reads them in.
      * <p>
      * This is an internal RPC endpoint called by the connector on behalf of the
      * web component, not part of the public API.
      *
-     * @param startYear
-     *            the year of the first date of the range
-     * @param startMonth
-     *            the zero-based month of the first date of the range
-     * @param startDay
-     *            the day of month of the first date of the range
-     * @param endYear
-     *            the year of the last date of the range
-     * @param endMonth
-     *            the zero-based month of the last date of the range
-     * @param endDay
-     *            the day of month of the last date of the range
+     * @param start
+     *            the first date of the range, as an ISO 8601 date
+     * @param end
+     *            the last date of the range, as an ISO 8601 date
      * @return the metadata entries for the disabled dates in the range
      */
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    ArrayNode requestDateMetadata(int startYear, int startMonth, int startDay,
-            int endYear, int endMonth, int endDay) {
+    ArrayNode requestDateMetadata(String start, String end) {
         ArrayNode entries = JacksonUtils.createArrayNode();
         if (dateMetadataProvider == null) {
             return entries;
         }
 
-        DateRange range = new DateRange(
-                LocalDate.of(startYear, startMonth + 1, startDay),
-                LocalDate.of(endYear, endMonth + 1, endDay));
+        DateRange range = new DateRange(LocalDate.parse(start),
+                LocalDate.parse(end));
         Collection<DateMetadata> metadata = dateMetadataProvider
                 .getDateMetadata(range);
         if (metadata == null) {

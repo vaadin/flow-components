@@ -26,15 +26,8 @@ export type DatePickerConnector = {
 };
 
 export type DatePickerServer = {
-  /** Months are 0-based, matching what the web component passes to the provider. */
-  requestDateMetadata: (
-    startYear: number,
-    startMonth: number,
-    startDay: number,
-    endYear: number,
-    endMonth: number,
-    endDay: number
-  ) => Promise<DatePickerDateMetadata[]>;
+  /** The range is given as ISO 8601 dates, the entries come back with a 0-based month. */
+  requestDateMetadata: (start: string, end: string) => Promise<DatePickerDateMetadata[]>;
 };
 
 export type FlowDatePicker = DatePicker & {

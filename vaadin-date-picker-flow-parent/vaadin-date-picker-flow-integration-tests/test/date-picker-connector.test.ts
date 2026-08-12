@@ -190,7 +190,7 @@ describe('date-picker connector', () => {
       expect(datePicker.dateMetadataProvider).to.be.null;
     });
 
-    it('should call $server.requestDateMetadata with 0-based months', () => {
+    it('should call $server.requestDateMetadata with ISO dates', () => {
       const requestDateMetadata = sinon.stub().resolves([]);
       datePicker.$server = { requestDateMetadata };
       datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
@@ -198,7 +198,22 @@ describe('date-picker connector', () => {
       datePicker.dateMetadataProvider!(RANGE);
 
       expect(requestDateMetadata).to.be.calledOnce;
-      expect(requestDateMetadata).to.be.calledWithExactly(2024, 0, 1, 2024, 11, 31);
+      expect(requestDateMetadata).to.be.calledWithExactly('2024-01-01', '2024-12-31');
+    });
+
+    it('should pad the ISO dates for years below 100', () => {
+      // The range is formatted from a date built in local time, so reading it back in UTC
+      // would shift it by a day, and a hand-rolled pad would not reach four digits here.
+      const requestDateMetadata = sinon.stub().resolves([]);
+      datePicker.$server = { requestDateMetadata };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      datePicker.dateMetadataProvider!({
+        start: { year: 50, month: 0, day: 1 },
+        end: { year: 50, month: 11, day: 31 }
+      });
+
+      expect(requestDateMetadata).to.be.calledWithExactly('0050-01-01', '0050-12-31');
     });
 
     it('should resolve the provider with the server response unchanged', async () => {
