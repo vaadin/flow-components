@@ -53,6 +53,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -655,11 +656,6 @@ public class DatePicker
      * committed even if the browser was never told about it. Setting a provider
      * does not re-validate the current value. Call
      * {@link #refreshDateMetadata()} when the data behind the provider changes.
-     * <p>
-     * If the component is inside an inert region, for example behind a modal
-     * dialog, while a value is set, the request for that month is dropped and
-     * the calendar keeps showing it as loading. Call
-     * {@link #refreshDateMetadata()} to recover.
      *
      * @param provider
      *            the date metadata provider, or {@code null} to remove the
@@ -755,6 +751,7 @@ public class DatePicker
      *            the day of month of the last date of the range
      * @return the metadata entries for the disabled dates in the range
      */
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     ArrayNode requestDateMetadata(int startYear, int startMonth, int startDay,
             int endYear, int endMonth, int endDay) {

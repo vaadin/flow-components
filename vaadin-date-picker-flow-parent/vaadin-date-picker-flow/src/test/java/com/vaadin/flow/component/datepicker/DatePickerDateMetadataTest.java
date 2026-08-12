@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import java.lang.reflect.Method;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,9 +29,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -184,6 +188,23 @@ class DatePickerDateMetadataTest {
                 indexOfExpression(expressions, SET_CONFIG));
         Assertions.assertEquals(-1,
                 indexOfExpression(expressions, CLEAR_CACHE));
+    }
+
+    @Test
+    void requestDateMetadata_allowsInertAndDisabledUpdates()
+            throws NoSuchMethodException {
+        Method method = DatePicker.class.getDeclaredMethod(
+                "requestDateMetadata", int.class, int.class, int.class,
+                int.class, int.class, int.class);
+
+        // A request that the server drops never settles its promise on the
+        // client, which leaves that month rendering as loading until
+        // refreshDateMetadata() is called. Both annotations prevent a drop:
+        // one for an inert component, for example behind a modal dialog, and
+        // one for a disabled component.
+        Assertions.assertTrue(method.isAnnotationPresent(AllowInert.class));
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
+                method.getAnnotation(ClientCallable.class).value());
     }
 
     @Test
