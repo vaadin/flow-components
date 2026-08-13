@@ -94,6 +94,12 @@ describe('time-picker connector', () => {
     });
   });
 
+  describe('unsupported locale', () => {
+    it('should name the unsupported locale in the error', () => {
+      expect(() => timePicker.$connector.setLocale('en_US')).to.throw('en_US');
+    });
+  });
+
   describe('locale change', () => {
     beforeEach(async () => {
       timePicker.$connector.setLocale('de-DE');
