@@ -449,8 +449,12 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // re-rendering (e.g. right after adding a freeze pane), so click
         // again until the editor shows up.
         waitUntil(driver -> {
-            clickCell(cellAddress);
-            return getInputInCustomEditorFromCell(cellAddress).isPresent();
+            try {
+                clickCell(cellAddress);
+                return getInputInCustomEditorFromCell(cellAddress).isPresent();
+            } catch (StaleElementReferenceException e) {
+                return false;
+            }
         });
 
         var editor = getInputInCustomEditorFromCell(cellAddress).orElseThrow();
