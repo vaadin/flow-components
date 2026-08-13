@@ -41,6 +41,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
@@ -51,6 +52,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyId;
 import com.vaadin.flow.dom.DomEvent;
@@ -2141,6 +2143,81 @@ class FormAIControllerTest {
         }
 
         @Test
+        void fieldSetReadOnlyMidTurn_reassertsClientReadOnlyAtTurnEnd() {
+            // A field switched to server-side read-only mid-turn (e.g. by a
+            // value-change listener reacting to an AI write) needs its client
+            // readonly re-asserted at turn end: the working guard held the
+            // client property at true, so Flow dropped the server's own write
+            // as a no-op. The sibling left editable must get no script.
+            var readOnly = new TestField();
+            var editable = new TestField();
+            var form = new Div(readOnly, editable);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            readOnly.setValue("filled");
+            readOnly.setReadOnly(true);
+            drainPendingJs(); // isolate the scripts queued at turn end
+            controller.onResponse(null);
+
+            var dump = drainPendingJs();
+            var scripts = scriptsOn(dump, readOnly);
+            Assertions.assertEquals(1, scripts.size(),
+                    "Turn end must queue exactly one re-assert script on the "
+                            + "read-only field; got: " + scripts);
+            Assertions.assertTrue(
+                    scripts.getFirst().contains("readonly = true"),
+                    "The script must re-assert the client-side readonly; "
+                            + "got: " + scripts.getFirst());
+            Assertions.assertEquals(List.of(), scriptsOn(dump, editable),
+                    "No script must be queued on a field left editable");
+        }
+
+        @Test
+        void unchangedFieldSetReadOnlyMidTurn_alsoGetsReassert() {
+            // The re-assert depends only on the field's read-only state at
+            // turn end, not on whether the AI changed its value.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setReadOnly(true); // no AI write to the field
+            drainPendingJs();
+            controller.onResponse(null);
+
+            var scripts = scriptsOn(drainPendingJs(), field);
+            Assertions.assertEquals(1, scripts.size(),
+                    "Turn end must queue the re-assert even when the AI did "
+                            + "not change the field; got: " + scripts);
+            Assertions
+                    .assertTrue(scripts.getFirst().contains("readonly = true"));
+        }
+
+        @Test
+        void fieldReadOnlyBeforeTurn_getsNoReassert() {
+            // A field that was read-only when the turn started never entered
+            // the working state, so its client readonly was never held by the
+            // guard and no re-assert must be queued.
+            var field = new TestField();
+            field.setReadOnly(true);
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            drainPendingJs();
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(),
+                    scriptsOn(drainPendingJs(), field),
+                    "No re-assert must be queued on a field that was "
+                            + "read-only before the turn started");
+        }
+
+        @Test
         void revertDuringTurnKeepsMarkerForWorkingState() {
             // The badge is hidden while the AI works, but a revert event can
             // still arrive from the client just as a turn starts. Clearing the
@@ -2623,6 +2700,26 @@ class FormAIControllerTest {
                             + "marking setting");
             Assertions.assertSame(field, events.get(0).getField());
             Assertions.assertEquals("filled", events.get(0).getNewValue());
+        }
+
+        // The read-only re-assert is the controller's only server-invoked
+        // script, so tests dump the UI's pending JavaScript invocations to
+        // pin exactly when it is queued. The dump is destructive, so tests
+        // inspecting more than one field must filter a single drained list.
+        private List<PendingJavaScriptInvocation> drainPendingJs() {
+            ui.getInternals().getStateTree()
+                    .runExecutionsBeforeClientResponse();
+            ui.getInternals().getStateTree().collectChanges(ignore -> {
+            });
+            return ui.getInternals().dumpPendingJavaScriptInvocations();
+        }
+
+        private static List<String> scriptsOn(
+                List<PendingJavaScriptInvocation> dump, HasElement target) {
+            return dump.stream()
+                    .filter(p -> p.getInvocation().getParameters()
+                            .contains(target.getElement()))
+                    .map(p -> p.getInvocation().getExpression()).toList();
         }
 
         // Dispatch the marker's revert event server-side so tests can drive
