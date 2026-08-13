@@ -34,16 +34,22 @@ import java.util.Optional;
  * <i>not</i> appended to {@link AIOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
- * stream error, or any throw between {@link AIController#onRequest()} and the
- * start of the stream); the response text is either empty or a partial stream
- * that was received before the failure.
+ * stream error, any throw between {@link AIController#onRequest()} and the
+ * start of the stream, or a {@link RequestInterceptor} failure — a throw, a
+ * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
+ * interception timeout); the response text is either empty or a partial stream
+ * that was received before the failure. An interceptor failure fires the
+ * listener without a preceding {@link AIController#onRequest()}, so an error
+ * does not imply that per-turn setup has happened.
  * <p>
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
  * <p>
- * <b>Threading:</b> the listener is called from a background thread (Reactor
- * scheduler). Blocking I/O (e.g. database writes) is safe directly. To update
- * Vaadin UI components from this listener, use {@code ui.access()}.
+ * <b>Threading:</b> the listener is called from whichever thread ends the turn
+ * — a Reactor thread for stream completion or error, the UI thread for
+ * synchronous failures, or the thread that completes a postponed prompt.
+ * Blocking I/O (e.g. database writes) is safe directly. To update Vaadin UI
+ * components from this listener, use {@code ui.access()}.
  * 
  * @since 25.2
  */

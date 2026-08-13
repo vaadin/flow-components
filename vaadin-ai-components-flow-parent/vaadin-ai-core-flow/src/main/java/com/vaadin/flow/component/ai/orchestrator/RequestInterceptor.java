@@ -311,10 +311,13 @@ public interface RequestInterceptor extends Serializable {
          * When the timeout elapses before the continuation is completed, the
          * prompt fails as if {@link RequestContinuation#fail(Throwable) failed}
          * with a {@link TimeoutException}. If the UI the prompt was submitted
-         * from is detached before completion, the prompt is abandoned. Throwing
-         * from the interceptor after postponing aborts the prompt like any
-         * other interceptor failure and the returned continuation becomes inert
-         * — completing it has no effect.
+         * from is detached before completion, the prompt is abandoned. The
+         * prompt's content, including attachment data, stays referenced until
+         * the continuation completes or the timeout fires — also when the UI is
+         * detached in the meantime — so keep the timeout as tight as the work
+         * allows. Throwing from the interceptor after postponing aborts the
+         * prompt like any other interceptor failure and the returned
+         * continuation becomes inert — completing it has no effect.
          *
          * @param timeout
          *            the maximum time to wait for the continuation to be

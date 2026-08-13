@@ -660,11 +660,14 @@ public class AIOrchestrator implements Serializable {
      * Resumes a postponed prompt on the UI thread: applies the verdict and
      * starts the turn with the event's final content. Mirrors
      * {@link #doPrompt}'s cleanup-then-rethrow handling, which cannot cover
-     * this path — the prompt call returned when the prompt was postponed. A
-     * detached UI abandons the prompt; {@code accessLater} is used instead of
-     * {@code access} because its detach handler also covers a UI that detaches
-     * after the resume task is enqueued but before it runs — a plain
-     * {@code access} would silently drop the task and leave
+     * this path — the prompt call returned when the prompt was postponed, so
+     * the rethrow surfaces the failure to the session error handler instead.
+     * That is deliberate: without a response listener or controller the
+     * graceful report reaches nobody, and the error handler is the only
+     * remaining channel. A detached UI abandons the prompt; {@code accessLater}
+     * is used instead of {@code access} because its detach handler also covers
+     * a UI that detaches after the resume task is enqueued but before it runs —
+     * a plain {@code access} would silently drop the task and leave
      * {@code isProcessing} claimed forever.
      */
     private void resumePostponedPrompt(UI ui,
