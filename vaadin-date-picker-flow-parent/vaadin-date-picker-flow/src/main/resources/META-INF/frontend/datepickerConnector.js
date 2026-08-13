@@ -4,6 +4,7 @@ import dateFnsIsValid from 'date-fns/isValid';
 import {
   createDate,
   extractDateParts,
+  formatISODate,
   parseDate as _parseDate
 } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
@@ -179,6 +180,18 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
     datepicker.i18n = Object.assign({}, i18n, formatterAndParser);
   };
 
+  // `createDate` builds a date at midnight in local time, so it has to be read back with
+  // `formatISODate`, which uses the local components too. `formatUTCISODate` would shift the
+  // date by a day. Both handle years outside 0000-9999 with the extended ISO 8601 format.
+  const toISODate = ({ year, month, day }) => formatISODate(createDate(year, month, day));
+
+  // STABLE reference — created once per connector, never reassigned. Assigning a new function
+  // to `dateMetadataProvider` clears the web component's cache and re-fetches every visible
+  // range, so the same function object is reused for every update.
+  const dateMetadataProvider = ({ start, end }) => {
+    return datepicker.$server.requestDateMetadata(toISODate(start), toISODate(end));
+  };
+
   datepicker.$connector.setDateMetadataConfig = (config) => {
     // Keys are `year-month-day` with a 0-based month, matching what the web component
     // passes to `isDateDisabled`, so nothing has to be parsed or converted per date.
@@ -194,6 +207,8 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
         : ({ year, month, day }) =>
             (hasDisabledDates && disabledDates.has(`${year}-${month}-${day}`)) ||
             (hasDisabledWeekdays && disabledWeekdays.has(createDate(year, month, day).getDay() || 7));
+
+    datepicker.dateMetadataProvider = config.hasProvider ? dateMetadataProvider : null;
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
