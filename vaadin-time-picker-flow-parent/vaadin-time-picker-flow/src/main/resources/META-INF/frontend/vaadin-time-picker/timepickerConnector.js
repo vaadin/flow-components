@@ -1,5 +1,6 @@
 import {
   TEST_PM_TIME,
+  escapeRegExp,
   formatMilliseconds,
   parseMillisecondsIntoInteger,
   parseDigitsIntoInteger,
@@ -8,31 +9,6 @@ import {
   getSeparator,
   searchAmOrPmToken
 } from './helpers.js';
-import { parseISOTime } from '@vaadin/time-picker/src/vaadin-time-picker-helper.js';
-
-// Execute callback when predicate returns true.
-// Try again later if predicate returns false.
-function when(predicate, callback, timeout = 0) {
-  if (predicate()) {
-    callback();
-  } else {
-    setTimeout(() => when(predicate, callback, 200), timeout);
-  }
-}
-
-function parseISO(text) {
-  // The default i18n parser of the web component is ISO 8601 compliant.
-  const timeObject = parseISOTime(text);
-
-  // The web component returns an object with string values
-  // while the connector expects number values.
-  return {
-    hours: parseInt(timeObject.hours || 0),
-    minutes: parseInt(timeObject.minutes || 0),
-    seconds: parseInt(timeObject.seconds || 0),
-    milliseconds: parseInt(timeObject.milliseconds || 0)
-  };
-}
 
 window.Vaadin.Flow.timepickerConnector = {};
 window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
@@ -44,21 +20,12 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
   timepicker.$connector = {};
 
   timepicker.$connector.setLocale = (locale) => {
-    // capture previous value if any
-    let previousValueObject;
-    if (timepicker.value && timepicker.value !== '') {
-      previousValueObject = parseISO(timepicker.value);
-    }
-
     try {
       // Check whether the locale is supported by the browser or not
       TEST_PM_TIME.toLocaleTimeString(locale);
     } catch (e) {
-      locale = 'en-US';
       // FIXME should do a callback for server to throw an exception ?
-      throw new Error(
-        'vaadin-time-picker: The locale ' + locale + ' is not supported, falling back to default locale setting(en-US).'
-      );
+      throw new Error(`vaadin-time-picker: The locale ${locale} is not supported.`);
     }
 
     // 1. 24 or 12 hour clock, if latter then what are the am/pm strings ?
@@ -67,6 +34,8 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
 
     // 2. What is the separator ?
     const separator = getSeparator(locale);
+    // The separator can be a regexp special character, such as the dot used by fi-FI
+    const escapedSeparator = escapeRegExp(separator || '');
 
     const includeSeconds = function () {
       return timepicker.step && timepicker.step < 60;
@@ -123,7 +92,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
           .trim();
 
         // A regexp that allows to find the numbers with optional separator and continuing searching after it.
-        const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
+        const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + escapedSeparator + ')?', 'g');
 
         let hours = numbersRegExp.exec(numbersOnlyTimeString);
         if (hours) {
@@ -163,19 +132,5 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
         }
       }
     };
-
-    if (previousValueObject) {
-      when(
-        () => timepicker.$,
-        () => {
-          const newValue = timepicker.i18n.formatTime(previousValueObject);
-          // FIXME works but uses private API, needs fixes in web component
-          if (timepicker.inputElement.value !== newValue) {
-            timepicker.inputElement.value = newValue;
-            timepicker.value = newValue;
-          }
-        }
-      );
-    }
   };
 };

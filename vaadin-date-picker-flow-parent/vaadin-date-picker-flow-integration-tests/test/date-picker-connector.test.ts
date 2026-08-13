@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { fixtureSync } from '@vaadin/testing-helpers';
+import * as sinon from 'sinon';
 import dateFnsFormat from 'date-fns/format';
 import { DatePickerDate } from '@vaadin/date-picker';
 import { init, extractDateParts, datepickerConnector, type FlowDatePicker } from './shared.js';
@@ -157,6 +158,70 @@ describe('date-picker connector', () => {
 
       datePicker.$connector.setDateMetadataConfig({});
       expect(datePicker.isDateDisabled).to.be.undefined;
+    });
+
+    // The range the web component would pass for a whole year, with 0-based months.
+    const RANGE = {
+      start: { year: 2024, month: 0, day: 1 },
+      end: { year: 2024, month: 11, day: 31 }
+    };
+
+    it('should not set dateMetadataProvider when hasProvider is false', () => {
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: false });
+      expect(datePicker.dateMetadataProvider).to.be.null;
+    });
+
+    it('should keep the same dateMetadataProvider reference across config updates', () => {
+      // The web component compares the provider by reference and clears its cache when a new
+      // function is assigned, so every config update has to reuse the same function object.
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 2]], hasProvider: true });
+      const provider = datePicker.dateMetadataProvider;
+      expect(provider).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 3]], hasProvider: true });
+      expect(datePicker.dateMetadataProvider).to.equal(provider);
+    });
+
+    it('should set dateMetadataProvider to null when hasProvider becomes false', () => {
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+      expect(datePicker.dateMetadataProvider).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: false });
+      expect(datePicker.dateMetadataProvider).to.be.null;
+    });
+
+    it('should call $server.requestDateMetadata with ISO dates', () => {
+      const requestDateMetadata = sinon.stub().resolves([]);
+      datePicker.$server = { requestDateMetadata };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      datePicker.dateMetadataProvider!(RANGE);
+
+      expect(requestDateMetadata).to.be.calledOnce;
+      expect(requestDateMetadata).to.be.calledWithExactly('2024-01-01', '2024-12-31');
+    });
+
+    it('should pad the ISO dates for years below 100', () => {
+      // An unpadded join would send "50-1-1", which the server cannot parse.
+      const requestDateMetadata = sinon.stub().resolves([]);
+      datePicker.$server = { requestDateMetadata };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      datePicker.dateMetadataProvider!({
+        start: { year: 50, month: 0, day: 1 },
+        end: { year: 50, month: 11, day: 31 }
+      });
+
+      expect(requestDateMetadata).to.be.calledWithExactly('0050-01-01', '0050-12-31');
+    });
+
+    it('should resolve the provider with the server response unchanged', async () => {
+      const metadata = [{ year: 2024, month: 0, day: 2, disabled: true }];
+      datePicker.$server = { requestDateMetadata: sinon.stub().resolves(metadata) };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      const result = await datePicker.dateMetadataProvider!(RANGE);
+      expect(result).to.equal(metadata);
     });
   });
 });
