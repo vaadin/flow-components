@@ -1122,7 +1122,7 @@ public class FormAIController implements AIController {
     private void startWorking() {
         stopWorking();
         for (var field : collectActiveFields()) {
-            if (isDisabled(field) || isApplicationReadOnly(field)) {
+            if (isDisabled(field) || field.isReadOnly()) {
                 continue;
             }
             if (field instanceof Component component) {
@@ -1177,10 +1177,11 @@ public class FormAIController implements AIController {
     /**
      * Returns the subset of {@link #collectKnownFields()} the LLM currently
      * acts on — visible fields only. Disabled and read-only fields are kept:
-     * the LLM reads them as context but cannot write them (see
-     * {@link #isDisabled} / {@link #isApplicationReadOnly}). Use this anywhere
-     * the LLM-visible field set matters (the working state, tool inputs and
-     * outputs).
+     * the LLM reads them as context but cannot write them. A read-only state is
+     * always application-set — the controller never touches server-side
+     * read-only, its turn guard is client-side only (see
+     * {@link #startWorking()}). Use this anywhere the LLM-visible field set
+     * matters (the working state, tool inputs and outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
         return collectKnownFields().stream().filter(this::isVisible).toList();
@@ -1221,21 +1222,6 @@ public class FormAIController implements AIController {
     private boolean isDisabled(HasValue<?, ?> field) {
         return field instanceof HasEnabled hasEnabled
                 && !hasEnabled.isEnabled();
-    }
-
-    /**
-     * Whether the field is read-only. The controller never sets a field's
-     * server-side read-only state — it guards against user edits during a turn
-     * with a client-side read-only only (see {@link #startWorking()}) — so any
-     * read-only state here is application-controlled. Such a field is shown to
-     * the LLM as read-only context but cannot be written.
-     *
-     * @param field
-     *            the discovered field to test, not {@code null}
-     * @return {@code true} when the field is read-only, {@code false} otherwise
-     */
-    private boolean isApplicationReadOnly(HasValue<?, ?> field) {
-        return field.isReadOnly();
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
@@ -1316,8 +1302,7 @@ public class FormAIController implements AIController {
                     continue;
                 }
                 descriptors.add(new FormFieldDescriptor(id, field, type, hints,
-                        isDisabled(field), isApplicationReadOnly(field),
-                        valuesHidden));
+                        isDisabled(field), field.isReadOnly(), valuesHidden));
             }
             return descriptors;
         }
@@ -1406,7 +1391,7 @@ public class FormAIController implements AIController {
                 // writable.
                 var raw = field.field();
                 var disabled = isDisabled(raw);
-                if (disabled || isApplicationReadOnly(raw)) {
+                if (disabled || raw.isReadOnly()) {
                     rejected.add(new RejectedEntry(id, value,
                             notWritableReason(disabled)));
                     continue;
