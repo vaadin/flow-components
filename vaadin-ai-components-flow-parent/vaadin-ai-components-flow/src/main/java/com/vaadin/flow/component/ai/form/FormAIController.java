@@ -817,7 +817,7 @@ public class FormAIController implements AIController {
             // not the controller through an implicit `this.turn`.
             var turnState = turn;
             var revert = element.addEventListener("ai-field-revert",
-                    event -> revertField(field));
+                    event -> revertField(field, turnState));
             var valueChange = field.addValueChangeListener(event -> {
                 if (!turnState.filling) {
                     unmarkField(field);
@@ -860,8 +860,11 @@ public class FormAIController implements AIController {
      *
      * @param field
      *            the field to revert, not {@code null}
+     * @param turn
+     *            the turn state of the controller that marked the field, not
+     *            {@code null}
      */
-    private static void revertField(HasValue<?, ?> field) {
+    private static void revertField(HasValue<?, ?> field, TurnState turn) {
         var mark = getMark(field);
         if (mark == null) {
             return;
@@ -870,6 +873,14 @@ public class FormAIController implements AIController {
         // listener, so restoring the value below doesn't re-enter through it.
         unmarkField(field);
         restoreValue(field, mark.revertValue());
+        // A revert can arrive from the popover while a new turn is running —
+        // it can be open from before the turn started. Rebase the turn's
+        // snapshot to the restored value so the turn-end diff does not
+        // attribute the user's revert to the AI and re-mark the field with
+        // the very value the user just discarded.
+        if (turn.filling && turn.preTurnValues.containsKey(field)) {
+            turn.preTurnValues.put(field, field.getValue());
+        }
     }
 
     /**

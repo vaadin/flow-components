@@ -2313,6 +2313,60 @@ class FormAIControllerTest {
         }
 
         @Test
+        void revertDuringTurnIsNotAttributedToAi() {
+            // The popover can be open from before a turn started, so a revert
+            // can arrive while a new turn is running. The turn-end diff must
+            // not treat the user's revert as an AI change — that would re-mark
+            // the field with the very value the user just discarded as its
+            // revert value.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            controller.onRequest(); // snapshots "filled"
+            fireRevert(field); // restores "original" mid-turn
+            controller.onResponse(null); // the AI writes nothing
+
+            Assertions.assertEquals("original", field.getValue());
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "A mid-turn revert must not re-mark the field at turn "
+                            + "end");
+        }
+
+        @Test
+        void aiWriteAfterMidTurnRevertComparesAgainstRevertedValue() {
+            // When the AI does write the field after a mid-turn revert, the
+            // new mark's revert value must be the value the revert restored,
+            // not the AI value from the previous turn.
+            var field = new TestField();
+            field.setValue("original");
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("first");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fireRevert(field); // restores "original" mid-turn
+            field.setValue("second"); // the AI writes the field again
+            controller.onResponse(null);
+
+            Assertions.assertEquals(1, markersOn(field).size());
+            fireRevert(field);
+            Assertions.assertEquals("original", field.getValue(),
+                    "Revert must restore the value the mid-turn revert "
+                            + "restored, not the previous turn's AI value");
+        }
+
+        @Test
         void revertRestoresValueFromBeforeFirstAiChangeAcrossTurns() {
             // The AI may change the same field over several turns. Revert must
             // restore the value from before the FIRST change, not the value the
