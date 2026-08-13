@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
@@ -61,6 +63,7 @@ import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.streams.UploadHandler;
 
+import reactor.core.scheduler.Schedulers;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -187,6 +190,7 @@ public class AIOrchestrator implements Serializable {
     private transient AIController controller;
     private String userName;
     private String assistantName;
+    private RequestInterceptor requestInterceptor;
     private RequestListener requestListener;
     private AttachmentClickListener attachmentClickListener;
     private ResponseListener responseListener;
@@ -194,6 +198,15 @@ public class AIOrchestrator implements Serializable {
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
     private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
+    /**
+     * Busy guard: claimed by {@code doPrompt}'s CAS, and every downstream path
+     * must release it exactly once — the {@code doPrompt} catch (sync
+     * failures), the verdict-drop paths, the stream's {@code doFinally}, the
+     * postponement abort/resume/detach handlers (including their
+     * release-then-rethrow catches), and {@code Reconnector#apply()} after
+     * deserialization. When adding a new path out of a prompt, decide which of
+     * these owns the release; a missed release blocks all later prompts.
+     */
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
@@ -245,6 +258,12 @@ public class AIOrchestrator implements Serializable {
      * If a request is already being processed, this method logs a warning and
      * returns without processing the new prompt.
      * </p>
+     * <p>
+     * An interceptor configured via
+     * {@link Builder#withRequestInterceptor(RequestInterceptor)} runs first and
+     * may change the content, reject the prompt entirely, or postpone it to
+     * finish preprocessing asynchronously.
+     * </p>
      *
      * @param userMessage
      *            the prompt to send to the AI
@@ -279,6 +298,12 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * If a request is already being processed, this method logs a warning and
      * returns without processing the new prompt.
+     * </p>
+     * <p>
+     * An interceptor configured via
+     * {@link Builder#withRequestInterceptor(RequestInterceptor)} runs first and
+     * may change the content, reject the prompt entirely, or postpone it to
+     * finish preprocessing asynchronously.
      * </p>
      *
      * @param userMessage
@@ -484,6 +509,36 @@ public class AIOrchestrator implements Serializable {
         checkFeatureFlag(ui);
 
         var attachments = getAttachmentsToProcess(explicitAttachments);
+        if (requestInterceptor != null) {
+            var event = new RequestInterceptor.RequestInterceptEvent(
+                    userMessage, attachments);
+            requestInterceptor.intercept(event);
+            if (event.getContinuation() != null) {
+                // isProcessing stays claimed until the continuation
+                // completes, so no other prompt can interleave with the
+                // suspended one.
+                handlePostponedPrompt(ui, event);
+                return;
+            }
+            if (!applyInterceptVerdict(event)) {
+                isProcessing.set(false);
+                return;
+            }
+            userMessage = event.getUserMessage();
+            attachments = event.getAttachments();
+        }
+        startTurn(ui, userMessage, attachments);
+    }
+
+    /**
+     * Runs an accepted prompt: displays it, fires the controller and request
+     * listener hooks, records the history entry, and starts the LLM stream.
+     * Assumes {@code isProcessing} is already claimed; the stream releases it
+     * on completion, and a throw propagates to the caller, which owns the
+     * cleanup.
+     */
+    private void startTurn(UI ui, String userMessage,
+            List<AIAttachment> attachments) {
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
         var assistantMessage = createAssistantMessagePlaceholder();
@@ -524,6 +579,113 @@ public class AIOrchestrator implements Serializable {
             }
             throw t;
         }
+    }
+
+    /**
+     * Applies the interceptor's verdict to the event. Returns {@code false}
+     * when the prompt must be dropped: the interceptor rejected it (a rejection
+     * message, if any, is shown in the message list as an assistant message),
+     * or the replacement text is blank. The caller owns releasing
+     * {@code isProcessing} on the {@code false} path.
+     */
+    private boolean applyInterceptVerdict(
+            RequestInterceptor.RequestInterceptEvent event) {
+        if (event.isRejected()) {
+            if (event.getRejectionMessage() != null && messageList != null) {
+                messageList.addMessage(event.getRejectionMessage(),
+                        assistantName, Collections.emptyList());
+            }
+            return false;
+        }
+        if (event.getUserMessage().isBlank()) {
+            LOGGER.warn("Prompt dropped: the processed message is blank. "
+                    + "Use reject() to cancel a prompt explicitly.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Arms the postponed prompt: schedules the timeout and registers the resume
+     * callback on the continuation. The callback may fire immediately on the
+     * current thread (the interceptor completed the continuation before
+     * returning) or later on whichever application or timer thread completes
+     * it.
+     */
+    private void handlePostponedPrompt(UI ui,
+            RequestInterceptor.RequestInterceptEvent event) {
+        var continuation = event.getContinuation();
+        var timeout = continuation.getTimeout();
+        var timer = Schedulers.parallel()
+                .schedule(() -> continuation.fail(new TimeoutException(
+                        "Request interception timed out after " + timeout)),
+                        timeout.toMillis(), TimeUnit.MILLISECONDS);
+        continuation.onComplete(failure -> {
+            try {
+                timer.dispose();
+                if (failure != null) {
+                    abortPostponedPrompt(ui, failure);
+                } else {
+                    resumePostponedPrompt(ui, event);
+                }
+            } catch (Throwable t) { // NOSONAR — release-then-rethrow
+                // A throw from the completion plumbing would otherwise leave
+                // isProcessing claimed forever, blocking all later prompts.
+                // Releasing here is safe: the resume task either never ran
+                // (nothing started) or already handed the flag to the stream,
+                // whose doFinally release is idempotent with this one.
+                isProcessing.set(false);
+                throw t;
+            }
+        });
+    }
+
+    /**
+     * Ends a postponed prompt that failed or timed out. Nothing was displayed
+     * for the prompt, so no UI cleanup is needed beyond reporting — which is
+     * why the flag is released before touching the UI: a detached UI must not
+     * leave the orchestrator stuck.
+     */
+    private void abortPostponedPrompt(UI ui, Throwable failure) {
+        isProcessing.set(false);
+        try {
+            fireResponseListener("", failure, ui);
+        } catch (UIDetachedException e) {
+            LOGGER.warn("Postponed prompt failed after its UI was detached",
+                    failure);
+        }
+    }
+
+    /**
+     * Resumes a postponed prompt on the UI thread: applies the verdict and
+     * starts the turn with the event's final content. Mirrors
+     * {@link #doPrompt}'s cleanup-then-rethrow handling, which cannot cover
+     * this path — the prompt call returned when the prompt was postponed. A
+     * detached UI abandons the prompt; {@code accessLater} is used instead of
+     * {@code access} because its detach handler also covers a UI that detaches
+     * after the resume task is enqueued but before it runs — a plain
+     * {@code access} would silently drop the task and leave
+     * {@code isProcessing} claimed forever.
+     */
+    private void resumePostponedPrompt(UI ui,
+            RequestInterceptor.RequestInterceptEvent event) {
+        ui.accessLater(() -> {
+            try {
+                if (!applyInterceptVerdict(event)) {
+                    isProcessing.set(false);
+                    return;
+                }
+                startTurn(ui, event.getUserMessage(), event.getAttachments());
+            } catch (Throwable t) { // NOSONAR — cleanup-then-rethrow
+                isProcessing.set(false);
+                fireResponseListener("", t, ui);
+                throw t;
+            }
+        }, () -> {
+            isProcessing.set(false);
+            LOGGER.warn("Postponed prompt abandoned: its UI was detached "
+                    + "before interception completed");
+        }).run();
     }
 
     private List<AIAttachment> getAttachmentsToProcess(
@@ -902,6 +1064,9 @@ public class AIOrchestrator implements Serializable {
      * messages (defaults to "You").</li>
      * <li>{@link #withAssistantName(String)} – sets the display name for
      * assistant messages (defaults to "Assistant").</li>
+     * <li>{@link #withRequestInterceptor(RequestInterceptor)} – sets an
+     * interceptor that can validate, sanitize, replace, reject, or postpone the
+     * user's message and attachments before anything is sent to the LLM.</li>
      * <li>{@link #withRequestListener(RequestListener)} – registers a callback
      * that fires on every prompt with the user message, the assigned message
      * id, and any attachments.</li>
@@ -937,6 +1102,7 @@ public class AIOrchestrator implements Serializable {
         private AIController controller;
         private String userName;
         private String assistantName;
+        private RequestInterceptor requestInterceptor;
         private RequestListener requestListener;
         private AttachmentClickListener attachmentClickListener;
         private ResponseListener responseListener;
@@ -1159,6 +1325,31 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
+         * Sets the interceptor that is called with the user's message text and
+         * attachments before the orchestrator acts on them — before the message
+         * appears in the message list, before controller and request listener
+         * hooks, and before the LLM request is built. The interceptor can
+         * validate and {@link RequestInterceptor.RequestInterceptEvent#reject()
+         * reject} the prompt, sanitize or replace the message text, replace the
+         * attachments, or
+         * {@link RequestInterceptor.RequestInterceptEvent#postpone(Duration)
+         * postpone} the prompt to finish preprocessing asynchronously;
+         * everything downstream sees only the processed content. See
+         * {@link RequestInterceptor} for the full contract.
+         *
+         * @param requestInterceptor
+         *            the interceptor to call on each prompt
+         * @return this builder
+         * @since 25.3
+         */
+        public Builder withRequestInterceptor(
+                RequestInterceptor requestInterceptor) {
+            warnIfAlreadySet(this.requestInterceptor, "Request interceptor");
+            this.requestInterceptor = requestInterceptor;
+            return this;
+        }
+
+        /**
          * Sets a listener that is called on every prompt, just before the LLM
          * stream opens. The listener receives the user message, the assigned
          * {@code messageId}, and the attachments included with the message
@@ -1335,6 +1526,7 @@ public class AIOrchestrator implements Serializable {
             orchestrator.userName = userName == null ? "You" : userName;
             orchestrator.assistantName = assistantName == null ? "Assistant"
                     : assistantName;
+            orchestrator.requestInterceptor = requestInterceptor;
             orchestrator.requestListener = requestListener;
             orchestrator.attachmentClickListener = attachmentClickListener;
             orchestrator.responseListener = responseListener;
