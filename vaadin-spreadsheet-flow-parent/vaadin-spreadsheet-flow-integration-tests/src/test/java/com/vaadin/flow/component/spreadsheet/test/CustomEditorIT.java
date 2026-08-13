@@ -559,18 +559,30 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     private void assertEditorInCellIsFocused(String cellAddress) {
-        var activeElement = getActiveElement();
-        String slotName = activeElement.getDomAttribute("slot");
-        if (!(slotName != null && slotName.startsWith("custom-editor"))) {
-            var parentElement = getActiveElement().findElement(By.xpath(".."));
-            slotName = parentElement.getDomAttribute("slot");
-        }
-
-        Assert.assertNotNull("Slot name is null", slotName);
-
-        var result = getSpreadsheet().getCellAt(cellAddress)
-                .findElements(By.cssSelector("slot[name='" + slotName + "']"));
-        Assert.assertEquals(1, result.size());
+        // Focus moves into the editor only after the spreadsheet has
+        // processed the key press, so wait instead of asserting immediately.
+        waitUntil(driver -> {
+            try {
+                var activeElement = getActiveElement();
+                String slotName = activeElement.getDomAttribute("slot");
+                if (!(slotName != null
+                        && slotName.startsWith("custom-editor"))) {
+                    var parentElement = activeElement
+                            .findElement(By.xpath(".."));
+                    slotName = parentElement.getDomAttribute("slot");
+                }
+                if (slotName == null) {
+                    return false;
+                }
+                return getSpreadsheet().getCellAt(cellAddress)
+                        .findElements(
+                                By.cssSelector("slot[name='" + slotName + "']"))
+                        .size() == 1;
+            } catch (StaleElementReferenceException
+                    | NoSuchElementException e) {
+                return false;
+            }
+        });
     }
 
     private WebElement getActiveElement() {
