@@ -69,9 +69,34 @@ public class DatePickerElement extends TestBenchElement
             return this.$(ButtonElement.class)
                     .withAttribute("slot", "cancel-button").first();
         }
+
+        /**
+         * Gets whether the overlay is waiting for date metadata. While waiting,
+         * the affected dates are rendered in a loading state, but stay
+         * selectable.
+         *
+         * @return {@code true} if the overlay is waiting for date metadata,
+         *         {@code false} otherwise
+         */
+        public boolean isLoading() {
+            return hasAttribute("loading");
+        }
     }
 
     public static class MonthCalendarElement extends TestBenchElement {
+
+        /**
+         * Finds the date cell for the day passed as the second script argument
+         * and stores it in a {@code cell} variable, which is {@code undefined}
+         * if the month calendar does not show that day. Prepend this to a
+         * script that reads something from the cell.
+         */
+        private static final String FIND_DATE_CELL = """
+                const cell = Array.from(
+                        arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
+                        .find((date) => date.textContent.trim() === String(arguments[1]));
+                """;
+
         /**
          * Gets the header text of the month calendar, e.g. `January 1999`
          *
@@ -90,6 +115,83 @@ public class DatePickerElement extends TestBenchElement
         public List<WeekdayElement> getWeekdays() {
             return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
+        }
+
+        /**
+         * Gets the CSS part names of the date cell for the given day of the
+         * month, as a space separated string.
+         *
+         * @param day
+         *            the day of the month
+         * @return the part names of the date cell, or {@code null} if the month
+         *         calendar does not show the given day
+         */
+        public String getDatePart(int day) {
+            return (String) executeScript(FIND_DATE_CELL + """
+                    return cell ? cell.getAttribute('part') : null;
+                    """, this, day);
+        }
+
+        /**
+         * Gets whether the date cell for the given day of the month is rendered
+         * as disabled.
+         *
+         * @param day
+         *            the day of the month
+         * @return {@code true} if the date cell is disabled, {@code false}
+         *         otherwise or if the month calendar does not show the given
+         *         day
+         */
+        public boolean isDateDisabled(int day) {
+            return hasDatePart(day, "disabled");
+        }
+
+        /**
+         * Gets whether the date cell for the given day of the month is rendered
+         * as loading, which is the case while the date metadata for it is being
+         * fetched.
+         *
+         * @param day
+         *            the day of the month
+         * @return {@code true} if the date cell is loading, {@code false}
+         *         otherwise or if the month calendar does not show the given
+         *         day
+         */
+        public boolean isDateLoading(int day) {
+            return hasDatePart(day, "loading");
+        }
+
+        /**
+         * Gets whether the date cell for the given day of the month has the
+         * given CSS part name.
+         *
+         * @param day
+         *            the day of the month
+         * @param partName
+         *            the part name to look for
+         * @return {@code true} if the date cell has the part name,
+         *         {@code false} otherwise or if the month calendar does not
+         *         show the given day
+         */
+        public boolean hasDatePart(int day, String partName) {
+            return Boolean.TRUE.equals(executeScript(FIND_DATE_CELL + """
+                    return cell ? cell.part.contains(arguments[2]) : false;
+                    """, this, day, partName));
+        }
+
+        /**
+         * Gets the value of the {@code aria-disabled} attribute of the date
+         * cell for the given day of the month.
+         *
+         * @param day
+         *            the day of the month
+         * @return the attribute value, or {@code null} if the month calendar
+         *         does not show the given day
+         */
+        public String getDateAriaDisabled(int day) {
+            return (String) executeScript(FIND_DATE_CELL + """
+                    return cell ? cell.getAttribute('aria-disabled') : null;
+                    """, this, day);
         }
     }
 
