@@ -699,7 +699,8 @@ public class DatePicker
      * {@link #setDateMetadataProvider(DateMetadataProvider)}. The provider, if
      * one is set, is called for that date.
      * <p>
-     * The minimum and maximum date are not considered.
+     * The minimum and maximum date are not considered, so this does not on its
+     * own answer whether the date can be selected.
      *
      * @param date
      *            the date to check, may be {@code null}
@@ -707,7 +708,7 @@ public class DatePicker
      *         otherwise or if the date is {@code null}
      * @since 25.3
      */
-    public boolean isDateDisabled(LocalDate date) {
+    protected final boolean isDateDisabled(LocalDate date) {
         if (date == null) {
             return false;
         }
