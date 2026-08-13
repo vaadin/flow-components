@@ -277,13 +277,7 @@ public class FormAIController implements AIController {
     private final Component fieldContainer;
     private final Binder<?> binder;
     private boolean valuesHidden;
-    /**
-     * {@code true} between {@link #onRequest} and {@link #onResponse}, i.e.
-     * while the AI is filling the form. The auto-hide value-change listener
-     * checks this so the AI's own writes don't clear the marker it is about to
-     * apply; only edits the user makes after the turn clear it.
-     */
-    private boolean filling;
+    private final TurnState turn = new TurnState();
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
     /**
      * Fields put into the "AI is working" state for the current turn. The state
@@ -293,8 +287,27 @@ public class FormAIController implements AIController {
      * with a stale shimmer. Cleared by {@link #stopWorking()}.
      */
     private final Set<HasValue<?, ?>> workingFields = new LinkedHashSet<>();
-    private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
+
+    /**
+     * The mutable state of the current fill turn. Kept in its own serializable
+     * object rather than on the controller because the listeners a mark
+     * installs on its field capture it and persist on the field — which is
+     * serialized with the UI, while the controller itself is deliberately not
+     * {@link Serializable}.
+     */
+    private static final class TurnState implements Serializable {
+        /**
+         * {@code true} between {@link FormAIController#onRequest} and
+         * {@link FormAIController#onResponse}, i.e. while the AI is filling the
+         * form. The auto-hide value-change listener checks this so the AI's own
+         * writes don't clear the marker it is about to apply; only edits the
+         * user makes after the turn clear it.
+         */
+        boolean filling;
+        final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
+    }
+
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
 
@@ -784,7 +797,10 @@ public class FormAIController implements AIController {
      * the marker, and a value-change listener that clears the marker as soon as
      * the user edits the field, so a stale cue does not linger over a value the
      * user changed (the AI's own writes during a fill turn are excluded via the
-     * {@code filling} flag). Both are removed by {@link #unmarkField}.
+     * turn's {@code filling} flag). Both are removed by {@link #unmarkField}.
+     * The listeners persist on the field, which is serialized with the UI, so
+     * they capture only the field and the serializable {@link TurnState} —
+     * never the controller, which is not serializable.
      *
      * @param field
      *            the field to mark, a discovered field and therefore always a
@@ -797,10 +813,13 @@ public class FormAIController implements AIController {
         var component = (Component) field;
         var element = component.getElement();
         if (getMark(field) == null) {
+            // Copied to a local so the lambdas below capture the state object,
+            // not the controller through an implicit `this.turn`.
+            var turnState = turn;
             var revert = element.addEventListener("ai-field-revert",
                     event -> revertField(field));
             var valueChange = field.addValueChangeListener(event -> {
-                if (!filling) {
+                if (!turnState.filling) {
                     unmarkField(field);
                 }
             });
@@ -818,7 +837,7 @@ public class FormAIController implements AIController {
      *            the field to clear the marker from, a discovered field and
      *            therefore always a {@link Component}
      */
-    private void unmarkField(HasValue<?, ?> field) {
+    private static void unmarkField(HasValue<?, ?> field) {
         var component = (Component) field;
         var mark = getMark(field);
         if (mark != null) {
@@ -842,7 +861,7 @@ public class FormAIController implements AIController {
      * @param field
      *            the field to revert, not {@code null}
      */
-    private void revertField(HasValue<?, ?> field) {
+    private static void revertField(HasValue<?, ?> field) {
         var mark = getMark(field);
         if (mark == null) {
             return;
@@ -916,7 +935,7 @@ public class FormAIController implements AIController {
 
     @Override
     public void onRequest() {
-        filling = true;
+        turn.filling = true;
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
@@ -957,7 +976,7 @@ public class FormAIController implements AIController {
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the marking pass) count as AI writes rather
             // than user edits that would clear the marker.
-            filling = false;
+            turn.filling = false;
         }
     }
 
@@ -975,12 +994,12 @@ public class FormAIController implements AIController {
      * pre-turn value rather than {@code null}.
      */
     private void snapshotPreTurnValues() {
-        preTurnValues.clear();
+        turn.preTurnValues.clear();
         if (!fieldMarkerEnabled && fieldValueChangeListeners.isEmpty()) {
             return;
         }
         for (var field : collectKnownFields()) {
-            preTurnValues.put(field, field.getValue());
+            turn.preTurnValues.put(field, field.getValue());
         }
     }
 
@@ -1006,14 +1025,14 @@ public class FormAIController implements AIController {
      */
     private List<FieldValueChangeEvent> collectFieldValueChanges(
             Throwable error) {
-        if (preTurnValues.isEmpty() || error != null) {
-            preTurnValues.clear();
+        if (turn.preTurnValues.isEmpty() || error != null) {
+            turn.preTurnValues.clear();
             return List.of();
         }
         var events = new ArrayList<FieldValueChangeEvent>();
         for (var field : collectKnownFields()) {
-            var oldValue = preTurnValues.containsKey(field)
-                    ? preTurnValues.get(field)
+            var oldValue = turn.preTurnValues.containsKey(field)
+                    ? turn.preTurnValues.get(field)
                     : field.getEmptyValue();
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
@@ -1021,7 +1040,7 @@ public class FormAIController implements AIController {
                         newValue));
             }
         }
-        preTurnValues.clear();
+        turn.preTurnValues.clear();
         return events;
     }
 

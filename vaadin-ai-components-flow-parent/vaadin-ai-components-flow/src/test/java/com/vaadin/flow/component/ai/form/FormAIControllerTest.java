@@ -21,6 +21,8 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
 
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -1661,6 +1663,30 @@ class FormAIControllerTest {
             ui = new UI();
             var mockSession = Mockito.mock(VaadinSession.class);
             ui.getInternals().setSession(mockSession);
+        }
+
+        @Test
+        void markListenersSerializeWithoutController() {
+            // The controller is deliberately not Serializable (it is restored
+            // via reconnect()), while the listeners a mark installs live on
+            // the field and are serialized with the UI. They must therefore
+            // not capture the controller. The form is kept detached so the
+            // write stops at the form instead of the test's mocked session.
+            var field = new TestField();
+            var form = new Div(field);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            Assertions.assertEquals(1, markersOn(field).size());
+
+            Assertions.assertDoesNotThrow(() -> {
+                try (var out = new ObjectOutputStream(
+                        OutputStream.nullOutputStream())) {
+                    out.writeObject(form);
+                }
+            }, "Serializing a marked field must not reach the controller");
         }
 
         @Test
