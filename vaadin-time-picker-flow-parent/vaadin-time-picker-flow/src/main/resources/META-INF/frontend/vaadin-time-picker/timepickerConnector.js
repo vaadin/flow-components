@@ -24,7 +24,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
       TEST_PM_TIME.toLocaleTimeString(locale);
     } catch (e) {
       // FIXME should do a callback for server to throw an exception ?
-      throw new Error('vaadin-time-picker: The locale ' + locale + ' is not supported.');
+      throw new Error(`vaadin-time-picker: The locale ${locale} is not supported.`);
     }
 
     // 1. 24 or 12 hour clock, if latter then what are the am/pm strings ?
