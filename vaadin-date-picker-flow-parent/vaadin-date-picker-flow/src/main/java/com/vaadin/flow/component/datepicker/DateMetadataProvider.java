@@ -16,7 +16,11 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Objects;
+
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * A callback that provides metadata for a range of dates, for example to mark
@@ -57,4 +61,33 @@ public interface DateMetadataProvider extends Serializable {
      *         empty collection if none have
      */
     Collection<DateMetadata> getDateMetadata(DateRange range);
+
+    /**
+     * Creates a provider that builds the metadata one date at a time. The given
+     * function is called for every date in the requested range, and returns the
+     * metadata for that date, or {@code null} for a date that has none:
+     *
+     * <pre>
+     * datePicker.setDateMetadataProvider(DateMetadataProvider.perDate(
+     *         date -&gt; isFullyBooked(date) ? new DateMetadata(date, true)
+     *                 : null));
+     * </pre>
+     *
+     * The function is called once per date, and a range can cover up to a year,
+     * so it has to answer from memory. A function that queries a backend would
+     * query it once per date; implement the provider directly instead, so that
+     * a single query can answer for the whole range.
+     *
+     * @param generator
+     *            the function that returns the metadata for a single date, or
+     *            {@code null} for a date that has none, not {@code null}
+     * @return a provider backed by the given function
+     * @since 25.3
+     */
+    static DateMetadataProvider perDate(
+            SerializableFunction<LocalDate, DateMetadata> generator) {
+        Objects.requireNonNull(generator, "Generator cannot be null");
+        return range -> range.start().datesUntil(range.end().plusDays(1))
+                .map(generator).filter(Objects::nonNull).toList();
+    }
 }
