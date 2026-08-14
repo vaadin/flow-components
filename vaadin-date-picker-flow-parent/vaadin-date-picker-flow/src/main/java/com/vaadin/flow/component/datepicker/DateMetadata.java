@@ -26,12 +26,19 @@ import java.util.Objects;
  *            the date the metadata applies to, not {@code null}
  * @param disabled
  *            whether the date cannot be selected
+ * @param partName
+ *            custom CSS part names for the date, or {@code null} for none.
+ *            Either a single name, or several names separated by spaces. Do not
+ *            use the names the component sets itself, such as {@code disabled},
+ *            {@code selected} or {@code today}: a theme already styles those,
+ *            and borrowing one can make a date look and behave as if it were in
+ *            that state.
  *
  * @author Vaadin Ltd
  * @since 25.3
  */
-public record DateMetadata(LocalDate date,
-        boolean disabled) implements Serializable {
+public record DateMetadata(LocalDate date, boolean disabled,
+        String partName) implements Serializable {
 
     /**
      * Creates new metadata for the given date.
@@ -40,8 +47,36 @@ public record DateMetadata(LocalDate date,
      *            the date the metadata applies to, not {@code null}
      * @param disabled
      *            whether the date cannot be selected
+     * @param partName
+     *            custom CSS part names for the date, or {@code null} for none
      */
     public DateMetadata {
         Objects.requireNonNull(date, "Date cannot be null");
+    }
+
+    /**
+     * Creates new metadata that only marks the date as disabled or not, without
+     * any custom part names.
+     *
+     * @param date
+     *            the date the metadata applies to, not {@code null}
+     * @param disabled
+     *            whether the date cannot be selected
+     */
+    public DateMetadata(LocalDate date, boolean disabled) {
+        this(date, disabled, null);
+    }
+
+    /**
+     * Creates new metadata that only adds custom part names to the date,
+     * leaving it selectable.
+     *
+     * @param date
+     *            the date the metadata applies to, not {@code null}
+     * @param partName
+     *            custom CSS part names for the date, or {@code null} for none
+     */
+    public DateMetadata(LocalDate date, String partName) {
+        this(date, false, partName);
     }
 }

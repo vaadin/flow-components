@@ -253,6 +253,73 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
+    void requestDateMetadata_includesPartName() {
+        picker.setDateMetadataProvider(range -> List
+                .of(new DateMetadata(LocalDate.of(2023, 1, 10), "busy")));
+
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
+
+        Assertions.assertEquals(1, entries.size());
+        Assertions.assertEquals("busy",
+                entries.get(0).get("part").stringValue());
+    }
+
+    @Test
+    void requestDateMetadata_partNameOnlyEntry_isIncluded() {
+        picker.setDateMetadataProvider(range -> List.of(
+                new DateMetadata(LocalDate.of(2023, 1, 10), false, "busy")));
+
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
+
+        Assertions.assertEquals(1, entries.size());
+        JsonNode entry = entries.get(0);
+        Assertions.assertEquals(10, entry.get("day").intValue());
+        Assertions.assertEquals("busy", entry.get("part").stringValue());
+        Assertions.assertFalse(entry.has("disabled"));
+    }
+
+    @Test
+    void requestDateMetadata_disabledEntryWithoutPartName_hasNoPartKey() {
+        picker.setDateMetadataProvider(range -> List
+                .of(new DateMetadata(LocalDate.of(2023, 1, 10), true)));
+
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
+
+        Assertions.assertEquals(1, entries.size());
+        JsonNode entry = entries.get(0);
+        Assertions.assertTrue(entry.get("disabled").booleanValue());
+        Assertions.assertFalse(entry.has("part"));
+    }
+
+    @Test
+    void requestDateMetadata_blankPartName_isSkipped() {
+        picker.setDateMetadataProvider(range -> List
+                .of(new DateMetadata(LocalDate.of(2023, 1, 10), false, "  ")));
+
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
+
+        Assertions.assertEquals(0, entries.size());
+    }
+
+    @Test
+    void requestDateMetadata_disabledAndPartName_includesBoth() {
+        picker.setDateMetadataProvider(range -> List
+                .of(new DateMetadata(LocalDate.of(2023, 1, 10), true, "busy")));
+
+        ArrayNode entries = picker.requestDateMetadata("2023-01-01",
+                "2023-01-31");
+
+        Assertions.assertEquals(1, entries.size());
+        JsonNode entry = entries.get(0);
+        Assertions.assertTrue(entry.get("disabled").booleanValue());
+        Assertions.assertEquals("busy", entry.get("part").stringValue());
+    }
+
+    @Test
     void requestDateMetadata_providerReturnsNull_returnsEmptyArray() {
         picker.setDateMetadataProvider(range -> null);
 
@@ -303,6 +370,24 @@ class DatePickerDateMetadataTest {
     void dateMetadata_nullDate_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> new DateMetadata(null, true));
+    }
+
+    @Test
+    void dateMetadata_partNameConstructor_isNotDisabled() {
+        DateMetadata metadata = new DateMetadata(LocalDate.of(2023, 1, 10),
+                "busy");
+
+        Assertions.assertFalse(metadata.disabled());
+        Assertions.assertEquals("busy", metadata.partName());
+    }
+
+    @Test
+    void dateMetadata_twoArgConstructor_hasNoPartName() {
+        DateMetadata metadata = new DateMetadata(LocalDate.of(2023, 1, 10),
+                true);
+
+        Assertions.assertTrue(metadata.disabled());
+        Assertions.assertNull(metadata.partName());
     }
 
     @Test

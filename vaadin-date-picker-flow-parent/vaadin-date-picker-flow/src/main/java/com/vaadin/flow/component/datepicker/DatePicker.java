@@ -651,6 +651,10 @@ public class DatePicker
      * as well as with the minimum and maximum date: a date cannot be selected
      * if any of these constraints disables it. By default, no provider is set.
      * <p>
+     * Entries can also carry custom CSS part names, so that a theme can style
+     * particular dates. A part name only affects styling, never whether a date
+     * can be selected.
+     * <p>
      * The provider is also called during server-side validation, with the date
      * being validated, so that a disabled date cannot be committed even if the
      * browser was never told about it. Setting a provider does not re-validate
@@ -740,7 +744,8 @@ public class DatePicker
      *            the first date of the range, as an ISO 8601 date
      * @param end
      *            the last date of the range, as an ISO 8601 date
-     * @return the metadata entries for the disabled dates in the range
+     * @return the metadata entries for the dates in the range that are disabled
+     *         or have custom part names
      */
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
@@ -759,15 +764,25 @@ public class DatePicker
         }
 
         metadata.stream().filter(Objects::nonNull)
-                .filter(DateMetadata::disabled).forEach(entry -> {
+                .filter(entry -> entry.disabled() || hasPartName(entry))
+                .forEach(entry -> {
                     ObjectNode node = JacksonUtils.createObjectNode();
                     node.put("year", entry.date().getYear());
                     node.put("month", entry.date().getMonthValue() - 1);
                     node.put("day", entry.date().getDayOfMonth());
-                    node.put("disabled", true);
+                    if (entry.disabled()) {
+                        node.put("disabled", true);
+                    }
+                    if (hasPartName(entry)) {
+                        node.put("part", entry.partName());
+                    }
                     entries.add(node);
                 });
         return entries;
+    }
+
+    private static boolean hasPartName(DateMetadata entry) {
+        return entry.partName() != null && !entry.partName().isBlank();
     }
 
     private boolean hasDateMetadataConfig() {
