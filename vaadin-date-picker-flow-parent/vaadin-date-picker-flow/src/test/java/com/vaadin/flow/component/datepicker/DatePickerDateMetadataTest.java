@@ -373,6 +373,58 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
+    void perDate_returnsEntriesForDatesWithMetadata() {
+        DateMetadataProvider provider = DateMetadataProvider
+                .perDate(date -> date.getDayOfMonth() % 3 == 0
+                        ? new DateMetadata(date, true)
+                        : null);
+
+        List<DateMetadata> metadata = List.copyOf(
+                provider.getDateMetadata(new DateRange(LocalDate.of(2023, 1, 1),
+                        LocalDate.of(2023, 1, 10))));
+
+        Assertions.assertEquals(
+                List.of(new DateMetadata(LocalDate.of(2023, 1, 3), true),
+                        new DateMetadata(LocalDate.of(2023, 1, 6), true),
+                        new DateMetadata(LocalDate.of(2023, 1, 9), true)),
+                metadata);
+    }
+
+    @Test
+    void perDate_calledOncePerDateInRange() {
+        AtomicInteger calls = new AtomicInteger();
+        DateMetadataProvider provider = DateMetadataProvider.perDate(date -> {
+            calls.incrementAndGet();
+            return null;
+        });
+
+        provider.getDateMetadata(new DateRange(LocalDate.of(2023, 1, 1),
+                LocalDate.of(2023, 1, 10)));
+
+        Assertions.assertEquals(10, calls.get());
+    }
+
+    @Test
+    void perDate_singleDayRange_bothBoundsIncluded() {
+        DateMetadataProvider provider = DateMetadataProvider
+                .perDate(date -> new DateMetadata(date, true));
+
+        List<DateMetadata> metadata = List.copyOf(
+                provider.getDateMetadata(new DateRange(LocalDate.of(2023, 1, 5),
+                        LocalDate.of(2023, 1, 5))));
+
+        Assertions.assertEquals(
+                List.of(new DateMetadata(LocalDate.of(2023, 1, 5), true)),
+                metadata);
+    }
+
+    @Test
+    void perDate_nullGenerator_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> DateMetadataProvider.perDate(null));
+    }
+
+    @Test
     void dateMetadata_partNameConstructor_isNotDisabled() {
         DateMetadata metadata = new DateMetadata(LocalDate.of(2023, 1, 10),
                 "busy");
