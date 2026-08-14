@@ -34,8 +34,7 @@ import java.util.Collection;
  * server-side validation.
  * <p>
  * Entries can also carry custom CSS part names, so that a theme can style
- * particular dates. A part name only affects styling, never whether a date can
- * be selected. See {@link DateMetadata} for the details.
+ * particular dates. See {@link DateMetadata} for the details.
  * <p>
  * Results are cached per month in the browser, but not on the server, so an
  * expensive implementation should cache its own results. Call
