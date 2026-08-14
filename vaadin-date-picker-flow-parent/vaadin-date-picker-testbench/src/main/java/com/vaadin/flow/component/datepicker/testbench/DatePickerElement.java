@@ -193,6 +193,19 @@ public class DatePickerElement extends TestBenchElement
                     return cell ? cell.getAttribute('aria-disabled') : null;
                     """, this, day);
         }
+
+        /**
+         * Clicks the date cell for the given day of the month. Fails if the
+         * month calendar does not show the given day.
+         *
+         * @param day
+         *            the day of the month
+         */
+        public void clickDate(int day) {
+            executeScript(FIND_DATE_CELL + """
+                    cell.click();
+                    """, this, day);
+        }
     }
 
     public static class WeekdayElement extends TestBenchElement {

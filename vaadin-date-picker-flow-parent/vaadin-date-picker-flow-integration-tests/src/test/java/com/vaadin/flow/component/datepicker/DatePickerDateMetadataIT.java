@@ -165,7 +165,7 @@ public class DatePickerDateMetadataIT extends AbstractComponentIT {
             Assert.assertFalse(
                     calendar.isDateDisabled(SLOW_PROVIDER_DISABLED_DAY));
 
-            clickDate(calendar, SLOW_PROVIDER_DISABLED_DAY);
+            calendar.clickDate(SLOW_PROVIDER_DISABLED_DAY);
             Assert.assertEquals(
                     LOADING_MONTH_VALUE_PREFIX + SLOW_PROVIDER_DISABLED_DAY,
                     slowDatePicker.getPropertyString("value"));
@@ -197,14 +197,4 @@ public class DatePickerDateMetadataIT extends AbstractComponentIT {
                 .findFirst().orElse(null));
     }
 
-    private void clickDate(MonthCalendarElement calendar, int day) {
-        executeScript(
-                """
-                        Array.from(
-                                arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
-                                .find((date) => date.textContent.trim() === String(arguments[1]))
-                                .click();
-                        """,
-                calendar, day);
-    }
 }
