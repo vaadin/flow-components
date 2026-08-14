@@ -616,7 +616,10 @@ public class AIOrchestrator implements Serializable {
             RequestInterceptor.RequestInterceptEvent event) {
         var continuation = event.getContinuation();
         var timeout = continuation.getTimeout();
-        var timer = Schedulers.parallel()
+        // boundedElastic, not parallel: on timeout the ResponseListener runs
+        // on this thread, and its documented blocking-I/O allowance must not
+        // occupy the CPU-sized parallel pool that backs stream timeouts.
+        var timer = Schedulers.boundedElastic()
                 .schedule(() -> continuation.fail(new TimeoutException(
                         "Request interception timed out after " + timeout)),
                         timeout.toMillis(), TimeUnit.MILLISECONDS);
