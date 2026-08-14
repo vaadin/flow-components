@@ -223,7 +223,7 @@ class DatePickerDateMetadataTest {
     }
 
     @Test
-    void requestDateMetadata_returnsZeroBasedMonths() {
+    void requestDateMetadata_returnsIsoDates() {
         picker.setDateMetadataProvider(range -> List
                 .of(new DateMetadata(LocalDate.of(2023, 1, 10), true)));
 
@@ -232,10 +232,7 @@ class DatePickerDateMetadataTest {
 
         Assertions.assertEquals(1, entries.size());
         JsonNode entry = entries.get(0);
-        Assertions.assertEquals(2023, entry.get("year").intValue());
-        // January is month 0 on the wire
-        Assertions.assertEquals(0, entry.get("month").intValue());
-        Assertions.assertEquals(10, entry.get("day").intValue());
+        Assertions.assertEquals("2023-01-10", entry.get("date").stringValue());
         Assertions.assertTrue(entry.get("disabled").booleanValue());
     }
 
@@ -249,7 +246,8 @@ class DatePickerDateMetadataTest {
                 "2023-01-31");
 
         Assertions.assertEquals(1, entries.size());
-        Assertions.assertEquals(11, entries.get(0).get("day").intValue());
+        Assertions.assertEquals("2023-01-11",
+                entries.get(0).get("date").stringValue());
     }
 
     @Test
@@ -275,7 +273,7 @@ class DatePickerDateMetadataTest {
 
         Assertions.assertEquals(1, entries.size());
         JsonNode entry = entries.get(0);
-        Assertions.assertEquals(10, entry.get("day").intValue());
+        Assertions.assertEquals("2023-01-10", entry.get("date").stringValue());
         Assertions.assertEquals("busy", entry.get("part").stringValue());
         Assertions.assertFalse(entry.has("disabled"));
     }

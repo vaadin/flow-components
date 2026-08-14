@@ -731,11 +731,9 @@ public class DatePicker
     }
 
     /**
-     * Provides the date metadata for the given range of dates. The range is
-     * given as ISO 8601 dates, the same format as the value and the minimum and
-     * maximum date. The entries are returned with the year, month and day as
-     * separate numbers, and a zero-based month, which is the shape the web
-     * component reads them in.
+     * Provides the date metadata for the given range of dates. The range and
+     * the returned entries identify a date by an ISO 8601 string, the same
+     * format as the value and the minimum and maximum date.
      * <p>
      * This is an internal RPC endpoint called by the connector on behalf of the
      * web component, not part of the public API.
@@ -767,9 +765,7 @@ public class DatePicker
                 .filter(entry -> entry.disabled() || hasPartName(entry))
                 .forEach(entry -> {
                     ObjectNode node = JacksonUtils.createObjectNode();
-                    node.put("year", entry.date().getYear());
-                    node.put("month", entry.date().getMonthValue() - 1);
-                    node.put("day", entry.date().getDayOfMonth());
+                    node.put("date", entry.date().toString());
                     if (entry.disabled()) {
                         node.put("disabled", true);
                     }
