@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright). Not browser-specific — Node and Chromium ICU agree, matching the reporter's note.
-- **Screenshot** (static bug): ![DatePicker input value vs. java.time format, per locale](https://raw.githubusercontent.com/vaadin/flow-components/7e1b6fb0f77f37c45076965893b8e4840298a47d/repro-6764.png) — embeds inline.
+- **Screenshot** (static bug): ![DatePicker input value vs. java.time format, per locale](https://raw.githubusercontent.com/vaadin/flow-components/f3ae77f89611e651a88780434c483107cb23bd94/repro-6764.png) — embeds inline.
 
 ## Observed behavior
 
@@ -70,7 +70,9 @@ The locale-based pattern is reverse-engineered from a formatted test date. `toLo
 
 https://github.com/vaadin/flow-components/blob/3110712634ddd4c0a3c1002e2d45923a45c265c1/vaadin-date-picker-flow-parent/vaadin-date-picker-flow/src/main/resources/META-INF/frontend/datepickerConnector.js#L19-L49
 
-The padded branches are reached only for locales where ICU's numeric skeleton happens to pad (`fr-FR`, `en-GB`). A fix would need the locale's actual short/medium date pattern rather than the numeric skeleton — e.g. deriving the pattern from `Intl.DateTimeFormat(locale, { dateStyle: 'short' }).formatToParts(...)` (which for `de-DE` returns 2-digit day and month), or sending the server-side `DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)` pattern down with the locale.
+The padded branches are reached only for locales where ICU's numeric skeleton happens to pad (`fr-FR`, `en-GB`).
+
+A fix would need the locale's actual short date pattern rather than the numeric skeleton. `Intl.DateTimeFormat('de-DE', { dateStyle: 'short' }).formatToParts(...)` returns `day: "01"`, `month: "03"` — the padding the reporter expects — but also a 2-digit year (`01.03.24`), so the derivation would have to keep the 4-digit year the connector uses today. Sending the server-side `DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)` pattern down together with the locale is the other option, and would keep the client in step with what the application formats on the server.
 
 ## Notes
 
