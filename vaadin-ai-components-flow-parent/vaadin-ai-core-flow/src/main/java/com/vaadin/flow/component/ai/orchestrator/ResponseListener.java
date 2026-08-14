@@ -21,11 +21,14 @@ import java.util.Optional;
 /**
  * Listener for LLM response events.
  * <p>
- * The listener is called once per turn — when the assistant's stream has
- * completed, whether successfully or with an error. The same lifecycle moment
- * as {@link AIController#onResponse(Throwable)}. Use it to persist conversation
- * state (via {@link AIOrchestrator#getHistory()}), trigger follow-up actions,
- * or surface errors to the user.
+ * The listener is called when the turn ends — normally when the assistant's
+ * stream has completed, whether successfully or with an error, but also when
+ * the turn fails before a stream ever opens. It fires at most once per prompt:
+ * a prompt rejected by the {@link RequestInterceptor} and a postponed prompt
+ * abandoned because its UI was detached end without firing it. The same
+ * lifecycle moment as {@link AIController#onResponse(Throwable)}. Use it to
+ * persist conversation state (via {@link AIOrchestrator#getHistory()}), trigger
+ * follow-up actions, or surface errors to the user.
  * <p>
  * On success the response text may still be empty if the model emitted only
  * tool calls or stopped without producing visible content. Such turns are
@@ -45,11 +48,13 @@ import java.util.Optional;
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
  * <p>
- * <b>Threading:</b> the listener is called from whichever thread ends the turn
- * — a Reactor thread for stream completion or error, the UI thread for
- * synchronous failures, or the thread that completes a postponed prompt.
- * Blocking I/O (e.g. database writes) is safe directly. To update Vaadin UI
- * components from this listener, use {@code ui.access()}.
+ * <b>Threading:</b> the listener is called from whichever thread ends the turn:
+ * a blocking-tolerant Reactor thread for stream completion, stream errors, and
+ * interception timeouts — blocking I/O (e.g. database writes) is safe there —
+ * the UI thread for synchronous failures, where blocking delays the current
+ * request, or the application's own thread when it completes a postponed
+ * prompt. To update Vaadin UI components from this listener, use
+ * {@code ui.access()}.
  * 
  * @since 25.2
  */
@@ -57,7 +62,8 @@ import java.util.Optional;
 public interface ResponseListener extends Serializable {
 
     /**
-     * Called when the assistant's stream has completed.
+     * Called when the turn has ended (see the class documentation for the exact
+     * moments).
      *
      * @param event
      *            the response event
@@ -65,8 +71,7 @@ public interface ResponseListener extends Serializable {
     void onResponse(ResponseEvent event);
 
     /**
-     * Event fired after the assistant's stream has completed, on success or
-     * failure.
+     * Event fired when a turn ends, on success or failure.
      */
     class ResponseEvent implements Serializable {
         private final String response;

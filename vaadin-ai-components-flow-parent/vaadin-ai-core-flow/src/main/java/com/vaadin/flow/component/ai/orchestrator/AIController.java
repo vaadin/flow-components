@@ -64,9 +64,12 @@ public interface AIController {
     }
 
     /**
-     * Called on the UI thread under the session lock when the LLM stream has
-     * completed — either successfully or with an error. Every turn fires this
-     * exactly once.
+     * Called on the UI thread under the session lock when the turn ends —
+     * normally when the LLM stream has completed, successfully or with an
+     * error, but also when the turn fails before a stream ever opens. Fires at
+     * most once per prompt: a prompt rejected by the {@link RequestInterceptor}
+     * and a postponed prompt abandoned because its UI was detached end without
+     * firing it.
      * <p>
      * On success {@code error} is {@code null}; use the call to commit staged
      * state or run deferred UI updates. On failure {@code error} carries the
