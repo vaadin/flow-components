@@ -49,9 +49,8 @@ public final class FieldValueChangeEvent implements Serializable {
 
     /**
      * Returns the controller that produced this event. Listeners can use this
-     * to call back into the controller (e.g.
-     * {@link FormAIController#showFieldHighlight}) without capturing it from
-     * the registration site.
+     * to call back into the controller without capturing it from the
+     * registration site.
      * <p>
      * The source is transient, so it is {@code null} on an event restored from
      * a serialized session.
