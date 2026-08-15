@@ -26,7 +26,7 @@ export type DatePickerConnector = {
 };
 
 export type DatePickerServer = {
-  /** The range is given as ISO 8601 dates, the entries come back with a 0-based month. */
+  /** The range and the returned entries identify a date by an ISO 8601 string. */
   requestDateMetadata: (start: string, end: string) => Promise<DatePickerDateMetadata[]>;
 };
 

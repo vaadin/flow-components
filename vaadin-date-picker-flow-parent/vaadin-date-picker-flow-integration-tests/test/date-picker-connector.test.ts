@@ -160,11 +160,8 @@ describe('date-picker connector', () => {
       expect(datePicker.isDateDisabled).to.be.undefined;
     });
 
-    // The range the web component would pass for a whole year, with 0-based months.
-    const RANGE = {
-      start: { year: 2024, month: 0, day: 1 },
-      end: { year: 2024, month: 11, day: 31 }
-    };
+    // The range the web component would pass for a whole year, as ISO 8601 dates.
+    const RANGE = { start: '2024-01-01', end: '2024-12-31' };
 
     it('should not set dateMetadataProvider when hasProvider is false', () => {
       datePicker.$connector.setDateMetadataConfig({ hasProvider: false });
@@ -190,7 +187,7 @@ describe('date-picker connector', () => {
       expect(datePicker.dateMetadataProvider).to.be.null;
     });
 
-    it('should call $server.requestDateMetadata with ISO dates', () => {
+    it('should call $server.requestDateMetadata with the range as it is', () => {
       const requestDateMetadata = sinon.stub().resolves([]);
       datePicker.$server = { requestDateMetadata };
       datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
@@ -201,22 +198,8 @@ describe('date-picker connector', () => {
       expect(requestDateMetadata).to.be.calledWithExactly('2024-01-01', '2024-12-31');
     });
 
-    it('should pad the ISO dates for years below 100', () => {
-      // An unpadded join would send "50-1-1", which the server cannot parse.
-      const requestDateMetadata = sinon.stub().resolves([]);
-      datePicker.$server = { requestDateMetadata };
-      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
-
-      datePicker.dateMetadataProvider!({
-        start: { year: 50, month: 0, day: 1 },
-        end: { year: 50, month: 11, day: 31 }
-      });
-
-      expect(requestDateMetadata).to.be.calledWithExactly('0050-01-01', '0050-12-31');
-    });
-
     it('should resolve the provider with the server response unchanged', async () => {
-      const metadata = [{ year: 2024, month: 0, day: 2, disabled: true }];
+      const metadata = [{ date: '2024-01-02', disabled: true }];
       datePicker.$server = { requestDateMetadata: sinon.stub().resolves(metadata) };
       datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
 
