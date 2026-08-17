@@ -258,18 +258,40 @@ class RequestInterceptorTest {
     }
 
     @Test
-    void rejectWithMessage_showsMessageAsAssistantWithoutHistoryEntry() {
+    void rejectWithMessage_showsOriginalPromptAndReasonWithoutHistoryEntry() {
+        var attachment = createAttachment("big.pdf");
         var orchestrator = orchestratorWith(
                 event -> event.reject("Files over 10 MB are not accepted."));
 
-        orchestrator.prompt("Hello");
+        orchestrator.prompt("Hello", List.of(attachment));
 
-        Mockito.verify(mockMessageList).addMessage(
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), Mockito.eq(List.of(attachment)));
+        inOrder.verify(mockMessageList).addMessage(
                 Mockito.eq("Files over 10 MB are not accepted."),
                 Mockito.eq("Assistant"), Mockito.eq(Collections.emptyList()));
-        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
-                Mockito.eq("Hello"), Mockito.anyString(), Mockito.anyList());
         Assertions.assertTrue(orchestrator.getHistory().isEmpty());
+    }
+
+    @Test
+    void rejectWithMessage_showsOriginalContentNotReplacements() {
+        var original = createAttachment("original.png");
+        var orchestrator = orchestratorWith(event -> {
+            event.setUserMessage("sanitized");
+            event.setAttachments(List.of(createAttachment("converted.png")));
+            event.reject("Not accepted.");
+        });
+
+        orchestrator.prompt("Hello", List.of(original));
+
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), Mockito.eq(List.of(original)));
+        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
+                Mockito.eq("sanitized"), Mockito.anyString(),
+                Mockito.anyList());
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
@@ -613,6 +635,8 @@ class RequestInterceptorTest {
 
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
+                Mockito.eq("You"), Mockito.anyList());
         Mockito.verify(mockMessageList).addMessage(
                 Mockito.eq("Conversion is not possible for this file."),
                 Mockito.eq("Assistant"), Mockito.eq(Collections.emptyList()));

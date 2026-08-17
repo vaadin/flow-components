@@ -583,15 +583,22 @@ public class AIOrchestrator implements Serializable {
 
     /**
      * Applies the interceptor's verdict to the event. Returns {@code false}
-     * when the prompt must be dropped: the interceptor rejected it (a rejection
-     * message, if any, is shown in the message list as an assistant message),
-     * or the replacement text is blank. The caller owns releasing
-     * {@code isProcessing} on the {@code false} path.
+     * when the prompt must be dropped: the interceptor rejected it (with a
+     * rejection message, the original prompt and the reason are shown in the
+     * message list, list-only), or the replacement text is blank. The caller
+     * owns releasing {@code isProcessing} on the {@code false} path.
      */
     private boolean applyInterceptVerdict(
             RequestInterceptor.RequestInterceptEvent event) {
         if (event.isRejected()) {
             if (event.getRejectionMessage() != null && messageList != null) {
+                // Show the exchange as the user experienced it: their
+                // original message (list-only, never in the history or a
+                // request) followed by the reason — a reason with no
+                // question above it would read as the assistant speaking
+                // unprompted, and the input has already cleared the text.
+                messageList.addMessage(event.getOriginalUserMessage(), userName,
+                        event.getOriginalAttachments());
                 messageList.addMessage(event.getRejectionMessage(),
                         assistantName, Collections.emptyList());
             }

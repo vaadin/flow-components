@@ -55,8 +55,10 @@ import com.vaadin.flow.function.SerializableConsumer;
  * appears in the message list, before {@link AIController#onRequest()
  * controller} and {@link RequestListener} hooks, before the conversation
  * history entry, and before the LLM request is built. Everything downstream
- * sees only the processed content, and a rejected prompt leaves no trace in the
- * UI or the history. Note that attachments pending in a configured file
+ * sees only the processed content. A silently rejected prompt leaves no trace
+ * in the UI or the history; rejecting with a user-facing message shows the
+ * original prompt and the reason in the message list only — never in the
+ * history or a request. Note that attachments pending in a configured file
  * receiver have already been taken from it when the interceptor runs, so they
  * are not resubmitted with the next prompt if this one is rejected, dropped, or
  * fails after being postponed. Prompts whose original text is blank are dropped
@@ -146,6 +148,8 @@ public interface RequestInterceptor extends Serializable {
      */
     class RequestInterceptEvent implements Serializable {
 
+        private final String originalUserMessage;
+        private final List<AIAttachment> originalAttachments;
         private String userMessage;
         private List<AIAttachment> attachments;
         private boolean rejected;
@@ -169,10 +173,30 @@ public interface RequestInterceptor extends Serializable {
          */
         public RequestInterceptEvent(String userMessage,
                 List<AIAttachment> attachments) {
-            this.userMessage = Objects.requireNonNull(userMessage,
+            this.originalUserMessage = Objects.requireNonNull(userMessage,
                     "User message must not be null");
-            this.attachments = List.copyOf(Objects.requireNonNull(attachments,
-                    "Attachments must not be null"));
+            this.originalAttachments = List.copyOf(Objects.requireNonNull(
+                    attachments, "Attachments must not be null"));
+            this.userMessage = originalUserMessage;
+            this.attachments = originalAttachments;
+        }
+
+        /**
+         * Returns the message text as originally submitted, unaffected by
+         * {@link #setUserMessage(String)}. Consulted by the orchestrator when
+         * displaying a prompt rejected with a user-facing message.
+         */
+        String getOriginalUserMessage() {
+            return originalUserMessage;
+        }
+
+        /**
+         * Returns the attachments as originally submitted, unaffected by
+         * {@link #setAttachments(List)}. Consulted by the orchestrator when
+         * displaying a prompt rejected with a user-facing message.
+         */
+        List<AIAttachment> getOriginalAttachments() {
+            return originalAttachments;
         }
 
         /**
@@ -250,17 +274,18 @@ public interface RequestInterceptor extends Serializable {
         }
 
         /**
-         * Rejects the prompt like {@link #reject()} and shows the given message
-         * in the message list as an assistant message, so the user learns why
-         * nothing was sent. The message is not added to the conversation
-         * history and is never sent to the LLM. Without a configured message
-         * list the message is not shown anywhere. When called multiple times,
-         * the last message wins.
+         * Rejects the prompt like {@link #reject()} and shows the exchange in
+         * the message list: the user's message and attachments as originally
+         * submitted (unaffected by any replacements), followed by the given
+         * message under the assistant name, so the user sees what was rejected
+         * and why. Neither entry is added to the conversation history and
+         * nothing is sent to the LLM. Without a configured message list nothing
+         * is shown anywhere. When called multiple times, the last message wins.
          * <p>
-         * Because the message lives only in the message list component, it
-         * survives session serialization together with the rest of the UI, but
-         * it is absent from {@link AIOrchestrator#getHistory()} — a UI rebuilt
-         * from saved history does not show past rejection messages.
+         * Because both entries live only in the message list component, they
+         * survive session serialization together with the rest of the UI, but
+         * are absent from {@link AIOrchestrator#getHistory()} — a UI rebuilt
+         * from saved history does not show past rejected exchanges.
          *
          * @param userFacingMessage
          *            the message to show to the user, not {@code null}
