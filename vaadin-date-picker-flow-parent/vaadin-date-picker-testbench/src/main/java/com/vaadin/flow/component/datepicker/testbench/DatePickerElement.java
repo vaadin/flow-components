@@ -72,19 +72,6 @@ public class DatePickerElement extends TestBenchElement
     }
 
     public static class MonthCalendarElement extends TestBenchElement {
-
-        /**
-         * Finds the date cell for the day passed as the second script argument
-         * and stores it in a {@code cell} variable, which is {@code undefined}
-         * if the month calendar does not show that day. Prepend this to a
-         * script that reads something from the cell.
-         */
-        private static final String FIND_DATE_CELL = """
-                const cell = Array.from(
-                        arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
-                        .find((date) => date.textContent.trim() === String(arguments[1]));
-                """;
-
         /**
          * Gets the header text of the month calendar, e.g. `January 1999`
          *
@@ -106,52 +93,58 @@ public class DatePickerElement extends TestBenchElement
         }
 
         /**
-         * Gets whether the date cell for the given day of the month is rendered
-         * as disabled.
+         * Gets the day cells that show a day of the month rendered by the month
+         * calendar.
          *
-         * @param day
-         *            the day of the month
-         * @return {@code true} if the date cell is disabled, {@code false}
-         *         otherwise or if the month calendar does not show the given
-         *         day
+         * @return the day cells
          */
-        public boolean isDateDisabled(int day) {
-            return hasDatePart(day, "disabled");
+        public List<DayElement> getDays() {
+            return getDayCells(
+                    """
+                            return Array.from(
+                                    arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
+                                    .filter((date) => date.textContent.trim() !== '');
+                            """);
         }
 
         /**
-         * Gets whether the date cell for the given day of the month has the
-         * given CSS part name.
+         * Gets the day cell for the given day of the month. The cell renders
+         * the state of the day: for example, a day that cannot be selected has
+         * a {@code disabled} attribute, and custom part names from the date
+         * metadata show up in its {@code part} attribute.
          *
          * @param day
          *            the day of the month
-         * @param partName
-         *            the part name to look for
-         * @return {@code true} if the date cell has the part name,
-         *         {@code false} otherwise or if the month calendar does not
+         * @return the day cell, or {@code null} if the month calendar does not
          *         show the given day
          */
-        public boolean hasDatePart(int day, String partName) {
-            return Boolean.TRUE.equals(executeScript(FIND_DATE_CELL + """
-                    return cell?.part.contains(arguments[2]) ?? false;
-                    """, this, day, partName));
+        public DayElement getDay(int day) {
+            List<DayElement> cells = getDayCells(
+                    """
+                            return Array.from(
+                                    arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
+                                    .filter((date) => date.textContent.trim() === String(arguments[1]));
+                            """,
+                    day);
+            return cells.isEmpty() ? null : cells.get(0);
         }
 
-        /**
-         * Clicks the date cell for the given day of the month. Fails if the
-         * month calendar does not show the given day.
-         *
-         * @param day
-         *            the day of the month
-         */
-        public void clickDate(int day) {
-            executeScript(FIND_DATE_CELL + """
-                    cell.click();
-                    """, this, day);
+        private List<DayElement> getDayCells(String script, Object... args) {
+            Object[] arguments = new Object[args.length + 1];
+            arguments[0] = this;
+            System.arraycopy(args, 0, arguments, 1, args.length);
+            @SuppressWarnings("unchecked")
+            List<TestBenchElement> cells = (List<TestBenchElement>) executeScript(
+                    script, arguments);
+            return cells.stream().map(cell -> cell.wrap(DayElement.class))
+                    .toList();
         }
     }
 
     public static class WeekdayElement extends TestBenchElement {
+    }
+
+    public static class DayElement extends TestBenchElement {
     }
 
     /**

@@ -26,11 +26,14 @@ import static com.vaadin.flow.component.datepicker.DatePickerDateMetadataPage.RE
 import static com.vaadin.flow.component.datepicker.DatePickerDateMetadataPage.SATURDAY_DAY;
 import static com.vaadin.flow.component.datepicker.DatePickerDateMetadataPage.SUNDAY_DAY;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement.DayElement;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement.MonthCalendarElement;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement.OverlayContentElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -54,48 +57,58 @@ public class DatePickerDateMetadataIT extends AbstractComponentIT {
     public void openOverlay_fixedDatesAreDisabled() {
         MonthCalendarElement calendar = openCalendar(datePicker, MONTH_HEADER);
 
-        Assert.assertTrue(calendar.isDateDisabled(FIXED_DISABLED_DAY));
-        Assert.assertTrue(calendar.isDateDisabled(OTHER_FIXED_DISABLED_DAY));
-        Assert.assertFalse(calendar.isDateDisabled(ENABLED_DAY));
+        Assert.assertTrue(isDayDisabled(calendar, FIXED_DISABLED_DAY));
+        Assert.assertTrue(isDayDisabled(calendar, OTHER_FIXED_DISABLED_DAY));
+        Assert.assertFalse(isDayDisabled(calendar, ENABLED_DAY));
     }
 
     @Test
     public void openOverlay_weekendsAreDisabled() {
         MonthCalendarElement calendar = openCalendar(datePicker, MONTH_HEADER);
 
-        Assert.assertTrue(calendar.isDateDisabled(SATURDAY_DAY));
-        Assert.assertTrue(calendar.isDateDisabled(SUNDAY_DAY));
+        Assert.assertTrue(isDayDisabled(calendar, SATURDAY_DAY));
+        Assert.assertTrue(isDayDisabled(calendar, SUNDAY_DAY));
     }
 
     @Test
     public void openOverlay_providerDisablesDate() {
         MonthCalendarElement calendar = openCalendar(datePicker, MONTH_HEADER);
 
-        waitUntil(driver -> calendar.isDateDisabled(PROVIDER_DISABLED_DAY));
-        Assert.assertFalse(calendar.isDateDisabled(ENABLED_DAY));
+        waitUntil(driver -> isDayDisabled(calendar, PROVIDER_DISABLED_DAY));
+        Assert.assertFalse(isDayDisabled(calendar, ENABLED_DAY));
     }
 
     @Test
     public void openOverlay_providerAddsPartName() {
         MonthCalendarElement calendar = openCalendar(datePicker, MONTH_HEADER);
 
-        waitUntil(driver -> calendar.hasDatePart(PART_NAME_DAY, PART_NAME));
-        Assert.assertFalse(calendar.isDateDisabled(PART_NAME_DAY));
+        waitUntil(driver -> hasDayPart(calendar.getDay(PART_NAME_DAY),
+                PART_NAME));
+        Assert.assertFalse(isDayDisabled(calendar, PART_NAME_DAY));
     }
 
     @Test
     public void refreshDateMetadata_disabledDatesAreUpdated() {
         MonthCalendarElement calendar = openCalendar(datePicker, MONTH_HEADER);
-        waitUntil(driver -> calendar.isDateDisabled(PROVIDER_DISABLED_DAY));
-        Assert.assertFalse(calendar.isDateDisabled(REFRESHED_DISABLED_DAY));
+        waitUntil(driver -> isDayDisabled(calendar, PROVIDER_DISABLED_DAY));
+        Assert.assertFalse(isDayDisabled(calendar, REFRESHED_DISABLED_DAY));
 
         datePicker.close();
         clickElementWithJs("refresh");
 
         MonthCalendarElement refreshedCalendar = openCalendar(datePicker,
                 MONTH_HEADER);
-        waitUntil(driver -> refreshedCalendar
-                .isDateDisabled(REFRESHED_DISABLED_DAY));
+        waitUntil(driver -> isDayDisabled(refreshedCalendar,
+                REFRESHED_DISABLED_DAY));
+    }
+
+    private boolean isDayDisabled(MonthCalendarElement calendar, int day) {
+        return calendar.getDay(day).hasAttribute("disabled");
+    }
+
+    private boolean hasDayPart(DayElement day, String partName) {
+        return List.of(day.getDomAttribute("part").split(" "))
+                .contains(partName);
     }
 
     private MonthCalendarElement openCalendar(DatePickerElement picker,
