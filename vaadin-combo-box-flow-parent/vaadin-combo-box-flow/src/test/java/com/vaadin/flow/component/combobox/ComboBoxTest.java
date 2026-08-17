@@ -272,14 +272,108 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue("C");
         comboBox.setOpened(true);
 
-        var invocations = ui.dumpPendingJavaScriptInvocations().stream()
+        var parameters = focusSelectedItemParameters(comboBox);
+        Assertions.assertEquals(1, parameters.size());
+        // Parameter 0 is the item index, parameter 1 is the filter the index
+        // was resolved against
+        Assertions.assertEquals(2, parameters.get(0).get(0));
+        Assertions.assertEquals("", parameters.get(0).get(1));
+    }
+
+    @Test
+    void focusSelectedItem_clientRequestedDataWithFilter_indexAndFilterOfFilteredItems() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("Cherry");
+        // Simulate the client requesting data with a filter that only "Cherry"
+        // matches, so that its index among the filtered items is 0 instead of 2
+        comboBox.getDataController().setViewportRange(0, 50, "err");
+        comboBox.setOpened(true);
+
+        var parameters = focusSelectedItemParameters(comboBox);
+        Assertions.assertEquals(1, parameters.size());
+        Assertions.assertEquals(0, parameters.get(0).get(0));
+        Assertions.assertEquals("err", parameters.get(0).get(1));
+    }
+
+    @Test
+    void focusSelectedItem_selectedItemNotMatchingServerFilter_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("Cherry");
+        comboBox.getDataController().setViewportRange(0, 50, "Ban");
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(),
+                focusSelectedItemParameters(comboBox));
+    }
+
+    @Test
+    void focusSelectedItem_disabled_open_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setValue("Cherry");
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(),
+                focusSelectedItemParameters(comboBox));
+    }
+
+    @Test
+    void focusSelectedItem_noValue_open_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(),
+                focusSelectedItemParameters(comboBox));
+    }
+
+    @Test
+    void focusSelectedItem_openedBeforeAttach_invocationToleratesMissingConnector() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("Cherry");
+        // Opening before attaching schedules the invocation before the
+        // connector
+        // is initialized, as the connector is initialized on attach
+        comboBox.setOpened(true);
+        ui.add(comboBox);
+
+        var expressions = focusSelectedItemExpressions();
+        Assertions.assertEquals(1, expressions.size());
+        Assertions.assertTrue(expressions.get(0).contains("$connector?."),
+                "Expected the connector to be accessed with optional chaining, but was: "
+                        + expressions.get(0));
+    }
+
+    /**
+     * Returns the parameters of every pending focusSelectedItem invocation that
+     * the given combo box has scheduled on the connector.
+     */
+    private List<List<Object>> focusSelectedItemParameters(
+            ComboBox<?> comboBox) {
+        return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .filter(invocation -> invocation.getExpression()
-                        .contains("__focusIndex"))
+                        .contains("focusSelectedItem"))
+                .map(invocation -> List.copyOf(invocation.getParameters()))
                 .toList();
-        Assertions.assertEquals(1, invocations.size());
-        // Parameter 0 is the target element, parameter 1 is the item index
-        Assertions.assertEquals(2, invocations.get(0).getParameters().get(1));
+    }
+
+    private List<String> focusSelectedItemExpressions() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .map(invocation -> invocation.getInvocation().getExpression())
+                .filter(expression -> expression.contains("focusSelectedItem"))
+                .toList();
     }
 
     @Test

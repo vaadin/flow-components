@@ -399,6 +399,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * index can be resolved against the current sorting. Opening the dropdown
      * throws {@link UnsupportedOperationException} otherwise.
      * <p>
+     * When the user opens the dropdown by typing a filter, the selected item is
+     * focused only if it matches that filter.
      *
      * @param focusSelectedItem
      *            {@code true} to scroll to and focus the selected item when the
@@ -445,7 +447,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (index == null || index < 0) {
             return;
         }
-        getElement().callJsFunction("__focusIndex", index);
+        // The connector reconciles the index with the items that the dropdown
+        // shows. Optional chaining is needed because opening the combo box from
+        // the server before it is attached schedules this call before the
+        // connector is initialized.
+        getElement().executeJs("this.$connector?.focusSelectedItem($0, $1)",
+                index, getDataController().getLastFilter());
     }
 
     /**

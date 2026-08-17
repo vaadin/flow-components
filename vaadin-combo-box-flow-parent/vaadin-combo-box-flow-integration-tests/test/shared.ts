@@ -37,5 +37,9 @@ export function init(comboBox: FlowComboBox): void {
     resetDataCommunicator: sinon.spy()
   };
 
+  // The Flow component identifies the generated wrapper items by their key
+  comboBox.itemValuePath = 'key';
+  comboBox.itemIdPath = 'key';
+
   comboBoxConnector.initLazy(comboBox);
 }

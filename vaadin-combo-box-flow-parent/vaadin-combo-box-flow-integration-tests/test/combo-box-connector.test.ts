@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { fixtureSync } from '@vaadin/testing-helpers';
 import { sendKeys } from '@web/test-runner-commands';
-import { comboBoxConnector, FlowComboBox, init } from './shared.ts';
+import { comboBoxConnector, FlowComboBox, init, Item } from './shared.ts';
 import '@vaadin/combo-box';
 import * as sinon from 'sinon';
 
@@ -157,6 +157,176 @@ describe('combo-box connector', () => {
       // Reset triggers a single fresh fetch; the cancelled debounced fetch
       // must not also fire.
       expect(comboBox.$server.setViewportRange).to.be.calledOnce;
+    });
+  });
+
+  describe('focusSelectedItem', () => {
+    const APPLES: Item[] = Array.from({ length: 10 }, (_, i) => ({ key: `a${i}`, label: `Apple ${i}` }));
+    const BANANAS: Item[] = Array.from({ length: 20 }, (_, i) => ({ key: `b${i}`, label: `Banana ${i}` }));
+    const ITEMS: Item[] = [...APPLES, ...BANANAS];
+    // "Banana 5" is at index 15 of all items, and at index 5 among the bananas
+    const SELECTED_KEY = 'b5';
+    const SELECTED_INDEX = 15;
+
+    let focusIndex: sinon.SinonStub;
+
+    beforeEach(() => {
+      focusIndex = sinon.stub(comboBox, '__focusIndex');
+    });
+
+    // Runs the round-trip that passes all items to the combo box, which then
+    // shows them either as they are or filtered on the client
+    function loadItems(): void {
+      comboBox.$connector.updateSize(ITEMS.length);
+      comboBox.__dataProviderController.loadFirstPage();
+      comboBox.$connector.set(0, ITEMS, '');
+      comboBox.$connector.confirm(1, '');
+    }
+
+    // The server only requests focusing the selected item while the dropdown is
+    // open, which is also the only state a filter can be typed in
+    async function open(): Promise<void> {
+      comboBox.opened = true;
+      await comboBox.updateComplete;
+    }
+
+    async function openAndFilter(filter: string): Promise<void> {
+      comboBox.opened = true;
+      comboBox.filter = filter;
+      await comboBox.updateComplete;
+    }
+
+    // Runs the round-trip that passes the items matching a server-side filter,
+    // skipping the debounce that the typed filter is otherwise delayed by
+    function loadFilteredItems(filter: string): void {
+      comboBox._filterDebouncer?.flush();
+      comboBox.$connector.updateSize(BANANAS.length);
+      comboBox.$connector.set(0, BANANAS, filter);
+      comboBox.$connector.confirm(1, filter);
+      // Guards the tests below against passing for lack of items to focus
+      expect(comboBox._dropdownItems).to.have.lengthOf(BANANAS.length);
+    }
+
+    it('should focus the item at the index resolved by the server', async () => {
+      loadItems();
+      comboBox.value = SELECTED_KEY;
+      await open();
+
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      expect(focusIndex).to.be.calledOnceWith(SELECTED_INDEX);
+    });
+
+    it('should focus the selected item at its index among client-side filtered items', async () => {
+      comboBox._clientSideFilter = true;
+      loadItems();
+      comboBox.value = SELECTED_KEY;
+      await openAndFilter('Banana');
+
+      // The server resolved the index against all items, while the dropdown
+      // only shows the bananas
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      expect(focusIndex).to.be.calledOnceWith(5);
+    });
+
+    it('should not focus any item when the selected item does not match the client-side filter', async () => {
+      comboBox._clientSideFilter = true;
+      loadItems();
+      comboBox.value = SELECTED_KEY;
+      await openAndFilter('Apple');
+
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      expect(focusIndex).to.be.not.called;
+    });
+
+    it('should focus the index resolved by the server when the selected item is not loaded', async () => {
+      // A selection outside the loaded pages, as with lazy loading: only the
+      // server can tell where the item is
+      comboBox.value = 'b99';
+      await openAndFilter('Banana');
+      loadFilteredItems('Banana');
+
+      comboBox.$connector.focusSelectedItem(60, 'Banana');
+
+      expect(focusIndex).to.be.calledOnceWith(60);
+    });
+
+    it('should not focus the index resolved by the server for another filter', async () => {
+      comboBox.value = 'b99';
+      await openAndFilter('Banana');
+      loadFilteredItems('Banana');
+
+      // The typed filter had not reached the server yet when it resolved the
+      // index, so the index counts other items than the dropdown shows
+      comboBox.$connector.focusSelectedItem(60, '');
+
+      expect(focusIndex).to.be.not.called;
+    });
+
+    it('should focus the selected item once the filtered items arrive', async () => {
+      comboBox._clientSideFilter = true;
+      comboBox.value = SELECTED_KEY;
+      await openAndFilter('Banana');
+
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+      expect(focusIndex).to.be.not.called;
+
+      loadItems();
+
+      expect(focusIndex).to.be.calledOnceWith(5);
+    });
+
+    it('should not focus any item once the connector has been reset', async () => {
+      comboBox.value = SELECTED_KEY;
+      await open();
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      comboBox.$connector.reset();
+      loadItems();
+
+      expect(focusIndex).to.be.not.called;
+    });
+
+    it('should focus the selected item once the items arrive with a server-side filter', async () => {
+      comboBox.value = SELECTED_KEY;
+      await open();
+
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+      expect(focusIndex, 'no items to resolve the request against yet').to.be.not.called;
+
+      loadItems();
+
+      expect(focusIndex).to.be.calledOnceWith(SELECTED_INDEX);
+    });
+
+    it('should not focus any item once the dropdown has been closed', async () => {
+      comboBox.value = SELECTED_KEY;
+      await open();
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      // The user closes the dropdown before any items arrive. Focusing an item
+      // now would be committed as the value the next time it closes.
+      comboBox.opened = false;
+      await comboBox.updateComplete;
+      loadItems();
+
+      expect(focusIndex).to.be.not.called;
+    });
+
+    it('should not focus any item once the value has changed', async () => {
+      comboBox.value = SELECTED_KEY;
+      await open();
+      comboBox.$connector.focusSelectedItem(SELECTED_INDEX, '');
+
+      // The server clears the value while the request is still pending, and
+      // sends no new request because there is no selected item to focus
+      comboBox.value = '';
+      await comboBox.updateComplete;
+      loadItems();
+
+      expect(focusIndex).to.be.not.called;
     });
   });
 });

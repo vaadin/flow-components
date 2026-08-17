@@ -21,6 +21,7 @@ export class ComboBoxConnector {
   #lastRequestedRange: ItemRange = [-1, -1];
   #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
+  #pendingFocus: { index: number; serverFilter: string; value: string } | null = null;
 
   constructor(comboBox: FlowComboBox) {
     this.#comboBox = comboBox;
@@ -117,6 +118,7 @@ export class ComboBoxConnector {
     this.#cache = {};
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
+    this.#pendingFocus = null;
     comboBox.clearCache();
   }
 
@@ -143,8 +145,78 @@ export class ComboBoxConnector {
       delete this.#cache[page];
     });
 
+    // Items that a pending focus request was waiting for may have arrived
+    this.#applyPendingFocus();
+
     // Let server know we're done
     comboBox.$server.confirmUpdate(id);
+  }
+
+  /**
+   * Focuses the selected item in the dropdown. Called by the server when the
+   * dropdown opens while `focusSelectedItem` is enabled.
+   *
+   * The server resolves `index` against the items matching `serverFilter`. The
+   * dropdown does not necessarily show that same set of items: with client-side
+   * filtering the typed filter never reaches the server, and with server-side
+   * filtering it is debounced, so it can reach the server only after the
+   * dropdown has opened. Applying the index as is would focus an unrelated
+   * item, which the combo box commits as its value once the dropdown is closed
+   * without an explicit selection.
+   *
+   * A request that cannot be resolved right away, because no items have reached
+   * the dropdown yet, is retried once they do. The latest request wins.
+   */
+  focusSelectedItem(index: number, serverFilter: string): void {
+    this.#pendingFocus = { index, serverFilter, value: this.#comboBox.value };
+    this.#applyPendingFocus();
+  }
+
+  /**
+   * Resolves a pending focus request against the items that the dropdown
+   * currently shows, as long as there are any.
+   */
+  #applyPendingFocus(): void {
+    const pending = this.#pendingFocus;
+    if (!pending) {
+      return;
+    }
+
+    const comboBox = this.#comboBox;
+
+    // The request only applies to the dropdown session it was made for, and
+    // only as long as it still describes the selected item. The server sends a
+    // new request every time the dropdown opens, so dropping it here loses
+    // nothing while it keeps a stale index from focusing an unrelated item.
+    if (!comboBox.opened || comboBox.value !== pending.value) {
+      this.#pendingFocus = null;
+      return;
+    }
+
+    const items = comboBox._dropdownItems;
+    if (!items || items.length === 0) {
+      // Nothing to focus yet, retry once items are passed to the combo box
+      return;
+    }
+    // Cleared before focusing, so that the retries which follow one item
+    // delivery do not apply the same request twice
+    this.#pendingFocus = null;
+
+    // Where the selected item sits in the dropdown is correct regardless of how
+    // either side filtered the items, so prefer it over the server index
+    const selectedIndex = comboBox.__getItemIndexByValue(items, comboBox.value);
+    if (selectedIndex > -1) {
+      comboBox.__focusIndex(selectedIndex);
+      return;
+    }
+
+    // The selected item is not among the items the dropdown shows: it may sit
+    // outside the loaded pages, where only the server can tell where it is. The
+    // server index counts the items matching the filter the server used, which
+    // makes it meaningless for any other filter.
+    if (comboBox.filter === pending.serverFilter) {
+      comboBox.__focusIndex(pending.index);
+    }
   }
 
   #loadPage(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<Item>): void {
@@ -271,6 +343,9 @@ export class ComboBoxConnector {
     }
 
     callback(filteredItems, filteredItems.length);
+
+    // Items that a pending focus request was waiting for have arrived
+    this.#applyPendingFocus();
   }
 }
 

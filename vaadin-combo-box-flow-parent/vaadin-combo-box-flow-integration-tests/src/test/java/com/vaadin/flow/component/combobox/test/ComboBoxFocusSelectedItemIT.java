@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -102,6 +103,73 @@ public class ComboBoxFocusSelectedItemIT extends AbstractComboBoxIT {
     @Test
     public void lazyToggleOff_open_doesNotScroll() {
         openAndAssertContains("lazy-toggle-off", "Item 0");
+    }
+
+    @Test
+    public void inMemory_openFromServer_scrollsToSelected() {
+        // Opening from the server reaches the connector through a different
+        // ordering than the client opening the dropdown itself
+        clickButton("in-memory-open");
+        ComboBoxElement combo = $(ComboBoxElement.class).id("in-memory");
+        assertLoadingStateResolved(combo);
+        assertOverlayContains(combo, "Item 30");
+    }
+
+    @Test
+    public void clientFilter_filterActive_focusesSelectedItem() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("client-filter");
+        filterWithoutOpening(combo, "B");
+
+        // The server resolves index 15 for "Banana 5" against all items, while
+        // the dropdown only shows the items matching "B", where it sits at
+        // index 5
+        waitUntil(driver -> getFocusedItemLabel(combo) != null);
+        Assert.assertEquals("Banana 5", getFocusedItemLabel(combo));
+    }
+
+    @Test
+    public void clientFilter_filterActive_focusOut_valueUnchanged() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("client-filter");
+        filterWithoutOpening(combo, "B");
+        waitUntil(driver -> getFocusedItemLabel(combo) != null);
+
+        // Closing the dropdown without selecting anything commits the focused
+        // item, which must still be the selected one
+        combo.sendKeys(Keys.TAB);
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("Banana 5", combo.getSelectedText());
+        Assert.assertEquals("Banana 5",
+                $("span").id("client-filter-value").getText());
+    }
+
+    /**
+     * Replaces the input value of the combo box with the given filter in a
+     * single edit, without clicking it. Clicking the combo box would open the
+     * dropdown while the filter is still empty, and sending the keys one by one
+     * would apply a filter per key, both of which resolve the index against
+     * other items than the ones the dropdown ends up showing.
+     */
+    private void filterWithoutOpening(ComboBoxElement combo, String filter) {
+        combo.focus();
+        executeScript("""
+                const input = arguments[0].inputElement;
+                input.value = arguments[1];
+                input.dispatchEvent(
+                        new Event('input', { bubbles: true, composed: true }));
+                """, combo, filter);
+    }
+
+    /**
+     * Returns the label of the item that the dropdown highlights, or null when
+     * no item is highlighted.
+     */
+    private String getFocusedItemLabel(ComboBoxElement combo) {
+        return (String) executeScript("""
+                const item = arguments[0]._scroller
+                        .querySelector('vaadin-combo-box-item[focused]');
+                return item ? item.textContent.trim() : null;
+                """, combo);
     }
 
     private ComboBoxElement openAndAssertContains(String id, String label) {

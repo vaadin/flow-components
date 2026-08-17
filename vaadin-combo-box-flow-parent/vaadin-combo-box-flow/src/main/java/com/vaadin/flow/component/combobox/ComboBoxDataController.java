@@ -197,6 +197,15 @@ class ComboBoxDataController<TItem>
     }
 
     /**
+     * Accesses the filter that the client last requested data with, which is
+     * the filter that the data communicator applies to its queries. Returns an
+     * empty string when the client has not requested data with a filter yet.
+     */
+    String getLastFilter() {
+        return lastFilter != null ? lastFilter : "";
+    }
+
+    /**
      * Updates the page size in the data communicator and triggers a full
      * refresh
      */

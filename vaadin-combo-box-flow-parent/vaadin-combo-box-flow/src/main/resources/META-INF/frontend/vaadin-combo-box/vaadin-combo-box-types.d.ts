@@ -42,9 +42,12 @@ export interface FlowComboBoxInternals {
   $server: ComboBoxServer;
   __dataProviderController: DataProviderController<Item, Record<string, unknown>>;
   _clientSideFilter: boolean;
+  _dropdownItems?: Item[];
   _filterDebouncer: Debouncer | null;
   _filterTimeout?: number;
   _scroller?: FlowComboBoxScroller;
+  __focusIndex(index: number): void;
+  __getItemIndexByValue(items: Item[], value: string): number;
   _getItemLabel(item: Item): string;
 }
 
