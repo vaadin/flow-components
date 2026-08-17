@@ -66,9 +66,12 @@ function mergeProfiles(prj1, prj2) {
 }
 
 function mergeProperties(props1, props2) {
-  const arr1 = (props1 || []).filter(o => typeof o === 'object');
-  const arr2 = (props2 || []).filter(o => typeof o === 'object');
-  return [...arr1, ...arr2.filter(a => !arr1.find(b => Object.keys(b)[0] === Object.keys(a)[0]))];
+  // each <properties> element parses into one object holding all property
+  // keys, so merge at the key level with props1 (the template) winning
+  const obj1 = (props1 || []).find(o => typeof o === 'object') || {};
+  const obj2 = (props2 || []).find(o => typeof o === 'object') || {};
+  const merged = {...obj2, ...obj1};
+  return Object.keys(merged).length ? [merged] : [];
 }
 
 async function consolidate(template, pom, cb) {
@@ -124,19 +127,32 @@ async function consolidatePomParent() {
 }
 
 async function consolidatePomFlow() {
-  const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  // skip components whose modules do not follow the `{name}-flow` naming,
-  // e.g. vaadin-ai-components-flow-parent
-  if (!fs.existsSync(`${mod}/${name}-flow/pom.xml`)) {
-    return;
+  // consolidate every published component module pom in the parent directory,
+  // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
+  const flowPoms = fs.readdirSync(mod, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && /-flow$/.test(entry.name))
+    .map(entry => `${mod}/${entry.name}/pom.xml`)
+    .filter(pomPath => fs.existsSync(pomPath))
+    .sort();
+  for (const pomPath of flowPoms) {
+    // a module is pro when the whole component is pro or when the module pom
+    // declares the commercial license, e.g. vaadin-ai-extensions-flow
+    const pro = proComponents.includes(componentName)
+      || fs.readFileSync(pomPath, 'utf8').includes('commercial-license-and-service-terms');
+    const template = pro ? 'pom-flow-pro.xml' : 'pom-flow.xml';
+    await consolidate(template, pomPath, (tplJs, pomJs) => {
+      // keep the identity and licensing of the existing module pom
+      pomJs.project.name && (tplJs.project.name = pomJs.project.name);
+      pomJs.project.description && (tplJs.project.description = pomJs.project.description);
+      pomJs.project.licenses && (tplJs.project.licenses = pomJs.project.licenses);
+      pomJs.project.dependencyManagement && (tplJs.project.dependencyManagement = pomJs.project.dependencyManagement);
+      tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
+      tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
+      if (pomJs.project.build[0].resources) {
+        tplJs.project.build[0].resources =  pomJs.project.build[0].resources;
+      }
+    });
   }
-  consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
-    tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
-    tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
-    if (pomJs.project.build[0].resources) {
-      tplJs.project.build[0].resources =  pomJs.project.build[0].resources;
-    }
-  });
 }
 async function consolidatePomTB() {
   const tbPom = `${mod}/${name}-testbench/pom.xml`;
