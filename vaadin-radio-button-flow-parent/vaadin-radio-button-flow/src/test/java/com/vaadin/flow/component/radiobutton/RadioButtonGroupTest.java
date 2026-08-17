@@ -30,9 +30,11 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -224,6 +226,35 @@ class RadioButtonGroupTest {
 
         Assertions.assertEquals(null, radioButtonGroup.getValue());
         Assertions.assertEquals(null, capture.get());
+    }
+
+    @Test
+    void customComponentInLabelSlot_setItems_componentIsPreserved() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        Div customLabel = new Div();
+        customLabel.getElement().setAttribute("slot", "label");
+        group.getElement().appendChild(customLabel.getElement());
+
+        group.setItems("foo", "bar");
+        group.setItems("foo", "baz");
+
+        Assertions.assertEquals(group.getElement(),
+                customLabel.getElement().getParent());
+        Assertions.assertEquals(2, group.getChildren()
+                .filter(RadioButton.class::isInstance).count());
+    }
+
+    @Test
+    void helperComponent_setItems_helperComponentIsPreserved() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        Div helper = new Div();
+        group.setHelperComponent(helper);
+
+        group.setItems("foo", "bar");
+
+        Assertions.assertEquals(helper, group.getHelperComponent());
+        Assertions.assertEquals(group.getElement(),
+                helper.getElement().getParent());
     }
 
     @Test
@@ -490,6 +521,28 @@ class RadioButtonGroupTest {
 
         group.setAriaLabelledBy((String) null);
         Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(HasAriaDescription.class
+                .isAssignableFrom(RadioButtonGroup.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                group.getAriaDescribedBy().get());
+
+        group.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(group.getAriaDescribedBy().isEmpty());
     }
 
     @Test

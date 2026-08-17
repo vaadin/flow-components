@@ -22,6 +22,7 @@ types.d.ts
 tsconfig.json
 !**/test/tsconfig.json
 !vaadin-grid-flow-parent/vaadin-grid-flow/tsconfig.json
+!vaadin-combo-box-flow-parent/vaadin-combo-box-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts

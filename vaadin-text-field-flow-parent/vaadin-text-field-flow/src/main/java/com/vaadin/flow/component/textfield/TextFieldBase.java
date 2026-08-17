@@ -22,6 +22,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.InputNotifier;
@@ -50,10 +51,11 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
-        HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
-        HasPlaceholder, HasPrefix, HasSuffix, InputNotifier, KeyNotifier,
+        implements CompositionNotifier, Focusable<TComponent>,
+        HasAriaDescription, HasAriaLabel, HasAutocapitalize, HasAutocomplete,
+        HasAutocorrect, HasClearButton, HasValidationProperties,
+        HasValidator<TValue>, HasValueChangeMode, HasPlaceholder, HasPrefix,
+        HasSuffix, InputNotifier, KeyNotifier,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
@@ -232,6 +234,23 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**

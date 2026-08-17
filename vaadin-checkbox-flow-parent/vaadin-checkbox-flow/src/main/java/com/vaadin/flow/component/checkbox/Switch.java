@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -80,11 +81,11 @@ import com.vaadin.flow.data.binder.Validator;
  * @since 25.3
  */
 @Tag("vaadin-switch")
-@NpmPackage(value = "@vaadin/switch", version = "25.3.0-alpha8")
+@NpmPackage(value = "@vaadin/switch", version = "25.3.0-alpha11")
 @JsModule("@vaadin/switch/src/vaadin-switch.js")
 public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
-        implements ClickNotifier<Switch>, Focusable<Switch>, HasAriaLabel,
-        HasValidationProperties, HasValidator<Boolean>,
+        implements ClickNotifier<Switch>, Focusable<Switch>, HasAriaDescription,
+        HasAriaLabel, HasValidationProperties, HasValidator<Boolean>,
         InputField<AbstractField.ComponentValueChangeEvent<Switch, Boolean>, Boolean>,
         HasThemeVariant<SwitchVariant> {
 
@@ -318,6 +319,23 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**

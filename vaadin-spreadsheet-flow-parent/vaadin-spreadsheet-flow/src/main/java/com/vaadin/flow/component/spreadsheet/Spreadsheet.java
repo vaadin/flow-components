@@ -2516,11 +2516,9 @@ public class Spreadsheet extends Component
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.
         selectionManager.reSelectSelectedCell();
-        // Update the cell comments as well to show them instantly after adding
-        // them
-        loadCellComments();
 
-        // update custom components, editors
+        // update custom components, editors, and the rest of the visible
+        // contents, including cell comments
         reloadVisibleCellContents(recreateEditors);
     }
 

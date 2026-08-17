@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -182,6 +183,35 @@ class CheckboxGroupTest {
                 "Checkbox group value should be empty");
         Assertions.assertTrue(capture.get().isEmpty(),
                 "Captured value should be empty");
+    }
+
+    @Test
+    void customComponentInLabelSlot_setItems_componentIsPreserved() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Div customLabel = new Div();
+        customLabel.getElement().setAttribute("slot", "label");
+        group.getElement().appendChild(customLabel.getElement());
+
+        group.setItems("foo", "bar");
+        group.setItems("foo", "baz");
+
+        Assertions.assertEquals(group.getElement(),
+                customLabel.getElement().getParent());
+        Assertions.assertEquals(2,
+                group.getChildren().filter(Checkbox.class::isInstance).count());
+    }
+
+    @Test
+    void helperComponent_setItems_helperComponentIsPreserved() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Div helper = new Div();
+        group.setHelperComponent(helper);
+
+        group.setItems("foo", "bar");
+
+        Assertions.assertEquals(helper, group.getHelperComponent());
+        Assertions.assertEquals(group.getElement(),
+                helper.getElement().getParent());
     }
 
     @Test
@@ -623,6 +653,28 @@ class CheckboxGroupTest {
 
         group.setAriaLabelledBy((String) null);
         Assertions.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(CheckboxGroup.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        group.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                group.getAriaDescribedBy().get());
+
+        group.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                group.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(group.getAriaDescribedBy().isEmpty());
     }
 
     @Test
