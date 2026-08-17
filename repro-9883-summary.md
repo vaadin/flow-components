@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT), commit `79f402a48087f4138edb5e21af9d07f14418a1b5`
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![Dropdown filtered to the 20 "Banana" items with "Banana 15" highlighted while the selected value is "Banana 5"](https://raw.githubusercontent.com/vaadin/flow-components/COMMIT_SHA/repro-9883.png)
+- **Screenshot** (static bug): ![Dropdown filtered to the 20 "Banana" items with "Banana 15" highlighted while the selected value is "Banana 5"](https://raw.githubusercontent.com/vaadin/flow-components/9506bdc7e4806f13ec15fa460c6869098fd25406/repro-9883.png)
 
 ## Observed behavior
 
