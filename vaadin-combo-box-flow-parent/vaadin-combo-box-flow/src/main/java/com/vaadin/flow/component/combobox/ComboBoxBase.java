@@ -345,6 +345,41 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Gets the mode that controls whether an item whose label partially matches
+     * the typed filter is automatically focused.
+     *
+     * @return the mode, not {@code null}
+     * @see #setAutoFocusPartialMatch(AutoFocusPartialMatch)
+     * @since 25.3
+     */
+    public AutoFocusPartialMatch getAutoFocusPartialMatch() {
+        String clientName = getElement().getProperty("autoFocusPartialMatch");
+        return Stream.of(AutoFocusPartialMatch.values())
+                .filter(mode -> mode.getClientName().equals(clientName))
+                .findFirst().orElse(AutoFocusPartialMatch.NONE);
+    }
+
+    /**
+     * Sets the mode that controls whether an item whose label partially matches
+     * the typed filter is automatically focused. The focused item is
+     * highlighted in the dropdown while typing and is selected when committing
+     * the value, for example on blur, Enter press, or outside click.
+     * <p>
+     * An item whose label matches the filter exactly is always focused,
+     * regardless of the mode. Matching is case-insensitive. A partial match is
+     * not focused when custom values are allowed with
+     * {@link #setAllowCustomValue(boolean)}.
+     *
+     * @param mode
+     *            the mode to set, not {@code null}
+     * @since 25.3
+     */
+    public void setAutoFocusPartialMatch(AutoFocusPartialMatch mode) {
+        Objects.requireNonNull(mode, "The mode to be set cannot be null");
+        getElement().setProperty("autoFocusPartialMatch", mode.getClientName());
+    }
+
+    /**
      * Filtering string the user has typed into the input field.
      *
      * @return the filter string
