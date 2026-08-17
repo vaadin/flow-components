@@ -48,6 +48,10 @@ public final class AIExtensionsLicense {
         var properties = new Properties();
         try (var stream = AIExtensionsLicense.class
                 .getResourceAsStream("ai-extensions.properties")) {
+            if (stream == null) {
+                throw new IOException(
+                        "ai-extensions.properties is not on the classpath");
+            }
             properties.load(stream);
         } catch (IOException e) {
             LOGGER.warn("Unable to read AI Extensions properties file", e);
