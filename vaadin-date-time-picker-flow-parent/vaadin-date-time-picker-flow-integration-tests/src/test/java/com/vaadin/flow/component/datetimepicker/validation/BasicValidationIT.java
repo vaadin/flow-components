@@ -17,9 +17,12 @@ package com.vaadin.flow.component.datetimepicker.validation;
 
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.DISABLED_DATES_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.DISABLED_DATE_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.INCOMPLETE_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.METADATA_PROVIDER_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
@@ -126,6 +129,38 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
         setTimeInputValue("11:00");
         assertValidation(true, "");
+    }
+
+    @Test
+    public void disabledDates_changeValue_assertValidity() {
+        $("input").id(DISABLED_DATES_INPUT).sendKeys("2000-02-02", Keys.ENTER);
+
+        // The disabled date is reported even though the time is still missing
+        setDateInputValue("2/2/2000");
+        assertValidation(false, DISABLED_DATE_ERROR_MESSAGE);
+
+        setTimeInputValue("12:00");
+        assertValidation(false, DISABLED_DATE_ERROR_MESSAGE);
+
+        setDateInputValue("2/3/2000");
+        assertValidation(true, "");
+    }
+
+    @Test
+    public void dateMetadataProvider_changeValue_assertValidity() {
+        $("input").id(METADATA_PROVIDER_INPUT).sendKeys("2000-02-02",
+                Keys.ENTER);
+
+        setDateInputValue("2/2/2000");
+        setTimeInputValue("12:00");
+        // The client only asks the provider about the dates that the calendar
+        // renders, so with the overlay closed only the server rejects the date
+        assertServerInvalid();
+        assertErrorMessage(DISABLED_DATE_ERROR_MESSAGE);
+
+        setDateInputValue("2/3/2000");
+        assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test

@@ -51,6 +51,8 @@ class DateTimePickerDateMetadataTest {
 
     private static final String ERROR_MESSAGE = "Date is disabled";
 
+    private static final String INCOMPLETE_INPUT_ERROR_MESSAGE = "Fill in both date and time";
+
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -174,6 +176,32 @@ class DateTimePickerDateMetadataTest {
 
         picker.setValue(DISABLED_DATE_TIME);
         Assertions.assertFalse(picker.isInvalid());
+
+        restrictive.set(true);
+        picker.refreshDateMetadata();
+
+        Assertions.assertTrue(picker.isInvalid());
+        Assertions.assertEquals(ERROR_MESSAGE, picker.getErrorMessage());
+    }
+
+    @Test
+    void refreshDateMetadata_dateOnlySet_revalidates() {
+        picker.setI18n(new DateTimePickerI18n()
+                .setDisabledDateErrorMessage(ERROR_MESSAGE)
+                .setIncompleteInputErrorMessage(
+                        INCOMPLETE_INPUT_ERROR_MESSAGE));
+        AtomicBoolean restrictive = new AtomicBoolean(false);
+        picker.setDateMetadataProvider(range -> restrictive.get()
+                ? List.of(new DateMetadata(DISABLED_DATE, true))
+                : List.of());
+
+        // Simulate incomplete input: date picker has a value, time picker is
+        // empty, so the component value itself stays empty
+        getDatePicker().setValue(DISABLED_DATE);
+        fireUnparsableChangeDomEvent();
+        // Invalid because the time is missing, not because of the date
+        Assertions.assertEquals(INCOMPLETE_INPUT_ERROR_MESSAGE,
+                picker.getErrorMessage());
 
         restrictive.set(true);
         picker.refreshDateMetadata();
