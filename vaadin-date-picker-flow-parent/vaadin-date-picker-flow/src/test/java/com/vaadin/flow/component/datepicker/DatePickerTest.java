@@ -257,6 +257,16 @@ class DatePickerTest {
     }
 
     @Test
+    void dialogAccessibleName_defaultIsNull_setAndGet() {
+        DatePickerI18n i18n = new DatePickerI18n();
+
+        Assertions.assertNull(i18n.getDialogAccessibleName());
+
+        Assertions.assertSame(i18n, i18n.setDialogAccessibleName("Kalenteri"));
+        Assertions.assertEquals("Kalenteri", i18n.getDialogAccessibleName());
+    }
+
+    @Test
     void datePickerFirstDayOfTheWeek() {
         DatePicker germanDatePicker = new DatePicker();
         germanDatePicker.setLabel("German");

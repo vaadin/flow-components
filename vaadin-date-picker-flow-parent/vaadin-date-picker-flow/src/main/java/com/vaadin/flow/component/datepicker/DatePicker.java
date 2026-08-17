@@ -1591,6 +1591,7 @@ public class DatePicker
         private int firstDayOfWeek;
         private String today;
         private String cancel;
+        private String dialogAccessibleName;
         private LocalDate referenceDate;
         private String badInputErrorMessage;
         private String requiredErrorMessage;
@@ -1843,6 +1844,34 @@ public class DatePicker
          */
         public DatePickerI18n setCancel(String cancel) {
             this.cancel = cancel;
+            return this;
+        }
+
+        /**
+         * Gets the accessible name of the overlay content.
+         *
+         * @return the accessible name of the overlay content
+         * @since 25.3
+         */
+        public String getDialogAccessibleName() {
+            return dialogAccessibleName;
+        }
+
+        /**
+         * Sets the accessible name of the overlay content, announced by screen
+         * readers when the overlay opens. Defaults to {@code Calendar}.
+         * <p>
+         * Unlike {@link DatePicker#setAriaLabel(String)}, which names the
+         * input, this only names the overlay content.
+         *
+         * @param dialogAccessibleName
+         *            the accessible name of the overlay content
+         * @return this instance for method chaining
+         * @since 25.3
+         */
+        public DatePickerI18n setDialogAccessibleName(
+                String dialogAccessibleName) {
+            this.dialogAccessibleName = dialogAccessibleName;
             return this;
         }
 
