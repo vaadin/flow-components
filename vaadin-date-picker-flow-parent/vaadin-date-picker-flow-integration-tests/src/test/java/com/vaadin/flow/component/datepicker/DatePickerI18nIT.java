@@ -70,8 +70,6 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         Assert.assertEquals("Today", overlayContent.getTodayButton().getText());
         Assert.assertEquals("Cancel",
                 overlayContent.getCancelButton().getText());
-        // An unset dialogAccessibleName is not sent to the client, so the
-        // client-side default applies.
         Assert.assertEquals("Calendar",
                 overlayContent.getDomAttribute("aria-label"));
         Assert.assertTrue(overlayContent.getVisibleMonthCalendars().stream()
