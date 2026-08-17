@@ -23,7 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
@@ -45,19 +44,6 @@ public class DatePickerDateMetadataPage extends Div {
     public static final int REFRESHED_DISABLED_DAY = 18;
     public static final int PART_NAME_DAY = 25;
     public static final String PART_NAME = "busy";
-    public static final String DISABLED_DATE_ERROR_MESSAGE = "Date is not available";
-    public static final int SLOW_PROVIDER_DISABLED_DAY = 15;
-    // The calendar fetches metadata a year at a time and already has the year
-    // of the initial value when the page is ready, so only the months of the
-    // neighboring year that the overlay renders are still loading when it
-    // opens.
-    public static final String LOADING_MONTH_HEADER = "December 2022";
-    public static final String LOADING_MONTH_VALUE_PREFIX = "2022-12-";
-
-    // Long enough for the test to observe the loading state between two
-    // WebDriver round-trips.
-    private static final int SLOW_PROVIDER_DELAY_MS = 3000;
-
     private final Set<Integer> disabledDays = new LinkedHashSet<>(
             List.of(PROVIDER_DISABLED_DAY));
 
@@ -70,8 +56,6 @@ public class DatePickerDateMetadataPage extends Div {
                         LocalDate.of(2023, 1, OTHER_FIXED_DISABLED_DAY)));
         datePicker.setDisabledWeekdays(
                 List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY));
-        datePicker.setI18n(new DatePickerI18n()
-                .setDisabledDateErrorMessage(DISABLED_DATE_ERROR_MESSAGE));
         datePicker.setDateMetadataProvider(this::getDateMetadata);
 
         NativeButton refresh = new NativeButton("Refresh date metadata",
@@ -81,13 +65,7 @@ public class DatePickerDateMetadataPage extends Div {
                 });
         refresh.setId("refresh");
 
-        DatePicker slowDatePicker = new DatePicker();
-        slowDatePicker.setId("slow-date-picker");
-        slowDatePicker.setValue(INITIAL_VALUE);
-        slowDatePicker.setDateMetadataProvider(
-                DatePickerDateMetadataPage::getSlowDateMetadata);
-
-        add(datePicker, refresh, slowDatePicker);
+        add(datePicker, refresh);
     }
 
     /**
@@ -107,26 +85,4 @@ public class DatePickerDateMetadataPage extends Div {
         return metadata;
     }
 
-    /**
-     * Takes a fixed time to answer, so that the loading state of the calendar
-     * can be observed. The delay has to be a sleep: the provider runs while
-     * Flow holds the session lock, so waiting for a second request to release
-     * it would deadlock.
-     */
-    private static Collection<DateMetadata> getSlowDateMetadata(
-            DateRange range) {
-        try {
-            Thread.sleep(SLOW_PROVIDER_DELAY_MS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        List<DateMetadata> metadata = new ArrayList<>();
-        for (LocalDate date = range.start(); !date
-                .isAfter(range.end()); date = date.plusDays(1)) {
-            if (date.getDayOfMonth() == SLOW_PROVIDER_DISABLED_DAY) {
-                metadata.add(new DateMetadata(date, true));
-            }
-        }
-        return metadata;
-    }
 }

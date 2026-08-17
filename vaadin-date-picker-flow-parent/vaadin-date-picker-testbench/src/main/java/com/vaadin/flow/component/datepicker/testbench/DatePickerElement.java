@@ -69,18 +69,6 @@ public class DatePickerElement extends TestBenchElement
             return this.$(ButtonElement.class)
                     .withAttribute("slot", "cancel-button").first();
         }
-
-        /**
-         * Gets whether the overlay is waiting for date metadata. While waiting,
-         * the affected dates are rendered in a loading state, but stay
-         * selectable.
-         *
-         * @return {@code true} if the overlay is waiting for date metadata,
-         *         {@code false} otherwise
-         */
-        public boolean isLoading() {
-            return hasAttribute("loading");
-        }
     }
 
     public static class MonthCalendarElement extends TestBenchElement {
@@ -118,21 +106,6 @@ public class DatePickerElement extends TestBenchElement
         }
 
         /**
-         * Gets the CSS part names of the date cell for the given day of the
-         * month, as a space separated string.
-         *
-         * @param day
-         *            the day of the month
-         * @return the part names of the date cell, or {@code null} if the month
-         *         calendar does not show the given day
-         */
-        public String getDatePart(int day) {
-            return (String) executeScript(FIND_DATE_CELL + """
-                    return cell ? cell.getAttribute('part') : null;
-                    """, this, day);
-        }
-
-        /**
          * Gets whether the date cell for the given day of the month is rendered
          * as disabled.
          *
@@ -144,21 +117,6 @@ public class DatePickerElement extends TestBenchElement
          */
         public boolean isDateDisabled(int day) {
             return hasDatePart(day, "disabled");
-        }
-
-        /**
-         * Gets whether the date cell for the given day of the month is rendered
-         * as loading, which is the case while the date metadata for it is being
-         * fetched.
-         *
-         * @param day
-         *            the day of the month
-         * @return {@code true} if the date cell is loading, {@code false}
-         *         otherwise or if the month calendar does not show the given
-         *         day
-         */
-        public boolean isDateLoading(int day) {
-            return hasDatePart(day, "loading");
         }
 
         /**
@@ -175,23 +133,8 @@ public class DatePickerElement extends TestBenchElement
          */
         public boolean hasDatePart(int day, String partName) {
             return Boolean.TRUE.equals(executeScript(FIND_DATE_CELL + """
-                    return cell ? cell.part.contains(arguments[2]) : false;
+                    return cell?.part.contains(arguments[2]) ?? false;
                     """, this, day, partName));
-        }
-
-        /**
-         * Gets the value of the {@code aria-disabled} attribute of the date
-         * cell for the given day of the month.
-         *
-         * @param day
-         *            the day of the month
-         * @return the attribute value, or {@code null} if the month calendar
-         *         does not show the given day
-         */
-        public String getDateAriaDisabled(int day) {
-            return (String) executeScript(FIND_DATE_CELL + """
-                    return cell ? cell.getAttribute('aria-disabled') : null;
-                    """, this, day);
         }
 
         /**
