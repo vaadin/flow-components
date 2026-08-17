@@ -8,6 +8,7 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
+const { readComponentPoms } = require('./lib/modules.js');
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
@@ -102,11 +103,8 @@ async function consolidatePomParent() {
     // list the published component modules present in the parent directory,
     // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
     modules.length = 0;
-    fs.readdirSync(mod, { withFileTypes: true })
-      .filter(entry => entry.isDirectory() && /-flow$/.test(entry.name))
-      .filter(entry => fs.existsSync(`${mod}/${entry.name}/pom.xml`))
-      .map(entry => entry.name)
-      .sort()
+    readComponentPoms(mod)
+      .map(pomPath => path.basename(path.dirname(pomPath)))
       .forEach(moduleName => modules.push(moduleName));
     // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
@@ -129,12 +127,7 @@ async function consolidatePomParent() {
 async function consolidatePomFlow() {
   // consolidate every published component module pom in the parent directory,
   // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
-  const flowPoms = fs.readdirSync(mod, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && /-flow$/.test(entry.name))
-    .map(entry => `${mod}/${entry.name}/pom.xml`)
-    .filter(pomPath => fs.existsSync(pomPath))
-    .sort();
-  for (const pomPath of flowPoms) {
+  for (const pomPath of readComponentPoms(mod)) {
     // a module is pro when the whole component is pro or when the module pom
     // declares the commercial license, e.g. vaadin-ai-extensions-flow
     const pro = proComponents.includes(componentName)
