@@ -92,15 +92,15 @@ import tools.jackson.databind.node.ObjectNode;
  * the {@link DatePickerI18n} object.
  * <p>
  * This component allows the date to be entered directly using the keyboard in
- * the format of the current locale or through the date picker overlay. The
- * overlay opens when the field is clicked and/or any input is entered when the
- * field is focused.
+ * the format of the current locale or through the calendar overlay. The overlay
+ * opens when the field is clicked and/or any input is entered when the field is
+ * focused.
  * <h2>Validation</h2>
  * <p>
  * Date Picker comes with a built-in validation mechanism based on constraints.
  * Validation is triggered whenever the user initiates a date change, for
- * example by selection from the overlay or manual entry followed by Enter or
- * blur. Programmatic value changes trigger validation as well.
+ * example by selection from the calendar overlay or manual entry followed by
+ * Enter or blur. Programmatic value changes trigger validation as well.
  * <p>
  * Validation verifies that the value is parsable into {@link LocalDate} and
  * satisfies the specified constraints. If validation fails, the component is
@@ -124,7 +124,7 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * In addition to validation, constraints may also have a visual aspect. For
  * example, dates before the minimum date are displayed as disabled in the
- * overlay to prevent their selection.
+ * calendar overlay to prevent their selection.
  * <p>
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
@@ -1435,10 +1435,11 @@ public class DatePicker
     }
 
     /**
-     * Sets the opened property of the datepicker to open or close its overlay.
+     * Sets the opened property of the datepicker to open or close its calendar
+     * overlay.
      *
      * @param opened
-     *            {@code true} to open the datepicker overlay, {@code false} to
+     *            {@code true} to open the calendar overlay, {@code false} to
      *            close it
      */
     public void setOpened(boolean opened) {
@@ -1446,14 +1447,14 @@ public class DatePicker
     }
 
     /**
-     * Opens the datepicker overlay.
+     * Opens the calendar overlay.
      */
     public void open() {
         setOpened(true);
     }
 
     /**
-     * Closes the datepicker overlay.
+     * Closes the calendar overlay.
      */
     protected void close() {
         setOpened(false);
@@ -1512,8 +1513,8 @@ public class DatePicker
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
-     * changes.
+     * {@code opened-changed} event is sent when the calendar overlay opened
+     * state changes.
      * 
      * @since 23.3
      */
@@ -1848,9 +1849,9 @@ public class DatePicker
         }
 
         /**
-         * Gets the accessible name of the overlay content.
+         * Gets the accessible name of the calendar overlay.
          *
-         * @return the accessible name of the overlay content
+         * @return the accessible name of the calendar overlay
          * @since 25.3
          */
         public String getDialogAccessibleName() {
@@ -1858,14 +1859,14 @@ public class DatePicker
         }
 
         /**
-         * Sets the accessible name of the overlay content, announced by screen
+         * Sets the accessible name of the calendar overlay, announced by screen
          * readers when the overlay opens. Defaults to {@code Calendar}.
          * <p>
          * Unlike {@link DatePicker#setAriaLabel(String)}, which names the
-         * input, this only names the overlay content.
+         * input, this only names the calendar overlay.
          *
          * @param dialogAccessibleName
-         *            the accessible name of the overlay content
+         *            the accessible name of the calendar overlay
          * @return this instance for method chaining
          * @since 25.3
          */
