@@ -40,6 +40,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
@@ -52,6 +53,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -68,6 +70,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -110,6 +113,7 @@ import tools.jackson.databind.node.ObjectNode;
  * <li>{@link #setMax(LocalDate)}
  * <li>{@link #setDisabledDates(Collection)}
  * <li>{@link #setDisabledWeekdays(Collection)}
+ * <li>{@link #setDateMetadataProvider(DateMetadataProvider)}
  * </ul>
  * <p>
  * Error messages for unparsable input and constraints can be configured with
@@ -139,7 +143,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.3.0-alpha9")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.3.0-alpha11")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -176,7 +180,13 @@ public class DatePicker
     private final Set<DayOfWeek> disabledWeekdays = EnumSet
             .noneOf(DayOfWeek.class);
 
+    private DateMetadataProvider dateMetadataProvider;
+
     private StateTree.ExecutionRegistration pendingDateMetadataUpdate;
+
+    private boolean pendingConfigUpdate;
+
+    private boolean pendingCacheClear;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
@@ -554,9 +564,14 @@ public class DatePicker
      * as disabled in the calendar overlay, and manual entry of one of them
      * causes the component to invalidate.
      * <p>
-     * The dates combine with the disabled weekdays, as well as with the minimum
-     * and maximum date: a date cannot be selected if any of these constraints
-     * disables it. By default, no individual dates are disabled.
+     * The dates combine with the disabled weekdays, the date metadata provider,
+     * as well as with the minimum and maximum date: a date cannot be selected
+     * if any of these constraints disables it. By default, no individual dates
+     * are disabled.
+     * <p>
+     * Use this for a small, fully known set of dates. For a large or changing
+     * set, use {@link #setDateMetadataProvider(DateMetadataProvider)} instead,
+     * which only fetches the dates that are shown.
      *
      * @param dates
      *            the dates that cannot be selected, or {@code null} to clear
@@ -572,7 +587,7 @@ public class DatePicker
             dates.forEach(date -> disabledDates.add(Objects.requireNonNull(date,
                     "Disabled dates cannot contain null elements")));
         }
-        requestDateMetadataUpdate();
+        requestConfigUpdate();
     }
 
     /**
@@ -592,9 +607,10 @@ public class DatePicker
      * displayed as disabled in the calendar overlay, and manual entry of one of
      * them causes the component to invalidate.
      * <p>
-     * The weekdays combine with the individually disabled dates, as well as
-     * with the minimum and maximum date: a date cannot be selected if any of
-     * these constraints disables it. By default, no weekdays are disabled.
+     * The weekdays combine with the individually disabled dates, the date
+     * metadata provider, as well as with the minimum and maximum date: a date
+     * cannot be selected if any of these constraints disables it. By default,
+     * no weekdays are disabled.
      *
      * @param weekdays
      *            the weekdays whose dates cannot be selected, or {@code null}
@@ -611,15 +627,84 @@ public class DatePicker
                     .add(Objects.requireNonNull(weekday,
                             "Disabled weekdays cannot contain null elements")));
         }
-        requestDateMetadataUpdate();
+        requestConfigUpdate();
+    }
+
+    /**
+     * Gets the callback that provides metadata for the dates shown in the
+     * calendar overlay.
+     *
+     * @return the date metadata provider, or {@code null} if none is set
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public DateMetadataProvider getDateMetadataProvider() {
+        return dateMetadataProvider;
+    }
+
+    /**
+     * Sets a callback that provides metadata for the dates shown in the
+     * calendar overlay, for example to mark dates as not selectable. See
+     * {@link DateMetadataProvider} for the semantics of the callback.
+     * <p>
+     * The provider combines with the individually disabled dates and weekdays,
+     * as well as with the minimum and maximum date: a date cannot be selected
+     * if any of these constraints disables it. By default, no provider is set.
+     * <p>
+     * Entries can also carry custom CSS part names, so that a theme can style
+     * particular dates. A part name only affects styling, never whether a date
+     * can be selected.
+     * <p>
+     * The provider is also called during server-side validation, with the date
+     * being validated, so that a disabled date cannot be committed even if the
+     * browser was never told about it. Setting a provider does not re-validate
+     * the current value. Call {@link #refreshDateMetadata()} when the data
+     * behind the provider changes.
+     *
+     * @param provider
+     *            the date metadata provider, or {@code null} to remove the
+     *            current one
+     * @see DatePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDateMetadataProvider(DateMetadataProvider provider) {
+        dateMetadataProvider = provider;
+        requestConfigUpdate();
+        requestCacheClear();
+    }
+
+    /**
+     * Discards the date metadata that the browser has cached and fetches it
+     * again for the dates that are shown. Call this when the data behind the
+     * date metadata provider has changed.
+     * <p>
+     * If the field has a value, it is also re-validated, since a date that was
+     * selectable before may not be anymore. Does nothing if no provider is set.
+     *
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public void refreshDateMetadata() {
+        if (dateMetadataProvider == null) {
+            return;
+        }
+        requestCacheClear();
+        if (getValue() != null) {
+            validate();
+            fireValidationStatusChangeEvent();
+        }
     }
 
     /**
      * Gets whether the given date cannot be selected because it is one of the
-     * dates set with {@link #setDisabledDates(Collection)}, or falls on one of
-     * the weekdays set with {@link #setDisabledWeekdays(Collection)}.
+     * dates set with {@link #setDisabledDates(Collection)}, falls on one of the
+     * weekdays set with {@link #setDisabledWeekdays(Collection)}, or is marked
+     * as disabled by the provider set with
+     * {@link #setDateMetadataProvider(DateMetadataProvider)}. The provider, if
+     * one is set, is called for that date.
      * <p>
-     * The minimum and maximum date are not considered.
+     * The minimum and maximum date are not considered, so this does not on its
+     * own answer whether the date can be selected.
      *
      * @param date
      *            the date to check, may be {@code null}
@@ -627,16 +712,78 @@ public class DatePicker
      *         otherwise or if the date is {@code null}
      * @since 25.3
      */
-    public boolean isDateDisabled(LocalDate date) {
+    protected final boolean isDateDisabled(LocalDate date) {
         if (date == null) {
             return false;
         }
-        return disabledDates.contains(date)
-                || disabledWeekdays.contains(date.getDayOfWeek());
+        if (disabledDates.contains(date)
+                || disabledWeekdays.contains(date.getDayOfWeek())) {
+            return true;
+        }
+        if (dateMetadataProvider == null) {
+            return false;
+        }
+        Collection<DateMetadata> metadata = dateMetadataProvider
+                .getDateMetadata(new DateRange(date, date));
+        return metadata != null
+                && metadata.stream().filter(Objects::nonNull).anyMatch(
+                        entry -> entry.disabled() && date.equals(entry.date()));
+    }
+
+    /**
+     * Provides the date metadata for the given range of dates. The range and
+     * the returned entries identify a date by an ISO 8601 string, the same
+     * format as the value and the minimum and maximum date.
+     * <p>
+     * This is an internal RPC endpoint called by the connector on behalf of the
+     * web component, not part of the public API.
+     *
+     * @param start
+     *            the first date of the range, as an ISO 8601 date
+     * @param end
+     *            the last date of the range, as an ISO 8601 date
+     * @return the metadata entries for the dates in the range that are disabled
+     *         or have custom part names
+     */
+    @AllowInert
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    ArrayNode requestDateMetadata(String start, String end) {
+        ArrayNode entries = JacksonUtils.createArrayNode();
+        if (dateMetadataProvider == null) {
+            return entries;
+        }
+
+        DateRange range = new DateRange(LocalDate.parse(start),
+                LocalDate.parse(end));
+        Collection<DateMetadata> metadata = dateMetadataProvider
+                .getDateMetadata(range);
+        if (metadata == null) {
+            return entries;
+        }
+
+        metadata.stream().filter(Objects::nonNull)
+                .filter(entry -> entry.disabled() || hasPartName(entry))
+                .forEach(entry -> {
+                    ObjectNode node = JacksonUtils.createObjectNode();
+                    node.put("date", entry.date().toString());
+                    if (entry.disabled()) {
+                        node.put("disabled", true);
+                    }
+                    if (hasPartName(entry)) {
+                        node.put("part", entry.partName());
+                    }
+                    entries.add(node);
+                });
+        return entries;
+    }
+
+    private static boolean hasPartName(DateMetadata entry) {
+        return entry.partName() != null && !entry.partName().isBlank();
     }
 
     private boolean hasDateMetadataConfig() {
-        return !disabledDates.isEmpty() || !disabledWeekdays.isEmpty();
+        return !disabledDates.isEmpty() || !disabledWeekdays.isEmpty()
+                || dateMetadataProvider != null;
     }
 
     /**
@@ -645,7 +792,8 @@ public class DatePicker
      * Months are zero-based in every direction on the wire, so the disabled
      * dates are emitted as {@code [year, month, day]} triples with the month
      * offset already applied. The disabled weekdays use ISO weekday numbers,
-     * where Monday is 1 and Sunday is 7.
+     * where Monday is 1 and Sunday is 7. The {@code hasProvider} flag tells the
+     * connector whether to install the date metadata provider.
      *
      * @return the date metadata configuration
      */
@@ -666,16 +814,46 @@ public class DatePicker
         disabledWeekdays.forEach(weekday -> weekdays.add(weekday.getValue()));
         config.set("disabledWeekdays", weekdays);
 
+        config.put("hasProvider", dateMetadataProvider != null);
+
         return config;
     }
 
-    private void requestDateMetadataUpdate() {
+    private void requestConfigUpdate() {
+        pendingConfigUpdate = true;
+        scheduleDateMetadataUpdate();
+    }
+
+    private void requestCacheClear() {
+        pendingCacheClear = true;
+        scheduleDateMetadataUpdate();
+    }
+
+    /**
+     * Schedules the pending date metadata work to run before the next client
+     * response. Both parts go through the same scheduled update, so that they
+     * keep their order and so that a config update requested in the same round
+     * trip is not replaced by a cache clear.
+     */
+    private void scheduleDateMetadataUpdate() {
         pendingDateMetadataUpdate = scheduleUpdate(pendingDateMetadataUpdate,
                 () -> {
                     pendingDateMetadataUpdate = null;
-                    getElement().callJsFunction(
-                            "$connector.setDateMetadataConfig",
-                            createDateMetadataConfig());
+                    // A cache clear on its own does not need the config, which
+                    // grows with the number of disabled dates, to be sent
+                    // again.
+                    if (pendingConfigUpdate) {
+                        pendingConfigUpdate = false;
+                        getElement().callJsFunction(
+                                "$connector.setDateMetadataConfig",
+                                createDateMetadataConfig());
+                    }
+                    // The config has to be in place before the cache is dropped
+                    // and refetched, so the order of the calls is load-bearing.
+                    if (pendingCacheClear) {
+                        pendingCacheClear = false;
+                        getElement().callJsFunction("clearCache");
+                    }
                 });
     }
 
@@ -759,8 +937,12 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
+        // Work requested while detached must not carry over to a freshly
+        // created client element, which has no config and an empty cache.
+        pendingConfigUpdate = false;
+        pendingCacheClear = false;
         if (hasDateMetadataConfig()) {
-            requestDateMetadataUpdate();
+            requestConfigUpdate();
         }
     }
 
@@ -1832,6 +2014,7 @@ public class DatePicker
          * @return the error message or {@code null} if not set
          * @see DatePicker#setDisabledDates(Collection)
          * @see DatePicker#setDisabledWeekdays(Collection)
+         * @see DatePicker#setDateMetadataProvider(DateMetadataProvider)
          * @since 25.3
          */
         @JsonIgnore // Not used in client side
@@ -1851,6 +2034,7 @@ public class DatePicker
          * @return this instance for method chaining
          * @see DatePicker#setDisabledDates(Collection)
          * @see DatePicker#setDisabledWeekdays(Collection)
+         * @see DatePicker#setDateMetadataProvider(DateMetadataProvider)
          * @since 25.3
          */
         public DatePickerI18n setDisabledDateErrorMessage(String errorMessage) {

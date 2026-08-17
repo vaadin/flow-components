@@ -55,11 +55,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-field-highlighter-flow</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-flow-components-test-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

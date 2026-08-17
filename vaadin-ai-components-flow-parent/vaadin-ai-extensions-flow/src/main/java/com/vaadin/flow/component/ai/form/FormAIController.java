@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -135,23 +137,29 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * the user can currently edit (visible, enabled, and not already read-only) is
- * set to read-only so the user cannot type into a field the AI is about to
- * overwrite. Locks are released when the turn ends, successfully or otherwise.
- * Application code that turns a locked field read-only mid-turn (e.g. from a
- * value-change listener reacting to the LLM's writes) is not honoured: the
- * field already reports read-only because of the lock, so the controller cannot
- * tell the application's toggle apart from its own lock. The AI can still write
- * the field, and the lock is released at turn end regardless. Applications
- * should avoid toggling read-only state during a fill turn, or reapply it after
- * the turn completes.
+ * made read-only <em>on the client</em> so the user cannot type into a field
+ * the AI is about to overwrite. This is a UX guard only: the field's
+ * server-side read-only state is never changed, so it does not affect what the
+ * LLM sees or writes, and a field's application-set read-only state is left
+ * untouched. The guard is applied and cleared together with the "AI is working"
+ * state (see below), so it is released when the turn ends, successfully or
+ * otherwise. A field switched to read-only on the server mid-turn — for example
+ * by a value-change listener reacting to one of the AI's writes — stays
+ * read-only on the client when the guard is released.
  * </p>
  *
  * <p>
- * <b>Change tracking and highlight:</b> a listener registered through
+ * <b>Change tracking and field marker:</b> while a turn runs, every visible
+ * field shows an "AI is working" shimmer; when the turn ends the shimmer clears
+ * and every field whose value changed during the turn is marked automatically
+ * with the AI marker, which offers a revert control that restores the field's
+ * value from before the AI's first change to it. The marker clears itself once
+ * the user edits the field. Marking is the controller's own doing end to end;
+ * an application that does not want it turns it off with
+ * {@link #setFieldMarkerEnabled(boolean)}. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
- * field whose value changed during a successful turn — the common driver for
- * {@link #showFieldHighlight(HasValue)} / {@link #hideFieldHighlight} to flash
- * the AI's edits in the UI.
+ * field whose value changed during a successful turn, for applications that
+ * need to react to the AI's edits beyond the marker.
  * </p>
  *
  * <p>
@@ -181,6 +189,14 @@ public class FormAIController implements AIController {
      * removing and re-adding the field within a session.
      */
     static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
+
+    /**
+     * Key under which a marked field's {@link FieldMark} is stored on the field
+     * component via {@link ComponentUtil#setData(Component, String, Object)}.
+     * Keeping the mark on the field itself, next to the marker element that
+     * shows it, ties its lifecycle to the field rather than to the controller.
+     */
+    private static final String FIELD_MARK_KEY = "vaadin.ai.form.fieldMark";
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_form_instructions";
 
@@ -259,18 +275,39 @@ public class FormAIController implements AIController {
     private final Component fieldContainer;
     private final Binder<?> binder;
     private boolean valuesHidden;
+    private final TurnState turn = new TurnState();
     private final Map<String, FormFieldHints> hintsById = new HashMap<>();
-    private final List<HasValue<?, ?>> lockedFields = new ArrayList<>();
-    private final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
-    private final String aiUserId = "vaadin-ai-" + UUID.randomUUID();
     /**
-     * Per-field attach-listener registrations that re-apply the AI highlight
-     * after detach/re-attach. Populated on the first
-     * {@link #showFieldHighlight} call for a field; entries are removed by
-     * {@link #hideFieldHighlight}.
+     * Fields put into the "AI is working" state for the current turn. The state
+     * itself lives on each field's marker element, but turn-end cleanup cannot
+     * rely on walking the form tree alone: a field detached mid-turn is not
+     * reachable there, yet must still be cleared so it does not come back later
+     * with a stale shimmer. Cleared by {@link #stopWorking()}.
      */
-    private final Map<HasValue<?, ?>, Registration> highlightedFields = new HashMap<>();
+    private final Set<HasValue<?, ?>> workingFields = new LinkedHashSet<>();
     private final List<FieldValueChangeListener> fieldValueChangeListeners = new ArrayList<>();
+
+    /**
+     * The mutable state of the current fill turn. Kept in its own serializable
+     * object rather than on the controller because the listeners a mark
+     * installs on its field capture it and persist on the field — which is
+     * serialized with the UI, while the controller itself is deliberately not
+     * {@link Serializable}.
+     */
+    private static final class TurnState implements Serializable {
+        /**
+         * {@code true} between {@link FormAIController#onRequest} and
+         * {@link FormAIController#onResponse}, i.e. while the AI is filling the
+         * form. The auto-hide value-change listener checks this so the AI's own
+         * writes don't clear the marker it is about to apply; only edits the
+         * user makes after the turn clear it.
+         */
+        boolean filling;
+        final Map<HasValue<?, ?>, Object> preTurnValues = new LinkedHashMap<>();
+    }
+
+    private FieldMarkerI18n fieldMarkerI18n;
+    private boolean fieldMarkerEnabled = true;
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -635,11 +672,10 @@ public class FormAIController implements AIController {
      * value}. No events fire when the turn ended in error.
      * <p>
      * Listeners run on the UI thread with the session lock held, so they can
-     * update components and call {@link #showFieldHighlight} /
-     * {@link #hideFieldHighlight} directly without {@code ui.access(...)}. A
-     * typical use is to flash the AI's edits by calling
-     * {@code showFieldHighlight} on every event's
-     * {@link FieldValueChangeEvent#getField field}.
+     * update components directly without {@code ui.access(...)}. Marking the
+     * changed fields is not the listener's job — the controller has already
+     * done it by the time the listener runs — so this is for
+     * application-specific reactions to the AI's edits.
      *
      * @param listener
      *            the listener to register, not {@code null}
@@ -655,75 +691,210 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Paints a highlight on the field via the {@code vaadin-field-highlighter}
-     * web component. Repeated calls keep exactly one highlight on the field.
-     * Call {@link #hideFieldHighlight} to clear it. The field can be any
-     * {@link HasValue} {@link Component}, in or out of this controller's form,
-     * and each field's highlight state is independent of the others.
-     * <p>
-     * The AI user added to the field carries an id unique to this controller,
-     * so the highlight coexists with any other {@code vaadin-field-highlighter}
-     * users the application keeps on the field (e.g. from a collaboration
-     * session) as long as those consumers also use {@code addUser} /
-     * {@code removeUser} rather than {@code setUsers}.
-     * <p>
-     * The first {@code showFieldHighlight} call on a field also registers an
-     * attach listener that re-applies the AI user every time the field
-     * re-enters the DOM, so the highlight survives detach/re-attach. The
-     * listener is removed by {@link #hideFieldHighlight}.
+     * Returns the texts shown by the AI field marker.
      *
-     * @param field
-     *            the field to highlight, not {@code null}; must be a
-     *            {@link Component}
-     * @throws NullPointerException
-     *             if {@code field} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
+     * @return the configured texts, or {@code null} when the built-in defaults
+     *         are used
+     * @see #setFieldMarkerI18n(FieldMarkerI18n)
      */
-    public void showFieldHighlight(HasValue<?, ?> field) {
-        var component = requireFieldComponent(field);
-        var element = component.getElement();
-        highlightedFields.computeIfAbsent(field,
-                ignored -> component.addAttachListener(
-                        event -> FormFieldHighlighter.show(element, aiUserId)));
-        FormFieldHighlighter.show(element, aiUserId);
+    public FieldMarkerI18n getFieldMarkerI18n() {
+        return fieldMarkerI18n;
     }
 
     /**
-     * Clears any highlight previously applied to the field via
-     * {@link #showFieldHighlight}. A no-op when no highlight is currently
-     * shown. Only this controller's AI user is removed; other users on the
-     * field stay highlighted. The field can be any {@link HasValue}
-     * {@link Component}, in or out of this controller's form, and clearing one
-     * field's highlight has no effect on others. The re-attach listener
-     * registered by {@link #showFieldHighlight} is also removed, so the
-     * highlight does not come back if the field leaves and returns to the DOM
-     * after this call.
+     * Sets the texts shown by the AI field marker — the "AI" badge, its
+     * tooltip, and the popover with the revert control — replacing the built-in
+     * English defaults. The texts are applied to every marker the controller
+     * puts on a field, so set them before the first turn to localize them all.
+     * A marker already on a field keeps its texts until the controller marks
+     * that field again. Texts left {@code null} fall back to the built-in
+     * defaults.
      *
-     * @param field
-     *            the field to clear the highlight from, not {@code null}; must
-     *            be a {@link Component}
-     * @throws NullPointerException
-     *             if {@code field} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
+     * @param i18n
+     *            the texts to use, or {@code null} to restore the built-in
+     *            defaults
+     * @return this controller, for chaining
      */
-    public void hideFieldHighlight(HasValue<?, ?> field) {
-        var element = requireFieldComponent(field).getElement();
-        var registration = highlightedFields.remove(field);
-        if (registration != null) {
-            registration.remove();
-        }
-        FormFieldHighlighter.hide(element, aiUserId);
+    public FormAIController setFieldMarkerI18n(FieldMarkerI18n i18n) {
+        this.fieldMarkerI18n = i18n;
+        return this;
     }
 
-    private static Component requireFieldComponent(HasValue<?, ?> field) {
-        Objects.requireNonNull(field, "Field must not be null");
-        if (!(field instanceof Component component)) {
-            throw new IllegalArgumentException(
-                    "Field must be a Component: " + field.getClass().getName());
+    /**
+     * Returns whether fields changed by the AI are marked automatically at the
+     * end of a turn. Defaults to {@code true}.
+     *
+     * @return {@code true} when changed fields are marked automatically,
+     *         {@code false} when they are left unmarked
+     * @see #setFieldMarkerEnabled(boolean)
+     */
+    public boolean isFieldMarkerEnabled() {
+        return fieldMarkerEnabled;
+    }
+
+    /**
+     * Controls whether every field whose value the AI changed during a turn is
+     * marked when the turn ends — an "AI" badge with a popover explaining the
+     * fill and offering a revert control. Defaults to {@code true}. Set to
+     * {@code false} for a form that should carry no trace of the AI's edits.
+     * <p>
+     * Only the mark is affected. The "AI is working" state shown while a turn
+     * runs — the shimmer and the client-side guard against editing a field the
+     * AI is about to overwrite — applies to every writable field regardless of
+     * this setting, and
+     * {@link #addFieldValueChangeListener(FieldValueChangeListener) change
+     * events} still report what the AI wrote.
+     * <p>
+     * Turning it off does not clear marks already shown; fields marked by
+     * earlier turns stay marked until the user edits or reverts them.
+     *
+     * @param fieldMarkerEnabled
+     *            {@code true} to mark changed fields, {@code false} to leave
+     *            them unmarked
+     * @return this controller, for chaining
+     */
+    public FormAIController setFieldMarkerEnabled(boolean fieldMarkerEnabled) {
+        this.fieldMarkerEnabled = fieldMarkerEnabled;
+        return this;
+    }
+
+    /**
+     * The state carried by a field's mark: the combined registration of the
+     * marker's revert-event listener and the auto-hide value-change listener,
+     * and the value the marker's revert control restores — the field's value
+     * from before the AI's first change to it. Stored on the field component
+     * under {@link #FIELD_MARK_KEY}; its presence is what makes a field
+     * "marked".
+     */
+    private record FieldMark(Registration registration,
+            Object revertValue) implements Serializable {
+    }
+
+    /**
+     * @return the state of the field's mark, or {@code null} when the field is
+     *         not marked
+     */
+    private static FieldMark getMark(HasValue<?, ?> field) {
+        return (FieldMark) ComponentUtil.getData((Component) field,
+                FIELD_MARK_KEY);
+    }
+
+    /**
+     * Marks the field as AI-filled via the {@code vaadin-ai-field-marker} web
+     * component: it shows an "AI" badge and a popover that explains the fill
+     * and offers a revert control that restores the given value. Repeated calls
+     * keep exactly one marker on the field — a field already marked by an
+     * earlier turn keeps its mark, and with it the revert value captured before
+     * the AI's first change — and each field's marker state is independent of
+     * the others. The marker survives detaching and re-attaching the field, and
+     * picks up the texts configured through {@link #setFieldMarkerI18n} every
+     * time it is applied.
+     * <p>
+     * The first call for a field registers two listeners: one for the marker's
+     * {@code ai-field-revert} event that restores the revert value and clears
+     * the marker, and a value-change listener that clears the marker as soon as
+     * the user edits the field, so a stale cue does not linger over a value the
+     * user changed (the AI's own writes during a fill turn are excluded via the
+     * turn's {@code filling} flag). Both are removed by {@link #unmarkField}.
+     * The listeners persist on the field, which is serialized with the UI, so
+     * they capture only the field and the serializable {@link TurnState} —
+     * never the controller, which is not serializable.
+     *
+     * @param field
+     *            the field to mark, a discovered field and therefore always a
+     *            {@link Component}
+     * @param revertValue
+     *            the value the marker's revert control restores; ignored when
+     *            the field is already marked
+     */
+    private void markField(HasValue<?, ?> field, Object revertValue) {
+        var component = (Component) field;
+        var element = component.getElement();
+        if (getMark(field) == null) {
+            // Copied to a local so the lambdas below capture the state object,
+            // not the controller through an implicit `this.turn`.
+            var turnState = turn;
+            var revert = element.addEventListener("ai-field-revert",
+                    event -> revertField(field, turnState));
+            var valueChange = field.addValueChangeListener(event -> {
+                if (!turnState.filling) {
+                    unmarkField(field);
+                }
+            });
+            ComponentUtil.setData(component, FIELD_MARK_KEY, new FieldMark(
+                    Registration.combine(revert, valueChange), revertValue));
         }
-        return component;
+        FormFieldMarker.add(element, fieldMarkerI18n);
+    }
+
+    /**
+     * Clears the field's marker along with the state {@link #markField}
+     * recorded for it. A no-op when the field is not marked.
+     *
+     * @param field
+     *            the field to clear the marker from, a discovered field and
+     *            therefore always a {@link Component}
+     */
+    private static void unmarkField(HasValue<?, ?> field) {
+        var component = (Component) field;
+        var mark = getMark(field);
+        if (mark != null) {
+            mark.registration().remove();
+            ComponentUtil.setData(component, FIELD_MARK_KEY, null);
+        }
+        // A field in the "AI is working" state still needs its marker to carry
+        // the shimmer; the badge is hidden for the duration anyway, and
+        // stopWorking() drops the marker at turn end.
+        if (!FormFieldMarker.isWorking(component.getElement())) {
+            FormFieldMarker.remove(component.getElement());
+        }
+    }
+
+    /**
+     * Restores the field's pre-fill value and clears its marker. Invoked by the
+     * {@code ai-field-revert} event the marker fires when the user activates
+     * the revert control. A no-op when the field is not marked, so an event
+     * that arrives after the mark was already cleared cannot change the field.
+     *
+     * @param field
+     *            the field to revert, not {@code null}
+     * @param turn
+     *            the turn state of the controller that marked the field, not
+     *            {@code null}
+     */
+    private static void revertField(HasValue<?, ?> field, TurnState turn) {
+        var mark = getMark(field);
+        if (mark == null) {
+            return;
+        }
+        // Clear the marker first: this removes the auto-hide value-change
+        // listener, so restoring the value below doesn't re-enter through it.
+        unmarkField(field);
+        restoreValue(field, mark.revertValue());
+        // A revert can arrive from the popover while a new turn is running —
+        // it can be open from before the turn started. Rebase the turn's
+        // snapshot to the restored value so the turn-end diff does not
+        // attribute the user's revert to the AI and re-mark the field with
+        // the very value the user just discarded.
+        if (turn.filling && turn.preTurnValues.containsKey(field)) {
+            turn.preTurnValues.put(field, field.getValue());
+        }
+    }
+
+    /**
+     * Writes {@code value} back to {@code field}. The value originates from the
+     * field's own {@link HasValue#getValue()} captured before the AI's first
+     * change to it, so the cast is type-safe at runtime; a {@code null} is
+     * restored via {@link HasValue#clear()} because some fields reject
+     * {@code setValue(null)}.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static void restoreValue(HasValue field, Object value) {
+        if (value == null) {
+            field.clear();
+        } else {
+            field.setValue(value);
+        }
     }
 
     @Override
@@ -773,13 +944,14 @@ public class FormAIController implements AIController {
 
     @Override
     public void onRequest() {
+        turn.filling = true;
         // Refresh the field set so fields added or removed between turns
         // are picked up.
         attachIds();
         seedDescriptionsFromBinder();
         refreshValueOptionsBindings();
-        lockFields();
         snapshotPreTurnValues();
+        startWorking();
     }
 
     /**
@@ -797,67 +969,79 @@ public class FormAIController implements AIController {
     @Override
     public void onResponse(Throwable error) {
         try {
-            fireFieldValueChanges(error);
+            var changes = collectFieldValueChanges(error);
+            // Marking before clearing the working state lets a changed field
+            // transition straight from working to marked, and tells
+            // stopWorking() which markers to keep.
+            if (fieldMarkerEnabled) {
+                changes.forEach(change -> markField(change.getField(),
+                        change.getOldValue()));
+            }
+            fireFieldValueChanges(changes);
         } finally {
-            // Unlock regardless of success or failure: locks set in onRequest
-            // must be released so the user can edit again. The failure path
-            // doesn't have any committed state to discard.
-            unlockFields();
+            // Runs regardless of success, failure, or an exception escaping
+            // the diff so the fields never stay locked for the user.
+            stopWorking();
+            // Clear last, so any field writes still happening as part of the
+            // turn (cascades, the marking pass) count as AI writes rather
+            // than user edits that would clear the marker.
+            turn.filling = false;
         }
     }
 
     /**
      * Captures the current value of every known field before the LLM runs. The
      * snapshot is consulted in {@link #onResponse} to compute the before /
-     * after diff for {@link #addFieldValueChangeListener}. Skipped when no
-     * listener is registered to avoid copying values that no one will read.
+     * after diff that drives the automatic field marker (whose revert control
+     * restores the pre-fill value the diff carries) and
+     * {@link #addFieldValueChangeListener}. Skipped when neither can consume it
+     * — marking turned off and no listener registered — to avoid copying values
+     * that no one will read.
      * <p>
      * Hidden and disabled fields are included so a value cascaded into a field
      * that's revealed during the turn can still be compared against a real
      * pre-turn value rather than {@code null}.
      */
     private void snapshotPreTurnValues() {
-        preTurnValues.clear();
-        if (fieldValueChangeListeners.isEmpty()) {
+        turn.preTurnValues.clear();
+        if (!fieldMarkerEnabled && fieldValueChangeListeners.isEmpty()) {
             return;
         }
         for (var field : collectKnownFields()) {
-            preTurnValues.put(field, field.getValue());
+            turn.preTurnValues.put(field, field.getValue());
         }
     }
 
     /**
      * Walks the pre-turn snapshot against the post-turn value of every known
-     * field and fires one {@link FieldValueChangeEvent} per changed field, in
+     * field and returns one {@link FieldValueChangeEvent} per changed field, in
      * document order. The post-turn walk picks up fields that were hidden (or
      * absent) at turn start but became visible / were added during the turn, so
      * visibility cascades report their value changes correctly. A field with no
      * snapshot entry (added mid-turn) compares against its empty value, so
      * adding a field that keeps its empty value does not produce an event.
      * <p>
-     * The diff is materialised before any listener runs, so a listener that
-     * writes to a tracked field cannot retroactively change the
-     * {@code newValue} another field's event carries. The listener set is also
-     * snapshotted once per turn, so adding or removing listeners mid-dispatch
-     * (including a listener removing itself) affects only subsequent turns, not
-     * the rest of the current turn.
+     * The diff is materialised in full before any listener runs, so a listener
+     * that writes to a tracked field cannot retroactively change the
+     * {@code newValue} another field's event carries.
      * <p>
-     * On error the snapshot is discarded and no events fire — the application
-     * learns about errors through the orchestrator's response listener instead.
-     * A throwing listener is logged and otherwise ignored so subsequent
-     * listeners still fire, subsequent change events in the same turn still
-     * fire, and the rest of the response lifecycle (notably
-     * {@link #unlockFields}) still runs.
+     * On error the snapshot is discarded and nothing is reported — the
+     * application learns about errors through the orchestrator's response
+     * listener instead.
+     *
+     * @return the changes of the turn, in document order; empty when the turn
+     *         ended in error or changed nothing
      */
-    private void fireFieldValueChanges(Throwable error) {
-        if (preTurnValues.isEmpty() || error != null) {
-            preTurnValues.clear();
-            return;
+    private List<FieldValueChangeEvent> collectFieldValueChanges(
+            Throwable error) {
+        if (turn.preTurnValues.isEmpty() || error != null) {
+            turn.preTurnValues.clear();
+            return List.of();
         }
         var events = new ArrayList<FieldValueChangeEvent>();
         for (var field : collectKnownFields()) {
-            var oldValue = preTurnValues.containsKey(field)
-                    ? preTurnValues.get(field)
+            var oldValue = turn.preTurnValues.containsKey(field)
+                    ? turn.preTurnValues.get(field)
                     : field.getEmptyValue();
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
@@ -865,10 +1049,20 @@ public class FormAIController implements AIController {
                         newValue));
             }
         }
-        preTurnValues.clear();
-        if (events.isEmpty()) {
-            return;
-        }
+        turn.preTurnValues.clear();
+        return events;
+    }
+
+    /**
+     * Dispatches the turn's changes to the registered listeners, all events of
+     * one field before the next field's. The listener set is snapshotted once
+     * per turn, so adding or removing listeners mid-dispatch (including a
+     * listener removing itself) affects only subsequent turns, not the rest of
+     * the current turn. A throwing listener is logged and otherwise ignored so
+     * subsequent listeners still fire, subsequent change events in the same
+     * turn still fire, and the rest of the response lifecycle still runs.
+     */
+    private void fireFieldValueChanges(List<FieldValueChangeEvent> events) {
         var snapshot = List.copyOf(fieldValueChangeListeners);
         for (var event : events) {
             for (var listener : snapshot) {
@@ -911,20 +1105,57 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Puts every discovered, non-ignored, currently writable field into
-     * read-only state so the user cannot type into a field the AI is about to
-     * overwrite. Fields that are disabled or were already read-only when the
-     * turn started are not writable, so they are left untouched and will not be
-     * unlocked at turn end.
+     * Puts every field the AI can write this turn into the "AI is working"
+     * state: a shimmer plus a client-side read-only guard so the user cannot
+     * type into a field the AI is about to overwrite. The read-only guard is
+     * applied on the client only — it never changes the field's server-side
+     * read-only state, so it is purely a UX measure and does not affect what
+     * the LLM sees. Fields that are disabled or already read-only are skipped:
+     * the AI cannot write them, so they are not "worked on" and their read-only
+     * state must not be touched. The state is carried by the field's marker, so
+     * a field that has none yet gets one; it stays hidden while the state is
+     * on. Tracks the affected fields so {@link #stopWorking()} clears exactly
+     * these at turn end, even the ones detached during the turn.
      */
-    private void lockFields() {
+    private void startWorking() {
+        stopWorking();
         for (var field : collectActiveFields()) {
-            if (isDisabled(field) || isApplicationReadOnly(field)) {
+            if (isDisabled(field) || field.isReadOnly()) {
                 continue;
             }
-            field.setReadOnly(true);
-            lockedFields.add(field);
+            if (field instanceof Component component) {
+                var element = component.getElement();
+                FormFieldMarker.add(element, fieldMarkerI18n);
+                FormFieldMarker.setWorking(element, true);
+                workingFields.add(field);
+            }
         }
+    }
+
+    /**
+     * Clears the "AI is working" state (shimmer + client-side read-only guard)
+     * from the fields {@link #startWorking()} set. A field that is marked keeps
+     * its marker, which becomes visible again as the state clears; a field that
+     * is not loses the marker that only carried the state.
+     */
+    private void stopWorking() {
+        for (var field : workingFields) {
+            var element = ((Component) field).getElement();
+            if (getMark(field) != null) {
+                FormFieldMarker.setWorking(element, false);
+            } else {
+                FormFieldMarker.remove(element);
+            }
+            // A field made read-only on the server mid-turn — e.g. by a
+            // value-change listener reacting to one of the AI's writes —
+            // needs its client-side readonly re-asserted: the guard held it
+            // at true, so the server's own write was dropped as a no-op on
+            // the client and the guard's restore would lift it.
+            if (field.isReadOnly()) {
+                FormFieldMarker.forceClientReadOnly(element);
+            }
+        }
+        workingFields.clear();
     }
 
     /**
@@ -944,9 +1175,11 @@ public class FormAIController implements AIController {
     /**
      * Returns the subset of {@link #collectKnownFields()} the LLM currently
      * acts on — visible fields only. Disabled and read-only fields are kept:
-     * the LLM reads them as context but cannot write them (see
-     * {@link #isDisabled} / {@link #isApplicationReadOnly}). Use this anywhere
-     * the LLM-visible field set matters (locking, tool inputs and outputs).
+     * the LLM reads them as context but cannot write them. A read-only state is
+     * always application-set — the controller never touches server-side
+     * read-only, its turn guard is client-side only (see
+     * {@link #startWorking()}). Use this anywhere the LLM-visible field set
+     * matters (the working state, tool inputs and outputs).
      */
     private List<HasValue<?, ?>> collectActiveFields() {
         return collectKnownFields().stream().filter(this::isVisible).toList();
@@ -987,35 +1220,6 @@ public class FormAIController implements AIController {
     private boolean isDisabled(HasValue<?, ?> field) {
         return field instanceof HasEnabled hasEnabled
                 && !hasEnabled.isEnabled();
-    }
-
-    /**
-     * Whether the application set the field read-only, as opposed to the
-     * controller's own turn lock. Between {@link #lockFields()} and
-     * {@link #unlockFields()} every writable field reports read-only, so a
-     * field counts as application-read-only only when it reports read-only yet
-     * is not one this controller locked (the {@code lockedFields} set). Such a
-     * field is shown to the LLM as read-only context but cannot be written.
-     *
-     * @param field
-     *            the discovered field to test, not {@code null}
-     * @return {@code true} when the field is read-only independently of the
-     *         controller's turn lock, {@code false} otherwise
-     */
-    private boolean isApplicationReadOnly(HasValue<?, ?> field) {
-        return field.isReadOnly() && !lockedFields.contains(field);
-    }
-
-    /**
-     * Restores fields locked by {@link #lockFields()} to read-write. Fields the
-     * application set to read-only before the turn started are not touched
-     * (they were skipped at lock time).
-     */
-    private void unlockFields() {
-        for (var field : lockedFields) {
-            field.setReadOnly(false);
-        }
-        lockedFields.clear();
     }
 
     private boolean isIgnored(HasValue<?, ?> field) {
@@ -1096,8 +1300,7 @@ public class FormAIController implements AIController {
                     continue;
                 }
                 descriptors.add(new FormFieldDescriptor(id, field, type, hints,
-                        isDisabled(field), isApplicationReadOnly(field),
-                        valuesHidden));
+                        isDisabled(field), field.isReadOnly(), valuesHidden));
             }
             return descriptors;
         }
@@ -1186,7 +1389,7 @@ public class FormAIController implements AIController {
                 // writable.
                 var raw = field.field();
                 var disabled = isDisabled(raw);
-                if (disabled || isApplicationReadOnly(raw)) {
+                if (disabled || raw.isReadOnly()) {
                     rejected.add(new RejectedEntry(id, value,
                             notWritableReason(disabled)));
                     continue;
