@@ -99,12 +99,9 @@ public class DatePickerElement extends TestBenchElement
          * @return the day cells
          */
         public List<DayElement> getDays() {
-            return getDayCells(
-                    """
-                            return Array.from(
-                                    arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
-                                    .filter((date) => date.textContent.trim() !== '');
-                            """);
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withCondition(day -> !day.getText().isEmpty()).all();
         }
 
         /**
@@ -119,25 +116,10 @@ public class DatePickerElement extends TestBenchElement
          *         show the given day
          */
         public DayElement getDay(int day) {
-            List<DayElement> cells = getDayCells(
-                    """
-                            return Array.from(
-                                    arguments[0].shadowRoot.querySelectorAll('[part~="date"]'))
-                                    .filter((date) => date.textContent.trim() === String(arguments[1]));
-                            """,
-                    day);
-            return cells.isEmpty() ? null : cells.get(0);
-        }
-
-        private List<DayElement> getDayCells(String script, Object... args) {
-            Object[] arguments = new Object[args.length + 1];
-            arguments[0] = this;
-            System.arraycopy(args, 0, arguments, 1, args.length);
-            @SuppressWarnings("unchecked")
-            List<TestBenchElement> cells = (List<TestBenchElement>) executeScript(
-                    script, arguments);
-            return cells.stream().map(cell -> cell.wrap(DayElement.class))
-                    .toList();
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withText(String.valueOf(day)).all().stream().findFirst()
+                    .orElse(null);
         }
     }
 
