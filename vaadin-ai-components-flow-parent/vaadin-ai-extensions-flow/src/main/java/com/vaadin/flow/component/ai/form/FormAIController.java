@@ -11,6 +11,7 @@ package com.vaadin.flow.component.ai.form;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +37,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.ai.common.ConfidenceLevel;
+import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
@@ -160,6 +164,15 @@ import tools.jackson.databind.JsonNode;
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
  * field whose value changed during a successful turn, for applications that
  * need to react to the AI's edits beyond the marker.
+ * </p>
+ *
+ * <p>
+ * <b>Source tracking:</b> with {@link #setSourceTrackingEnabled(boolean)} on,
+ * the LLM also reports, per filled value, the snippets it read, where each one
+ * sits in the document, and a confidence level. The data is available from
+ * {@link FieldValueChangeEvent#getFieldSource()} and
+ * {@link #getFieldSource(HasValue)}, and can be stored and put back later with
+ * {@link #restoreFieldSource(HasValue, ValueSource)}. Off by default.
  * </p>
  *
  * <p>
@@ -304,6 +317,41 @@ public class FormAIController implements AIController {
 
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
+    private boolean sourceTrackingEnabled;
+    /**
+     * The last source reported (or restored) per field, together with the field
+     * value it describes. A source lasts as long as the value it describes, so
+     * entries are dropped lazily on read when the field no longer holds the
+     * recorded value — no per-field listener is needed.
+     */
+    private final Map<HasValue<?, ?>, StoredFieldSource> fieldSources = new HashMap<>();
+    /**
+     * Application-supplied wordings for confidence levels, overriding
+     * {@link #DEFAULT_CONFIDENCE_DESCRIPTIONS} in the {@code fill_form} tool
+     * description. Levels not present keep the default.
+     */
+    private final Map<ConfidenceLevel, String> confidenceDescriptions = new EnumMap<>(
+            ConfidenceLevel.class);
+
+    private static final Map<ConfidenceLevel, String> DEFAULT_CONFIDENCE_DESCRIPTIONS = Map
+            .of(ConfidenceLevel.HIGH,
+                    "the value is written in the document and copied as it is",
+                    ConfidenceLevel.MEDIUM,
+                    "the value follows from the document but needed some "
+                            + "interpretation: fields combined, units "
+                            + "converted, or one candidate chosen over another",
+                    ConfidenceLevel.LOW,
+                    "the document is unclear, or the value is a guess");
+
+    /**
+     * One field's stored source, tied to the field value the source was
+     * reported with. The value is captured from the field right after the write
+     * (or at {@link #restoreFieldSource} time) so any normalisation the field
+     * applied is reflected; {@link #getFieldSource} compares it against the
+     * field's current value to detect a stale source.
+     */
+    private record StoredFieldSource(Object value, ValueSource source) {
+    }
 
     /**
      * Creates a new form AI controller for the given container. Fields are
@@ -646,6 +694,122 @@ public class FormAIController implements AIController {
      */
     public boolean isFieldValuesHidden() {
         return valuesHidden;
+    }
+
+    /**
+     * Returns whether the LLM is asked to report a source for each value it
+     * fills.
+     *
+     * @return {@code true} when source tracking is on, {@code false} otherwise
+     * @see #setSourceTrackingEnabled(boolean)
+     */
+    public boolean isSourceTrackingEnabled() {
+        return sourceTrackingEnabled;
+    }
+
+    /**
+     * Controls whether the LLM is asked to report, along with each value it
+     * fills, the source it read: the snippets, where each snippet sits in the
+     * document, and a {@link ConfidenceLevel confidence level}. The reported
+     * source is available from {@link FieldValueChangeEvent#getFieldSource()}
+     * and from {@link #getFieldSource(HasValue)}.
+     * <p>
+     * Off by default: source tracking costs extra output tokens on every fill
+     * and brings document snippets into the server, so an application that does
+     * not use the data should not pay for either. It can be switched on or off
+     * at any time; turns that ran while it was off simply have no sources.
+     * <p>
+     * Source data is best effort and never blocks a fill: a malformed part (an
+     * unknown confidence level, a rectangle with no size, an unknown location
+     * type) is dropped and logged while the value is still written. The
+     * extracts are what the model says it read — they are not checked against
+     * the document.
+     *
+     * @param sourceTrackingEnabled
+     *            {@code true} to ask the LLM for sources, {@code false} to not
+     * @return this controller, for chaining
+     */
+    public FormAIController setSourceTrackingEnabled(
+            boolean sourceTrackingEnabled) {
+        this.sourceTrackingEnabled = sourceTrackingEnabled;
+        return this;
+    }
+
+    /**
+     * Replaces the meaning the LLM is given for one confidence level,
+     * overriding the built-in wording in the {@code fill_form} tool
+     * description. Levels not touched keep their defaults: {@code high} means
+     * the value is written in the document and copied as it is, {@code medium}
+     * that it follows from the document but needed some interpretation, and
+     * {@code low} that the document is unclear or the value is a guess.
+     *
+     * @param level
+     *            the level to describe, not {@code null}
+     * @param description
+     *            the meaning the LLM sees for the level, not {@code null}
+     * @return this controller, for chaining
+     */
+    public FormAIController describeConfidenceLevel(ConfidenceLevel level,
+            String description) {
+        Objects.requireNonNull(level, "Level must not be null");
+        Objects.requireNonNull(description, "Description must not be null");
+        confidenceDescriptions.put(level, description);
+        return this;
+    }
+
+    /**
+     * Returns the source the LLM reported for the value the field currently
+     * holds. Use it to go through the whole form at once, or for the case where
+     * the model wrote a field with the value it already had, which fires no
+     * change event.
+     * <p>
+     * A source lasts as long as the value it describes: once the field's value
+     * no longer equals the one the source was reported with — the user edited
+     * the field, the application overwrote it, or a revert restored the old
+     * value — the source no longer applies and is not returned. Sources build
+     * up across turns, so a field a later prompt did not touch keeps the source
+     * from the earlier one, and filling a field again replaces its source.
+     *
+     * @param field
+     *            the field to read the source of, not {@code null}
+     * @return the source describing the field's current value, or empty when
+     *         none applies
+     * @throws NullPointerException
+     *             if {@code field} is {@code null}
+     */
+    public Optional<ValueSource> getFieldSource(HasValue<?, ?> field) {
+        Objects.requireNonNull(field, "Field must not be null");
+        var stored = fieldSources.get(field);
+        if (stored == null) {
+            return Optional.empty();
+        }
+        if (!Objects.equals(stored.value(), field.getValue())) {
+            fieldSources.remove(field);
+            return Optional.empty();
+        }
+        return Optional.of(stored.source());
+    }
+
+    /**
+     * Attaches a previously stored source to the field, so an application that
+     * persisted the data (see {@link FieldValueChangeEvent#getFieldSource()})
+     * can show it again after a reload without the original chat session.
+     * Restore the field's value first and the source after: the source is tied
+     * to the field's value at the moment of this call, so it goes stale on the
+     * next edit just like a fresh one.
+     *
+     * @param field
+     *            the field the source describes, not {@code null}
+     * @param source
+     *            the source to restore, not {@code null}
+     * @throws NullPointerException
+     *             if {@code field} or {@code source} is {@code null}
+     */
+    public void restoreFieldSource(HasValue<?, ?> field, ValueSource source) {
+        Objects.requireNonNull(field, "Field must not be null");
+        Objects.requireNonNull(source, "Source must not be null");
+        fieldSources.put(field,
+                new StoredFieldSource(field.getValue(), source));
     }
 
     /**
@@ -1044,7 +1208,7 @@ public class FormAIController implements AIController {
             var newValue = field.getValue();
             if (!Objects.equals(oldValue, newValue)) {
                 events.add(new FieldValueChangeEvent(this, field, oldValue,
-                        newValue));
+                        newValue, getFieldSource(field).orElse(null)));
             }
         }
         turn.preTurnValues.clear();
@@ -1316,6 +1480,45 @@ public class FormAIController implements AIController {
         }
 
         @Override
+        public String sourceInstructions() {
+            if (!sourceTrackingEnabled) {
+                return "";
+            }
+            return """
+                    \s\
+                    Source tracking is on. When a value comes from an \
+                    attached document, wrap it in an object instead of \
+                    sending it plainly: {"value": <the value as you would \
+                    otherwise send it>, "confidence": <level>, "extracts": \
+                    [{"text": <snippet>, "location": {"type": \
+                    "page-region", "page": <page>, "rect": [x, y, width, \
+                    height]}}]}. "value" is required; plain values stay \
+                    valid for fields with nothing to point at. List in \
+                    "extracts" every snippet you read to produce the \
+                    value, each with its text copied verbatim from the \
+                    document. "rect" is the snippet's bounding box as \
+                    fractions of the page as displayed, [left, top, width, \
+                    height] measured from the top-left corner. "page" \
+                    starts at 1; leave it out when the source has a single \
+                    surface, such as an image. Leave "location" out when \
+                    the snippet has no position, such as pasted text; \
+                    leave "extracts" out when there is no source document \
+                    at all. "confidence" is "high" when %s; "medium" when \
+                    %s; "low" when %s. Leave "confidence" out when you \
+                    cannot judge it, such as for a value taken from the \
+                    chat prompt. Never invent a snippet, a location, or a \
+                    confidence level.""".formatted(
+                    describeConfidence(ConfidenceLevel.HIGH),
+                    describeConfidence(ConfidenceLevel.MEDIUM),
+                    describeConfidence(ConfidenceLevel.LOW));
+        }
+
+        private String describeConfidence(ConfidenceLevel level) {
+            return confidenceDescriptions.getOrDefault(level,
+                    DEFAULT_CONFIDENCE_DESCRIPTIONS.get(level));
+        }
+
+        @Override
         public String executeFill(JsonNode arguments) {
             // The fill always hops through ui.access so writes land on the
             // UI thread with CurrentInstance bound, regardless of whether
@@ -1433,6 +1636,12 @@ public class FormAIController implements AIController {
          * not run here — it happens in a single pass after every value is
          * written (see {@code doFill}). Only write failures (a rejected
          * conversion or a field that refuses the value) are recorded.
+         * <p>
+         * When source tracking is on, the value may arrive wrapped in a
+         * source-reporting envelope. The plain value inside goes through the
+         * regular conversion, and the reported source is stored on a successful
+         * write, tied to the value the field then holds. Bad source data never
+         * blocks the value (see {@link ValueSourceParser}).
          *
          * @return {@code true} when the value was written and is eligible for
          *         the post-write validation pass, {@code false} when a write
@@ -1441,9 +1650,15 @@ public class FormAIController implements AIController {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private boolean applyValue(FormFieldDescriptor field, JsonNode value,
                 List<RejectedEntry> rejected) {
+            var payload = value;
+            ValueSource reportedSource = null;
+            if (sourceTrackingEnabled && ValueSourceParser.isEnvelope(value)) {
+                payload = ValueSourceParser.unwrapValue(value);
+                reportedSource = ValueSourceParser.parse(value, field.id());
+            }
             Object converted;
             try {
-                converted = FormValueConverter.convert(field, value);
+                converted = FormValueConverter.convert(field, payload);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());
@@ -1473,6 +1688,13 @@ public class FormAIController implements AIController {
                 rejected.add(new RejectedEntry(field.id(), value,
                         "Field rejected the value."));
                 return false;
+            }
+            if (reportedSource != null) {
+                // Capture the post-write value rather than the converted one
+                // so any normalisation the field applied in setValue is what
+                // the staleness check in getFieldSource compares against.
+                fieldSources.put(raw,
+                        new StoredFieldSource(raw.getValue(), reportedSource));
             }
             return true;
         }
