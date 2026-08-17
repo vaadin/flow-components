@@ -16,6 +16,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 
 import tools.jackson.databind.JsonNode;
@@ -39,6 +40,10 @@ public final class GridAITools {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAITools.class);
+
+    static {
+        AIExtensionsLicense.check();
+    }
 
     private GridAITools() {
     }

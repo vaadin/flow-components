@@ -21,6 +21,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 
 import tools.jackson.databind.JsonNode;
@@ -44,6 +45,10 @@ public final class ChartAITools {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAITools.class);
+
+    static {
+        AIExtensionsLicense.check();
+    }
 
     /**
      * Callback interface that chart tool consumers must implement to provide
