@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.event.Level;
 
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
@@ -49,6 +52,23 @@ class SourceTrackingTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
+    @BeforeEach
+    void clearParserLogger() {
+        TestLoggerFactory.getTestLogger(ValueSourceParser.class).clearAll();
+    }
+
+    /**
+     * The debug events {@link ValueSourceParser} logged in this test. Each
+     * dropped part must be logged exactly once — a drop that falls through to a
+     * second catch-all message would double-log.
+     */
+    private static List<String> parserDebugMessages() {
+        return TestLoggerFactory.getTestLogger(ValueSourceParser.class)
+                .getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.DEBUG)
+                .map(e -> e.getMessage()).toList();
+    }
+
     @Nested
     class Toggle {
 
@@ -77,76 +97,48 @@ class SourceTrackingTest {
     class ToolDescription {
 
         @Test
-        void descriptionOmitsSourceInstructionsWhenTrackingOff() {
-            var controller = controllerFor(new TestField());
-
-            var description = fillFormDescription(controller);
-
-            Assertions.assertFalse(description.contains("Source tracking"),
-                    "Untracked description must not mention source tracking, "
-                            + "got: " + description);
-        }
-
-        @Test
-        void descriptionIncludesEnvelopeShapeWhenTrackingOn() {
-            var controller = controllerFor(new TestField())
-                    .setSourceTrackingEnabled(true);
-
-            var description = fillFormDescription(controller);
-
-            Assertions.assertTrue(description.contains("Source tracking is on"),
-                    "Description must announce source tracking, got: "
-                            + description);
-            Assertions.assertTrue(description.contains("\"extracts\""),
-                    "Description must describe the envelope shape, got: "
-                            + description);
-            Assertions.assertTrue(description.contains("page-region"),
-                    "Description must name the location type, got: "
-                            + description);
-        }
-
-        @Test
-        void descriptionReflectsTogglingTrackingBackOff() {
+        void descriptionChangesOnlyWhileTrackingIsOn() {
+            // The instruction prose itself is deliberately not pinned by
+            // tests — only that turning tracking on extends the description
+            // and turning it off restores the untracked one byte for byte.
             var controller = controllerFor(new TestField());
             var untracked = fillFormDescription(controller);
 
             controller.setSourceTrackingEnabled(true);
-            controller.setSourceTrackingEnabled(false);
+            Assertions.assertNotEquals(untracked,
+                    fillFormDescription(controller),
+                    "Tracking must add source instructions to the "
+                            + "description");
 
+            controller.setSourceTrackingEnabled(false);
             Assertions.assertEquals(untracked, fillFormDescription(controller),
                     "Toggling tracking off must restore the untracked "
                             + "description");
         }
 
         @Test
-        void customConfidenceWordingReplacesDefaultForThatLevelOnly() {
+        void customConfidenceWordingAppearsInToolDescription() {
             var controller = controllerFor(new TestField())
                     .setSourceTrackingEnabled(true);
             controller.describeConfidenceLevel(ConfidenceLevel.HIGH,
                     "the value is stated in the contract as a signed figure");
 
-            var description = fillFormDescription(controller);
-
-            Assertions.assertTrue(description.contains(
+            Assertions.assertTrue(fillFormDescription(controller).contains(
                     "the value is stated in the contract as a signed figure"),
-                    "Custom wording must appear, got: " + description);
-            Assertions.assertFalse(
-                    description.contains(
-                            "written in the document and copied as it is"),
-                    "Default wording of the replaced level must be gone, "
-                            + "got: " + description);
-            Assertions.assertTrue(description.contains(
-                    "the document is unclear, or the value is a " + "guess"),
-                    "Untouched levels must keep the default wording, got: "
-                            + description);
+                    "The wording given to describeConfidenceLevel must reach "
+                            + "the LLM");
         }
 
         @Test
         void describeConfidenceLevelRejectsNullArguments() {
             var controller = controllerFor(new TestField());
 
-            Assertions.assertThrows(NullPointerException.class,
+            var thrown = Assertions.assertThrows(NullPointerException.class,
                     () -> controller.describeConfidenceLevel(null, "text"));
+            Assertions.assertEquals("Level must not be null",
+                    thrown.getMessage(),
+                    "The guard must fail fast with its own message, not "
+                            + "through a downstream NPE");
             Assertions.assertThrows(NullPointerException.class, () -> controller
                     .describeConfidenceLevel(ConfidenceLevel.HIGH, null));
         }
@@ -309,6 +301,50 @@ class SourceTrackingTest {
             Assertions.assertEquals(1, region.page(),
                     "A single-surface source must land on page 1");
         }
+
+        @Test
+        void explicitPageOneIsKept() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "snippet", "location": {"type": "page-region",
+                       "page": 1, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
+
+            var region = (PageRegion) controller.getFieldSource(field)
+                    .orElseThrow().extracts().get(0).location();
+            Assertions.assertEquals(1, region.page(),
+                    "Page numbers start at 1, so an explicit first page is "
+                            + "valid");
+        }
+
+        @Test
+        void rectBoundaryValuesAreAccepted() {
+            // The 0..1 range is inclusive at both ends for x and y, and
+            // inclusive at 1 for width and height: a snippet can start at the
+            // page edge and a rectangle can span the whole page.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "whole page", "location":
+                       {"type": "page-region", "rect": [0, 0, 1, 1]}},
+                      {"text": "far corner", "location":
+                       {"type": "page-region", "rect": [1, 1, 0.5, 0.5]}}]}""");
+
+            var extracts = controller.getFieldSource(field).orElseThrow()
+                    .extracts();
+            var wholePage = Assertions.assertInstanceOf(PageRegion.class,
+                    extracts.get(0).location(),
+                    "A rect covering the whole page must be kept");
+            Assertions.assertEquals(0, wholePage.rect().x());
+            Assertions.assertEquals(1, wholePage.rect().width());
+            Assertions.assertInstanceOf(PageRegion.class,
+                    extracts.get(1).location(),
+                    "A rect starting at the far page corner must be kept");
+        }
     }
 
     @Nested
@@ -329,23 +365,69 @@ class SourceTrackingTest {
             var source = controller.getFieldSource(field).orElseThrow();
             Assertions.assertNull(source.confidence());
             Assertions.assertEquals("snippet", source.extracts().get(0).text());
+            Assertions.assertEquals(1, parserDebugMessages().size(),
+                    "The unknown level must be logged exactly once, got: "
+                            + parserDebugMessages());
         }
 
         @Test
         void unknownLocationTypeIsDroppedWhileExtractTextIsKept() {
+            // The unknown-type location carries a valid page and rect — the
+            // type check alone must drop it, not the shape of the rest.
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
             fill(controller, field, """
                     {"value": "x", "extracts": [
                       {"text": "snippet", "location":
-                       {"type": "time-range", "start": 3, "end": 8}}]}""");
+                       {"type": "time-range", "start": 3, "end": 8,
+                        "page": 2, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
 
             var extract = controller.getFieldSource(field).orElseThrow()
                     .extracts().get(0);
             Assertions.assertEquals("snippet", extract.text());
             Assertions.assertNull(extract.location(),
                     "Unknown location type must be dropped");
+        }
+
+        @Test
+        void nonObjectLocationIsDroppedWhileExtractTextIsKept() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "snippet", "location": "on page three"}]}""");
+
+            var extract = controller.getFieldSource(field).orElseThrow()
+                    .extracts().get(0);
+            Assertions.assertEquals("snippet", extract.text());
+            Assertions.assertNull(extract.location(),
+                    "A non-object location must be dropped");
+            Assertions.assertEquals(1, parserDebugMessages().size(),
+                    "The malformed location must be logged exactly once, "
+                            + "got: " + parserDebugMessages());
+        }
+
+        @Test
+        void pageRegionWithoutRectDropsLocationButKeepsExtract() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            var result = fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "snippet", "location":
+                       {"type": "page-region", "page": 2}}]}""");
+
+            Assertions.assertEquals("x", field.getValue());
+            Assertions.assertTrue(rejectedIsEmpty(result),
+                    "A rect-less location must not block the value, got: "
+                            + result);
+            var extract = controller.getFieldSource(field).orElseThrow()
+                    .extracts().get(0);
+            Assertions.assertEquals("snippet", extract.text());
+            Assertions.assertNull(extract.location(),
+                    "A page-region without a rect must be dropped");
         }
 
         @Test
@@ -358,14 +440,18 @@ class SourceTrackingTest {
                             {"value": "x", "extracts": [
                               {"text": "three numbers", "location":
                                {"type": "page-region", "rect": [0.1, 0.2, 0.3]}},
-                              {"text": "no size", "location":
+                              {"text": "no width", "location":
                                {"type": "page-region", "rect": [0.1, 0.2, 0, 0.1]}},
+                              {"text": "no height", "location":
+                               {"type": "page-region", "rect": [0.1, 0.2, 0.3, 0]}},
                               {"text": "out of range", "location":
-                               {"type": "page-region", "rect": [1.5, 0.2, 0.3, 0.1]}}]}""");
+                               {"type": "page-region", "rect": [1.5, 0.2, 0.3, 0.1]}},
+                              {"text": "not numbers", "location":
+                               {"type": "page-region", "rect": [0.1, "oops", 0.3, 0.1]}}]}""");
 
             var extracts = controller.getFieldSource(field).orElseThrow()
                     .extracts();
-            Assertions.assertEquals(3, extracts.size(),
+            Assertions.assertEquals(5, extracts.size(),
                     "Every extract must survive its bad rect");
             extracts.forEach(
                     extract -> Assertions.assertNull(extract.location(),
@@ -405,6 +491,22 @@ class SourceTrackingTest {
                     .extracts();
             Assertions.assertEquals(1, extracts.size());
             Assertions.assertEquals("kept", extracts.get(0).text());
+        }
+
+        @Test
+        void objectShapedExtractsAreDroppedAsNonArray() {
+            // "extracts" must be an array. An object carrying extract-shaped
+            // values must not have its values mined for extracts.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts":
+                     {"first": {"text": "snippet"}}}""");
+
+            Assertions.assertEquals("x", field.getValue());
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "Non-array extracts must be dropped entirely");
         }
 
         @Test
@@ -448,6 +550,24 @@ class SourceTrackingTest {
 
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
                     "A source must not outlive the value it describes");
+        }
+
+        @Test
+        void staleSourceDoesNotComeBackWhenValueIsRestored() {
+            // Editing away and back is the revert case: once the source was
+            // observed stale it is gone for good, not resurrected by the
+            // field regaining the AI-written value.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, trackedValue("Acme"));
+
+            field.setValue("edited by hand");
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
+            field.setValue("Acme");
+
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "A stale source must not come back when the old value is "
+                            + "restored");
         }
 
         @Test
@@ -533,8 +653,12 @@ class SourceTrackingTest {
             var controller = controllerFor(field);
             var source = new ValueSource(null, null);
 
-            Assertions.assertThrows(NullPointerException.class,
+            var thrown = Assertions.assertThrows(NullPointerException.class,
                     () -> controller.restoreFieldSource(null, source));
+            Assertions.assertEquals("Field must not be null",
+                    thrown.getMessage(),
+                    "The guard must fail fast with its own message, not "
+                            + "through a downstream NPE");
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.restoreFieldSource(field, null));
         }
