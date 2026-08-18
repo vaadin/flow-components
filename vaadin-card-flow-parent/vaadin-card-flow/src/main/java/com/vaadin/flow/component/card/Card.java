@@ -335,7 +335,6 @@ public class Card extends Component implements HasSize,
 
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
         if (index < 0) {
             throw new IllegalArgumentException(
                     "Cannot add a component with a negative index");
@@ -351,13 +350,14 @@ public class Card extends Component implements HasSize,
                             + children.size() + ").");
         }
 
-        if (index == children.size()) {
-            getElement().appendChild(component.getElement());
-        } else {
-            var reference = children.get(index);
-            var actualIndex = getElement().indexOfChild(reference.getElement());
-            getElement().insertChild(actualIndex, component.getElement());
-        }
+        // The default-slot index is relative to getChildren(), which excludes
+        // the slotted children (header, footer, ...) that are interleaved in
+        // the element tree. Translate it to the element index and delegate to
+        // the default implementation so its signal-binding checks still run.
+        var elementIndex = index == children.size()
+                ? getElement().getChildCount()
+                : getElement().indexOfChild(children.get(index).getElement());
+        HasComponents.super.addComponentAtIndex(elementIndex, component);
     }
 
     /**
