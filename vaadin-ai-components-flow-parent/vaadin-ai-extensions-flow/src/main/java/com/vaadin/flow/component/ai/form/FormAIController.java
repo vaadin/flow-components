@@ -715,7 +715,10 @@ public class FormAIController implements AIController {
      * fills, the source it read: the snippets, where each snippet sits in the
      * document, and a {@link ConfidenceLevel confidence level}. The reported
      * source is available from {@link FieldValueChangeEvent#getFieldSource()}
-     * and from {@link #getFieldSource(HasValue)}.
+     * and from {@link #getFieldSource(HasValue)}. While the
+     * {@link #setFieldMarkerEnabled(boolean) automatic field marker} is on, the
+     * marker also shows the reported confidence level; a value reported without
+     * a level shows no indicator.
      * <p>
      * Off by default: source tracking costs extra output tokens on every fill
      * and brings document snippets into the server, so an application that does
@@ -999,6 +1002,10 @@ public class FormAIController implements AIController {
                     Registration.combine(revert, valueChange), revertValue));
         }
         FormFieldMarker.add(element, fieldMarkerI18n);
+        // Applied on every mark so a refill without a source clears the
+        // indicator a previous fill set on the reused marker.
+        FormFieldMarker.setConfidence(element, getFieldSource(field)
+                .map(ValueSource::confidence).orElse(null));
     }
 
     /**

@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
@@ -755,6 +756,77 @@ class SourceTrackingTest {
 
             Assertions.assertEquals(1, events.size());
             Assertions.assertTrue(events.get(0).getFieldSource().isEmpty());
+        }
+    }
+
+    @Nested
+    class MarkerConfidence {
+
+        @Test
+        void markerShowsConfidenceFromReportedSource() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"),
+                    "The marker must show the reported confidence level");
+        }
+
+        @Test
+        void markerShowsNoConfidenceForPlainValue() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, "\"plain\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A value with no reported source must show no indicator");
+        }
+
+        @Test
+        void markerShowsNoConfidenceWhenSourceHasNoLevel() {
+            // A missing level means unknown, not low — the marker must not
+            // show the value as doubtful.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "Acme", "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A source without a level must show no indicator");
+        }
+
+        @Test
+        void refillWithoutSourceClearsMarkerConfidence() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "first", "confidence": "medium",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fill(controller, field, "\"second\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A refill without a source must clear the indicator the "
+                            + "previous fill set on the reused marker");
+        }
+
+        private static Element markerOn(HasValue<?, ?> field) {
+            return ((Component) field).getElement().getChildren().filter(
+                    child -> "vaadin-ai-field-marker".equals(child.getTag()))
+                    .findFirst().orElseThrow(() -> new AssertionError(
+                            "Expected a marker on the field"));
         }
     }
 
