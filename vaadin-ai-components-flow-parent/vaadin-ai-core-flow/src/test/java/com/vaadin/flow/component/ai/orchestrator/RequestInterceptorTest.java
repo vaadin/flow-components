@@ -600,6 +600,29 @@ class RequestInterceptorTest {
     }
 
     @Test
+    void proceedAfterFail_isIgnored() {
+        var boom = new RuntimeException("conversion failed");
+        var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
+        var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestInterceptor(event -> continuation
+                        .set(event.postpone(Duration.ofMinutes(1))))
+                .withResponseListener(responseEvents::add).build();
+
+        orchestrator.prompt("Hello");
+        continuation.get().fail(boom);
+        continuation.get().proceed();
+
+        // The failed turn must not be resurrected by the late proceed().
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+        Assertions.assertEquals(1, responseEvents.size());
+        Assertions.assertSame(boom,
+                responseEvents.getFirst().getError().orElseThrow());
+    }
+
+    @Test
     void secondProceed_isIgnored() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
