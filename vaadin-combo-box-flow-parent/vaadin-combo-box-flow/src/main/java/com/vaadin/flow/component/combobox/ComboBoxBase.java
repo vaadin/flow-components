@@ -363,12 +363,16 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Sets the mode that controls whether an item whose label partially matches
      * the typed filter is automatically focused. The focused item is
      * highlighted in the dropdown while typing and is selected when committing
-     * the value, for example on blur, Enter press, or outside click.
+     * the value, for example on Enter press. Defaults to
+     * {@link AutoFocusPartialMatch#NONE}.
      * <p>
      * An item whose label matches the filter exactly is always focused,
      * regardless of the mode. Matching is case-insensitive. A partial match is
      * not focused when custom values are allowed with
-     * {@link #setAllowCustomValue(boolean)}.
+     * {@link #setAllowCustomValue(boolean)}, or while the dropdown is closed.
+     * For example, when auto-open is disabled with
+     * {@link #setAutoOpen(boolean)}, typing does not focus or select a match
+     * until the dropdown is opened.
      *
      * @param mode
      *            the mode to set, not {@code null}
