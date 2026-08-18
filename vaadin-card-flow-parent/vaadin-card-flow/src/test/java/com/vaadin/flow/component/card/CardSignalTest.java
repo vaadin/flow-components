@@ -39,20 +39,7 @@ class CardSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindChildren_addsChildrenToDefaultSlot() {
-        var textSignal1 = new ValueSignal<>("Item 1");
-        var textSignal2 = new ValueSignal<>("Item 2");
-        var listSignal = new ValueSignal<>(List.of(textSignal1, textSignal2));
-
-        card.bindChildren(listSignal, Span::new);
-
-        Assertions.assertEquals(2, card.getChildren().count());
-        Assertions.assertEquals("Item 1",
-                card.getChildren().findFirst().get().getElement().getText());
-    }
-
-    @Test
-    void bindChildren_slottedContentPreserved() {
+    void bindChildren_slottedContentExcludedFromChildren() {
         var header = new Div();
         card.setHeader(header);
 
@@ -60,10 +47,11 @@ class CardSignalTest extends AbstractSignalsTest {
         var listSignal = new ValueSignal<>(List.of(textSignal));
         card.bindChildren(listSignal, Span::new);
 
-        // The children binding manages only the default slot; slotted content
-        // stays in place and is excluded from getChildren().
+        // The binding owns the default slot, which getChildren() reports, while
+        // the header stays in its slot and out of the filtered view.
+        Assertions.assertEquals(List.of("Item 1"), card.getChildren()
+                .map(child -> child.getElement().getText()).toList());
         Assertions.assertSame(header, card.getHeader());
-        Assertions.assertEquals(1, card.getChildren().count());
     }
 
     @Test
@@ -72,8 +60,11 @@ class CardSignalTest extends AbstractSignalsTest {
         var listSignal = new ValueSignal<>(List.of(textSignal));
         card.bindChildren(listSignal, Span::new);
 
+        var component = new Span();
         Assertions.assertThrows(BindingActiveException.class,
-                () -> card.addComponentAtIndex(0, new Span()));
+                () -> card.addComponentAtIndex(0, component));
+        Assertions.assertEquals(1, card.getChildren().count());
+        Assertions.assertFalse(component.isAttached());
     }
 
     @Test
@@ -82,7 +73,10 @@ class CardSignalTest extends AbstractSignalsTest {
         var listSignal = new ValueSignal<>(List.of(textSignal));
         card.bindChildren(listSignal, Span::new);
 
+        var component = new Span();
         Assertions.assertThrows(BindingActiveException.class,
-                () -> card.addComponentAsFirst(new Span()));
+                () -> card.addComponentAsFirst(component));
+        Assertions.assertEquals(1, card.getChildren().count());
+        Assertions.assertFalse(component.isAttached());
     }
 }
