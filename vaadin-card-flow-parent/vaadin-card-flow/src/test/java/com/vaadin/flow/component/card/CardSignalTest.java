@@ -17,28 +17,28 @@ package com.vaadin.flow.component.card;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.AbstractSignalsTest;
+import com.vaadin.tests.AbstractSignalsUnitTest;
 
-class CardSignalTest extends AbstractSignalsTest {
+public class CardSignalTest extends AbstractSignalsUnitTest {
 
     private Card card;
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setup() {
         card = new Card();
         ui.add(card);
     }
 
     @Test
-    void bindChildren_slottedContentExcludedFromChildren() {
+    public void bindChildren_slottedContentExcludedFromChildren() {
         var header = new Div();
         card.setHeader(header);
 
@@ -48,34 +48,34 @@ class CardSignalTest extends AbstractSignalsTest {
 
         // The binding owns the default slot, which getChildren() reports, while
         // the header stays in its slot and out of the filtered view.
-        Assertions.assertEquals(List.of("Item 1"), card.getChildren()
+        Assert.assertEquals(List.of("Item 1"), card.getChildren()
                 .map(child -> child.getElement().getText()).toList());
-        Assertions.assertSame(header, card.getHeader());
+        Assert.assertSame(header, card.getHeader());
     }
 
     @Test
-    void childrenBindingActive_addComponentAtIndex_throws() {
+    public void childrenBindingActive_addComponentAtIndex_throws() {
         var textSignal = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal));
         card.bindChildren(listSignal, Span::new);
 
         var component = new Span();
-        Assertions.assertThrows(BindingActiveException.class,
+        Assert.assertThrows(BindingActiveException.class,
                 () -> card.addComponentAtIndex(0, component));
-        Assertions.assertEquals(1, card.getChildren().count());
-        Assertions.assertFalse(component.isAttached());
+        Assert.assertEquals(1, card.getChildren().count());
+        Assert.assertFalse(component.isAttached());
     }
 
     @Test
-    void childrenBindingActive_addComponentAsFirst_throws() {
+    public void childrenBindingActive_addComponentAsFirst_throws() {
         var textSignal = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal));
         card.bindChildren(listSignal, Span::new);
 
         var component = new Span();
-        Assertions.assertThrows(BindingActiveException.class,
+        Assert.assertThrows(BindingActiveException.class,
                 () -> card.addComponentAsFirst(component));
-        Assertions.assertEquals(1, card.getChildren().count());
-        Assertions.assertFalse(component.isAttached());
+        Assert.assertEquals(1, card.getChildren().count());
+        Assert.assertFalse(component.isAttached());
     }
 }
