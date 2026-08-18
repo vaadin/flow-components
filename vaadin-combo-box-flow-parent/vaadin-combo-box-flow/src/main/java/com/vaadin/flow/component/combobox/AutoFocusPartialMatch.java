@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
+
 /**
  * Defines whether an item whose label partially matches the typed filter is
  * automatically focused in the dropdown of a combo box.
@@ -54,5 +56,19 @@ public enum AutoFocusPartialMatch {
      */
     public String getClientName() {
         return clientName;
+    }
+
+    /**
+     * Gets the mode matching the given client-side name, or {@link #NONE} if no
+     * mode matches.
+     *
+     * @param clientName
+     *            the client-side name of the mode
+     * @return the matching mode, or {@link #NONE}
+     */
+    static AutoFocusPartialMatch fromClientName(String clientName) {
+        return Arrays.stream(values())
+                .filter(mode -> mode.getClientName().equals(clientName))
+                .findFirst().orElse(NONE);
     }
 }

@@ -353,10 +353,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @since 25.3
      */
     public AutoFocusPartialMatch getAutoFocusPartialMatch() {
-        String clientName = getElement().getProperty("autoFocusPartialMatch");
-        return Stream.of(AutoFocusPartialMatch.values())
-                .filter(mode -> mode.getClientName().equals(clientName))
-                .findFirst().orElse(AutoFocusPartialMatch.NONE);
+        return AutoFocusPartialMatch.fromClientName(
+                getElement().getProperty("autoFocusPartialMatch"));
     }
 
     /**
