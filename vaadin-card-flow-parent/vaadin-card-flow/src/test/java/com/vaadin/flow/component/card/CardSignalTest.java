@@ -67,6 +67,36 @@ class CardSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void childrenBindingActive_removeAll_throws() {
+        var textSignal = new ValueSignal<>("Item 1");
+        var listSignal = new ValueSignal<>(List.of(textSignal));
+        card.bindChildren(listSignal, Span::new);
+
+        var exception = Assertions.assertThrows(BindingActiveException.class,
+                () -> card.removeAll());
+        // The message names the method that was called, not the per-child
+        // remove that the implementation uses internally.
+        Assertions.assertTrue(exception.getMessage().startsWith("removeAll"),
+                "Unexpected message: " + exception.getMessage());
+        Assertions.assertEquals(1, card.getChildren().count());
+    }
+
+    @Test
+    void childrenBindingActive_emptyDefaultSlot_removeAll_throws() {
+        var header = new Div();
+        card.setHeader(header);
+
+        var listSignal = new ValueSignal<>(List.<ValueSignal<String>> of());
+        card.bindChildren(listSignal, Span::new);
+
+        // Nothing is in the default slot, so there is no child whose removal
+        // would report the active binding.
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> card.removeAll());
+        Assertions.assertSame(header, card.getHeader());
+    }
+
+    @Test
     void childrenBindingActive_addComponentAsFirst_throws() {
         var textSignal = new ValueSignal<>("Item 1");
         var listSignal = new ValueSignal<>(List.of(textSignal));
