@@ -8,6 +8,7 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
+const { readComponentPoms } = require('./lib/modules.js');
 const itFolder = 'integration-tests';
 let version;
 
@@ -69,8 +70,10 @@ async function createPom() {
     // Add component-flow and component-testbench dependencies
     const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
 
-    if (fs.existsSync(`${name}/${id}-flow/pom.xml`)) {
-      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow/pom.xml`, 'utf8'));
+    // Add a dependency for every published module of the component, e.g.
+    // vaadin-ai-core-flow and vaadin-ai-extensions-flow
+    for (const pomPath of readComponentPoms(name)) {
+      const js = await xml2js.parseStringPromise(fs.readFileSync(pomPath, 'utf8'));
       addDependency(prev, 'com.vaadin', js.project.artifactId[0], `${componentVersion}`);
     }
     if (fs.existsSync(`${name}/${id}-testbench/pom.xml`)) {
