@@ -151,16 +151,13 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         $("input").id(METADATA_PROVIDER_INPUT).sendKeys("2000-02-02",
                 Keys.ENTER);
 
-        setDateInputValue("2/2/2000");
-        setTimeInputValue("12:00");
-        // The client only asks the provider about the dates that the calendar
-        // renders, so with the overlay closed only the server rejects the date
-        assertServerInvalid();
-        assertErrorMessage(DISABLED_DATE_ERROR_MESSAGE);
+        // The client cannot tell that the provider disables the date, so the
+        // component waits for both pickers to be filled before committing
+        setValue("2/2/2000", "12:00");
+        assertValidation(false, DISABLED_DATE_ERROR_MESSAGE);
 
         setDateInputValue("2/3/2000");
-        assertServerValid();
-        assertErrorMessage("");
+        assertValidation(true, "");
     }
 
     @Test
