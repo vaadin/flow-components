@@ -21,6 +21,7 @@
 
 const fs = require('fs');
 const { parseArgs } = require('util');
+const { readComponentPoms } = require('./lib/modules.js');
 
 // Read component parent modules from the root pom.xml
 function readParentModules() {
@@ -39,6 +40,18 @@ function dependsOn(pomXml, artifactId) {
   );
 }
 
+// Collect the artifact ids of the published modules of a component. The
+// artifact id of each module matches its directory name.
+function readComponentArtifactIds(component) {
+  const parentModule = `vaadin-${component}-flow-parent`;
+  if (!fs.existsSync(parentModule)) {
+    return [`vaadin-${component}-flow`];
+  }
+  return readComponentPoms(parentModule).map(
+    (pomPath) => pomPath.split('/').at(-2)
+  );
+}
+
 // Map changed file paths to component names. Returns null (= full
 // validation) if any file is outside a component parent module.
 function componentsFromChangedFiles(changedFiles) {
@@ -53,24 +66,24 @@ function componentsFromChangedFiles(changedFiles) {
   return [...components];
 }
 
-// Recursively add components whose main module depends on one of the
-// given components
+// Recursively add components whose modules depend on one of the given
+// components
 function addDependentComponents(components) {
   const parentModules = readParentModules();
   const result = [...components];
   const queue = [...components];
   while (queue.length > 0) {
-    const artifactId = `vaadin-${queue.shift()}-flow`;
+    const artifactIds = readComponentArtifactIds(queue.shift());
     for (const parentModule of parentModules) {
       const componentName = parentModule.replace(/^vaadin-(.+)-flow-parent$/, '$1');
       if (result.includes(componentName)) {
         continue;
       }
-      const pomPath = `${parentModule}/vaadin-${componentName}-flow/pom.xml`;
-      if (!fs.existsSync(pomPath)) {
-        continue;
-      }
-      if (dependsOn(fs.readFileSync(pomPath, 'utf8'), artifactId)) {
+      const dependent = readComponentPoms(parentModule).some((pomPath) => {
+        const pomXml = fs.readFileSync(pomPath, 'utf8');
+        return artifactIds.some((artifactId) => dependsOn(pomXml, artifactId));
+      });
+      if (dependent) {
         result.push(componentName);
         queue.push(componentName);
       }

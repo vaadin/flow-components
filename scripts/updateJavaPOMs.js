@@ -8,6 +8,7 @@
 const xml2js = require('xml2js');
 const fs = require('fs');
 const path = require('path');
+const { readComponentPoms } = require('./lib/modules.js');
 
 const templateDir = path.dirname(process.argv[1]) + '/templates';
 const mod = process.argv[2] || process.exit(1);
@@ -66,9 +67,24 @@ function mergeProfiles(prj1, prj2) {
 }
 
 function mergeProperties(props1, props2) {
-  const arr1 = (props1 || []).filter(o => typeof o === 'object');
-  const arr2 = (props2 || []).filter(o => typeof o === 'object');
-  return [...arr1, ...arr2.filter(a => !arr1.find(b => Object.keys(b)[0] === Object.keys(a)[0]))];
+  // each <properties> element parses into one object holding all property
+  // keys, so merge at the key level with props1 (the template) winning
+  const obj1 = (props1 || []).find(o => typeof o === 'object') || {};
+  const obj2 = (props2 || []).find(o => typeof o === 'object') || {};
+  const merged = {...obj2, ...obj1};
+  return Object.keys(merged).length ? [merged] : [];
+}
+
+// Order the project elements by the maven pom convention, so that elements
+// assigned after parsing (e.g. licenses) do not end up at the end of the file
+function orderProject(project) {
+  const order = ['$', 'modelVersion', 'parent', 'groupId', 'artifactId', 'version',
+    'packaging', 'name', 'description', 'licenses', 'modules', 'properties',
+    'dependencyManagement', 'dependencies', 'build', 'profiles'];
+  const ordered = {};
+  order.filter(key => key in project).forEach(key => ordered[key] = project[key]);
+  Object.keys(project).filter(key => !order.includes(key)).forEach(key => ordered[key] = project[key]);
+  return ordered;
 }
 
 async function consolidate(template, pom, cb) {
@@ -78,6 +94,9 @@ async function consolidate(template, pom, cb) {
   await renameBase(tplJs);
 
   tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+  // keep the identity of the existing pom, e.g. "Vaadin AI Core"
+  pomJs.project.name && (tplJs.project.name = pomJs.project.name);
+  pomJs.project.description && (tplJs.project.description = pomJs.project.description);
 
   pomJs.project.dependencies = pomJs.project.dependencies || [];
   pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
@@ -86,6 +105,7 @@ async function consolidate(template, pom, cb) {
 
   cb && cb(tplJs, pomJs);
 
+  tplJs.project = orderProject(tplJs.project);
   const xml = new xml2js.Builder({renderOpts: {pretty: true, indent: '    '}}).buildObject(tplJs);
   console.log(`writing ${pom}`);
   fs.writeFileSync(pom, xml + '\n', 'utf8');
@@ -96,7 +116,12 @@ async function consolidatePomParent() {
   consolidate(template, `${mod}/pom.xml`, (js, org)  => {
     const modules = js.project.modules[0].module;
 
-    renameComponent(modules, name);
+    // list the published component modules present in the parent directory,
+    // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
+    modules.length = 0;
+    readComponentPoms(mod)
+      .map(pomPath => path.basename(path.dirname(pomPath)))
+      .forEach(moduleName => modules.push(moduleName));
     // add testbench if module exists
     if (fs.existsSync(`${mod}/${name}-testbench/pom.xml`)) {
       modules.push(`${name}-testbench`);
@@ -116,14 +141,25 @@ async function consolidatePomParent() {
 }
 
 async function consolidatePomFlow() {
-  const template = proComponents.includes(componentName) ? 'pom-flow-pro.xml' : 'pom-flow.xml';
-  consolidate(template, `${mod}/${name}-flow/pom.xml`, (tplJs, pomJs) => {
-    tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
-    tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
-    if (pomJs.project.build[0].resources) {
-      tplJs.project.build[0].resources =  pomJs.project.build[0].resources;
-    }
-  });
+  // consolidate every published component module pom in the parent directory,
+  // e.g. vaadin-ai-core-flow and vaadin-ai-extensions-flow
+  for (const pomPath of readComponentPoms(mod)) {
+    // a module is pro when the whole component is pro or when the module pom
+    // declares the commercial license, e.g. vaadin-ai-extensions-flow
+    const pro = proComponents.includes(componentName)
+      || fs.readFileSync(pomPath, 'utf8').includes('commercial-license-and-service-terms');
+    const template = pro ? 'pom-flow-pro.xml' : 'pom-flow.xml';
+    await consolidate(template, pomPath, (tplJs, pomJs) => {
+      // keep the licensing of the existing module pom
+      pomJs.project.licenses && (tplJs.project.licenses = pomJs.project.licenses);
+      pomJs.project.dependencyManagement && (tplJs.project.dependencyManagement = pomJs.project.dependencyManagement);
+      tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
+      tplJs.project.properties = mergeProperties(tplJs.project.properties, pomJs.project.properties);
+      if (pomJs.project.build[0].resources) {
+        tplJs.project.build[0].resources =  pomJs.project.build[0].resources;
+      }
+    });
+  }
 }
 async function consolidatePomTB() {
   const tbPom = `${mod}/${name}-testbench/pom.xml`;
