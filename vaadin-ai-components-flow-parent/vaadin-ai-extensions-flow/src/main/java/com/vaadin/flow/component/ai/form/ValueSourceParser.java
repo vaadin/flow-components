@@ -178,7 +178,13 @@ final class ValueSourceParser {
         if (node == null || node.isNull()) {
             return 1;
         }
-        if (node.isIntegralNumber() && node.asInt() >= 1) {
+        // Whole-number floats (e.g. 2.0) are accepted like
+        // FormValueConverter's integer handling accepts them for fields;
+        // canConvertToInt keeps a number beyond the int range from silently
+        // truncating to its low 32 bits and passing the range check.
+        if (node.isNumber() && node.canConvertToInt()
+                && node.asDouble() == Math.floor(node.asDouble())
+                && node.asInt() >= 1) {
             return node.asInt();
         }
         LOGGER.debug("Dropping location with invalid page number reported "

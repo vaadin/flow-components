@@ -460,6 +460,44 @@ class SourceTrackingTest {
         }
 
         @Test
+        void wholeNumberFloatPageIsAccepted() {
+            // LLMs sometimes emit 2.0 for an integer — accepted the same way
+            // integer fields accept whole-number floats.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "snippet", "location":
+                       {"type": "page-region", "page": 2.0,
+                        "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
+
+            var region = (PageRegion) controller.getFieldSource(field)
+                    .orElseThrow().extracts().get(0).location();
+            Assertions.assertEquals(2, region.page());
+        }
+
+        @Test
+        void pageBeyondIntRangeDropsLocationButKeepsExtract() {
+            // 4294967297 truncates to 1 in a plain asInt() — the location
+            // must be dropped instead of landing on a page it never named.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "x", "extracts": [
+                      {"text": "snippet", "location":
+                       {"type": "page-region", "page": 4294967297,
+                        "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
+
+            var extract = controller.getFieldSource(field).orElseThrow()
+                    .extracts().get(0);
+            Assertions.assertEquals("snippet", extract.text());
+            Assertions.assertNull(extract.location(),
+                    "An out-of-int-range page must drop the location");
+        }
+
+        @Test
         void invalidPageNumberDropsLocationButKeepsExtract() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
