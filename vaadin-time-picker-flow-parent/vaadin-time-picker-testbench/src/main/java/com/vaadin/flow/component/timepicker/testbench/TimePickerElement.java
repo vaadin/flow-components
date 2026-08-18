@@ -21,6 +21,8 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.HasValidation;
@@ -33,8 +35,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-time-picker")
 public class TimePickerElement extends TestBenchElement
-        implements HasStringValueProperty, HasSelectByText, HasHelper,
-        HasClearButton, HasValidation {
+        implements HasStringValueProperty, HasSelectByText, HasLabel,
+        HasPlaceholder, HasHelper, HasClearButton, HasValidation {
     /**
      * Gets the <code>&lt;input&gt;</code> element inside the
      * <code>&lt;vaadin-time-picker&gt;</code> element.
