@@ -29,16 +29,16 @@ package com.vaadin.flow.component.ai.common;
  */
 public enum ConfidenceLevel {
 
-    /** The value is written in the source and copied as it is. */
+    /** The value is written in the document and copied as it is. */
     HIGH,
 
     /**
-     * The value follows from the source but needed some interpretation, such as
-     * combining fields, converting units, or choosing one candidate over
+     * The value follows from the document but needed some interpretation, such
+     * as combining fields, converting units, or choosing one candidate over
      * another.
      */
     MEDIUM,
 
-    /** The source is unclear, or the value is a guess. */
+    /** The document is unclear, or the value is a guess. */
     LOW
 }
