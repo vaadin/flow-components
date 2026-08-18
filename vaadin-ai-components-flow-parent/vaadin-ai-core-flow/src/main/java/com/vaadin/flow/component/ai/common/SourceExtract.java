@@ -22,6 +22,10 @@ import java.io.Serializable;
  * model reports, not a verified quote: the controller never sees the source
  * document, so the snippet records what the AI said its source was rather than
  * proof that the value is correct.
+ * <p>
+ * The location says where the snippet sits inside its source document, but not
+ * which document. Sources are unambiguous only when a single document is
+ * attached per prompt.
  *
  * @param text
  *            the snippet as the model reports it, not {@code null}

@@ -724,6 +724,11 @@ public class FormAIController implements AIController {
      * type) is dropped and logged while the value is still written. The
      * extracts are what the model says it read — they are not checked against
      * the document.
+     * <p>
+     * A source says where a snippet is inside a document, but not which
+     * document. Send at most one attachment per prompt while source tracking is
+     * on: with several, there is no way to tell which one a reported location
+     * points into.
      *
      * @param sourceTrackingEnabled
      *            {@code true} to ask the LLM for sources, {@code false} to not
