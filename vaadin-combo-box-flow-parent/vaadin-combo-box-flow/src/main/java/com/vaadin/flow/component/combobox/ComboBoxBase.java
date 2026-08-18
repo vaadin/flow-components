@@ -346,7 +346,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Gets the mode that controls whether an item whose label partially matches
-     * the typed filter is automatically focused.
+     * the typed filter is automatically focused. Defaults to
+     * {@link AutoFocusPartialMatch#NONE}.
      *
      * @return the mode, not {@code null}
      * @see #setAutoFocusPartialMatch(AutoFocusPartialMatch)
