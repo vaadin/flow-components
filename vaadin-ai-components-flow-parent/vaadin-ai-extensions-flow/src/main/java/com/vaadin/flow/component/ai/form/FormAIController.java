@@ -702,6 +702,7 @@ public class FormAIController implements AIController {
      *
      * @return {@code true} when source tracking is on, {@code false} otherwise
      * @see #setSourceTrackingEnabled(boolean)
+     * @since 25.3
      */
     public boolean isSourceTrackingEnabled() {
         return sourceTrackingEnabled;
@@ -733,6 +734,7 @@ public class FormAIController implements AIController {
      * @param sourceTrackingEnabled
      *            {@code true} to ask the LLM for sources, {@code false} to not
      * @return this controller, for chaining
+     * @since 25.3
      */
     public FormAIController setSourceTrackingEnabled(
             boolean sourceTrackingEnabled) {
@@ -753,6 +755,7 @@ public class FormAIController implements AIController {
      * @param description
      *            the meaning the LLM sees for the level, not {@code null}
      * @return this controller, for chaining
+     * @since 25.3
      */
     public FormAIController describeConfidenceLevel(ConfidenceLevel level,
             String description) {
@@ -781,6 +784,7 @@ public class FormAIController implements AIController {
      *         none applies
      * @throws NullPointerException
      *             if {@code field} is {@code null}
+     * @since 25.3
      */
     public Optional<ValueSource> getFieldSource(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
@@ -809,6 +813,7 @@ public class FormAIController implements AIController {
      *            the source to restore, not {@code null}
      * @throws NullPointerException
      *             if {@code field} or {@code source} is {@code null}
+     * @since 25.3
      */
     public void restoreFieldSource(HasValue<?, ?> field, ValueSource source) {
         Objects.requireNonNull(field, "Field must not be null");
