@@ -322,7 +322,9 @@ public class FormAIController implements AIController {
      * The last source reported (or restored) per field, together with the field
      * value it describes. A source lasts as long as the value it describes, so
      * entries are dropped lazily on read when the field no longer holds the
-     * recorded value — no per-field listener is needed.
+     * recorded value — no per-field listener is needed. Stale entries nobody
+     * reads are swept at turn end so the map does not grow with sources (and
+     * their field references) that can never be returned again.
      */
     private final Map<HasValue<?, ?>, StoredFieldSource> fieldSources = new HashMap<>();
     /**
@@ -1154,11 +1156,25 @@ public class FormAIController implements AIController {
             // Runs regardless of success, failure, or an exception escaping
             // the diff so the fields never stay locked for the user.
             stopWorking();
+            purgeStaleFieldSources();
             // Clear last, so any field writes still happening as part of the
             // turn (cascades, the marking pass) count as AI writes rather
             // than user edits that would clear the marker.
             turn.filling = false;
         }
+    }
+
+    /**
+     * Drops every stored source whose field no longer holds the value it was
+     * recorded with. {@link #getFieldSource} already skips such entries on
+     * read; the turn-end sweep keeps entries nobody reads — an application
+     * consuming sources only through {@link FieldValueChangeEvent}, or a field
+     * removed from the form after an edit — from accumulating for the life of
+     * the controller.
+     */
+    private void purgeStaleFieldSources() {
+        fieldSources.entrySet().removeIf(entry -> !Objects
+                .equals(entry.getValue().value(), entry.getKey().getValue()));
     }
 
     /**
