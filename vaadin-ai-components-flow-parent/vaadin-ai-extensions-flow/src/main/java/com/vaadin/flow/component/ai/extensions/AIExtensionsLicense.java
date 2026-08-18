@@ -21,7 +21,8 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
 
 /**
  * Development-mode license check for the Vaadin AI Extensions product, called
- * from the static initializer of each controller in this module.
+ * from the constructors of the controllers and from the tool factories in this
+ * module.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
@@ -55,12 +56,13 @@ public final class AIExtensionsLicense {
             properties.load(stream);
         } catch (IOException e) {
             LOGGER.warn("Unable to read AI Extensions properties file", e);
-            throw new ExceptionInInitializerError(e);
+            throw new IllegalStateException(
+                    "Unable to read AI Extensions properties file", e);
         }
 
         // A null build type allows trial licensing builds
-        LicenseChecker.checkLicenseFromStaticBlock("vaadin-ai-extensions",
-                properties.getProperty("ai-extensions.version"), null,
-                Capabilities.of(Capability.PRE_TRIAL));
+        LicenseChecker.checkLicense("vaadin-ai-extensions",
+                properties.getProperty("ai-extensions.version"),
+                Capabilities.of(Capability.PRE_TRIAL), null);
     }
 }

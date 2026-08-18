@@ -46,10 +46,6 @@ public final class ChartAITools {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAITools.class);
 
-    static {
-        AIExtensionsLicense.check();
-    }
-
     /**
      * Callback interface that chart tool consumers must implement to provide
      * chart state access and mutation operations.
@@ -229,6 +225,7 @@ public final class ChartAITools {
      * @return a list of all chart tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
+        AIExtensionsLicense.check();
         Objects.requireNonNull(callbacks, "callbacks must not be null");
         return List.of(getChartState(callbacks),
                 updateChartConfiguration(callbacks),

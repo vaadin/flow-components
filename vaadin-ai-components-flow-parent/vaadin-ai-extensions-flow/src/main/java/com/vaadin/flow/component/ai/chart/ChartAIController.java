@@ -109,10 +109,6 @@ public class ChartAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAIController.class);
 
-    static {
-        AIExtensionsLicense.check();
-    }
-
     private static final String CHART_ID = "chart";
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
@@ -153,6 +149,7 @@ public class ChartAIController implements AIController {
      *            {@code null}
      */
     public ChartAIController(Chart chart, DatabaseProvider databaseProvider) {
+        AIExtensionsLicense.check();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "Database provider cannot be null");

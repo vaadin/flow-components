@@ -41,10 +41,6 @@ public final class GridAITools {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAITools.class);
 
-    static {
-        AIExtensionsLicense.check();
-    }
-
     private GridAITools() {
     }
 
@@ -259,6 +255,7 @@ public final class GridAITools {
      * @return a list of all grid tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(Callbacks callbacks) {
+        AIExtensionsLicense.check();
         Objects.requireNonNull(callbacks, "callbacks must not be null");
         return List.of(getGridState(callbacks), updateGridData(callbacks));
     }

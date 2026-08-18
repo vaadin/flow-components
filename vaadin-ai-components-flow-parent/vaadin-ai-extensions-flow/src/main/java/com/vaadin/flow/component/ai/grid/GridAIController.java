@@ -104,10 +104,6 @@ public class GridAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAIController.class);
 
-    static {
-        AIExtensionsLicense.check();
-    }
-
     private static final String GRID_ID = "grid";
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_grid_instructions";
@@ -146,6 +142,7 @@ public class GridAIController implements AIController {
      */
     public GridAIController(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider) {
+        AIExtensionsLicense.check();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
         this.databaseProvider = Objects.requireNonNull(databaseProvider,
                 "DatabaseProvider must not be null");

@@ -179,10 +179,6 @@ public class FormAIController implements AIController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAIController.class);
 
-    static {
-        AIExtensionsLicense.check();
-    }
-
     /**
      * Key under which a field's opaque id is stored on the field component via
      * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
@@ -323,6 +319,7 @@ public class FormAIController implements AIController {
      */
     public <T extends Component & HasComponents> FormAIController(
             T fieldContainer) {
+        AIExtensionsLicense.check();
         Objects.requireNonNull(fieldContainer,
                 "Field container must not be null");
         this.fieldContainer = fieldContainer;
@@ -354,6 +351,7 @@ public class FormAIController implements AIController {
      */
     public <T extends Component & HasComponents> FormAIController(
             T fieldContainer, Binder<?> binder) {
+        AIExtensionsLicense.check();
         Objects.requireNonNull(fieldContainer,
                 "Field container must not be null");
         Objects.requireNonNull(binder, "Binder must not be null");
