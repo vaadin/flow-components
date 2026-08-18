@@ -125,6 +125,7 @@ abstract class ComboBoxBaseTest {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Assertions.assertEquals(AutoFocusPartialMatch.NONE,
                 comboBox.getAutoFocusPartialMatch());
+
         comboBox.setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH);
         Assertions.assertEquals("first-match",
                 comboBox.getElement().getProperty("autoFocusPartialMatch"));

@@ -377,7 +377,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @since 25.3
      */
     public void setAutoFocusPartialMatch(AutoFocusPartialMatch mode) {
-        Objects.requireNonNull(mode, "The mode to be set cannot be null");
+        Objects.requireNonNull(mode, "The mode cannot be null");
         getElement().setProperty("autoFocusPartialMatch", mode.getClientName());
     }
 
