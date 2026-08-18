@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.signals.BindingActiveException;
@@ -35,7 +34,7 @@ class CardSignalTest extends AbstractSignalsTest {
     @BeforeEach
     void setup() {
         card = new Card();
-        UI.getCurrent().add(card);
+        ui.add(card);
     }
 
     @Test

@@ -336,7 +336,6 @@ public class Card extends Component implements HasSize, HasAriaLabel,
 
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
         if (index < 0) {
             throw new IllegalArgumentException(
                     "Cannot add a component with a negative index");
