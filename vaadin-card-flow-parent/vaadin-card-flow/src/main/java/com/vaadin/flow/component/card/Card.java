@@ -32,6 +32,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.signals.BindingActiveException;
 
 /**
  * Card is a visual content container for creating a card-based layout.
@@ -331,7 +333,28 @@ public class Card extends Component implements HasSize, HasAriaLabel,
 
     @Override
     public void removeAll() {
+        // Removing the children one by one only rejects an active binding
+        // while the bound list is non-empty.
+        if (hasChildrenBinding()) {
+            throw new BindingActiveException(
+                    "removeAll is not allowed while a binding for children exists.");
+        }
         getChildren().toList().forEach(this::remove);
+    }
+
+    /**
+     * Checks whether a children binding set up with {@code bindChildren} is
+     * active on this component's element. Mirrors the check that Flow performs
+     * internally, reading the binding state from the element node.
+     *
+     * @return {@code true} if a children binding is active
+     */
+    private boolean hasChildrenBinding() {
+        return getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .map(feature -> feature
+                        .hasBinding(SignalBindingFeature.CHILDREN))
+                .orElse(false);
     }
 
     @Override
