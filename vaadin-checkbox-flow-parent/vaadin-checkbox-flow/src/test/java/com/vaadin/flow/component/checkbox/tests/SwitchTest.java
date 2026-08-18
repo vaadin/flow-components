@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.tests.MockUIExtension;
@@ -72,5 +73,27 @@ class SwitchTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Switch.class));
+    }
+
+    @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(Switch.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        Switch field = new Switch();
+        field.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 }

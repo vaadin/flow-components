@@ -17,7 +17,6 @@ package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -48,8 +47,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public List<MonthCalendarElement> getVisibleMonthCalendars() {
             return this.$("vaadin-month-calendar").all().stream()
-                    .map(el -> el.wrap(MonthCalendarElement.class))
-                    .collect(Collectors.toList());
+                    .map(el -> el.wrap(MonthCalendarElement.class)).toList();
         }
 
         /**
@@ -93,9 +91,42 @@ public class DatePickerElement extends TestBenchElement
             return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
         }
+
+        /**
+         * Gets the day cells that show a day of the month rendered by the month
+         * calendar.
+         *
+         * @return the day cells
+         */
+        public List<DayElement> getDays() {
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withCondition(day -> !day.getText().isEmpty()).all();
+        }
+
+        /**
+         * Gets the day cell for the given day of the month. The cell renders
+         * the state of the day: for example, a day that cannot be selected has
+         * a {@code disabled} attribute, and custom part names from the date
+         * metadata show up in its {@code part} attribute.
+         *
+         * @param day
+         *            the day of the month
+         * @return the day cell, or {@code null} if the month calendar does not
+         *         show the given day
+         */
+        public DayElement getDay(int day) {
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withText(String.valueOf(day)).all().stream().findFirst()
+                    .orElse(null);
+        }
     }
 
     public static class WeekdayElement extends TestBenchElement {
+    }
+
+    public static class DayElement extends TestBenchElement {
     }
 
     /**

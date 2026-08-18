@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
@@ -249,6 +250,28 @@ class IntegerFieldTest extends TextFieldTest {
 
         field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        IntegerField field = new IntegerField();
+        Assertions.assertTrue(field instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        IntegerField field = new IntegerField();
+
+        field.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 
     @Test

@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -49,7 +48,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/crud", version = "25.3.0-alpha11")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -655,7 +654,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
     private static List<String> variantNames(CrudVariant... variants) {
         return Arrays.stream(variants).map(CrudVariant::getVariantName)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

@@ -32,6 +32,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
@@ -112,13 +113,13 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.3.0-alpha11")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
-        implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton,
+        implements Focusable<TimePicker>, HasAllowedCharPattern,
+        HasAriaDescription, HasAriaLabel, HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
         HasPrefix, HasThemeVariant<TimePickerVariant>, HasValidationProperties,
         HasValidator<LocalTime>, HasPlaceholder {
@@ -451,6 +452,23 @@ public class TimePicker
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     @Override

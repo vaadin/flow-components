@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -57,7 +56,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/notification", version = "25.3.0-alpha11")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -645,8 +644,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
         this.getElement().setPropertyList("virtualChildNodeIds",
                 getElement().getChildren()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
+                        .map(element -> element.getNode().getId()).toList());
 
         this.getElement().callJsFunction("requestContentUpdate");
     }

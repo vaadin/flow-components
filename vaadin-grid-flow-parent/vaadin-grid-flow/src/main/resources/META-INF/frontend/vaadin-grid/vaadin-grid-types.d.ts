@@ -5,9 +5,12 @@
 import type { Grid, GridDefaultItem } from '@vaadin/grid/src/vaadin-grid.js';
 import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
-import type { GridSorterDefinition, GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
+import type { GridSorterDefinition } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent, GridItemModel } from '@vaadin/grid/src/vaadin-grid-mixin.js';
 import type { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
+import type { GridConnector } from '../gridConnector.js';
+
+export type { GridConnector };
 
 /** An item sent by the server-side data communicator */
 export interface Item {
@@ -48,32 +51,6 @@ export interface GridServer {
   sortersChanged(sorters: GridSorterDefinition[]): void;
   updateContextMenuTargetItem(key: string, columnId: string): void;
   updateExpandedState(key: unknown, expanded: boolean): void;
-}
-
-/** The client-side connector API, called by the server-side Flow component */
-export interface GridConnector {
-  hasRootRequestQueue(): boolean;
-  doSelection(items: (Item | null)[], userOriginated?: boolean): void;
-  doDeselection(items: Item[], userOriginated?: boolean): void;
-  getRenderedRange(): ItemRange;
-  getFetchRange(): ItemRange;
-  fetchCurrentRange(): Promise<void>;
-  resolvePendingCallbacks(): void;
-  set(startIndex: number, items: Item[]): void;
-  updateFlatData(updatedItems: Item[]): void;
-  clear(index: number, length: number): void;
-  reset(): void;
-  updateSize(size: number): void;
-  updateUniqueItemIdPath(path: string): void;
-  confirm(id: number): void;
-  setSelectionMode(mode: SelectionMode): void;
-  setSorterDirections(directions: { column: string; direction: GridSorterDirection }[]): void;
-  setHeaderRenderer(
-    column: GridColumn<Item>,
-    options: { content: Node | string | null; showSorter?: boolean; sorterPath?: string }
-  ): void;
-  setFooterRenderer(column: GridColumn<Item>, options: { content: Node | string | null }): void;
-  scrollToItem(itemKey: string, ...args: number[]): void;
 }
 
 /**

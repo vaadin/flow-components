@@ -37,6 +37,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasTheme;
@@ -91,9 +92,10 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
  * @since 23.2
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue> implements
-        Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel, HasAutoOpen,
-        HasClearButton, HasDataView<TItem, String, ComboBoxDataView<TItem>>,
+        extends AbstractSinglePropertyField<TComponent, TValue>
+        implements Focusable<TComponent>, HasAllowedCharPattern,
+        HasAriaDescription, HasAriaLabel, HasAutoOpen, HasClearButton,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
@@ -459,6 +461,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**

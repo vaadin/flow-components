@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -619,8 +618,7 @@ public class TreeGrid<T> extends Grid<T>
     public Column<T> setHierarchyColumn(String propertyName,
             ValueProvider<T, ?> valueProvider) {
         List<String> currentPropertyList = getColumns().stream()
-                .map(Column::getKey).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .map(Column::getKey).filter(Objects::nonNull).toList();
         resetColumns(propertyName, valueProvider, currentPropertyList);
         return getColumnByKey(propertyName);
     }
@@ -923,7 +921,7 @@ public class TreeGrid<T> extends Grid<T>
                             getItemsWithChildrenRecursively(getDataProvider()
                                     .fetchChildren(
                                             new HierarchicalQuery<>(null, item))
-                                    .collect(Collectors.toList()), depth - 1));
+                                    .toList(), depth - 1));
                 });
         return itemsWithChildren;
     }

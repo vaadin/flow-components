@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -179,7 +180,7 @@ public class GridListDataViewPage extends Div {
                 .mapToObj(i -> new Person("Person " + i, "lastName",
                         "person" + i + "@test.com", (i % 90) + 15,
                         Gender.UNKNOWN, new Address()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

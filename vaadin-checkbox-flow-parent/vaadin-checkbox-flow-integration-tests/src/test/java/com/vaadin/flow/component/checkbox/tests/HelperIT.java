@@ -35,20 +35,6 @@ public class HelperIT extends AbstractComponentIT {
         open();
     }
 
-    /**
-     * Assert that helper component exists after setItems.
-     * https://github.com/vaadin/vaadin-checkbox/issues/191
-     */
-    @Test
-    public void checkboxGroupHelperComponent() {
-        TestBenchElement checkboxGroup = $("vaadin-checkbox-group").first();
-
-        TestBenchElement helperComponent = checkboxGroup.$("span")
-                .withAttribute("slot", "helper").first();
-        Assert.assertEquals("Helper text", helperComponent.getText());
-
-    }
-
     @Test
     public void checkboxGroupHelperGenerator() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)

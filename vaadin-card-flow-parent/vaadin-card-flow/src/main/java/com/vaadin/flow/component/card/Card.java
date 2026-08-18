@@ -32,6 +32,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.signals.BindingActiveException;
 
 /**
  * Card is a visual content container for creating a card-based layout.
@@ -40,7 +42,7 @@ import com.vaadin.flow.dom.Element;
  * @since 24.7
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/card", version = "25.3.0-alpha11")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize, HasAriaLabel,
         HasAriaRole, HasComponents, HasThemeVariant<CardVariant> {
@@ -331,12 +333,32 @@ public class Card extends Component implements HasSize, HasAriaLabel,
 
     @Override
     public void removeAll() {
+        // Removing the children one by one only rejects an active binding
+        // while the bound list is non-empty.
+        if (hasChildrenBinding()) {
+            throw new BindingActiveException(
+                    "removeAll is not allowed while a binding for children exists.");
+        }
         getChildren().toList().forEach(this::remove);
+    }
+
+    /**
+     * Checks whether a children binding set up with {@code bindChildren} is
+     * active on this component's element. Mirrors the check that Flow performs
+     * internally, reading the binding state from the element node.
+     *
+     * @return {@code true} if a children binding is active
+     */
+    private boolean hasChildrenBinding() {
+        return getElement().getNode()
+                .getFeatureIfInitialized(SignalBindingFeature.class)
+                .map(feature -> feature
+                        .hasBinding(SignalBindingFeature.CHILDREN))
+                .orElse(false);
     }
 
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
         if (index < 0) {
             throw new IllegalArgumentException(
                     "Cannot add a component with a negative index");
@@ -352,13 +374,14 @@ public class Card extends Component implements HasSize, HasAriaLabel,
                             + children.size() + ").");
         }
 
-        if (index == children.size()) {
-            getElement().appendChild(component.getElement());
-        } else {
-            var reference = children.get(index);
-            var actualIndex = getElement().indexOfChild(reference.getElement());
-            getElement().insertChild(actualIndex, component.getElement());
-        }
+        // The default-slot index is relative to getChildren(), which excludes
+        // the slotted children (header, footer, ...) that are interleaved in
+        // the element tree. Translate it to the element index and delegate to
+        // the default implementation so its signal-binding checks still run.
+        var elementIndex = index == children.size()
+                ? getElement().getChildCount()
+                : getElement().indexOfChild(children.get(index).getElement());
+        HasComponents.super.addComponentAtIndex(elementIndex, component);
     }
 
     private void doSetTitle(String title) {

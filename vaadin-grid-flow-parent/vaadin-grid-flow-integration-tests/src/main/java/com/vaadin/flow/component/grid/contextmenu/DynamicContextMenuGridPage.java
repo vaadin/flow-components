@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -36,8 +35,7 @@ public class DynamicContextMenuGridPage extends Div {
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
 
         grid.setItems(IntStream.range(0, 50)
-                .mapToObj(i -> new Person("Person " + i, i))
-                .collect(Collectors.toList()));
+                .mapToObj(i -> new Person("Person " + i, i)).toList());
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
 

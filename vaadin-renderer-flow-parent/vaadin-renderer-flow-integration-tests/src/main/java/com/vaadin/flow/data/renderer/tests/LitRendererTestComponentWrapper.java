@@ -17,7 +17,6 @@ package com.vaadin.flow.data.renderer.tests;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -122,8 +121,7 @@ public class LitRendererTestComponentWrapper extends Div
     }
 
     private List<LitRendererTestComponent> getComponents() {
-        return getChildren().map(LitRendererTestComponent.class::cast)
-                .collect(Collectors.toList());
+        return getChildren().map(LitRendererTestComponent.class::cast).toList();
     }
 
     @Override

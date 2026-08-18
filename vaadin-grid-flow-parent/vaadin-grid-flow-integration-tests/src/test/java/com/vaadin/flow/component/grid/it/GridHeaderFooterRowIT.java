@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -429,24 +428,23 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         List<WebElement> headers = thead.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("th")).stream())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> cellNames = headers.stream().map(header -> header
                 .findElement(By.tagName("slot")).getDomAttribute("name"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<WebElement> headerCells = cellNames.stream()
-                .map(name -> grid.findElement(By.cssSelector(
+                .<WebElement> map(name -> grid.findElement(By.cssSelector(
                         "vaadin-grid-cell-content[slot='" + name + "']")))
-                .collect(Collectors.toList());
+                .toList();
 
         return headerCells;
     }
 
     private List<String> getHeaderContents() {
         return getHeaderCells().stream()
-                .map(cell -> cell.getDomProperty("innerHTML"))
-                .collect(Collectors.toList());
+                .map(cell -> cell.getDomProperty("innerHTML")).toList();
     }
 
     private void assertFooterOrder(int... numbers) {
@@ -466,16 +464,16 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         List<WebElement> footers = tfoot.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("td")).stream())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> cellNames = footers.stream().map(footer -> footer
                 .findElement(By.tagName("slot")).getDomAttribute("name"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<WebElement> footerCells = cellNames.stream()
-                .map(name -> grid.findElement(By.cssSelector(
+                .<WebElement> map(name -> grid.findElement(By.cssSelector(
                         "vaadin-grid-cell-content[slot='" + name + "']")))
-                .collect(Collectors.toList());
+                .toList();
 
         return footerCells;
     }

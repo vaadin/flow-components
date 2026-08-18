@@ -11,7 +11,6 @@ package com.vaadin.flow.component.gridpro;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.3.0-alpha11")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -794,9 +793,8 @@ public class GridPro<E> extends Grid<E> {
      * @since 23.1
      */
     public void addThemeVariants(GridProVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(GridProVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(Stream.of(variants)
+                .map(GridProVariant::getVariantName).toList());
     }
 
     /**
@@ -807,8 +805,7 @@ public class GridPro<E> extends Grid<E> {
      * @since 23.1
      */
     public void removeThemeVariants(GridProVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(GridProVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(GridProVariant::getVariantName).toList());
     }
 }

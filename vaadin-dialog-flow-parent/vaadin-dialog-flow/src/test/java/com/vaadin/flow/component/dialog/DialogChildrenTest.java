@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -236,7 +235,7 @@ class DialogChildrenTest {
      */
     private void assertContent(Component... expected) {
         Assertions.assertEquals(List.of(expected),
-                dialog.getChildren().collect(Collectors.toList()));
+                dialog.getChildren().toList());
         for (Component component : expected) {
             Assertions.assertEquals(dialog.getElement(),
                     component.getElement().getParent());

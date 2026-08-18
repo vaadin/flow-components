@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -30,8 +29,7 @@ import com.vaadin.flow.router.Route;
 public class GridSingleSelectionPage extends Div {
 
     public GridSingleSelectionPage() {
-        List<Integer> items = IntStream.range(0, 500).boxed()
-                .collect(Collectors.toList());
+        List<Integer> items = IntStream.range(0, 500).boxed().toList();
         Grid<Integer> grid = new Grid<>();
         grid.setItems(items);
         grid.addColumn(ValueProvider.identity()).setHeader("Item");

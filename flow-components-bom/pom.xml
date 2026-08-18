@@ -31,7 +31,12 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-ai-components-flow</artifactId>
+                <artifactId>vaadin-ai-core-flow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-ai-extensions-flow</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -531,7 +536,7 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.9.0</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

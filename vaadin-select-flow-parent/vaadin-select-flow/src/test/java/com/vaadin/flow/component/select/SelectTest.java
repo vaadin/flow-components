@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -34,6 +33,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
@@ -651,9 +651,8 @@ class SelectTest {
 
         Assertions.assertEquals("<span slot=\"prefix\">prefix1</span>", select
                 .getChildren().findFirst().get().getElement().getOuterHTML());
-        Assertions.assertEquals("<span slot=\"prefix\">prefix2</span>",
-                select.getChildren().collect(Collectors.toList()).get(1)
-                        .getElement().getOuterHTML());
+        Assertions.assertEquals("<span slot=\"prefix\">prefix2</span>", select
+                .getChildren().toList().get(1).getElement().getOuterHTML());
 
         select.remove(span);
 
@@ -863,6 +862,29 @@ class SelectTest {
 
         select.setAriaLabelledBy((String) null);
         Assertions.assertTrue(select.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(Select.class),
+                "Select should support aria-describedby");
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        Select<String> select = new Select<>();
+
+        select.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                select.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                select.getAriaDescribedBy().get());
+
+        select.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                select.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(select.getAriaDescribedBy().isEmpty());
     }
 
     @Test

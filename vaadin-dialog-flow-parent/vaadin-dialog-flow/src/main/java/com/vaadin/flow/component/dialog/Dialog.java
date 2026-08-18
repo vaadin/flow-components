@@ -78,7 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-alpha11")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -683,8 +683,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return {@code true} if focus trap is enabled (default), {@code false}
      *         otherwise
+     * @deprecated use {@link #isAutofocus()} instead
      * @since 25.1
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public boolean isFocusTrap() {
         return !getElement().getProperty("noFocusTrap", false);
     }
@@ -698,10 +700,42 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param focusTrap
      *            {@code true} to enable focus trap, {@code false} to disable it
+     * @deprecated use {@link #setAutofocus(boolean)} instead
      * @since 25.1
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public void setFocusTrap(boolean focusTrap) {
         getElement().setProperty("noFocusTrap", !focusTrap);
+    }
+
+    /**
+     * Gets whether focus moves into the dialog when opened.
+     * <p>
+     * This setting only works for non-modal dialogs and is ignored for modal
+     * ones, where focus must always stay inside. Autofocus is enabled by
+     * default.
+     *
+     * @return {@code true} if autofocus is enabled (default), {@code false}
+     *         otherwise
+     * @since 25.3
+     */
+    public boolean isAutofocus() {
+        return !getElement().getProperty("noAutofocus", false);
+    }
+
+    /**
+     * Sets whether focus should move into the dialog when opened.
+     * <p>
+     * This setting only works for non-modal dialogs and is ignored for modal
+     * ones, where focus must always stay inside. Autofocus is enabled by
+     * default.
+     *
+     * @param autofocus
+     *            {@code true} to enable autofocus, {@code false} to disable it
+     * @since 25.3
+     */
+    public void setAutofocus(boolean autofocus) {
+        getElement().setProperty("noAutofocus", !autofocus);
     }
 
     /**

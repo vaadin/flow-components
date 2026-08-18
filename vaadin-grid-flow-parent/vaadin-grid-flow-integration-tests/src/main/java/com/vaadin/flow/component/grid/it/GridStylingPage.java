@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -32,7 +31,7 @@ public class GridStylingPage extends Div {
         Grid<String> grid = new Grid<>();
 
         List<String> items = IntStream.range(0, 20).mapToObj(String::valueOf)
-                .collect(Collectors.toList());
+                .toList();
         grid.setItems(items);
 
         Grid.Column<String> col0 = grid.addColumn(i -> i).setHeader("text");

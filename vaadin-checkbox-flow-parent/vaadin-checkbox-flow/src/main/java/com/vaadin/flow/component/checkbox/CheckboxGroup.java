@@ -33,6 +33,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
@@ -112,12 +113,12 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.3.0-alpha6")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.3.0-alpha11")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
-        implements HasAriaLabel, HasDataView<T, Void, CheckboxGroupDataView<T>>,
-        HasItemComponents<T>,
+        implements HasAriaDescription, HasAriaLabel,
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
@@ -664,6 +665,23 @@ public class CheckboxGroup<T>
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
+    }
+
+    /**
      * Sets whether the user is required to select at least one checkbox. When
      * required, an indicator appears next to the label and the field
      * invalidates if all previously selected checkboxes are deselected.
@@ -831,16 +849,10 @@ public class CheckboxGroup<T>
     @SuppressWarnings("unchecked")
     private void rebuild() {
         synchronized (dataProvider) {
-            // Cache helper component before removal
-            Component helperComponent = getHelperComponent();
-
-            // Remove all known children (doesn't remove client-side-only
-            // children such as the label)
-            getChildren().forEach(this::remove);
-
-            // reinsert helper component
-            // see https://github.com/vaadin/vaadin-checkbox/issues/191
-            setHelperComponent(helperComponent);
+            // Remove children in the default slot
+            getChildren()
+                    .filter(child -> !child.getElement().hasAttribute("slot"))
+                    .forEach(this::remove);
 
             final AtomicInteger itemCounter = new AtomicInteger(0);
 
@@ -999,7 +1011,7 @@ public class CheckboxGroup<T>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.0
      */
     protected void validate() {
@@ -1039,7 +1051,7 @@ public class CheckboxGroup<T>
 
     /**
      * The internationalization properties for {@link CheckboxGroup}.
-     * 
+     *
      * @since 24.5
      */
     public static class CheckboxGroupI18n implements Serializable {
