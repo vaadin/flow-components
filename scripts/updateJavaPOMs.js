@@ -75,6 +75,18 @@ function mergeProperties(props1, props2) {
   return Object.keys(merged).length ? [merged] : [];
 }
 
+// Order the project elements by the maven pom convention, so that elements
+// assigned after parsing (e.g. licenses) do not end up at the end of the file
+function orderProject(project) {
+  const order = ['$', 'modelVersion', 'parent', 'groupId', 'artifactId', 'version',
+    'packaging', 'name', 'description', 'licenses', 'modules', 'properties',
+    'dependencyManagement', 'dependencies', 'build', 'profiles'];
+  const ordered = {};
+  order.filter(key => key in project).forEach(key => ordered[key] = project[key]);
+  Object.keys(project).filter(key => !order.includes(key)).forEach(key => ordered[key] = project[key]);
+  return ordered;
+}
+
 async function consolidate(template, pom, cb) {
   const tplJs = await xml2js.parseStringPromise(fs.readFileSync(`${templateDir}/${template}`, 'utf8'));
   const pomJs = await xml2js.parseStringPromise(fs.readFileSync(pom, 'utf8'));
@@ -82,6 +94,9 @@ async function consolidate(template, pom, cb) {
   await renameBase(tplJs);
 
   tplJs.project.artifactId[0] = pomJs.project.artifactId[0] || tplJs.project.artifactId[0];
+  // keep the identity of the existing pom, e.g. "Vaadin AI Core"
+  pomJs.project.name && (tplJs.project.name = pomJs.project.name);
+  pomJs.project.description && (tplJs.project.description = pomJs.project.description);
 
   pomJs.project.dependencies = pomJs.project.dependencies || [];
   pomJs.project.dependencies[0] = {dependency: mergeDependencies(tplJs.project, pomJs.project)};
@@ -90,6 +105,7 @@ async function consolidate(template, pom, cb) {
 
   cb && cb(tplJs, pomJs);
 
+  tplJs.project = orderProject(tplJs.project);
   const xml = new xml2js.Builder({renderOpts: {pretty: true, indent: '    '}}).buildObject(tplJs);
   console.log(`writing ${pom}`);
   fs.writeFileSync(pom, xml + '\n', 'utf8');
@@ -134,9 +150,7 @@ async function consolidatePomFlow() {
       || fs.readFileSync(pomPath, 'utf8').includes('commercial-license-and-service-terms');
     const template = pro ? 'pom-flow-pro.xml' : 'pom-flow.xml';
     await consolidate(template, pomPath, (tplJs, pomJs) => {
-      // keep the identity and licensing of the existing module pom
-      pomJs.project.name && (tplJs.project.name = pomJs.project.name);
-      pomJs.project.description && (tplJs.project.description = pomJs.project.description);
+      // keep the licensing of the existing module pom
       pomJs.project.licenses && (tplJs.project.licenses = pomJs.project.licenses);
       pomJs.project.dependencyManagement && (tplJs.project.dependencyManagement = pomJs.project.dependencyManagement);
       tplJs.project.build && (tplJs.project.build[0].plugins[0] = {plugin: mergePlugins(tplJs.project.build, pomJs.project.build)});
