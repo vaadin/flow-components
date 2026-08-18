@@ -805,6 +805,51 @@ class SourceTrackingTest {
         }
 
         @Test
+        void sameValueRewriteWithoutLevelClearsMarkerConfidence() {
+            // Rewriting the value the field already had fires no change event
+            // and never re-marks, but it does replace the source — the kept
+            // marker must not show a level the new source does not include.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            fill(controller, field, """
+                    {"value": "Acme", "extracts": [{"text": "re-read"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "The kept marker must drop the level the new source does "
+                            + "not include");
+        }
+
+        @Test
+        void sourcelessSameValueRewriteClearsMarkerConfidence() {
+            // A plain rewrite of the value the field already had clears the
+            // stored source, and the kept marker must drop its level with it
+            // — an indicator with no source behind it would be fabricated.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fill(controller, field, "\"Acme\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "The kept marker must drop its level when the rewrite "
+                            + "carries no source");
+        }
+
+        @Test
         void refillWithoutSourceClearsMarkerConfidence() {
             var field = new TestField();
             var controller = trackingControllerFor(field);

@@ -1736,6 +1736,16 @@ public class FormAIController implements AIController {
                 // source it never had.
                 fieldSources.remove(raw);
             }
+            // A write of the value the field already had fires no change
+            // event and is never re-marked, so a marker kept from an earlier
+            // turn must have its confidence synced here to the write's
+            // source — or cleared with it when the write carried none. A
+            // no-op when the field has no marker.
+            if (raw instanceof Component component) {
+                FormFieldMarker.setConfidence(component.getElement(),
+                        reportedSource == null ? null
+                                : reportedSource.confidence());
+            }
             return true;
         }
 
