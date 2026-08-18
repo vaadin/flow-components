@@ -1705,6 +1705,13 @@ public class FormAIController implements AIController {
                 // the staleness check in getFieldSource compares against.
                 fieldSources.put(raw,
                         new StoredFieldSource(raw.getValue(), reportedSource));
+            } else {
+                // Every successful write replaces the field's source, so a
+                // write without one clears it — otherwise a write that lands
+                // on the same value an earlier source was recorded with would
+                // pass the staleness check and describe the new write with a
+                // source it never had.
+                fieldSources.remove(raw);
             }
             return true;
         }

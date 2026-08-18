@@ -571,6 +571,26 @@ class SourceTrackingTest {
         }
 
         @Test
+        void sourcelessWriteDoesNotInheritEarlierSource() {
+            // The AI writing back a value an earlier turn sourced — without
+            // reporting a source for it — must not revive the old source:
+            // the new write never had one, and the old citation would be
+            // fabricated for it.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, trackedValue("Acme"));
+            field.setValue("edited by hand");
+
+            controller.onRequest();
+            fill(controller, field, "\"Acme\"");
+
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "A write without a source must clear the field's source, "
+                            + "even when it lands on a previously sourced "
+                            + "value");
+        }
+
+        @Test
         void refillingAFieldReplacesItsSource() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
