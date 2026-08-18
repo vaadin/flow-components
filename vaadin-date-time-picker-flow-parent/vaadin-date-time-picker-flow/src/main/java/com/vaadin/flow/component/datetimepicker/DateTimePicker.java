@@ -16,12 +16,16 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
@@ -32,6 +36,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.datepicker.DateMetadataProvider;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -67,6 +72,10 @@ class DateTimePickerDatePicker
 
     boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
+    }
+
+    boolean isPickerDateDisabled(LocalDate date) {
+        return super.isDateDisabled(date);
     }
 }
 
@@ -154,6 +163,11 @@ public class DateTimePicker
             if (minResult.isError()) {
                 return minResult;
             }
+
+            if (datePicker.isPickerDateDisabled(datePicker.getValue())) {
+                return ValidationResult.error(getI18nErrorMessage(
+                        DateTimePickerI18n::getDisabledDateErrorMessage));
+            }
         }
 
         // Report error if only one of the pickers has a value
@@ -188,6 +202,12 @@ public class DateTimePicker
                 value, min);
         if (minResult.isError()) {
             return minResult;
+        }
+
+        if (value != null
+                && datePicker.isPickerDateDisabled(value.toLocalDate())) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DateTimePickerI18n::getDisabledDateErrorMessage));
         }
 
         return ValidationResult.ok();
@@ -984,6 +1004,143 @@ public class DateTimePicker
     }
 
     /**
+     * Gets the individual dates that cannot be selected.
+     *
+     * @return an unmodifiable set of the dates that cannot be selected, empty
+     *         if none are set, never {@code null}
+     * @see #setDisabledDates(Collection)
+     * @since 25.3
+     */
+    public Set<LocalDate> getDisabledDates() {
+        return datePicker.getDisabledDates();
+    }
+
+    /**
+     * Sets individual dates that cannot be selected. Such dates are displayed
+     * as disabled in the calendar overlay, and manual entry of one of them
+     * causes the component to invalidate.
+     * <p>
+     * The dates combine with the disabled weekdays, the date metadata provider,
+     * as well as with the minimum and maximum date and time: a date cannot be
+     * selected if any of these constraints disables it. By default, no
+     * individual dates are disabled.
+     * <p>
+     * Use this for a small, fully known set of dates. For a large or changing
+     * set, use {@link #setDateMetadataProvider(DateMetadataProvider)} instead,
+     * which only fetches the dates that are shown.
+     *
+     * @param dates
+     *            the dates that cannot be selected, or {@code null} to clear
+     *            the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledDates(Collection<LocalDate> dates) {
+        datePicker.setDisabledDates(dates);
+    }
+
+    /**
+     * Gets the weekdays whose dates cannot be selected.
+     *
+     * @return an unmodifiable set of the weekdays whose dates cannot be
+     *         selected, empty if none are set, never {@code null}
+     * @see #setDisabledWeekdays(Collection)
+     * @since 25.3
+     */
+    public Set<DayOfWeek> getDisabledWeekdays() {
+        return datePicker.getDisabledWeekdays();
+    }
+
+    /**
+     * Sets the weekdays whose dates cannot be selected. Such dates are
+     * displayed as disabled in the calendar overlay, and manual entry of one of
+     * them causes the component to invalidate.
+     * <p>
+     * The weekdays combine with the individually disabled dates, the date
+     * metadata provider, as well as with the minimum and maximum date and time:
+     * a date cannot be selected if any of these constraints disables it. By
+     * default, no weekdays are disabled.
+     *
+     * @param weekdays
+     *            the weekdays whose dates cannot be selected, or {@code null}
+     *            to clear the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledWeekdays(Collection<DayOfWeek> weekdays) {
+        datePicker.setDisabledWeekdays(weekdays);
+    }
+
+    /**
+     * Gets the callback that provides metadata for the dates shown in the
+     * calendar overlay.
+     *
+     * @return the date metadata provider, or {@code null} if none is set
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public DateMetadataProvider getDateMetadataProvider() {
+        return datePicker.getDateMetadataProvider();
+    }
+
+    /**
+     * Sets a callback that provides metadata for the dates shown in the
+     * calendar overlay, for example to mark dates as not selectable. See
+     * {@link DateMetadataProvider} for the semantics of the callback.
+     * <p>
+     * The provider combines with the individually disabled dates and weekdays,
+     * as well as with the minimum and maximum date and time: a date cannot be
+     * selected if any of these constraints disables it. By default, no provider
+     * is set.
+     * <p>
+     * Entries can also carry custom CSS part names, so that a theme can style
+     * particular dates. A part name only affects styling, never whether a date
+     * can be selected.
+     * <p>
+     * The provider is also called during server-side validation, with the date
+     * being validated, so that a disabled date cannot be committed even if the
+     * browser was never told about it. Setting a provider does not re-validate
+     * the current value. Call {@link #refreshDateMetadata()} when the data
+     * behind the provider changes.
+     *
+     * @param provider
+     *            the date metadata provider, or {@code null} to remove the
+     *            current one
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDateMetadataProvider(DateMetadataProvider provider) {
+        datePicker.setDateMetadataProvider(provider);
+    }
+
+    /**
+     * Discards the date metadata that the browser has cached and fetches it
+     * again for the dates that are shown. Call this when the data behind the
+     * date metadata provider has changed.
+     * <p>
+     * If the field has a value, or only its date part has one, it is also
+     * re-validated, since a date that was selectable before may not be anymore.
+     * Does nothing if no provider is set.
+     *
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public void refreshDateMetadata() {
+        datePicker.refreshDateMetadata();
+        // The inner date picker only drops the client-side cache, as its own
+        // validate() is a no-op, so run validation on this component instead
+        // and notify Binder about the possibly changed validity.
+        if (datePicker.getDateMetadataProvider() != null
+                && (getValue() != null || !datePicker.isEmpty())) {
+            validate(true);
+        }
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
@@ -1085,6 +1242,7 @@ public class DateTimePicker
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
+        private String disabledDateErrorMessage;
 
         /**
          * Gets the aria-label suffix for the date picker.
@@ -1306,6 +1464,41 @@ public class DateTimePicker
          */
         public DateTimePickerI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date is disabled.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DateTimePicker#setDisabledDates(Collection)
+         * @see DateTimePicker#setDisabledWeekdays(Collection)
+         * @see DateTimePicker#setDateMetadataProvider(DateMetadataProvider)
+         * @since 25.3
+         */
+        @JsonIgnore // Not used on the client side
+        public String getDisabledDateErrorMessage() {
+            return disabledDateErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date is disabled.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DateTimePicker#setDisabledDates(Collection)
+         * @see DateTimePicker#setDisabledWeekdays(Collection)
+         * @see DateTimePicker#setDateMetadataProvider(DateMetadataProvider)
+         * @since 25.3
+         */
+        public DateTimePickerI18n setDisabledDateErrorMessage(
+                String errorMessage) {
+            disabledDateErrorMessage = errorMessage;
             return this;
         }
     }
