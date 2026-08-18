@@ -191,7 +191,6 @@ function parseLog(log) {
 // to the commit JS object passed as argument
 function parseBody(commit) {
   commit.originalBody = commit.body.trim();
-  commit.body = '';
   const commitTitle = commit.title.replace(/ +\(.+\)$/, '').toLowerCase();
   let nestedCommit, result;
   commit.originalBody.split('\n').forEach(line => {
@@ -214,7 +213,6 @@ function parseBody(commit) {
         breaking: !!result[2],
         skip: !result[2] && !/(feat|fix|perf)/.test(result[1].toLowerCase()),
         commit: commit.commit,
-        body: '',
         footers: {
           "web-component": commit.footers['web-component']
         }
@@ -226,14 +224,9 @@ function parseBody(commit) {
     }
     result = /^(fixes|fix|related-to|connected-to|warranty):? +(.+)$/i.exec(line);
     if (result) {
-      commit.footers.fixes.push(...result[2].split(/[, ]+/));
+      commit.footers.fixes.push(...result[2].split(/[, ]+/).filter(s => /\d/.test(s)));
       nestedCommit = undefined;
       return;
-    }
-    if (nestedCommit) {
-      nestedCommit.body = `${nestedCommit.body} ${line}`.trim();
-    } else {
-      commit.body = `${commit.body} ${line}`.trim();
     }
   });
   if (commit.footers['web-component']) {
@@ -299,8 +292,13 @@ function logCommit(c, withComponents) {
     const components = getComponents(c);
     components && (log += `. ${components}`);
   }
-  c.body && (log += `\n\n        _${c.body}_`);
   console.log(log);
+}
+
+// render a single consolidated bullet for all Web-Component version bumps
+function logWebComponentBumps(commits) {
+  const links = commits.map(c => createLink('commit', c.commit.substring(0, 7), '⧉')).join(' ');
+  console.log(`    - Increase Web-Component version (${links})`);
 }
 
 // log a set of commits, and group by types
@@ -314,7 +312,10 @@ function logCommitsByType(commits) {
   Object.keys(keyName).forEach(k => {
     if (byType[k]) {
       console.log(`\n - **${keyName[k]}**:`);
-      byType[k].forEach(c => logCommit(c));
+      const bumps = byType[k].filter(c => c.title.includes('Increase Web-Component version'));
+      const rest = byType[k].filter(c => !c.title.includes('Increase Web-Component version'));
+      bumps.length && logWebComponentBumps(bumps);
+      rest.forEach(c => logCommit(c));
     }
   });
 }
