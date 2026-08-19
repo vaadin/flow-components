@@ -315,6 +315,43 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return HasComponents.super.bindEnabled(enabledSignal);
     }
 
+    @Override
+    public void setVisible(boolean visible) {
+        boolean becomingVisible = visible && !isVisible();
+        super.setVisible(visible);
+        if (becomingVisible) {
+            resetContentIfParentItem();
+        }
+    }
+
+    @Override
+    public SignalBinding<Boolean> bindVisible(Signal<Boolean> visibleSignal) {
+        // This also runs when the binding is first applied. Binding a hidden
+        // item to a signal that is already true is how such an item is
+        // typically shown, and that case is indistinguishable from binding an
+        // already visible item, so the content is regenerated for both.
+        return super.bindVisible(visibleSignal).onChange(context -> {
+            if (Boolean.TRUE.equals(context.getNewValue())) {
+                resetContentIfParentItem();
+            }
+        });
+    }
+
+    /**
+     * Regenerates the menu content so that the client rebuilds its items array.
+     * Flow withholds property changes for invisible elements, so an item that
+     * was invisible when the content was last generated ended up in that array
+     * without the sub menu that its {@code _containerNodeId} property points
+     * to. Showing the item delivers the property, but only a regeneration makes
+     * the client read it again.
+     */
+    private void resetContentIfParentItem() {
+        // Checking the field first avoids creating a sub menu for leaf items
+        if (subMenu != null && isParentItem()) {
+            contentReset.run();
+        }
+    }
+
     /**
      * Adds one or more theme names to this item. Multiple theme names can be
      * specified by using multiple parameters.
