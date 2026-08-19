@@ -47,6 +47,7 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -160,7 +161,11 @@ import tools.jackson.databind.JsonNode;
  * value from before the AI's first change to it. The marker clears itself once
  * the user edits the field. Marking is the controller's own doing end to end;
  * an application that does not want it turns it off with
- * {@link #setFieldMarkerEnabled(boolean)}. A listener registered through
+ * {@link #setFieldMarkerEnabled(boolean)}. A
+ * {@link #setFieldMarkerContentProvider(FieldMarkerContentProvider) content
+ * provider} can add application content to each marker's popover — for example
+ * the {@link FieldValueChangeEvent#getFieldSource() source data} behind the
+ * value. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
  * field whose value changed during a successful turn, for applications that
  * need to react to the AI's edits beyond the marker.
@@ -317,6 +322,7 @@ public class FormAIController implements AIController {
 
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
+    private FieldMarkerContentProvider fieldMarkerContentProvider;
     private boolean sourceTrackingEnabled;
     /**
      * Application-supplied wordings for confidence levels, overriding
@@ -989,15 +995,65 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * The state carried by a field's mark: the combined registration of the
-     * marker's revert-event listener and the auto-hide value-change listener,
-     * and the value the marker's revert control restores — the field's value
-     * from before the AI's first change to it. Stored on the field component
-     * under {@link #FIELD_MARK_KEY}; its presence is what makes a field
-     * "marked".
+     * Returns the provider that supplies the extra content shown in the AI
+     * field marker's popover.
+     *
+     * @return the content provider, or {@code null} when the popover shows only
+     *         its built-in parts
+     * @see #setFieldMarkerContentProvider(FieldMarkerContentProvider)
+     * @since 25.3
      */
-    private record FieldMark(Registration registration,
-            Object revertValue) implements Serializable {
+    public FieldMarkerContentProvider getFieldMarkerContentProvider() {
+        return fieldMarkerContentProvider;
+    }
+
+    /**
+     * Sets a provider that supplies extra content for the popover of the AI
+     * field marker, shown between the explanation message and the revert
+     * control. Use it to show what the AI based a value on — for example the
+     * {@link FieldValueChangeEvent#getFieldSource() source data} reported when
+     * {@link #setSourceTrackingEnabled(boolean) source tracking} is on.
+     * Defaults to {@code null}, meaning the popover shows only its built-in
+     * parts.
+     * <p>
+     * The provider is called whenever the controller marks a field: once per
+     * field whose value changed during a successful turn, with the same event
+     * the {@link #addFieldValueChangeListener(FieldValueChangeListener)
+     * field-value-change listeners} receive, before those listeners run. A
+     * provider that returns {@code null} leaves that field's popover without
+     * extra content, and with the {@link #setFieldMarkerEnabled(boolean) marker
+     * turned off} the provider is never called.
+     * <p>
+     * The controller owns the returned component's lifecycle: it stays in the
+     * popover for as long as the mark it belongs to, is replaced when a later
+     * turn fills the field again, and goes away with the mark when the user
+     * edits or reverts the field. Return a fresh component rather than one
+     * attached elsewhere — a component that has a parent is moved into the
+     * marker.
+     *
+     * @param fieldMarkerContentProvider
+     *            the provider to use, or {@code null} to show no extra content
+     * @return this controller, for chaining
+     * @since 25.3
+     */
+    public FormAIController setFieldMarkerContentProvider(
+            FieldMarkerContentProvider fieldMarkerContentProvider) {
+        this.fieldMarkerContentProvider = fieldMarkerContentProvider;
+        return this;
+    }
+
+    /**
+     * The state carried by a field's mark: the combined registration of the
+     * listeners {@link #markField} installs, the value the marker's revert
+     * control restores — the field's value from before the AI's first change to
+     * it — and the content component currently shown in the marker's popover,
+     * if any. Stored on the field component under {@link #FIELD_MARK_KEY}; its
+     * presence is what makes a field "marked". The record is immutable, so a
+     * content change replaces the whole mark while keeping the registration and
+     * revert value.
+     */
+    private record FieldMark(Registration registration, Object revertValue,
+            Component content) implements Serializable {
     }
 
     /**
@@ -1020,24 +1076,26 @@ public class FormAIController implements AIController {
      * picks up the texts configured through {@link #setFieldMarkerI18n} every
      * time it is applied.
      * <p>
-     * The first call for a field registers two listeners: one for the marker's
-     * {@code ai-field-revert} event that restores the revert value and clears
-     * the marker, and a value-change listener that clears the marker as soon as
-     * the user edits the field, so a stale cue does not linger over a value the
-     * user changed (the AI's own writes during a fill turn are excluded via the
-     * turn's {@code filling} flag). Both are removed by {@link #unmarkField}.
-     * The listeners persist on the field, which is serialized with the UI, so
-     * they capture only the field and the serializable {@link TurnState} —
-     * never the controller, which is not serializable.
+     * The first call for a field registers three listeners: one for the
+     * marker's {@code ai-field-revert} event that restores the revert value and
+     * clears the marker, a value-change listener that clears the marker as soon
+     * as the user edits the field, so a stale cue does not linger over a value
+     * the user changed (the AI's own writes during a fill turn are excluded via
+     * the turn's {@code filling} flag), and an attach listener that re-asserts
+     * the marker's popover content when the field re-enters the DOM. All are
+     * removed by {@link #unmarkField}. The listeners persist on the field,
+     * which is serialized with the UI, so they capture only the field and the
+     * serializable {@link TurnState} — never the controller, which is not
+     * serializable.
      *
-     * @param field
-     *            the field to mark, a discovered field and therefore always a
-     *            {@link Component}
-     * @param revertValue
-     *            the value the marker's revert control restores; ignored when
-     *            the field is already marked
+     * @param change
+     *            the change the mark annotates; its field is a discovered field
+     *            and therefore always a {@link Component}, and its old value is
+     *            what the marker's revert control restores — ignored when the
+     *            field is already marked
      */
-    private void markField(HasValue<?, ?> field, Object revertValue) {
+    private void markField(FieldValueChangeEvent change) {
+        var field = change.getField();
         var component = (Component) field;
         var element = component.getElement();
         if (getMark(field) == null) {
@@ -1051,10 +1109,82 @@ public class FormAIController implements AIController {
                     unmarkField(field);
                 }
             });
-            ComponentUtil.setData(component, FIELD_MARK_KEY, new FieldMark(
-                    Registration.combine(revert, valueChange), revertValue));
+            var attach = component
+                    .addAttachListener(event -> reapplyMarkerContent(field));
+            ComponentUtil.setData(component, FIELD_MARK_KEY,
+                    new FieldMark(
+                            Registration.combine(revert, valueChange, attach),
+                            change.getOldValue(), null));
         }
         FormFieldMarker.add(element, fieldMarkerI18n);
+        applyMarkerContent(change);
+    }
+
+    /**
+     * Applies the content the
+     * {@link #setFieldMarkerContentProvider(FieldMarkerContentProvider)
+     * provider} supplies for the change to the field's marker popover. Runs on
+     * every marking, so a re-filled field's content is rebuilt for the new
+     * change and content never outlives the fill it described — including
+     * clearing content left from an earlier fill when the provider was removed
+     * in between. Without a provider, and no earlier content to clear, this is
+     * a no-op, so applications not using the feature see no client traffic from
+     * it.
+     */
+    private void applyMarkerContent(FieldValueChangeEvent change) {
+        var field = change.getField();
+        var mark = getMark(field);
+        var content = createMarkerContent(change);
+        if (mark.content() == content) {
+            return;
+        }
+        FormFieldMarker.setContent(((Component) field).getElement(),
+                elementOf(mark.content()), elementOf(content));
+        ComponentUtil.setData((Component) field, FIELD_MARK_KEY, new FieldMark(
+                mark.registration(), mark.revertValue(), content));
+    }
+
+    /**
+     * Invokes the content provider for one change. A throwing provider is
+     * logged and treated as returning no content, so the field still ends up
+     * marked.
+     *
+     * @return the content to show, or {@code null} for none
+     */
+    private Component createMarkerContent(FieldValueChangeEvent change) {
+        if (fieldMarkerContentProvider == null) {
+            return null;
+        }
+        try {
+            return fieldMarkerContentProvider.createContent(change);
+        } catch (Exception ex) {
+            LOGGER.warn("Field-marker content provider threw an exception", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Re-asserts the marker content of a re-attached field on the client. The
+     * marker element and the content component are re-created verbatim from the
+     * state tree, but the script handing the content to the marker is not — see
+     * {@link FormFieldMarker#reassignContent}. Static, so the attach listener
+     * that calls it captures only the field, keeping the mark serializable
+     * without the controller.
+     */
+    private static void reapplyMarkerContent(HasValue<?, ?> field) {
+        var mark = getMark(field);
+        if (mark != null && mark.content() != null) {
+            FormFieldMarker.reassignContent(((Component) field).getElement(),
+                    mark.content().getElement());
+        }
+    }
+
+    /**
+     * @return the component's element, or {@code null} for a {@code null}
+     *         component
+     */
+    private static Element elementOf(Component component) {
+        return component == null ? null : component.getElement();
     }
 
     /**
@@ -1067,6 +1197,7 @@ public class FormAIController implements AIController {
      */
     private static void unmarkField(HasValue<?, ?> field) {
         var component = (Component) field;
+        var element = component.getElement();
         var mark = getMark(field);
         if (mark != null) {
             mark.registration().remove();
@@ -1075,8 +1206,14 @@ public class FormAIController implements AIController {
         // A field in the "AI is working" state still needs its marker to carry
         // the shimmer; the badge is hidden for the duration anyway, and
         // stopWorking() drops the marker at turn end.
-        if (!FormFieldMarker.isWorking(component.getElement())) {
-            FormFieldMarker.remove(component.getElement());
+        if (!FormFieldMarker.isWorking(element)) {
+            FormFieldMarker.remove(element);
+        } else if (mark != null && mark.content() != null) {
+            // The retained marker no longer has a mark tracking its content,
+            // so release the content here — otherwise it would linger as a
+            // stale virtual child when a re-mark reuses the marker.
+            FormFieldMarker.setContent(element, mark.content().getElement(),
+                    null);
         }
     }
 
@@ -1204,8 +1341,7 @@ public class FormAIController implements AIController {
             // transition straight from working to marked, and tells
             // stopWorking() which markers to keep.
             if (fieldMarkerEnabled) {
-                changes.forEach(change -> markField(change.getField(),
-                        change.getOldValue()));
+                changes.forEach(this::markField);
             }
             fireFieldValueChanges(changes);
         } finally {
