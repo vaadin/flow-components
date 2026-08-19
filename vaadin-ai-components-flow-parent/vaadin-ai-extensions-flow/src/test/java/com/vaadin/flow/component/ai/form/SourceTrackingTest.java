@@ -628,6 +628,32 @@ class SourceTrackingTest {
         }
 
         @Test
+        void sourceStaleAtTurnEndIsDroppedForGood() {
+            // A value-change cascade during a turn can overwrite a sourced
+            // field without the write path touching its source, and the
+            // eager drop stands down for writes made while the turn runs.
+            // The turn-end sweep must drop the entry so a later turn's
+            // cascade landing back on the recorded value cannot resurrect
+            // a citation that was never reported for its write.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, trackedValue("Acme"));
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("cascaded");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("Acme");
+            controller.onResponse(null);
+
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "A source stale at turn end must not be returned when a "
+                            + "later turn lands on the recorded value again");
+        }
+
+        @Test
         void sourcelessWriteDoesNotInheritEarlierSource() {
             // The AI writing back a value an earlier turn sourced — without
             // reporting a source for it — must not revive the old source:
