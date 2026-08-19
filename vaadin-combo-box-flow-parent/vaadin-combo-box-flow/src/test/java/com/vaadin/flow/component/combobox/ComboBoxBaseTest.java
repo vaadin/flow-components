@@ -141,6 +141,26 @@ abstract class ComboBoxBaseTest {
     }
 
     @Test
+    void allowCustomValue_setAutoFocusPartialMatch_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setAllowCustomValue(true);
+        Assertions.assertThrows(IllegalStateException.class, () -> comboBox
+                .setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH));
+        Assertions.assertDoesNotThrow(() -> comboBox
+                .setAutoFocusPartialMatch(AutoFocusPartialMatch.NONE));
+    }
+
+    @Test
+    void autoFocusPartialMatch_setAllowCustomValue_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> comboBox.setAllowCustomValue(true));
+        Assertions
+                .assertDoesNotThrow(() -> comboBox.setAllowCustomValue(false));
+    }
+
+    @Test
     void setEnabled() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setEnabled(true);

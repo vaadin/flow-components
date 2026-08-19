@@ -334,13 +334,29 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
+     * <p>
+     * Custom values cannot be used together with
+     * {@link #setAutoFocusPartialMatch(AutoFocusPartialMatch)}. Enabling custom
+     * values while the auto focus partial match mode is other than
+     * {@link AutoFocusPartialMatch#NONE} throws an exception.
      *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
+     * @throws IllegalStateException
+     *             when enabling custom values while the auto focus partial
+     *             match mode is other than {@link AutoFocusPartialMatch#NONE}
      * @see #addCustomValueSetListener(ComponentEventListener)
      */
     public void setAllowCustomValue(boolean allowCustomValue) {
+        if (allowCustomValue
+                && getAutoFocusPartialMatch() != AutoFocusPartialMatch.NONE) {
+            throw new IllegalStateException("""
+                    Custom values cannot be allowed when auto focus partial \
+                    match is used. Disable it with \
+                    setAutoFocusPartialMatch(AutoFocusPartialMatch.NONE) \
+                    first.""");
+        }
         getElement().setProperty("allowCustomValue", allowCustomValue);
     }
 
@@ -367,18 +383,30 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * <p>
      * An item whose label matches the filter exactly is always focused,
      * regardless of the mode. Matching is case-insensitive. A partial match is
-     * not focused when custom values are allowed with
-     * {@link #setAllowCustomValue(boolean)}, or while the dropdown is closed.
-     * For example, when auto-open is disabled with
-     * {@link #setAutoOpen(boolean)}, typing does not focus or select a match
-     * until the dropdown is opened.
+     * not focused while the dropdown is closed. For example, when auto-open is
+     * disabled with {@link #setAutoOpen(boolean)}, typing does not focus or
+     * select a match until the dropdown is opened.
+     * <p>
+     * This feature cannot be used together with custom values. Setting a mode
+     * other than {@link AutoFocusPartialMatch#NONE} while custom values are
+     * allowed with {@link #setAllowCustomValue(boolean)} throws an exception.
      *
      * @param mode
      *            the mode to set, not {@code null}
+     * @throws IllegalStateException
+     *             when setting a mode other than
+     *             {@link AutoFocusPartialMatch#NONE} while custom values are
+     *             allowed
      * @since 25.3
      */
     public void setAutoFocusPartialMatch(AutoFocusPartialMatch mode) {
         Objects.requireNonNull(mode, "The mode cannot be null");
+        if (mode != AutoFocusPartialMatch.NONE && isAllowCustomValue()) {
+            throw new IllegalStateException("""
+                    Auto focus partial match cannot be used when custom \
+                    values are allowed. Disable custom values with \
+                    setAllowCustomValue(false) first.""");
+        }
         getElement().setProperty("autoFocusPartialMatch", mode.getClientName());
     }
 
