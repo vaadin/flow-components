@@ -7,11 +7,11 @@
 - **Regression?:** not a regression (broken since introduction) — `MenuItemsArrayGenerator` and `menubarConnector.js` are logically identical on `24.0`, `24.4`, `24.10` and `main`, and `_containerNodeId` dates back to the repository's initial commit.
 - **Fixed by:** n/a — partially addressed by #5539, which restored the *button* for an initially hidden root item but not its sub menu
 - **Duplicate of:** none found. #4984 (closed, fixed by #5539) is the root-item *button* half of the same root cause; its reproduction used items without sub menus, which is why the sub-menu half survived.
-- **Branch:** `repro/1042`
+- **Branch:** `repro/1042` — pushed to `vaadin/flow-components`
 - **Reproduced on:** vaadin/flow-components @ `main` (25.3-SNAPSHOT, `4f185a0690`)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot:** ![Sub 1 opens its sub-sub menu, Sub 2 does not](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-1042.png)
+- **Screenshot:** ![Sub 1 opens its sub-sub menu, Sub 2 does not](https://raw.githubusercontent.com/vaadin/flow-components/fcfc159a5449797f1263e66e6e95cf57030f6304/repro-1042.png)
 
 ## Observed behavior
 
