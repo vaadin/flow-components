@@ -40,4 +40,33 @@ import java.io.Serializable;
  */
 public record Rect(double x, double y, double width,
         double height) implements Serializable {
+
+    /**
+     * Creates a new rectangle.
+     *
+     * @param x
+     *            the left edge as a fraction of the surface width, in the
+     *            {@code 0..1} range
+     * @param y
+     *            the top edge as a fraction of the surface height, in the
+     *            {@code 0..1} range
+     * @param width
+     *            the width as a fraction of the surface width, greater than
+     *            {@code 0} and at most {@code 1}
+     * @param height
+     *            the height as a fraction of the surface height, greater than
+     *            {@code 0} and at most {@code 1}
+     * @throws IllegalArgumentException
+     *             if a value is outside its range, or not a number
+     */
+    public Rect {
+        if (!(x >= 0 && x <= 1) || !(y >= 0 && y <= 1)) {
+            throw new IllegalArgumentException(
+                    "x and y must be in the 0..1 range");
+        }
+        if (!(width > 0 && width <= 1) || !(height > 0 && height <= 1)) {
+            throw new IllegalArgumentException(
+                    "width and height must be greater than 0 and at most 1");
+        }
+    }
 }
