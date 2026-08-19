@@ -319,18 +319,6 @@ public class FormAIController implements AIController {
     private boolean fieldMarkerEnabled = true;
     private boolean sourceTrackingEnabled;
     /**
-     * The last source reported (or restored) per field, together with the field
-     * value it describes. A source lasts as long as the value it describes:
-     * {@link #putFieldSource} installs a value-change listener that drops the
-     * entry the moment the value changes outside a fill turn, so a stale source
-     * can never come back by the field regaining the value. The listener stands
-     * down during a turn — the AI's own write sequence must not drop the source
-     * it just stored — so entries a turn leaves stale (a value-change cascade
-     * overwriting a sourced field) are swept at turn end instead by
-     * {@link #purgeStaleFieldSources}.
-     */
-    private final Map<HasValue<?, ?>, StoredFieldSource> fieldSources = new HashMap<>();
-    /**
      * Application-supplied wordings for confidence levels, overriding
      * {@link #DEFAULT_CONFIDENCE_DESCRIPTIONS} in the {@code fill_form} tool
      * description. Levels not present keep the default.
@@ -349,15 +337,21 @@ public class FormAIController implements AIController {
                     "the document is unclear, or the value is a guess");
 
     /**
-     * One field's stored source, tied to the field value the source was
-     * reported with. The value is captured from the field right after the write
-     * (or at {@link #restoreFieldSource} time) so any normalisation the field
-     * applied is reflected; {@link #getFieldSource} compares it against the
-     * field's current value to detect a source a turn left stale. The
-     * registration removes the value-change listener {@link #putFieldSource}
-     * installed, and is removed together with the entry. Serializable because
-     * that listener persists on the field, which is serialized with the UI, and
-     * captures the map holding these entries.
+     * One field's stored source, kept on the field itself via
+     * {@link ComponentUtil#setData(Component, Class, Object)} — tying its
+     * lifecycle to the field rather than to the controller — and tied to the
+     * field value the source was reported with. The value is captured from the
+     * field right after the write (or at {@link #restoreFieldSource} time) so
+     * any normalisation the field applied is reflected; {@link #getFieldSource}
+     * compares it against the field's current value to detect a source a turn
+     * left stale. A source lasts as long as the value it describes: the
+     * registration belongs to a value-change listener that drops the source the
+     * moment the value changes outside a fill turn, so a stale source can never
+     * come back by the field regaining the value. The listener stands down
+     * during a turn — the AI's own write sequence must not drop the source it
+     * just stored — so sources a turn leaves stale (a value-change cascade
+     * overwriting a sourced field) are swept at turn end instead by
+     * {@link #purgeStaleFieldSources}.
      */
     private record StoredFieldSource(Object value, ValueSource source,
             Registration registration) implements Serializable {
@@ -799,7 +793,7 @@ public class FormAIController implements AIController {
      */
     public Optional<ValueSource> getFieldSource(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
-        var stored = fieldSources.get(field);
+        var stored = getStoredFieldSource(field);
         // The value check covers sources a running turn has already left
         // stale: eager removal stands down during a turn and the turn-end
         // sweep has not run yet.
@@ -824,6 +818,8 @@ public class FormAIController implements AIController {
      *            the source to restore, not {@code null}
      * @throws NullPointerException
      *             if {@code field} or {@code source} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code field} is not a {@link Component}
      * @since 25.3
      */
     public void restoreFieldSource(HasValue<?, ?> field, ValueSource source) {
@@ -833,43 +829,54 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Stores the field's source, keyed to the value the field holds right now
-     * so any normalisation a write applied is what staleness is judged against,
-     * and installs a value-change listener that drops the entry the moment that
-     * value changes outside a fill turn. During a turn the listener stands
-     * down: the AI's own write sequence must not drop the source it just
-     * stored, and entries a turn leaves stale are swept by
-     * {@link #purgeStaleFieldSources} instead. Replaces the field's previous
-     * entry, and its listener, if any.
+     * @return the source stored on the field, or {@code null} when the field
+     *         carries none (or is not a component and so can never carry one)
+     */
+    private static StoredFieldSource getStoredFieldSource(
+            HasValue<?, ?> field) {
+        return field instanceof Component component
+                ? ComponentUtil.getData(component, StoredFieldSource.class)
+                : null;
+    }
+
+    /**
+     * Stores the field's source on the field itself, keyed to the value the
+     * field holds right now so any normalisation a write applied is what
+     * staleness is judged against, and installs a value-change listener that
+     * drops the source the moment that value changes outside a fill turn.
+     * During a turn the listener stands down: the AI's own write sequence must
+     * not drop the source it just stored, and sources a turn leaves stale are
+     * swept by {@link #purgeStaleFieldSources} instead. Replaces the field's
+     * previous source, and its listener, if any. The listener persists on the
+     * field, which is serialized with the UI, so it captures only the field and
+     * the serializable {@link TurnState} — never the controller, which is not
+     * serializable.
      */
     private void putFieldSource(HasValue<?, ?> field, ValueSource source) {
-        removeFieldSource(fieldSources, field);
-        // Copied to locals so the listener, which persists on the field and
-        // is serialized with the UI, captures the map and the turn state
-        // rather than the controller, which is not serializable.
-        var sources = fieldSources;
+        if (!(field instanceof Component component)) {
+            throw new IllegalArgumentException("Field must be a Component");
+        }
+        removeFieldSource(field);
         var turnState = turn;
         var registration = field.addValueChangeListener(event -> {
             if (!turnState.filling) {
-                removeFieldSource(sources, field);
+                removeFieldSource(field);
             }
         });
-        fieldSources.put(field,
+        ComponentUtil.setData(component, StoredFieldSource.class,
                 new StoredFieldSource(field.getValue(), source, registration));
     }
 
     /**
-     * Removes the field's entry from the given source map, along with the
-     * value-change listener the entry holds. A no-op when the field has no
-     * entry. Static, and handed the map explicitly, so the listener installed
-     * by {@link #putFieldSource} can call it without capturing the controller.
+     * Removes the source stored on the field, along with the value-change
+     * listener it holds. A no-op when the field carries no source.
      */
-    private static void removeFieldSource(
-            Map<HasValue<?, ?>, StoredFieldSource> sources,
-            HasValue<?, ?> field) {
-        var stored = sources.remove(field);
+    private static void removeFieldSource(HasValue<?, ?> field) {
+        var stored = getStoredFieldSource(field);
         if (stored != null) {
             stored.registration().remove();
+            ComponentUtil.setData((Component) field, StoredFieldSource.class,
+                    null);
         }
     }
 
@@ -1215,21 +1222,20 @@ public class FormAIController implements AIController {
 
     /**
      * Drops every stored source whose field no longer holds the value it was
-     * recorded with. Value changes outside a turn drop their entry on the spot
+     * recorded with. Value changes outside a turn drop their source on the spot
      * (see {@link #putFieldSource}); this turn-end sweep catches the changes
      * made during the turn, where the eager drop stands down — a value-change
      * cascade overwriting a field sourced earlier — so a later write landing on
      * the recorded value cannot resurrect the source.
      */
     private void purgeStaleFieldSources() {
-        fieldSources.entrySet().removeIf(entry -> {
-            if (Objects.equals(entry.getValue().value(),
-                    entry.getKey().getValue())) {
-                return false;
+        for (var field : collectKnownFields()) {
+            var stored = getStoredFieldSource(field);
+            if (stored != null
+                    && !Objects.equals(stored.value(), field.getValue())) {
+                removeFieldSource(field);
             }
-            entry.getValue().registration().remove();
-            return true;
-        });
+        }
     }
 
     /**
@@ -1778,7 +1784,7 @@ public class FormAIController implements AIController {
                 // on the same value an earlier source was recorded with would
                 // pass the staleness check and describe the new write with a
                 // source it never had.
-                removeFieldSource(fieldSources, raw);
+                removeFieldSource(raw);
             }
             return true;
         }
