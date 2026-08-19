@@ -583,6 +583,7 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
+            controller.onResponse(null);
 
             field.setValue("edited by hand");
 
@@ -592,12 +593,13 @@ class SourceTrackingTest {
 
         @Test
         void staleSourceDoesNotComeBackWhenValueIsRestored() {
-            // Editing away and back is the revert case: once the source was
-            // observed stale it is gone for good, not resurrected by the
+            // Editing away and back is the revert case: once the user edited
+            // the field the source is gone for good, not resurrected by the
             // field regaining the AI-written value.
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
+            controller.onResponse(null);
 
             field.setValue("edited by hand");
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
@@ -606,6 +608,23 @@ class SourceTrackingTest {
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
                     "A stale source must not come back when the old value is "
                             + "restored");
+        }
+
+        @Test
+        void staleSourceDoesNotComeBackWithoutAnIntermediateRead() {
+            // The drop must not depend on anyone observing the source stale:
+            // an edit away and back with no getFieldSource call in between
+            // must not hand back the old citation for the retyped value.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, trackedValue("Acme"));
+            controller.onResponse(null);
+
+            field.setValue("edited by hand");
+            field.setValue("Acme");
+
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "An unread edit must still drop the source for good");
         }
 
         @Test
@@ -697,6 +716,7 @@ class SourceTrackingTest {
             var field = new TestField();
             field.setValue("persisted");
             var controller = controllerFor(field);
+            controller.onResponse(null);
             controller.restoreFieldSource(field,
                     new ValueSource(ConfidenceLevel.MEDIUM, null));
 
