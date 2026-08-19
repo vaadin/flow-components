@@ -69,34 +69,34 @@ public class LockedCellValueTest {
     }
 
     @Test
-    void lockSheet_receiveUpdateCellCommentEvent_preventsEdit() {
+    public void lockSheet_receiveUpdateCellCommentEvent_preventsEdit() {
         var cell = spreadsheet.createCell(1, 1, "Initial value");
         lockSheet();
         var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
         spreadsheet.addProtectedEditListener(protectedEditEvent::set);
         fireUpdateCellCommentEvent(2, 2, "Comment");
-        Assertions.assertNotNull(protectedEditEvent.get());
-        Assertions.assertNull(cell.getCellComment());
+        Assert.assertNotNull(protectedEditEvent.get());
+        Assert.assertNull(cell.getCellComment());
     }
 
     @Test
-    void lockSheet_receiveUpdateCellCommentEventForMissingCell_doesNotCreateCell() {
+    public void lockSheet_receiveUpdateCellCommentEventForMissingCell_doesNotCreateCell() {
         lockSheet();
         fireUpdateCellCommentEvent(5, 5, "Comment");
-        Assertions.assertNull(spreadsheet.getActiveSheet().getRow(4));
+        Assert.assertNull(spreadsheet.getActiveSheet().getRow(4));
     }
 
     @Test
-    void lockSheet_unlockCell_receiveUpdateCellCommentEvent_allowsEdit() {
+    public void lockSheet_unlockCell_receiveUpdateCellCommentEvent_allowsEdit() {
         var cell = spreadsheet.createCell(1, 1, "Initial value");
         lockSheet();
         unlockCell("B2");
         var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
         spreadsheet.addProtectedEditListener(protectedEditEvent::set);
         fireUpdateCellCommentEvent(2, 2, "Comment");
-        Assertions.assertNull(protectedEditEvent.get());
-        Assertions.assertNotNull(cell.getCellComment());
-        Assertions.assertEquals("Comment",
+        Assert.assertNull(protectedEditEvent.get());
+        Assert.assertNotNull(cell.getCellComment());
+        Assert.assertEquals("Comment",
                 cell.getCellComment().getString().getString());
     }
 
