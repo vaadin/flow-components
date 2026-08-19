@@ -68,6 +68,43 @@ public class LockedCellValueTest {
         Assert.assertEquals("Updated value", cell.getStringCellValue());
     }
 
+    @Test
+    void lockSheet_receiveUpdateCellCommentEvent_preventsEdit() {
+        var cell = spreadsheet.createCell(1, 1, "Initial value");
+        lockSheet();
+        var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
+        spreadsheet.addProtectedEditListener(protectedEditEvent::set);
+        fireUpdateCellCommentEvent(2, 2, "Comment");
+        Assertions.assertNotNull(protectedEditEvent.get());
+        Assertions.assertNull(cell.getCellComment());
+    }
+
+    @Test
+    void lockSheet_receiveUpdateCellCommentEventForMissingCell_doesNotCreateCell() {
+        lockSheet();
+        fireUpdateCellCommentEvent(5, 5, "Comment");
+        Assertions.assertNull(spreadsheet.getActiveSheet().getRow(4));
+    }
+
+    @Test
+    void lockSheet_unlockCell_receiveUpdateCellCommentEvent_allowsEdit() {
+        var cell = spreadsheet.createCell(1, 1, "Initial value");
+        lockSheet();
+        unlockCell("B2");
+        var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
+        spreadsheet.addProtectedEditListener(protectedEditEvent::set);
+        fireUpdateCellCommentEvent(2, 2, "Comment");
+        Assertions.assertNull(protectedEditEvent.get());
+        Assertions.assertNotNull(cell.getCellComment());
+        Assertions.assertEquals("Comment",
+                cell.getCellComment().getString().getString());
+    }
+
+    private void fireUpdateCellCommentEvent(int row, int col, String text) {
+        TestHelper.fireClientEvent(spreadsheet, "updateCellComment",
+                "[\"" + text + "\", " + col + ", " + row + "]");
+    }
+
     private void fireCellValueEditedEvent(int row, int col, String value) {
         TestHelper.fireClientEvent(spreadsheet, "cellValueEdited",
                 "[" + row + ", " + col + ", \"" + value + "\"]");
