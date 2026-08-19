@@ -64,16 +64,21 @@ public interface AIController {
     }
 
     /**
-     * Called on the UI thread under the session lock when the LLM stream has
-     * completed — either successfully or with an error. Every turn fires this
-     * exactly once.
+     * Called on the UI thread under the session lock when the turn ends —
+     * normally when the LLM stream has completed, successfully or with an
+     * error, but also when the turn fails before a stream ever opens. Fires at
+     * most once per prompt: a prompt rejected by the {@link RequestInterceptor}
+     * and a postponed prompt abandoned because its UI was detached end without
+     * firing it.
      * <p>
      * On success {@code error} is {@code null}; use the call to commit staged
      * state or run deferred UI updates. On failure {@code error} carries the
-     * cause (stream error, timeout, or any throw between {@link #onRequest()}
-     * and the start of the stream); release per-turn state captured in
-     * {@code onRequest} (locks, pending writes, snapshots) and discard the
-     * staged work.
+     * cause (stream error, timeout, or any throw on the prompt path before the
+     * stream opens); release per-turn state captured in {@code onRequest}
+     * (locks, pending writes, snapshots) and discard the staged work. Note that
+     * a failure before {@link #onRequest()} — for example a throwing
+     * {@link RequestInterceptor} — also fires this method, so it can run
+     * without a preceding {@code onRequest} call.
      * </p>
      * <p>
      * The default does nothing. Exceptions thrown from the hook are caught and
