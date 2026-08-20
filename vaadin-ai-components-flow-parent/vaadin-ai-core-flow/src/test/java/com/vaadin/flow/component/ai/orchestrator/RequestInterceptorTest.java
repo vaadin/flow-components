@@ -483,6 +483,34 @@ class RequestInterceptorTest {
     }
 
     @Test
+    void postponedPrompt_backgroundExecution_resumedTurnRunsOffCallerThread()
+            throws Exception {
+        var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
+        var subscribeThread = new AtomicReference<Thread>();
+        var subscribed = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.defer(() -> {
+                    subscribeThread.set(Thread.currentThread());
+                    subscribed.countDown();
+                    return Flux.just("Response");
+                }));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withRequestInterceptor(event -> continuation
+                        .set(event.postpone(Duration.ofMinutes(1))))
+                .withBackgroundExecution().build();
+
+        orchestrator.prompt("Hello");
+        continuation.get().proceed();
+
+        Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                "Provider stream was never subscribed");
+        Assertions.assertNotSame(Thread.currentThread(), subscribeThread.get(),
+                "A resumed postponed prompt must still run in the background");
+    }
+
+    @Test
     void proceed_appliesChangesMadeAfterInterceptReturned() {
         var seen = new AtomicReference<RequestInterceptor.RequestInterceptEvent>();
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();

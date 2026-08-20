@@ -20,6 +20,10 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -181,6 +185,105 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(newProvider).stream(captor.capture());
         Assertions.assertEquals("second", captor.getValue().userMessage());
+    }
+
+    @Test
+    void serialization_roundTrip_preservesBackgroundExecution()
+            throws Throwable {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().build();
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        var newProvider = Mockito.mock(LLMProvider.class);
+        var subscribeThread = new AtomicReference<Thread>();
+        var subscribed = new CountDownLatch(1);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.defer(() -> {
+                    subscribeThread.set(Thread.currentThread());
+                    subscribed.countDown();
+                    return Flux.just("Response");
+                }));
+        deserialized.reconnect(newProvider).apply();
+
+        deserialized.prompt("Hello");
+
+        Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                "Provider stream was never subscribed");
+        Assertions.assertNotSame(Thread.currentThread(), subscribeThread.get(),
+                "Background execution must survive serialization");
+    }
+
+    @Test
+    void serialization_roundTrip_reconnectRestoresBackgroundExecutor()
+            throws Throwable {
+        // The build-time executor is transient and lost on serialization;
+        // a direct executor keeps this turn-free until the restore.
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution(Runnable::run).build();
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        var restoredExecutor = Executors.newSingleThreadExecutor(
+                runnable -> new Thread(runnable, "restored-executor"));
+        try {
+            var newProvider = Mockito.mock(LLMProvider.class);
+            var subscribeThread = new AtomicReference<Thread>();
+            var subscribed = new CountDownLatch(1);
+            Mockito.when(newProvider
+                    .stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                    .thenReturn(Flux.defer(() -> {
+                        subscribeThread.set(Thread.currentThread());
+                        subscribed.countDown();
+                        return Flux.just("Response");
+                    }));
+            deserialized.reconnect(newProvider)
+                    .withBackgroundExecution(restoredExecutor).apply();
+
+            deserialized.prompt("Hello");
+
+            Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                    "Provider stream was never subscribed");
+            Assertions.assertEquals("restored-executor",
+                    subscribeThread.get().getName(),
+                    "The restored executor must carry the turn");
+        } finally {
+            restoredExecutor.shutdownNow();
+        }
+    }
+
+    @Test
+    void reconnect_withBackgroundExecution_enablesBackgroundExecution()
+            throws Throwable {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        var deserialized = serializeAndDeserialize(orchestrator);
+
+        var executor = Executors.newSingleThreadExecutor(
+                runnable -> new Thread(runnable, "enabled-executor"));
+        try {
+            var newProvider = Mockito.mock(LLMProvider.class);
+            var subscribeThread = new AtomicReference<Thread>();
+            var subscribed = new CountDownLatch(1);
+            Mockito.when(newProvider
+                    .stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                    .thenReturn(Flux.defer(() -> {
+                        subscribeThread.set(Thread.currentThread());
+                        subscribed.countDown();
+                        return Flux.just("Response");
+                    }));
+            deserialized.reconnect(newProvider)
+                    .withBackgroundExecution(executor).apply();
+
+            deserialized.prompt("Hello");
+
+            Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                    "Provider stream was never subscribed");
+            Assertions.assertEquals("enabled-executor",
+                    subscribeThread.get().getName(),
+                    "Reconnecting with an executor must enable background "
+                            + "execution on an orchestrator built without it");
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test

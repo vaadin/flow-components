@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,7 +63,9 @@ import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.communication.PushMode;
 
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import tools.jackson.databind.JsonNode;
 
@@ -195,6 +198,16 @@ public class AIOrchestrator implements Serializable {
     private AttachmentClickListener attachmentClickListener;
     private ResponseListener responseListener;
     private SerializableSupplier<String> contextSupplier;
+    private boolean backgroundExecution;
+    /**
+     * Custom executor for background execution. Transient like the provider —
+     * restored via {@link Reconnector#withBackgroundExecution(Executor)} after
+     * deserialization; when absent, the built-in scheduler is used as long as
+     * {@link #backgroundExecution} is set.
+     */
+    private transient Executor backgroundExecutor;
+    private final AtomicBoolean backgroundDeliveryWarned = new AtomicBoolean(
+            false);
     private final Map<AIMessage, String> itemToMessageId = new HashMap<>();
     private final List<ChatMessage> conversationHistory = new CopyOnWriteArrayList<>();
 
@@ -434,6 +447,13 @@ public class AIOrchestrator implements Serializable {
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+        if (backgroundExecution) {
+            // Move the subscription — where a non-streaming provider runs its
+            // blocking chat call and where tool round-trips execute — off the
+            // caller's (UI) thread, so the session lock is free while the LLM
+            // works. Everything before this point stays on the UI thread.
+            responseStream = responseStream.subscribeOn(backgroundScheduler());
+        }
         responseStream.doFinally(signal -> {
             isProcessing.set(false);
         }).subscribe(token -> {
@@ -465,6 +485,42 @@ public class AIOrchestrator implements Serializable {
             fireResponseListener(responseText, null, ui);
             LOGGER.debug("LLM streaming completed successfully");
         });
+    }
+
+    /**
+     * Scheduler that carries a background-executed turn. An app-supplied
+     * executor wins; otherwise Reactor's shared blocking-tolerant pool is used
+     * (also the fallback after deserialization when a custom executor was not
+     * restored via {@link Reconnector#withBackgroundExecution(Executor)}).
+     */
+    private Scheduler backgroundScheduler() {
+        return backgroundExecutor != null
+                ? Schedulers.fromExecutor(backgroundExecutor)
+                : Schedulers.boundedElastic();
+    }
+
+    /**
+     * Logs a one-time warning when a background-executed turn cannot reach the
+     * browser on its own: without automatic push or polling, UI changes made
+     * through {@code ui.access()} from the background thread are only delivered
+     * with the next request the client happens to make. Manual push counts as
+     * blocked too — the orchestrator never calls {@code ui.push()}, so its
+     * updates sit in the queue until the application pushes or the client makes
+     * a request.
+     */
+    private void warnIfBackgroundDeliveryBlocked(UI ui) {
+        if (PushMode.AUTOMATIC.equals(ui.getPushConfiguration().getPushMode())
+                || ui.getPollInterval() > 0) {
+            return;
+        }
+        if (backgroundDeliveryWarned.compareAndSet(false, true)) {
+            LOGGER.warn("Background execution is enabled but neither "
+                    + "automatic push nor polling is active, so the response "
+                    + "will not appear in the browser until the next request "
+                    + "(with manual push mode, until the application calls "
+                    + "ui.push()). Annotate the application shell or UI with "
+                    + "@Push, or enable polling with UI.setPollInterval().");
+        }
     }
 
     private void doPrompt(String userMessage,
@@ -539,6 +595,9 @@ public class AIOrchestrator implements Serializable {
      */
     private void startTurn(UI ui, String userMessage,
             List<AIAttachment> attachments) {
+        if (backgroundExecution) {
+            warnIfBackgroundDeliveryBlocked(ui);
+        }
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
         var assistantMessage = createAssistantMessagePlaceholder();
@@ -940,10 +999,10 @@ public class AIOrchestrator implements Serializable {
      * {@link AIOrchestrator#reconnect(LLMProvider)}.
      * <p>
      * The provider is specified when the reconnector is created. Optional
-     * transient dependencies (tools, controller, and file attachments) can be
-     * restored via chained methods before calling {@link #apply()}. The
-     * {@code apply()} call replays the existing conversation history onto the
-     * new provider but does not modify the UI.
+     * transient dependencies (tools, controller, file attachments, and the
+     * background executor) can be restored via chained methods before calling
+     * {@link #apply()}. The {@code apply()} call replays the existing
+     * conversation history onto the new provider but does not modify the UI.
      * </p>
      *
      * <pre>
@@ -959,6 +1018,7 @@ public class AIOrchestrator implements Serializable {
         private Object[] tools;
         private AIController controller;
         private Map<String, List<AIAttachment>> attachmentsByMessageId;
+        private Executor backgroundExecutor;
 
         private Reconnector(AIOrchestrator orchestrator, LLMProvider provider) {
             this.orchestrator = orchestrator;
@@ -1024,6 +1084,34 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
+         * Restores background execution with the given executor. Like the
+         * provider, an executor passed to
+         * {@link Builder#withBackgroundExecution(Executor)} is transient and
+         * lost on serialization; pass it again here to keep running turns on
+         * it. Calling this on an orchestrator built without background
+         * execution enables it — the same semantics as the builder method.
+         * <p>
+         * If background execution was enabled at build time and this method is
+         * not called, turns keep running in the background on the built-in
+         * scheduler — which is why there is no no-arg variant here.
+         * Reconnection restores or extends the build-time configuration; it
+         * cannot switch background execution off. To change the execution mode
+         * itself, build a new orchestrator.
+         *
+         * @param executor
+         *            the executor to run turns on, not {@code null}
+         * @return this reconnector
+         * @throws NullPointerException
+         *             if executor is {@code null}
+         * @since 25.3
+         */
+        public Reconnector withBackgroundExecution(Executor executor) {
+            Objects.requireNonNull(executor, "Executor cannot be null");
+            this.backgroundExecutor = executor;
+            return this;
+        }
+
+        /**
          * Applies the reconnection, restoring the provider, tools, and
          * conversation history on the new provider. The existing conversation
          * history is replayed onto the new provider's memory so that it has
@@ -1038,6 +1126,10 @@ public class AIOrchestrator implements Serializable {
             orchestrator.provider = provider;
             orchestrator.tools = tools;
             orchestrator.controller = controller;
+            if (backgroundExecutor != null) {
+                orchestrator.backgroundExecution = true;
+                orchestrator.backgroundExecutor = backgroundExecutor;
+            }
             if (!orchestrator.conversationHistory.isEmpty()) {
                 provider.setHistory(
                         List.copyOf(orchestrator.conversationHistory),
@@ -1097,6 +1189,11 @@ public class AIOrchestrator implements Serializable {
      * interpret relative date/time references; pass {@code null} to disable, or
      * a custom supplier to include tenant, locale, page state, or anything else
      * worth keeping out of the system prompt.</li>
+     * <li>{@link #withBackgroundExecution()} or
+     * {@link #withBackgroundExecution(Executor)} – runs each turn on a
+     * background thread so a blocking (non-streaming) LLM call does not hold
+     * the UI thread and the session lock. Synchronous execution is the
+     * default.</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
@@ -1123,6 +1220,8 @@ public class AIOrchestrator implements Serializable {
         private Map<String, List<AIAttachment>> historyAttachments;
         private SerializableSupplier<String> contextSupplier;
         private boolean contextSupplierSet;
+        private boolean backgroundExecution;
+        private Executor backgroundExecutor;
 
         private Builder(LLMProvider provider, String systemPrompt) {
             Objects.requireNonNull(provider, "Provider cannot be null");
@@ -1429,10 +1528,15 @@ public class AIOrchestrator implements Serializable {
          * response text is empty or a partial stream that was received before
          * the failure.
          * <p>
-         * The listener is called from a background thread (Reactor scheduler).
-         * It is safe to perform blocking I/O (e.g. database writes) directly.
+         * The thread the listener runs on depends on the configuration: with a
+         * streaming provider or with {@link #withBackgroundExecution()}
+         * enabled, it is called from a background thread where blocking I/O
+         * (e.g. database writes) is safe. With a non-streaming provider in the
+         * default synchronous mode, the whole turn — this listener included —
+         * runs on the UI thread, where blocking prolongs the current request.
          * To update Vaadin UI components from this listener, use
-         * {@code ui.access()}.
+         * {@code ui.access()}. See {@link ResponseListener} for the full
+         * threading contract.
          * <p>
          * The listener is not called when history is restored via
          * {@link #withHistory(List, Map)}.
@@ -1493,6 +1597,107 @@ public class AIOrchestrator implements Serializable {
         }
 
         /**
+         * Runs each turn on a background thread instead of the thread that
+         * triggers the prompt.
+         * <p>
+         * By default the orchestrator subscribes to the LLM provider's response
+         * stream on the calling thread. With a non-streaming provider, whose
+         * blocking LLM call runs at subscription time, the entire turn — every
+         * LLM round-trip and tool call included — then runs on the UI thread
+         * while holding the session lock, so nothing reaches the browser and
+         * the application appears frozen until the turn ends. With this option
+         * enabled, the subscription moves to a background thread: the UI thread
+         * is released as soon as the turn starts, the user message and the
+         * assistant placeholder render immediately, and the blocking work
+         * happens without the session lock.
+         * <p>
+         * What runs where when this option is enabled:
+         * <ul>
+         * <li>Still on the UI thread, before the stream opens: the
+         * {@link RequestInterceptor}, adding the user message and the assistant
+         * placeholder to the message list, {@link AIController#onRequest()},
+         * the {@link RequestListener}, and the session context supplier.</li>
+         * <li>On the background thread: the LLM call(s), tool executions (both
+         * vendor-annotated tools and {@link LLMProvider.ToolSpec} tools), and
+         * the {@link ResponseListener}.</li>
+         * </ul>
+         * <p>
+         * <b>Delivering updates to the browser:</b> UI changes made while the
+         * turn runs in the background reach the client through automatic server
+         * push or polling. Enable push with {@code @Push} on the application
+         * shell or UI class, or enable polling with
+         * {@link UI#setPollInterval(int)}; otherwise the response appears only
+         * with the next request the browser happens to make. Manual push mode
+         * is not enough on its own — the orchestrator never calls
+         * {@code ui.push()}, so the application would have to push after each
+         * turn itself. A warning is logged when neither automatic push nor
+         * polling is active.
+         * <p>
+         * <b>Tool implementations:</b> on the background thread, Vaadin thread
+         * locals such as {@link UI#getCurrent()} and framework contexts such as
+         * Spring Security's {@code SecurityContext} are not available, and UI
+         * components must not be accessed directly. Wrap component access in
+         * {@code ui.access()}, or capture the needed state up front in
+         * {@link AIController#onRequest()}, which still runs on the UI thread.
+         * The built-in controllers ({@code GridAIController},
+         * {@code ChartAIController}, {@code FormAIController}) already handle
+         * this. To propagate framework contexts, use
+         * {@link #withBackgroundExecution(Executor)} with a context-propagating
+         * executor.
+         * <p>
+         * Calling this method after {@link #withBackgroundExecution(Executor)}
+         * discards the executor and reverts to the built-in pool.
+         *
+         * @return this builder
+         * @see #withBackgroundExecution(Executor)
+         * @since 25.3
+         */
+        public Builder withBackgroundExecution() {
+            warnIfAlreadySet(this.backgroundExecutor, "Background executor");
+            this.backgroundExecution = true;
+            this.backgroundExecutor = null;
+            return this;
+        }
+
+        /**
+         * Runs each turn on the given executor instead of the thread that
+         * triggers the prompt. See {@link #withBackgroundExecution()} for the
+         * full contract; this variant additionally lets the application control
+         * which threads carry the turns — for example a virtual thread per task
+         * executor, a bounded application pool, or a context-propagating
+         * wrapper such as Spring Security's
+         * {@code DelegatingSecurityContextExecutor}.
+         * <p>
+         * The executor's lifecycle is owned by the application; the
+         * orchestrator never shuts it down. Each turn submits a single task
+         * that occupies a thread for the whole turn, so size the executor by
+         * the number of concurrent turns to allow.
+         * <p>
+         * <b>Serialization:</b> the executor is transient. After
+         * deserialization, restore it via
+         * {@code reconnect(provider).withBackgroundExecution(executor)};
+         * otherwise background execution continues on the built-in scheduler.
+         * <p>
+         * The later call wins in either direction: calling this after
+         * {@link #withBackgroundExecution()} switches from the built-in pool to
+         * the executor, and vice versa.
+         *
+         * @param executor
+         *            the executor to run turns on, not {@code null}
+         * @return this builder
+         * @throws NullPointerException
+         *             if executor is {@code null}
+         * @since 25.3
+         */
+        public Builder withBackgroundExecution(Executor executor) {
+            Objects.requireNonNull(executor, "Executor cannot be null");
+            warnIfAlreadySet(this.backgroundExecutor, "Background executor");
+            this.backgroundExecution = true;
+            this.backgroundExecutor = executor;
+            return this;
+        }
+
+        /**
          * Sets the conversation history and associated attachments to restore
          * when the orchestrator is built. This restores the LLM provider's
          * conversation context (including multimodal content), the message list
@@ -1545,6 +1750,8 @@ public class AIOrchestrator implements Serializable {
             orchestrator.responseListener = responseListener;
             orchestrator.contextSupplier = contextSupplierSet ? contextSupplier
                     : defaultContextSupplier();
+            orchestrator.backgroundExecution = backgroundExecution;
+            orchestrator.backgroundExecutor = backgroundExecutor;
             try {
                 if (input != null) {
                     input.addSubmitListener(
