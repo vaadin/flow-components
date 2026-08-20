@@ -18,7 +18,9 @@ import com.vaadin.flow.component.charts.model.PlotBand;
 import com.vaadin.flow.component.charts.model.PlotOptionsBullet;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/bullet")
 public class Bullet extends AbstractChartExample {
 
     @Override

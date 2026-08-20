@@ -192,7 +192,7 @@ class ColorUtils {
     }
 
     /**
-     * Apply lum modifications according to the forumula from here:
+     * Apply lum modifications according to the formula from here:
      * https://msdn.microsoft.com/
      * en-us/library/office/dd560821(v=office.12).aspx
      */

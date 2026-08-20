@@ -107,6 +107,6 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
     }
 
     private SpreadsheetElement getSpreadsheetElement() {
-        return $(SpreadsheetElement.class).first();
+        return $(SpreadsheetElement.class).waitForFirst();
     }
 }

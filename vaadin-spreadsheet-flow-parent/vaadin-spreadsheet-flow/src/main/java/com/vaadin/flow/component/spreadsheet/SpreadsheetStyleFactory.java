@@ -45,6 +45,7 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * This class handles converting Apache POI CellStyles to CSS styles.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetStyleFactory implements Serializable {
@@ -658,7 +659,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         }
 
         // merged regions have their borders in edge cells that are "invisible"
-        // inside the region -> right and bottom cells need to be transfered to
+        // inside the region -> right and bottom cells need to be transferred to
         // the actual merged cell
         final int columnIndex = cell.getColumnIndex();
         final int rowIndex = cell.getRowIndex();
@@ -705,7 +706,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         }
 
-        // only take transfered borders into account on the (possible) merged
+        // only take transferred borders into account on the (possible) merged
         // regions edges
         if (region == null || region.col1 == (columnIndex + 1)
                 || region.col2 == (columnIndex + 1)

@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AxisGrid;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -29,9 +28,10 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.Style;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
-@SkipFromDemo
+@Route("vaadin-charts/gantt/gantt-custom-x-axis")
 public class GanttCustomXAxis extends AbstractChartExample {
 
     private static final Instant TODAY = Instant.now()

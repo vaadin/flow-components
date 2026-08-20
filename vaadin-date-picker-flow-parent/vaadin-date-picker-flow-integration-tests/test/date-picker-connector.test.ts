@@ -1,4 +1,6 @@
-import { expect, fixtureSync } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync } from '@vaadin/testing-helpers';
+import * as sinon from 'sinon';
 import dateFnsFormat from 'date-fns/format';
 import { DatePickerDate } from '@vaadin/date-picker';
 import { init, extractDateParts, datepickerConnector, type FlowDatePicker } from './shared.js';
@@ -83,6 +85,126 @@ describe('date-picker connector', () => {
         const result = datePicker.i18n.parseDate(DATE.slice(0, 5)) as DatePickerDate;
         expect(result.year).to.equal(new Date().getFullYear());
       });
+    });
+  });
+
+  describe('date metadata', () => {
+    function isDateDisabled(year: number, month: number, day: number): boolean {
+      return datePicker.isDateDisabled!({ year, month, day });
+    }
+
+    it('should not set isDateDisabled when no static rules are configured', () => {
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [], disabledWeekdays: [] });
+      expect(datePicker.isDateDisabled).to.be.undefined;
+    });
+
+    it('should disable dates from the fixed list', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [
+          [2024, 0, 2],
+          [2024, 0, 4]
+        ]
+      });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true;
+      expect(isDateDisabled(2024, 0, 4)).to.be.true;
+      expect(isDateDisabled(2024, 0, 3)).to.be.false;
+    });
+
+    it('should disable dates from the weekday list', () => {
+      // Monday = 1 and Sunday = 7, the latter being 0 in `Date.prototype.getDay()`.
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [1, 7] });
+      expect(isDateDisabled(2024, 0, 1)).to.be.true; // Monday
+      expect(isDateDisabled(2024, 0, 7)).to.be.true; // Sunday
+      expect(isDateDisabled(2024, 0, 8)).to.be.true; // Monday
+      expect(isDateDisabled(2024, 0, 6)).to.be.false; // Saturday
+      expect(isDateDisabled(2024, 0, 2)).to.be.false; // Tuesday
+    });
+
+    it('should disable dates from the fixed list and the weekday list together', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [[2024, 0, 2]],
+        disabledWeekdays: [7]
+      });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true; // Tuesday, from the fixed list
+      expect(isDateDisabled(2024, 0, 7)).to.be.true; // Sunday, from the weekday list
+      expect(isDateDisabled(2024, 0, 3)).to.be.false; // Wednesday, neither
+    });
+
+    it('should compute weekdays correctly for years below 100', () => {
+      // Year 50 January 1st is a Saturday, while `new Date(50, 0, 1)` would map to
+      // 1950-01-01, which is a Sunday.
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [6] });
+      expect(isDateDisabled(50, 0, 1)).to.be.true;
+
+      datePicker.$connector.setDateMetadataConfig({ disabledWeekdays: [7] });
+      expect(isDateDisabled(50, 0, 1)).to.be.false;
+    });
+
+    it('should replace isDateDisabled when the config changes', () => {
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 2]] });
+      expect(isDateDisabled(2024, 0, 2)).to.be.true;
+
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 3]] });
+      expect(isDateDisabled(2024, 0, 3)).to.be.true;
+      expect(isDateDisabled(2024, 0, 2)).to.be.false;
+    });
+
+    it('should clear isDateDisabled when the config becomes empty', () => {
+      datePicker.$connector.setDateMetadataConfig({
+        disabledDates: [[2024, 0, 2]],
+        disabledWeekdays: [7]
+      });
+      expect(datePicker.isDateDisabled).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({});
+      expect(datePicker.isDateDisabled).to.be.undefined;
+    });
+
+    // The range the web component would pass for a whole year, as ISO 8601 dates.
+    const RANGE = { start: '2024-01-01', end: '2024-12-31' };
+
+    it('should not set dateMetadataProvider when hasProvider is false', () => {
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: false });
+      expect(datePicker.dateMetadataProvider).to.be.null;
+    });
+
+    it('should keep the same dateMetadataProvider reference across config updates', () => {
+      // The web component compares the provider by reference and clears its cache when a new
+      // function is assigned, so every config update has to reuse the same function object.
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 2]], hasProvider: true });
+      const provider = datePicker.dateMetadataProvider;
+      expect(provider).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({ disabledDates: [[2024, 0, 3]], hasProvider: true });
+      expect(datePicker.dateMetadataProvider).to.equal(provider);
+    });
+
+    it('should set dateMetadataProvider to null when hasProvider becomes false', () => {
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+      expect(datePicker.dateMetadataProvider).to.be.a('function');
+
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: false });
+      expect(datePicker.dateMetadataProvider).to.be.null;
+    });
+
+    it('should call $server.requestDateMetadata with the range as it is', () => {
+      const requestDateMetadata = sinon.stub().resolves([]);
+      datePicker.$server = { requestDateMetadata };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      datePicker.dateMetadataProvider!(RANGE);
+
+      expect(requestDateMetadata).to.be.calledOnce;
+      expect(requestDateMetadata).to.be.calledWithExactly('2024-01-01', '2024-12-31');
+    });
+
+    it('should resolve the provider with the server response unchanged', async () => {
+      const metadata = [{ date: '2024-01-02', disabled: true }];
+      datePicker.$server = { requestDateMetadata: sinon.stub().resolves(metadata) };
+      datePicker.$connector.setDateMetadataConfig({ hasProvider: true });
+
+      const result = await datePicker.dateMetadataProvider!(RANGE);
+      expect(result).to.equal(metadata);
     });
   });
 });

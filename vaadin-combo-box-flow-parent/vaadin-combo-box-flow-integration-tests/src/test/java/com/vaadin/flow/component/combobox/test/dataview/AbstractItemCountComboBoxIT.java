@@ -20,6 +20,7 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -104,10 +105,16 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
             RangeLog... rangeLogs) {
         Arrays.stream(rangeLogs).forEach(rangeLog -> {
             int index = rangeLog.getIndex();
-            WebElement log = findElement(By.id("log-" + index));
-            Assert.assertEquals("Invalid range for index " + index,
-                    index + ":" + rangeLog.getRange().toString(),
-                    log.getText());
+            try {
+                WebElement log = findElement(By.id("log-" + index));
+                Assert.assertEquals("Invalid range for index " + index,
+                        index + ":" + rangeLog.getRange().toString(),
+                        log.getText());
+            } catch (NoSuchElementException e) {
+                Assert.fail("Log element not found for index " + index
+                        + ", expected range: "
+                        + rangeLog.getRange().toString());
+            }
         });
     }
 

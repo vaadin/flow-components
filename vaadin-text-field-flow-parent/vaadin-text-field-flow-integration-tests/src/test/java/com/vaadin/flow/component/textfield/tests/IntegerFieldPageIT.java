@@ -108,8 +108,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
         field = $(IntegerFieldElement.class).id("clear-integer-field");
 
         WebElement input = field.$("input").first();
-        input.sendKeys("300");
-        blur();
+        input.sendKeys("300", Keys.ENTER);
 
         field.clickClearButton();
 

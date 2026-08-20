@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -21,8 +21,6 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-spreadsheet")
 public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
-    private final static String NEW_VALUE = "something";
-
     @Before
     public void init() {
         open();
@@ -30,7 +28,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedRowsAndColumns_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRowsAndColumns_trySetCellValue_onlyUnlockedCellsEditable() {
         checkProtectionInCell("B2", true);
         checkProtectionInCell("C2", false);
         checkProtectionInCell("D2", true);
@@ -43,7 +41,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedColumns_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedColumns_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(1);
 
         checkProtectionInCell("A5", false);
@@ -65,7 +63,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetHasUnprotectedRows_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRows_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(2);
 
         checkProtectionInCell("B1", false);
@@ -84,7 +82,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
     @Ignore("Ignored until https://github.com/vaadin/flow-components/issues/3233 is fixed")
     @Test
-    public void sheetHasUnprotectedRanges_trySetCellValue_onlyUnlockedCellsUpdated() {
+    public void sheetHasUnprotectedRanges_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(3);
 
         checkProtectionInCell("D1", false);
@@ -108,7 +106,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetIsAllLocked_trySetCellValue_noCellUpdated() {
+    public void sheetIsAllLocked_trySetCellValue_noCellEditable() {
         selectSheetAt(4);
 
         checkProtectionInCell("B2", true);
@@ -124,7 +122,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
     @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
-    public void sheetIsAllLocked_changeDefaultStyleAndTrySetCellValue_allCellUpdated() {
+    public void sheetIsAllLocked_changeDefaultStyleAndTrySetCellValue_allCellsEditable() {
         selectSheetAt(4);
         loadTestFixture(TestFixtures.DefaultStyleUnlocked);
 
@@ -140,7 +138,7 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void sheetIsAllUnlocked_trySetCellValue_allCellUpdated() {
+    public void sheetIsAllUnlocked_trySetCellValue_allCellsEditable() {
         selectSheetAt(5);
 
         checkProtectionInCell("B2", false);
@@ -157,19 +155,29 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
     private void checkProtectionInCell(String address,
             boolean shouldBeProtected) {
         SheetCellElement cell = getSpreadsheet().getCellAt(address);
-        try {
-            cell.setValue(NEW_VALUE);
-        } catch (WebDriverException e) {
-            // Cell is locked and the input is not visible
+        boolean editable = isCellEditable(cell);
+        Assert.assertEquals(
+                address + (shouldBeProtected ? " should be protected"
+                        : " should be editable"),
+                !shouldBeProtected, editable);
+    }
+
+    /**
+     * Checks if a cell is editable by double-clicking it and checking whether
+     * the cell value input becomes visible.
+     */
+    private boolean isCellEditable(SheetCellElement cell) {
+        if (!cell.isNormalCell()) {
+            return false;
         }
-        if (shouldBeProtected) {
-            Assert.assertNotEquals(
-                    address + " is protected and value shouldn't have changed",
-                    NEW_VALUE, cell.getValue());
-        } else {
-            Assert.assertEquals(
-                    address + " is unprotected and value should have changed",
-                    NEW_VALUE, cell.getValue());
+        try {
+            waitUntil(driver -> {
+                cell.doubleClick();
+                return getSpreadsheet().getCellValueInput().isDisplayed();
+            }, 2);
+            return true;
+        } catch (TimeoutException e) {
+            return false;
         }
     }
 }

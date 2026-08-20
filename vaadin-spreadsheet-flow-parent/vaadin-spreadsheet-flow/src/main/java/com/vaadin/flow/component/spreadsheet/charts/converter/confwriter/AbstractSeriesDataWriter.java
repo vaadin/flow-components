@@ -18,6 +18,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Abstract
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataUpdateListener;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 
+/**
+ * @since 24.0
+ */
 public abstract class AbstractSeriesDataWriter {
     private final AbstractSeriesData series;
     private AbstractPlotOptions plotOptions;

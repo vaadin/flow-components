@@ -30,8 +30,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
@@ -51,11 +53,14 @@ import tools.jackson.databind.node.ObjectNode;
  *            the sub menu type
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.3.0-alpha12")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha12")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
@@ -226,6 +231,36 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
+     * Creates a new menu item with the given text content and tooltip text and
+     * adds it to the context menu.
+     *
+     * @param text
+     *            the text content for the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     * @since 25.2
+     */
+    public I addItem(String text, String tooltipText) {
+        return getMenuManager().addItem(text, tooltipText);
+    }
+
+    /**
+     * Creates a new menu item with the given component content and tooltip text
+     * and adds it to the context menu.
+     *
+     * @param component
+     *            the component to add to the created menu item
+     * @param tooltipText
+     *            the tooltip text for the created menu item
+     * @return the created menu item
+     * @since 25.2
+     */
+    public I addItem(Component component, String tooltipText) {
+        return getMenuManager().addItem(component, tooltipText);
+    }
+
+    /**
      * Adds the given components to the context menu.
      * <p>
      * For the common use case of having a list of high-lightable items inside
@@ -235,6 +270,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @since 24.8
      */
     public void addComponent(Component... components) {
         getMenuManager().addComponent(components);
@@ -250,6 +286,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @since 24.8
      */
     public void addComponent(Collection<Component> components) {
         if (components == null) {
@@ -286,6 +323,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the index, where the component will be added
      * @param component
      *            the component to add
+     * @since 1.1
      */
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
@@ -299,6 +337,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *
      * @param component
      *            the component to add
+     * @since 24.8
      */
     public void addComponentAsFirst(Component component) {
         getMenuManager().addComponentAtIndex(0, component);
@@ -306,6 +345,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds a separator between items.
+     * 
+     * @since 24.8
      */
     public void addSeparator() {
         getMenuManager().addSeparator();
@@ -352,6 +393,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * {@code opened-changed} event is sent when the opened state changes.
+     * 
+     * @since 23.3
      */
     public static class OpenedChangeEvent<TComponent extends ContextMenuBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -385,6 +428,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Gets the menu manager.
      *
      * @return the menu manager
+     * @since 2.0
      */
     protected MenuManager<C, I, S> getMenuManager() {
         if (menuManager == null) {
@@ -400,6 +444,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param contentReset
      *            callback to reset the menu content
      * @return a new menu manager instance
+     * @since 2.0
      */
     protected abstract MenuManager<C, I, S> createMenuManager(
             SerializableRunnable contentReset);
@@ -423,6 +468,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *
      * @return {@code true} if the context menu should be opened, {@code false}
      *         otherwise.
+     * @since 25.0
      */
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         return true;
@@ -478,5 +524,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         getElement().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
                 appId);
+    }
+
+    void ensureTooltipElement() {
+        if (SlotUtils.getElementsInSlot(this, "tooltip").count() == 0) {
+            SlotUtils.addToSlot(this, "tooltip", new Element("vaadin-tooltip"));
+        }
     }
 }

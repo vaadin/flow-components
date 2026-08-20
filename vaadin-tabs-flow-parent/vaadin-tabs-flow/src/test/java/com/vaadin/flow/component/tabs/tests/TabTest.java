@@ -87,7 +87,7 @@ class TabTest {
         Assertions.assertEquals("aria-labelledby",
                 tab.getAriaLabelledBy().get());
 
-        tab.setAriaLabelledBy(null);
+        tab.setAriaLabelledBy((String) null);
         Assertions.assertTrue(tab.getAriaLabelledBy().isEmpty());
     }
 

@@ -360,7 +360,7 @@ class MultiSelectListBoxTest {
         Assertions.assertEquals("aria-labelledby",
                 listBox.getAriaLabelledBy().get());
 
-        listBox.setAriaLabelledBy(null);
+        listBox.setAriaLabelledBy((String) null);
 
         Assertions.assertTrue(listBox.getAriaLabelledBy().isEmpty());
     }

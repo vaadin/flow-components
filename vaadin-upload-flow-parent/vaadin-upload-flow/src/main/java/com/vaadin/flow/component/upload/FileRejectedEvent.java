@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * on {@link Upload}
  *
  * @author Vaadin Ltd.
+ * @since 2.1
  */
 public class FileRejectedEvent extends ComponentEvent<Upload> {
 
@@ -56,6 +57,7 @@ public class FileRejectedEvent extends ComponentEvent<Upload> {
      *            the error message
      * @param fileName
      *            the rejected file name
+     * @since 24.4
      */
     public FileRejectedEvent(Upload source, String errorMessage,
             String fileName) {
@@ -77,6 +79,7 @@ public class FileRejectedEvent extends ComponentEvent<Upload> {
      * Get the file name.
      *
      * @return file name
+     * @since 24.4
      */
     public String getFileName() {
         return fileName;

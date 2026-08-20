@@ -70,10 +70,11 @@ import tools.jackson.databind.node.ObjectNode;
  * the overflow item displays the overflowing avatars and names in a list.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.3.0-alpha12")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -244,6 +245,7 @@ public class AvatarGroup extends Component
          * @param downloadHandler
          *            the download resource or {@code null} to remove the
          *            resource
+         * @since 24.8
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
             if (downloadHandler == null) {
@@ -415,6 +417,7 @@ public class AvatarGroup extends Component
          *
          * @param classNames
          *            the class name or class names to be added to the item
+         * @since 24.3
          */
         public void addClassNames(String... classNames) {
             this.classNames.addAll(Arrays.asList(classNames));
@@ -429,6 +432,7 @@ public class AvatarGroup extends Component
          *
          * @param classNames
          *            the class name or class names to be removed from the item
+         * @since 24.3
          */
         public void removeClassNames(String... classNames) {
             this.classNames.removeAll(Arrays.asList(classNames));
@@ -441,6 +445,7 @@ public class AvatarGroup extends Component
          * Gets the CSS class name set on this item.
          *
          * @return a space-delimited list of CSS class names
+         * @since 24.3
          */
         public String getClassName() {
             if (classNames.isEmpty()) {
@@ -655,7 +660,7 @@ public class AvatarGroup extends Component
      */
     public void add(AvatarGroupItem... items) {
         setItems(Stream.concat(this.items.stream(), Arrays.stream(items))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     /**
@@ -668,8 +673,7 @@ public class AvatarGroup extends Component
         List<AvatarGroupItem> itemsToRemove = Arrays.asList(items);
 
         setItems(this.items.stream()
-                .filter(item -> !itemsToRemove.contains(item))
-                .collect(Collectors.toList()));
+                .filter(item -> !itemsToRemove.contains(item)).toList());
     }
 
     /**
@@ -709,8 +713,8 @@ public class AvatarGroup extends Component
     public <S extends Signal<AvatarGroupItem>> SignalBinding<Collection<AvatarGroupItem>> bindItems(
             Signal<List<S>> itemsSignal) {
         Objects.requireNonNull(itemsSignal, "Signal cannot be null");
-        return itemsSupport.bind(() -> itemsSignal.get().stream()
-                .map(Signal::get).collect(Collectors.toList()));
+        return itemsSupport.bind(
+                () -> itemsSignal.get().stream().map(Signal::get).toList());
     }
 
     /**
@@ -748,7 +752,7 @@ public class AvatarGroup extends Component
     }
 
     /**
-     * Sets the the maximum number of avatars to display.
+     * Sets the maximum number of avatars to display.
      * <p>
      * By default, all the avatars are displayed. When max is set, the
      * overflowing avatars are grouped into one avatar.

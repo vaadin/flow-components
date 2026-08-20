@@ -97,7 +97,9 @@ public class XSSFColorConverterIT extends AbstractSpreadsheetIT {
      * for testing only - POI should do the proper color lookups now
      *
      * @param workbook
+     *            the workbook
      * @param color
+     *            the color
      * @return ARGB Hex
      */
     private static String getIndexedARGB(XSSFWorkbook workbook,

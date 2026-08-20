@@ -1,0 +1,83 @@
+name: Checkstyle Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  checkstyle-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run checkstyle
+        id: checkstyle
+        run: |
+          output=$(./scripts/checkstyle.sh 2>&1) || true
+          exit_code=${PIPESTATUS[0]:-$?}
+
+          {
+            echo 'output<<EOF'
+            echo "$output"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+          if echo "$output" | grep -q "Found .* checkstyle error"; then
+            echo "has_errors=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_errors=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find existing checkstyle comment
+        if: always()
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: '<!-- tc-checkstyle -->'
+
+      - name: Post or update checkstyle comment
+        if: steps.checkstyle.outputs.has_errors == 'true'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            <!-- tc-checkstyle -->
+            ### Checkstyle errors found
+
+            Please fix the following checkstyle errors:
+
+            ```
+            ${{ steps.checkstyle.outputs.output }}
+            ```
+
+      - name: Delete checkstyle comment if clean
+        if: steps.checkstyle.outputs.has_errors == 'false' && steps.find-comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            <!-- tc-checkstyle -->
+            _Checkstyle issues resolved._
+
+      - name: Fail if checkstyle errors found
+        if: steps.checkstyle.outputs.has_errors == 'true'
+        run: |
+          echo "::error::Checkstyle errors found. See PR comment for details."
+          exit 1

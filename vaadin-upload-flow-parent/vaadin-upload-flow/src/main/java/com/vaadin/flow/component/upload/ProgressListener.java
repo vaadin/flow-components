@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * ProgressListener receives events to track progress of upload.
+ * 
+ * @since 1.0
  */
 @FunctionalInterface
 public interface ProgressListener extends Serializable {

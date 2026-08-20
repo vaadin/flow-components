@@ -40,14 +40,27 @@ import com.vaadin.flow.component.html.Div;
  * clears all the filters for that column (contained within the same pop-up).
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable {
+    /**
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
     public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
 
     public static final String FILTER_TABLE_CONTENT_CLASSNAME = "spreadsheet-filter-table-content";
 
     protected final Map<PopupButton, HashSet<SpreadsheetFilter>> popupButtonToFiltersMap;
+    /**
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected final Map<PopupButton, Button> popupButtonToClearButtonMap;
     protected CellRangeAddress filteringRegion;
 
@@ -151,6 +164,17 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButtonToClearButtonMap.get(popupButton).setEnabled(false);
             popupButton.markActive(false);
         }
+
+        // Refresh option lists after all filters cleared, so each ItemFilter
+        // sees the now-empty filteredRows of its siblings.
+        for (var filters : popupButtonToFiltersMap.values()) {
+            for (var filter : filters) {
+                if (filter instanceof ItemFilter itemFilter) {
+                    itemFilter.updateOptions();
+                }
+            }
+        }
+
         getSpreadsheet().setRowsHidden(IntStream
                 .range(filteringRegion.getFirstRow(),
                         filteringRegion.getLastRow() + 1)
@@ -160,7 +184,12 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
 
     /**
      * Creates the "Clear filters" buttons for the pop-ups.
+     *
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected void initClearAllButtons() {
         for (PopupButton popupButton : getPopupButtons()) {
             Button clearButton = createClearButton();
@@ -209,13 +238,17 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
      * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name.
      *
      * @return Button for clearing the filters
+     * @deprecated The "Clear filters" button will be removed in Vaadin 26. Use
+     *             {@link #clearAllFilters()} and bind it to a button of your
+     *             own instead.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected Button createClearButton() {
         final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
         button.setEnabled(false);
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-                ButtonVariant.LUMO_SMALL);
+                ButtonVariant.SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
         button.addClickListener(event -> clearAllFilters());
         return button;
@@ -260,6 +293,27 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
                         filteringRegion.getLastRow() + 1)
                 .boxed().collect(Collectors.toMap(Function.identity(),
                         filteredRows::contains)));
+    }
+
+    /**
+     * Gets the union of rows hidden by all filters in this table except the
+     * given one.
+     *
+     * @param self
+     *            Filter to exclude from the union
+     * @return Rows hidden by other filters
+     */
+    Set<Integer> getRowsHiddenByOtherFilters(SpreadsheetFilter self) {
+        Set<Integer> hidden = new HashSet<>();
+        for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
+                .values()) {
+            for (SpreadsheetFilter filter : filters) {
+                if (!filter.equals(self)) {
+                    hidden.addAll(filter.getFilteredRows());
+                }
+            }
+        }
+        return hidden;
     }
 
     /**

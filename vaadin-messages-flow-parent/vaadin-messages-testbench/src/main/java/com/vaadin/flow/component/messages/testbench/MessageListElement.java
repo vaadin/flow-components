@@ -33,7 +33,7 @@ public class MessageListElement extends TestBenchElement {
      * Gets the <code>&lt;vaadin-message&gt;</code> elements rendered in this
      * message list.
      *
-     * @return
+     * @return the message elements
      */
     public List<MessageElement> getMessageElements() {
         return $(MessageElement.class).all();

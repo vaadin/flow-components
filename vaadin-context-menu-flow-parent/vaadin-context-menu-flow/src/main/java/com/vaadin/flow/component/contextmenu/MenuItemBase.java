@@ -27,8 +27,10 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.Signal;
 
@@ -43,6 +45,7 @@ import com.vaadin.flow.signals.Signal;
  *            the sub menu type
  * @author Vaadin Ltd.
  * @see MenuItem
+ * @since 2.0
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
@@ -62,6 +65,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
             this);
 
+    private final SerializableRunnable contentReset;
+
     /**
      * Default constructor
      *
@@ -69,7 +74,22 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *            the context menu to which this item belongs to
      */
     public MenuItemBase(C contextMenu) {
+        this(contextMenu, () -> {
+        });
+    }
+
+    /**
+     * Creates a menu item belonging to the given menu.
+     *
+     * @param contextMenu
+     *            the context menu to which this item belongs to
+     * @param contentReset
+     *            callback to reset the menu content
+     * @since 25.2
+     */
+    public MenuItemBase(C contextMenu, SerializableRunnable contentReset) {
         this.contextMenu = contextMenu;
+        this.contentReset = contentReset;
         getElement().addEventListener("click", e -> {
             if (checkable) {
                 setChecked(!isChecked());
@@ -196,6 +216,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * @param keepOpen
      *            {@code true} to enable keeping the menu open when toggle this
      *            item selection, {@code false} to disable it.
+     * @since 24.2
      */
     public void setKeepOpen(boolean keepOpen) {
         if (keepOpen && isParentItem()) {
@@ -215,6 +236,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *
      * @return the keep open state of the item
      * @see #setKeepOpen(boolean)
+     * @since 24.2
      */
     public boolean isKeepOpen() {
         return getElement().getProperty("_keepOpen", false);
@@ -237,6 +259,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *            whether the item should be disabled when clicked
      * @throws IllegalStateException
      *             if the enabled state is already bound to a signal
+     * @since 24.6
      */
     public void setDisableOnClick(boolean disableOnClick) {
         boolean hasEnabledBinding = getElement().getNode()
@@ -255,6 +278,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * Gets whether the item is set to be disabled when clicked.
      *
      * @return whether the item is set to be disabled on click
+     * @since 24.6
      */
     public boolean isDisableOnClick() {
         return disableOnClickController.isDisableOnClick();
@@ -280,6 +304,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *         onChange} callbacks
      * @throws IllegalStateException
      *             if disable-on-click is active
+     * @since 25.1
      */
     @Override
     public SignalBinding<Boolean> bindEnabled(Signal<Boolean> enabledSignal) {
@@ -296,6 +321,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *
      * @param themeNames
      *            the theme name or theme names to be added to the item
+     * @since 22.0
      */
     public void addThemeNames(String... themeNames) {
         this.themeNames.addAll(Arrays.asList(themeNames));
@@ -308,6 +334,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *
      * @param themeNames
      *            the theme name or theme names to be removed from the item
+     * @since 22.0
      */
     public void removeThemeNames(String... themeNames) {
         this.themeNames.removeAll(Arrays.asList(themeNames));
@@ -321,6 +348,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *            the theme name to check for
      * @return <code>true</code> if the item has the given theme name,
      *         <code>false</code> otherwise
+     * @since 22.0
      */
     public boolean hasThemeName(String themeName) {
         return themeNames.contains(themeName);
@@ -337,6 +365,44 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         executeJsWhenAttached(
                 "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
                 getElement(), themeName);
+    }
+
+    /**
+     * Sets the tooltip text for this menu item. Setting {@code null} or an
+     * empty text removes the tooltip from the item.
+     *
+     * @param tooltipText
+     *            the tooltip text to set for the item, or {@code null} to clear
+     *            it
+     * @see #setTooltipPosition(TooltipPosition)
+     * @since 25.2
+     */
+    public void setTooltipText(String tooltipText) {
+        ensureTooltipElement();
+        getElement().setProperty("tooltip", tooltipText);
+        contentReset.run();
+    }
+
+    /**
+     * Sets the tooltip position for this menu item, overriding the default.
+     * Items with a sub-menu default to {@code start} so the tooltip doesn't
+     * overlap the opening sub-menu; all other items, including disabled ones,
+     * default to {@code end}.
+     *
+     * @param position
+     *            the tooltip position, or {@code null} to clear it and use the
+     *            default
+     * @see #setTooltipText(String)
+     * @since 25.2
+     */
+    public void setTooltipPosition(TooltipPosition position) {
+        getElement().setProperty("tooltipPosition",
+                position != null ? position.getPosition() : null);
+        contentReset.run();
+    }
+
+    protected void ensureTooltipElement() {
+        contextMenu.ensureTooltipElement();
     }
 
     protected abstract S createSubMenu();

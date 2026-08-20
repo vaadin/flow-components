@@ -1,8 +1,9 @@
-import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { init, setRootItems, getBodyCell, getBodyCellContent, getHeaderCellContent } from './shared.js';
 import type { FlowGrid } from './shared.js';
 import sinon from 'sinon';
-import { GridColumn } from '@vaadin/grid';
+import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 
 describe('grid connector - item click', () => {
   let grid: FlowGrid;
@@ -49,6 +50,18 @@ describe('grid connector - item click', () => {
     cell?.addEventListener('click', (e) => e.preventDefault());
     grid.addEventListener('item-click' as any, spy);
     cell?.click();
+    expect(spy.called).to.be.false;
+  });
+
+  it('should not dispatch an item-click event on overlay content click', async () => {
+    column.renderer = (root: HTMLElement) => {
+      root.innerHTML = '<foo-overlay><span>overlay content</span></foo-overlay>';
+    };
+
+    const spy = sinon.spy();
+    grid.addEventListener('item-click' as any, spy);
+
+    getBodyCellContent(grid, 0, 0)?.querySelector('span')?.click();
     expect(spy.called).to.be.false;
   });
 

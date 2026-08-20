@@ -95,12 +95,13 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <TItem>
  *            the type of the items to be selectable from the combo box
  * @author Vaadin Ltd
+ * @since 23.2
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0-alpha12")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./comboBoxConnector.js")
+@JsModule("./vaadin-combo-box/comboBoxConnector.ts")
 public class MultiSelectComboBox<TItem>
         extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
         implements MultiSelect<MultiSelectComboBox<TItem>, TItem>,
@@ -134,6 +135,10 @@ public class MultiSelectComboBox<TItem>
         super("selectedItems", new LinkedHashSet<>(), ArrayNode.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
+
+        // Use change instead of the default selected-items-changed
+        // event to avoid notification for programmatic value changes.
+        setSynchronizedEvent("change");
 
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data
@@ -309,6 +314,7 @@ public class MultiSelectComboBox<TItem>
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -320,6 +326,7 @@ public class MultiSelectComboBox<TItem>
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -442,6 +449,8 @@ public class MultiSelectComboBox<TItem>
     /**
      * Defines possible behavior of the component when not all selected items
      * can be displayed as chips within the current field width.
+     * 
+     * @since 24.3
      */
     public enum AutoExpandMode {
         /**
@@ -511,8 +520,8 @@ public class MultiSelectComboBox<TItem>
      * Expansion only works with undefined size in the desired direction (i.e.
      * setting `max-width` limits the component's width).
      *
-     * @param {AutoExpandMode}
-     *            autoExpandMode
+     * @param autoExpandMode
+     *            the auto-expand mode
      * @since 24.3
      */
     public void setAutoExpand(AutoExpandMode autoExpandMode) {
@@ -549,6 +558,30 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets whether all selected item chips collapse into the overflow chip when
+     * they don't all fit.
+     *
+     * @since 25.2
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isCollapseChips() {
+        return getElement().getProperty("collapseChips", false);
+    }
+
+    /**
+     * Enables or disables collapsing of all selected item chips into the
+     * overflow chip when they don't all fit. By default, as many chips as
+     * possible are shown and only the remaining ones are collapsed.
+     *
+     * @since 25.2
+     * @param collapseChips
+     *            {@code true} to collapse all chips into the overflow chip
+     */
+    public void setCollapseChips(boolean collapseChips) {
+        getElement().setProperty("collapseChips", collapseChips);
+    }
+
+    /**
      * Gets whether the filter is kept after selecting items. {@code false} by
      * default.
      *
@@ -567,6 +600,7 @@ public class MultiSelectComboBox<TItem>
      *
      * @param keepFilter
      *            whether to keep the filter after selecting an item
+     * @since 24.4
      */
     public void setKeepFilter(boolean keepFilter) {
         getElement().setProperty("keepFilter", keepFilter);
@@ -602,6 +636,7 @@ public class MultiSelectComboBox<TItem>
      * @param width
      *            the new dropdown width. Pass in null to set the dropdown width
      *            back to the default value.
+     * @since 24.4
      */
     public void setOverlayWidth(String width) {
         getStyle().set("--vaadin-multi-select-combo-box-overlay-width", width);
@@ -615,6 +650,7 @@ public class MultiSelectComboBox<TItem>
      *            the width of the dropdown.
      * @param unit
      *            the unit used for the dropdown.
+     * @since 24.4
      */
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");

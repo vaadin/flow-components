@@ -10,6 +10,8 @@ package com.vaadin.flow.component.gridpro;
 
 /**
  * Set of theme variants applicable for {@code vaadin-grid-pro} component.
+ * 
+ * @since 23.1
  */
 public enum GridProVariant {
     LUMO_NO_BORDER("no-border"),
@@ -22,36 +24,43 @@ public enum GridProVariant {
     LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells"),
     /**
      * @deprecated Use {@link #NO_BORDER} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_BORDER("no-border"),
     /**
      * @deprecated Use {@link #NO_ROW_BORDERS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_ROW_BORDERS("no-row-borders"),
     /**
      * @deprecated Use {@link #COLUMN_BORDERS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_COLUMN_BORDERS("column-borders"),
     /**
      * @deprecated Use {@link #ROW_STRIPES} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_ROW_STRIPES("row-stripes"),
     /**
      * @deprecated Use {@link #WRAP_CELL_CONTENT} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_WRAP_CELL_CONTENT("wrap-cell-content"),
     /**
      * @deprecated Use {@link #HIGHLIGHT_EDITABLE_CELLS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
     /**
      * @deprecated Use {@link #HIGHLIGHT_READ_ONLY_CELLS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells"),

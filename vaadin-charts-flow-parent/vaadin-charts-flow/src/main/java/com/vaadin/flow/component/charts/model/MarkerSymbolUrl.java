@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Symbol that is fetched from the url, implementing ChartEnum to provide
  * correct serialization
+ * 
+ * @since 6.0.1
  */
 public class MarkerSymbolUrl extends AbstractConfigurationObject
         implements MarkerSymbol, ChartEnum {

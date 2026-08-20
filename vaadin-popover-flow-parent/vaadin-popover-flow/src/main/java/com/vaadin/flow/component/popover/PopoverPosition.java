@@ -17,6 +17,8 @@ package com.vaadin.flow.component.popover;
 
 /**
  * Popover position in relation to the target element.
+ * 
+ * @since 24.5
  */
 public enum PopoverPosition {
     TOP_START("top-start"),

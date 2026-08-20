@@ -19,14 +19,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.poi.hssf.model.InternalSheet;
@@ -69,6 +67,7 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  * values and formatting for individual cells.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class CellValueManager implements Serializable {
@@ -448,6 +447,7 @@ public class CellValueManager implements Serializable {
      * Calculate cell width, accounting for merged cells (see #655)
      *
      * @param cell
+     *            the cell
      * @return cell width, including widths of any merged columns
      */
     protected int getCellWidth(Cell cell) {
@@ -915,7 +915,9 @@ public class CellValueManager implements Serializable {
      * Checks whether the given cell belongs to any given range.
      *
      * @param cell
+     *            the cell
      * @param cellRangeAddresses
+     *            the cell range addresses
      * @return {@code true} if in range, {@code false} otherwise
      */
     private boolean selectedIsInRange(CellReference cell,
@@ -934,6 +936,7 @@ public class CellValueManager implements Serializable {
      * everything.
      *
      * @param selectedCellReference
+     *            the selected cell reference
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */
@@ -965,6 +968,7 @@ public class CellValueManager implements Serializable {
      * care of everything.
      *
      * @param individualSelectedCells
+     *            the individually selected cells
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */
@@ -987,6 +991,7 @@ public class CellValueManager implements Serializable {
      * cell range or whether a custom deletion handler takes care of everything.
      *
      * @param cellRangeAddresses
+     *            the cell range addresses
      * @return {@code true} if the default handling should be performed,
      *         {@code false} otherwise
      */
@@ -1125,12 +1130,8 @@ public class CellValueManager implements Serializable {
         Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook
                 .getSheetAt(workbook.getActiveSheetIndex());
-        Map<String, String> componentIDtoCellKeysMap = spreadsheet
-                .getComponentIDtoCellKeysMap();
-        @SuppressWarnings("unchecked")
-        final Collection<String> customComponentCells = (Collection<String>) (componentIDtoCellKeysMap == null
-                ? Collections.emptyList()
-                : componentIDtoCellKeysMap.values());
+        final Collection<String> customComponentCells = spreadsheet
+                .getComponentIDtoCellKeysMap().values();
         for (int r = firstRow - 1; r < lastRow; r++) {
             Row row = activeSheet.getRow(r);
             if (row != null && row.getLastCellNum() != -1

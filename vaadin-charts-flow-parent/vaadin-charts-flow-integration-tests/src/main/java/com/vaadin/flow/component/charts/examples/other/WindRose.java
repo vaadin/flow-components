@@ -22,7 +22,9 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/wind-rose")
 public class WindRose extends AbstractChartExample {
 
     @Override

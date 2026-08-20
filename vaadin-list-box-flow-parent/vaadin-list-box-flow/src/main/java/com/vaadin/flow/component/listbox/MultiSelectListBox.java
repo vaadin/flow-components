@@ -46,6 +46,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @param <T>
  *            the type of the items contained by this component
  * @see ListBox
+ * @since 2.1
  */
 public class MultiSelectListBox<T>
         extends ListBoxBase<MultiSelectListBox<T>, T, Set<T>>
@@ -186,6 +187,7 @@ public class MultiSelectListBox<T>
      *            the selection preservation mode to switch to, not {@code null}
      *
      * @see SelectionPreservationMode
+     * @since 24.4
      */
     public void setSelectionPreservationMode(
             SelectionPreservationMode selectionPreservationMode) {
@@ -199,6 +201,7 @@ public class MultiSelectListBox<T>
      * @return the selection preservation mode
      *
      * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     * @since 24.4
      */
     public SelectionPreservationMode getSelectionPreservationMode() {
         return selectionPreservationHandler.getSelectionPreservationMode();
@@ -246,6 +249,7 @@ public class MultiSelectListBox<T>
      *            the second set of instance
      * @return <code>true</code> if sets are equal in size and also the items;
      *         otherwise <code>false</code>
+     * @since 18.0
      */
     @Override
     protected boolean valueEquals(Set<T> value1, Set<T> value2) {

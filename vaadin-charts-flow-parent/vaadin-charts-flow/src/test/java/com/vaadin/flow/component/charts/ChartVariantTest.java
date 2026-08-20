@@ -74,7 +74,7 @@ class ChartVariantTest {
     }
 
     @Test
-    void addTwiceAndSeeIbce_themeAttributeUpdated() {
+    void addTwiceAndSeeOnce_themeAttributeUpdated() {
         assertThemeAttribute(null);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);
         chart.addThemeVariants(ChartVariant.LUMO_CLASSIC);

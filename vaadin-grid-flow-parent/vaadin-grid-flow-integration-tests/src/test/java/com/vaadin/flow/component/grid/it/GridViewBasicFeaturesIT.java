@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -41,8 +42,7 @@ public class GridViewBasicFeaturesIT extends AbstractComponentIT {
 
         TestBenchElement filteringField = grid
                 .findElement(By.tagName("vaadin-text-field"));
-        filteringField.sendKeys("sek");
-        blur();
+        filteringField.sendKeys("sek", Keys.ENTER);
 
         Assert.assertTrue(
                 "The first company name should contain the applied filter string",

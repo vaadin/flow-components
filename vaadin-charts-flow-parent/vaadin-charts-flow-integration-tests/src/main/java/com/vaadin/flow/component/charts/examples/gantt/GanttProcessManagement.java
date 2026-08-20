@@ -27,8 +27,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
+@Route("vaadin-charts/gantt/gantt-process-management")
 public class GanttProcessManagement extends AbstractChartExample {
     private static final Instant TODAY = Instant.now()
             .truncatedTo(ChronoUnit.DAYS);

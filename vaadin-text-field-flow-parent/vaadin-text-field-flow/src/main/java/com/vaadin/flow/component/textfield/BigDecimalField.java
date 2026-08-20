@@ -82,6 +82,7 @@ import com.vaadin.flow.shared.Registration;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
+ * @since 2.1
  */
 @Tag("vaadin-big-decimal-field")
 @JsModule("./vaadin-big-decimal-field.js")
@@ -266,6 +267,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
+     * 
+     * @since 24.5
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -274,6 +277,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     /**
      * @see BigDecimalFieldI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -456,6 +460,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
      * {@link #setI18n(BigDecimalFieldI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public BigDecimalFieldI18n getI18n() {
         return i18n;
@@ -466,6 +471,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(BigDecimalFieldI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -479,6 +485,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     /**
      * The internationalization properties for {@link BigDecimalField}.
+     * 
+     * @since 24.5
      */
     public static class BigDecimalFieldI18n implements Serializable {
 

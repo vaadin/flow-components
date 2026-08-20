@@ -48,7 +48,7 @@ import com.vaadin.shared.ui.ui.UIConstants;
 public class ApplicationConfiguration implements EntryPoint {
 
     /**
-     * Helper class for reading configuration options from the bootstap
+     * Helper class for reading configuration options from the bootstrap
      * javascript
      *
      * @since 7.0
@@ -367,7 +367,7 @@ public class ApplicationConfiguration implements EntryPoint {
      * Gets the initial UIDL from the DOM, if it was provided during the init
      * process.
      *
-     * @return
+     * @return the UIDL
      */
     public String getUIDL() {
         return getJsoConfiguration(id).getUIDL();

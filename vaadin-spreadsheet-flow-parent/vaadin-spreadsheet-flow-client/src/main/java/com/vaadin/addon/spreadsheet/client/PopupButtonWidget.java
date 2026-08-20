@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.ui.VOverlay;
 
 public class PopupButtonWidget extends FocusWidget
         implements ClickHandler, HasCloseHandlers<PopupPanel> {
@@ -60,7 +59,7 @@ public class PopupButtonWidget extends FocusWidget
         }
     };
 
-    private final VOverlay popup;
+    private final SpreadsheetOverlay popup;
     private final PopupButtonHeader popupHeader;
     private final VerticalPanel popupLayout;
 
@@ -94,6 +93,7 @@ public class PopupButtonWidget extends FocusWidget
         this.sheet = sheet;
         this.owner = owner;
         popup.setOwner(owner);
+        popup.setOverlayContainer(owner.getOverlayContainer());
         popupHeader.setSheet(owner);
     }
 
@@ -139,7 +139,9 @@ public class PopupButtonWidget extends FocusWidget
      * 1-based
      *
      * @param row
+     *            the row index
      * @param col
+     *            the column index
      */
     public void setRowCol(int row, int col) {
         Widget owner = popup.getOwner();
@@ -237,7 +239,7 @@ public class PopupButtonWidget extends FocusWidget
     /**
      * Returns the position callback method used for the button's popup.
      *
-     * @return
+     * @return the position callback
      */
     public PositionCallback getPositionCallback() {
         return callback;

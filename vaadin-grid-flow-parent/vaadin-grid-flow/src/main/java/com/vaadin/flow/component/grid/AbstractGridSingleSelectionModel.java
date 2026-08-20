@@ -44,6 +44,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @param <T>
  *            the grid type
+ * @since 1.0
  */
 public abstract class AbstractGridSingleSelectionModel<T> extends
         AbstractGridExtension<T> implements GridSingleSelectionModel<T> {

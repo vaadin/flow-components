@@ -18,6 +18,8 @@ import java.util.List;
  * A collection of {@link TreeSeriesItem TreeSeriesItems} that compose a
  * multi-root tree. This series is meant to be used with
  * {@link ChartType#TREEMAP} charts.
+ * 
+ * @since 6.0.1
  */
 public class TreeSeries extends AbstractSeries {
 

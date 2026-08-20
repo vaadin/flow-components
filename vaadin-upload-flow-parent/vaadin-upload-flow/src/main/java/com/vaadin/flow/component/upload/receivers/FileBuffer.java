@@ -36,6 +36,7 @@ import com.vaadin.flow.component.upload.Receiver;
  * should be used.
  *
  * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
+ * @since 1.0
  */
 @Deprecated(since = "24.8", forRemoval = true)
 public class FileBuffer extends AbstractFileBuffer implements Receiver {
@@ -58,6 +59,7 @@ public class FileBuffer extends AbstractFileBuffer implements Receiver {
      *
      * @param factory
      *            file factory for file buffer
+     * @since 22.0
      */
     public FileBuffer(FileFactory factory) {
         super(factory);

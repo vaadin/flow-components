@@ -1,4 +1,5 @@
-import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { expect } from 'chai';
+import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { sendKeys } from '@web/test-runner-commands';
 import {
   init,

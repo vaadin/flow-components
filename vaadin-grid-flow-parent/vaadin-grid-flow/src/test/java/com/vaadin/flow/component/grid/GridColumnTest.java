@@ -207,30 +207,21 @@ class GridColumnTest {
     }
 
     @Test
-    void addColumn_defaultTextAlign() {
+    void setTextAlign_textAlignPropertyUpdated() {
         Grid<Person> grid = new Grid<>();
 
-        Column<Person> nameColumn = grid.addColumn(Person::getName);
-        Assertions.assertEquals(ColumnTextAlign.START,
-                nameColumn.getTextAlign());
-    }
+        Column<Person> column = grid.addColumn(Person::getName);
+        Assertions.assertEquals(ColumnTextAlign.START, column.getTextAlign());
+        Assertions.assertNull(column.getElement().getProperty("textAlign"));
 
-    @Test
-    void setTextAlignToNull_defaultTextAlign() {
-        Grid<Person> grid = new Grid<>();
+        column.setTextAlign(ColumnTextAlign.END);
+        Assertions.assertEquals(ColumnTextAlign.END, column.getTextAlign());
+        Assertions.assertEquals("end",
+                column.getElement().getProperty("textAlign"));
 
-        Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setTextAlign(null);
-        Assertions.assertEquals(ColumnTextAlign.START,
-                nameColumn.getTextAlign());
-
-        nameColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assertions.assertEquals(ColumnTextAlign.CENTER,
-                nameColumn.getTextAlign());
-
-        nameColumn.setTextAlign(null);
-        Assertions.assertEquals(ColumnTextAlign.START,
-                nameColumn.getTextAlign());
+        column.setTextAlign(null);
+        Assertions.assertEquals(ColumnTextAlign.START, column.getTextAlign());
+        Assertions.assertNull(column.getElement().getProperty("textAlign"));
     }
 
     @Test

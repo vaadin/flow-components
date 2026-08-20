@@ -20,22 +20,25 @@ pom.xml.bak
 .vscode
 types.d.ts
 tsconfig.json
+!**/test/tsconfig.json
+!vaadin-grid-flow-parent/vaadin-grid-flow/tsconfig.json
+!vaadin-combo-box-flow-parent/vaadin-combo-box-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts
 node_modules
 .driver
-package*json
+**/package*json
+!/package.json
+!/package-lock.json
 pnpm*
 .npmrc
-.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated
 **/frontend/index.html
 **/frontend/*.tsx
 dev-bundle
-prod.bundle
 .vaadin-node-tasks.lock
 
 # Claude Code

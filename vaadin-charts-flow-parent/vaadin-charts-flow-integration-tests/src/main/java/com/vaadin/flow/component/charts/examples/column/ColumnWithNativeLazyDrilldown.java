@@ -25,8 +25,10 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
+@Route("vaadin-charts/column/column-with-native-lazy-drilldown")
 public class ColumnWithNativeLazyDrilldown extends AbstractChartExample {
 
     private Map<String, DataSeries> drillSeries;

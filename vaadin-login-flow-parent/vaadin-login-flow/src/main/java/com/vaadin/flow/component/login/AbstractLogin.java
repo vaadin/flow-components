@@ -30,6 +30,8 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -58,6 +60,7 @@ import tools.jackson.databind.node.BaseJsonNode;
  * that can in turn cancel a potential redirect issued by the form submission.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 public abstract class AbstractLogin extends Component implements HasEnabled {
 
@@ -67,6 +70,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     private static final String PROP_DISABLED = "disabled";
     private static final String PROP_ERROR = "error";
     private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
+    private static final String PROP_HEADING_LEVEL = "headingLevel";
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
@@ -111,10 +115,45 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * listeners added with {@link #addLoginListener(ComponentEventListener)}.
      * See class Javadoc for more information.
      *
+     * @throws IllegalArgumentException
+     *             if {@code action} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafeAction(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     *
      * @see #getAction()
+     * @see #setUnsafeAction(String)
      * @see #addLoginListener(ComponentEventListener)
      */
     public void setAction(String action) {
+        if (action != null && !UrlUtil.isSafeUrl(action)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "action", action, "setUnsafeAction(String)"));
+        }
+        doSetAction(action);
+    }
+
+    /**
+     * Sets the action URL without validating its scheme.
+     * <p>
+     * Unlike {@link #setAction(String)}, this method does not reject URLs based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for URLs that are fully under your control and known to be safe,
+     * such as a hard-coded {@code javascript:} URL. Passing untrusted input
+     * here can expose the application to cross-site scripting (XSS) attacks.
+     *
+     * @see #setAction(String)
+     *
+     * @param action
+     *            the action URL, or {@code null} to remove the action and
+     *            restore the default login listener handling
+     * @since 25.2
+     */
+    public void setUnsafeAction(String action) {
+        doSetAction(action);
+    }
+
+    private void doSetAction(String action) {
         if (action == null) {
             getElement().removeProperty(PROP_ACTION);
             if (registration == null) {
@@ -192,6 +231,36 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
+     * Gets the root heading level ({@code aria-level}) of the heading
+     * hierarchy.
+     *
+     * @return the heading level
+     * @see #setHeadingLevel(int)
+     * @since 25.3
+     */
+    public int getHeadingLevel() {
+        return getElement().getProperty(PROP_HEADING_LEVEL, 1);
+    }
+
+    /**
+     * Sets the root heading level ({@code aria-level}) for the heading
+     * hierarchy, exposing the headings at the level that matches the
+     * surrounding page structure. Child headings automatically increment from
+     * this base level: a standalone login form renders its title at the given
+     * level, whereas the form inside the overlay uses the next level down, as
+     * the base level is used by the overlay's own title.
+     * <p>
+     * The default heading level is {@code 1}.
+     *
+     * @param headingLevel
+     *            the heading level
+     * @since 25.3
+     */
+    public void setHeadingLevel(int headingLevel) {
+        getElement().setProperty(PROP_HEADING_LEVEL, headingLevel);
+    }
+
+    /**
      * Sets the internationalized messages to be used by this instance.
      *
      * @param i18n
@@ -239,6 +308,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -256,6 +326,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @param message
      *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
      *            may be null.
+     * @since 24.4
      */
     public void showErrorMessage(String title, String message) {
         var loginI18n = getI18n();

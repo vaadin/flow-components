@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
@@ -182,21 +183,21 @@ class IntegerFieldTest extends TextFieldTest {
 
     @Test
     void addThemeVariant_themeAttributeContainsThemeVariant() {
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
     void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
+        field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -247,8 +248,30 @@ class IntegerFieldTest extends TextFieldTest {
         Assertions.assertEquals("aria-labelledby",
                 field.getAriaLabelledBy().get());
 
-        field.setAriaLabelledBy(null);
+        field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        IntegerField field = new IntegerField();
+        Assertions.assertTrue(field instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        IntegerField field = new IntegerField();
+
+        field.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 
     @Test

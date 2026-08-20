@@ -13,7 +13,6 @@ import java.util.Map;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -26,9 +25,10 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("serial")
-@SkipFromDemo
+@Route("vaadin-charts/column/column-with-native-lazy-drilldown-multiple-series")
 public class ColumnWithNativeLazyDrilldownMultipleSeries
         extends AbstractChartExample {
 

@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.InputField;
@@ -131,22 +132,22 @@ class PasswordFieldTest {
     @Test
     void addThemeVariant_themeAttributeContainsThemeVariant() {
         PasswordField field = new PasswordField();
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
     void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         PasswordField field = new PasswordField();
-        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.SMALL);
+        field.removeThemeVariants(TextFieldVariant.SMALL);
 
         ThemeList themeNames = field.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextFieldVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -184,8 +185,30 @@ class PasswordFieldTest {
         Assertions.assertEquals("aria-labelledby",
                 field.getAriaLabelledBy().get());
 
-        field.setAriaLabelledBy(null);
+        field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        PasswordField field = new PasswordField();
+        Assertions.assertTrue(field instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        PasswordField field = new PasswordField();
+
+        field.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 
     @Test

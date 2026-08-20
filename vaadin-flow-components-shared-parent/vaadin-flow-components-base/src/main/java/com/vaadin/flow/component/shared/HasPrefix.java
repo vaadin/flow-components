@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasElement;
  * Mixin interface for components that have a prefix slot.
  *
  * @author Vaadin Ltd
+ * @since 24.0
  */
 public interface HasPrefix extends HasElement {
     /**

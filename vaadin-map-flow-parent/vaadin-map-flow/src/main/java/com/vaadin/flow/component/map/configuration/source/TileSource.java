@@ -10,6 +10,8 @@ package com.vaadin.flow.component.map.configuration.source;
 
 /**
  * Abstract base class for map sources providing tiled map data
+ * 
+ * @since 23.0
  */
 public abstract class TileSource extends Source {
 
@@ -34,6 +36,9 @@ public abstract class TileSource extends Source {
         return opaque;
     }
 
+    /**
+     * @since 23.1
+     */
     protected static abstract class Options extends Source.Options {
         private boolean opaque = false;
 

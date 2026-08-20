@@ -30,11 +30,13 @@ import com.vaadin.flow.dom.ThemeList;
  * component theme supports it.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public interface ThemableLayout extends HasElement {
     /**
      * Toggles {@code margin} theme setting for the element. If a theme supports
-     * this attribute, it will apply or remove margin to the element.
+     * this attribute, it will apply margin to or remove margin from the
+     * element.
      *
      * @param margin
      *            adds {@code margin} theme setting if {@code true} or removes
@@ -55,7 +57,8 @@ public interface ThemableLayout extends HasElement {
 
     /**
      * Toggles {@code padding} theme setting for the element. If a theme
-     * supports this attribute, it will apply or remove padding to the element.
+     * supports this attribute, it will apply padding to or remove padding from
+     * the element.
      *
      * @param padding
      *            adds {@code padding} theme setting if {@code true} or removes
@@ -76,7 +79,8 @@ public interface ThemableLayout extends HasElement {
 
     /**
      * Toggles {@code spacing} theme setting for the element. If a theme
-     * supports this attribute, it will apply or remove spacing to the element.
+     * supports this attribute, it will apply spacing to or remove spacing from
+     * the element.
      * <p>
      * This method adds medium spacing to the component theme, to set other
      * options, use {@link ThemableLayout#getThemeList()}. List of options
@@ -118,6 +122,7 @@ public interface ThemableLayout extends HasElement {
      *            the spacing between the components. The value must be a valid
      *            CSS length, i.e. must provide a unit (e.g. "1px", "1rem",
      *            "1%") for values other than 0.
+     * @since 24.7
      */
     default void setSpacing(String spacing) {
         getElement().getStyle().set("gap", spacing);
@@ -130,6 +135,7 @@ public interface ThemableLayout extends HasElement {
      *            the spacing between the components
      * @param unit
      *            the unit of the spacing value
+     * @since 24.7
      */
     default void setSpacing(float spacing, Unit unit) {
         if (spacing < 0) {
@@ -148,6 +154,7 @@ public interface ThemableLayout extends HasElement {
      * this case, use {@link #isSpacing()} instead.
      *
      * @return the spacing between the components
+     * @since 24.7
      */
     default String getSpacing() {
         return getElement().getStyle().get("gap");
@@ -164,6 +171,7 @@ public interface ThemableLayout extends HasElement {
      * @param wrap
      *            true to enable wrapping, false to force items into a single
      *            row/column
+     * @since 24.6
      */
     default void setWrap(boolean wrap) {
         getThemeList().set("wrap", wrap);
@@ -180,6 +188,7 @@ public interface ThemableLayout extends HasElement {
      * @return true if wrapping is enabled, false if items are forced into a
      *         single row/column
      * @see #setWrap(boolean)
+     * @since 24.6
      */
     default boolean isWrap() {
         return getThemeList().contains("wrap");

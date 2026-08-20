@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -141,22 +142,22 @@ class TextAreaTest {
     @Test
     void addThemeVariant_themeAttributeContainsThemeVariant() {
         TextArea textArea = new TextArea();
-        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textArea.addThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assertions.assertTrue(themeNames
-                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertTrue(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test
     void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         TextArea textArea = new TextArea();
-        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-        textArea.removeThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textArea.addThemeVariants(TextAreaVariant.SMALL);
+        textArea.removeThemeVariants(TextAreaVariant.SMALL);
 
         ThemeList themeNames = textArea.getThemeNames();
-        Assertions.assertFalse(themeNames
-                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+        Assertions.assertFalse(
+                themeNames.contains(TextAreaVariant.SMALL.getVariantName()));
     }
 
     @Test
@@ -200,8 +201,30 @@ class TextAreaTest {
         Assertions.assertEquals("aria-labelledby",
                 field.getAriaLabelledBy().get());
 
-        field.setAriaLabelledBy(null);
+        field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        TextArea field = new TextArea();
+        Assertions.assertTrue(field instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        TextArea field = new TextArea();
+
+        field.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 
     @Test

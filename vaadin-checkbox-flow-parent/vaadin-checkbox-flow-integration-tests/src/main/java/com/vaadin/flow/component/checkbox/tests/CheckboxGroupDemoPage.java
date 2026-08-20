@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -210,12 +209,12 @@ public class CheckboxGroupDemoPage extends Div {
     }
 
     private String toString(Set<String> value) {
-        return value.stream().sorted().collect(Collectors.toList()).toString();
+        return value.stream().sorted().toList().toString();
     }
 
     private String getNames(Set<Person> persons) {
-        return persons.stream().map(Person::getName).sorted()
-                .collect(Collectors.toList()).toString();
+        return persons.stream().map(Person::getName).sorted().toList()
+                .toString();
     }
 
     private void addCard(String title, Component... components) {

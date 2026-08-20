@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * The bottom of the frame around a 3D chart.
+ * 
+ * @since 6.0.1
  */
 public class Bottom extends AbstractConfigurationObject {
 

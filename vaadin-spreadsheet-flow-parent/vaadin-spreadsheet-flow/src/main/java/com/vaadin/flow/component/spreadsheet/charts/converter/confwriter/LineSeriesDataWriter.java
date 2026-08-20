@@ -13,6 +13,9 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.LineSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class LineSeriesDataWriter extends AbstractSeriesDataWriter {
 
     public LineSeriesDataWriter(LineSeriesData series) {

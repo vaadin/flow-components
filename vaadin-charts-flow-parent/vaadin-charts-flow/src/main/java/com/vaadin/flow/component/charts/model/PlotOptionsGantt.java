@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the gantt series type.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class PlotOptionsGantt extends AbstractPlotOptions {
@@ -352,7 +354,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-     * >styled mode</a>, the data labels can be styled wtih the
+     * >styled mode</a>, the data labels can be styled with the
      * <code>.highcharts-data-label-box</code> and
      * <code>.highcharts-data-label</code> class names (<a href=
      * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/css/series-datalabels"

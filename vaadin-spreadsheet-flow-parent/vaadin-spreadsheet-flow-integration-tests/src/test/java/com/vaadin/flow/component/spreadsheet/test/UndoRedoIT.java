@@ -346,7 +346,9 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
      * Does not work with PhantomJS or Firefox
      *
      * @param spreadsheet
+     *            the spreadsheet
      * @param row
+     *            the row index
      */
     private void deleteRow(SpreadsheetElement spreadsheet, int row) {
         spreadsheet.getRowHeader(row).contextClick();

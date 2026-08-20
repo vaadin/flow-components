@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +32,8 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.shared.JsonConstants;
 
 import tools.jackson.databind.node.ArrayNode;
 
@@ -47,6 +48,23 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     void initialValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         Assertions.assertEquals(Collections.emptySet(), comboBox.getValue());
+    }
+
+    @Test
+    void valueSynchronizedOnChangeEvent() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        ElementListenerMap listeners = comboBox.getElement().getNode()
+                .getFeature(ElementListenerMap.class);
+        String syncExpression = JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                + "selectedItems";
+
+        Assertions.assertTrue(
+                listeners.getExpressions("change").contains(syncExpression),
+                "value should synchronize on the change event");
+        Assertions.assertFalse(
+                listeners.getExpressions("selected-items-changed")
+                        .contains(syncExpression),
+                "value should not synchronize on selected-items-changed");
     }
 
     @Test
@@ -243,18 +261,17 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.select("Two");
         comboBox.select("Four");
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));
         comboBox.clear();
 
         Set<String> linkedHashSetValue = new LinkedHashSet<>(
-                Arrays.asList("Eight", "Two", "Four").stream()
-                        .collect(Collectors.toList()));
+                Arrays.asList("Eight", "Two", "Four").stream().toList());
         comboBox.setValue(linkedHashSetValue);
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));
@@ -262,7 +279,7 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         comboBox.select("Eight", "Two", "Four");
         value = comboBox.getValue();
-        valueAsList = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().toList();
         Assertions.assertEquals("Eight", valueAsList.get(0));
         Assertions.assertEquals("Two", valueAsList.get(1));
         Assertions.assertEquals("Four", valueAsList.get(2));
@@ -325,6 +342,21 @@ class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assertions.assertTrue(comboBox.isSelectedItemsOnTop());
         Assertions.assertTrue(
                 comboBox.getElement().getProperty("selectedItemsOnTop", true));
+    }
+
+    @Test
+    void setCollapseChips() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assertions.assertFalse(comboBox.isCollapseChips());
+        Assertions.assertFalse(
+                comboBox.getElement().getProperty("collapseChips", false));
+
+        comboBox.setCollapseChips(true);
+
+        Assertions.assertTrue(comboBox.isCollapseChips());
+        Assertions.assertTrue(
+                comboBox.getElement().getProperty("collapseChips", true));
     }
 
     @Test

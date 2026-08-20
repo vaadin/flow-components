@@ -59,14 +59,14 @@ class BinderValidationTest {
     void init() {
         MockitoAnnotations.openMocks(this);
         field = new TimePicker();
-        field.setMax(LocalTime.now().plusHours(1));
+        field.setMax(LocalTime.of(13, 0));
     }
 
     @Test
     void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
         attachBinderToField();
 
-        field.setValue(LocalTime.now().plusHours(2));
+        field.setValue(LocalTime.of(14, 0));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assertions.assertTrue(statusCaptor.getValue().isError(),
@@ -76,7 +76,7 @@ class BinderValidationTest {
     @Test
     void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
         attachBinderToField();
-        field.setValue(LocalTime.now().minusHours(2));
+        field.setValue(LocalTime.of(10, 0));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assertions.assertTrue(statusCaptor.getValue().isError(),
@@ -111,7 +111,7 @@ class BinderValidationTest {
     void elementWithConstraints_validValue_validationPasses() {
         attachBinderToField();
 
-        field.setValue(LocalTime.now());
+        field.setValue(LocalTime.of(12, 0));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assertions.assertFalse(statusCaptor.getValue().isError());
@@ -126,7 +126,7 @@ class BinderValidationTest {
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
                 .withValidator(
                         value -> value == null
-                                || value.isAfter(LocalTime.now().minusHours(1)),
+                                || value.isAfter(LocalTime.of(11, 0)),
                         BINDER_FAIL_MESSAGE)
                 .withValidationStatusHandler(statusHandlerMock);
 

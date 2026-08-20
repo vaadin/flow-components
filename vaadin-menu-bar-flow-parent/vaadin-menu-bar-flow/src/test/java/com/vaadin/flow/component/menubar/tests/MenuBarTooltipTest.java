@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -46,22 +48,83 @@ class MenuBarTooltipTest {
 
     @Test
     void addItemWithTooltip_hasTooltipElement() {
-        menuBar.addItem("Item", "Item tooltip");
+        menuBar.addItem("Item 0", "Item 0 / Tooltip");
         Assertions.assertTrue(getTooltipElement(menuBar).isPresent());
     }
 
     @Test
     void addItemWithTooltip_tooltipHasSlot() {
-        menuBar.addItem("Item", "Item tooltip");
+        menuBar.addItem("Item 0", "Item 0 / Tooltip");
         Assertions.assertEquals("tooltip",
                 getTooltipElement(menuBar).get().getAttribute("slot"));
     }
 
     @Test
     void addAnotherItemWithTooltip_hasOneTooltipElement() {
-        menuBar.addItem("Item 0", "Item 0 tooltip");
-        menuBar.addItem("Item 1", "Item 1 tooltip");
+        menuBar.addItem("Item 0", "Item 0 / Tooltip");
+        menuBar.addItem("Item 1", "Item 1 / Tooltip");
         Assertions.assertEquals(1, getTooltipElements(menuBar).count());
+    }
+
+    @Test
+    void addItemWithTextAndTooltip_setsTooltipProperty() {
+        var item = menuBar.addItem("Item 0", "Item 0 / Tooltip");
+        Assertions.assertEquals("Item 0 / Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void addItemWithComponentAndTooltip_setsTooltipProperty() {
+        var item = menuBar.addItem(new Span("Item 0"), "Item 0 / Tooltip");
+        Assertions.assertEquals("Item 0 / Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void addItemWithTextTooltipAndListener_setsTooltipProperty() {
+        var item = menuBar.addItem("Item 0", "Item 0 / Tooltip", e -> {
+        });
+        Assertions.assertEquals("Item 0 / Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void setTooltipText_updatesTooltipProperty() {
+        var item = menuBar.addItem("Item 0", "Item 0 / Tooltip");
+        item.setTooltipText("Item 0 / Updated Tooltip");
+
+        Assertions.assertEquals("Item 0 / Updated Tooltip",
+                item.getElement().getProperty("tooltip"));
+    }
+
+    @Test
+    void setTooltipText_subMenuItem_setsTooltipProperty() {
+        var rootItem = menuBar.addItem("Item 0");
+        var subItem = rootItem.getSubMenu().addItem("Item 0-0");
+
+        subItem.setTooltipText("Item 0-0 / Tooltip");
+
+        Assertions.assertEquals("Item 0-0 / Tooltip",
+                subItem.getElement().getProperty("tooltip"));
+        Assertions.assertTrue(getTooltipElement(menuBar).isPresent());
+    }
+
+    @Test
+    void setTooltipPosition_setsTooltipPositionPropertyOnItem() {
+        var item = menuBar.addItem("Item 0");
+        item.setTooltipPosition(TooltipPosition.BOTTOM);
+
+        Assertions.assertEquals("bottom",
+                item.getElement().getProperty("tooltipPosition"));
+    }
+
+    @Test
+    void setTooltipPositionNull_clearsTooltipPositionProperty() {
+        var item = menuBar.addItem("Item 0");
+        item.setTooltipPosition(TooltipPosition.BOTTOM);
+        item.setTooltipPosition(null);
+
+        Assertions.assertNull(item.getElement().getProperty("tooltipPosition"));
     }
 
     private Optional<Element> getTooltipElement(MenuBar menuBar) {

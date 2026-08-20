@@ -20,8 +20,11 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.TextRenderer;
 
@@ -87,17 +90,15 @@ public abstract class AbstractLayout extends Div {
         return rbg;
     }
 
-    protected Div createLoremIpsum() {
-        Div component = new Div();
-        component.setText("Lorem ipsum dolor sit amet, consectetur "
-                + "adipiscing elit, sed do eiusmod tempor incididunt "
-                + "ut labore et dolore magna aliqua. Ut enim ad minim "
-                + "veniam, quis nostrud exercitation ullamco laboris "
-                + "nisi ut aliquip ex ea commodo consequat. Duis aute "
-                + "irure dolor in reprehenderit in voluptate velit "
-                + "esse cillum dolore eu fugiat nulla pariatur.");
-        component.getStyle().set("border", "1px solid #CCCCCC");
-
-        return component;
+    protected void addCard(String title, String description,
+            Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        if (description != null) {
+            layout.add(new Span(description));
+        }
+        layout.add(components);
+        add(layout);
     }
 }

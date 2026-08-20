@@ -31,6 +31,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
  *            the grid bean type
  * @author Vaadin Ltd
  * @see GridMultiSelectionModel#addClientItemToggleListener(com.vaadin.flow.component.ComponentEventListener)
+ * @since 24.7
  */
 public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
     private final T item;

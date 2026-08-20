@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.radiobutton;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -91,7 +90,6 @@ class RadioButtonGroupSignalTest extends AbstractSignalsTest {
     @SuppressWarnings("unchecked")
     private List<RadioButton<String>> getRadioButtons() {
         return group.getChildren().filter(RadioButton.class::isInstance)
-                .map(child -> (RadioButton<String>) child)
-                .collect(Collectors.toList());
+                .map(child -> (RadioButton<String>) child).toList();
     }
 }

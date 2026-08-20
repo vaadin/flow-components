@@ -12,7 +12,6 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Completed;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -21,9 +20,10 @@ import com.vaadin.flow.component.charts.model.GanttSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
-@SkipFromDemo
+@Route("vaadin-charts/gantt/gantt-progress-indicator")
 public class GanttProgressIndicator extends AbstractChartExample {
     @Override
     public void initDemo() {

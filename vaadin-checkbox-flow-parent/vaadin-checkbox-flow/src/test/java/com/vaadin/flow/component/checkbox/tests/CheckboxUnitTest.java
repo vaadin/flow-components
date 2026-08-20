@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -143,8 +144,30 @@ class CheckboxUnitTest {
         Assertions.assertEquals("aria-labelledby",
                 checkbox.getAriaLabelledBy().get());
 
-        checkbox.setAriaLabelledBy(null);
+        checkbox.setAriaLabelledBy((String) null);
         Assertions.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Checkbox checkbox = new Checkbox();
+        Assertions.assertTrue(checkbox instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                checkbox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                checkbox.getAriaDescribedBy().get());
+
+        checkbox.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                checkbox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(checkbox.getAriaDescribedBy().isEmpty());
     }
 
     @Test

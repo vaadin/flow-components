@@ -19,7 +19,7 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetUtil;
  * Command for shifting the value(s) of one or more cells.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class CellShiftValuesCommand extends CellValueCommand {
 
@@ -32,6 +32,7 @@ public class CellShiftValuesCommand extends CellValueCommand {
      * @param spreadsheet
      *            Target spreadsheet
      * @param decrease
+     *            whether the selection decreases
      */
     public CellShiftValuesCommand(Spreadsheet spreadsheet, boolean decrease) {
         super(spreadsheet);

@@ -21,8 +21,10 @@ import com.vaadin.flow.component.charts.model.Navigator;
 import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
 @SuppressWarnings("unused")
+@Route("vaadin-charts/gantt/gantt-with-navigation")
 public class GanttWithNavigation extends AbstractChartExample {
     @Override
     public void initDemo() {

@@ -370,6 +370,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                 getCellValue(address)));
     }
 
+    @Test
     public void customEditorShared_persistsValuesCorrectly() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.CustomEditorShared);
@@ -444,11 +445,19 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     private void performKeyboardTestsToCell(String column) {
         final String cellAddress = column + "2";
 
-        clickCell(cellAddress);
-        var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
-        Assert.assertTrue(maybeEditor.isPresent());
+        // A click on the cell can get lost while the spreadsheet is still
+        // re-rendering (e.g. right after adding a freeze pane), so click
+        // again until the editor shows up.
+        waitUntil(driver -> {
+            try {
+                clickCell(cellAddress);
+                return getInputInCustomEditorFromCell(cellAddress).isPresent();
+            } catch (StaleElementReferenceException e) {
+                return false;
+            }
+        });
 
-        var editor = maybeEditor.get();
+        var editor = getInputInCustomEditorFromCell(cellAddress).orElseThrow();
 
         // Test Esc with arrow keys persistence on cell
         editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
@@ -554,22 +563,73 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     private void assertEditorInCellIsFocused(String cellAddress) {
-        var activeElement = getActiveElement();
-        String slotName = activeElement.getDomAttribute("slot");
-        if (!(slotName != null && slotName.startsWith("custom-editor"))) {
-            var parentElement = getActiveElement().findElement(By.xpath(".."));
-            slotName = parentElement.getDomAttribute("slot");
-        }
-
-        Assert.assertNotNull("Slot name is null", slotName);
-
-        var result = getSpreadsheet().getCellAt(cellAddress)
-                .findElements(By.cssSelector("slot[name='" + slotName + "']"));
-        Assert.assertEquals(1, result.size());
+        // Focus moves into the editor only after the spreadsheet has
+        // processed the key press, so wait instead of asserting immediately.
+        waitUntil(driver -> {
+            try {
+                var activeElement = getActiveElement();
+                String slotName = activeElement.getDomAttribute("slot");
+                if (!(slotName != null
+                        && slotName.startsWith("custom-editor"))) {
+                    var parentElement = activeElement
+                            .findElement(By.xpath(".."));
+                    slotName = parentElement.getDomAttribute("slot");
+                }
+                if (slotName == null) {
+                    return false;
+                }
+                return getSpreadsheet().getCellAt(cellAddress)
+                        .findElements(
+                                By.cssSelector("slot[name='" + slotName + "']"))
+                        .size() == 1;
+            } catch (StaleElementReferenceException
+                    | NoSuchElementException e) {
+                return false;
+            }
+        });
     }
 
     private WebElement getActiveElement() {
         return getDriver().switchTo().activeElement();
+    }
+
+    @Test
+    public void comboBoxEditorWithSelect_clickCell_callbackFiredOnce() {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorSelect);
+
+        clickCell("B2");
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("1", getCallbackCount());
+    }
+
+    @Test
+    public void comboBoxEditorWithSelect_switchBetweenCells_noInfiniteLoop() {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorSelect);
+
+        // Click rapidly through editor cells and stop at a non-editor cell.
+        // The server-side callback has a 200ms delay, so responses arrive
+        // after the user has already moved past those cells.
+        clickCell("B2");
+        clickCell("C2");
+        clickCell("F2");
+        getCommandExecutor().waitForVaadin();
+
+        // Selection must stay on the cell where the user stopped, not jump
+        // back to a stale editor cell when delayed responses arrive.
+        assertAddressFieldValue("F2");
+
+        // Each editor cell visited should trigger exactly one callback.
+        // Without the fix, this would cause an infinite loop.
+        int count = Integer.parseInt(getCallbackCount());
+        Assert.assertTrue("Expected at most 2 callbacks but got " + count
+                + " — possible infinite loop", count <= 2);
+    }
+
+    private String getCallbackCount() {
+        return $(TestBenchElement.class).id("callbackCount").getText();
     }
 
     private void clickToggleCellVisibleButton() {

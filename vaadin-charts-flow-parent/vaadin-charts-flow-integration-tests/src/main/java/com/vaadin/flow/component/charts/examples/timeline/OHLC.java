@@ -20,7 +20,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsOhlc;
 import com.vaadin.flow.component.charts.model.RangeSelector;
 import com.vaadin.flow.component.charts.model.TimeUnit;
 import com.vaadin.flow.component.charts.model.TimeUnitMultiples;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/timeline/ohlc")
 public class OHLC extends AbstractChartExample {
 
     @Override

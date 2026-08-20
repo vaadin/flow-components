@@ -74,7 +74,7 @@ fs.writeFileSync(
   JSON.stringify(packageJson, null, 2)
 );
 
-execSync('npm install', {
+execSync('npm install --ignore-scripts', {
   cwd: tempDir,
   stdio: 'inherit'
 });

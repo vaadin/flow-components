@@ -31,6 +31,7 @@ import com.vaadin.flow.function.ValueProvider;
  * @param <SOURCE>
  *            the type of the input item, from which the {@link LocalDate} is
  *            extracted
+ * @since 22.0
  */
 public class LocalDateRenderer<SOURCE>
         extends BasicRenderer<SOURCE, LocalDate> {
@@ -154,6 +155,7 @@ public class LocalDateRenderer<SOURCE>
      *            not <code>null</code>
      * @param formatter
      *            the formatter to use, not <code>null</code>
+     * @since 23.2
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
             SerializableSupplier<DateTimeFormatter> formatter) {
@@ -173,6 +175,7 @@ public class LocalDateRenderer<SOURCE>
      * @param nullRepresentation
      *            the textual representation of the <code>null</code> value
      *
+     * @since 23.2
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
             SerializableSupplier<DateTimeFormatter> formatter,

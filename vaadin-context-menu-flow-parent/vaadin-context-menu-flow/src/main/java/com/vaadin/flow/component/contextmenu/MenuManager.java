@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -42,6 +41,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *            the sub menu type
  *
  * @author Vaadin Ltd.
+ * @since 2.0
  */
 public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S extends SubMenuBase<?, I, S>>
         implements Serializable {
@@ -147,6 +147,76 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     }
 
     /**
+     * Adds a text as a menu item with a tooltip text.
+     *
+     * @param text
+     *            the text for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @return a new menu item
+     * @since 25.2
+     */
+    public I addItem(String text, String tooltipText) {
+        I menuItem = addItem(text);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a component as a menu item with a tooltip text.
+     *
+     * @param component
+     *            the component for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @return a new menu item
+     * @since 25.2
+     */
+    public I addItem(Component component, String tooltipText) {
+        I menuItem = addItem(component);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a text as a menu item with a tooltip text and a click listener.
+     *
+     * @param text
+     *            the text for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     * @since 25.2
+     */
+    public I addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<I>> clickListener) {
+        I menuItem = addItem(text, clickListener);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
+     * Adds a component as a menu item with a tooltip text and a click listener.
+     *
+     * @param component
+     *            the component for the menu item
+     * @param tooltipText
+     *            the tooltip text for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     * @since 25.2
+     */
+    public I addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<I>> clickListener) {
+        I menuItem = addItem(component, clickListener);
+        menuItem.setTooltipText(tooltipText);
+        return menuItem;
+    }
+
+    /**
      * Adds components to the (sub)menu.
      * <p>
      * The components are added into the content as is, they are not wrapped as
@@ -156,6 +226,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
+     * @since 24.8
      */
     public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
@@ -174,7 +245,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     }
 
     /**
-     * Removes components to the (sub)menu.
+     * Removes components from the (sub)menu.
      *
      * @param components
      *            components to remove
@@ -264,11 +335,13 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      */
     public List<I> getItems() {
         return getChildren().filter(itemType::isInstance).map(itemType::cast)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
      * Adds a separator between items.
+     * 
+     * @since 24.8
      */
     public void addSeparator() {
         addComponent(new Hr());

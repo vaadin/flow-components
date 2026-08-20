@@ -36,7 +36,7 @@ public class JoinedHeadersPage extends Div {
     private static Grid<String> createGrid() {
         Grid<String> grid = new Grid<>();
         grid.setId("grid1");
-        grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
+        grid.addThemeVariants(GridVariant.COLUMN_BORDERS);
         grid.appendHeaderRow();
         List<Grid.Column<String>> columns = addColumns(grid);
         HeaderRow.HeaderCell header = grid.prependHeaderRow()

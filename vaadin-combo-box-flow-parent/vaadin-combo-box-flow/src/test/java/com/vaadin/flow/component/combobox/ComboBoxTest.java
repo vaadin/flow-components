@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -29,9 +30,12 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 
@@ -236,6 +240,46 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setOverlayWidth(100, Unit.PIXELS);
         Assertions.assertEquals("100.0px",
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+    }
+
+    @Test
+    void focusSelectedItem_defaultsToFalse() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
+    void setFocusSelectedItem_isFocusSelectedItem() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setFocusSelectedItem(true);
+        Assertions.assertTrue(comboBox.isFocusSelectedItem());
+        comboBox.setFocusSelectedItem(false);
+        Assertions.assertFalse(comboBox.isFocusSelectedItem());
+    }
+
+    @Test
+    void focusSelectedItem_convertedFilterListDataProvider_scrollsToSelectedItem() {
+        // withConvertedFilter wraps the ListDataProvider in a provider that is
+        // in-memory but not a ListDataProvider. Opening the dropdown must
+        // resolve the selected item's index without failing.
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        ListDataProvider<String> dataProvider = DataProvider
+                .ofCollection(List.of("A", "B", "C", "D"));
+        comboBox.setItems(dataProvider.withConvertedFilter(
+                filterText -> item -> item.contains(filterText)));
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("C");
+        comboBox.setOpened(true);
+
+        var invocations = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("__focusIndex"))
+                .toList();
+        Assertions.assertEquals(1, invocations.size());
+        // Parameter 0 is the target element, parameter 1 is the item index
+        Assertions.assertEquals(2, invocations.get(0).getParameters().get(1));
     }
 
     @Test

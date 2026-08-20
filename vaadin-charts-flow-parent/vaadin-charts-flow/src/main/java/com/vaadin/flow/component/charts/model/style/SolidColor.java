@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Solid (non gradient) colors
+ * 
+ * @since 6.0.1
  */
 @SuppressWarnings("serial")
 public class SolidColor extends AbstractConfigurationObject implements Color {

@@ -20,6 +20,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
  * @apiNote <a href=
  *          "https://openlayers.org/en/latest/apidoc/module-ol_geom_Polygon-Polygon.html">ol/geom/Polygon~Polygon
  *          </a>
+ * @since 24.8
  */
 public class Polygon extends SimpleGeometry {
 

@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -71,9 +70,9 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
         return getElement().getChildren()
                 .filter(element -> element.getComponent().isPresent() && element
                         .getComponent().get() instanceof AbstractColumn)
-                .map(element -> (AbstractColumn<?>) element.getComponent()
-                        .get())
-                .collect(Collectors.toList());
+                .<AbstractColumn<?>> map(element -> (AbstractColumn<?>) element
+                        .getComponent().get())
+                .toList();
     }
 
     /**

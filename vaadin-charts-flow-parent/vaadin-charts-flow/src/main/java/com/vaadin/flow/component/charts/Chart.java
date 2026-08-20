@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -87,9 +86,10 @@ import tools.jackson.databind.node.ObjectNode;
  * layout.
  *
  * @author Vaadin Ltd
+ * @since 6.0.1
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/charts", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/charts", version = "25.3.0-alpha12")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -258,6 +258,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * @param configuration
      *            new configuration for this chart.
+     * @since 18.0
      */
     public void setConfiguration(Configuration configuration) {
         if (this.configuration != null) {
@@ -599,6 +600,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * drag a point.
      *
      * @param listener
+     * @since 24.7
      */
     public Registration addPointDragStartListener(
             ComponentEventListener<PointDragStartEvent> listener) {
@@ -609,6 +611,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Adds a point drop listener, which will be notified point is dropped.
      *
      * @param listener
+     * @since 24.7
      */
     public Registration addPointDropListener(
             ComponentEventListener<PointDropEvent> listener) {
@@ -620,6 +623,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * dragged.
      *
      * @param listener
+     * @since 24.7
      */
     public Registration addPointDragListener(
             ComponentEventListener<PointDragEvent> listener) {
@@ -656,11 +660,11 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      *
      * @param variants
      *            theme variants to add
+     * @since 23.1
      */
     public void addThemeVariants(ChartVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(ChartVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(
+                Stream.of(variants).map(ChartVariant::getVariantName).toList());
     }
 
     /**
@@ -668,11 +672,11 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      *
      * @param variants
      *            theme variants to remove
+     * @since 23.1
      */
     public void removeThemeVariants(ChartVariant... variants) {
-        getThemeNames()
-                .removeAll(Stream.of(variants).map(ChartVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ChartVariant::getVariantName).toList());
     }
 
     /*

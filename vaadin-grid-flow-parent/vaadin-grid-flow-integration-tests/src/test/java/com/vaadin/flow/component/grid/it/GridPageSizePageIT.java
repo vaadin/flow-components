@@ -48,7 +48,6 @@ public class GridPageSizePageIT extends AbstractComponentIT {
         WebElement button = findElement(By.id("size-submit"));
 
         input.sendKeys("80");
-        blur();
         button.click();
 
         assertPageSize(grid, 80);
@@ -56,7 +55,6 @@ public class GridPageSizePageIT extends AbstractComponentIT {
 
         input.clear();
         input.sendKeys("10");
-        blur();
         button.click();
 
         assertPageSize(grid, 10);

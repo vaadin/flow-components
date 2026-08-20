@@ -21,6 +21,8 @@ import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Provides data for when a feature is dropped after a drag operation
+ * 
+ * @since 24.1
  */
 @DomEvent("map-feature-drop")
 public class MapFeatureDropEvent extends ComponentEvent<Map> {

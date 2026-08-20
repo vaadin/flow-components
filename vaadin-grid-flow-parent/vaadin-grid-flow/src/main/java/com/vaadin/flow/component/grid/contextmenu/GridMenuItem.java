@@ -29,6 +29,7 @@ import com.vaadin.flow.shared.Registration;
  * methods.
  *
  * @author Vaadin Ltd.
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public class GridMenuItem<T> extends
@@ -46,7 +47,7 @@ public class GridMenuItem<T> extends
      */
     public GridMenuItem(GridContextMenu<T> contextMenu,
             SerializableRunnable contentReset) {
-        super(contextMenu);
+        super(contextMenu, contentReset);
         Objects.requireNonNull(contextMenu);
         Objects.requireNonNull(contentReset);
         this.contentReset = contentReset;

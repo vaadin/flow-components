@@ -26,6 +26,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * methods.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @SuppressWarnings("serial")
 public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
@@ -35,13 +36,37 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
-        super(contextMenu);
+        super(contextMenu, contentReset);
         this.contentReset = contentReset;
     }
 
     @Override
     protected SubMenu createSubMenu() {
         return new SubMenu(this, contentReset);
+    }
+
+    /**
+     * Sets the menu item explicitly disabled or enabled. When disabled, menu
+     * items are rendered as "dimmed".
+     * <p>
+     * By default, disabled items are not focusable and don't react to hover. As
+     * a result, they are hidden from assistive technologies, and it's not
+     * possible to show a tooltip to explain why they are disabled. This can be
+     * addressed by enabling the feature flag
+     * {@code accessibleDisabledMenuItems}, which makes disabled items focusable
+     * and hoverable, while still preventing them from being activated. To
+     * enable this feature flag, add the following line to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledMenuItems = true
+     * </pre>
+     * 
+     * @since 25.2
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
     }
 
 }

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.map.configuration.source.ImageSource;
 /**
  * Layer for server-rendered images that are available in arbitrary extents and
  * resolutions.
+ * 
+ * @since 23.0
  */
 public class ImageLayer extends Layer {
 

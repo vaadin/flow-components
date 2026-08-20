@@ -22,7 +22,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/combinations/scatter-and-polygon")
 public class ScatterAndPolygon extends AbstractChartExample {
     @Override
     public void initDemo() {

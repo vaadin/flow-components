@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -32,6 +31,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
  * cells refer to the cells on the first row of the region.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetTable implements Serializable {
@@ -92,6 +92,7 @@ public class SpreadsheetTable implements Serializable {
      *            XSSFSheet.getCTWorksheet().getAutoFilter()
      * @param xssfTable
      *            Set this to not-null if this table is backed by a XSSFTable
+     * @since 24.3
      */
     public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion,
@@ -197,7 +198,7 @@ public class SpreadsheetTable implements Serializable {
                     .map(filterColumn -> new CellReference(sheet.getSheetName(),
                             fullTableRegion.getFirstRow(),
                             (int) filterColumn.getColId(), true, true))
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 
@@ -292,6 +293,7 @@ public class SpreadsheetTable implements Serializable {
      *
      * @param ctWorksheetAutoFilter
      *            Referenced autofilter.
+     * @since 24.2.4
      */
     protected void setCtWorksheetAutoFilter(
             CTAutoFilter ctWorksheetAutoFilter) {
@@ -302,6 +304,7 @@ public class SpreadsheetTable implements Serializable {
      * @return Returns the CTAutoFilter object that represents this table in the
      *         underlying POI model. Can be null if this table is not backed by
      *         a Worksheet CTAutoFilter.
+     * @since 24.2.4
      */
     public CTAutoFilter getCtWorksheetAutoFilter() {
         return ctWorksheetAutoFilter;
@@ -313,6 +316,7 @@ public class SpreadsheetTable implements Serializable {
      *
      * @param xssfTable
      *            Referenced table.
+     * @since 24.2.4
      */
     protected void setXssfTable(XSSFTable xssfTable) {
         this.xssfTable = xssfTable;
@@ -322,6 +326,7 @@ public class SpreadsheetTable implements Serializable {
      * @return Returns the XSSFTable object that represents this table in the
      *         underlying POI model. Can be null if this table is not backed by
      *         a XSSFTable.
+     * @since 24.2.4
      */
     public XSSFTable getXssfTable() {
         return xssfTable;

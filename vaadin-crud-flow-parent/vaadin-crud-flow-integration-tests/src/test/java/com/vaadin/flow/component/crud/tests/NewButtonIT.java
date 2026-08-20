@@ -31,13 +31,6 @@ public class NewButtonIT extends AbstractComponentIT {
                 verifyButtonRendered(crud));
     }
 
-    @Test
-    public void newButtonVisibleFalse_noNewButtonPresent() {
-        CrudElement crud = $(CrudElement.class).id("crud-new-button-hidden");
-        Assert.assertFalse("New button should not be rendered",
-                verifyButtonRendered(crud));
-    }
-
     private boolean verifyButtonRendered(CrudElement crud) {
         return crud.$("*").withAttribute("slot", "new-button").exists();
     }

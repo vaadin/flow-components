@@ -907,6 +907,45 @@ class DashboardTest extends DashboardTestBase {
     }
 
     @Test
+    void setRowHeight_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-row-height";
+        String valueToSet = "200px";
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setRowHeight(valueToSet);
+        Assertions.assertEquals(valueToSet,
+                dashboard.getStyle().get(propertyName));
+        dashboard.setRowHeight(null);
+        Assertions.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    void setRowHeightNull_propertyIsRemoved() {
+        dashboard.setRowHeight("200px");
+        dashboard.setRowHeight(null);
+        Assertions.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-row-height"));
+    }
+
+    @Test
+    void defaultRowHeightValueIsCorrectlyRetrieved() {
+        Assertions.assertNull(dashboard.getRowHeight());
+    }
+
+    @Test
+    void setRowHeight_valueIsCorrectlyRetrieved() {
+        String valueToSet = "200px";
+        dashboard.setRowHeight(valueToSet);
+        Assertions.assertEquals(valueToSet, dashboard.getRowHeight());
+    }
+
+    @Test
+    void setRowHeightNull_valueIsCorrectlyRetrieved() {
+        dashboard.setRowHeight("200px");
+        dashboard.setRowHeight(null);
+        Assertions.assertNull(dashboard.getRowHeight());
+    }
+
+    @Test
     void setGap_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-gap";
         String valueToSet = "10px";

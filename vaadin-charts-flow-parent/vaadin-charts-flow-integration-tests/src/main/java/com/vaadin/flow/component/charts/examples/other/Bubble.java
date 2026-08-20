@@ -16,7 +16,9 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.DataSeriesItem3d;
 import com.vaadin.flow.component.charts.model.PlotOptionsBubble;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/bubble")
 public class Bubble extends AbstractChartExample {
 
     @Override

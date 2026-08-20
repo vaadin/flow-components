@@ -19,7 +19,9 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/column/column-with-zooming")
 public class ColumnWithZooming extends AbstractChartExample {
 
     @Override

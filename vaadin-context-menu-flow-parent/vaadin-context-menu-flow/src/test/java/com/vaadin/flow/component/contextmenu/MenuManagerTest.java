@@ -17,7 +17,6 @@ package com.vaadin.flow.component.contextmenu;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -117,7 +116,8 @@ class MenuManagerTest {
     void addItem_textNullListener_createItemUsingFactory_setText_addToItemAndNoListenerAdded() {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
-        manager.addItem("foo", null);
+        manager.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Mockito.verify(item).setText("foo");
         Mockito.verifyNoMoreInteractions(item);
@@ -147,7 +147,8 @@ class MenuManagerTest {
         TestMenuItem item = Mockito.mock(TestMenuItem.class);
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
         Component component = Mockito.mock(Component.class);
-        manager.addItem(component, null);
+        manager.addItem(component,
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
         Mockito.verify(item).add(component);
         Mockito.verifyNoMoreInteractions(item);
@@ -166,8 +167,7 @@ class MenuManagerTest {
 
         manager.addComponent(component1, component2);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertEquals(2, children.size());
         Assertions.assertEquals(component1, children.get(0));
@@ -198,8 +198,7 @@ class MenuManagerTest {
 
         manager.remove(component1, component2);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertTrue(children.isEmpty());
 
@@ -230,8 +229,7 @@ class MenuManagerTest {
 
         manager.removeAll();
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertTrue(children.isEmpty());
 
@@ -251,8 +249,7 @@ class MenuManagerTest {
         manager.addComponent(component1, component2);
         manager.addComponentAtIndex(1, component3);
 
-        List<Component> children = manager.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = manager.getChildren().toList();
 
         Assertions.assertEquals(3, children.size());
         Assertions.assertEquals(component1, children.get(0));

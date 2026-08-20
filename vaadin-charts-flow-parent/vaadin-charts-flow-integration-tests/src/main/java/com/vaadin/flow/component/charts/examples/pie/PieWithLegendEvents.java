@@ -10,10 +10,10 @@ package com.vaadin.flow.component.charts.examples.pie;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.Route;
 
-@SkipFromDemo
+@Route("vaadin-charts/pie/pie-with-legend-events")
 public class PieWithLegendEvents extends PieWithLegend {
 
     private Span lastEvent;

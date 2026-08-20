@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.shared;
 
 import java.io.Serializable;
 
+/**
+ * @since 23.1
+ */
 public class URLReference implements Serializable {
 
     private String url;
@@ -29,6 +32,7 @@ public class URLReference implements Serializable {
      * Sets the URL that this object refers to.
      *
      * @param url
+     *            the URL
      */
     public void setURL(String url) {
         this.url = url;

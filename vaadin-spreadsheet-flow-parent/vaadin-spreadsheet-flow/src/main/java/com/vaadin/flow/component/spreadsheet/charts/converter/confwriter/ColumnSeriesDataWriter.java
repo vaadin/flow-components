@@ -15,6 +15,9 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.charts.converter.Utils;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ColumnSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class ColumnSeriesDataWriter extends AbstractSeriesDataWriter {
 
     public ColumnSeriesDataWriter(ColumnSeriesData series) {

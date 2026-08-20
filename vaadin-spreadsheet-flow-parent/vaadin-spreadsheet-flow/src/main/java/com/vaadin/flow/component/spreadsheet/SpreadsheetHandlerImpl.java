@@ -37,6 +37,8 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetServerRpc;
 
 /**
  * Implementation of the Spreadsheet Server RPC interface.
+ * 
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
@@ -465,6 +467,10 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void updateCellComment(String text, int col, int row) {
+        if (spreadsheet.isCellLocked(new CellAddress(row - 1, col - 1))) {
+            protectedCellWriteAttempted();
+            return;
+        }
         CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
         RichTextString str = factory.createRichTextString(text);
         Cell cell = getOrCreateCell(spreadsheet.getActiveSheet(), row - 1,

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
  *
  * @see Grid#addColumnResizeListener(com.vaadin.flow.component.ComponentEventListener)
  *
+ * @since 4.1
  */
 @DomEvent("column-drag-resize")
 public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {

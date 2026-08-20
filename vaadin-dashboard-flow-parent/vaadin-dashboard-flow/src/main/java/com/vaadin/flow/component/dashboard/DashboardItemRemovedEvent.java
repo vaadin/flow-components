@@ -19,6 +19,7 @@ import com.vaadin.flow.component.ComponentEventListener;
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemRemovedListener(ComponentEventListener)
+ * @since 24.6
  */
 public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
 

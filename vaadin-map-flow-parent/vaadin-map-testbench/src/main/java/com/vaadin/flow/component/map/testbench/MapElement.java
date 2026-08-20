@@ -34,7 +34,9 @@ public class MapElement extends TestBenchElement {
      * at the calculated pixel offset.
      *
      * @param x
+     *            the x coordinate
      * @param y
+     *            the y coordinate
      */
     public void clickAtCoordinates(double x, double y) {
         PixelCoordinate pixelCoordinates = getPixelCoordinates(x, y, true);
@@ -317,6 +319,14 @@ public class MapElement extends TestBenchElement {
 
         public void setRotation(float rotation) {
             executor.executeScript(path("setRotation(%s)", rotation));
+        }
+
+        public float getMinZoom() {
+            return getFloat("getMinZoom()");
+        }
+
+        public float getMaxZoom() {
+            return getFloat("getMaxZoom()");
         }
 
         public List<Double> calculateExtent() {

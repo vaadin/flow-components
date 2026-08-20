@@ -41,6 +41,7 @@ import com.vaadin.flow.shared.Registration;
  * parameter to one of the previously mentioned methods.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 @Tag("div")

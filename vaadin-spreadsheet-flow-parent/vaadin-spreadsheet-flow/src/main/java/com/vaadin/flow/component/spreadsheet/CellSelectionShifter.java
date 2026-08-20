@@ -37,6 +37,7 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  * determined from the existing values.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class CellSelectionShifter implements Serializable {
@@ -396,7 +397,7 @@ public class CellSelectionShifter implements Serializable {
                 if (newPaintedCellRange != null) {
                     CellReference selectedCellReference = spreadsheet
                             .getSelectedCellReference();
-                    // if the decrease caused the seleced cell to be out of
+                    // if the decrease caused the selected cell to be out of
                     // painted range, move selected cell to first in range
                     if (!SpreadsheetUtil.isCellInRange(selectedCellReference,
                             newPaintedCellRange)) {

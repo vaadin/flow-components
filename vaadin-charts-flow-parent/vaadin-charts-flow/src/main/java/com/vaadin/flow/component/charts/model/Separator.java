@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Style;
 
+/**
+ * @since 25.0
+ */
 public class Separator extends AbstractConfigurationObject {
     private String text;
     private Style style;

@@ -8,14 +8,11 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertNotEquals;
-
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
@@ -53,13 +50,24 @@ public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
 
         Thread.sleep(500);
 
-        final List<WebElement> elements = findElementsInShadowRoot(
-                By.cssSelector(".cell"));
+        // Check all cells for "###" in a single JavaScript call to avoid
+        // thousands of Selenium roundtrips (one per cell)
+        @SuppressWarnings("unchecked")
+        List<String> hashCells = (List<String>) executeScript("""
+                var root = arguments[0].shadowRoot || arguments[0];
+                var cells = root.querySelectorAll('.cell');
+                var result = [];
+                for (var i = 0; i < cells.length; i++) {
+                  if (cells[i].textContent === '###') {
+                    result.push(cells[i].className);
+                  }
+                }
+                return result;
+                """, getSpreadsheet());
 
-        for (WebElement cell : elements) {
-            assertNotEquals("Cell with class " + cell.getDomAttribute("class")
-                    + " fails", "###", cell.getText());
-        }
+        Assert.assertTrue(
+                "Cells with ### found: " + String.join(", ", hashCells),
+                hashCells.isEmpty());
     }
 
 }

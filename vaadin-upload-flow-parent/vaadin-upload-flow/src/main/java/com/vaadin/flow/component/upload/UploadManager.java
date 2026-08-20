@@ -21,11 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -35,8 +31,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -72,6 +66,7 @@ import com.vaadin.flow.shared.Registration;
  * </pre>
  *
  * @author Vaadin Ltd.
+ * @since 25.1
  */
 public class UploadManager implements Serializable {
 
@@ -122,8 +117,8 @@ public class UploadManager implements Serializable {
         owner.getElement().appendVirtualChild(connector.getElement());
 
         // Set up default fail-fast handler
-        setUploadHandler(
-                handler != null ? handler : new FailFastUploadHandler());
+        setUploadHandler(handler != null ? handler
+                : new UploadHelper.FailFastUploadHandler());
 
         // Listen for file-remove and file-reject events from client.
         // We manually listen to DOM events and fire ComponentEvents with the
@@ -197,25 +192,12 @@ public class UploadManager implements Serializable {
      *            blank
      */
     public void setUploadHandler(UploadHandler handler, String targetName) {
-        Objects.requireNonNull(handler, "UploadHandler cannot be null");
-        Objects.requireNonNull(targetName, "The target name cannot be null");
-        if (targetName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "The target name cannot be blank");
-        }
-        if (!(handler instanceof FailFastUploadHandler)) {
+        var elementStreamResource = UploadHelper.createTargetResource(handler,
+                connector.getElement(), targetName, () -> acceptedMimeTypes,
+                () -> acceptedFileExtensions);
+        if (!(handler instanceof UploadHelper.FailFastUploadHandler)) {
             handlerExplicitlyConfigured.set(true);
         }
-        var validatingHandler = UploadHelper.wrapHandlerWithFileTypeValidation(
-                handler, () -> acceptedMimeTypes, () -> acceptedFileExtensions);
-        // Wrap handler with ElementStreamResource to use custom target name
-        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                validatingHandler, connector.getElement()) {
-            @Override
-            public String getName() {
-                return targetName;
-            }
-        };
         connector.getElement().setAttribute("target", elementStreamResource);
     }
 
@@ -289,22 +271,7 @@ public class UploadManager implements Serializable {
      *             character
      */
     public void setAcceptedMimeTypes(String... mimeTypes) {
-        if (mimeTypes == null || mimeTypes.length == 0) {
-            acceptedMimeTypes = List.of();
-        } else {
-            for (String mimeType : mimeTypes) {
-                if (mimeType == null || mimeType.isBlank()) {
-                    throw new IllegalArgumentException(
-                            "MIME types cannot contain null or blank values");
-                }
-                if (!mimeType.contains("/")) {
-                    throw new IllegalArgumentException(
-                            "MIME type must contain a '/' character: "
-                                    + mimeType);
-                }
-            }
-            acceptedMimeTypes = List.of(mimeTypes);
-        }
+        acceptedMimeTypes = UploadHelper.validateMimeTypes(mimeTypes);
         updateAcceptProperty();
     }
 
@@ -335,21 +302,8 @@ public class UploadManager implements Serializable {
      *             if any value is null, blank, or does not start with a dot
      */
     public void setAcceptedFileExtensions(String... extensions) {
-        if (extensions == null || extensions.length == 0) {
-            acceptedFileExtensions = List.of();
-        } else {
-            for (String ext : extensions) {
-                if (ext == null || ext.isBlank()) {
-                    throw new IllegalArgumentException(
-                            "File extensions cannot contain null or blank values");
-                }
-                if (!ext.startsWith(".")) {
-                    throw new IllegalArgumentException(
-                            "File extension must start with '.': " + ext);
-                }
-            }
-            acceptedFileExtensions = List.of(extensions);
-        }
+        acceptedFileExtensions = UploadHelper
+                .validateFileExtensions(extensions);
         updateAcceptProperty();
     }
 
@@ -367,11 +321,8 @@ public class UploadManager implements Serializable {
      * configured MIME types and file extensions.
      */
     private void updateAcceptProperty() {
-        String accept = Stream
-                .concat(acceptedMimeTypes.stream(),
-                        acceptedFileExtensions.stream())
-                .collect(Collectors.joining(","));
-        connector.getElement().setProperty("accept", accept);
+        connector.getElement().setProperty("accept", UploadHelper
+                .formatAcceptValue(acceptedMimeTypes, acceptedFileExtensions));
     }
 
     /**
@@ -526,39 +477,14 @@ public class UploadManager implements Serializable {
     }
 
     /**
-     * The feature flag ID for modular upload components (UploadManager and
-     * related components).
-     */
-    public static final String FEATURE_FLAG_ID = ModularUploadFeatureFlagProvider.FEATURE_FLAG_ID;
-
-    /**
      * Internal connector component that loads the JS module and handles
      * client-server communication. Added as a virtual child of the owner
      * component so it doesn't appear in the DOM.
      */
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload-manager-connector.ts")
-    @NpmPackage(value = "@vaadin/upload", version = "25.2.0-alpha2")
+    @NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha12")
     static class Connector extends Component {
-        @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            super.onAttach(attachEvent);
-            checkFeatureFlag(attachEvent.getUI());
-        }
-
-        private void checkFeatureFlag(com.vaadin.flow.component.UI ui) {
-            FeatureFlags featureFlags = FeatureFlags
-                    .get(ui.getSession().getService().getContext());
-
-            // Check if either the specific modularUpload flag or the umbrella
-            // aiComponents flag is enabled
-            boolean enabled = featureFlags.isEnabled(FEATURE_FLAG_ID)
-                    || featureFlags.isEnabled("aiComponents");
-
-            if (!enabled) {
-                throw new ModularUploadExperimentalFeatureException();
-            }
-        }
     }
 
     /**
@@ -568,20 +494,6 @@ public class UploadManager implements Serializable {
      */
     boolean isHandlerExplicitlyConfigured() {
         return handlerExplicitlyConfigured.get();
-    }
-
-    /**
-     * An internal implementation of the UploadHandler interface that reminds
-     * the developer that UploadHandler must be set. Upload event listeners are
-     * not registered for this handler.
-     */
-    private static final class FailFastUploadHandler implements UploadHandler {
-        @Override
-        public void handleUploadRequest(UploadEvent event) {
-            throw new IllegalStateException(
-                    "Upload cannot be performed without an upload handler set. "
-                            + "Please first set the upload handler with setUploadHandler()");
-        }
     }
 
     /**

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -229,50 +230,61 @@ class PopoverTest {
         Assertions.assertEquals("aria-labelledby",
                 popover.getAriaLabelledBy().get());
 
-        popover.setAriaLabelledBy(null);
+        popover.setAriaLabelledBy((String) null);
         Assertions.assertTrue(popover.getAriaLabelledBy().isEmpty());
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void getRole_defaultDialog() {
         Popover popover = new Popover();
 
         Assertions.assertEquals("dialog", popover.getRole());
         Assertions.assertEquals("dialog", popover.getOverlayRole());
         Assertions.assertEquals("dialog",
-                popover.getElement().getProperty("role"));
+                popover.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_getOverlayRole() {
         popover.setOverlayRole("alertdialog");
 
         Assertions.assertEquals("alertdialog", popover.getRole());
         Assertions.assertEquals("alertdialog", popover.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                popover.getElement().getProperty("role"));
+                popover.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_null_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> popover.setOverlayRole(null));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_getRole() {
         popover.setRole("alertdialog");
 
         Assertions.assertEquals("alertdialog", popover.getRole());
         Assertions.assertEquals("alertdialog", popover.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                popover.getElement().getProperty("role"));
+                popover.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_null_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> popover.setRole(null));
+    }
+
+    @Test
+    void implementsHasAriaRole() {
+        Assertions
+                .assertTrue(HasAriaRole.class.isAssignableFrom(Popover.class));
     }
 
     @Test
@@ -319,6 +331,23 @@ class PopoverTest {
         Assertions.assertTrue(popover.isAutofocus());
         Assertions.assertTrue(
                 popover.getElement().getProperty("autofocus", false));
+    }
+
+    @Test
+    void setTabFocusEnabled_isTabFocusEnabled() {
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(false);
+        Assertions.assertFalse(popover.isTabFocusEnabled());
+        Assertions.assertTrue(
+                popover.getElement().getProperty("noTabFocus", false));
+
+        popover.setTabFocusEnabled(true);
+        Assertions.assertTrue(popover.isTabFocusEnabled());
+        Assertions.assertFalse(
+                popover.getElement().getProperty("noTabFocus", false));
     }
 
     @Test

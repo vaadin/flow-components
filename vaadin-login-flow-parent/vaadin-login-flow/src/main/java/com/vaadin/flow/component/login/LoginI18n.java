@@ -30,6 +30,7 @@ import tools.jackson.databind.JsonNode;
  * {@link LoginI18n#createDefault()}
  *
  * @see LoginForm#setI18n(LoginI18n)
+ * @since 1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginI18n implements Serializable {
@@ -289,6 +290,7 @@ public class LoginI18n implements Serializable {
 
         /**
          * @return current value for the username property
+         * @since 24.1
          */
         public String getUsername() {
             return username;
@@ -299,6 +301,7 @@ public class LoginI18n implements Serializable {
          *
          * @param username
          *            new value for the username property
+         * @since 24.1
          */
         public void setUsername(String username) {
             this.username = username;
@@ -306,6 +309,7 @@ public class LoginI18n implements Serializable {
 
         /**
          * @return current value for the password property
+         * @since 24.1
          */
         public String getPassword() {
             return password;
@@ -316,6 +320,7 @@ public class LoginI18n implements Serializable {
          *
          * @param password
          *            new value for the password property
+         * @since 24.1
          */
         public void setPassword(String password) {
             this.password = password;

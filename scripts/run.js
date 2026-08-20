@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
+const { readComponentPoms } = require('./lib/modules.js');
 
 // === Configuration ===
 
@@ -38,7 +39,12 @@ const pom = fs.readFileSync('pom.xml', 'utf8');
 const modules = [...pom.matchAll(/module>vaadin-([^<]+)-flow-parent<\/module/g)].map((m) => m[1]).sort();
 
 const itModule = (m) => `vaadin-${m}-flow-parent/vaadin-${m}-flow-integration-tests`;
-const flowModule = (m) => `vaadin-${m}-flow-parent/vaadin-${m}-flow`;
+// all published modules of a component, e.g. vaadin-ai-core-flow and
+// vaadin-ai-extensions-flow for ai-components
+const flowModules = (m) =>
+  readComponentPoms(`vaadin-${m}-flow-parent`)
+    .map((pomPath) => path.dirname(pomPath))
+    .join(',');
 
 // === Mode Definitions ===
 
@@ -130,8 +136,8 @@ function runJetty(module, modeKey) {
   const args = [
     'package',
     'jetty:run',
-    '-Dvaadin.pnpm.enable',
     '-Dvaadin.frontend.hotdeploy=true',
+    '-Djetty.scan=5',
     '-am',
     '-B',
     '-q',
@@ -147,7 +153,7 @@ function runJetty(module, modeKey) {
 }
 
 function runUnitTests(module, modeKey, pattern = '') {
-  const args = ['test', '-pl', flowModule(module)];
+  const args = ['test', '-pl', flowModules(module)];
   if (pattern) args.push(`-Dtest=${pattern}`);
   runMvn(module, modeKey, args, `Running unit tests for ${module}...`);
 }
@@ -155,7 +161,6 @@ function runUnitTests(module, modeKey, pattern = '') {
 function runIntegrationTests(module, modeKey, pattern = '') {
   const args = [
     'verify',
-    '-Dvaadin.pnpm.enable',
     '-Dvaadin.frontend.hotdeploy=true',
     '-am',
     '-B',

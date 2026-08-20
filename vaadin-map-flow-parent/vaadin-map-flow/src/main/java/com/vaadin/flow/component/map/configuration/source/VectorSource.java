@@ -19,6 +19,9 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 
+/**
+ * @since 23.0
+ */
 public class VectorSource extends Source {
     private final List<Feature> features = new ArrayList<>();
 

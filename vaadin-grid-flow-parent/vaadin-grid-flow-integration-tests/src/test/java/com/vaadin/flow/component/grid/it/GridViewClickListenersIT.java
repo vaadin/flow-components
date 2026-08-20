@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -91,6 +92,25 @@ public class GridViewClickListenersIT extends AbstractComponentIT {
         WebElement icon = cell.getContext()
                 .findElement(By.tagName("vaadin-icon"));
         icon.click();
+
+        WebElement clickInfo = findElement(By.id("clicked-item"));
+
+        Assert.assertEquals("", clickInfo.getText());
+    }
+
+    @Test
+    public void itemClickListener_singleClick_overlaySelectElementClickIgnored() {
+        GridElement grid = $(GridElement.class).id("item-click-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement cell = row.getCell(grid.getColumn("Select"));
+
+        SelectElement select = cell.$(SelectElement.class).all().getFirst();
+        select.selectByText("Rating: high to low");
+
+        Assert.assertEquals("Rating: high to low", select.getSelectedText());
 
         WebElement clickInfo = findElement(By.id("clicked-item"));
 

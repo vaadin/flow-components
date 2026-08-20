@@ -17,7 +17,6 @@ package com.vaadin.flow.component.select.testbench;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
@@ -86,7 +85,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     public List<ItemElement> getItems() {
-        return getItemsStream().collect(Collectors.toList());
+        return getItemsStream().toList();
     }
 
     @Override
@@ -99,7 +98,8 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
 
     @Override
     public String getSelectedText() {
-        return getSelectedItem().getText();
+        ItemElement selectedItem = getSelectedItem();
+        return selectedItem == null ? "" : selectedItem.getText();
     }
 
     public ItemElement getSelectedOptionItem() {
@@ -109,8 +109,15 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
                         "No item selected from popup"));
     }
 
+    /**
+     * Gets the currently selected item shown in the value button, or
+     * {@code null} if nothing is selected.
+     *
+     * @return the selected item, or {@code null} if nothing is selected
+     */
     public ItemElement getSelectedItem() {
         TestBenchElement valueElement = $("vaadin-select-value-button").first();
-        return valueElement.$(ItemElement.class).first();
+        return valueElement.$(ItemElement.class).all().stream().findFirst()
+                .orElse(null);
     }
 }

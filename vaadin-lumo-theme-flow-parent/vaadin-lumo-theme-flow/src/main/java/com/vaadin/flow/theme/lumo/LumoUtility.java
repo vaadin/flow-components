@@ -17,6 +17,8 @@ package com.vaadin.flow.theme.lumo;
 
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
+ * 
+ * @since 23.1
  */
 public final class LumoUtility {
 
@@ -75,6 +77,8 @@ public final class LumoUtility {
          * Set of classes for aligning items along a flexbox’s cross axis or a
          * grid’s block axis that will be applied only for certain viewport
          * sizes. Applies to flexbox and grid layouts.
+         * 
+         * @since 24.4.7
          */
         public static final class Breakpoint {
             private Breakpoint() {
@@ -183,6 +187,8 @@ public final class LumoUtility {
 
     /**
      * Classes for setting the aspect ratio of an element.
+     * 
+     * @since 24.4.7
      */
     public static final class AspectRatio {
         public static final String SQUARE = "aspect-square";
@@ -195,6 +201,8 @@ public final class LumoUtility {
 
     /**
      * Classes for setting the backdrop blur of an element.
+     * 
+     * @since 24.4.7
      */
     public static final class BackdropBlur {
         public static final String NONE = "backdrop-blur-none";
@@ -509,6 +517,8 @@ public final class LumoUtility {
 
     /**
      * Classes for setting borders between elements.
+     * 
+     * @since 24.4.7
      */
     public static final class Divide {
         public static final String X = "divide-x";
@@ -1278,6 +1288,8 @@ public final class LumoUtility {
 
         /**
          * Set of classes defining negative margins for an element.
+         * 
+         * @since 24.4.7
          */
         public static final class Minus {
 
@@ -1649,6 +1661,8 @@ public final class LumoUtility {
 
         /**
          * Classes for setting the bottom position of an element.
+         * 
+         * @since 24.4.7
          */
         public static final class Bottom {
             public static final String NONE = "bottom-0";
@@ -1666,6 +1680,8 @@ public final class LumoUtility {
 
         /**
          * Classes for setting the end position of an element.
+         * 
+         * @since 24.4.7
          */
         public static final class End {
             public static final String NONE = "end-0";
@@ -1683,6 +1699,8 @@ public final class LumoUtility {
 
         /**
          * Classes for setting the start position of an element.
+         * 
+         * @since 24.4.7
          */
         public static final class Start {
             public static final String NONE = "start-0";
@@ -1700,6 +1718,8 @@ public final class LumoUtility {
 
         /**
          * Classes for setting the top position of an element.
+         * 
+         * @since 24.4.7
          */
         public static final class Top {
             public static final String NONE = "top-0";
@@ -1717,6 +1737,8 @@ public final class LumoUtility {
 
         /**
          * Classes for setting a negative position for an element.
+         * 
+         * @since 24.4.7
          */
         public static final class Minus {
 
@@ -1787,6 +1809,8 @@ public final class LumoUtility {
         /**
          * Set of classes defining the position of an element that will be
          * applied only for certain viewport sizes.
+         * 
+         * @since 24.4.7
          */
         public static final class Breakpoint {
             private Breakpoint() {
@@ -1946,6 +1970,8 @@ public final class LumoUtility {
 
     /**
      * Classes for transitioning various properties.
+     * 
+     * @since 24.4.7
      */
     public static final class Transition {
         public static final String NONE = "transition-none";
@@ -1997,6 +2023,8 @@ public final class LumoUtility {
 
     /**
      * Classes for setting the z-index of an element.
+     * 
+     * @since 24.4.7
      */
     public static final class ZIndex {
         public static final String NONE = "z-0";

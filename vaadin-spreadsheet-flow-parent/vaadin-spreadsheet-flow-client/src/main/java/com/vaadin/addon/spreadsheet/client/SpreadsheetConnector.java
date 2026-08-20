@@ -215,6 +215,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private SpreadsheetServerRpcImpl serverRPC;
 
     private Element host;
+    private Element overlayContainer;
 
     private HashMap<String, Slot> customEditors = null;
 
@@ -231,6 +232,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     @Override
     protected void init() {
         super.init();
+        getConnection()
+                .setContextMenu(new SpreadsheetOverlay.SpreadsheetContextMenu(
+                        overlayContainer));
         getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
         getWidget().setCommsTrigger(new CommsTrigger() {
@@ -396,7 +400,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             StateChangeEvent stateChangeEvent) {
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
-        if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
+        boolean componentMapChanged = stateChangeEvent
+                .hasPropertyChanged("componentIDtoCellKeysMap");
+        boolean editorMapChanged = stateChangeEvent
+                .hasPropertyChanged("cellKeysToEditorIdMap");
+        boolean showOnFocusChanged = stateChangeEvent
+                .hasPropertyChanged("showCustomEditorOnFocus");
+        if (componentMapChanged) {
             HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
             HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
@@ -410,22 +420,17 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
-            if (!state.showCustomEditorOnFocus) {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
         }
-        if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
+        if (editorMapChanged) {
             setupCustomEditors();
-            if (!state.showCustomEditorOnFocus) {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
         }
-        if (stateChangeEvent.hasPropertyChanged("showCustomEditorOnFocus")) {
-            if (state.showCustomEditorOnFocus) {
-                widget.removeCellCustomEditors(getCustomEditors());
-            } else {
-                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
-            }
+        // Mount the editors once, after the factory has been set up, however
+        // many of the properties above changed in this round trip
+        if (showOnFocusChanged && state.showCustomEditorOnFocus) {
+            widget.removeCellCustomEditors(getCustomEditors());
+        } else if ((componentMapChanged || editorMapChanged
+                || showOnFocusChanged) && !state.showCustomEditorOnFocus) {
+            widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
@@ -610,8 +615,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
-    public void setHost(Element host, Node renderRoot) {
+    public void setHost(Element host, Node renderRoot,
+            Element overlayContainer) {
         this.host = host;
-        getWidget().setHost(host, renderRoot);
+        this.overlayContainer = overlayContainer;
+        getWidget().setHost(host, renderRoot, overlayContainer);
+    }
+
+    public Element getOverlayContainer() {
+        return overlayContainer;
     }
 }

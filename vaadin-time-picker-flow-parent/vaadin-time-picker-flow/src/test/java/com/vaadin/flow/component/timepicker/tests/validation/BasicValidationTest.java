@@ -63,7 +63,7 @@ class BasicValidationTest
     @Test
     void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
-        testField.setValue(LocalTime.now());
+        testField.setValue(LocalTime.of(12, 0));
         testField.setValue(null);
         Assertions.assertEquals("", testField.getErrorMessage());
     }
@@ -73,7 +73,7 @@ class BasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
-        testField.setValue(LocalTime.now());
+        testField.setValue(LocalTime.of(12, 0));
         testField.setValue(null);
         Assertions.assertEquals("Field is required",
                 testField.getErrorMessage());
@@ -81,34 +81,34 @@ class BasicValidationTest
 
     @Test
     void min_validate_emptyErrorMessageDisplayed() {
-        testField.setMin(LocalTime.now());
-        testField.setValue(LocalTime.now().minusHours(1));
+        testField.setMin(LocalTime.of(12, 0));
+        testField.setValue(LocalTime.of(11, 0));
         Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
     void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
-        testField.setMin(LocalTime.now());
+        testField.setMin(LocalTime.of(12, 0));
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setMinErrorMessage("Time is too small"));
-        testField.setValue(LocalTime.now().minusHours(1));
+        testField.setValue(LocalTime.of(11, 0));
         Assertions.assertEquals("Time is too small",
                 testField.getErrorMessage());
     }
 
     @Test
     void max_validate_emptyErrorMessageDisplayed() {
-        testField.setMax(LocalTime.now());
-        testField.setValue(LocalTime.now().plusHours(1));
+        testField.setMax(LocalTime.of(12, 0));
+        testField.setValue(LocalTime.of(13, 0));
         Assertions.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
     void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
-        testField.setMax(LocalTime.now());
+        testField.setMax(LocalTime.of(12, 0));
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setMaxErrorMessage("Time is too big"));
-        testField.setValue(LocalTime.now().plusHours(1));
+        testField.setValue(LocalTime.of(13, 0));
         Assertions.assertEquals("Time is too big", testField.getErrorMessage());
     }
 
@@ -118,7 +118,7 @@ class BasicValidationTest
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
-        testField.setValue(LocalTime.now());
+        testField.setValue(LocalTime.of(12, 0));
         testField.setValue(null);
         Assertions.assertEquals("Custom error message",
                 testField.getErrorMessage());
@@ -130,10 +130,10 @@ class BasicValidationTest
         testField.setI18n(new TimePicker.TimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
-        testField.setValue(LocalTime.now());
+        testField.setValue(LocalTime.of(12, 0));
         testField.setValue(null);
         testField.setErrorMessage("");
-        testField.setValue(LocalTime.now());
+        testField.setValue(LocalTime.of(12, 0));
         testField.setValue(null);
         Assertions.assertEquals("Field is required",
                 testField.getErrorMessage());

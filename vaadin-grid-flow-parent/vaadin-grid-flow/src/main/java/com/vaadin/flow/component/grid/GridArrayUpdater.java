@@ -21,6 +21,7 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
  * Array update strategy aware class for Grid.
  *
  * @author Vaadin Ltd
+ * @since 1.1
  */
 public interface GridArrayUpdater extends ArrayUpdater {
 }

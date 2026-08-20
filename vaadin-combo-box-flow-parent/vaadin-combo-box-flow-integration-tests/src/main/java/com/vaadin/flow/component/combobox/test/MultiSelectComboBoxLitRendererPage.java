@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -33,8 +32,7 @@ public class MultiSelectComboBoxLitRendererPage extends Div {
     private void addReadOnlyUseCase() {
         MultiSelectComboBox<Integer> multiSelect = new MultiSelectComboBox<>();
         multiSelect.setId("read-only-multi-select-combo-box");
-        multiSelect.setItems(
-                IntStream.range(0, 1000).boxed().collect(Collectors.toList()));
+        multiSelect.setItems(IntStream.range(0, 1000).boxed().toList());
         multiSelect.select(0, 1);
         multiSelect.setRenderer(createLitRenderer());
         multiSelect.setReadOnly(true);

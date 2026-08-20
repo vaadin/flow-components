@@ -23,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
@@ -45,8 +44,7 @@ public class TimePickerLocalizationView extends Div
         NativeSelect localesSelect = new NativeSelect();
         localesSelect.setWidth("230px");
         localesSelect.setOptions(TimePicker.getSupportedAvailableLocales()
-                .map(Locale::toLanguageTag).sorted()
-                .collect(Collectors.toList()));
+                .map(Locale::toLanguageTag).sorted().toList());
         localesSelect.setId("locale-picker");
 
         timePicker = new TimePicker();

@@ -39,7 +39,7 @@ class PersonCrudDataProvider
                 .of(new Person(1, "Sayo", "Sayo"),
                         new Person(2, "Manolo", "Otto"),
                         new Person(3, "Guille", "Guille"))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Consumer<Long> sizeChangeListener;

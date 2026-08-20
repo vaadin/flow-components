@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * ChartDrillupEvent triggered after all the series has been drilled up if chart
  * has multiple drilldown series
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-drillupall")
 public class ChartDrillupAllEvent extends ComponentEvent<Chart> {

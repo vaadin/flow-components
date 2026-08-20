@@ -55,13 +55,6 @@ public class DetailsElement extends TestBenchElement {
     }
 
     /**
-     * Whether the component is enabled or not
-     */
-    public boolean isEnabled() {
-        return !getPropertyBoolean("disabled");
-    }
-
-    /**
      * Returns a wrapper of the summary component
      */
     public TestBenchElement getSummaryWrapper() {

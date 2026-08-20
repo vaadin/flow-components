@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Base class for series events.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public abstract class AbstractSeriesEvent implements Serializable {

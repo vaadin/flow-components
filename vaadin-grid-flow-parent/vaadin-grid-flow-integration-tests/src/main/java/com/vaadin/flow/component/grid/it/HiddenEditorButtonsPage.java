@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -42,8 +41,8 @@ public class HiddenEditorButtonsPage extends Div {
 
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setId("editor-grid");
-        grid.setItems(IntStream.range(1, 1001).mapToObj(this::createPerson)
-                .collect(Collectors.toList()));
+        grid.setItems(
+                IntStream.range(1, 1001).mapToObj(this::createPerson).toList());
 
         Binder<Person> binder = new Binder<>(Person.class);
         TextField editorComponent = new TextField();

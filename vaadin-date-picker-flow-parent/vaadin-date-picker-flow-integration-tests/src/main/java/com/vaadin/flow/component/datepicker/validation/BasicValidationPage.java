@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.vaadin.flow.component.datepicker.DateMetadata;
+import com.vaadin.flow.component.datepicker.DateMetadataProvider;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
@@ -26,12 +29,15 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String DISABLED_DATES_INPUT = "disabled-dates-input";
+    public static final String METADATA_PROVIDER_INPUT = "metadata-provider-input";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String BAD_INPUT_ERROR_MESSAGE = "Date has incorrect format";
     public static final String MIN_ERROR_MESSAGE = "Date is too small";
     public static final String MAX_ERROR_MESSAGE = "Date is too big";
+    public static final String DISABLED_DATE_ERROR_MESSAGE = "Date is disabled";
 
     public BasicValidationPage() {
         super();
@@ -40,7 +46,8 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
                 .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
                 .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
                 .setMinErrorMessage(MIN_ERROR_MESSAGE)
-                .setMaxErrorMessage(MAX_ERROR_MESSAGE));
+                .setMaxErrorMessage(MAX_ERROR_MESSAGE)
+                .setDisabledDateErrorMessage(DISABLED_DATE_ERROR_MESSAGE));
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequired(true);
@@ -55,6 +62,20 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
             LocalDate value = LocalDate.parse(event.getValue());
             testField.setMax(value);
         }));
+
+        add(createInput(DISABLED_DATES_INPUT, "Set disabled dates", event -> {
+            LocalDate value = LocalDate.parse(event.getValue());
+            testField.setDisabledDates(List.of(value));
+        }));
+
+        add(createInput(METADATA_PROVIDER_INPUT,
+                "Set date metadata provider disabling a date", event -> {
+                    LocalDate disabledDate = LocalDate.parse(event.getValue());
+                    testField.setDateMetadataProvider(DateMetadataProvider
+                            .perDate(date -> date.equals(disabledDate)
+                                    ? new DateMetadata(date, true)
+                                    : null));
+                }));
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();

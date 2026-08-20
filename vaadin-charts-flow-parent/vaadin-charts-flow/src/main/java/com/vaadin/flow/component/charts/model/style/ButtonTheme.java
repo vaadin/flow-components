@@ -11,6 +11,9 @@ package com.vaadin.flow.component.charts.model.style;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
+/**
+ * @since 6.0.1
+ */
 public class ButtonTheme extends AbstractConfigurationObject {
     private Color fill;
     private Color stroke;

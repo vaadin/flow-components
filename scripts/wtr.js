@@ -6,13 +6,22 @@
 const fs = require('fs');
 const xml2js = require('xml2js');
 const { execSync } = require('child_process');
+const { parseArgs } = require('util');
+
+const { values: options, positionals } = parseArgs({
+  options: {
+    watch: { type: 'boolean', default: false },
+    files: { type: 'string' }
+  },
+  allowPositionals: true
+});
 
 let modules = [];
 async function computeModules() {
-  if (process.argv.length > 2) {
+  if (positionals.length > 0) {
     // Modules are passed as arguments
-    for (let i = 2; i < process.argv.length; i++) {
-      modules.push(`vaadin-${process.argv[i]}-flow-parent`);
+    for (const positional of positionals) {
+      modules.push(`vaadin-${positional}-flow-parent`);
     }
   } else {
     // Read modules from the parent pom.xml
@@ -25,7 +34,32 @@ async function computeModules() {
 
 const wtrTestsFolderName = 'test';
 
-function runTests() {
+async function appendSessionError(xmlPath, error) {
+  let xml;
+  if (fs.existsSync(xmlPath)) {
+    xml = await xml2js.parseStringPromise(fs.readFileSync(xmlPath, 'utf8'));
+    if (!xml.testsuites.testsuite) {
+      xml.testsuites.testsuite = [];
+    }
+  } else {
+    xml = { testsuites: { $: {}, testsuite: [] } };
+  }
+  const hasFailures = xml.testsuites.testsuite?.some(
+    (s) => parseInt(s.$.failures || '0') > 0 || parseInt(s.$.errors || '0') > 0
+  );
+  if (hasFailures) return;
+
+  xml.testsuites.testsuite.push({
+    $: { name: 'WTR Session', tests: '1', failures: '1', errors: '0', skipped: '0', time: '0' },
+    testcase: [{
+      $: { name: 'Browser session completed cleanly', classname: 'WTR Session', time: '0' },
+      failure: [{ _: `WTR exited with code ${error.status}: ${error.message}`, $: { message: 'WTR session error' } }]
+    }]
+  });
+  fs.writeFileSync(xmlPath, new xml2js.Builder().buildObject(xml));
+}
+
+async function runTests() {
   for (const module of modules) {
     const id = module.replace('-parent', '');
     const itFolder = `${module}/${id}-integration-tests`;
@@ -47,16 +81,21 @@ function runTests() {
       }
 
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
+      execSync(`mvn flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
 
-      // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
+      // Type-check the component module's frontend files if it has a tsconfig.
+      // Run after the Flow build so the IT module's node_modules, which the
+      // tsconfig resolves the @vaadin package types from, is populated.
+      if (fs.existsSync(`${module}/${id}/tsconfig.json`)) {
+        console.log(`Type-checking frontend files in ${module}/${id}`);
+        execSync(`npx tsc -p ../${id}/tsconfig.json`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      }
 
       // Install Playwright Chromium
       execSync(`npx playwright install chromium`, {
@@ -66,17 +105,37 @@ function runTests() {
 
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
-      execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
+      try {
+        const glob = options.files
+          ? `${wtrTestsFolderName}/${options.files}`
+          : `${wtrTestsFolderName}/**/*.test.ts`;
+        const watchFlag = options.watch ? ' --watch' : '';
+        execSync(`npx web-test-runner --playwright ${glob}${watchFlag}`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      } catch (e) {
+        if (process.env.GITHUB_ACTIONS) {
+          await appendSessionError(`${itFolder}/wtr-results.xml`, e);
+        }
+
+        throw e;
+      }
     }
   }
 }
 
 async function main() {
   await computeModules();
-  runTests();
+
+  if (options.files && modules.length !== 1) {
+    console.error(
+      '--files requires exactly one component module, e.g. `node scripts/wtr.js grid --files grid-connector-sorting.test.ts`'
+    );
+    process.exit(1);
+  }
+
+  await runTests();
 }
 
 main();

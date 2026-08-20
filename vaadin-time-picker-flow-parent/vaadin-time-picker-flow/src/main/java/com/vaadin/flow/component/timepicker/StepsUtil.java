@@ -24,6 +24,8 @@ import java.time.Duration;
  * <p>
  * NOTE: This class is not part of the public API surface and for internal use
  * only
+ * 
+ * @since 21.0.2
  */
 public class StepsUtil {
     private static final long MILLISECONDS_IN_A_DAY = 86400000L;

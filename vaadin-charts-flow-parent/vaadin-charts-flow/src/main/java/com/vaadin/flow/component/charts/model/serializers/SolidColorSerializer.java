@@ -19,6 +19,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializer for {@link SolidColor}
  *
+ * @since 6.0.1
  */
 public class SolidColorSerializer extends ValueSerializer<SolidColor> {
 

@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -54,9 +53,10 @@ import com.vaadin.flow.signals.Signal;
  * information about activities, processes, and events in the application.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/notification", version = "25.3.0-alpha12")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -221,6 +221,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * @param assertive
      *            whether the notification should have {@code aria-live}
      *            attribute set to {@code assertive} or {@code polite}
+     * @since 24.6
      */
     public Notification(String text, int duration, Position position,
             boolean assertive) {
@@ -276,6 +277,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            whether the notification should have {@code aria-live}
      *            attribute set to {@code assertive} or {@code polite}
      * @return the notification
+     * @since 24.6
      */
     public static Notification show(String text, int duration,
             Position position, boolean assertive) {
@@ -419,6 +421,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @param components
      *            the components to add
+     * @since 24.0
      */
     @Override
     public void add(Collection<Component> components) {
@@ -443,6 +446,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            the index, where the component will be added.
      * @param component
      *            the component to add
+     * @since 1.1
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
@@ -487,6 +491,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * {@code opened-changed} event is sent when the notification opened state
      * changes.
+     * 
+     * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Notification> {
         private final boolean opened;
@@ -547,6 +553,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @param assertive
      *            the value to set
+     * @since 24.6
      */
     public void setAssertive(boolean assertive) {
         getElement().setProperty("assertive", assertive);
@@ -558,6 +565,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * announce the notification content immediately when it appears.
      *
      * @return the {@code assertive} property from the webcomponent
+     * @since 24.6
      */
     public boolean isAssertive() {
         return getElement().getProperty("assertive", false);
@@ -636,8 +644,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
         this.getElement().setPropertyList("virtualChildNodeIds",
                 getElement().getChildren()
-                        .map(element -> element.getNode().getId())
-                        .collect(Collectors.toList()));
+                        .map(element -> element.getNode().getId()).toList());
 
         this.getElement().callJsFunction("requestContentUpdate");
     }
@@ -676,6 +683,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * @param className
      *            a space-separated string of class names to set, or
      *            <code>null</code> to remove all class names
+     * @since 24.0
      */
     @Override
     public void setClassName(String className) {
@@ -693,6 +701,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * @throws UnsupportedOperationException
      *             Notification does not support adding styles to card element
+     * @since 23.1
      */
     @Override
     public Style getStyle() {
@@ -720,6 +729,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * @throws UnsupportedOperationException
      *             always thrown, as Notification does not support binding
      *             children directly
+     * @since 25.1
      */
     @Override
     public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,

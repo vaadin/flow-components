@@ -17,12 +17,16 @@ import com.vaadin.flow.component.map.configuration.source.Source;
 /**
  * Represents a map's viewport, responsible for changing properties like center
  * and zoom level
+ * 
+ * @since 23.0
  */
 public class View extends AbstractConfigurationObject {
 
     private Coordinate center;
     private double rotation;
     private double zoom;
+    private double minZoom;
+    private double maxZoom;
     private Extent extent;
     private final String projection;
 
@@ -48,6 +52,8 @@ public class View extends AbstractConfigurationObject {
         this.center = new Coordinate(0, 0);
         this.rotation = 0;
         this.zoom = 0;
+        this.minZoom = 0;
+        this.maxZoom = 28;
         this.extent = new Extent(0, 0, 0, 0);
         this.projection = projection;
     }
@@ -103,6 +109,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @param rotation
      *            the rotation in radians format
+     * @since 24.0
      */
     public void setRotation(double rotation) {
         this.rotation = rotation;
@@ -125,12 +132,62 @@ public class View extends AbstractConfigurationObject {
      * currently restricted to {@code 28}. In practical terms, the level of
      * detail of the map data that a map service provides determines how useful
      * higher zoom levels are.
+     * <p>
+     * The allowed zoom range can be customized using
+     * {@link #setMinZoom(double)} and {@link #setMaxZoom(double)}.
      *
      * @param zoom
      *            new zoom level
+     * @since 24.0
      */
     public void setZoom(double zoom) {
         this.zoom = zoom;
+        markAsDirty();
+    }
+
+    /**
+     * Gets the minimum zoom level that the view allows. Defaults to {@code 0}.
+     *
+     * @return the minimum zoom level
+     * @since 25.3
+     */
+    public double getMinZoom() {
+        return minZoom;
+    }
+
+    /**
+     * Sets the minimum zoom level the user can zoom out to. Defaults to
+     * {@code 0}.
+     *
+     * @param minZoom
+     *            the new minimum zoom level
+     * @since 25.3
+     */
+    public void setMinZoom(double minZoom) {
+        this.minZoom = minZoom;
+        markAsDirty();
+    }
+
+    /**
+     * Gets the maximum zoom level that the view allows. Defaults to {@code 28}.
+     *
+     * @return the maximum zoom level
+     * @since 25.3
+     */
+    public double getMaxZoom() {
+        return maxZoom;
+    }
+
+    /**
+     * Sets the maximum zoom level the user can zoom in to. Defaults to
+     * {@code 28}.
+     *
+     * @param maxZoom
+     *            the new maximum zoom level
+     * @since 25.3
+     */
+    public void setMaxZoom(double maxZoom) {
+        this.maxZoom = maxZoom;
         markAsDirty();
     }
 
@@ -172,6 +229,7 @@ public class View extends AbstractConfigurationObject {
      *            the updated zoom level
      * @param extent
      *            the updated extent
+     * @since 24.0
      */
     public void updateInternalViewState(Coordinate center, double rotation,
             double zoom, Extent extent) {

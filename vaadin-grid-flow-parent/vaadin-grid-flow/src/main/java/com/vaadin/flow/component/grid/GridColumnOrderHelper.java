@@ -76,7 +76,7 @@ class GridColumnOrderHelper<T> {
 
         // sanity test passed. Reorder the columns.
         final List<String> newOrderIDs = columns.stream()
-                .map(Grid.Column::getInternalId).collect(Collectors.toList());
+                .map(Grid.Column::getInternalId).toList();
         final GraphNodeLeafCache nodeLeafCache = new GraphNodeLeafCache();
         // first run a dry run, to check whether the column ordering is possible
         // without actually performing the DOM reorder.
@@ -100,8 +100,7 @@ class GridColumnOrderHelper<T> {
 
         // This will reset all column orders so that the visual column order
         // will also reflect that in the DOM.
-        grid.getElement()
-                .executeJs("this._updateOrders(this._columnTree, null)");
+        grid.getElement().callJsFunction("_resetColumnOrder");
     }
 
     /**

@@ -20,6 +20,8 @@ import java.util.List;
  * pointStart and pointInterval given in the plotOptions. If the axis has
  * categories, these will be used. This option is not available for range
  * series.
+ * 
+ * @since 6.0.1
  */
 public class ListSeries extends AbstractSeries {
 

@@ -34,7 +34,7 @@ After applying the patch, for debugging the GWT code you have two options:
   # Start the GWT SuperDevMode code server (in a separate terminal)
   mvn -B -q -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client -Psdm
   # Start the Jetty server for integration tests
-  mvn package jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true -B -q -DskipTests -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests
+  mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -B -q -DskipTests -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests
   ```
 - If not already, you need to install the bookmark as it is indicated in the next block
 

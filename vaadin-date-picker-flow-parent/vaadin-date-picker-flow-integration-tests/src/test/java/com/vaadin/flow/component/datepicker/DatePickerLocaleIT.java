@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -326,7 +325,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 .filter(log -> !log.getMessage().contains("Lit is in dev mode"))
                 .filter(log -> !log.getMessage()
                         .contains("React Router Future Flag Warning"))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void assertNoWarnings() {

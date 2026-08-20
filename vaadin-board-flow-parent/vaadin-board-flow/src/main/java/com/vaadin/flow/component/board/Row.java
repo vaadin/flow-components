@@ -28,9 +28,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @deprecated Board Row is deprecated and will be removed in Vaadin 26.
  *             Consider using Dashboard as an alternative.
+ * @since 2.0.1
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/board", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/board", version = "25.3.0-alpha12")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Row extends Component
@@ -50,7 +51,7 @@ public class Row extends Component
     }
 
     /**
-     * Creates an new row with the given components.
+     * Creates a new row with the given components.
      *
      * @param components
      *            initial content of the row

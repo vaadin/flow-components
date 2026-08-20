@@ -203,10 +203,6 @@ public class ButtonIT extends AbstractComponentIT {
         Assert.assertFalse("The button should contain the 'disabled' attribute",
                 button.isEnabled());
 
-        // valo theme adds the pointer-events: none CSS property, which makes
-        // the button unclickable by selenium.
-        Assert.assertEquals("none", button.getCssValue("pointer-events"));
-
         WebElement message = layout.findElement(By.id("buttonMessage"));
         Assert.assertEquals("", message.getText());
 

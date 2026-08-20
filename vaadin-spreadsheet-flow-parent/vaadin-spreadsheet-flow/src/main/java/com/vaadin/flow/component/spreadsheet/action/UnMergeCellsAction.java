@@ -20,7 +20,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
  * Spreadsheet action for breaking a merged cell into its constituents.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class UnMergeCellsAction extends SpreadsheetAction {

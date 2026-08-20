@@ -19,6 +19,7 @@ package com.vaadin.flow.component.grid.dnd;
  * Defines the locations within the Grid row where an element can be dropped.
  *
  * @author Vaadin Ltd.
+ * @since 4.0
  */
 public enum GridDropMode {
 

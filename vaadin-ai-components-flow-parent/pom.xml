@@ -4,14 +4,15 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>25.2-SNAPSHOT</version>
+        <version>25.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-ai-components-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin AI Components Parent</name>
     <description>Vaadin AI Components Parent</description>
     <modules>
-        <module>vaadin-ai-components-flow</module>
+        <module>vaadin-ai-core-flow</module>
+        <module>vaadin-ai-extensions-flow</module>
     </modules>
     <dependencies/>
     <profiles>

@@ -58,7 +58,7 @@ public class DetachReattachIT extends AbstractComboBoxIT {
         clickButton("attach");
         combo = $(ComboBoxElement.class).first();
         combo.openPopup();
-        assertLoadedItemsCount("Expected 2 items to be loaded", 2, combo);
+        waitForLoadedItemsCount("Expected 2 items to be loaded", 2, combo);
     }
 
     @Test

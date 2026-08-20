@@ -15,6 +15,7 @@
  */
 package com.vaadin.tests.dataprovider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -119,7 +120,8 @@ public final class DataProviderListenersTest {
             super(Collections.emptyList());
             final int maxListenerNumberExpected = 4;
             listenerRemoved = Stream.of(new Boolean[maxListenerNumberExpected])
-                    .map(item -> Boolean.FALSE).collect(Collectors.toList());
+                    .map(item -> Boolean.FALSE)
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
 
         @Override

@@ -84,7 +84,7 @@ class MenuItemTest {
         Assertions.assertEquals("aria-labelledby",
                 item.getAriaLabelledBy().get());
 
-        item.setAriaLabelledBy(null);
+        item.setAriaLabelledBy((String) null);
         Assertions.assertTrue(item.getAriaLabelledBy().isEmpty());
     }
 

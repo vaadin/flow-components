@@ -1,7 +1,8 @@
-import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { getHeaderCellContent, init, setRootItems } from './shared.js';
+import { expect } from 'chai';
+import { aTimeout, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
+import { getHeaderCellContent, init, setRootItems, GRID_CONNECTOR_ROOT_REQUEST_DELAY } from './shared.js';
 import type { FlowGrid, FlowGridSorter, Item } from './shared.js';
-import { GridColumn } from '@vaadin/grid';
+import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
 
 describe('grid connector - sorting', () => {
@@ -35,6 +36,13 @@ describe('grid connector - sorting', () => {
 
   it('should not make sort requests by default', () => {
     expect(grid.$server.sortersChanged).to.not.be.called;
+  });
+
+  it('should not clear the cache and request data again when sorting', async () => {
+    grid.$server.setViewportRange.resetHistory();
+    sorters[0].click();
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setViewportRange.called).to.be.false;
   });
 
   describe('single column sorting', () => {

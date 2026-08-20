@@ -21,23 +21,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 class MasterDetailLayoutTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
 
     private final MasterDetailLayout layout = new MasterDetailLayout();
 
@@ -47,27 +41,21 @@ class MasterDetailLayoutTest {
     }
 
     @Test
-    void constructorWithSizesAndExpand() {
-        var customLayout = new MasterDetailLayout("400px", "200px",
-                MasterDetailLayout.ExpandingArea.MASTER);
+    void constructorWithSizes() {
+        var customLayout = new MasterDetailLayout("400px", "200px");
         ui.add(customLayout);
 
         Assertions.assertEquals("400px", customLayout.getMasterSize());
         Assertions.assertEquals("200px", customLayout.getDetailSize());
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
-                customLayout.getExpandingArea());
     }
 
     @Test
-    void constructorWithSizesUnitsAndExpandingArea() {
-        var customLayout = new MasterDetailLayout(30, Unit.EM, 15, Unit.EM,
-                MasterDetailLayout.ExpandingArea.DETAIL);
+    void constructorWithSizesAndUnits() {
+        var customLayout = new MasterDetailLayout(30, Unit.EM, 15, Unit.EM);
         ui.add(customLayout);
 
         Assertions.assertEquals("30.0em", customLayout.getMasterSize());
         Assertions.assertEquals("15.0em", customLayout.getDetailSize());
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
-                customLayout.getExpandingArea());
     }
 
     @Test
@@ -281,6 +269,20 @@ class MasterDetailLayoutTest {
     }
 
     @Test
+    void setMasterSizeWithExpand_getMasterSize_isExpandMaster() {
+        layout.setMasterSize("300px", true);
+        Assertions.assertEquals("300px", layout.getMasterSize());
+        Assertions.assertTrue(layout.isExpandMaster());
+    }
+
+    @Test
+    void setMasterSizeWithUnitAndExpand_getMasterSize_isExpandMaster() {
+        layout.setMasterSize(30, Unit.EM, true);
+        Assertions.assertEquals("30.0em", layout.getMasterSize());
+        Assertions.assertTrue(layout.isExpandMaster());
+    }
+
+    @Test
     void setDetailSize_getDetailSize() {
         String size = "400px";
         layout.setDetailSize(size);
@@ -295,6 +297,50 @@ class MasterDetailLayoutTest {
         Assertions.assertEquals("30.0em", layout.getDetailSize());
         Assertions.assertEquals("30.0em",
                 layout.getElement().getProperty("detailSize"));
+    }
+
+    @Test
+    void setDetailSizeWithExpand_getDetailSize_isExpandDetail() {
+        layout.setDetailSize("300px", true);
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+    }
+
+    @Test
+    void setDetailSizeWithUnitAndExpand_getDetailSize_isExpandDetail() {
+        layout.setDetailSize(30, Unit.EM, true);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+    }
+
+    @Test
+    void setDetailSizeWithOverlaySize_getDetailSize_getOverlaySize() {
+        layout.setDetailSize("300px", "200px");
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertEquals("200px", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithUnitAndOverlaySize_getDetailSize_getOverlaySize() {
+        layout.setDetailSize(30, Unit.EM, 20, Unit.EM);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertEquals("20.0em", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithExpandAndOverlaySize_getDetailSize_isExpandDetail_getOverlaySize() {
+        layout.setDetailSize("300px", true, "200px");
+        Assertions.assertEquals("300px", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertEquals("200px", layout.getOverlaySize());
+    }
+
+    @Test
+    void setDetailSizeWithUnitExpandAndOverlaySize_getDetailSize_isExpandDetail_getOverlaySize() {
+        layout.setDetailSize(30, Unit.EM, true, 20, Unit.EM);
+        Assertions.assertEquals("30.0em", layout.getDetailSize());
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertEquals("20.0em", layout.getOverlaySize());
     }
 
     @Test
@@ -346,11 +392,11 @@ class MasterDetailLayoutTest {
                 layout.getOverlayContainment());
 
         layout.setOverlayContainment(
-                MasterDetailLayout.OverlayContainment.VIEWPORT);
+                MasterDetailLayout.OverlayContainment.PAGE);
 
-        Assertions.assertEquals(MasterDetailLayout.OverlayContainment.VIEWPORT,
+        Assertions.assertEquals(MasterDetailLayout.OverlayContainment.PAGE,
                 layout.getOverlayContainment());
-        Assertions.assertEquals("viewport",
+        Assertions.assertEquals("page",
                 layout.getElement().getProperty("overlayContainment"));
     }
 
@@ -361,29 +407,42 @@ class MasterDetailLayoutTest {
     }
 
     @Test
-    void setExpandingArea_getExpandingArea() {
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.BOTH,
-                layout.getExpandingArea());
+    void setExpandMaster_isExpandMaster() {
+        Assertions.assertFalse(layout.isExpandMaster());
+        Assertions.assertFalse(
+                layout.getElement().getProperty("expandMaster", false));
 
-        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.MASTER);
+        layout.setExpandMaster(true);
 
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.MASTER,
-                layout.getExpandingArea());
-        Assertions.assertEquals("master",
-                layout.getElement().getProperty("expand"));
-
-        layout.setExpandingArea(MasterDetailLayout.ExpandingArea.DETAIL);
-
-        Assertions.assertEquals(MasterDetailLayout.ExpandingArea.DETAIL,
-                layout.getExpandingArea());
-        Assertions.assertEquals("detail",
-                layout.getElement().getProperty("expand"));
+        Assertions.assertTrue(layout.isExpandMaster());
+        Assertions.assertTrue(
+                layout.getElement().getProperty("expandMaster", false));
     }
 
     @Test
-    void setExpandingAreaNull_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> layout.setExpandingArea(null));
+    void setExpandDetail_isExpandDetail() {
+        Assertions.assertFalse(layout.isExpandDetail());
+        Assertions.assertFalse(
+                layout.getElement().getProperty("expandDetail", false));
+
+        layout.setExpandDetail(true);
+
+        Assertions.assertTrue(layout.isExpandDetail());
+        Assertions.assertTrue(
+                layout.getElement().getProperty("expandDetail", false));
+    }
+
+    @Test
+    public void setForceOverlay_isForceOverlay() {
+        Assertions.assertFalse(layout.isForceOverlay());
+        Assertions.assertFalse(
+                layout.getElement().getProperty("forceOverlay", false));
+
+        layout.setForceOverlay(true);
+
+        Assertions.assertTrue(layout.isForceOverlay());
+        Assertions.assertTrue(
+                layout.getElement().getProperty("forceOverlay", false));
     }
 
     @Test
@@ -427,12 +486,6 @@ class MasterDetailLayoutTest {
         ComponentUtil.fireEvent(layout, detailEscapePressEvent);
 
         Mockito.verify(listener).onComponentEvent(detailEscapePressEvent);
-    }
-
-    @Test
-    void implementsHasThemeVariant() {
-        Assertions.assertTrue(HasThemeVariant.class
-                .isAssignableFrom(MasterDetailLayout.class));
     }
 
     private void assertMasterContent(Component component) {

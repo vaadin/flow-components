@@ -20,7 +20,9 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/column/column-with-multi-level-drilldown")
 public class ColumnWithMultiLevelDrilldown extends AbstractChartExample {
 
     @Override

@@ -31,6 +31,7 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil;
  * details of which cells are selected.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class CellSelectionManager implements Serializable {
@@ -50,6 +51,7 @@ public class CellSelectionManager implements Serializable {
      * Creates a new CellSelectionManager and ties it to the given Spreadsheet
      *
      * @param spreadsheet
+     *            the spreadsheet
      */
     public CellSelectionManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;

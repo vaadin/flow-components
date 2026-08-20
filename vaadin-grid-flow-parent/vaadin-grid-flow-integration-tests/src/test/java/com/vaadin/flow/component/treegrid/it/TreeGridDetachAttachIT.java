@@ -71,7 +71,7 @@ public class TreeGridDetachAttachIT extends AbstractComponentIT {
 
         getDriver().navigate().refresh();
 
-        grid = $(TreeGridElement.class).first();
+        grid = $(TreeGridElement.class).waitForFirst();
         Assert.assertTrue(grid.isRowExpanded(2, 0));
     }
 

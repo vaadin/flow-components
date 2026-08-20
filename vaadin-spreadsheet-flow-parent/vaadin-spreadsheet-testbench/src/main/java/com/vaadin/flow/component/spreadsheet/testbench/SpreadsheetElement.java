@@ -60,14 +60,43 @@ public class SpreadsheetElement extends TestBenchElement {
      *             if the cell at (row, column) is not found.
      */
     public SheetCellElement getCellAt(int row, int column) {
-        String cellSelector = String.format(".col%d.row%d.cell", column, row);
-        // If there are multiple cells return the merged cell
-        if (findElementsInShadowRoot(By.cssSelector(cellSelector)).size() > 1) {
-            cellSelector += ".merged-cell";
+        String selector = String.format(".col%d.row%d.cell", column, row);
+        String mergedSelector = selector + ".merged-cell";
+        // Single async JS call to find the cell, preferring merged cell
+        // when multiple matches exist. Polls to handle cases where the
+        // cell hasn't been rendered yet (e.g. after scrolling).
+        WebElement cell = (WebElement) getCommandExecutor().getDriver()
+                .executeAsyncScript(
+                        """
+                                const root = arguments[0].shadowRoot
+                                    .querySelector('.v-spreadsheet');
+                                const selector = arguments[1];
+                                const mergedSelector = arguments[2];
+                                const callback = arguments[arguments.length - 1];
+
+                                const MAX_ATTEMPTS = 50;
+                                const delay = () => new Promise(r => setTimeout(r, 100));
+
+                                for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                    const cells = root.querySelectorAll(selector);
+                                    if (cells.length > 1) {
+                                        callback(root.querySelector(mergedSelector));
+                                        return;
+                                    } else if (cells.length === 1) {
+                                        callback(cells[0]);
+                                        return;
+                                    }
+                                    await delay();
+                                }
+                                callback(null);
+                                """,
+                        this, selector, mergedSelector);
+        if (cell == null) {
+            throw new NoSuchElementException(
+                    "Cell not found: row=" + row + ", column=" + column);
         }
-        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
-                By.cssSelector(cellSelector));
-        SheetCellElement cellElement = cell.wrap(SheetCellElement.class);
+        TestBenchElement wrapped = wrapElement(cell, getCommandExecutor());
+        SheetCellElement cellElement = wrapped.wrap(SheetCellElement.class);
         cellElement.setParent(this);
         return cellElement;
     }

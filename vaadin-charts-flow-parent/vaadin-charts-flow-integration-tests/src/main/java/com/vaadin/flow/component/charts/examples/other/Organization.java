@@ -19,7 +19,9 @@ import com.vaadin.flow.component.charts.model.NodeLayout;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsOrganization;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/other/organization")
 public class Organization extends AbstractChartExample {
 
     @Override

@@ -19,12 +19,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -52,28 +55,36 @@ class GridContextMenuTest {
     void addItemsWithNullClickListener_doesNotThrow() {
         GridContextMenu<Object> gridContextMenu = new GridContextMenu<>();
 
-        GridMenuItem<Object> foo = gridContextMenu.addItem("foo", null);
-        gridContextMenu.addItem(new NativeButton(), null);
+        GridMenuItem<Object> foo = gridContextMenu.addItem("foo",
+                (ComponentEventListener<GridContextMenuItemClickEvent<Object>>) null);
+        gridContextMenu.addItem(new NativeButton(),
+                (ComponentEventListener<GridContextMenuItemClickEvent<Object>>) null);
 
-        foo.getSubMenu().addItem("bar", null);
-        foo.getSubMenu().addItem(new NativeButton(), null);
+        foo.getSubMenu().addItem("bar",
+                (ComponentEventListener<GridContextMenuItemClickEvent<Object>>) null);
+        foo.getSubMenu().addItem(new NativeButton(),
+                (ComponentEventListener<GridContextMenuItemClickEvent<Object>>) null);
     }
 
     @Test
     void addTextItem_delegateToMenuManager() {
         TestContextMenu menu = new TestContextMenu();
-        menu.addItem("foo", null);
+        menu.addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
-        Mockito.verify(menuManager).addItem("foo", null);
+        Mockito.verify(menuManager).addItem("foo",
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
     }
 
     @Test
     void addComponentItem_delegateToMenuManager() {
         TestContextMenu menu = new TestContextMenu();
         Component component = Mockito.mock(Component.class);
-        menu.addItem(component, null);
+        menu.addItem(component,
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
 
-        Mockito.verify(menuManager).addItem(component, null);
+        Mockito.verify(menuManager).addItem(component,
+                (ComponentEventListener<ClickEvent<MenuItem>>) null);
     }
 
     @Test

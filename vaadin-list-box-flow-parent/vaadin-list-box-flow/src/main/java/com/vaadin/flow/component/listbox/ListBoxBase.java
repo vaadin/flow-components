@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -68,9 +67,10 @@ import com.vaadin.flow.signals.Signal;
  * Base class for the {@link ListBox} and {@link MultiSelectListBox}.
  *
  * @author Vaadin Ltd
+ * @since 2.1
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/list-box", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/list-box", version = "25.3.0-alpha12")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -108,6 +108,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *
      * @param dataProvider
      *            DataProvider instance to use, not <code>null</code>
+     * @since 24.2
      */
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
@@ -159,6 +160,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
      *
      * @return the data provider used by this ListBox
+     * @since 24.2
      */
     public DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
@@ -194,6 +196,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
+     * @since 23.0
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<ITEM> itemLabelGenerator) {
@@ -208,6 +211,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * in the ListBox for each item.
      *
      * @return the item label generator used, not null
+     * @since 23.0
      */
     public ItemLabelGenerator<ITEM> getItemLabelGenerator() {
         return itemLabelGenerator;
@@ -272,6 +276,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *         onChange} callbacks
      * @deprecated This method is not supported and will throw an exception when
      *             called.
+     * @since 25.1
      */
     @Deprecated
     @Override
@@ -288,8 +293,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         synchronized (dataProvider) {
             final AtomicInteger itemCounter = new AtomicInteger(0);
             items = (List<ITEM>) getDataProvider()
-                    .fetch(DataViewUtils.getQuery(this))
-                    .collect(Collectors.toList());
+                    .fetch(DataViewUtils.getQuery(this)).toList();
             items.stream().map(this::createItemComponent).forEach(component -> {
                 add(component);
                 itemCounter.incrementAndGet();
@@ -352,8 +356,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @SuppressWarnings("unchecked")
     List<VaadinItem<ITEM>> getItemComponents() {
         return getChildren().filter(VaadinItem.class::isInstance)
-                .map(component -> (VaadinItem<ITEM>) component)
-                .collect(Collectors.toList());
+                .map(component -> (VaadinItem<ITEM>) component).toList();
     }
 
     /**
@@ -367,6 +370,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * @param dataProvider
      *            DataProvider instance to use, not <code>null</code>
      * @return ListBoxDataView providing information on the data
+     * @since 18.0
      */
     @Override
     public ListBoxDataView<ITEM> setItems(
@@ -386,6 +390,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * @param inMemoryDataProvider
      *            InMemoryDataProvider to use, not <code>null</code>
      * @return ListBoxDataView providing information on the data
+     * @since 18.0
      */
     @Override
     public ListBoxDataView<ITEM> setItems(
@@ -415,6 +420,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * @param listDataProvider
      *            ListDataProvider providing items to the ListBox.
      * @return ListBoxListDataView providing access to the items
+     * @since 18.0
      */
     @Override
     public ListBoxListDataView<ITEM> setItems(
@@ -435,6 +441,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *
      * @return the list data view that provides access to the data bound to the
      *         ListBox
+     * @since 18.0
      */
     @Override
     public ListBoxListDataView<ITEM> getListDataView() {
@@ -449,6 +456,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      *
      * @return the generic DataView instance implementing
      *         {@link ListBoxDataView}
+     * @since 18.0
      */
     @Override
     public ListBoxDataView<ITEM> getGenericDataView() {

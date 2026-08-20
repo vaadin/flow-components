@@ -25,6 +25,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -40,6 +41,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -76,13 +80,15 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/checkbox", version = "25.3.0-alpha12")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
-        implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
-        HasValidationProperties, HasValidator<Boolean>,
+        implements ClickNotifier<Checkbox>, Focusable<Checkbox>,
+        HasAriaDescription, HasAriaLabel, HasValidationProperties,
+        HasValidator<Boolean>,
         InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>,
         HasThemeVariant<CheckboxVariant> {
 
@@ -198,6 +204,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *            the value change listener to add
      * @see AbstractField#setValue(Object)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Checkbox(boolean initialValue,
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
@@ -218,6 +225,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * @see #setLabel(String)
      * @see AbstractField#setValue(Object)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public Checkbox(String labelText, boolean initialValue,
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
@@ -237,6 +245,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *            {@code true} to make the field required, {@code false}
      *            otherwise
      * @see CheckboxI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -248,6 +257,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -315,6 +325,23 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
+    }
+
+    /**
      * Set the checkbox to be input focused when the page loads.
      *
      * @param autofocus
@@ -348,6 +375,28 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     public void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
+    }
+
+    /**
+     * Binds the indeterminate state to the given signal. The binding is
+     * two-way: signal changes push to the DOM property, and client-side
+     * property changes invoke the write callback.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate value changes back, or {@code null}
+     *            for one-way binding
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.2
+     */
+    public SignalBinding<Boolean> bindIndeterminate(Signal<Boolean> signal,
+            SerializableConsumer<Boolean> writeCallback) {
+        Objects.requireNonNull(signal, "Signal cannot be null");
+        return getElement().bindProperty("indeterminate",
+                signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
 
     /**
@@ -387,6 +436,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     * 
+     * @since 24.4
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -419,6 +470,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * {@link #setI18n(CheckboxI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public CheckboxI18n getI18n() {
         return i18n;
@@ -429,6 +481,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(CheckboxI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -441,6 +494,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     /**
      * The internationalization properties for {@link Checkbox}.
+     * 
+     * @since 24.5
      */
     public static class CheckboxI18n implements Serializable {
 

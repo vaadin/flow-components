@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 /**
  * Enum with the possible values for the crud's editor position.
+ * 
+ * @since 2.1
  */
 public enum CrudEditorPosition {
 

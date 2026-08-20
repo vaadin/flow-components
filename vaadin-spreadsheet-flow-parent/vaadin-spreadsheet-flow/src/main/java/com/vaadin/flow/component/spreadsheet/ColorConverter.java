@@ -21,6 +21,8 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * <p>
  * This interface has been created because the POI implementations differ quite
  * a lot.
+ * 
+ * @since 23.1
  */
 public interface ColorConverter extends Serializable {
 
@@ -76,6 +78,7 @@ public interface ColorConverter extends Serializable {
      * Returns true if the given cell style has a background color.
      *
      * @param cs
+     *            the cell style
      * @return Whether the given cell style has a defined background color or
      *         not.
      */

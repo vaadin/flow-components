@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
@@ -55,8 +56,7 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         WebElement input = findElement(By.id("size-input"));
         WebElement button = findElement(By.id("size-submit"));
 
-        input.sendKeys("80");
-        blur();
+        input.sendKeys("80", Keys.ENTER);
         button.click();
 
         // assert here only minimum required fetches
@@ -74,8 +74,7 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         clearLog();
 
         input.clear();
-        input.sendKeys("10");
-        blur();
+        input.sendKeys("10", Keys.ENTER);
         button.click();
 
         // assert here only minimum required fetches

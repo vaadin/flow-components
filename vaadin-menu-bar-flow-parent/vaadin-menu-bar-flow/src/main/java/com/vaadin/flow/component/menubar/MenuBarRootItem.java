@@ -19,11 +19,8 @@ import com.vaadin.flow.function.SerializableRunnable;
 
 class MenuBarRootItem extends MenuBarItem {
 
-    private MenuBar menuBar;
-
     MenuBarRootItem(MenuBar menuBar, SerializableRunnable contentReset) {
-        super(null, contentReset);
-        this.menuBar = menuBar;
+        super(menuBar, contentReset);
     }
 
     @Override

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-virtual-list-flow-parent</artifactId>
-        <version>25.2-SNAPSHOT</version>
+        <version>25.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-virtual-list-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -116,9 +116,6 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <configuration>
@@ -139,7 +136,7 @@
     </build>
     <profiles>
         <profile>
-            <id>build-frontend</id>
+            <id>frontend</id>
             <activation>
                 <property>
                     <name>!skipFrontend</name>
@@ -152,13 +149,14 @@
                         <artifactId>flow-maven-plugin</artifactId>
                         <configuration>
                             <frontendDirectory>./frontend</frontendDirectory>
+                            <generateBundle>false</generateBundle>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
         <profile>
-            <id>run-jetty</id>
+            <id>jetty</id>
             <activation>
                 <property>
                     <name>!skipJetty</name>
@@ -169,9 +167,6 @@
                     <plugin>
                         <groupId>org.eclipse.jetty.ee10</groupId>
                         <artifactId>jetty-ee10-maven-plugin</artifactId>
-                        <configuration>
-                            <scan>5</scan>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.HashMap;
@@ -34,6 +33,8 @@ import com.vaadin.flow.shared.Registration;
  * Note that even if you use a lazy loading {@link DataProvider}, this series
  * will work in an eager fashion and load all the data from the provider at
  * once.
+ * 
+ * @since 6.0.1
  */
 public class DataProviderSeries<T> extends AbstractSeries {
 
@@ -232,7 +233,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
                                         ? Optional.ofNullable(
                                                 entry.getValue().apply(item))
                                         : Optional.empty())))
-                .collect(toList());
+                .toList();
     }
 
     /**

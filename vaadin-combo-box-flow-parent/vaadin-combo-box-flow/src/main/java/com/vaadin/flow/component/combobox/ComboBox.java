@@ -86,17 +86,20 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the type of the items to be selectable from the combo box
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0-alpha12")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./comboBoxConnector.js")
+@JsModule("./vaadin-combo-box/comboBoxConnector.ts")
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+
+    private boolean focusSelectedItem;
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -104,6 +107,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      *
      * @param <T>
      *            item (bean) type in ComboBox
+     * @since 2.0
      */
     @FunctionalInterface
     public interface FetchItemsCallback<T> extends Serializable {
@@ -125,6 +129,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * Predicate to check {@link ComboBox} items against user typed strings.
+     * 
+     * @since 2.0
      */
     @FunctionalInterface
     public interface ItemFilter<T> extends SerializableBiPredicate<T, String> {
@@ -144,6 +150,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
      * @see #setPageSize(int)
+     * @since 2.0
      */
     public ComboBox(int pageSize) {
         super("value", null, String.class, ComboBox::presentationToModel,
@@ -162,6 +169,13 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         addValueChangeListener(event -> {
             if (event.isFromClient()) {
                 refreshValue();
+            }
+        });
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            var isOpened = (boolean) event.getValue();
+            if (isOpened && focusSelectedItem) {
+                focusOnSelectedItem();
             }
         });
     }
@@ -226,6 +240,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * @param listener
      *            the value change listener to add
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public ComboBox(
             ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
@@ -243,6 +258,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      *            the value change listener to add
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
+     * @since 23.1
      */
     public ComboBox(String label,
             ValueChangeListener<ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
@@ -263,6 +279,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * @see #setLabel(String)
      * @see #addValueChangeListener(ValueChangeListener)
      * @see #setItems(Object...)
+     * @since 23.1
      */
     @SafeVarargs
     public ComboBox(String label,
@@ -294,6 +311,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * @see ComboBoxI18n#setRequiredErrorMessage(String)
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -369,11 +387,74 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     }
 
     /**
+     * Sets whether the dropdown should scroll to and focus the currently
+     * selected item when it opens. Off by default.
+     * <p>
+     * Works out of the box for in-memory data. For a lazy data provider, the
+     * lazy data view must have an
+     * {@link com.vaadin.flow.data.provider.ItemIndexProvider ItemIndexProvider}
+     * configured via
+     * {@link com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView#setItemIndexProvider(com.vaadin.flow.data.provider.ItemIndexProvider)
+     * getLazyDataView().setItemIndexProvider(...)} so that the selected item's
+     * index can be resolved against the current sorting. Opening the dropdown
+     * throws {@link UnsupportedOperationException} otherwise.
+     * <p>
+     *
+     * @param focusSelectedItem
+     *            {@code true} to scroll to and focus the selected item when the
+     *            dropdown opens, {@code false} to keep the default behavior of
+     *            opening at the top
+     * @since 25.2
+     */
+    public void setFocusSelectedItem(boolean focusSelectedItem) {
+        this.focusSelectedItem = focusSelectedItem;
+    }
+
+    /**
+     * Gets whether the dropdown scrolls to and focuses the currently selected
+     * item when it opens.
+     *
+     * @return {@code true} if the dropdown auto-focuses the selected item,
+     *         {@code false} otherwise
+     * @see #setFocusSelectedItem(boolean)
+     * @since 25.2
+     */
+    public boolean isFocusSelectedItem() {
+        return focusSelectedItem;
+    }
+
+    private void focusOnSelectedItem() {
+        if (getValue() == null) {
+            return;
+        }
+        DataProvider<T, ?> dataProvider = getDataProvider();
+        if (dataProvider == null) {
+            return;
+        }
+        Integer index;
+        if (dataProvider.isInMemory()) {
+            // Use the generic data view rather than the list data view: it
+            // resolves the item index through the data communicator and works
+            // for any in-memory provider, including wrapped ones (e.g. from
+            // ListDataProvider.withConvertedFilter) that are not a
+            // ListDataProvider and would fail the list data view's cast.
+            index = getGenericDataView().getItemIndex(getValue()).orElse(null);
+        } else {
+            index = getLazyDataView().getItemIndex(getValue()).orElse(null);
+        }
+        if (index == null || index < 0) {
+            return;
+        }
+        getElement().callJsFunction("__focusIndex", index);
+    }
+
+    /**
      * Sets the dropdown overlay width.
      *
      * @param width
      *            the new dropdown width. Pass in null to set the dropdown width
      *            back to the default value.
+     * @since 24.4
      */
     public void setOverlayWidth(String width) {
         getStyle().set("--vaadin-combo-box-overlay-width", width);
@@ -387,6 +468,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      *            the width of the dropdown.
      * @param unit
      *            the unit used for the dropdown.
+     * @since 24.4
      */
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
@@ -401,6 +483,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * {@link #setI18n(ComboBoxI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     public ComboBoxI18n getI18n() {
         return (ComboBoxI18n) super.getI18n();
@@ -411,6 +494,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     public void setI18n(ComboBoxI18n i18n) {
         super.setI18n(i18n);
@@ -418,6 +502,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * The internationalization properties for {@link ComboBox}.
+     * 
+     * @since 24.5
      */
     public static class ComboBoxI18n implements ComboBoxBaseI18n {
 

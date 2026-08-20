@@ -35,6 +35,7 @@ import tools.jackson.databind.node.ObjectNode;
  *            The Grid bean type.
  * @author Vaadin Ltd.
  * @see Grid#addDragStartListener(GridDragStartListener)
+ * @since 4.0
  */
 @SuppressWarnings("serial")
 @DomEvent("grid-dragstart")
@@ -52,6 +53,7 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
      *            side, <code>false</code> otherwise
      * @param details
      *            Event details from {@code detail}.
+     * @since 25.0
      */
     public GridDragStartEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail") ObjectNode details) {

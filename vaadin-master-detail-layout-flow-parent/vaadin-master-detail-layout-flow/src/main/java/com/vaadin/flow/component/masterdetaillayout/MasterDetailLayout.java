@@ -19,7 +19,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -31,12 +30,10 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
@@ -48,12 +45,13 @@ import com.vaadin.flow.shared.Registration;
  * on top of, the master area, depending on configuration and viewport size.
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.3.0-alpha12")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
-public class MasterDetailLayout extends Component implements HasSize,
-        HasThemeVariant<MasterDetailLayoutVariant>, RouterLayout {
+public class MasterDetailLayout extends Component
+        implements HasSize, RouterLayout {
 
     public static final String MASTER_SLOT = "";
     public static final String DETAIL_PLACEHOLDER_SLOT = "detail-placeholder";
@@ -71,17 +69,11 @@ public class MasterDetailLayout extends Component implements HasSize,
 
     /**
      * Supported overlay containment values for {@link MasterDetailLayout}.
+     * 
+     * @since 25.2
      */
     public enum OverlayContainment {
-        LAYOUT, VIEWPORT
-    }
-
-    /**
-     * Supported expand values for {@link MasterDetailLayout}. Controls which
-     * area(s) expand to fill available space.
-     */
-    public enum ExpandingArea {
-        MASTER, DETAIL, BOTH
+        LAYOUT, PAGE
     }
 
     /**
@@ -91,26 +83,21 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Creates a Master Detail Layout with the given master size, detail size,
-     * and expanding side.
+     * Creates a Master Detail Layout with the given master and detail sizes.
      *
      * @param masterSize
      *            the size of the master area in CSS length units
      * @param detailSize
      *            the size of the detail area in CSS length units
-     * @param expandingArea
-     *            which area(s) expand to fill available space
+     * @since 25.2
      */
-    public MasterDetailLayout(String masterSize, String detailSize,
-            ExpandingArea expandingArea) {
+    public MasterDetailLayout(String masterSize, String detailSize) {
         setMasterSize(masterSize);
         setDetailSize(detailSize);
-        setExpandingArea(expandingArea);
     }
 
     /**
-     * Creates a Master Detail Layout with the given master size, detail size,
-     * and expanding area.
+     * Creates a Master Detail Layout with the given master and detail sizes.
      *
      * @param masterSize
      *            the size of the master area
@@ -120,14 +107,12 @@ public class MasterDetailLayout extends Component implements HasSize,
      *            the size of the detail area
      * @param detailUnit
      *            the unit for the detail size
-     * @param expandingArea
-     *            which area(s) expand to fill available space
+     * @since 25.2
      */
     public MasterDetailLayout(float masterSize, Unit masterUnit,
-            float detailSize, Unit detailUnit, ExpandingArea expandingArea) {
+            float detailSize, Unit detailUnit) {
         setMasterSize(masterSize, masterUnit);
         setDetailSize(detailSize, detailUnit);
-        setExpandingArea(expandingArea);
     }
 
     /**
@@ -183,6 +168,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      *
      * @return the component in the detail placeholder area, or {@code null} if
      *         there is no component in the detail placeholder area
+     * @since 25.2
      */
     public Component getDetailPlaceholder() {
         return SlotUtils.getElementsInSlot(this, DETAIL_PLACEHOLDER_SLOT)
@@ -198,6 +184,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      * @param component
      *            the component to display in the detail placeholder area, or
      *            {@code null} to clear the detail placeholder area
+     * @since 25.2
      */
     public void setDetailPlaceholder(Component component) {
         SlotUtils.clearSlot(this, DETAIL_PLACEHOLDER_SLOT);
@@ -235,7 +222,6 @@ public class MasterDetailLayout extends Component implements HasSize,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
         updateDetails();
         attachEvent.getUI().beforeClientResponse(this, executionContext -> {
             this.hasInitialized = true;
@@ -286,6 +272,44 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
+     * Sets the size of the master area in CSS length units and whether the
+     * master area expands to fill available space.
+     *
+     * @param size
+     *            the size of the master area in CSS length units
+     * @param expand
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
+     * @see #setMasterSize(String)
+     * @see #setExpandMaster(boolean)
+     * @since 25.2
+     */
+    public void setMasterSize(String size, boolean expand) {
+        setMasterSize(size);
+        setExpandMaster(expand);
+    }
+
+    /**
+     * Sets the size of the master area in CSS length units and whether the
+     * master area expands to fill available space.
+     *
+     * @param size
+     *            the size of the master area
+     * @param unit
+     *            the unit
+     * @param expand
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
+     * @see #setMasterSize(float, Unit)
+     * @see #setExpandMaster(boolean)
+     * @since 25.2
+     */
+    public void setMasterSize(float size, Unit unit, boolean expand) {
+        setMasterSize(size, unit);
+        setExpandMaster(expand);
+    }
+
+    /**
      * Gets the size of the detail area.
      *
      * @return the size of the detail area in CSS length units, or {@code null}
@@ -296,9 +320,14 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Sets the size of the detail area in CSS length units. If there is not
+     * Sets the size of the detail area in CSS length units. When there is not
      * enough space to show master and detail areas next to each other, the
-     * detail area is shown as an overlay. Defaults to 15em.
+     * detail area is shown as an overlay.
+     * <p>
+     * If not specified, the size is determined automatically by measuring the
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area in CSS length units
@@ -308,9 +337,14 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Sets the size of the detail area in CSS length units. If there is not
+     * Sets the size of the detail area in CSS length units. When there is not
      * enough space to show master and detail areas next to each other, the
-     * detail area is shown as an overlay. Defaults to 15em.
+     * detail area is shown as an overlay.
+     * <p>
+     * If not specified, the size is determined automatically by measuring the
+     * detail content whenever new content is provided via {@link #setDetail}.
+     * The measured intrinsic size is then cached until the next
+     * {@link #setDetail} call.
      *
      * @param size
      *            the size of the detail area
@@ -320,6 +354,134 @@ public class MasterDetailLayout extends Component implements HasSize,
     public void setDetailSize(float size, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
         getElement().setProperty("detailSize", HasSize.getCssSize(size, unit));
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units and whether the
+     * detail area expands to fill available space.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @see #setDetailSize(String)
+     * @see #setExpandDetail(boolean)
+     * @since 25.2
+     */
+    public void setDetailSize(String size, boolean expand) {
+        setDetailSize(size);
+        setExpandDetail(expand);
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units and whether the
+     * detail area expands to fill available space.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @see #setDetailSize(float, Unit)
+     * @see #setExpandDetail(boolean)
+     * @since 25.2
+     */
+    public void setDetailSize(float size, Unit unit, boolean expand) {
+        setDetailSize(size, unit);
+        setExpandDetail(expand);
+    }
+
+    /**
+     * Sets the size of the detail area and the size of the detail area when
+     * shown as an overlay, both in CSS length units.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param overlaySize
+     *            the overlay size in CSS length units
+     * @see #setDetailSize(String)
+     * @see #setOverlaySize(String)
+     * @since 25.2
+     */
+    public void setDetailSize(String size, String overlaySize) {
+        setDetailSize(size);
+        setOverlaySize(overlaySize);
+    }
+
+    /**
+     * Sets the size of the detail area and the size of the detail area when
+     * shown as an overlay, both in CSS length units.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit for the detail size
+     * @param overlaySize
+     *            the overlay size
+     * @param overlayUnit
+     *            the unit for the overlay size
+     * @see #setDetailSize(float, Unit)
+     * @see #setOverlaySize(float, Unit)
+     * @since 25.2
+     */
+    public void setDetailSize(float size, Unit unit, float overlaySize,
+            Unit overlayUnit) {
+        setDetailSize(size, unit);
+        setOverlaySize(overlaySize, overlayUnit);
+    }
+
+    /**
+     * Sets the size of the detail area in CSS length units, whether the detail
+     * area expands to fill available space, and the size of the detail area
+     * when shown as an overlay.
+     *
+     * @param size
+     *            the size of the detail area in CSS length units
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @param overlaySize
+     *            the overlay size in CSS length units
+     * @see #setDetailSize(String)
+     * @see #setExpandDetail(boolean)
+     * @see #setOverlaySize(String)
+     * @since 25.2
+     */
+    public void setDetailSize(String size, boolean expand, String overlaySize) {
+        setDetailSize(size);
+        setExpandDetail(expand);
+        setOverlaySize(overlaySize);
+    }
+
+    /**
+     * Sets the size of the detail area, whether the detail area expands to fill
+     * available space, and the size of the detail area when shown as an
+     * overlay.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit for the detail size
+     * @param expand
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @param overlaySize
+     *            the overlay size
+     * @param overlayUnit
+     *            the unit for the overlay size
+     * @see #setDetailSize(float, Unit)
+     * @see #setExpandDetail(boolean)
+     * @see #setOverlaySize(float, Unit)
+     * @since 25.2
+     */
+    public void setDetailSize(float size, Unit unit, boolean expand,
+            float overlaySize, Unit overlayUnit) {
+        setDetailSize(size, unit);
+        setExpandDetail(expand);
+        setOverlaySize(overlaySize, overlayUnit);
     }
 
     /**
@@ -355,6 +517,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      * {@link OverlayContainment#LAYOUT}.
      *
      * @return the overlay containment
+     * @since 25.2
      */
     public OverlayContainment getOverlayContainment() {
         String overlayContainment = getElement()
@@ -368,12 +531,13 @@ public class MasterDetailLayout extends Component implements HasSize,
     /**
      * Sets the containment of the detail area when the layout is in overlay
      * mode. When set to {@link OverlayContainment#LAYOUT}, the overlay is
-     * confined to the layout. When set to {@link OverlayContainment#VIEWPORT},
-     * the overlay is confined to the browser's viewport. Defaults to
+     * confined to the layout. When set to {@link OverlayContainment#PAGE}, the
+     * overlay is confined to the browser's viewport. Defaults to
      * {@link OverlayContainment#LAYOUT}.
      *
      * @param overlayContainment
      *            the overlay containment
+     * @since 25.2
      */
     public void setOverlayContainment(OverlayContainment overlayContainment) {
         Objects.requireNonNull(overlayContainment,
@@ -387,6 +551,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      *
      * @return the overlay size in CSS length units, or {@code null} if the
      *         overlay size is not set
+     * @since 25.2
      */
     public String getOverlaySize() {
         return getElement().getProperty("overlaySize");
@@ -399,6 +564,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      *
      * @param size
      *            the overlay size in CSS length units
+     * @since 25.2
      */
     public void setOverlaySize(String size) {
         getElement().setProperty("overlaySize", size);
@@ -413,6 +579,7 @@ public class MasterDetailLayout extends Component implements HasSize,
      *            the overlay size
      * @param unit
      *            the unit
+     * @since 25.2
      */
     public void setOverlaySize(float size, Unit unit) {
         Objects.requireNonNull(unit, "Unit cannot be null");
@@ -420,31 +587,80 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Gets which area(s) expand to fill available space. Defaults to
-     * {@link ExpandingArea#BOTH}.
+     * Gets whether the master area expands to fill available space. Defaults to
+     * {@code false}.
      *
-     * @return the expanding area
+     * @return {@code true} if the master area expands, {@code false} otherwise
+     * @since 25.2
      */
-    public ExpandingArea getExpandingArea() {
-        String expand = getElement().getProperty("expand");
-        if (expand != null) {
-            return ExpandingArea.valueOf(expand.toUpperCase());
-        }
-        return ExpandingArea.BOTH;
+    public boolean isExpandMaster() {
+        return getElement().getProperty("expandMaster", false);
     }
 
     /**
-     * Controls which area(s) expand to fill available space. Possible values
-     * are {@link ExpandingArea#MASTER}, {@link ExpandingArea#DETAIL}, and
-     * {@link ExpandingArea#BOTH}. Defaults to {@link ExpandingArea#BOTH}.
+     * Sets whether the master area expands to fill available space. When both
+     * {@link #setExpandMaster(boolean)} and {@link #setExpandDetail(boolean)}
+     * are set to {@code true}, the master and detail areas share the available
+     * space equally.
      *
-     * @param expandingArea
-     *            the expanding area
+     * @param expandMaster
+     *            {@code true} to expand the master area, {@code false}
+     *            otherwise
+     * @since 25.2
      */
-    public void setExpandingArea(ExpandingArea expandingArea) {
-        Objects.requireNonNull(expandingArea, "ExpandingArea cannot be null");
-        getElement().setProperty("expand",
-                expandingArea.name().toLowerCase(Locale.ENGLISH));
+    public void setExpandMaster(boolean expandMaster) {
+        getElement().setProperty("expandMaster", expandMaster);
+    }
+
+    /**
+     * Gets whether the detail area expands to fill available space. Defaults to
+     * {@code false}.
+     *
+     * @return {@code true} if the detail area expands, {@code false} otherwise
+     * @since 25.2
+     */
+    public boolean isExpandDetail() {
+        return getElement().getProperty("expandDetail", false);
+    }
+
+    /**
+     * Sets whether the detail area expands to fill available space. When both
+     * {@link #setExpandMaster(boolean)} and {@link #setExpandDetail(boolean)}
+     * are set to {@code true}, the master and detail areas share the available
+     * space equally.
+     *
+     * @param expandDetail
+     *            {@code true} to expand the detail area, {@code false}
+     *            otherwise
+     * @since 25.2
+     */
+    public void setExpandDetail(boolean expandDetail) {
+        getElement().setProperty("expandDetail", expandDetail);
+    }
+
+    /**
+     * Gets whether the layout forces the detail area to be shown as an overlay,
+     * even if there is enough space for master and detail to be shown next to
+     * each other using the default (split) mode.
+     *
+     * @return {@code true} if the overlay mode is enforced, {@code false}
+     *         otherwise
+     */
+    public boolean isForceOverlay() {
+        return getElement().getProperty("forceOverlay", false);
+    }
+
+    /**
+     * Sets whether the layout forces the detail area to be shown as an overlay,
+     * even if there is enough space for master and detail to be shown next to
+     * each other using the default (split) mode.
+     *
+     * @param forceOverlay
+     *            {@code true} if the overlay mode is enforced, {@code false}
+     *            otherwise
+     */
+    public void setForceOverlay(boolean forceOverlay) {
+        getElement().setProperty("forceOverlay", forceOverlay);
     }
 
     /**
@@ -470,7 +686,7 @@ public class MasterDetailLayout extends Component implements HasSize,
     /**
      * Adds a listener for when the backdrop of the details overlay is clicked.
      * The backdrop is the area outside the detail area when it is shown in
-     * drawer mode. Can be used to hide the details when the backdrop is
+     * overlay mode. Can be used to hide the details when the backdrop is
      * clicked.
      *
      * @param listener
@@ -510,28 +726,9 @@ public class MasterDetailLayout extends Component implements HasSize,
     }
 
     /**
-     * Checks whether the Master Detail Layout component feature flag is active.
-     * Succeeds if the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MASTER_DETAIL_LAYOUT_COMPONENT}
-     *             feature is not enabled
-     */
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        boolean enabled = featureFlags
-                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
      * Event that is fired when the backdrop of the details overlay is clicked.
      * The backdrop is the area outside the detail area when it is shown in
-     * drawer mode. Can be used to hide the details when the backdrop is
+     * overlay mode. Can be used to hide the details when the backdrop is
      * clicked.
      */
     @DomEvent("backdrop-click")

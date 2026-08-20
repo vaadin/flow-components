@@ -21,7 +21,9 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.router.Route;
 
+@Route("vaadin-charts/lineandscatter/spline-updating-each-second")
 public class SplineUpdatingEachSecond extends AbstractChartExample {
 
     @Override

@@ -39,6 +39,7 @@ public interface SpreadsheetServerRpc extends ServerRpc, SpreadsheetHandler {
      * The action was selected from context menu for the current selection.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnCurrentSelection(String actionKey);
 
@@ -54,6 +55,7 @@ public interface SpreadsheetServerRpc extends ServerRpc, SpreadsheetHandler {
      * The action was selected from context menu for the row header.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnRowHeader(String actionKey);
 
@@ -69,6 +71,7 @@ public interface SpreadsheetServerRpc extends ServerRpc, SpreadsheetHandler {
      * The action was selected from context menu for the column header.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnColumnHeader(String actionKey);
 

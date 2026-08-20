@@ -16,12 +16,16 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
@@ -32,6 +36,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.datepicker.DateMetadataProvider;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -68,6 +73,10 @@ class DateTimePickerDatePicker
     boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
     }
+
+    boolean isPickerDateDisabled(LocalDate date) {
+        return super.isDateDisabled(date);
+    }
 }
 
 @Tag("vaadin-time-picker")
@@ -91,9 +100,10 @@ class DateTimePickerTimePicker
  * the fields are focused.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.2.0-alpha2")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-alpha12")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -153,6 +163,11 @@ public class DateTimePicker
             if (minResult.isError()) {
                 return minResult;
             }
+
+            if (datePicker.isPickerDateDisabled(datePicker.getValue())) {
+                return ValidationResult.error(getI18nErrorMessage(
+                        DateTimePickerI18n::getDisabledDateErrorMessage));
+            }
         }
 
         // Report error if only one of the pickers has a value
@@ -187,6 +202,12 @@ public class DateTimePicker
                 value, min);
         if (minResult.isError()) {
             return minResult;
+        }
+
+        if (value != null
+                && datePicker.isPickerDateDisabled(value.toLocalDate())) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DateTimePickerI18n::getDisabledDateErrorMessage));
         }
 
         return ValidationResult.ok();
@@ -490,6 +511,7 @@ public class DateTimePicker
      *
      * @param ariaLabel
      *            the value to set as aria-label
+     * @since 24.1
      */
     public void setAriaLabel(String ariaLabel) {
         getElement().setProperty("accessibleName", ariaLabel);
@@ -500,6 +522,7 @@ public class DateTimePicker
      *
      * @return an optional aria-label or an empty optional if no aria-label has
      *         been set
+     * @since 24.1
      */
     public Optional<String> getAriaLabel() {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
@@ -517,6 +540,7 @@ public class DateTimePicker
      * @param dateLabel
      *            the value to be used as a suffix in the date picker
      *            aria-label.
+     * @since 24.1
      */
     public void setDateAriaLabel(String dateLabel) {
         dateAriaLabel = dateLabel;
@@ -532,6 +556,7 @@ public class DateTimePicker
      *
      * @return an optional label or an empty optional if no label has been set
      *         with this method before.
+     * @since 24.1
      */
     public Optional<String> getDateAriaLabel() {
         return Optional.ofNullable(dateAriaLabel);
@@ -549,6 +574,7 @@ public class DateTimePicker
      * @param timeLabel
      *            the value to be used as a suffix in the time picker
      *            aria-label.
+     * @since 24.1
      */
     public void setTimeAriaLabel(String timeLabel) {
         timeAriaLabel = timeLabel;
@@ -564,6 +590,7 @@ public class DateTimePicker
      *
      * @return an optional label or an empty optional if no label has been set
      *         with this method before.
+     * @since 24.1
      */
     public Optional<String> getTimeAriaLabel() {
         return Optional.ofNullable(timeAriaLabel);
@@ -977,6 +1004,143 @@ public class DateTimePicker
     }
 
     /**
+     * Gets the individual dates that cannot be selected.
+     *
+     * @return an unmodifiable set of the dates that cannot be selected, empty
+     *         if none are set, never {@code null}
+     * @see #setDisabledDates(Collection)
+     * @since 25.3
+     */
+    public Set<LocalDate> getDisabledDates() {
+        return datePicker.getDisabledDates();
+    }
+
+    /**
+     * Sets individual dates that cannot be selected. Such dates are displayed
+     * as disabled in the calendar overlay, and manual entry of one of them
+     * causes the component to invalidate.
+     * <p>
+     * The dates combine with the disabled weekdays, the date metadata provider,
+     * as well as with the minimum and maximum date and time: a date cannot be
+     * selected if any of these constraints disables it. By default, no
+     * individual dates are disabled.
+     * <p>
+     * Use this for a small, fully known set of dates. For a large or changing
+     * set, use {@link #setDateMetadataProvider(DateMetadataProvider)} instead,
+     * which only fetches the dates that are shown.
+     *
+     * @param dates
+     *            the dates that cannot be selected, or {@code null} to clear
+     *            the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledDates(Collection<LocalDate> dates) {
+        datePicker.setDisabledDates(dates);
+    }
+
+    /**
+     * Gets the weekdays whose dates cannot be selected.
+     *
+     * @return an unmodifiable set of the weekdays whose dates cannot be
+     *         selected, empty if none are set, never {@code null}
+     * @see #setDisabledWeekdays(Collection)
+     * @since 25.3
+     */
+    public Set<DayOfWeek> getDisabledWeekdays() {
+        return datePicker.getDisabledWeekdays();
+    }
+
+    /**
+     * Sets the weekdays whose dates cannot be selected. Such dates are
+     * displayed as disabled in the calendar overlay, and manual entry of one of
+     * them causes the component to invalidate.
+     * <p>
+     * The weekdays combine with the individually disabled dates, the date
+     * metadata provider, as well as with the minimum and maximum date and time:
+     * a date cannot be selected if any of these constraints disables it. By
+     * default, no weekdays are disabled.
+     *
+     * @param weekdays
+     *            the weekdays whose dates cannot be selected, or {@code null}
+     *            to clear the constraint
+     * @throws NullPointerException
+     *             if the collection contains {@code null} elements
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDisabledWeekdays(Collection<DayOfWeek> weekdays) {
+        datePicker.setDisabledWeekdays(weekdays);
+    }
+
+    /**
+     * Gets the callback that provides metadata for the dates shown in the
+     * calendar overlay.
+     *
+     * @return the date metadata provider, or {@code null} if none is set
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public DateMetadataProvider getDateMetadataProvider() {
+        return datePicker.getDateMetadataProvider();
+    }
+
+    /**
+     * Sets a callback that provides metadata for the dates shown in the
+     * calendar overlay, for example to mark dates as not selectable. See
+     * {@link DateMetadataProvider} for the semantics of the callback.
+     * <p>
+     * The provider combines with the individually disabled dates and weekdays,
+     * as well as with the minimum and maximum date and time: a date cannot be
+     * selected if any of these constraints disables it. By default, no provider
+     * is set.
+     * <p>
+     * Entries can also carry custom CSS part names, so that a theme can style
+     * particular dates. A part name only affects styling, never whether a date
+     * can be selected.
+     * <p>
+     * The provider is also called during server-side validation, with the date
+     * being validated, so that a disabled date cannot be committed even if the
+     * browser was never told about it. Setting a provider does not re-validate
+     * the current value. Call {@link #refreshDateMetadata()} when the data
+     * behind the provider changes.
+     *
+     * @param provider
+     *            the date metadata provider, or {@code null} to remove the
+     *            current one
+     * @see DateTimePickerI18n#setDisabledDateErrorMessage(String)
+     * @since 25.3
+     */
+    public void setDateMetadataProvider(DateMetadataProvider provider) {
+        datePicker.setDateMetadataProvider(provider);
+    }
+
+    /**
+     * Discards the date metadata that the browser has cached and fetches it
+     * again for the dates that are shown. Call this when the data behind the
+     * date metadata provider has changed.
+     * <p>
+     * If the field has a value, or only its date part has one, it is also
+     * re-validated, since a date that was selectable before may not be anymore.
+     * Does nothing if no provider is set.
+     *
+     * @see #setDateMetadataProvider(DateMetadataProvider)
+     * @since 25.3
+     */
+    public void refreshDateMetadata() {
+        datePicker.refreshDateMetadata();
+        // The inner date picker only drops the client-side cache, as its own
+        // validate() is a no-op, so run validation on this component instead
+        // and notify Binder about the possibly changed validity.
+        if (datePicker.getDateMetadataProvider() != null
+                && (getValue() != null || !datePicker.isEmpty())) {
+            validate(true);
+        }
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
@@ -1011,6 +1175,7 @@ public class DateTimePicker
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
      *         properties weren't set.
+     * @since 24.5
      */
     public DateTimePickerI18n getI18n() {
         return i18n;
@@ -1021,6 +1186,7 @@ public class DateTimePicker
      *
      * @param i18n
      *            the internationalized properties, not <code>null</code>
+     * @since 24.5
      */
     public void setI18n(DateTimePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -1050,6 +1216,7 @@ public class DateTimePicker
      *
      * @param autoOpen
      *            Value for the auto open property,
+     * @since 14.5
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty("autoOpenDisabled", !autoOpen);
@@ -1064,6 +1231,8 @@ public class DateTimePicker
 
     /**
      * The internationalization properties for {@link DateTimePicker}.
+     * 
+     * @since 24.1
      */
     public static class DateTimePickerI18n implements Serializable {
         private String dateLabel;
@@ -1073,6 +1242,7 @@ public class DateTimePicker
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
+        private String disabledDateErrorMessage;
 
         /**
          * Gets the aria-label suffix for the date picker.
@@ -1139,6 +1309,7 @@ public class DateTimePicker
          * that the server is unable to convert to type {@link LocalDateTime}.
          *
          * @return the error message or {@code null} if not set
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getBadInputErrorMessage() {
@@ -1156,6 +1327,7 @@ public class DateTimePicker
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
+         * @since 24.5
          */
         public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
@@ -1167,6 +1339,7 @@ public class DateTimePicker
          * empty.
          *
          * @return the error message or {@code null} if not set
+         * @since 24.8
          */
         @JsonIgnore // Not used on the client side
         public String getIncompleteInputErrorMessage() {
@@ -1184,6 +1357,7 @@ public class DateTimePicker
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
+         * @since 24.8
          */
         public DateTimePickerI18n setIncompleteInputErrorMessage(
                 String errorMessage) {
@@ -1198,6 +1372,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#isRequiredIndicatorVisible()
          * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getRequiredErrorMessage() {
@@ -1217,6 +1392,7 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#isRequiredIndicatorVisible()
          * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         * @since 24.5
          */
         public DateTimePickerI18n setRequiredErrorMessage(String errorMessage) {
             requiredErrorMessage = errorMessage;
@@ -1230,6 +1406,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#getMin()
          * @see DateTimePicker#setMin(LocalDateTime)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getMinErrorMessage() {
@@ -1249,6 +1426,7 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#getMin()
          * @see DateTimePicker#setMin(LocalDateTime)
+         * @since 24.5
          */
         public DateTimePickerI18n setMinErrorMessage(String errorMessage) {
             minErrorMessage = errorMessage;
@@ -1262,6 +1440,7 @@ public class DateTimePicker
          * @return the error message or {@code null} if not set
          * @see DateTimePicker#getMax()
          * @see DateTimePicker#setMax(LocalDateTime)
+         * @since 24.5
          */
         @JsonIgnore // Not used on the client side
         public String getMaxErrorMessage() {
@@ -1281,9 +1460,45 @@ public class DateTimePicker
          * @return this instance for method chaining
          * @see DateTimePicker#getMax()
          * @see DateTimePicker#setMax(LocalDateTime)
+         * @since 24.5
          */
         public DateTimePickerI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date is disabled.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DateTimePicker#setDisabledDates(Collection)
+         * @see DateTimePicker#setDisabledWeekdays(Collection)
+         * @see DateTimePicker#setDateMetadataProvider(DateMetadataProvider)
+         * @since 25.3
+         */
+        @JsonIgnore // Not used on the client side
+        public String getDisabledDateErrorMessage() {
+            return disabledDateErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date is disabled.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DateTimePicker#setDisabledDates(Collection)
+         * @see DateTimePicker#setDisabledWeekdays(Collection)
+         * @see DateTimePicker#setDateMetadataProvider(DateMetadataProvider)
+         * @since 25.3
+         */
+        public DateTimePickerI18n setDisabledDateErrorMessage(
+                String errorMessage) {
+            disabledDateErrorMessage = errorMessage;
             return this;
         }
     }

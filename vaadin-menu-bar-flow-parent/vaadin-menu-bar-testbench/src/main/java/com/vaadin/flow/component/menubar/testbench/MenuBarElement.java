@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.menubar.testbench;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -37,7 +36,7 @@ public class MenuBarElement extends TestBenchElement {
     public List<MenuBarButtonElement> getButtons() {
         return $(MenuBarButtonElement.class).all().stream().filter(
                 element -> !isOverflowButton(element) && isVisible(element))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

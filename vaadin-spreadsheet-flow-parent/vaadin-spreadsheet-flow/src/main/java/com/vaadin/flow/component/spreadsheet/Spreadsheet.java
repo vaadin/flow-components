@@ -116,6 +116,7 @@ import tools.jackson.databind.JsonNode;
  * web browsers.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
@@ -224,9 +225,27 @@ public class Spreadsheet extends Component
 
     private boolean sheetProtected;
 
-    private HashMap<String, String> cellKeysToEditorIdMap;
+    /**
+     * Editor instance currently shown for each cell key. Used to reuse the same
+     * editor across re-renders that keep the same cells visible (scroll,
+     * selection, resize) instead of re-creating it from the factory, which
+     * would discard editor state such as an uncommitted ComboBox value.
+     * Editor-only; cleared whenever editors are recreated from the factory (see
+     * {@link #setCellKeyToEditorMap(Map)}).
+     */
+    private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
-    private HashMap<String, String> componentIDtoCellKeysMap;
+    /**
+     * Cell key and editor instance that {@code onCustomEditorDisplayed} was
+     * last invoked for, so the callback fires only on a real selection change
+     * and not on re-renders that keep the same selection (scroll, resize,
+     * extending a range).
+     */
+    private String lastEditorCallbackKey;
+
+    private Component lastEditorCallbackComponent;
+
+    private HashMap<String, String> componentIDtoCellKeysMap = new HashMap<>();
 
     // Cell CSS key to link tooltip (usually same as address)
     private HashMap<String, String> hyperlinksTooltips;
@@ -252,6 +271,8 @@ public class Spreadsheet extends Component
     private Locale locale;
 
     private Registration spreadsheetHandlerRegistration;
+
+    private boolean insideCustomEditorCallback;
 
     int getCols() {
         return cols;
@@ -347,10 +368,6 @@ public class Spreadsheet extends Component
 
     private boolean isSheetProtected() {
         return sheetProtected;
-    }
-
-    private HashMap<String, String> getCellKeysToEditorIdMap() {
-        return cellKeysToEditorIdMap;
     }
 
     HashMap<String, String> getComponentIDtoCellKeysMap() {
@@ -556,16 +573,40 @@ public class Spreadsheet extends Component
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
-    private void setCellKeysToEditorIdMap(
-            HashMap<String, String> cellKeysToEditorIdMap) {
-        this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
-        getElement().setProperty("cellKeysToEditorIdMap",
-                Serializer.serialize(cellKeysToEditorIdMap));
+    /**
+     * Sets the cell-key-to-editor map and pushes it to the client. The client
+     * property maps each cell key to its editor's node id, derived from the
+     * live editor instances so it cannot drift from the server-side map.
+     * <p>
+     * Passing {@code null} clears the server map and the callback tracker and
+     * sends a {@code null} property. A {@code null} property has different
+     * client semantics than an empty map (see
+     * {@code SpreadsheetConnector.setupCustomEditors}), so the reset paths
+     * (sheet switch, factory removal/replacement, forced refresh) rely on it.
+     */
+    private void setCellKeyToEditorMap(Map<String, Component> cellKeyToEditor) {
+        if (cellKeyToEditor == null) {
+            this.cellKeyToEditor.clear();
+            resetEditorCallbackTracker();
+            getElement().setProperty("cellKeysToEditorIdMap",
+                    Serializer.serialize((HashMap<String, String>) null));
+        } else {
+            this.cellKeyToEditor = cellKeyToEditor;
+            HashMap<String, String> editorIds = new HashMap<>();
+            cellKeyToEditor.forEach((key, editor) -> editorIds.put(key,
+                    getComponentNodeId(editor)));
+            getElement().setProperty("cellKeysToEditorIdMap",
+                    Serializer.serialize(editorIds));
+        }
     }
 
     private void setComponentIDtoCellKeysMap(
             HashMap<String, String> componentIDtoCellKeysMap) {
-        this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
+        if (componentIDtoCellKeysMap == null) {
+            this.componentIDtoCellKeysMap.clear();
+        } else {
+            this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
+        }
         getElement().setProperty("componentIDtoCellKeysMap",
                 Serializer.serialize(componentIDtoCellKeysMap));
     }
@@ -1207,6 +1248,8 @@ public class Spreadsheet extends Component
      * the default / previously set spreadsheet handler.
      *
      * @param spreadsheetHandler
+     *            the spreadsheet handler
+     * @since 24.9.2
      */
     public void setSpreadsheetHandler(
             SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1221,6 +1264,7 @@ public class Spreadsheet extends Component
      * Create the default Spreadsheet handler.
      *
      * @return SpreadsheetHandlerImpl
+     * @since 24.9.2
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {
         return new SpreadsheetHandlerImpl(this);
@@ -1487,7 +1531,8 @@ public class Spreadsheet extends Component
      * Returns true if embedded charts are displayed
      *
      * @see #setChartsEnabled(boolean)
-     * @return
+     * @return {@code true} if charts are enabled, {@code false} otherwise
+     * @since 24.0
      */
     public boolean isChartsEnabled() {
         return chartsEnabled;
@@ -1498,6 +1543,8 @@ public class Spreadsheet extends Component
      * the spreadsheet or not.
      *
      * @param chartsEnabled
+     *            whether charts are enabled
+     * @since 24.0
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
@@ -1524,6 +1571,7 @@ public class Spreadsheet extends Component
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
+     * @since 24.8
      */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
         getElement().setProperty("showCustomEditorOnFocus",
@@ -1535,6 +1583,7 @@ public class Spreadsheet extends Component
      *
      * @return a boolean indicating whether the custom editor is visible on
      *         focus (true) or not (false)
+     * @since 24.8
      */
     public boolean isShowCustomEditorOnFocus() {
         return getElement().getProperty("showCustomEditorOnFocus", false);
@@ -1739,11 +1788,11 @@ public class Spreadsheet extends Component
             loadOrUpdateOverlays();
         }
 
-        if (componentIDtoCellKeysMap != null || cellKeysToEditorIdMap != null) {
+        if (!componentIDtoCellKeysMap.isEmpty() || !cellKeyToEditor.isEmpty()) {
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
             // updated node id's).
-            loadCustomComponents();
+            loadCustomComponents(true);
         }
     }
 
@@ -1902,7 +1951,7 @@ public class Spreadsheet extends Component
         // if the currently active sheet was protected, the protection for the
         // currently selected cell might have changed
         if (sheetPOIIndex == workbook.getActiveSheetIndex()) {
-            loadCustomComponents();
+            loadCustomComponents(true);
             selectionManager.reSelectSelectedCell();
         }
     }
@@ -2435,10 +2484,29 @@ public class Spreadsheet extends Component
      * Updates the content of the cells that have been marked for update with
      * {@link #markCellAsUpdated(Cell, boolean)}.
      * <p>
-     * Does NOT update custom components (editors / always visible) for the
-     * cells. For that, use {@link #reloadVisibleCellContents()}
+     * Also reloads custom components, reusing the editors already shown so
+     * their state survives the update. Use
+     * {@link #updateMarkedCellsRecreatingEditors()} when the cells behind the
+     * editors move.
      */
     void updateMarkedCells() {
+        updateMarkedCells(false);
+    }
+
+    /**
+     * Updates the content of the cells that have been marked for update, like
+     * {@link #updateMarkedCells()}, but discards the custom editors currently
+     * shown and asks {@link SpreadsheetComponentFactory} for new ones.
+     * <p>
+     * Only for updates that move cells, such as inserting or deleting rows:
+     * editors are cached per cell, so one left in place would end up on the
+     * wrong cell.
+     */
+    void updateMarkedCellsRecreatingEditors() {
+        updateMarkedCells(true);
+    }
+
+    private void updateMarkedCells(boolean recreateEditors) {
         // update conditional formatting in case styling has changed. New values
         // are fetched in ValueManager (below).
         conditionalFormatter.createConditionalFormatterRules();
@@ -2448,12 +2516,10 @@ public class Spreadsheet extends Component
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.
         selectionManager.reSelectSelectedCell();
-        // Update the cell comments as well to show them instantly after adding
-        // them
-        loadCellComments();
 
-        // update custom components, editors
-        reloadVisibleCellContents();
+        // update custom components, editors, and the rest of the visible
+        // contents, including cell comments
+        reloadVisibleCellContents(recreateEditors);
     }
 
     /**
@@ -2867,7 +2933,8 @@ public class Spreadsheet extends Component
         }
         styler.loadCustomBorderStylesToState();
 
-        updateMarkedCells(); // deleted and formula cells and style selectors
+        // deleted and formula cells and style selectors
+        updateMarkedCellsRecreatingEditors();
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn); // shifted area values
         updateMergedRegions();
@@ -3093,7 +3160,7 @@ public class Spreadsheet extends Component
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
         }
-        updateMarkedCells();
+        updateMarkedCellsRecreatingEditors();
         CellReference selectedCellReference = getSelectedCellReference();
         if (selectedCellReference.getRow() >= startRow
                 && selectedCellReference.getRow() <= endRow) {
@@ -3448,7 +3515,7 @@ public class Spreadsheet extends Component
      *
      * @param fileName
      *            The full name of the file. If the name doesn't end with '.xls'
-     *            or '.xlsx', the approriate one will be appended.
+     *            or '.xlsx', the appropriate one will be appended.
      * @return A File with the content of the current {@link Workbook}, In the
      *         file format of the original {@link Workbook}.
      * @throws FileNotFoundException
@@ -3576,9 +3643,23 @@ public class Spreadsheet extends Component
      * contents. This forces reload of all: custom components (always visible
      * and editors) from {@link SpreadsheetComponentFactory}, hyperlinks, cells'
      * comments and cells' contents. Also updates styles for the visible area.
+     * <p>
+     * Any state entered into a custom editor is lost, as the editors are
+     * replaced with new instances from the factory.
      */
     public void reloadVisibleCellContents() {
-        loadCustomComponents();
+        reloadVisibleCellContents(true);
+    }
+
+    /**
+     * Reloads the currently viewed cell contents.
+     *
+     * @param recreateEditors
+     *            {@code true} to ask the factory for new editors, {@code false}
+     *            to keep the existing ones so their state survives
+     */
+    private void reloadVisibleCellContents(boolean recreateEditors) {
+        loadCustomComponents(recreateEditors);
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn);
     }
@@ -3702,7 +3783,7 @@ public class Spreadsheet extends Component
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
         setSheetProtected(getActiveSheet().getProtect());
-        setCellKeysToEditorIdMap(null);
+        setCellKeyToEditorMap(null);
         setHyperlinksTooltips(null);
         setComponentIDtoCellKeysMap(null);
         setOverlays(null);
@@ -3748,29 +3829,53 @@ public class Spreadsheet extends Component
      * cell.
      */
     protected void loadCustomEditorOnSelectedCell() {
+        // Guard against reentrancy: onCustomEditorDisplayed that changes the
+        // selection or the component factory ends up back here, so skip the
+        // nested call instead of firing the callback again.
+        if (insideCustomEditorCallback) {
+            return;
+        }
         CellReference selectedCellReference = selectionManager
                 .getSelectedCellReference();
         if (selectedCellReference != null && customComponentFactory != null) {
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            var currentCellKeysToEditorIdMap = getCellKeysToEditorIdMap();
-            if (currentCellKeysToEditorIdMap != null
-                    && currentCellKeysToEditorIdMap.containsKey(key)
-                    && customComponents != null) {
-                String componentId = currentCellKeysToEditorIdMap.get(key);
-                for (Component c : customComponents) {
-                    if (getComponentNodeId(c).equals(componentId)) {
-                        customComponentFactory.onCustomEditorDisplayed(
-                                getCell(row, col), row, col, this,
-                                getActiveSheet(), c);
-                        return;
-                    }
+            Component editor = cellKeyToEditor.get(key);
+            if (editor != null) {
+                // Fire only on a real selection change. Re-renders that keep
+                // the same selection (scroll, resize, extending a range) re-run
+                // this method; re-firing would re-run the user's setValue and
+                // clobber in-progress editor input.
+                if (key.equals(lastEditorCallbackKey)
+                        && editor == lastEditorCallbackComponent) {
+                    return;
                 }
+                lastEditorCallbackKey = key;
+                lastEditorCallbackComponent = editor;
+                insideCustomEditorCallback = true;
+                try {
+                    customComponentFactory.onCustomEditorDisplayed(
+                            getCell(row, col), row, col, this, getActiveSheet(),
+                            editor);
+                } catch (Exception e) {
+                    LOGGER.warn(
+                            "Error in onCustomEditorDisplayed for cell ({}, {})",
+                            col + 1, row + 1, e);
+                } finally {
+                    insideCustomEditorCallback = false;
+                }
+                return;
             }
-            setCellKeysToEditorIdMap(currentCellKeysToEditorIdMap == null ? null
-                    : new HashMap<>(currentCellKeysToEditorIdMap));
+            // Selected cell has no custom editor: forget the last-fired editor
+            // so a later return to an editor cell fires the callback again.
+            resetEditorCallbackTracker();
         }
+    }
+
+    private void resetEditorCallbackTracker() {
+        lastEditorCallbackKey = null;
+        lastEditorCallbackComponent = null;
     }
 
     private void reloadSheetNames() {
@@ -3863,6 +3968,7 @@ public class Spreadsheet extends Component
      * @param cellAddress
      *            The address of the cell to check
      * @return true if the cell is locked, false otherwise
+     * @since 24.8.8
      */
     public boolean isCellLocked(CellAddress cellAddress) {
         // Locking cells only works if the sheet is protected
@@ -4000,7 +4106,10 @@ public class Spreadsheet extends Component
      */
     protected void loadCells(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        loadCustomComponents();
+        // Reuse the editors already shown for cells instead of recreating them.
+        // For all existing callers of this method (scrolling, selection,
+        // row/column resize) it makes sense to preserve editor state.
+        loadCustomComponents(false);
         loadHyperLinks();
         loadCellComments();
         loadOrUpdateOverlays();
@@ -4587,18 +4696,29 @@ public class Spreadsheet extends Component
     /**
      * Loads the custom components for the currently viewed cells and clears
      * previous components that are not currently visible.
+     *
+     * @param recreateEditors
+     *            {@code true} to recreate custom editors from the factory, used
+     *            when the application forces a refresh, changes the factory, or
+     *            the sheet changes; {@code false} to reuse the editor already
+     *            shown for a cell so its state survives the re-render, used
+     *            when the same cells stay visible (scrolling, selection,
+     *            resize).
      */
-    private void loadCustomComponents() {
+    private void loadCustomComponents(boolean recreateEditors) {
+        if (recreateEditors) {
+            // Drop the cached editors (and the callback tracker) so the loop
+            // below asks the factory for fresh instances and the callback fires
+            // again for the selected cell.
+            setCellKeyToEditorMap(null);
+        }
         if (customComponentFactory != null) {
-            // Preserve custom editor mappings to maintain StateNode connections
-            HashMap<String, String> _cellKeysToEditorIdMap = getCellKeysToEditorIdMap() != null
-                    ? new HashMap<>(getCellKeysToEditorIdMap())
-                    : new HashMap<>();
             HashMap<String, String> _componentIDtoCellKeysMap = new HashMap<>();
-            if (customComponents == null) {
-                customComponents = new HashSet<Component>();
-            }
             HashSet<Component> newCustomComponents = new HashSet<Component>();
+            // Carry over the editor-instance cache so editors are reused
+            // (state preserved) instead of re-created from the factory.
+            HashMap<String, Component> _cellKeyToEditor = new HashMap<>(
+                    cellKeyToEditor);
             Set<Integer> rowsWithComponents = new HashSet<Integer>();
             // iteration indexes 0-based
             int verticalSplitPosition = getLastFrozenRow();
@@ -4606,23 +4726,23 @@ public class Spreadsheet extends Component
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
                 // top left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1, 1,
+                        _componentIDtoCellKeysMap, _cellKeyToEditor, 1, 1,
                         verticalSplitPosition, horizontalSplitPosition);
             }
             if (verticalSplitPosition > 0) {
                 // top right pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, 1,
+                        _componentIDtoCellKeysMap, _cellKeyToEditor, 1,
                         firstColumn, verticalSplitPosition, lastColumn);
             }
             if (horizontalSplitPosition > 0) {
                 // bottom left pane
                 loadRangeComponents(newCustomComponents, rowsWithComponents,
-                        _cellKeysToEditorIdMap, _componentIDtoCellKeysMap,
-                        firstRow, 1, lastRow, horizontalSplitPosition);
+                        _componentIDtoCellKeysMap, _cellKeyToEditor, firstRow,
+                        1, lastRow, horizontalSplitPosition);
             }
             loadRangeComponents(newCustomComponents, rowsWithComponents,
-                    _cellKeysToEditorIdMap, _componentIDtoCellKeysMap, firstRow,
+                    _componentIDtoCellKeysMap, _cellKeyToEditor, firstRow,
                     firstColumn, lastRow, lastColumn);
 
             // Keep custom editors registered to preserve StateNode connections
@@ -4630,19 +4750,23 @@ public class Spreadsheet extends Component
                     .hasNext();) {
                 Component c = i.next();
                 if (!newCustomComponents.contains(c)) {
-                    String nodeId = getComponentNodeId(c);
-                    if (_cellKeysToEditorIdMap.containsValue(nodeId)) {
+                    if (_cellKeyToEditor.containsValue(c)) {
                         newCustomComponents.add(c);
                     } else {
                         unRegisterCustomComponent(c);
-                        _componentIDtoCellKeysMap.remove(nodeId);
+                        _componentIDtoCellKeysMap.remove(getComponentNodeId(c));
                         i.remove();
                     }
                 }
             }
             customComponents = newCustomComponents;
 
-            setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
+            // Drop cache entries whose editor is no longer registered (e.g. a
+            // cell that lost its editor); keep those still in use, including
+            // out-of-view cells whose editors remain registered.
+            _cellKeyToEditor.values().retainAll(customComponents);
+
+            setCellKeyToEditorMap(_cellKeyToEditor);
             setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
 
             if (!rowsWithComponents.isEmpty()) {
@@ -4650,9 +4774,9 @@ public class Spreadsheet extends Component
             }
 
         } else {
-            setCellKeysToEditorIdMap(null);
+            setCellKeyToEditorMap(null);
             setComponentIDtoCellKeysMap(null);
-            if (customComponents != null && !customComponents.isEmpty()) {
+            if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
                 }
@@ -4664,9 +4788,9 @@ public class Spreadsheet extends Component
 
     void loadRangeComponents(HashSet<Component> newCustomComponents,
             Set<Integer> rowsWithComponents,
-            HashMap<String, String> cellKeysToEditorIdMap,
-            HashMap<String, String> componentIDtoCellKeysMap, int row1,
-            int col1, int row2, int col2) {
+            HashMap<String, String> componentIDtoCellKeysMap,
+            Map<String, Component> cellKeyToEditor, int row1, int col1,
+            int row2, int col2) {
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -4679,38 +4803,51 @@ public class Spreadsheet extends Component
                     if (row != null) {
                         cell = row.getCell(c);
                     }
-                    // check if the cell has a custom component
-                    Component customComponent = customComponentFactory
-                            .getCustomComponentForCell(cell, r, c, this,
-                                    getActiveSheet());
-                    if (customComponent != null) {
-                        final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
-                        if (!customComponents.contains(customComponent)) {
-                            registerCustomComponent(customComponent);
-                        }
-                        componentIDtoCellKeysMap
-                                .put(getComponentNodeId(customComponent), key);
-                        newCustomComponents.add(customComponent);
-                        rowsWithComponents.add(r);
-                    } else if (!isCellLocked(new CellAddress(r, c))) {
-                        // no custom component and not locked, check if
-                        // the cell has a custom editor
-                        Component customEditor = customComponentFactory
-                                .getCustomEditorForCell(cell, r, c, this,
+                    try {
+                        // check if the cell has a custom component
+                        Component customComponent = customComponentFactory
+                                .getCustomComponentForCell(cell, r, c, this,
                                         getActiveSheet());
-                        if (customEditor != null) {
+                        if (customComponent != null) {
                             final String key = SpreadsheetUtil.toKey(c + 1,
                                     r + 1);
-                            if (!newCustomComponents.contains(customEditor)
-                                    && !customComponents
-                                            .contains(customEditor)) {
-                                registerCustomComponent(customEditor);
+                            if (!customComponents.contains(customComponent)) {
+                                registerCustomComponent(customComponent);
                             }
-                            cellKeysToEditorIdMap.put(key,
-                                    getComponentNodeId(customEditor));
-                            newCustomComponents.add(customEditor);
+                            componentIDtoCellKeysMap.put(
+                                    getComponentNodeId(customComponent), key);
+                            newCustomComponents.add(customComponent);
                             rowsWithComponents.add(r);
+                        } else if (!isCellLocked(new CellAddress(r, c))) {
+                            // no custom component and not locked, check if
+                            // the cell has a custom editor
+                            final String key = SpreadsheetUtil.toKey(c + 1,
+                                    r + 1);
+                            // Reuse the editor already shown for this cell so
+                            // its state (e.g. an uncommitted ComboBox value)
+                            // survives the re-render. Only ask the factory when
+                            // the cell does not have an editor yet.
+                            Component customEditor = cellKeyToEditor.get(key);
+                            if (customEditor == null) {
+                                customEditor = customComponentFactory
+                                        .getCustomEditorForCell(cell, r, c,
+                                                this, getActiveSheet());
+                            }
+                            if (customEditor != null) {
+                                if (!newCustomComponents.contains(customEditor)
+                                        && !customComponents
+                                                .contains(customEditor)) {
+                                    registerCustomComponent(customEditor);
+                                }
+                                cellKeyToEditor.put(key, customEditor);
+                                newCustomComponents.add(customEditor);
+                                rowsWithComponents.add(r);
+                            }
                         }
+                    } catch (Exception e) {
+                        LOGGER.warn(
+                                "Error loading custom component/editor for cell ({}, {})",
+                                c + 1, r + 1, e);
                     }
                 }
                 if (region != null) {
@@ -4830,16 +4967,19 @@ public class Spreadsheet extends Component
      *
      * @param customComponentFactory
      *            The new component factory to use.
+     * @since 24.0
      */
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {
-            loadCustomComponents();
+            // A new factory produces its own editors, so recreate them instead
+            // of reusing the previous factory's by cell-key.
+            loadCustomComponents(true);
             loadCustomEditorOnSelectedCell();
         } else {
-            setCellKeysToEditorIdMap(null);
-            if (customComponents != null && !customComponents.isEmpty()) {
+            setCellKeyToEditorMap(null);
+            if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     unRegisterCustomComponent(c);
                 }
@@ -6082,17 +6222,17 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Get the minimum row heigth in points for the rows that contain custom
+     * Get the minimum row height in points for the rows that contain custom
      * components
      *
-     * @return the minimum row heigths in points
+     * @return the minimum row heights in points
      */
     public int getMinimumRowHeightForComponents() {
         return minimumRowHeightForComponents;
     }
 
     /***
-     * Set the minimum row heigth in points for the rows that contain custom
+     * Set the minimum row height in points for the rows that contain custom
      * components. If set to a small value, it might cause some components like
      * checkboxes to be cut off
      *
@@ -6172,6 +6312,7 @@ public class Spreadsheet extends Component
      *
      * @param theme
      *            SpreadsheetTheme
+     * @since 24.5
      */
     public void setTheme(SpreadsheetTheme theme) {
         getElement().setAttribute("theme", theme.getThemeName());
@@ -6179,6 +6320,8 @@ public class Spreadsheet extends Component
 
     /**
      * Themes for the Spreadsheet.
+     * 
+     * @since 24.5
      */
     public enum SpreadsheetTheme {
         LUMO("lumo"), VALO("");

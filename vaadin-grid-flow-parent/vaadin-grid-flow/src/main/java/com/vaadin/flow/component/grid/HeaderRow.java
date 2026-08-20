@@ -30,6 +30,7 @@ import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
  * One row of {@link HeaderCell}s in a Grid.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class HeaderRow extends AbstractRow<HeaderCell> {
 
@@ -44,6 +45,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
          * Creates a new HeaderCell which wraps the given column element.
          *
          * @param column
+         *            the column element
          */
         HeaderCell(AbstractColumn<?> column) {
             super(column);
@@ -89,6 +91,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      * Creates a new header row from the layer of column elements.
      *
      * @param layer
+     *            the column layer
      */
     HeaderRow(ColumnLayer layer) {
         super(layer, HeaderCell::new);

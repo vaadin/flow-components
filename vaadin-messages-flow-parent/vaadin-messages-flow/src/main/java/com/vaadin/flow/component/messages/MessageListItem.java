@@ -52,6 +52,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer;
  *
  * @author Vaadin Ltd.
  * @see MessageList#setItems(Collection)
+ * @since 14.7
  */
 public class MessageListItem implements Serializable {
 
@@ -108,6 +109,7 @@ public class MessageListItem implements Serializable {
      *            the user name of the message sender
      * @see #setText(String)
      * @see #setUserName(String)
+     * @since 24.8
      */
     public MessageListItem(String text, String userName) {
         this(text);
@@ -193,6 +195,7 @@ public class MessageListItem implements Serializable {
      *
      * @param text
      *            the text to append to the message's text content
+     * @since 24.8
      */
     public void appendText(String text) {
         if (text == null) {
@@ -346,6 +349,7 @@ public class MessageListItem implements Serializable {
      *
      * @param themeNames
      *            the theme name or theme names to be added to the message
+     * @since 21.0
      */
     public void addThemeNames(String... themeNames) {
         this.themeNames.addAll(Arrays.asList(themeNames));
@@ -358,6 +362,7 @@ public class MessageListItem implements Serializable {
      *
      * @param themeNames
      *            the theme name or theme names to be removed from the message
+     * @since 21.0
      */
     public void removeThemeNames(String... themeNames) {
         this.themeNames.removeAll(Arrays.asList(themeNames));
@@ -371,6 +376,7 @@ public class MessageListItem implements Serializable {
      *            the theme name to check for
      * @return <code>true</code> if the message has the given theme name,
      *         <code>false</code> otherwise
+     * @since 21.0
      */
     public boolean hasThemeName(String themeName) {
         return themeNames.contains(themeName);
@@ -392,6 +398,7 @@ public class MessageListItem implements Serializable {
      *
      * @param classNames
      *            the class name or class names to be added to the item
+     * @since 24.3
      */
     public void addClassNames(String... classNames) {
         this.classNames.addAll(Arrays.asList(classNames));
@@ -404,6 +411,7 @@ public class MessageListItem implements Serializable {
      *
      * @param classNames
      *            the class name or class names to be removed from the item
+     * @since 24.3
      */
     public void removeClassNames(String... classNames) {
         this.classNames.removeAll(Arrays.asList(classNames));
@@ -417,6 +425,7 @@ public class MessageListItem implements Serializable {
      *            the class name to check for
      * @return <code>true</code> if the message has the given class name,
      *         <code>false</code> otherwise
+     * @since 24.3
      */
     public boolean hasClassName(String className) {
         return classNames.contains(className);
@@ -459,6 +468,7 @@ public class MessageListItem implements Serializable {
      *            download handler for the image resource, or {@code null} to
      *            remove the resource
      * @see MessageListItem#setUserImage(String)
+     * @since 24.8
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
         if (downloadHandler == null) {
@@ -619,6 +629,7 @@ public class MessageListItem implements Serializable {
      * Gets the attachments of this message.
      *
      * @return an unmodifiable list of attachments, never {@code null}
+     * @since 25.1
      */
     public List<Attachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
@@ -630,6 +641,7 @@ public class MessageListItem implements Serializable {
      *
      * @param attachments
      *            the attachments to set, or an empty list to clear attachments
+     * @since 25.1
      */
     public void setAttachments(List<Attachment> attachments) {
         Objects.requireNonNull(attachments,
@@ -643,6 +655,7 @@ public class MessageListItem implements Serializable {
      *
      * @param attachment
      *            the attachment to add, not {@code null}
+     * @since 25.1
      */
     public void addAttachment(Attachment attachment) {
         Objects.requireNonNull(attachment, "Attachment cannot be null");
@@ -665,6 +678,7 @@ public class MessageListItem implements Serializable {
      * @param mimeType
      *            the MIME type of the attachment (e.g., "application/pdf",
      *            "image/png"). Serialized as "type" in JSON.
+     * @since 25.1
      */
     public record Attachment(String name, String url,
             @JsonProperty("type") String mimeType) implements Serializable {

@@ -28,6 +28,8 @@ import com.vaadin.flow.component.map.configuration.style.Style;
  * representation, and a visual {@link Style} configured to use an {@link Icon}.
  * <p>
  * The class provides a default marker icon if no custom icon is provided.
+ * 
+ * @since 23.0
  */
 public class MarkerFeature extends PointBasedFeature {
 

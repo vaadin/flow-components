@@ -24,11 +24,6 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-tab")
 public class TabElement extends TestBenchElement {
 
-    @Override
-    public boolean isEnabled() {
-        return !getPropertyBoolean("disabled");
-    }
-
     /**
      * Gets the label of the tab.
      *

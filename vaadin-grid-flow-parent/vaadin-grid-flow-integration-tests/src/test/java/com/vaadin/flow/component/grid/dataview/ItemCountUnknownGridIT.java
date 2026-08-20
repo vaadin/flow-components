@@ -48,10 +48,20 @@ public class ItemCountUnknownGridIT extends AbstractItemCountGridIT {
         // scroll to actual end, no more items returned and size is adjusted
         doScroll(500, 500, 5, 450, 500);
         Assert.assertEquals(499, grid.getLastVisibleRowIndex());
-        // TODO #1038 test further after grid is note fetching extra stuff when
-        // size has been adjusted to less than what it is
-        // doScroll(0, 500, 6, 0, 100);
-        // doScroll(450, 500, 7, 400, 500);
+
+        // After the size is adjusted down, scrolling back and forth keeps the
+        // size and only fetches the visited viewports (near the top and near
+        // row 450) - never the ranges in between.
+        int fetchesBefore = getFetchQueryCount();
+        doScroll(0, 500, 6, 0, 100);
+        doScroll(450, 500, 7, 400, 500);
+        for (int i = fetchesBefore; i < getFetchQueryCount(); i++) {
+            int offset = getFetchedOffset(i);
+            Assert.assertTrue(
+                    "Refetched an off-viewport range at offset " + offset
+                            + " after the size was adjusted",
+                    offset < 150 || offset >= 350);
+        }
     }
 
     @Test

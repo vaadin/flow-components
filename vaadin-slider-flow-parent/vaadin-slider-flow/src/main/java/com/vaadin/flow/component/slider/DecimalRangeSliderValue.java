@@ -1,0 +1,54 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.slider;
+
+import java.util.Objects;
+
+/**
+ * Represents the value of a {@link DecimalRangeSlider}, consisting of decimal
+ * start and end values.
+ *
+ * @param start
+ *            the start value of the range
+ * @param end
+ *            the end value of the range
+ *
+ * @author Vaadin Ltd
+ * @since 25.2
+ */
+public record DecimalRangeSliderValue(Double start,
+        Double end) implements Range<Double> {
+
+    /**
+     * Creates a new DecimalRangeSliderValue with the given start and end
+     * values.
+     *
+     * @param start
+     *            the start value of the range
+     * @param end
+     *            the end value of the range
+     * @throws IllegalArgumentException
+     *             if start is greater than end
+     */
+    public DecimalRangeSliderValue {
+        Objects.requireNonNull(start, "Start value cannot be null");
+        Objects.requireNonNull(end, "End value cannot be null");
+        if (start > end) {
+            throw new IllegalArgumentException(
+                    "Start value cannot be greater than end value");
+        }
+    }
+}

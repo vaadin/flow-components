@@ -78,6 +78,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
  * data.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFactory implements Serializable {
@@ -514,7 +515,9 @@ public class SpreadsheetFactory implements Serializable {
      * indexes.
      *
      * @param spreadsheet
+     *            the spreadsheet
      * @param sheet
+     *            the sheet
      */
     static void calculateSheetSizes(final Spreadsheet spreadsheet,
             final Sheet sheet) {
@@ -730,7 +733,7 @@ public class SpreadsheetFactory implements Serializable {
          *
          * Each row that is part of a group has a set outline level. Unlike
          * cols, the 'collapse' property is actually used for rows, in
-         * conjuction with the 'hidden' prop. If a group is collapsed, each row
+         * conjunction with the 'hidden' prop. If a group is collapsed, each row
          * in the group has its 'hidden' prop set to true. Also, the column
          * after the group (or before, if inverted) has its 'collapsed' property
          * set to true.
@@ -875,9 +878,9 @@ public class SpreadsheetFactory implements Serializable {
                         LOGGER.debug("IMAGE WITHOUT ANCHOR: " + overlayWrapper);
 
                         // FIXME seems like there is a POI bug, images that have
-                        // in Excel (XLSX) been se as a certain type (type==3)
+                        // in Excel (XLSX) been set as a certain type (type==3)
                         // will get a null anchor.
-                        // Achor types:
+                        // Anchor types:
                         // 0 = Move and size with Cells,
                         // 2 = Move but don't size with cells,
                         // 3 = Don't move or size with cells.
@@ -1080,9 +1083,12 @@ public class SpreadsheetFactory implements Serializable {
                             .boxed().collect(Collectors.toMap(
                                     Function.identity(), index -> true)));
                 }
-            } else if (leftCol > 0) {
-                // TODO: should scroll vertically to restore viewport state
-                // This needs API on the Spreadsheet side
+            } else {
+                spreadsheet.setHorizontalSplitPosition(0);
+                if (leftCol > 0) {
+                    // TODO: should scroll horizontally to restore viewport
+                    // state. This needs API on the Spreadsheet side
+                }
             }
 
             if (hSplit > 0) {
@@ -1092,9 +1098,12 @@ public class SpreadsheetFactory implements Serializable {
                             .collect(Collectors.toMap(Function.identity(),
                                     index -> true)));
                 }
-            } else if (topRow > 0) {
-                // TODO: should scroll vertically to restore viewport state
-                // This needs API on the Spreadsheet side
+            } else {
+                spreadsheet.setVerticalSplitPosition(0);
+                if (topRow > 0) {
+                    // TODO: should scroll vertically to restore viewport
+                    // state. This needs API on the Spreadsheet side
+                }
             }
         } else {
             spreadsheet.setVerticalSplitPosition(0);
