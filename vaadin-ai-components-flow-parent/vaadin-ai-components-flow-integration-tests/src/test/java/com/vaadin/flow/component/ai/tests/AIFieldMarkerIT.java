@@ -96,7 +96,10 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         Assert.assertTrue(
                 "The indicator must carry the reported level as a class name",
                 indicator.getClassNames().contains("ai-confidence-high"));
-        Assert.assertEquals("High confidence", textContentOf(indicator));
+        Assert.assertEquals(
+                "The indicator must render the localized text sent by the "
+                        + "server instead of the built-in default",
+                AIFieldMarkerPage.CONFIDENCE_HIGH, textContentOf(indicator));
     }
 
     @Test

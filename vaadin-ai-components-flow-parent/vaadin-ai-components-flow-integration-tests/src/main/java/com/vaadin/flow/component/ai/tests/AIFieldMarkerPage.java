@@ -44,6 +44,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String REVERT = "Undo this value";
     static final String BADGE_LABEL = "Value provided by AI";
     static final String BADGE_TOOLTIP = "This value came from the AI.";
+    static final String CONFIDENCE_HIGH = "Varma lähde";
 
     static final String NAME_VALUE = "Ada Lovelace";
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
@@ -86,7 +87,9 @@ public class AIFieldMarkerPage extends VerticalLayout {
         var controller = new FormAIController(form);
         controller.setFieldMarkerI18n(new FieldMarkerI18n().setMessage(MESSAGE)
                 .setRevert(REVERT).setBadgeLabel(BADGE_LABEL)
-                .setBadgeTooltip(BADGE_TOOLTIP));
+                .setBadgeTooltip(BADGE_TOOLTIP)
+                .setConfidence(new FieldMarkerI18n.Confidence()
+                        .setHigh(CONFIDENCE_HIGH)));
 
         var startTurn = new NativeButton("Start turn",
                 event -> controller.onRequest());
