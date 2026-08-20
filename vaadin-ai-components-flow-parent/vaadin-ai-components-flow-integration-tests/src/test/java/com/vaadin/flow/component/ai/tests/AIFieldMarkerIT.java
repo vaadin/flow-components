@@ -44,6 +44,7 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     private TextFieldElement company;
     private TextFieldElement unchanged;
     private TextFieldElement locked;
+    private TextFieldElement confident;
 
     @Before
     public void init() {
@@ -52,6 +53,7 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         company = $(TextFieldElement.class).id("company");
         unchanged = $(TextFieldElement.class).id("unchanged");
         locked = $(TextFieldElement.class).id("locked");
+        confident = $(TextFieldElement.class).id("confident");
     }
 
     @Test
@@ -78,6 +80,23 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
         Assert.assertTrue(
                 "A field the turn left unchanged must not carry a marker",
                 unchanged.$(MARKER).all().isEmpty());
+    }
+
+    @Test
+    public void runTurn_fillWithSource_markerShowsConfidenceIndicator() {
+        runTurn();
+
+        waitForMarker(confident);
+        // The indicator is a span the marker renders into the field's helper
+        // text section once the working state has ended.
+        waitUntil(driver -> !confident.$("span").withClassName("ai-confidence")
+                .all().isEmpty());
+        var indicator = confident.$("span").withClassName("ai-confidence")
+                .first();
+        Assert.assertTrue(
+                "The indicator must carry the reported level as a class name",
+                indicator.getClassNames().contains("ai-confidence-high"));
+        Assert.assertEquals("High confidence", textContentOf(indicator));
     }
 
     @Test
