@@ -93,6 +93,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+    private DialogContent dialogContent;
     private ModalityMode modality = ModalityMode.VISUAL;
 
     private final SignalPropertySupport<Boolean> visibleSupport = SignalPropertySupport
@@ -574,29 +575,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-
-        // getChildren() returns only the main content; the header/footer live
-        // in separate slotted wrappers. Translate the content index to the
-        // matching element index so the wrappers do not offset the position.
-        var children = getChildren().toList();
-        if (index > children.size()) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component at index " + index
-                            + ", there are only " + children.size()
-                            + " content components");
-        }
-        if (index == children.size()) {
-            getElement().appendChild(component.getElement());
-        } else {
-            getElement().insertChild(
-                    getElement().indexOfChild(children.get(index).getElement()),
-                    component.getElement());
-        }
+        getContent().addComponentAtIndex(index, component);
     }
 
     private boolean isHeaderFooterWrapper(Element element) {
@@ -606,22 +585,22 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public Stream<Component> getChildren() {
-        // Collect into a list so the returned stream is a snapshot, matching
-        // Component.getChildren() and staying safe when callers such as
-        // removeAll() remove children while iterating.
-        return getElement().getChildren()
-                .filter(element -> !isHeaderFooterWrapper(element))
-                .flatMap(element -> element.getComponent().stream()).toList()
-                .stream();
+        return getContent().getChildren();
+    }
+
+    @Override
+    public void add(Collection<Component> components) {
+        getContent().add(components);
+    }
+
+    @Override
+    public void remove(Collection<Component> components) {
+        getContent().remove(components);
     }
 
     @Override
     public void removeAll() {
-        // HasComponents.removeAll would clear all children of the dialog
-        // element, including the slotted header/footer wrappers. getChildren()
-        // returns only the main content, so removing those preserves the
-        // header/footer.
-        getChildren().forEach(this::remove);
+        getContent().removeAll();
     }
 
     /**
@@ -946,6 +925,22 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Gets the object from which components can be added or removed from the
+     * dialog content area. The content area is the part of the dialog between
+     * the header and the footer, and holds the components added with
+     * {@link #add(Component...)}.
+     *
+     * @return the content object
+     * @since 25.3
+     */
+    public HasComponents getContent() {
+        if (this.dialogContent == null) {
+            this.dialogContent = new DialogContent(this);
+        }
+        return this.dialogContent;
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
      * dialog header area. The header is displayed only if there's a
      * {@link #getHeaderTitle()} or at least one component added with
      * {@link DialogHeaderFooter#add(Component...)}.
@@ -1084,6 +1079,129 @@ public class Dialog extends Component implements HasComponents, HasSize,
         @Override
         public Element getElement() {
             return root;
+        }
+    }
+
+    /**
+     * Class for managing components in the content area of a dialog. The
+     * content area is the default slot of the dialog element; the header and
+     * footer are separate areas managed through {@link Dialog#getHeader()} and
+     * {@link Dialog#getFooter()}.
+     *
+     * @since 25.3
+     */
+    static final class DialogContent implements HasComponents {
+        private final Dialog dialog;
+
+        private DialogContent(Dialog dialog) {
+            this.dialog = dialog;
+        }
+
+        @Override
+        public Element getElement() {
+            return dialog.getElement();
+        }
+
+        @Override
+        public Stream<Component> getChildren() {
+            // Collect into a list so the returned stream is a snapshot,
+            // matching Component.getChildren() and staying safe when callers
+            // such as removeAll() remove children while iterating.
+            return getElement().getChildren()
+                    .filter(element -> !dialog.isHeaderFooterWrapper(element))
+                    .flatMap(element -> element.getComponent().stream())
+                    .toList().stream();
+        }
+
+        @Override
+        public void add(Collection<Component> components) {
+            HasComponents.super.add(components);
+            // A component may have been moved here out of the header or
+            // footer wrapper, leaving the wrapper empty but still attached,
+            // which keeps the has-header/has-footer state on client side.
+            dialog.updateHeaderFooterSlotStates();
+        }
+
+        @Override
+        public void addComponentAtIndex(int index, Component component) {
+            Objects.requireNonNull(component, "Component should not be null");
+            if (index < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot add a component with a negative index");
+            }
+
+            // getChildren() returns only the content; the header/footer live
+            // in separate slotted wrappers. Translate the content index to
+            // the matching element index so the wrappers do not offset the
+            // position, and delegate so the signal-binding checks in the
+            // default implementation run.
+            var children = getChildren().toList();
+            if (index > children.size()) {
+                throw new IllegalArgumentException(
+                        "Cannot add a component at index " + index
+                                + ", there are only " + children.size()
+                                + " content components");
+            }
+            var elementIndex = index == children.size()
+                    ? getElement().getChildCount()
+                    : getElement()
+                            .indexOfChild(children.get(index).getElement());
+            HasComponents.super.addComponentAtIndex(elementIndex, component);
+            dialog.updateHeaderFooterSlotStates();
+        }
+
+        @Override
+        public void replace(Component oldComponent, Component newComponent) {
+            HasComponents.super.replace(oldComponent, newComponent);
+            dialog.updateHeaderFooterSlotStates();
+        }
+
+        @Override
+        public void removeAll() {
+            // HasComponents.removeAll would clear all children of the dialog
+            // element, including the slotted header/footer wrappers.
+            // getChildren() returns only the content, so removing those
+            // preserves the header/footer.
+            getChildren().forEach(this::remove);
+        }
+
+        @Override
+        public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
+                SerializableFunction<S, Component> childFactory) {
+            throw new UnsupportedOperationException(
+                    "Dialog does not support binding children directly. "
+                            + "Add a container component, such as Div, to the Dialog "
+                            + "and use bindChildren on the container component instead.");
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            throw new UnsupportedOperationException(
+                    "The content area cannot be disabled separately. "
+                            + "Use Dialog.setEnabled to disable the dialog.");
+        }
+
+        @Override
+        public SignalBinding<Boolean> bindEnabled(
+                Signal<Boolean> enabledSignal) {
+            throw new UnsupportedOperationException(
+                    "The content area cannot be disabled separately. "
+                            + "Use Dialog.bindEnabled to bind the dialog's enabled state.");
+        }
+    }
+
+    /**
+     * Attaches or detaches the header and footer wrappers based on whether they
+     * have any children. Called after content mutations that may move a
+     * component out of a wrapper without going through
+     * {@link DialogHeaderFooter}.
+     */
+    private void updateHeaderFooterSlotStates() {
+        if (dialogHeader != null) {
+            ((DialogHeaderFooter) dialogHeader).updateSlotState();
+        }
+        if (dialogFooter != null) {
+            ((DialogHeaderFooter) dialogFooter).updateSlotState();
         }
     }
 
