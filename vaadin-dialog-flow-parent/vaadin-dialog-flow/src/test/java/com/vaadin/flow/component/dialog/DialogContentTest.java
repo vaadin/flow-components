@@ -163,6 +163,20 @@ class DialogContentTest {
     }
 
     @Test
+    void dialogReplace_headerChildAsReplacement_detachesEmptyWrapper() {
+        var headerChild = new Div();
+        dialog.getHeader().add(headerChild);
+        var content = new Div();
+        dialog.add(content);
+
+        dialog.replace(content, headerChild);
+
+        Assertions.assertEquals(List.of(headerChild),
+                dialog.getChildren().toList());
+        Assertions.assertEquals(0, wrapperCount("header-content"));
+    }
+
+    @Test
     void getContent_bindChildren_throwsUnsupported() {
         Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> dialog.getContent().bindChildren(null, null));

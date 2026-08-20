@@ -572,7 +572,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param component
      *            the component to add
      * @since 1.1
+     * @deprecated use {@code addComponentAtIndex} on {@link #getContent()}
+     *             instead
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     @Override
     public void addComponentAtIndex(int index, Component component) {
         getContent().addComponentAtIndex(index, component);
@@ -601,6 +604,53 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void removeAll() {
         getContent().removeAll();
+    }
+
+    /**
+     * @deprecated use {@code addComponentAsFirst} on {@link #getContent()}
+     *             instead
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
+    @Override
+    public void addComponentAsFirst(Component component) {
+        getContent().addComponentAsFirst(component);
+    }
+
+    /**
+     * @deprecated use {@code replace} on {@link #getContent()} instead
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        getContent().replace(oldComponent, newComponent);
+    }
+
+    /**
+     * @deprecated use {@code indexOf} on {@link #getContent()} instead
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
+    @Override
+    public int indexOf(Component component) {
+        return getContent().indexOf(component);
+    }
+
+    /**
+     * @deprecated use {@code getComponentCount} on {@link #getContent()}
+     *             instead
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
+    @Override
+    public int getComponentCount() {
+        return getContent().getComponentCount();
+    }
+
+    /**
+     * @deprecated use {@code getComponentAt} on {@link #getContent()} instead
+     */
+    @Deprecated(since = "25.3", forRemoval = true)
+    @Override
+    public Component getComponentAt(int index) {
+        return getContent().getComponentAt(index);
     }
 
     /**
@@ -1512,7 +1562,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *             always thrown, as Dialog does not support binding children
      *             directly
      * @since 25.1
+     * @deprecated This method is not supported and will throw an exception when
+     *             called
      */
+    @Deprecated
     @Override
     public <T, S extends Signal<T>> void bindChildren(Signal<List<S>> list,
             SerializableFunction<S, Component> childFactory) {
