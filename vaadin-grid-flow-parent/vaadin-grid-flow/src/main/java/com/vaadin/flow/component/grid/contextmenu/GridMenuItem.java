@@ -47,7 +47,7 @@ public class GridMenuItem<T> extends
      */
     public GridMenuItem(GridContextMenu<T> contextMenu,
             SerializableRunnable contentReset) {
-        super(contextMenu);
+        super(contextMenu, contentReset);
         Objects.requireNonNull(contextMenu);
         Objects.requireNonNull(contentReset);
         this.contentReset = contentReset;
