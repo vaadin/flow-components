@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -102,6 +103,25 @@ public class ComboBoxFocusSelectedItemIT extends AbstractComboBoxIT {
     @Test
     public void lazyToggleOff_open_doesNotScroll() {
         openAndAssertContains("lazy-toggle-off", "Item 0");
+    }
+
+    @Test
+    public void clientFilter_filterActive_focusOut_valueUnchanged() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("client-filter");
+        setFilterValue(combo, "B");
+        assertLoadingStateResolved(combo);
+
+        // Closing without selecting commits the focused item
+        combo.sendKeys(Keys.TAB);
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("Banana 5", combo.getSelectedText());
+        Assert.assertEquals("Banana 5",
+                $("span").id("client-filter-value").getText());
+    }
+
+    private void setFilterValue(ComboBoxElement combo, String filter) {
+        combo.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), filter);
     }
 
     private ComboBoxElement openAndAssertContains(String id, String label) {
