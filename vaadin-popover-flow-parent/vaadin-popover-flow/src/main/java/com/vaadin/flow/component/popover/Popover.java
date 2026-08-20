@@ -747,12 +747,12 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
         targetDetachRegistration = target.addDetachListener(e -> {
             removeFromUiIfAutoAdded();
         });
+        target.getUI().ifPresent(this::onTargetAttach);
     }
 
     private void removeFromUiIfAutoAdded() {
