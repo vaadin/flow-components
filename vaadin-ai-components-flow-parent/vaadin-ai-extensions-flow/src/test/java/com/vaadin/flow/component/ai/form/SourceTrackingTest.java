@@ -851,6 +851,32 @@ class SourceTrackingTest {
         }
 
         @Test
+        void sameValueRewriteWithNewLevelUpdatesMarkerConfidence() {
+            // Rewriting the value the field already had fires no change event
+            // and never re-marks, so the kept marker's indicator can only be
+            // updated by the write itself — a newly reported level must
+            // replace the one shown.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "low",
+                     "extracts": [{"text": "re-read"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("low",
+                    markerOn(field).getProperty("confidence"),
+                    "The kept marker must show the newly reported level");
+        }
+
+        @Test
         void sameValueRewriteWithoutLevelClearsMarkerConfidence() {
             // Rewriting the value the field already had fires no change event
             // and never re-marks, but it does replace the source — the kept
