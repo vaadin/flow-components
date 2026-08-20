@@ -936,12 +936,12 @@ public class FormAIController implements AIController {
 
     /**
      * Sets the texts shown by the AI field marker — the "AI" badge, its
-     * tooltip, and the popover with the revert control — replacing the built-in
-     * English defaults. The texts are applied to every marker the controller
-     * puts on a field, so set them before the first turn to localize them all.
-     * A marker already on a field keeps its texts until the controller marks
-     * that field again. Texts left {@code null} fall back to the built-in
-     * defaults.
+     * tooltip, the popover with the revert control, and the confidence
+     * indicator — replacing the built-in English defaults. The texts are
+     * applied to every marker the controller puts on a field, so set them
+     * before the first turn to localize them all. A marker already on a field
+     * keeps its texts until the controller marks that field again. Texts left
+     * {@code null} fall back to the built-in defaults.
      *
      * @param i18n
      *            the texts to use, or {@code null} to restore the built-in
