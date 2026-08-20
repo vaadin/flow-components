@@ -20,7 +20,6 @@
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>com.vaadin.flow.component.ai.extensions</osgi.export.package>
         <osgi.export.package.additional>com.vaadin.flow.component.ai.chart,com.vaadin.flow.component.ai.form,com.vaadin.flow.component.ai.grid</osgi.export.package.additional>
-        <cvdlName>vaadin-ai-extensions</cvdlName>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
