@@ -2930,14 +2930,15 @@ class AIOrchestratorTest {
     @Test
     void builder_claimsAllResources_toPreventSharing() throws Exception {
         // Builder with-methods that do NOT configure a shareable resource —
-        // value types, listeners, tools, and restored conversation state. Any
-        // other with-method is treated as configuring a resource that build()
-        // must claim. If you add a new resource with-method (component,
-        // controller, ...), do not add it here — ensure build() claims it.
+        // value types, listeners and other callbacks, tools, and restored
+        // conversation state. Any other with-method is treated as configuring
+        // a resource that build() must claim. If you add a new resource
+        // with-method (component, controller, ...), do not add it here —
+        // ensure build() claims it.
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
-                "withAssistantName", "withRequestListener",
-                "withAttachmentClickListener", "withResponseListener",
-                "withHistory", "withMetadata");
+                "withAssistantName", "withRequestInterceptor",
+                "withRequestListener", "withAttachmentClickListener",
+                "withResponseListener", "withHistory", "withMetadata");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);

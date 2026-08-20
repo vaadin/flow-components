@@ -25,11 +25,6 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-avatar")
 public class AvatarElement extends TestBenchElement {
 
-    @Override
-    public boolean isEnabled() {
-        return !getPropertyBoolean("disabled");
-    }
-
     /**
      * Gets the title displayed as a tooltip.
      *

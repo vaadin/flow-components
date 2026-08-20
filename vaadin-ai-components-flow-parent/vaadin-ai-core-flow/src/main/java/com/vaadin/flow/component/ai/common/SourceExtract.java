@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.common;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * One snippet the LLM says it read to produce a value. The text is what the
@@ -38,4 +39,19 @@ import java.io.Serializable;
  */
 public record SourceExtract(String text,
         SourceLocation location) implements Serializable {
+
+    /**
+     * Creates a new source extract.
+     *
+     * @param text
+     *            the snippet as the model reports it, not {@code null}
+     * @param location
+     *            where the snippet sits inside the source document, or
+     *            {@code null} when the source has no position to point at
+     * @throws NullPointerException
+     *             if {@code text} is {@code null}
+     */
+    public SourceExtract {
+        Objects.requireNonNull(text, "Text must not be null");
+    }
 }

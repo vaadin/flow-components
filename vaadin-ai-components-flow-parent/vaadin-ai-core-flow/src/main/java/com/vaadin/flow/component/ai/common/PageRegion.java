@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.common;
 
+import java.util.Objects;
+
 /**
  * A rectangular area on a page of the source document. The meaning of the
  * rectangle is fixed — always fractions of the page as the user sees it — but
@@ -30,4 +32,23 @@ package com.vaadin.flow.component.ai.common;
  * @since 25.3
  */
 public record PageRegion(int page, Rect rect) implements SourceLocation {
+
+    /**
+     * Creates a new page region.
+     *
+     * @param page
+     *            the 1-based page number
+     * @param rect
+     *            the area on the page, not {@code null}
+     * @throws NullPointerException
+     *             if {@code rect} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code page} is less than {@code 1}
+     */
+    public PageRegion {
+        Objects.requireNonNull(rect, "Rect must not be null");
+        if (page < 1) {
+            throw new IllegalArgumentException("Page must be 1 or greater");
+        }
+    }
 }
