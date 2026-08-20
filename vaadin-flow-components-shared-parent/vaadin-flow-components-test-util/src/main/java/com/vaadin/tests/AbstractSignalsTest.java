@@ -92,25 +92,23 @@ public class AbstractSignalsTest {
      *            the setter for the bound property (e.g.
      *            {@code DatePicker::setMin}), used to verify that imperative
      *            updates are rejected while a binding is active
-     * @param signalFactory
-     *            supplier that creates a new signal with an initial value for
-     *            each test
+     * @param initialValue
+     *            the initial value of the signal created for each test
      * @param updatedValue
-     *            a value different from the signal's initial value, used to
-     *            test synchronization behavior
+     *            a value different from {@code initialValue}, used to test
+     *            synchronization behavior
      * @return a stream of dynamic tests to be returned from a
      *         {@link org.junit.jupiter.api.TestFactory} method
      */
     protected <C extends Component, T> Stream<DynamicTest> generateBindingTests(
             Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
-            Function<C, T> getter, BiConsumer<C, T> setter,
-            Supplier<ValueSignal<T>> signalFactory, T updatedValue) {
+            Function<C, T> getter, BiConsumer<C, T> setter, T initialValue,
+            T updatedValue) {
 
         var synchronizesWhileAttached = createTest("synchronizesWhileAttached",
                 () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
-                    var initialValue = signal.peek();
+                    var signal = new ValueSignal<>(initialValue);
 
                     UI.getCurrent().add(component);
 
@@ -124,8 +122,7 @@ public class AbstractSignalsTest {
         var appliesInitialValueWhileDetached = createTest(
                 "appliesInitialValueWhileDetached", () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
-                    var initialValue = signal.peek();
+                    var signal = new ValueSignal<>(initialValue);
 
                     bind.accept(component, signal);
 
@@ -135,8 +132,7 @@ public class AbstractSignalsTest {
         var doesNotSynchronizeWhileDetached = createTest(
                 "doesNotSynchronizeWhileDetached", () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
-                    T initialValue = signal.peek();
+                    var signal = new ValueSignal<>(initialValue);
 
                     bind.accept(component, signal);
                     signal.set(updatedValue);
@@ -147,7 +143,7 @@ public class AbstractSignalsTest {
         var resynchronizesAfterAttach = createTest("resynchronizesAfterAttach",
                 () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
 
                     bind.accept(component, signal);
                     signal.set(updatedValue);
@@ -160,8 +156,9 @@ public class AbstractSignalsTest {
         var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
                 () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
 
+                    UI.getCurrent().add(component);
                     bind.accept(component, signal);
 
                     assertThrows(BindingActiveException.class,
@@ -171,12 +168,14 @@ public class AbstractSignalsTest {
         var rebindWhileBoundThrows = createTest("rebindWhileBoundThrows",
                 () -> {
                     var component = componentFactory.get();
-                    var signal = signalFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
 
+                    UI.getCurrent().add(component);
                     bind.accept(component, signal);
 
                     assertThrows(BindingActiveException.class,
-                            () -> bind.accept(component, signalFactory.get()));
+                            () -> bind.accept(component,
+                                    new ValueSignal<>(initialValue)));
                 });
 
         var bindNullSignalThrows = createTest("bindNullSignalThrows", () -> {
@@ -200,11 +199,11 @@ public class AbstractSignalsTest {
      */
     private DynamicTest createTest(String name, Executable test) {
         return dynamicTest(name, () -> {
-            ui.beforeEach(null);
+            ui.setUp();
             try {
                 test.execute();
             } finally {
-                ui.afterEach(null);
+                ui.tearDown();
             }
         });
     }

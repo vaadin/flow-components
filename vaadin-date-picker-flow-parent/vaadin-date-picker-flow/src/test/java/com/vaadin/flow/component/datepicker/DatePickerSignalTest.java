@@ -21,33 +21,31 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class DatePickerSignalTest extends AbstractSignalsTest {
 
+    private static final LocalDate INITIAL_VALUE = LocalDate.of(2023, 1, 1);
+    private static final LocalDate UPDATED_VALUE = LocalDate.of(2023, 1, 2);
+
     @TestFactory
     Stream<DynamicTest> bindMin() {
         return generateBindingTests(DatePicker::new, DatePicker::bindMin,
-                DatePicker::getMin, DatePicker::setMin,
-                () -> new ValueSignal<>(LocalDate.of(2023, 1, 1)),
-                LocalDate.of(2023, 1, 2));
+                DatePicker::getMin, DatePicker::setMin, INITIAL_VALUE,
+                UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
         return generateBindingTests(DatePicker::new, DatePicker::bindMax,
-                DatePicker::getMax, DatePicker::setMax,
-                () -> new ValueSignal<>(LocalDate.of(2023, 1, 1)),
-                LocalDate.of(2023, 1, 2));
+                DatePicker::getMax, DatePicker::setMax, INITIAL_VALUE,
+                UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindInitialPosition() {
         return generateBindingTests(DatePicker::new,
                 DatePicker::bindInitialPosition, DatePicker::getInitialPosition,
-                DatePicker::setInitialPosition,
-                () -> new ValueSignal<>(LocalDate.of(2023, 1, 1)),
-                LocalDate.of(2023, 1, 2));
+                DatePicker::setInitialPosition, INITIAL_VALUE, UPDATED_VALUE);
     }
 }
