@@ -22,7 +22,8 @@ import tools.jackson.databind.node.ObjectNode;
  * the {@code vaadin-ai-field-marker} web component, which annotates a field as
  * AI-filled and offers a popover to review and revert the value. It also
  * toggles the field's "AI is working" shimmer ({@link #setWorking}) shown while
- * a fill is in progress. The annotations on this class load the web component
+ * a fill is in progress, and applies the application-supplied popover content
+ * ({@link #setContent}). The annotations on this class load the web component
  * on the client.
  * <p>
  * The web component manages the annotation through its own element lifecycle:
@@ -76,6 +77,64 @@ final class FormFieldMarker {
      */
     static void remove(Element field) {
         find(field).ifPresent(Element::removeFromParent);
+    }
+
+    /**
+     * Replaces the custom content shown in the popover of the field's marker.
+     * The content element travels as a virtual child of the marker element — it
+     * has no place among the marker's DOM children, which the web component's
+     * own rendering manages — and is handed to the web component through its
+     * {@code content} property, which renders it into the popover. A
+     * {@code null} content restores the popover's default parts. A no-op when
+     * the field has no marker.
+     * <p>
+     * This class keeps no state, so the caller tracks the previously applied
+     * content element and passes it back in to be released. The new content
+     * must not have a parent — {@link Element#appendVirtualChild} rejects a
+     * parented element.
+     *
+     * @param field
+     *            the field whose marker gets the content, not {@code null}
+     * @param previousContent
+     *            the content element applied before, or {@code null} when there
+     *            was none
+     * @param content
+     *            the content element to apply, or {@code null} to clear
+     */
+    static void setContent(Element field, Element previousContent,
+            Element content) {
+        find(field).ifPresent(marker -> {
+            if (previousContent != null
+                    && marker.equals(previousContent.getParent())) {
+                marker.removeVirtualChild(previousContent);
+            }
+            if (content != null) {
+                marker.appendVirtualChild(content);
+            }
+            assignContent(marker, content);
+        });
+    }
+
+    /**
+     * Re-asserts the {@code content} property on the field's marker after the
+     * field was detached and re-attached. Flow re-creates the marker element
+     * and the content element it carries verbatim, but the property assignment
+     * is a one-off script, so it must run again for the new client elements. A
+     * no-op when the field has no marker.
+     */
+    static void reassignContent(Element field, Element content) {
+        find(field).ifPresent(marker -> assignContent(marker, content));
+    }
+
+    /**
+     * Hands {@code content} to the web component, which renders it into the
+     * popover between the message and the revert control. Node-valued
+     * properties have no place in Flow's state tree, so the assignment is a
+     * script and does not survive a re-attach on its own — see
+     * {@link #reassignContent(Element, Element)}.
+     */
+    private static void assignContent(Element marker, Element content) {
+        marker.executeJs("this.content = $0;", content);
     }
 
     /**

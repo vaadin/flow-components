@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.tests;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -31,7 +32,8 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The controller is configured with {@link FieldMarkerI18n} texts that differ
  * from the web component's defaults, so a test can tell the texts sent by the
- * server apart from the built-in ones.
+ * server apart from the built-in ones, and with a field-marker content provider
+ * that adds a recognizable node to the name field's popover only.
  *
  * @author Vaadin Ltd
  */
@@ -42,6 +44,9 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String REVERT = "Undo this value";
     static final String BADGE_LABEL = "Value provided by AI";
     static final String BADGE_TOOLTIP = "This value came from the AI.";
+
+    static final String CONTENT_ID = "marker-content";
+    static final String CONTENT_TEXT = "Source: invoice.pdf";
 
     static final String NAME_VALUE = "Ada Lovelace";
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
@@ -78,6 +83,14 @@ public class AIFieldMarkerPage extends VerticalLayout {
         controller.setFieldMarkerI18n(new FieldMarkerI18n().setMessage(MESSAGE)
                 .setRevert(REVERT).setBadgeLabel(BADGE_LABEL)
                 .setBadgeTooltip(BADGE_TOOLTIP));
+        controller.setFieldMarkerContentProvider(change -> {
+            if (change.getField() != name) {
+                return null;
+            }
+            var content = new Span(CONTENT_TEXT);
+            content.setId(CONTENT_ID);
+            return content;
+        });
 
         var startTurn = new NativeButton("Start turn",
                 event -> controller.onRequest());
