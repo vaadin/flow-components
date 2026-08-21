@@ -47,7 +47,6 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -1027,9 +1026,8 @@ public class FormAIController implements AIController {
      * The controller owns the returned component's lifecycle: it stays in the
      * popover for as long as the mark it belongs to, is replaced when a later
      * turn fills the field again, and goes away with the mark when the user
-     * edits or reverts the field. Return a fresh component rather than one
-     * attached elsewhere — a component that has a parent is moved into the
-     * marker.
+     * edits or reverts the field. Return a fresh component for every call — a
+     * component that already has a parent is rejected.
      *
      * @param fieldMarkerContentProvider
      *            the provider to use, or {@code null} to show no extra content
@@ -1139,7 +1137,8 @@ public class FormAIController implements AIController {
             return;
         }
         FormFieldMarker.setContent(((Component) field).getElement(),
-                elementOf(mark.content()), elementOf(content));
+                mark.content() == null ? null : mark.content().getElement(),
+                content == null ? null : content.getElement());
         ComponentUtil.setData((Component) field, FIELD_MARK_KEY, new FieldMark(
                 mark.registration(), mark.revertValue(), content));
     }
@@ -1180,14 +1179,6 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * @return the component's element, or {@code null} for a {@code null}
-     *         component
-     */
-    private static Element elementOf(Component component) {
-        return component == null ? null : component.getElement();
-    }
-
-    /**
      * Clears the field's marker along with the state {@link #markField}
      * recorded for it. A no-op when the field is not marked.
      *
@@ -1202,18 +1193,20 @@ public class FormAIController implements AIController {
         if (mark != null) {
             mark.registration().remove();
             ComponentUtil.setData(component, FIELD_MARK_KEY, null);
+            if (mark.content() != null) {
+                // Release the content with the mark: a marker retained for
+                // the working state must not carry stale content, and the
+                // component must be parentless for the provider to hand out
+                // again.
+                FormFieldMarker.setContent(element, mark.content().getElement(),
+                        null);
+            }
         }
         // A field in the "AI is working" state still needs its marker to carry
         // the shimmer; the badge is hidden for the duration anyway, and
         // stopWorking() drops the marker at turn end.
         if (!FormFieldMarker.isWorking(element)) {
             FormFieldMarker.remove(element);
-        } else if (mark != null && mark.content() != null) {
-            // The retained marker no longer has a mark tracking its content,
-            // so release the content here — otherwise it would linger as a
-            // stale virtual child when a re-mark reuses the marker.
-            FormFieldMarker.setContent(element, mark.content().getElement(),
-                    null);
         }
     }
 

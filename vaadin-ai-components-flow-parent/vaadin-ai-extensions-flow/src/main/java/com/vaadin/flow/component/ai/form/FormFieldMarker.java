@@ -89,9 +89,9 @@ final class FormFieldMarker {
      * the field has no marker.
      * <p>
      * This class keeps no state, so the caller tracks the previously applied
-     * content element and passes it back in to be released. The new content is
-     * detached from any parent it still has — a previous mark's marker, or a
-     * spot in the application's layout — so it can always be applied.
+     * content element and passes it back in to be released. The new content
+     * must not have a parent — {@link Element#appendVirtualChild} rejects a
+     * parented element.
      *
      * @param field
      *            the field whose marker gets the content, not {@code null}
@@ -109,7 +109,6 @@ final class FormFieldMarker {
                 marker.removeVirtualChild(previousContent);
             }
             if (content != null) {
-                detachFromParent(content);
                 marker.appendVirtualChild(content);
             }
             assignContent(marker, content);
@@ -136,21 +135,6 @@ final class FormFieldMarker {
      */
     private static void assignContent(Element marker, Element content) {
         marker.executeJs("this.content = $0;", content);
-    }
-
-    /**
-     * Detaches {@code content} from its current parent, if any, so it can be
-     * appended as a virtual child — which requires a parentless element.
-     */
-    private static void detachFromParent(Element content) {
-        if (content.getParentNode() == null) {
-            return;
-        }
-        if (content.isVirtualChild()) {
-            content.getParentNode().removeVirtualChild(content);
-        } else {
-            content.removeFromParent();
-        }
     }
 
     /**
