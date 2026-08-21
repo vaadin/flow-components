@@ -15,10 +15,13 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
@@ -60,5 +63,81 @@ class MenuItemSignalTest extends AbstractSignalsTest {
     @Test
     void bindEnabled_disableOnClickNotActive_doesNotThrow() {
         item.bindEnabled(new ValueSignal<>(true));
+    }
+
+    @Test
+    void bindVisible_hiddenParentItem_signalAlreadyTrue_menuContentGenerated() {
+        item.getSubMenu().addItem("sub item");
+        item.setVisible(false);
+        flushPendingInvocations();
+
+        item.bindVisible(new ValueSignal<>(true));
+
+        Assertions.assertEquals(1, getGenerateItemsInvocations().size());
+    }
+
+    @Test
+    void bindVisible_visibleParentItem_signalAlreadyTrue_menuContentGenerated() {
+        // The binding can not tell this case apart from the one above, where
+        // regenerating is required, so it regenerates here as well
+        item.getSubMenu().addItem("sub item");
+        flushPendingInvocations();
+
+        item.bindVisible(new ValueSignal<>(true));
+
+        Assertions.assertEquals(1, getGenerateItemsInvocations().size());
+    }
+
+    @Test
+    void bindVisible_hiddenParentItem_signalTurnsTrue_menuContentGenerated() {
+        item.getSubMenu().addItem("sub item");
+        var visibleSignal = new ValueSignal<>(false);
+        item.bindVisible(visibleSignal);
+        flushPendingInvocations();
+
+        visibleSignal.set(true);
+
+        Assertions.assertEquals(1, getGenerateItemsInvocations().size());
+    }
+
+    @Test
+    void bindVisible_hiddenLeafItem_signalTurnsTrue_menuContentNotGenerated() {
+        var visibleSignal = new ValueSignal<>(false);
+        item.bindVisible(visibleSignal);
+        flushPendingInvocations();
+
+        visibleSignal.set(true);
+
+        Assertions.assertEquals(0, getGenerateItemsInvocations().size());
+    }
+
+    @Test
+    void bindVisible_visibleParentItem_signalTurnsFalse_menuContentNotGenerated() {
+        item.getSubMenu().addItem("sub item");
+        var visibleSignal = new ValueSignal<>(true);
+        item.bindVisible(visibleSignal);
+        // Discards the regeneration from applying the binding, which is
+        // asserted by bindVisible_visibleParentItem_signalAlreadyTrue_*
+        flushPendingInvocations();
+
+        visibleSignal.set(false);
+
+        Assertions.assertEquals(0, getGenerateItemsInvocations().size());
+    }
+
+    private List<PendingJavaScriptInvocation> getGenerateItemsInvocations() {
+        return getPendingInvocations()
+                .stream().filter(invocation -> invocation.getInvocation()
+                        .getExpression().contains("$connector.generateItems"))
+                .toList();
+    }
+
+    private void flushPendingInvocations() {
+        getPendingInvocations();
+    }
+
+    private List<PendingJavaScriptInvocation> getPendingInvocations() {
+        ui.fakeClientCommunication();
+        return ui.dumpPendingJavaScriptInvocations();
     }
 }
