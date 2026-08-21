@@ -68,7 +68,7 @@ When adding custom logic to handle client-side values (e.g. presentation-to-mode
 
 Pair `@Deprecated` annotations with a matching `@deprecated` Javadoc tag. The annotation must carry `since` in major.minor form (e.g. "25.0", not "25.0.0"). The version can be determined from the project version in the root POM.
 
-When deprecating API, ensure there is a concrete replacement API in place and cite it from the `@deprecated` tag via `{@link ...}`. There are two exceptions: when an API turns out to be broken, in which case the tag should mention that the API is not supported; and when no replacement is planned, in which case the tag should explicitly state that.
+When deprecating API, ensure there is a concrete replacement API in place and cite it from the `@deprecated` tag via `{@link ...}`. The exception is when an API turns out to be broken, in which case the tag should mention that the API is not supported.
 
 Deprecations must not change the member's behavior and test coverage for the deprecated member must be preserved.
 
