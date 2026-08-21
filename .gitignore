@@ -32,6 +32,7 @@ node_modules
 !/package.json
 !/package-lock.json
 pnpm*
+.pnpm-store
 .npmrc
 error-screenshots
 
