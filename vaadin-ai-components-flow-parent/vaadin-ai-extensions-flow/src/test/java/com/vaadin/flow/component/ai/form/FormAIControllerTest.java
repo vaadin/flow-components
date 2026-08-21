@@ -2982,8 +2982,8 @@ class FormAIControllerTest {
             field.setValue("user edit");
 
             Assertions.assertEquals(List.of(), markersOn(field));
-            Assertions.assertTrue(content.getUI().isEmpty(),
-                    "The content must be detached along with the marker");
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The content must be released from the discarded marker");
         }
 
         @Test
@@ -3002,8 +3002,8 @@ class FormAIControllerTest {
             fireRevert(field);
 
             Assertions.assertEquals(List.of(), markersOn(field));
-            Assertions.assertTrue(content.getUI().isEmpty(),
-                    "The content must be detached along with the marker");
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The content must be released from the discarded marker");
         }
 
         @Test
