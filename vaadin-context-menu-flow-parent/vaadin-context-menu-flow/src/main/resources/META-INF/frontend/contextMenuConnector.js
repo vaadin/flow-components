@@ -115,10 +115,28 @@ function setTheme(component, theme) {
   }
 }
 
+/**
+ * Sets the tooltip for a context menu item.
+ *
+ * This method is supposed to be called when the context menu item is closed,
+ * so there is no need for triggering a re-render eagarly.
+ *
+ * @param {HTMLElement} component
+ * @param {string | undefined | null} tooltip
+ * @param {string | undefined | null} tooltipPosition
+ */
+function setTooltip(component, tooltip, tooltipPosition) {
+  if (component._item) {
+    component._item.tooltip = tooltip;
+    component._item.tooltipPosition = tooltipPosition;
+  }
+}
+
 window.Vaadin.Flow.contextMenuConnector = {
   initLazy,
   generateItemsTree,
   setChecked,
   setKeepOpen,
-  setTheme
+  setTheme,
+  setTooltip
 };
