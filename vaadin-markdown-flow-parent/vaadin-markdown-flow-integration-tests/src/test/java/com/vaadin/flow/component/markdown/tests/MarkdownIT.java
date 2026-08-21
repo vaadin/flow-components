@@ -17,6 +17,7 @@ package com.vaadin.flow.component.markdown.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.markdown.testbench.MarkdownElement;
@@ -43,6 +44,8 @@ public class MarkdownIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore("Enable once @vaadin/markdown is updated to a version that has the "
+            + "lineBreaks property: https://github.com/vaadin/web-components/pull/12459")
     public void enableLineBreaks_softBreakRendered() {
         var lineBreaksMarkdown = $(MarkdownElement.class)
                 .id("line-breaks-markdown");
