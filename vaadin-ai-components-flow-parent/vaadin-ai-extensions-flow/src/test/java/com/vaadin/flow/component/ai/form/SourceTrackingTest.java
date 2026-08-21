@@ -939,6 +939,31 @@ class SourceTrackingTest {
                             + "previous fill set on the reused marker");
         }
 
+        @Test
+        void cascadedValueClearsMarkerConfidence() {
+            // A value the application cascades into the field during a turn
+            // never goes through the AI's write path, so only the turn-end
+            // marking can sync the indicator: the earlier source is stale for
+            // the new value, and the reused marker must not keep describing
+            // the value the field no longer holds.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            field.setValue("cascaded");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A cascaded value must drop the level the previous fill "
+                            + "set on the reused marker");
+        }
+
         private static Element markerOn(HasValue<?, ?> field) {
             return ((Component) field).getElement().getChildren().filter(
                     child -> "vaadin-ai-field-marker".equals(child.getTag()))

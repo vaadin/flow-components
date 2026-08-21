@@ -1058,8 +1058,10 @@ public class FormAIController implements AIController {
                     Registration.combine(revert, valueChange), revertValue));
         }
         FormFieldMarker.add(element, fieldMarkerI18n);
-        // Applied on every mark so a refill without a source clears the
-        // indicator a previous fill set on the reused marker.
+        // Applied on every mark so a value the AI's write path never set —
+        // one cascaded into the field during the turn — drops the indicator
+        // the earlier fill left on the reused marker: its source describes a
+        // value the field no longer holds.
         FormFieldMarker.setConfidence(element, getFieldSource(field)
                 .map(ValueSource::confidence).orElse(null));
     }
