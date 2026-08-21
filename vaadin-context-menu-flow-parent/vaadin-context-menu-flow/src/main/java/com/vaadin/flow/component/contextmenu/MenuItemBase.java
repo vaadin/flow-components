@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.SignalBinding;
@@ -66,6 +67,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
             this);
 
     private final SerializableRunnable contentReset;
+
+    private PendingJavaScriptResult pendingTooltipUpdate;
 
     /**
      * Default constructor
@@ -381,6 +384,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         ensureTooltipElement();
         getElement().setProperty("tooltip", tooltipText);
         contentReset.run();
+        updateTooltip();
     }
 
     /**
@@ -399,6 +403,30 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         getElement().setProperty("tooltipPosition",
                 position != null ? position.getPosition() : null);
         contentReset.run();
+        updateTooltip();
+    }
+
+    /**
+     * Copies the tooltip into the generated items array. The connector reads
+     * the tooltip off the item element when it generates that array, and the
+     * web component then reads it from the array instead of from the element.
+     * Flow does not send property changes for invisible elements, so a tooltip
+     * set while the item is invisible would be missing from the array.
+     * <p>
+     * The call is made through the item element so that Flow holds it back for
+     * as long as the item is invisible, and runs it once the item is shown,
+     * which is when the array needs the value.
+     */
+    private void updateTooltip() {
+        if (pendingTooltipUpdate != null
+                && !pendingTooltipUpdate.isSentToBrowser()) {
+            pendingTooltipUpdate.cancelExecution();
+        }
+
+        pendingTooltipUpdate = getElement().executeJs(
+                "window.Vaadin.Flow.contextMenuConnector.setTooltip(this, $0, $1)",
+                getElement().getProperty("tooltip"),
+                getElement().getProperty("tooltipPosition"));
     }
 
     protected void ensureTooltipElement() {
