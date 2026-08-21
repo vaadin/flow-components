@@ -2901,6 +2901,28 @@ class FormAIControllerTest {
         }
 
         @Test
+        void markingWithoutProviderLogsNoWarning() {
+            // Having no provider is the default, not a failure — marking
+            // must not spam a warning per marked field.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            requireMarkerOn(field);
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(List.of(), warnings,
+                    "Marking without a provider must not log warnings");
+        }
+
+        @Test
         void userEditReleasesMarkerContent() {
             // The content goes away with the mark: once the user edits the
             // field, the marker and the content it carried are gone.
