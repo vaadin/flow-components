@@ -780,7 +780,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     private static String createEditColumnTemplate(CrudI18n crudI18n) {
-        return "<vaadin-crud-edit aria-label=\"" + crudI18n.getEditLabel()
+        String editLabel = crudI18n.getEditLabel();
+        if (editLabel == null) {
+            editLabel = "Edit item";
+        }
+        return "<vaadin-crud-edit aria-label=\"" + editLabel
                 + "\"></vaadin-crud-edit>";
     }
 
