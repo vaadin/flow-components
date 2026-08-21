@@ -79,6 +79,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     /**
      * Initializes a new AbstractLogin with a default localization.
      */
+    @SuppressWarnings("removal")
     public AbstractLogin() {
         this(LoginI18n.createDefault());
         getElement().setProperty("_preventAutoEnable", true);
@@ -265,7 +266,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * @param i18n
      *            the internationalized messages
-     * @see LoginI18n#createDefault()
      */
     public void setI18n(LoginI18n i18n) {
         BaseJsonNode jsonNode = i18n != null ? JacksonUtils.beanToJson(i18n)
@@ -328,6 +328,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *            may be null.
      * @since 24.4
      */
+    @SuppressWarnings("removal")
     public void showErrorMessage(String title, String message) {
         var loginI18n = getI18n();
         if (loginI18n == null) {

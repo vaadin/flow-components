@@ -125,6 +125,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #setEditor(CrudEditor)
      * @see #setBeanType(Class)
      */
+    @SuppressWarnings("removal")
     public Crud() {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
@@ -525,12 +526,12 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *
      * @param i18n
      *            the internationalized messages
-     * @see CrudI18n#createDefault()
      */
     public void setI18n(CrudI18n i18n) {
         setI18n(i18n, true);
     }
 
+    @SuppressWarnings("removal")
     private void setI18n(CrudI18n i18n, boolean fireEvent) {
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
         if (fireEvent) {
@@ -756,6 +757,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #removeEditColumn(Grid)
      * @see #hasEditColumn(Grid)
      */
+    @SuppressWarnings("removal")
     public static void addEditColumn(Grid<?> grid) {
         addEditColumn(grid, CrudI18n.createDefault());
     }
@@ -778,7 +780,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     private static String createEditColumnTemplate(CrudI18n crudI18n) {
-        return "<vaadin-crud-edit aria-label=\"" + crudI18n.getEditLabel()
+        String editLabel = crudI18n.getEditLabel();
+        if (editLabel == null) {
+            editLabel = "Edit item";
+        }
+        return "<vaadin-crud-edit aria-label=\"" + editLabel
                 + "\"></vaadin-crud-edit>";
     }
 
