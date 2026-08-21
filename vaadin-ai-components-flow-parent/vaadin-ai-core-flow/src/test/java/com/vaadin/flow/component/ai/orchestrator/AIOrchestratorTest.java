@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +61,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -2935,10 +2937,13 @@ class AIOrchestratorTest {
         // a resource that build() must claim. If you add a new resource
         // with-method (component, controller, ...), do not add it here —
         // ensure build() claims it.
+        // withBackgroundExecution is exempt because an executor is meant to
+        // be shareable across orchestrators (e.g. one application pool).
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
                 "withAssistantName", "withRequestInterceptor",
                 "withRequestListener", "withAttachmentClickListener",
-                "withResponseListener", "withHistory", "withMetadata");
+                "withResponseListener", "withHistory", "withMetadata",
+                "withBackgroundExecution");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);
@@ -3133,6 +3138,326 @@ class AIOrchestratorTest {
         var controller = Mockito.mock(AIController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
         return controller;
+    }
+
+    @Test
+    void defaultExecution_streamSubscribedOnCallerThread() {
+        var subscribeThread = new AtomicReference<Thread>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.defer(() -> {
+                    subscribeThread.set(Thread.currentThread());
+                    return Flux.just("Response");
+                }));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertSame(Thread.currentThread(), subscribeThread.get(),
+                "Without background execution the provider stream must be "
+                        + "subscribed on the calling thread");
+    }
+
+    @Test
+    void withBackgroundExecution_streamSubscribedOffCallerThread()
+            throws Exception {
+        var subscribeThread = new AtomicReference<Thread>();
+        var subscribed = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.defer(() -> {
+                    subscribeThread.set(Thread.currentThread());
+                    subscribed.countDown();
+                    return Flux.just("Response");
+                }));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                "Provider stream was never subscribed");
+        Assertions.assertNotSame(Thread.currentThread(), subscribeThread.get(),
+                "With background execution the provider stream must be "
+                        + "subscribed off the calling thread");
+    }
+
+    @Test
+    void withBackgroundExecution_customExecutor_turnRunsOnExecutorThread()
+            throws Exception {
+        var executor = java.util.concurrent.Executors.newSingleThreadExecutor(
+                runnable -> new Thread(runnable, "custom-turn-thread"));
+        try {
+            var subscribeThread = new AtomicReference<Thread>();
+            var subscribed = new CountDownLatch(1);
+            Mockito.when(mockProvider
+                    .stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                    .thenReturn(Flux.defer(() -> {
+                        subscribeThread.set(Thread.currentThread());
+                        subscribed.countDown();
+                        return Flux.just("Response");
+                    }));
+
+            var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                    .withBackgroundExecution(executor).build();
+            orchestrator.prompt("Hello");
+
+            Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                    "Provider stream was never subscribed");
+            Assertions.assertEquals("custom-turn-thread",
+                    subscribeThread.get().getName(),
+                    "The turn must run on the supplied executor");
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    void withBackgroundExecution_nullExecutor_throwsNullPointerException() {
+        var builder = AIOrchestrator.builder(mockProvider, null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> builder.withBackgroundExecution(null));
+    }
+
+    @Test
+    void withBackgroundExecution_responseListenerRunsOffCallerThread()
+            throws Exception {
+        var listenerThread = new AtomicReference<Thread>();
+        var listenerCalled = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().withResponseListener(event -> {
+                    listenerThread.set(Thread.currentThread());
+                    listenerCalled.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(listenerCalled.await(5, TimeUnit.SECONDS),
+                "Response listener was never called");
+        Assertions.assertNotSame(Thread.currentThread(), listenerThread.get(),
+                "With background execution the response listener must run "
+                        + "off the calling thread");
+    }
+
+    @Test
+    void withBackgroundExecution_completedTurn_allowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution()
+                .withResponseListener(event -> firstDone.countDown()).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never completed");
+
+        // The busy flag is released in the stream's doFinally, which runs
+        // just after the response listener on the background thread — poll
+        // until the next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = Mockito.mockingDetails(mockProvider).getInvocations()
+                    .stream().filter(invocation -> invocation.getMethod()
+                            .getName().equals("stream"))
+                    .count() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A completed background turn must release the busy flag "
+                        + "so the next prompt is processed");
+    }
+
+    @Test
+    void withBackgroundExecution_noPushNoPolling_logsDeliveryWarningOnce()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution()
+                .withResponseListener(event -> firstDone.countDown()).build();
+        orchestrator.prompt("Hello");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never completed");
+
+        // Ensure the second prompt is actually accepted (not dropped by the
+        // busy guard, which is released just after the listener) so the
+        // warn-once guard really runs a second time.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Hello again");
+            accepted = Mockito.mockingDetails(mockProvider).getInvocations()
+                    .stream().filter(invocation -> invocation.getMethod()
+                            .getName().equals("stream"))
+                    .count() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted, "Second prompt was never accepted");
+
+        var warnings = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .count();
+        Assertions.assertEquals(1, warnings,
+                "Expected exactly one delivery warning across two turns");
+    }
+
+    @Test
+    void withBackgroundExecution_manualPush_logsDeliveryWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.MANUAL);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().build();
+        orchestrator.prompt("Hello");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Manual push does not deliver the orchestrator's updates, "
+                        + "so the delivery warning is expected");
+    }
+
+    @Test
+    void withBackgroundExecution_pollingEnabled_noDeliveryWarning() {
+        ui.getUI().setPollInterval(500);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().build();
+        orchestrator.prompt("Hello");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .findFirst();
+        Assertions.assertTrue(warning.isEmpty(),
+                "Polling makes background updates reach the browser, so no "
+                        + "delivery warning is expected");
+    }
+
+    @Test
+    void withBackgroundExecution_pushEnabled_noDeliveryWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution().build();
+        orchestrator.prompt("Hello");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .findFirst();
+        Assertions.assertTrue(warning.isEmpty(),
+                "Push makes background updates reach the browser, so no "
+                        + "delivery warning is expected");
+    }
+
+    @Test
+    void withBackgroundExecution_streamError_allowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API Error")));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution()
+                .withResponseListener(event -> firstDone.countDown()).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never failed");
+
+        // The busy flag is released in the stream's doFinally, which runs
+        // just after the response listener on the background thread — poll
+        // until the next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = Mockito.mockingDetails(mockProvider).getInvocations()
+                    .stream().filter(invocation -> invocation.getMethod()
+                            .getName().equals("stream"))
+                    .count() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A failed background turn must release the busy flag so the "
+                        + "next prompt is processed");
+    }
+
+    @Test
+    void builder_backgroundExecutionAfterExecutor_discardsExecutor()
+            throws Exception {
+        var submissions = new AtomicInteger();
+        Executor executor = command -> {
+            submissions.incrementAndGet();
+            new Thread(command).start();
+        };
+        var subscribed = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.defer(() -> {
+                    subscribed.countDown();
+                    return Flux.just("Response");
+                }));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withBackgroundExecution(executor).withBackgroundExecution()
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(subscribed.await(5, TimeUnit.SECONDS),
+                "Provider stream was never subscribed");
+        Assertions.assertEquals(0, submissions.get(),
+                "The no-arg call must discard the executor in favor of the "
+                        + "built-in pool");
+        assertBuilderWarning("backgroundExecutor");
+    }
+
+    @Test
+    void defaultExecution_noPushNoPolling_noDeliveryWarning() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        orchestrator.prompt("Hello");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .findFirst();
+        Assertions.assertTrue(warning.isEmpty(),
+                "Synchronous execution must not log the delivery warning");
     }
 
     private AIOrchestrator orchestratorWith(AIController controller) {

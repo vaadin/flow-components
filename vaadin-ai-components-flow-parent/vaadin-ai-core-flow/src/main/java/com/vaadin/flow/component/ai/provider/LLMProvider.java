@@ -53,6 +53,13 @@ public interface LLMProvider {
      * become available from the LLM. The provider manages conversation history
      * internally, so each call to this method adds to the ongoing conversation
      * context.
+     * <p>
+     * Implementations may run blocking work at subscription time, as the
+     * built-in non-streaming providers do. The caller decides which thread
+     * subscribes — the orchestrator subscribes on the calling thread by default
+     * and on a background thread when background execution is enabled — so
+     * implementations must not assume a specific thread, such as the UI thread
+     * with Vaadin thread locals bound.
      *
      * @param request
      *            the LLM request containing user message, system prompt,
@@ -245,6 +252,14 @@ public interface LLMProvider {
          * <p>
          * Implementations should return a human-readable result string on
          * success. On failure, they may throw any runtime exception.
+         * </p>
+         * <p>
+         * May be invoked from a background thread — with a streaming provider,
+         * or when background execution is enabled on the orchestrator — where
+         * Vaadin thread locals such as {@code UI.getCurrent()} are not
+         * available. Wrap UI component access in {@code ui.access()}, or work
+         * on state captured in
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}.
          * </p>
          *
          * @param arguments
