@@ -153,6 +153,23 @@ class MarkdownTest {
         Assertions.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
+    @Test
+    void testLineBreaks() {
+        Assertions.assertFalse(markdown.isLineBreaks());
+        Assertions.assertFalse(
+                markdown.getElement().getProperty("lineBreaks", false));
+
+        markdown.setLineBreaks(true);
+        Assertions.assertTrue(markdown.isLineBreaks());
+        Assertions.assertTrue(
+                markdown.getElement().getProperty("lineBreaks", false));
+
+        markdown.setLineBreaks(false);
+        Assertions.assertFalse(markdown.isLineBreaks());
+        Assertions.assertFalse(
+                markdown.getElement().getProperty("lineBreaks", false));
+    }
+
     private void assertUpdateMarkdownCall(Component component, String content,
             boolean isAppend) {
         var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
