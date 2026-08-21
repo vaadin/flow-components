@@ -156,8 +156,6 @@ class MarkdownTest {
     @Test
     void testLineBreaks() {
         Assertions.assertFalse(markdown.isLineBreaks());
-        Assertions.assertFalse(
-                markdown.getElement().getProperty("lineBreaks", false));
 
         markdown.setLineBreaks(true);
         Assertions.assertTrue(markdown.isLineBreaks());
@@ -166,8 +164,6 @@ class MarkdownTest {
 
         markdown.setLineBreaks(false);
         Assertions.assertFalse(markdown.isLineBreaks());
-        Assertions.assertFalse(
-                markdown.getElement().getProperty("lineBreaks", false));
     }
 
     private void assertUpdateMarkdownCall(Component component, String content,

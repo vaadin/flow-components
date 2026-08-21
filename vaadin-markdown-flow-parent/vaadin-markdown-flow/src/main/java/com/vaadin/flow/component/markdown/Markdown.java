@@ -153,10 +153,11 @@ public class Markdown extends Component implements HasSize {
     /**
      * Binds the line breaks state to the given signal. While the binding is
      * active, calling {@link #setLineBreaks(boolean)} will throw a
-     * {@code BindingActiveException}.
+     * {@code BindingActiveException}. A {@code null} signal value is treated as
+     * {@code false}.
      *
      * @param lineBreaksSignal
-     *            the signal providing the line breaks state
+     *            the signal providing the line breaks state, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
@@ -164,6 +165,7 @@ public class Markdown extends Component implements HasSize {
      */
     public SignalBinding<Boolean> bindLineBreaks(
             Signal<Boolean> lineBreaksSignal) {
+        Objects.requireNonNull(lineBreaksSignal, "Signal cannot be null");
         return getElement().bindProperty("lineBreaks", lineBreaksSignal
                 .map(value -> value == null ? Boolean.FALSE : value), null);
     }

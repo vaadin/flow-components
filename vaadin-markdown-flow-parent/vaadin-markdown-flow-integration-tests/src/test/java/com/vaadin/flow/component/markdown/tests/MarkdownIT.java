@@ -38,6 +38,7 @@ public class MarkdownIT extends AbstractComponentIT {
     public void lineBreaksDisabledByDefault_softBreakNotRendered() {
         var lineBreaksMarkdown = $(MarkdownElement.class)
                 .id("line-breaks-markdown");
+        waitUntil(driver -> lineBreaksMarkdown.$("p").exists());
         Assert.assertEquals(0, lineBreaksMarkdown.$("br").all().size());
     }
 
