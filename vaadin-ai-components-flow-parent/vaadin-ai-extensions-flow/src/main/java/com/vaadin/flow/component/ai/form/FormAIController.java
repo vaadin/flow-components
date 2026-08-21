@@ -1027,7 +1027,8 @@ public class FormAIController implements AIController {
      * popover for as long as the mark it belongs to, is replaced when a later
      * turn fills the field again, and goes away with the mark when the user
      * edits or reverts the field. Return a fresh component for every call — a
-     * component that already has a parent is rejected.
+     * component that already has a parent is rejected: a warning is logged and
+     * the field is marked without extra content.
      *
      * @param fieldMarkerContentProvider
      *            the provider to use, or {@code null} to show no extra content
@@ -1128,6 +1129,14 @@ public class FormAIController implements AIController {
      * in between. Without a provider, and no earlier content to clear, this is
      * a no-op, so applications not using the feature see no client traffic from
      * it.
+     * <p>
+     * A component that already has a parent is rejected here, before anything
+     * is mutated, rather than left to {@code appendVirtualChild}'s own check:
+     * its exception would abort the marking of the remaining fields and silence
+     * the turn's change listeners. Logged like a throwing provider, so both
+     * failure modes surface the same way while the field still gets its mark.
+     * The check runs after the identity comparison, which covers the one
+     * legitimate parented case — the component this mark already carries.
      */
     private void applyMarkerContent(FieldValueChangeEvent change) {
         var field = change.getField();
@@ -1135,6 +1144,15 @@ public class FormAIController implements AIController {
         var content = createMarkerContent(change);
         if (mark.content() == content) {
             return;
+        }
+        if (content != null && content.getElement().getParentNode() != null) {
+            LOGGER.warn("Field-marker content provider returned a component "
+                    + "that already has a parent; the field is marked without "
+                    + "content. Return a fresh component for every call.");
+            if (mark.content() == null) {
+                return;
+            }
+            content = null;
         }
         FormFieldMarker.setContent(((Component) field).getElement(),
                 mark.content() == null ? null : mark.content().getElement(),

@@ -2901,6 +2901,49 @@ class FormAIControllerTest {
         }
 
         @Test
+        void attachedProviderContentMarksFieldWithoutContentAndTurnGoesOn() {
+            // A provider handing out a component that already sits somewhere
+            // must be rejected like a throwing provider: logged, the field
+            // marked without content — and above all the rest of the turn
+            // must go on, marking the remaining fields and firing the change
+            // events.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var first = new TestField();
+            var second = new TestField();
+            var form = new Div(first, second);
+            ui.add(form);
+            var attached = new Div();
+            ui.add(attached);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerContentProvider(
+                            change -> change.getField() == first ? attached
+                                    : null);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
+
+            controller.onRequest();
+            first.setValue("one");
+            second.setValue("two");
+            controller.onResponse(null);
+
+            var marker = requireMarkerOn(first);
+            requireMarkerOn(second);
+            Assertions.assertEquals(2, events.size(),
+                    "The change listeners must still fire for the whole turn");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(), marker),
+                    "The attached component must not be applied as content");
+            Assertions.assertEquals(ui.getElement(),
+                    attached.getElement().getParent(),
+                    "The rejected component must be left where it was");
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(1, warnings.size(),
+                    "The rejected content must be logged; got: " + warnings);
+        }
+
+        @Test
         void markingWithoutProviderLogsNoWarning() {
             // Having no provider is the default, not a failure — marking
             // must not spam a warning per marked field.
