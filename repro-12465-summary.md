@@ -11,8 +11,8 @@
 - **Reproduced on:** flow-components @ `main` (25.3-SNAPSHOT), `25.2`, and `25.1` (platform 25.1.11 — the reported version)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot:** ![Select 2 overlay open, "Footer 1" of the dialog behind hidden under Dialog 2](https://raw.githubusercontent.com/vaadin/flow-components/6fe0fa0072c498650844174eb16474297d7d000a/repro-12465-before.png)
-- **Screenshot:** ![After clicking that same spot: the hidden "Footer 1" button fired and Dialog 1 was raised](https://raw.githubusercontent.com/vaadin/flow-components/6fe0fa0072c498650844174eb16474297d7d000a/repro-12465.png)
+- **Screenshot:** ![Select 2 overlay open, "Footer 1" of the dialog behind hidden under Dialog 2](https://raw.githubusercontent.com/vaadin/flow-components/24016f1f3afc3435fa64f18e3aff259e498e0747/repro-12465-before.png)
+- **Screenshot:** ![After clicking that same spot: the hidden "Footer 1" button fired and Dialog 1 was raised](https://raw.githubusercontent.com/vaadin/flow-components/24016f1f3afc3435fa64f18e3aff259e498e0747/repro-12465.png)
 
 ## Observed behavior
 
