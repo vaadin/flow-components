@@ -72,7 +72,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.1
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
-@JsModule("./treeGridConnector.ts")
+@JsModule("./vaadin-grid/treeGridConnector.ts")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
     /**

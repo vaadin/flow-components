@@ -8,7 +8,7 @@ import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
 import type { GridSorterDefinition } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent, GridItemModel } from '@vaadin/grid/src/vaadin-grid-mixin.js';
 import type { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
-import type { GridConnector } from '../gridConnector.js';
+import type { GridConnector } from './gridConnector.js';
 
 export type { GridConnector };
 
