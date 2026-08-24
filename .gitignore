@@ -27,6 +27,7 @@ tsconfig.json
 !vaadin-date-picker-flow-parent/vaadin-date-picker-flow/tsconfig.json
 !vaadin-time-picker-flow-parent/vaadin-time-picker-flow/tsconfig.json
 !vaadin-menu-bar-flow-parent/vaadin-menu-bar-flow/tsconfig.json
+!vaadin-context-menu-flow-parent/vaadin-context-menu-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts
