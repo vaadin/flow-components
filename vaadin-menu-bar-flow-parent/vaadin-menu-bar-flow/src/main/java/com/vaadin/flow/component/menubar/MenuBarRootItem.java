@@ -116,8 +116,6 @@ class MenuBarRootItem extends MenuBarItem {
     }
 
     private void updateClassName() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.setClassName(this)");
         menuBar.updateButtons();
     }
 }

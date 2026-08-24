@@ -15,7 +15,7 @@
  */
 // Resolved from the folder Flow merges all jar frontend resources into
 import '../contextMenuConnector.js';
-import type { FlowMenuBar, FlowMenuBarItem, FlowMenuBarItemComponent } from './vaadin-menu-bar-types.js';
+import type { FlowMenuBar, FlowMenuBarItem } from './vaadin-menu-bar-types.js';
 
 /**
  * menubarConnector is a communication layer between MenuBar's flow component
@@ -29,8 +29,8 @@ export class MenuBarConnector {
   #generatedItems: FlowMenuBarItem[] = [];
 
   // Observe for hidden and disabled attributes in case they are changed by Flow.
-  // When a change occurs, the observer will re-generate items on top of the existing
-  // tree to sync the new attribute values with the corresponding properties in the items array.
+  // When a change occurs, the observer re-assigns the items to re-filter hidden
+  // items and re-render the buttons with the new attribute values.
   #observer = new MutationObserver((records) => {
     const hasChangedAttributes = records.some((entry) => {
       const oldValue = entry.oldValue;
@@ -53,7 +53,8 @@ export class MenuBarConnector {
    *
    * When the method is called without providing a node id,
    * the previously generated items tree will be used.
-   * That can be useful if you only want to sync the disabled and hidden properties of root items.
+   * That can be useful if you only want to re-filter hidden items
+   * and re-render the buttons.
    */
   generateItems(nodeId?: number): void {
     const menuBar = this.#menuBar;
@@ -76,13 +77,6 @@ export class MenuBarConnector {
     }
 
     this.#generatedItems.forEach((item) => {
-      // Propagate disabled state from items to parent buttons
-      item.disabled = item.component.disabled;
-
-      // Saving item to component because `_item` can be reassigned to a new value
-      // when the component goes to the overflow menu
-      item.component._rootItem = item;
-
       this.#observer.observe(item.component, {
         attributeFilter: ['hidden', 'disabled'],
         attributeOldValue: true
@@ -93,7 +87,7 @@ export class MenuBarConnector {
     // could cause the overflow button to be rendered without items.
     //
     // The items-prop needs to be set even when all items are visible
-    // to update the disabled state and re-render buttons.
+    // to re-render the buttons, which snapshot the item properties.
     menuBar.items = this.#generatedItems.filter((item) => !item.component.hidden);
   }
 }
@@ -103,12 +97,4 @@ function initLazy(menuBar: FlowMenuBar, appId: string): void {
   menuBar.$connector ??= new MenuBarConnector(menuBar, appId);
 }
 
-function setClassName(component: FlowMenuBarItemComponent): void {
-  const item = component._rootItem || component._item;
-
-  if (item) {
-    item.className = component.className;
-  }
-}
-
-window.Vaadin.Flow.menubarConnector = { initLazy, setClassName };
+window.Vaadin.Flow.menubarConnector = { initLazy };
