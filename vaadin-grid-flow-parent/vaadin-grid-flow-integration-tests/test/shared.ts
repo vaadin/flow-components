@@ -42,9 +42,9 @@ export type FlowGrid = {
   $connector: GridConnector;
   $server: GridServer;
 } & ConnectorFlowGrid & {
-  _flatSize: number;
-  _updateItem: (index: number, item: Item) => void;
-};
+    _flatSize: number;
+    _updateItem: (index: number, item: Item) => void;
+  };
 
 export type FlowGridSorter = GridSorter & {
   _order?: number | null;
@@ -63,10 +63,7 @@ export const GRID_CONNECTOR_ROOT_REQUEST_DELAY = 150;
 /**
  * Initializes the grid connector and the grid server mock.
  */
-export function init(
-  grid: FlowGrid,
-  connector: { initLazy(grid: ConnectorFlowGrid): void } = gridConnector
-): void {
+export function init(grid: FlowGrid, connector: { initLazy(grid: ConnectorFlowGrid): void } = gridConnector): void {
   grid.$server = {
     confirmUpdate: sinon.spy(),
     select: sinon.spy(),
@@ -83,7 +80,7 @@ export function init(
     setViewportRangeByIndexPath: sinon.spy(),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
-    updateContextMenuTargetItem: sinon.spy(),
+    updateContextMenuTargetItem: sinon.spy()
   };
 
   connector.initLazy(grid);
@@ -124,7 +121,7 @@ export function getFooterCellContent(column: GridColumn): HTMLElement {
  */
 export function getBodyRow(grid: Grid, rowIndex: number): HTMLElement | null {
   const row = [...grid.shadowRoot!.querySelectorAll('.row')].find((row) => (row as any).index === rowIndex);
-  return row as HTMLElement ?? null;
+  return (row as HTMLElement) ?? null;
 }
 
 /**
@@ -136,11 +133,13 @@ export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): 
     return null;
   }
 
-  const cellsInVisualOrder = [...row.children].sort((a, b) => {
-    const aOrder = parseInt(getComputedStyle(a).order) || 0;
-    const bOrder = parseInt(getComputedStyle(b).order) || 0;
-    return aOrder - bOrder;
-  }).map(cell => cell as HTMLElement);
+  const cellsInVisualOrder = [...row.children]
+    .sort((a, b) => {
+      const aOrder = parseInt(getComputedStyle(a).order) || 0;
+      const bOrder = parseInt(getComputedStyle(b).order) || 0;
+      return aOrder - bOrder;
+    })
+    .map((cell) => cell as HTMLElement);
 
   return cellsInVisualOrder[columnIndex];
 }

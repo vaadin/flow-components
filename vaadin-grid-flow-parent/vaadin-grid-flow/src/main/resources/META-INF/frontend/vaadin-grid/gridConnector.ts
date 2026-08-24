@@ -6,13 +6,7 @@ import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
 import type { GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
-import type {
-  FlowDataProviderController,
-  FlowGrid,
-  Item,
-  ItemRange,
-  SelectionMode
-} from './vaadin-grid-types.js';
+import type { FlowDataProviderController, FlowGrid, Item, ItemRange, SelectionMode } from './vaadin-grid-types.js';
 
 const requestDebouncerDelay = 150;
 
