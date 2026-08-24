@@ -84,6 +84,42 @@ class MenuItemTooltipTest {
     }
 
     @Test
+    void hiddenItemWithTooltip_menuContentRegenerated_show_tooltipSynced() {
+        MenuItem hiddenItem = contextMenu.addItem("hidden item");
+        hiddenItem.setTooltipText("Tooltip");
+        hiddenItem.setVisible(false);
+        flushPendingInvocations();
+
+        // Regenerating the content re-attaches every item element
+        contextMenu.addItem("another item");
+        flushPendingInvocations();
+
+        hiddenItem.setVisible(true);
+
+        List<PendingJavaScriptInvocation> invocations = getSetTooltipInvocations();
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertEquals("Tooltip", getParameter(invocations.get(0), 0));
+    }
+
+    @Test
+    void hiddenItemWithTooltip_menuDetachedAndAttached_show_tooltipSynced() {
+        MenuItem hiddenItem = contextMenu.addItem("hidden item");
+        hiddenItem.setTooltipText("Tooltip");
+        hiddenItem.setVisible(false);
+        flushPendingInvocations();
+
+        ui.remove(contextMenu);
+        ui.add(contextMenu);
+        flushPendingInvocations();
+
+        hiddenItem.setVisible(true);
+
+        List<PendingJavaScriptInvocation> invocations = getSetTooltipInvocations();
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertEquals("Tooltip", getParameter(invocations.get(0), 0));
+    }
+
+    @Test
     void setTooltipTextTwice_onlyLatestSynced() {
         flushPendingInvocations();
 

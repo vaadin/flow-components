@@ -98,7 +98,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
                 setChecked(!isChecked());
             }
         });
-
+        addAttachListener(event -> updateTooltip());
     }
 
     /**
@@ -415,9 +415,16 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * <p>
      * The call is made through the item element so that Flow holds it back for
      * as long as the item is invisible, and runs it once the item is shown,
-     * which is when the array needs the value.
+     * which is when the array needs the value. A held back call is dropped when
+     * the item element is detached, which generating the content does to every
+     * item, so this also runs from the attach handler.
      */
     private void updateTooltip() {
+        if (!getElement().hasProperty("tooltip")
+                && !getElement().hasProperty("tooltipPosition")) {
+            return;
+        }
+
         if (pendingTooltipUpdate != null
                 && !pendingTooltipUpdate.isSentToBrowser()) {
             pendingTooltipUpdate.cancelExecution();
