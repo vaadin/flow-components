@@ -51,7 +51,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @since 1.0
  */
 @Tag("vaadin-menu-bar")
-@JsModule("./menubarConnector.js")
+@JsModule("./vaadin-menu-bar/menubarConnector.ts")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "25.3.0-alpha12")
