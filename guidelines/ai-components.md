@@ -154,8 +154,8 @@ server-side only):
 
 ## Testing
 
-- Unit tests are JUnit 5 + Mockito; ITs are JUnit 4 as everywhere else.
-  Both published modules need the Mockito java-agent `surefire.argLine`
+- Unit and integration tests use the same JUnit setup as the rest of the
+  repo. Both published modules need the Mockito java-agent `surefire.argLine`
   (already in the poms) because `EnableFeatureFlagExtension` uses
   `mockStatic`.
 - No test ever uses a real LLM or API key. Unit tests mock `LLMProvider`
