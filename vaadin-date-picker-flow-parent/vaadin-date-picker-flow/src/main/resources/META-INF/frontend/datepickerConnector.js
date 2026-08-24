@@ -1,11 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import {
-  createDate,
-  extractDateParts,
-  parseDate as _parseDate
-} from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
+import { createDate, extractDateParts, parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
 function createLocaleBasedDateFormat(locale) {
   try {
@@ -142,7 +138,7 @@ class DatePickerConnector {
   }
 
   #formatDate(dateParts, format) {
-    const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+    const date = parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
     return dateFnsFormat(date, format);
   }
@@ -200,7 +196,7 @@ class DatePickerConnector {
     }
 
     // Update century if this is the first parse after overlay open.
-    const currentValue = _parseDate(this.#datePicker.value);
+    const currentValue = parseDate(this.#datePicker.value);
     if (
       dateFnsIsValid(currentValue) &&
       currentValue.getDate() === date.getDate() &&
