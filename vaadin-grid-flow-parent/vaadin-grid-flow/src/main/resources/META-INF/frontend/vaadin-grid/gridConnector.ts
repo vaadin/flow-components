@@ -12,7 +12,7 @@ import type {
   Item,
   ItemRange,
   SelectionMode
-} from './vaadin-grid/vaadin-grid-types.js';
+} from './vaadin-grid-types.js';
 
 const requestDebouncerDelay = 150;
 
