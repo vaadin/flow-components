@@ -145,7 +145,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-date-picker")
 @NpmPackage(value = "@vaadin/date-picker", version = "25.3.0-alpha12")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
-@JsModule("./datepickerConnector.js")
+@JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.1.0")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
