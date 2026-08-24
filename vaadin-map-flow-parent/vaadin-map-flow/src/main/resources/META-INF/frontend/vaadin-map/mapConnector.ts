@@ -14,6 +14,10 @@ import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 import { synchronize } from './synchronization/index.js';
 import { createLookup, getFeatureInfo } from './util';
+import type { Extent } from 'ol/extent';
+import type Feature from 'ol/Feature';
+import type MapBrowserEvent from 'ol/MapBrowserEvent';
+import type { FlowFeature, FlowMap, MapFeatureInfo, MapSyncChange, MapZoomToFitOptions } from './vaadin-map-types.js';
 
 // By default, use EPSG:4326 projection for all coordinates passed to, and return from the public API.
 // Internally coordinates will be converted to the projection used by the map's view.
@@ -23,8 +27,8 @@ openLayersSetUserProjection('EPSG:4326');
  * mapConnector is a communication layer between Map's flow component
  * (server-side) and web component (client-side).
  */
-class MapConnector {
-  #mapElement;
+export class MapConnector {
+  readonly #mapElement: FlowMap;
 
   /**
    * Lookup for storing and retrieving every OL instance used in the map's configuration
@@ -32,9 +36,9 @@ class MapConnector {
    */
   #lookup = createLookup();
 
-  #forceRenderTimeout;
+  #forceRenderTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(mapElement) {
+  constructor(mapElement: FlowMap) {
     this.#mapElement = mapElement;
 
     // Clear default controls from web component, so that we can cleanly synchronize controls from server configuration
@@ -54,7 +58,7 @@ class MapConnector {
    * reference them.
    * @param changedObjects array of Javascript objects to be synchronized into OL instances
    */
-  synchronize(changedObjects) {
+  synchronize(changedObjects: MapSyncChange[]): void {
     // Provide synchronization function and the OL instance lookup through context object
     const context = { synchronize, lookup: this.#lookup, mapElement: this.#mapElement, connector: this };
 
@@ -79,7 +83,7 @@ class MapConnector {
    * its synced object is in. Even if the change event is fired from multiple layers, this
    * only results in a single render of the map.
    */
-  forceRender() {
+  forceRender(): void {
     if (this.#forceRenderTimeout) {
       return;
     }
@@ -97,18 +101,18 @@ class MapConnector {
    * @param featureIds array of IDs of the features to fit in the map view
    * @param options optional options for the OL `View.fit` method
    */
-  zoomToFit(featureIds, options) {
+  zoomToFit(featureIds: string[], options?: MapZoomToFitOptions): void {
     // Synchronization call for the referenced features must run beforehand, but may have
     // been scheduled after this call. Using a timeout to compensate.
     setTimeout(() => {
-      const features = featureIds.map((id) => this.#lookup.get(id)).filter(Boolean);
+      const features: Feature[] = featureIds.map((id) => this.#lookup.get(id)).filter(Boolean);
       if (features.length === 0) {
         return;
       }
 
-      let extent;
+      let extent: Extent | undefined;
       features.forEach((feature) => {
-        const featureExtent = feature.getGeometry().getExtent();
+        const featureExtent = feature.getGeometry()!.getExtent();
         if (!extent) {
           extent = featureExtent.slice();
         } else {
@@ -123,7 +127,7 @@ class MapConnector {
       const bounds = this.#mapElement.getBoundingClientRect();
       const size = [bounds.width, bounds.height];
 
-      this.#mapElement.configuration.getView().fit(extent, {
+      this.#mapElement.configuration.getView().fit(extent!, {
         padding: [padding, padding, padding, padding],
         duration,
         size
@@ -131,7 +135,7 @@ class MapConnector {
     });
   }
 
-  #addViewListeners() {
+  #addViewListeners(): void {
     this.#mapElement.configuration.on('moveend', (_event) => {
       const view = this.#mapElement.configuration.getView();
       const center = view.getCenter();
@@ -152,7 +156,7 @@ class MapConnector {
     });
   }
 
-  #addClickListeners() {
+  #addClickListeners(): void {
     this.#mapElement.configuration.on('singleclick', (event) => {
       // Get the features at the clicked pixel position
       // In case multiple features exist at that position, OpenLayers
@@ -160,7 +164,9 @@ class MapConnector {
       // with the front-most feature as the first result, and the
       // back-most feature as the last result
       const featuresAtPixel = this.#mapElement.configuration.getFeaturesAtPixel(event.pixel);
-      const featureInfos = featuresAtPixel.map((feature) => getFeatureInfo(this.#mapElement.configuration, feature));
+      const featureInfos: MapFeatureInfo[] = featuresAtPixel.map((feature) =>
+        getFeatureInfo(this.#mapElement.configuration, feature)
+      );
 
       const nonClusterFeatures = featureInfos.filter((info) => info && !info.isCluster);
       this.#dispatchMapClick(event, nonClusterFeatures);
@@ -178,7 +184,7 @@ class MapConnector {
     });
   }
 
-  #dispatchMapClick(event, features) {
+  #dispatchMapClick(event: MapBrowserEvent, features: MapFeatureInfo[]): void {
     this.#mapElement.dispatchEvent(
       new CustomEvent('map-click', {
         detail: {
@@ -190,7 +196,7 @@ class MapConnector {
     );
   }
 
-  #dispatchFeatureClick(event, featureInfo) {
+  #dispatchFeatureClick(event: MapBrowserEvent, featureInfo: MapFeatureInfo): void {
     this.#mapElement.dispatchEvent(
       new CustomEvent('map-feature-click', {
         detail: {
@@ -202,7 +208,7 @@ class MapConnector {
     );
   }
 
-  #dispatchClusterClick(event, clusterInfo) {
+  #dispatchClusterClick(event: MapBrowserEvent, clusterInfo: MapFeatureInfo): void {
     this.#mapElement.dispatchEvent(
       new CustomEvent('map-cluster-click', {
         detail: {
@@ -214,10 +220,10 @@ class MapConnector {
     );
   }
 
-  #addFeatureDragAndDrop() {
+  #addFeatureDragAndDrop(): void {
     const translate = new Translate({
       filter(feature) {
-        return !!feature.draggable;
+        return !!(feature as FlowFeature).draggable;
       }
     });
 
@@ -225,7 +231,7 @@ class MapConnector {
       const feature = event.features.item(0);
       if (!feature) return;
 
-      const featureInfo = getFeatureInfo(this.#mapElement.configuration, feature);
+      const featureInfo: MapFeatureInfo = getFeatureInfo(this.#mapElement.configuration, feature);
       this.#mapElement.dispatchEvent(
         new CustomEvent('map-feature-drop', {
           detail: {
@@ -244,7 +250,7 @@ class MapConnector {
 
 // Called from the component's attach handler, which runs again for every element
 // Flow creates for the component, so the connector is always replaced.
-function init(mapElement) {
+function init(mapElement: FlowMap): void {
   mapElement.$connector = new MapConnector(mapElement);
 }
 
@@ -253,7 +259,7 @@ function init(mapElement) {
  * Internally coordinates will be converted to the projection used by the map's view.
  * @param projection
  */
-function setUserProjection(projection) {
+function setUserProjection(projection: string): void {
   openLayersSetUserProjection(projection);
 }
 
@@ -265,7 +271,7 @@ function setUserProjection(projection) {
  * @param projection
  * @param wksDefinition
  */
-function defineProjection(projection, wksDefinition) {
+function defineProjection(projection: string, wksDefinition: string): void {
   // Define projection in proj4, and then integrate it with OpenLayers
   // There should not be any side effects from calling either multiple times
   proj4.defs(projection, wksDefinition);
