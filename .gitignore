@@ -23,6 +23,7 @@ tsconfig.json
 !**/test/tsconfig.json
 !vaadin-grid-flow-parent/vaadin-grid-flow/tsconfig.json
 !vaadin-combo-box-flow-parent/vaadin-combo-box-flow/tsconfig.json
+!vaadin-virtual-list-flow-parent/vaadin-virtual-list-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts
