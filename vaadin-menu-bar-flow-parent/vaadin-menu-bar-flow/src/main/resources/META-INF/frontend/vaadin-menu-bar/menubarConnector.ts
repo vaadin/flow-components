@@ -13,18 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import './contextMenuConnector.js';
+// Resolved from the folder Flow merges all jar frontend resources into
+import '../contextMenuConnector.js';
+import type { FlowMenuBar, FlowMenuBarItem, FlowMenuBarItemComponent } from './vaadin-menu-bar-types.js';
 
 /**
  * menubarConnector is a communication layer between MenuBar's flow component
  * (server-side) and web component (client-side).
  */
-class MenuBarConnector {
-  #menuBar;
-  #appId;
+export class MenuBarConnector {
+  readonly #menuBar: FlowMenuBar;
+  readonly #appId: string;
 
   /** The last generated items tree, before hidden items are filtered out */
-  #generatedItems = [];
+  #generatedItems: FlowMenuBarItem[] = [];
 
   // Observe for hidden and disabled attributes in case they are changed by Flow.
   // When a change occurs, the observer will re-generate items on top of the existing
@@ -32,7 +34,7 @@ class MenuBarConnector {
   #observer = new MutationObserver((records) => {
     const hasChangedAttributes = records.some((entry) => {
       const oldValue = entry.oldValue;
-      const newValue = entry.target.getAttribute(entry.attributeName);
+      const newValue = (entry.target as Element).getAttribute(entry.attributeName!);
       return oldValue !== newValue;
     });
 
@@ -41,7 +43,7 @@ class MenuBarConnector {
     }
   });
 
-  constructor(menuBar, appId) {
+  constructor(menuBar: FlowMenuBar, appId: string) {
     this.#menuBar = menuBar;
     this.#appId = appId;
   }
@@ -52,10 +54,8 @@ class MenuBarConnector {
    * When the method is called without providing a node id,
    * the previously generated items tree will be used.
    * That can be useful if you only want to sync the disabled and hidden properties of root items.
-   *
-   * @param {number | undefined} nodeId
    */
-  generateItems(nodeId) {
+  generateItems(nodeId?: number): void {
     const menuBar = this.#menuBar;
 
     if (!menuBar.shadowRoot) {
@@ -98,18 +98,12 @@ class MenuBarConnector {
   }
 }
 
-/**
- * Initializes the connector for a menu bar element.
- *
- * @param {HTMLElement} menuBar
- * @param {string} appId
- */
-function initLazy(menuBar, appId) {
+function initLazy(menuBar: FlowMenuBar, appId: string): void {
   // Init the connector only once for the menu bar
   menuBar.$connector ??= new MenuBarConnector(menuBar, appId);
 }
 
-function setClassName(component) {
+function setClassName(component: FlowMenuBarItemComponent): void {
   const item = component._rootItem || component._item;
 
   if (item) {

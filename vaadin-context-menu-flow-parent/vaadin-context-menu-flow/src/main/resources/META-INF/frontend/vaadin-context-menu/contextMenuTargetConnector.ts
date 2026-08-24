@@ -1,19 +1,21 @@
 import * as Gestures from '@vaadin/component-base/src/gestures.js';
+import type { ContextMenu } from '@vaadin/context-menu/src/vaadin-context-menu.js';
+import type { ContextMenuTarget, OpenEvent } from './vaadin-context-menu-types.js';
 
 /**
  * contextMenuTargetConnector listens for the event that opens a context menu on
  * the menu's target element, and notifies the server so that it can open the
  * menu after the items have been generated.
  */
-class ContextMenuTargetConnector {
-  #target;
-  #openOnEventType;
-  #openEvent;
+export class ContextMenuTargetConnector {
+  readonly #target: ContextMenuTarget;
+  #openOnEventType?: string;
+  #openEvent?: OpenEvent;
 
   // Registered as an event listener, so it has to stay the same function object
   // for the listener to be removable, and it has to be bound to the connector
   // rather than to the target the event is dispatched on.
-  #openOnHandler = (e) => {
+  #openOnHandler = (e: OpenEvent) => {
     const target = this.#target;
 
     // used by Grid to prevent context menu on selection column click
@@ -29,7 +31,7 @@ class ContextMenuTargetConnector {
     e.__composedPath = e.composedPath();
     this.#openEvent = e;
 
-    let detail = {};
+    let detail: Record<string, unknown> = {};
     if (target.getContextMenuBeforeOpenDetail) {
       detail = target.getContextMenuBeforeOpenDetail(e);
     }
@@ -40,11 +42,11 @@ class ContextMenuTargetConnector {
     );
   };
 
-  constructor(target) {
+  constructor(target: ContextMenuTarget) {
     this.#target = target;
   }
 
-  updateOpenOn(eventType) {
+  updateOpenOn(eventType: string): void {
     this.#removeListener();
     this.#openOnEventType = eventType;
 
@@ -63,16 +65,16 @@ class ContextMenuTargetConnector {
     });
   }
 
-  openMenu(contextMenu) {
+  openMenu(contextMenu: ContextMenu): void {
     contextMenu.open(this.#openEvent);
   }
 
-  removeConnector() {
+  removeConnector(): void {
     this.#removeListener();
     this.#target.$contextMenuTargetConnector = undefined;
   }
 
-  #removeListener() {
+  #removeListener(): void {
     if (this.#openOnEventType) {
       if (Gestures.gestures[this.#openOnEventType]) {
         Gestures.removeListener(this.#target, this.#openOnEventType, this.#openOnHandler);
@@ -83,7 +85,7 @@ class ContextMenuTargetConnector {
   }
 }
 
-function init(target) {
+function init(target: ContextMenuTarget): void {
   // Init the connector only once for the target
   target.$contextMenuTargetConnector ??= new ContextMenuTargetConnector(target);
 }
