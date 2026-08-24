@@ -64,8 +64,11 @@ async function runTests() {
     const id = module.replace('-parent', '');
     const itFolder = `${module}/${id}-integration-tests`;
 
-    // Check if the IT module has wtr tests
-    if (fs.existsSync(`${itFolder}/${wtrTestsFolderName}`)) {
+    const hasTests = fs.existsSync(`${itFolder}/${wtrTestsFolderName}`);
+    const hasTsConfig = fs.existsSync(`${module}/${id}/tsconfig.json`);
+
+    // Check if the IT module has wtr tests or frontend files to type-check
+    if (hasTests || hasTsConfig) {
       console.log(`Installing dependencies in ${itFolder}`);
 
       // Set up an empty node_modules and package.json before running Flow build
@@ -89,12 +92,16 @@ async function runTests() {
       // Type-check the component module's frontend files if it has a tsconfig.
       // Run after the Flow build so the IT module's node_modules, which the
       // tsconfig resolves the @vaadin package types from, is populated.
-      if (fs.existsSync(`${module}/${id}/tsconfig.json`)) {
+      if (hasTsConfig) {
         console.log(`Type-checking frontend files in ${module}/${id}`);
         execSync(`npx tsc -p ../${id}/tsconfig.json`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
+      }
+
+      if (!hasTests) {
+        continue;
       }
 
       // Install Playwright Chromium
