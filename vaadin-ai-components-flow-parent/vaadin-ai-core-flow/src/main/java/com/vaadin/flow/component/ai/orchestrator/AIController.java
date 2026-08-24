@@ -72,7 +72,8 @@ public interface AIController {
      * successfully or with an error, but also when the turn fails before a
      * stream ever opens. Fires at most once per prompt: a prompt rejected by
      * the {@link RequestInterceptor} and a postponed prompt abandoned because
-     * its UI was detached end without firing it.
+     * its UI was detached end without firing it, and a turn whose UI is
+     * detached when it ends skips the hook (it requires {@code ui.access()}).
      * <p>
      * On success {@code error} is {@code null}; use the call to commit staged
      * state or run deferred UI updates. On failure {@code error} carries the

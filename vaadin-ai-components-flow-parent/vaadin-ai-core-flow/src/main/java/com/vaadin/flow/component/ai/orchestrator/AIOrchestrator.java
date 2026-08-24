@@ -62,6 +62,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.communication.PushMode;
 
@@ -459,7 +460,7 @@ public class AIOrchestrator implements Serializable {
         }).subscribe(token -> {
             responseBuilder.append(token);
             if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.appendText(token));
+                accessIfAttached(ui, () -> assistantMessage.appendText(token));
             }
         }, error -> {
             String userMessage;
@@ -472,7 +473,8 @@ public class AIOrchestrator implements Serializable {
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (assistantMessage != null && messageList != null) {
-                ui.access(() -> assistantMessage.setText(userMessage));
+                accessIfAttached(ui,
+                        () -> assistantMessage.setText(userMessage));
             }
             fireResponseListener("", error, ui);
         }, () -> {
@@ -710,6 +712,23 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
+     * Runs a UI update for the current turn, tolerating a UI that was detached
+     * while the turn ran in the background: the update is skipped and logged at
+     * debug instead of surfacing {@link UIDetachedException} as a stream error.
+     * The turn itself is unaffected — the conversation history and the
+     * {@link ResponseListener} are UI-independent.
+     */
+    private static void accessIfAttached(UI ui, Command command) {
+        try {
+            ui.access(command);
+        } catch (UIDetachedException e) {
+            LOGGER.debug(
+                    "Skipped a UI update for an abandoned turn (UI detached)",
+                    e);
+        }
+    }
+
+    /**
      * Ends a postponed prompt that failed or timed out. Nothing was displayed
      * for the prompt, so no UI cleanup is needed beyond reporting — which is
      * why the flag is released before touching the UI: a detached UI must not
@@ -717,12 +736,7 @@ public class AIOrchestrator implements Serializable {
      */
     private void abortPostponedPrompt(UI ui, Throwable failure) {
         isProcessing.set(false);
-        try {
-            fireResponseListener("", failure, ui);
-        } catch (UIDetachedException e) {
-            LOGGER.warn("Postponed prompt failed after its UI was detached",
-                    failure);
-        }
+        fireResponseListener("", failure, ui);
     }
 
     /**
@@ -928,7 +942,7 @@ public class AIOrchestrator implements Serializable {
             }
         }
         if (controller != null) {
-            ui.access(() -> {
+            accessIfAttached(ui, () -> {
                 try {
                     controller.onResponse(error);
                 } catch (Exception e) {

@@ -3444,6 +3444,90 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void withBackgroundExecution_uiDetachedMidTurn_completesQuietly()
+            throws Exception {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        var listenerError = new AtomicReference<Throwable>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withBackgroundExecution()
+                .withResponseListener(event -> {
+                    listenerError.set(event.getError().orElse(null));
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        // Detach the UI while the provider is still blocking in the
+        // background, then let the turn finish.
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        Assertions.assertNull(listenerError.get(),
+                "A detached UI must not surface as a turn error");
+        var lastMessage = orchestrator.getHistory()
+                .get(orchestrator.getHistory().size() - 1);
+        Assertions.assertEquals("Response", lastMessage.content(),
+                "The response must still be recorded in the history");
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .noneMatch(event -> event.getMessage()
+                                .contains("Error during LLM streaming")),
+                "A detached UI must not be logged as a streaming error");
+    }
+
+    @Test
+    void withBackgroundExecution_uiDetachedMidTurn_skipsControllerOnResponse()
+            throws Exception {
+        var controller = Mockito.mock(AIController.class);
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withController(controller).withBackgroundExecution()
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("Hello");
+
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        // The listener fires just before the controller hook would run on
+        // the same thread — after() covers that window.
+        Mockito.verify(controller, Mockito.after(500).never())
+                .onResponse(Mockito.any());
+    }
+
+    @Test
     void defaultExecution_noPushNoPolling_noDeliveryWarning() {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
