@@ -8,7 +8,7 @@ import {
   getPmString,
   getSeparator,
   searchAmOrPmToken
-} from './helpers.js';
+} from './helpers.ts';
 import type { FlowTimePicker, FlowTimePickerTime } from './vaadin-time-picker-types.js';
 
 /**
