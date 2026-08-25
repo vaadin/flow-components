@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
@@ -801,6 +802,173 @@ class SourceTrackingTest {
 
             Assertions.assertEquals(1, events.size());
             Assertions.assertTrue(events.get(0).getFieldSource().isEmpty());
+        }
+    }
+
+    @Nested
+    class MarkerConfidence {
+
+        @Test
+        void markerShowsConfidenceFromReportedSource() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"),
+                    "The marker must show the reported confidence level");
+        }
+
+        @Test
+        void markerShowsNoConfidenceForPlainValue() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, "\"plain\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A value with no reported source must show no indicator");
+        }
+
+        @Test
+        void markerShowsNoConfidenceWhenSourceHasNoLevel() {
+            // A missing level means unknown, not low — the marker must not
+            // show the value as doubtful.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, """
+                    {"value": "Acme", "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A source without a level must show no indicator");
+        }
+
+        @Test
+        void sameValueRewriteWithNewLevelUpdatesMarkerConfidence() {
+            // Rewriting the value the field already had fires no change event
+            // and never re-marks, so the kept marker's indicator can only be
+            // updated by the write itself — a newly reported level must
+            // replace the one shown.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "low",
+                     "extracts": [{"text": "re-read"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertEquals("low",
+                    markerOn(field).getProperty("confidence"),
+                    "The kept marker must show the newly reported level");
+        }
+
+        @Test
+        void sameValueRewriteWithoutLevelClearsMarkerConfidence() {
+            // Rewriting the value the field already had fires no change event
+            // and never re-marks, but it does replace the source — the kept
+            // marker must not show a level the new source does not include.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            fill(controller, field, """
+                    {"value": "Acme", "extracts": [{"text": "re-read"}]}""");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "The kept marker must drop the level the new source does "
+                            + "not include");
+        }
+
+        @Test
+        void sourcelessSameValueRewriteClearsMarkerConfidence() {
+            // A plain rewrite of the value the field already had clears the
+            // stored source, and the kept marker must drop its level with it
+            // — an indicator with no source behind it would be fabricated.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fill(controller, field, "\"Acme\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "The kept marker must drop its level when the rewrite "
+                            + "carries no source");
+        }
+
+        @Test
+        void refillWithoutSourceClearsMarkerConfidence() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "first", "confidence": "medium",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            fill(controller, field, "\"second\"");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A refill without a source must clear the indicator the "
+                            + "previous fill set on the reused marker");
+        }
+
+        @Test
+        void cascadedValueClearsMarkerConfidence() {
+            // A value the application cascades into the field during a turn
+            // never goes through the AI's write path, so only the turn-end
+            // marking can sync the indicator: the earlier source is stale for
+            // the new value, and the reused marker must not keep describing
+            // the value the field no longer holds.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+            fill(controller, field, """
+                    {"value": "Acme", "confidence": "high",
+                     "extracts": [{"text": "snippet"}]}""");
+            controller.onResponse(null);
+            Assertions.assertEquals("high",
+                    markerOn(field).getProperty("confidence"));
+
+            controller.onRequest();
+            field.setValue("cascaded");
+            controller.onResponse(null);
+
+            Assertions.assertNull(markerOn(field).getProperty("confidence"),
+                    "A cascaded value must drop the level the previous fill "
+                            + "set on the reused marker");
+        }
+
+        private static Element markerOn(HasValue<?, ?> field) {
+            return ((Component) field).getElement().getChildren().filter(
+                    child -> "vaadin-ai-field-marker".equals(child.getTag()))
+                    .findFirst().orElseThrow(() -> new AssertionError(
+                            "Expected a marker on the field"));
         }
     }
 

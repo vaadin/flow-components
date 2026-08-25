@@ -221,7 +221,7 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.ts")
+@JsModule("./vaadin-grid/gridConnector.ts")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,

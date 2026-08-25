@@ -18,33 +18,37 @@ package com.vaadin.flow.component.combobox;
 import java.util.Arrays;
 
 /**
- * Defines whether an item whose label partially matches the typed filter is
- * automatically focused in the dropdown of a combo box.
+ * Defines which item in a combo box is automatically set to be selected, for
+ * example on Enter, when the typed filter only partially matches its label. The
+ * item that will be selected is highlighted in the dropdown while typing.
  *
  * @author Vaadin Ltd.
- * @see ComboBoxBase#setAutoFocusPartialMatch(AutoFocusPartialMatch)
+ * @see ComboBoxBase#setPartialMatchMode(PartialMatchMode)
  * @since 25.3
  */
-public enum AutoFocusPartialMatch {
+public enum PartialMatchMode {
 
     /**
-     * Partial matches are not focused.
+     * An item is automatically set to be selected only when the filter matches
+     * its label exactly.
      */
     NONE("none"),
 
     /**
-     * The first item in the filtered results is focused.
+     * The first item in the filtered results is automatically set to be
+     * selected.
      */
     FIRST_MATCH("first-match"),
 
     /**
-     * The item is focused when filtering narrows the results to a single item.
+     * The item is automatically set to be selected when filtering narrows the
+     * results to a single item.
      */
     ONLY_MATCH("only-match");
 
     private final String clientName;
 
-    AutoFocusPartialMatch(String clientName) {
+    PartialMatchMode(String clientName) {
         this.clientName = clientName;
     }
 
@@ -66,7 +70,7 @@ public enum AutoFocusPartialMatch {
      *            the client-side name of the mode
      * @return the matching mode, or {@link #NONE}
      */
-    static AutoFocusPartialMatch fromClientName(String clientName) {
+    static PartialMatchMode fromClientName(String clientName) {
         return Arrays.stream(values())
                 .filter(mode -> mode.getClientName().equals(clientName))
                 .findFirst().orElse(NONE);

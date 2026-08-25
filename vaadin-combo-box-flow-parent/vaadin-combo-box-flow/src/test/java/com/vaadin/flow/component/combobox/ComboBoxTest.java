@@ -272,14 +272,61 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue("C");
         comboBox.setOpened(true);
 
-        var invocations = ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("__focusIndex"))
-                .toList();
-        Assertions.assertEquals(1, invocations.size());
+        var parameters = focusSelectedItemParameters();
+        Assertions.assertEquals(1, parameters.size());
         // Parameter 0 is the target element, parameter 1 is the item index
-        Assertions.assertEquals(2, invocations.get(0).getParameters().get(1));
+        Assertions.assertEquals(2, parameters.get(0).get(1));
+    }
+
+    @Test
+    void focusSelectedItem_filterActive_open_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("Cherry");
+        // The filter property is only ever set by the client
+        comboBox.getElement().setProperty("filter", "C");
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
+    }
+
+    @Test
+    void focusSelectedItem_filterCleared_open_scrollsToSelectedItem() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setValue("Cherry");
+        comboBox.getElement().setProperty("filter", "");
+        comboBox.setOpened(true);
+
+        var parameters = focusSelectedItemParameters();
+        Assertions.assertEquals(1, parameters.size());
+        Assertions.assertEquals(2, parameters.get(0).get(1));
+    }
+
+    @Test
+    void focusSelectedItem_disabled_open_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setValue("Cherry");
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
+    }
+
+    @Test
+    void focusSelectedItem_noValue_open_noInvocation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        ui.add(comboBox);
+        comboBox.setItems("Apple", "Banana", "Cherry");
+        comboBox.setFocusSelectedItem(true);
+        comboBox.setOpened(true);
+
+        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
     }
 
     @Test
@@ -293,6 +340,15 @@ class ComboBoxTest extends ComboBoxBaseTest {
         Assertions.assertEquals(750, comboBox.getFilterTimeout());
         Assertions.assertEquals(750,
                 comboBox.getElement().getProperty("_filterTimeout", 0));
+    }
+
+    private List<List<Object>> focusSelectedItemParameters() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("__focusIndex"))
+                .map(invocation -> List.copyOf(invocation.getParameters()))
+                .toList();
     }
 
     @Tag("div")

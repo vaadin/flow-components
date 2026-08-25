@@ -18,9 +18,9 @@ import com.vaadin.flow.internal.StringUtil;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Internationalization object for customizing the component UI texts. An
- * instance with the default messages can be obtained using
- * {@link CrudI18n#createDefault()}
+ * Internationalization object for customizing the component UI texts. Set only
+ * the properties to customize; unset properties fall back to the component's
+ * default texts.
  *
  * @see Crud#setI18n(CrudI18n)
  * @since 1.0
@@ -53,7 +53,11 @@ public class CrudI18n implements Serializable {
      * Creates a new instance with the default messages
      *
      * @return a new instance with the default messages
+     * @deprecated Create a new instance and set only the properties to
+     *             customize. Unset properties fall back to the component's
+     *             default texts.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public static CrudI18n createDefault() {
         return JacksonUtils.readToObject(DEFAULT_I18N, CrudI18n.class);
     }

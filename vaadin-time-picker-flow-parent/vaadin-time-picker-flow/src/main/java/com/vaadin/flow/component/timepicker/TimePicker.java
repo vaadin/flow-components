@@ -115,7 +115,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/time-picker", version = "25.3.0-alpha12")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
-@JsModule("./vaadin-time-picker/timepickerConnector.js")
+@JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern,

@@ -399,6 +399,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * index can be resolved against the current sorting. Opening the dropdown
      * throws {@link UnsupportedOperationException} otherwise.
      * <p>
+     * The dropdown opens at the top while a filter is active, so that filtering
+     * always starts from the first matching item.
      *
      * @param focusSelectedItem
      *            {@code true} to scroll to and focus the selected item when the
@@ -425,6 +427,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     private void focusOnSelectedItem() {
         if (getValue() == null) {
+            return;
+        }
+        String filter = getFilter();
+        if (filter != null && !filter.isEmpty()) {
+            // Filtering starts from the first match, so there is no index to
+            // resolve, which for a lazy data view would query the backend
             return;
         }
         DataProvider<T, ?> dataProvider = getDataProvider();
