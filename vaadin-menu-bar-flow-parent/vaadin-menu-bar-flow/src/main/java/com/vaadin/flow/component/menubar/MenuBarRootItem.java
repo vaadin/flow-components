@@ -66,7 +66,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void addClassName(String className) {
         super.addClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -75,7 +75,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void addClassNames(String... classNames) {
         super.addClassNames(classNames);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -84,7 +84,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void setClassName(String className) {
         super.setClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -93,7 +93,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void setClassName(String className, boolean set) {
         super.setClassName(className, set);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -102,7 +102,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public boolean removeClassName(String className) {
         var result = super.removeClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
         return result;
     }
 
@@ -112,10 +112,6 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void removeClassNames(String... classNames) {
         super.removeClassNames(classNames);
-        updateClassName();
-    }
-
-    private void updateClassName() {
         menuBar.updateButtons();
     }
 }
