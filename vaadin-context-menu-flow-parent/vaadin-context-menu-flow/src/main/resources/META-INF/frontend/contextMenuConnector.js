@@ -51,6 +51,7 @@ function generateItemsTree(appId, nodeId) {
   return Array.from(container.children).map((child) => {
     // Use getters to provide up to date values for the web component when
     // the menu is rendered or tooltip is shown without regenerating items.
+    let children;
     const item = {
       component: child,
       get checked() {
@@ -73,27 +74,20 @@ function generateItemsTree(appId, nodeId) {
       },
       get tooltipPosition() {
         return child.tooltipPosition;
-      }
-    };
-    // Do not hardcode tag name to allow `vaadin-menu-bar-item`
-    if (child._hasVaadinItemMixin) {
+      },
       // Flow does not send the container node id for the invisible item, so
       // reading it while generating items would leave item without sub menu.
       // Result is cached as web component reads `children` on every render.
       // Generating items builds both new containers and new items, so a cached
       // sub menu never outlives the node id it was resolved from.
-      let children;
-      Object.defineProperty(item, 'children', {
-        enumerable: true,
-        configurable: true,
-        get() {
-          if (!children && child._containerNodeId) {
-            children = generateItemsTree(appId, child._containerNodeId);
-          }
-          return children;
+      get children() {
+        // Do not hardcode tag name to allow `vaadin-menu-bar-item`
+        if (!children && child._hasVaadinItemMixin && child._containerNodeId) {
+          children = generateItemsTree(appId, child._containerNodeId);
         }
-      });
-    }
+        return children;
+      }
+    };
     child._item = item;
     return item;
   });
