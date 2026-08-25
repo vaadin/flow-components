@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.menubar;
 
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.function.SerializableRunnable;
 
 class MenuBarRootItem extends MenuBarItem {
@@ -112,6 +113,24 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void removeClassNames(String... classNames) {
         super.removeClassNames(classNames);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setTooltipText(String tooltipText) {
+        super.setTooltipText(tooltipText);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setTooltipPosition(TooltipPosition position) {
+        super.setTooltipPosition(position);
         menuBar.updateButtons();
     }
 }
