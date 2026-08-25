@@ -76,8 +76,23 @@ function generateItemsTree(appId, nodeId) {
       }
     };
     // Do not hardcode tag name to allow `vaadin-menu-bar-item`
-    if (child._hasVaadinItemMixin && child._containerNodeId) {
-      item.children = generateItemsTree(appId, child._containerNodeId);
+    if (child._hasVaadinItemMixin) {
+      // The sub menu is read through a getter for the same reason as the state
+      // above: Flow does not send the container node id of an invisible item,
+      // so reading it when the items were generated would leave the item
+      // without its sub menu until the items are generated again. The result is
+      // cached, as the web component reads `children` on every render and the
+      // node id only changes when the items are generated anew.
+      let children;
+      Object.defineProperty(item, 'children', {
+        enumerable: true,
+        get() {
+          if (!children && child._containerNodeId) {
+            children = generateItemsTree(appId, child._containerNodeId);
+          }
+          return children;
+        }
+      });
     }
     child._item = item;
     return item;
