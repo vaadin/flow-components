@@ -713,6 +713,11 @@ public class DateTimePicker
      * outside the range defined by {@link #setMin(LocalDateTime)} and
      * {@link #setMax(LocalDateTime)} is filled in as is and makes the component
      * invalid.
+     * <p>
+     * The default time itself will be truncated to millisecond precision, as
+     * that is the maximum that the time picker supports. This means that
+     * {@link #getDefaultTime()} might return a different value than what was
+     * passed in.
      *
      * @param defaultTime
      *            the default time, or {@code null} to remove the default time
