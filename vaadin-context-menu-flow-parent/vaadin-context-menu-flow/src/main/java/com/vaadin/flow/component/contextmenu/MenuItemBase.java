@@ -86,7 +86,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * @param contextMenu
      *            the context menu to which this item belongs to
      * @param contentReset
-     *            callback to reset the menu content, not used
+     *            callback to reset the menu content
      * @since 25.2
      */
     public MenuItemBase(C contextMenu, SerializableRunnable contentReset) {
