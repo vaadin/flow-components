@@ -18,10 +18,9 @@ package com.vaadin.flow.component.combobox;
 import java.util.Arrays;
 
 /**
- * Defines which item in a combo box is automatically set to be selected on
- * Enter or outside click when the typed filter only partially matches its
- * label. The item that will be selected is highlighted in the dropdown while
- * typing.
+ * Defines which item in a combo box is automatically set to be selected, for
+ * example on Enter, when the typed filter only partially matches its label. The
+ * item that will be selected is highlighted in the dropdown while typing.
  *
  * @author Vaadin Ltd.
  * @see ComboBoxBase#setPartialMatchMode(PartialMatchMode)

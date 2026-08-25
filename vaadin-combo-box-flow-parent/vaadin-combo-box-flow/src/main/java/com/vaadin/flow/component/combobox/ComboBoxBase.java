@@ -361,7 +361,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Gets the mode that controls which item is automatically set to be
-     * selected on Enter or outside click when the typed filter only partially
+     * selected, for example on Enter, when the typed filter only partially
      * matches its label. Defaults to {@link PartialMatchMode#NONE}.
      *
      * @return the mode, not {@code null}
@@ -375,7 +375,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Sets the mode that controls which item is automatically set to be
-     * selected on Enter or outside click when the typed filter only partially
+     * selected, for example on Enter, when the typed filter only partially
      * matches its label. The item that will be selected is highlighted in the
      * dropdown while typing.
      * <p>
