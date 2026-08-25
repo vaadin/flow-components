@@ -65,8 +65,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
             this);
 
-    private final SerializableRunnable contentReset;
-
     /**
      * Default constructor
      *
@@ -74,7 +72,11 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      *            the context menu to which this item belongs to
      */
     public MenuItemBase(C contextMenu) {
-        this(contextMenu, () -> {
+        this.contextMenu = contextMenu;
+        getElement().addEventListener("click", e -> {
+            if (checkable) {
+                setChecked(!isChecked());
+            }
         });
     }
 
@@ -88,14 +90,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      * @since 25.2
      */
     public MenuItemBase(C contextMenu, SerializableRunnable contentReset) {
-        this.contextMenu = contextMenu;
-        this.contentReset = contentReset;
-        getElement().addEventListener("click", e -> {
-            if (checkable) {
-                setChecked(!isChecked());
-            }
-        });
-
+        this(contextMenu);
     }
 
     /**
@@ -374,7 +369,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     public void setTooltipText(String tooltipText) {
         ensureTooltipElement();
         getElement().setProperty("tooltip", tooltipText);
-        contentReset.run();
     }
 
     /**
@@ -392,7 +386,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     public void setTooltipPosition(TooltipPosition position) {
         getElement().setProperty("tooltipPosition",
                 position != null ? position.getPosition() : null);
-        contentReset.run();
     }
 
     protected void ensureTooltipElement() {
