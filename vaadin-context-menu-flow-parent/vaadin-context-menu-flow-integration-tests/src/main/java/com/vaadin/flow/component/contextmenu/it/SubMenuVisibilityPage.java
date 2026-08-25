@@ -39,6 +39,8 @@ public class SubMenuVisibilityPage extends Div {
                 event -> item.setVisible(true));
         showItem.setId("show-item");
 
-        add(target, showItem);
+        // Add <vaadin-context-menu> to DOM manually, so that closing it does
+        // not detach it and generate the items again on the next open
+        add(target, contextMenu, showItem);
     }
 }
