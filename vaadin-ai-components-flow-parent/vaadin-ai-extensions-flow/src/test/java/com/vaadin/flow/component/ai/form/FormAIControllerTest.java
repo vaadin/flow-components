@@ -1809,8 +1809,57 @@ class FormAIControllerTest {
 
             Assertions.assertEquals("Vain viesti",
                     i18n.get("message").asString());
-            for (var key : List.of("revert", "badgeLabel", "badgeTooltip")) {
+            for (var key : List.of("revert", "badgeLabel", "badgeTooltip",
+                    "confidence")) {
                 Assertions.assertFalse(i18n.has(key),
+                        "Unset text must be omitted from the marker: " + key);
+            }
+        }
+
+        @Test
+        void fieldMarkerI18nCarriesConfidenceTexts() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setConfidence(new FieldMarkerI18n.Confidence()
+                                    .setLow("Epävarma").setMedium("Melko varma")
+                                    .setHigh("Varma")));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            var confidence = i18nOn(field).get("confidence");
+
+            Assertions.assertEquals("Epävarma",
+                    confidence.get("low").asString());
+            Assertions.assertEquals("Melko varma",
+                    confidence.get("medium").asString());
+            Assertions.assertEquals("Varma", confidence.get("high").asString());
+        }
+
+        @Test
+        void fieldMarkerI18nOmitsUnsetConfidenceTexts() {
+            // A level text left null falls back to the web component's
+            // default, so it must not appear in the confidence texts at all.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerI18n(new FieldMarkerI18n()
+                            .setConfidence(new FieldMarkerI18n.Confidence()
+                                    .setLow("Epävarma")));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            var confidence = i18nOn(field).get("confidence");
+
+            Assertions.assertEquals("Epävarma",
+                    confidence.get("low").asString());
+            for (var key : List.of("medium", "high")) {
+                Assertions.assertFalse(confidence.has(key),
                         "Unset text must be omitted from the marker: " + key);
             }
         }

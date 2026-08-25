@@ -25,9 +25,9 @@ import com.vaadin.flow.internal.StringUtil;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Internationalization object for customizing the component UI texts. An
- * instance with the default messages can be obtained using
- * {@link LoginI18n#createDefault()}
+ * Internationalization object for customizing the component UI texts. Set only
+ * the properties to customize; unset properties fall back to the component's
+ * default texts.
  *
  * @see LoginForm#setI18n(LoginI18n)
  * @since 1.0
@@ -55,8 +55,14 @@ public class LoginI18n implements Serializable {
     private String additionalInformation;
 
     /**
+     * Creates a new instance with the default messages.
+     *
      * @return a new instance with the default messages
+     * @deprecated Create a new instance and set only the properties to
+     *             customize. Unset properties fall back to the component's
+     *             default texts.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public static LoginI18n createDefault() {
         return JacksonUtils.readToObject(DEFAULT_I18N, LoginI18n.class);
     }

@@ -14,9 +14,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * The texts shown by the marker the {@link FormAIController} applies to the
- * fields the AI filled: the "AI" badge, its tooltip, and the popover that
- * explains the AI fill and offers a revert control. Use to localize the marker;
- * any text left {@code null} falls back to the built-in English default.
+ * fields the AI filled: the "AI" badge, its tooltip, the popover that explains
+ * the AI fill and offers a revert control, and the confidence indicator. Use to
+ * localize the marker; any text left {@code null} falls back to the built-in
+ * English default.
  *
  * @author Vaadin Ltd
  * @since 25.3
@@ -29,6 +30,7 @@ public class FieldMarkerI18n implements Serializable {
     private String revert;
     private String badgeLabel;
     private String badgeTooltip;
+    private Confidence confidence;
 
     /**
      * Gets the message shown in the popover explaining the AI fill.
@@ -120,5 +122,116 @@ public class FieldMarkerI18n implements Serializable {
     public FieldMarkerI18n setBadgeTooltip(String badgeTooltip) {
         this.badgeTooltip = badgeTooltip;
         return this;
+    }
+
+    /**
+     * Gets the texts of the confidence indicator.
+     *
+     * @return the confidence indicator texts, or {@code null} when the built-in
+     *         defaults are used
+     */
+    public Confidence getConfidence() {
+        return confidence;
+    }
+
+    /**
+     * Sets the texts of the confidence indicator shown for a value whose source
+     * reports a confidence level.
+     *
+     * @param confidence
+     *            the confidence indicator texts, or {@code null} to use the
+     *            built-in defaults
+     * @return this instance, for chaining
+     */
+    public FieldMarkerI18n setConfidence(Confidence confidence) {
+        this.confidence = confidence;
+        return this;
+    }
+
+    /**
+     * The texts of the confidence indicator, one per
+     * {@link com.vaadin.flow.component.ai.common.ConfidenceLevel confidence
+     * level}. The text is shown next to the field and is included in the
+     * field's accessible description. Any text left {@code null} falls back to
+     * the built-in English default.
+     *
+     * @author Vaadin Ltd
+     * @since 25.3
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class Confidence implements Serializable {
+
+        private String low;
+        private String medium;
+        private String high;
+
+        /**
+         * Gets the indicator text for the low confidence level.
+         *
+         * @return the low-level text, or {@code null} when the built-in default
+         *         is used
+         */
+        public String getLow() {
+            return low;
+        }
+
+        /**
+         * Sets the indicator text for the low confidence level.
+         *
+         * @param low
+         *            the low-level text, or {@code null} to use the built-in
+         *            default
+         * @return this instance, for chaining
+         */
+        public Confidence setLow(String low) {
+            this.low = low;
+            return this;
+        }
+
+        /**
+         * Gets the indicator text for the medium confidence level.
+         *
+         * @return the medium-level text, or {@code null} when the built-in
+         *         default is used
+         */
+        public String getMedium() {
+            return medium;
+        }
+
+        /**
+         * Sets the indicator text for the medium confidence level.
+         *
+         * @param medium
+         *            the medium-level text, or {@code null} to use the built-in
+         *            default
+         * @return this instance, for chaining
+         */
+        public Confidence setMedium(String medium) {
+            this.medium = medium;
+            return this;
+        }
+
+        /**
+         * Gets the indicator text for the high confidence level.
+         *
+         * @return the high-level text, or {@code null} when the built-in
+         *         default is used
+         */
+        public String getHigh() {
+            return high;
+        }
+
+        /**
+         * Sets the indicator text for the high confidence level.
+         *
+         * @param high
+         *            the high-level text, or {@code null} to use the built-in
+         *            default
+         * @return this instance, for chaining
+         */
+        public Confidence setHigh(String high) {
+            this.high = high;
+            return this;
+        }
     }
 }

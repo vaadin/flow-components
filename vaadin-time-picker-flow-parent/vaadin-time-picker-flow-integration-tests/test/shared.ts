@@ -1,34 +1,16 @@
 import './env-setup.js';
 import '@vaadin/time-picker/src/vaadin-time-picker.js';
-import '../frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js';
-import type { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
+import '../frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.ts';
 import type {} from '@web/test-runner-mocha';
+import type { FlowTimePicker } from '../frontend/generated/jar-resources/vaadin-time-picker/vaadin-time-picker-types.js';
 
-export type FlowTimePickerTime = {
-  hours: number;
-  minutes: number;
-  seconds: number;
-  milliseconds: number;
-};
+export type {
+  FlowTimePicker,
+  FlowTimePickerTime,
+  TimePickerConnector
+} from '../frontend/generated/jar-resources/vaadin-time-picker/vaadin-time-picker-types.js';
 
-export type TimePickerConnector = {
-  initLazy: (timePicker: TimePicker) => void;
-  setLocale: (locale: string) => void;
-};
-
-export type FlowTimePicker = TimePicker & {
-  $connector: TimePickerConnector;
-};
-
-type Vaadin = {
-  Flow: {
-    timepickerConnector: TimePickerConnector;
-  };
-};
-
-const Vaadin = window.Vaadin as Vaadin;
-
-export const timepickerConnector = Vaadin.Flow.timepickerConnector;
+export const timepickerConnector = window.Vaadin.Flow.timepickerConnector;
 
 export function init(timePicker: FlowTimePicker): void {
   timepickerConnector.initLazy(timePicker);

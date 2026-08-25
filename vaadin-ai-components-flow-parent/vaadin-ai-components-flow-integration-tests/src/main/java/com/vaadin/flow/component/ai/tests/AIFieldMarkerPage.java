@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import com.vaadin.flow.component.ai.common.ConfidenceLevel;
+import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.html.NativeButton;
@@ -44,6 +46,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String REVERT = "Undo this value";
     static final String BADGE_LABEL = "Value provided by AI";
     static final String BADGE_TOOLTIP = "This value came from the AI.";
+    static final String CONFIDENCE_HIGH = "Varma lähde";
 
     static final String CONTENT_ID = "marker-content";
     static final String CONTENT_TEXT = "Source: invoice.pdf";
@@ -52,6 +55,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
     static final String UNCHANGED_VALUE = "Unchanged";
     static final String LOCKED_VALUE = "CC-1024";
+    static final String CONFIDENT_VALUE = "42";
 
     public AIFieldMarkerPage() {
         var name = new TextField("Name");
@@ -76,13 +80,21 @@ public class AIFieldMarkerPage extends VerticalLayout {
         locked.setId("locked");
         name.addValueChangeListener(event -> locked.setReadOnly(true));
 
-        var form = new VerticalLayout(name, company, unchanged, locked);
+        // Filled together with a source reporting a confidence level, so its
+        // marker must show the confidence indicator.
+        var confident = new TextField("Quantity");
+        confident.setId("confident");
+
+        var form = new VerticalLayout(name, company, unchanged, locked,
+                confident);
         form.setId("form");
 
         var controller = new FormAIController(form);
         controller.setFieldMarkerI18n(new FieldMarkerI18n().setMessage(MESSAGE)
                 .setRevert(REVERT).setBadgeLabel(BADGE_LABEL)
-                .setBadgeTooltip(BADGE_TOOLTIP));
+                .setBadgeTooltip(BADGE_TOOLTIP)
+                .setConfidence(new FieldMarkerI18n.Confidence()
+                        .setHigh(CONFIDENCE_HIGH)));
         controller.setFieldMarkerContentProvider(change -> {
             if (change.getField() != name) {
                 return null;
@@ -103,6 +115,12 @@ public class AIFieldMarkerPage extends VerticalLayout {
             name.setValue(NAME_VALUE);
             company.setValue(COMPANY_VALUE);
             unchanged.setValue(UNCHANGED_VALUE);
+            confident.setValue(CONFIDENT_VALUE);
+            // Attach a source to the value just written, standing in for the
+            // one a real fill would report, so the marker applied at turn end
+            // shows its confidence level.
+            controller.restoreFieldSource(confident,
+                    new ValueSource(ConfidenceLevel.HIGH, null));
             controller.onResponse(null);
         });
         finishTurn.setId("finish-turn");
