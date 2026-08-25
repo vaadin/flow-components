@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.JsonNode;
@@ -111,22 +112,6 @@ final class FormAITools {
          * result is in sync with the page.
          */
         String executeFill(JsonNode arguments);
-    }
-
-    /**
-     * Thrown by a {@link Callbacks} implementation to surface a curated message
-     * to the LLM. The exception {@link #getMessage() message} is forwarded
-     * verbatim as the tool's error output, so callers must ensure it is safe to
-     * expose: no PII, no internal identifiers other than what the LLM already
-     * sent, no third-party error text. For any uncontrolled failure throw a
-     * regular {@link RuntimeException} instead — the tool will log it and
-     * return a generic error.
-     */
-    public static class ToolException extends RuntimeException {
-
-        public ToolException(String llmFacingMessage) {
-            super(llmFacingMessage);
-        }
     }
 
     /**

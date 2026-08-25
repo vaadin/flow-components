@@ -161,8 +161,11 @@ public class GridAIController implements AIController {
 
             @Override
             public void updateData(String gridId, String query) {
-                // Validate eagerly so invalid SQL propagates back
-                // to the LLM as a tool error it can fix.
+                // Validate eagerly so an invalid query is rejected
+                // within the turn. A DatabaseProvider that throws
+                // ToolException gets its message relayed to the LLM so
+                // it can fix the query; any other exception is replaced
+                // with a generic error.
                 databaseProvider.executeQuery(
                         "SELECT * FROM (" + query + ") AS _v LIMIT 1");
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);

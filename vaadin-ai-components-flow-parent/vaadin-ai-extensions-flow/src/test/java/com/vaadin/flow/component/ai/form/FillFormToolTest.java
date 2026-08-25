@@ -40,6 +40,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
@@ -1252,9 +1253,8 @@ class FillFormToolTest {
         // message is allowed to leak into the response (callers must scrub
         // it themselves before throwing). Pins the ToolException catch in
         // FormAITools.fillForm.execute().
-        var tool = FormAITools
-                .fillForm(throwingCallbacks(new FormAITools.ToolException(
-                        "field 'foo' is no longer addressable")));
+        var tool = FormAITools.fillForm(throwingCallbacks(
+                new ToolException("field 'foo' is no longer addressable")));
 
         var result = tool.execute(wrappedValues());
 

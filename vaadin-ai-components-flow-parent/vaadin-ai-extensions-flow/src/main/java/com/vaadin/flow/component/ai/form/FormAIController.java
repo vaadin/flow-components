@@ -45,6 +45,7 @@ import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueExcepti
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -1568,8 +1569,7 @@ public class FormAIController implements AIController {
                 int limit) {
             var hints = hintsById.get(fieldId);
             if (hints == null || hints.valueOptionsQuery == null) {
-                throw new FormAITools.ToolException(
-                        "Unknown field id: " + fieldId);
+                throw new ToolException("Unknown field id: " + fieldId);
             }
             return new ArrayList<>(
                     hints.valueOptionsQuery.apply(filter, limit));

@@ -1244,6 +1244,49 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessage() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                result);
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool.", result);
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_usesEmptySchema() {
         provider.setStreaming(false);
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",

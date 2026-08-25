@@ -933,6 +933,54 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessageToModel() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool.",
+                toolResults.getFirst().text());
+    }
+
+    @Test
     void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");

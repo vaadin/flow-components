@@ -244,7 +244,10 @@ public interface LLMProvider {
          * Executes the tool with the given arguments.
          * <p>
          * Implementations should return a human-readable result string on
-         * success. On failure, they may throw any runtime exception.
+         * success. On failure, throw a {@link ToolException} to pass its
+         * message to the LLM so it can correct its next attempt; any other
+         * runtime exception is caught, logged, and replaced with a generic
+         * error message so internal details are not leaked.
          * </p>
          *
          * @param arguments

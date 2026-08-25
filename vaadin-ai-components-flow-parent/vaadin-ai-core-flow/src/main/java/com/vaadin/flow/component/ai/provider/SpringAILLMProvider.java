@@ -355,10 +355,27 @@ public class SpringAILLMProvider implements LLMProvider {
 
             @Override
             public String call(String arguments) {
+                JsonNode parsed;
                 try {
-                    return tool.execute(parseArguments(arguments));
+                    parsed = parseArguments(arguments);
                 } catch (Exception e) {
+                    // The malformed JSON came from the model itself, so
+                    // the parser message is safe to relay and lets the
+                    // model repair its next attempt.
+                    LOGGER.warn("Tool '{}' received malformed JSON arguments",
+                            tool.getName(), e);
+                    return "Error executing tool: invalid JSON arguments: "
+                            + e.getMessage();
+                }
+                try {
+                    return tool.execute(parsed);
+                } catch (ToolException e) {
+                    LOGGER.warn("Tool '{}' failed: {}", tool.getName(),
+                            e.getMessage(), e);
                     return "Error executing tool: " + e.getMessage();
+                } catch (Exception e) {
+                    LOGGER.error("Tool '{}' failed", tool.getName(), e);
+                    return "Error executing tool.";
                 }
             }
         };
