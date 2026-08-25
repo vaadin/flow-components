@@ -191,6 +191,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
 
         getElement().setProperty("_checked", checked);
 
+        // A menu that stays open after a click (keepOpen) does not re-render
+        // its items, so the connector toggles the checkmark attribute directly.
         executeJsWhenAttached(
                 "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
                 getElement(), checked);
@@ -225,10 +227,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         }
 
         getElement().setProperty("_keepOpen", keepOpen);
-
-        executeJsWhenAttached(
-                "window.Vaadin.Flow.contextMenuConnector.setKeepOpen($0, $1)",
-                getElement(), keepOpen);
     }
 
     /**
@@ -361,10 +359,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         } else {
             getElement().removeProperty(PRIVATE_THEME_ATTRIBUTE);
         }
-
-        executeJsWhenAttached(
-                "window.Vaadin.Flow.contextMenuConnector.setTheme($0, $1)",
-                getElement(), themeName);
     }
 
     /**
