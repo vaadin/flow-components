@@ -80,9 +80,12 @@ function generateItemsTree(appId, nodeId) {
       // Flow does not send the container node id for the invisible item, so
       // reading it while generating items would leave item without sub menu.
       // Result is cached as web component reads `children` on every render.
+      // Generating items builds both new containers and new items, so a cached
+      // sub menu never outlives the node id it was resolved from.
       let children;
       Object.defineProperty(item, 'children', {
         enumerable: true,
+        configurable: true,
         get() {
           if (!children && child._containerNodeId) {
             children = generateItemsTree(appId, child._containerNodeId);

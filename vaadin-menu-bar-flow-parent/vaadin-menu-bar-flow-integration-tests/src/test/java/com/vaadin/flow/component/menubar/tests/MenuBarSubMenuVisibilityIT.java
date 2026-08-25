@@ -33,6 +33,7 @@ public class MenuBarSubMenuVisibilityIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        $(MenuBarElement.class).waitForFirst();
     }
 
     @Test
@@ -54,11 +55,16 @@ public class MenuBarSubMenuVisibilityIT extends AbstractComponentIT {
     public void hiddenSubItem_show_subSubMenuRenders() {
         MenuBarElement menuBar = $(MenuBarElement.class)
                 .id("sub-item-menu-bar");
+        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
+                .openSubMenu();
+        Assert.assertTrue("Expected no sub item while it is hidden",
+                subMenu.getMenuItem("Sub item").isEmpty());
+        menuBar.getButtons().get(0).click();
+        subMenu.waitUntilClosed();
 
         $("button").id("show-sub-item").click();
 
-        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
-                .openSubMenu();
+        subMenu = menuBar.getButtons().get(0).openSubMenu();
         MenuBarSubMenuElement subSubMenu = subMenu.getMenuItem("Sub item")
                 .orElseThrow().openSubMenu();
         Assert.assertArrayEquals(new String[] { "Sub sub item" },

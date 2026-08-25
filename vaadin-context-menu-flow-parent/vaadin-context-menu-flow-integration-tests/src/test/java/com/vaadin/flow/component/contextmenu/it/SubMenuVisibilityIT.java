@@ -35,7 +35,7 @@ public class SubMenuVisibilityIT extends AbstractContextMenuIT {
     }
 
     @Test
-    public void hiddenItem_show_subMenuRendered() {
+    public void hiddenItem_show_subMenuRenders() {
         ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
         Assert.assertFalse("Expected the item to be hidden initially",
                 menu.getMenuItems().get(0).isDisplayed());
