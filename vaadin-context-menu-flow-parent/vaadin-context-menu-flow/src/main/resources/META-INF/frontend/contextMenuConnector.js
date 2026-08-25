@@ -49,76 +49,68 @@ function generateItemsTree(appId, nodeId) {
   }
 
   return Array.from(container.children).map((child) => {
+    // Use getters to provide up to date values for the web component when
+    // the menu is rendered or tooltip is shown without regenerating items.
+    let children;
     const item = {
       component: child,
-      checked: child._checked,
-      keepOpen: child._keepOpen,
-      className: child.className,
-      theme: child.__theme,
-      tooltip: child.tooltip,
-      tooltipPosition: child.tooltipPosition
+      get checked() {
+        return child._checked;
+      },
+      get keepOpen() {
+        return child._keepOpen;
+      },
+      get disabled() {
+        return child.disabled;
+      },
+      get className() {
+        return child.className;
+      },
+      get theme() {
+        return child.__theme;
+      },
+      get tooltip() {
+        return child.tooltip;
+      },
+      get tooltipPosition() {
+        return child.tooltipPosition;
+      },
+      // Flow does not send the container node id for the invisible item, so
+      // reading it while generating items would leave item without sub menu.
+      // Result is cached as web component reads `children` on every render.
+      // Generating items builds both new containers and new items, so a cached
+      // sub menu never outlives the node id it was resolved from.
+      get children() {
+        // Do not hardcode tag name to allow `vaadin-menu-bar-item`
+        if (!children && child._hasVaadinItemMixin && child._containerNodeId) {
+          children = generateItemsTree(appId, child._containerNodeId);
+        }
+        return children;
+      }
     };
-    // Do not hardcode tag name to allow `vaadin-menu-bar-item`
-    if (child._hasVaadinItemMixin && child._containerNodeId) {
-      item.children = generateItemsTree(appId, child._containerNodeId);
-    }
     child._item = item;
     return item;
   });
 }
 
 /**
- * Sets the checked state for a context menu item.
+ * Toggles the checkmark attribute for a keep-open context menu item.
  *
- * This method is supposed to be called when the context menu item is closed,
- * so there is no need for triggering a re-render eagarly.
+ * The items array reflects the new checked state through a getter, but a menu
+ * that stays open after a click does not re-render its items, so the attribute
+ * is toggled directly to show the checkmark immediately.
  *
  * @param {HTMLElement} component
  * @param {boolean} checked
  */
 function setChecked(component, checked) {
-  if (component._item) {
-    component._item.checked = checked;
-
-    // Set the attribute in the connector to show the checkmark
-    // without having to re-render the whole menu while opened.
-    if (component._item.keepOpen) {
-      component.toggleAttribute('menu-item-checked', checked);
-    }
-  }
-}
-
-/**
- * Sets the keep open state for a context menu item.
- *
- * @param {HTMLElement} component
- * @param {boolean} keepOpen
- */
-function setKeepOpen(component, keepOpen) {
-  if (component._item) {
-    component._item.keepOpen = keepOpen;
-  }
-}
-
-/**
- * Sets the theme for a context menu item.
- *
- * This method is supposed to be called when the context menu item is closed,
- * so there is no need for triggering a re-render eagarly.
- *
- * @param {HTMLElement} component
- * @param {string | undefined | null} theme
- */
-function setTheme(component, theme) {
-  if (component._item) {
-    component._item.theme = theme;
+  if (component._item && component._item.keepOpen) {
+    component.toggleAttribute('menu-item-checked', checked);
   }
 }
 
 window.Vaadin.Flow.contextMenuConnector = {
   initLazy,
   generateItemsTree,
-  setChecked,
-  setKeepOpen,
-  setTheme
+  setChecked
 };

@@ -717,7 +717,10 @@ public class FormAIController implements AIController {
      * fills, the source it read: the snippets, where each snippet sits in the
      * document, and a {@link ConfidenceLevel confidence level}. The reported
      * source is available from {@link FieldValueChangeEvent#getFieldSource()}
-     * and from {@link #getFieldSource(HasValue)}.
+     * and from {@link #getFieldSource(HasValue)}. While the
+     * {@link #setFieldMarkerEnabled(boolean) automatic field marker} is on, the
+     * marker also shows the reported confidence level; a value reported without
+     * a level shows no indicator.
      * <p>
      * Off by default: source tracking costs extra output tokens on every fill
      * and brings document snippets into the server, so an application that does
@@ -933,12 +936,12 @@ public class FormAIController implements AIController {
 
     /**
      * Sets the texts shown by the AI field marker — the "AI" badge, its
-     * tooltip, and the popover with the revert control — replacing the built-in
-     * English defaults. The texts are applied to every marker the controller
-     * puts on a field, so set them before the first turn to localize them all.
-     * A marker already on a field keeps its texts until the controller marks
-     * that field again. Texts left {@code null} fall back to the built-in
-     * defaults.
+     * tooltip, the popover with the revert control, and the confidence
+     * indicator — replacing the built-in English defaults. The texts are
+     * applied to every marker the controller puts on a field, so set them
+     * before the first turn to localize them all. A marker already on a field
+     * keeps its texts until the controller marks that field again. Texts left
+     * {@code null} fall back to the built-in defaults.
      *
      * @param i18n
      *            the texts to use, or {@code null} to restore the built-in
@@ -1055,6 +1058,12 @@ public class FormAIController implements AIController {
                     Registration.combine(revert, valueChange), revertValue));
         }
         FormFieldMarker.add(element, fieldMarkerI18n);
+        // Applied on every mark so a value the AI's write path never set —
+        // one cascaded into the field during the turn — drops the indicator
+        // the earlier fill left on the reused marker: its source describes a
+        // value the field no longer holds.
+        FormFieldMarker.setConfidence(element, getFieldSource(field)
+                .map(ValueSource::confidence).orElse(null));
     }
 
     /**
@@ -1785,6 +1794,16 @@ public class FormAIController implements AIController {
                 // pass the staleness check and describe the new write with a
                 // source it never had.
                 removeFieldSource(raw);
+            }
+            // A write of the value the field already had fires no change
+            // event and is never re-marked, so a marker kept from an earlier
+            // turn must have its confidence synced here to the write's
+            // source — or cleared with it when the write carried none. A
+            // no-op when the field has no marker.
+            if (raw instanceof Component component) {
+                FormFieldMarker.setConfidence(component.getElement(),
+                        reportedSource == null ? null
+                                : reportedSource.confidence());
             }
             return true;
         }

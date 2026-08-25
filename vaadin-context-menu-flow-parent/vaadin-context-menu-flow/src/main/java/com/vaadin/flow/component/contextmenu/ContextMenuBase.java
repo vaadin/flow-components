@@ -57,13 +57,13 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.3.0-alpha12")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha12")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha13")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
-@JsModule("./contextMenuTargetConnector.js")
+@JsModule("./vaadin-context-menu/contextMenuTargetConnector.ts")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasStyle {
 
