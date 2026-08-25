@@ -36,18 +36,16 @@ public class MarkdownIT extends AbstractComponentIT {
 
     @Test
     public void lineBreaksDisabledByDefault_softBreakNotRendered() {
-        var lineBreaksMarkdown = $(MarkdownElement.class)
-                .id("line-breaks-markdown");
-        waitUntil(driver -> lineBreaksMarkdown.$("p").exists());
-        Assert.assertEquals(0, lineBreaksMarkdown.$("br").all().size());
+        clickElementWithJs("set-line-breaks-content-button");
+        waitUntil(driver -> markdownElement.$("p").exists());
+        Assert.assertEquals(0, markdownElement.$("br").all().size());
     }
 
     @Test
     public void enableLineBreaks_softBreakRendered() {
-        var lineBreaksMarkdown = $(MarkdownElement.class)
-                .id("line-breaks-markdown");
+        clickElementWithJs("set-line-breaks-content-button");
         clickElementWithJs("toggle-line-breaks-button");
-        waitUntil(driver -> lineBreaksMarkdown.$("br").all().size() == 1);
+        waitUntil(driver -> markdownElement.$("br").all().size() == 1);
     }
 
     @Test
