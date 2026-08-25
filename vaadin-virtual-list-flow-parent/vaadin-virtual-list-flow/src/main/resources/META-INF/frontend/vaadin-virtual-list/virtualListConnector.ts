@@ -1,5 +1,13 @@
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
+import type {
+  FlowVirtualList,
+  FlowVirtualListRenderer,
+  Item,
+  ItemRange,
+  PlaceholderItem,
+  VirtualListRenderRoot
+} from './vaadin-virtual-list-types.js';
 
 const EXTRA_ITEMS_BUFFER = 20;
 
@@ -7,15 +15,15 @@ const EXTRA_ITEMS_BUFFER = 20;
  * virtualListConnector is a communication layer between VirtualList's flow
  * component (server-side) and web component (client-side).
  */
-class VirtualListConnector {
+export class VirtualListConnector {
   /** The item the renderer uses to render items that are being loaded */
-  placeholderItem = { __placeholder: true };
+  placeholderItem: PlaceholderItem = { __placeholder: true };
 
-  #list;
-  #placeholderElement;
-  #lastRequestedRange = [0, 0];
+  readonly #list: FlowVirtualList;
+  #placeholderElement: HTMLElement | null = null;
+  #lastRequestedRange: ItemRange = [0, 0];
 
-  constructor(list) {
+  constructor(list: FlowVirtualList) {
     this.#list = list;
 
     list.itemAccessibleNameGenerator = (item) => item && item.accessibleName;
@@ -30,20 +38,20 @@ class VirtualListConnector {
     list.items = [];
   }
 
-  set(index, items) {
+  set(index: number, items: Array<Item | undefined>): void {
     const list = this.#list;
     list.items.splice(index, items.length, ...items);
     list.items = [...list.items];
   }
 
-  clear(index, length) {
+  clear(index: number, length: number): void {
     // How many items, starting from "index", should be set as undefined
     const clearCount = Math.min(length, this.#list.items.length - index);
     this.set(index, [...Array(clearCount)]);
   }
 
-  updateData(items) {
-    const updatedItemsMap = items.reduce((map, item) => {
+  updateData(items: Item[]): void {
+    const updatedItemsMap = items.reduce<Record<string, Item>>((map, item) => {
       map[item.key] = item;
       return map;
     }, {});
@@ -59,7 +67,7 @@ class VirtualListConnector {
     });
   }
 
-  updateSize(newSize) {
+  updateSize(newSize: number): void {
     const list = this.#list;
     const delta = newSize - list.items.length;
     if (delta > 0) {
@@ -69,11 +77,11 @@ class VirtualListConnector {
     }
   }
 
-  setPlaceholderItem(placeholderItem = {}, appId) {
+  setPlaceholderItem(placeholderItem: PlaceholderItem = {}, appId: string): void {
     placeholderItem.__placeholder = true;
     this.placeholderItem = placeholderItem;
     const nodeId = Object.entries(placeholderItem).find(([key]) => key.endsWith('_nodeid'));
-    this.#placeholderElement = nodeId ? Vaadin.Flow.clients[appId].getByNodeId(nodeId[1]) : null;
+    this.#placeholderElement = nodeId ? window.Vaadin.Flow.clients[appId].getByNodeId(nodeId[1] as number) : null;
   }
 
   /**
@@ -81,7 +89,7 @@ class VirtualListConnector {
    * are rendered as placeholders, and so that the rendered range is reported
    * back to the server.
    */
-  #patchRenderer() {
+  #patchRenderer(): void {
     const originalRenderer = this.#list.renderer;
 
     if (!originalRenderer || originalRenderer.__virtualListConnectorPatched) {
@@ -89,7 +97,7 @@ class VirtualListConnector {
       return;
     }
 
-    const renderer = (root, list, model) => {
+    const renderer: FlowVirtualListRenderer = (root, list, model) => {
       root.__virtualListIndex = model.index;
 
       if (model.item === undefined) {
@@ -132,7 +140,7 @@ class VirtualListConnector {
     this.#list.renderer = renderer;
   }
 
-  #scheduleRangeUpdate() {
+  #scheduleRangeUpdate(): void {
     const list = this.#list;
     // Kept on the element: `VirtualListElement` flushes the debouncer to make
     // the visible range available to tests without waiting.
@@ -145,7 +153,7 @@ class VirtualListConnector {
    * Asks the server for the rendered items, plus a buffer above and below, so
    * that scrolling has data ready ahead of rendering.
    */
-  #updateRequestedRange() {
+  #updateRequestedRange(): void {
     const list = this.#list;
 
     /*
@@ -156,7 +164,7 @@ class VirtualListConnector {
      * buffer is within some tolerance compared to the requested buffer.
      */
     const visibleIndexes = [...list.children]
-      .filter((el) => '__virtualListIndex' in el)
+      .filter((el): el is VirtualListRenderRoot => '__virtualListIndex' in el)
       .map((el) => el.__virtualListIndex);
     const firstNeededItem = Math.min(...visibleIndexes);
     const lastNeededItem = Math.max(...visibleIndexes);
@@ -172,7 +180,7 @@ class VirtualListConnector {
   }
 }
 
-function initLazy(list) {
+function initLazy(list: FlowVirtualList): void {
   // Init the connector only once for the virtual list
   list.$connector ??= new VirtualListConnector(list);
 }

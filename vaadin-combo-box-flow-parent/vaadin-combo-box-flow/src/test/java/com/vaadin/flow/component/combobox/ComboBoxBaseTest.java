@@ -121,39 +121,39 @@ abstract class ComboBoxBaseTest {
     }
 
     @Test
-    void setAutoFocusPartialMatch_getAutoFocusPartialMatch() {
+    void setPartialMatchMode_getPartialMatchMode() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        Assertions.assertEquals(AutoFocusPartialMatch.NONE,
-                comboBox.getAutoFocusPartialMatch());
+        Assertions.assertEquals(PartialMatchMode.NONE,
+                comboBox.getPartialMatchMode());
 
-        comboBox.setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH);
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
         Assertions.assertEquals("first-match",
-                comboBox.getElement().getProperty("autoFocusPartialMatch"));
-        Assertions.assertEquals(AutoFocusPartialMatch.FIRST_MATCH,
-                comboBox.getAutoFocusPartialMatch());
+                comboBox.getElement().getProperty("partialMatchMode"));
+        Assertions.assertEquals(PartialMatchMode.FIRST_MATCH,
+                comboBox.getPartialMatchMode());
     }
 
     @Test
-    void setAutoFocusPartialMatchNull_throws() {
+    void setPartialMatchModeNull_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Assertions.assertThrows(NullPointerException.class,
-                () -> comboBox.setAutoFocusPartialMatch(null));
+                () -> comboBox.setPartialMatchMode(null));
     }
 
     @Test
-    void allowCustomValue_setAutoFocusPartialMatch_throws() {
+    void allowCustomValue_setPartialMatchMode_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setAllowCustomValue(true);
         Assertions.assertThrows(IllegalStateException.class, () -> comboBox
-                .setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH));
-        Assertions.assertDoesNotThrow(() -> comboBox
-                .setAutoFocusPartialMatch(AutoFocusPartialMatch.NONE));
+                .setPartialMatchMode(PartialMatchMode.FIRST_MATCH));
+        Assertions.assertDoesNotThrow(
+                () -> comboBox.setPartialMatchMode(PartialMatchMode.NONE));
     }
 
     @Test
-    void autoFocusPartialMatch_setAllowCustomValue_throws() {
+    void partialMatchMode_setAllowCustomValue_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        comboBox.setAutoFocusPartialMatch(AutoFocusPartialMatch.FIRST_MATCH);
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
         Assertions.assertThrows(IllegalStateException.class,
                 () -> comboBox.setAllowCustomValue(true));
         Assertions

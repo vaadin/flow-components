@@ -8,32 +8,33 @@ import {
   getPmString,
   getSeparator,
   searchAmOrPmToken
-} from './helpers.js';
+} from './helpers.ts';
+import type { FlowTimePicker, FlowTimePickerTime } from './vaadin-time-picker-types.js';
 
 /**
  * timepickerConnector is a communication layer between TimePicker's flow
  * component (server-side) and web component (client-side).
  */
-class TimePickerConnector {
-  #timePicker;
+export class TimePickerConnector {
+  readonly #timePicker: FlowTimePicker;
 
   // Locale and the values derived from it, assigned by `setLocale`
-  #locale;
-  #amString;
-  #pmString;
-  #separator;
-  #escapedSeparator;
+  #locale?: string;
+  #amString: string | null = null;
+  #pmString: string | null = null;
+  #separator: string | null = null;
+  #escapedSeparator = '';
 
   // The result of the last successful parse, reused when the same string is
   // parsed again
-  #cachedTimeString;
-  #cachedTimeObject;
+  #cachedTimeString?: string;
+  #cachedTimeObject?: FlowTimePickerTime;
 
-  constructor(timePicker) {
+  constructor(timePicker: FlowTimePicker) {
     this.#timePicker = timePicker;
   }
 
-  setLocale(locale) {
+  setLocale(locale: string): void {
     try {
       // Check whether the locale is supported by the browser or not
       TEST_PM_TIME.toLocaleTimeString(locale);
@@ -64,16 +65,16 @@ class TimePickerConnector {
     };
   }
 
-  #includeSeconds() {
-    return this.#timePicker.step && this.#timePicker.step < 60;
+  #includeSeconds(): boolean {
+    return !!this.#timePicker.step && this.#timePicker.step < 60;
   }
 
-  #includeMilliseconds() {
-    return this.#timePicker.step && this.#timePicker.step < 1;
+  #includeMilliseconds(): boolean {
+    return !!this.#timePicker.step && this.#timePicker.step < 1;
   }
 
-  #formatTime(timeObject) {
-    if (!timeObject) return;
+  #formatTime(timeObject: FlowTimePickerTime | undefined): string | undefined {
+    if (!timeObject) return undefined;
 
     const timeToBeFormatted = new Date();
     timeToBeFormatted.setHours(timeObject.hours);
@@ -96,14 +97,14 @@ class TimePickerConnector {
     return localeTimeString;
   }
 
-  #parseTime(timeString) {
+  #parseTime(timeString: string): FlowTimePickerTime | undefined {
     if (timeString && timeString === this.#cachedTimeString && this.#cachedTimeObject) {
       return this.#cachedTimeObject;
     }
 
     if (!timeString) {
       // when nothing is returned, the component shows the invalid state for the input
-      return;
+      return undefined;
     }
 
     const amToken = searchAmOrPmToken(timeString, this.#amString);
@@ -117,9 +118,9 @@ class TimePickerConnector {
     // A regexp that allows to find the numbers with optional separator and continuing searching after it.
     const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + this.#escapedSeparator + ')?', 'g');
 
-    let hours = numbersRegExp.exec(numbersOnlyTimeString);
-    if (hours) {
-      hours = parseDigitsIntoInteger(hours[0].replace(this.#separator, ''));
+    const hoursMatch = numbersRegExp.exec(numbersOnlyTimeString);
+    if (hoursMatch) {
+      let hours = parseDigitsIntoInteger(hoursMatch[0].replace(this.#separator || '', ''));
       // handle 12 am -> 0
       // do not do anything if am & pm are not used or if those are the same,
       // as with locale bg-BG there is always ч. at the end of the time
@@ -136,27 +137,29 @@ class TimePickerConnector {
       // detecting milliseconds from input, expects am/pm removed from end, eg. .0 or .00 or .000
       const millisecondRegExp = /[[\.][\d\u0660-\u0669]{1,3}$/;
       // reset to end or things can explode
-      let milliseconds = seconds && this.#includeMilliseconds() && millisecondRegExp.exec(numbersOnlyTimeString);
+      let milliseconds: RegExpExecArray | false | null | undefined =
+        seconds && this.#includeMilliseconds() && millisecondRegExp.exec(numbersOnlyTimeString);
       // handle case where last numbers are seconds and . is the separator (invalid regexp match)
-      if (milliseconds && milliseconds['index'] <= seconds['index']) {
+      if (milliseconds && seconds && milliseconds.index <= seconds.index) {
         milliseconds = undefined;
       }
       // hours is a number at this point, others are either arrays or null
       // the string in [0] from the arrays includes the separator too
       this.#cachedTimeObject = {
         hours: hours,
-        minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(this.#separator, '')) : 0,
-        seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(this.#separator, '')) : 0,
+        minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(this.#separator || '', '')) : 0,
+        seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(this.#separator || '', '')) : 0,
         milliseconds:
           minutes && seconds && milliseconds ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', '')) : 0
       };
       this.#cachedTimeString = timeString;
       return this.#cachedTimeObject;
     }
+    return undefined;
   }
 }
 
-function initLazy(timePicker) {
+function initLazy(timePicker: FlowTimePicker): void {
   // Init the connector only once for the time picker
   timePicker.$connector ??= new TimePickerConnector(timePicker);
 }

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "useDefineForClassFields": false,
+    // Resolve @vaadin and date-fns package types from the integration tests
+    // module, whose node_modules is populated by the Maven frontend build
+    "paths": {
+      "@vaadin/*": ["../vaadin-date-picker-flow-integration-tests/node_modules/@vaadin/*"],
+      "date-fns/*": ["../vaadin-date-picker-flow-integration-tests/node_modules/date-fns/*"]
+    }
+  },
+  "include": ["src/main/resources/META-INF/frontend/**/*"]
+}
