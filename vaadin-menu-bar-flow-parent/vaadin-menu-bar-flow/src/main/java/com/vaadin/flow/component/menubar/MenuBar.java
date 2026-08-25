@@ -456,10 +456,10 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
             return;
         }
         runBeforeClientResponse(ui -> {
-            // When calling `generateItems` without providing a node id, it will
-            // use the previously generated items tree, only updating the
-            // disabled and hidden properties of the root items = the menu bar
-            // buttons.
+            // When calling `generateItems` without providing a node id, it
+            // will use the previously generated items tree, re-filtering
+            // hidden items and re-rendering the root items = the menu bar
+            // buttons, which snapshot the item properties on render.
             getElement().executeJs("this.$connector.generateItems()");
             updateScheduled = false;
         });
