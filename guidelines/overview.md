@@ -27,3 +27,4 @@ something work.
 | [Documenting](documenting.md)                           | Javadoc and README.                                                       |
 | [Testing](testing.md)                                   | Unit tests, TestBench elements, integration tests, WTR.                   |
 | [Feature Flags](feature-flags.md)                       | Using feature flags for experimental components and features.             |
+| [AI Components](ai-components.md)                       | The AI module group: orchestrator, providers, tools, licensing split.     |
