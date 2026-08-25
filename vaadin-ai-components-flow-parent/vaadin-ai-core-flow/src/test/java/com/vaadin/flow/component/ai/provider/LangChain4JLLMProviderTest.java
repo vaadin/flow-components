@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -602,10 +603,7 @@ class LangChain4JLLMProviderTest {
 
         streamingProvider.stream(request).collectList().block();
 
-        var warning = logger.getLoggingEvents().stream().filter(
-                event -> event.getMessage().contains("Push is not enabled"))
-                .findFirst();
-        Assertions.assertTrue(warning.isPresent(), "Expected push warning");
+        Assertions.assertTrue(hasDeliveryWarning(), "Expected push warning");
     }
 
     @Test
@@ -619,10 +617,93 @@ class LangChain4JLLMProviderTest {
 
         provider.stream(request).collectList().block();
 
-        var warning = logger.getLoggingEvents().stream().filter(
-                event -> event.getMessage().contains("Push is not enabled"))
-                .findFirst();
-        Assertions.assertFalse(warning.isPresent(), "Expected no push warning");
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "A synchronous turn completes within the request, so no "
+                        + "warning is expected");
+    }
+
+    @Test
+    void backgroundExecution_isDisabledByDefault() {
+        Assertions.assertFalse(provider.isBackgroundExecution());
+    }
+
+    @Test
+    void setBackgroundExecution_isReflectedByGetter() {
+        provider.setBackgroundExecution(true);
+        Assertions.assertTrue(provider.isBackgroundExecution());
+
+        provider.setBackgroundExecution(false);
+        Assertions.assertFalse(provider.isBackgroundExecution());
+    }
+
+    @Test
+    void stream_nonStreamingByDefault_callsModelOnSubscribingThread() {
+        var callThread = captureChatModelCallThread();
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertSame(Thread.currentThread(), callThread.get(),
+                "Without background execution the blocking call must stay on "
+                        + "the subscribing thread");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_callsModelOffSubscribingThread() {
+        provider.setBackgroundExecution(true);
+        var callThread = captureChatModelCallThread();
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertNotSame(Thread.currentThread(), callThread.get(),
+                "With background execution the blocking call must move off the "
+                        + "subscribing thread");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_returnsResponse() {
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = provider.stream(createSimpleRequest("Hello"))
+                .collectList().block();
+
+        Assertions.assertEquals(List.of("Hi there"), results);
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_pushDisabled_logsWarning() {
+        provider.setBackgroundExecution(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasDeliveryWarning(),
+                "A background turn needs push or polling to reach the browser");
+    }
+
+    /**
+     * Records the thread the blocking chat model call runs on and answers with
+     * a simple response.
+     */
+    private AtomicReference<Thread> captureChatModelCallThread() {
+        var callThread = new AtomicReference<Thread>();
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    callThread.set(Thread.currentThread());
+                    return response;
+                });
+        return callThread;
+    }
+
+    private boolean hasDeliveryWarning() {
+        return logger.getLoggingEvents().stream().anyMatch(event -> event
+                .getMessage().contains("neither automatic push nor polling"));
     }
 
     @Test

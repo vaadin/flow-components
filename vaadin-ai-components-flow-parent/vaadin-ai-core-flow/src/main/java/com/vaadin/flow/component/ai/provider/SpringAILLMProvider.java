@@ -45,7 +45,6 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.shared.communication.PushMode;
 
 import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
@@ -63,6 +62,14 @@ import tools.jackson.databind.JsonNode;
  * requires server push to be enabled. Annotate your UI class or application
  * shell with {@code @Push}, or configure push programmatically, before using
  * streaming mode. A warning is logged at runtime if push is not enabled.
+ * </p>
+ * <p>
+ * <b>Blocking the request thread:</b> in non-streaming mode the LLM call blocks
+ * the thread that subscribes to the response, which is the UI thread for a
+ * prompt triggered from the browser. Call
+ * {@link #setBackgroundExecution(boolean) setBackgroundExecution(true)} to run
+ * the call on a background thread instead, so the request completes and the
+ * user's message renders while the LLM works.
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
@@ -93,6 +100,8 @@ public class SpringAILLMProvider implements LLMProvider {
     private final transient MessageWindowChatMemory chatMemory;
     private final boolean hasManagedMemory;
     private boolean isStreaming = true;
+    private final BackgroundExecution backgroundExecution = new BackgroundExecution(
+            SpringAILLMProvider.class);
 
     /**
      * Constructor with a chat model.
@@ -136,10 +145,20 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
         if (isStreaming) {
-            checkPushConfiguration();
-            return executeStreamingChat(request);
+            return backgroundExecution
+                    .applyToStreamingResponse(executeStreamingChat(request));
         }
-        return executeNonStreamingChat(request);
+        return backgroundExecution
+                .applyToBlockingResponse(executeNonStreamingChat(request));
+    }
+
+    /**
+     * Gets whether streaming mode is used.
+     *
+     * @return {@code true} if streaming mode is used, {@code false} otherwise
+     */
+    public boolean isStreaming() {
+        return isStreaming;
     }
 
     /**
@@ -151,6 +170,57 @@ public class SpringAILLMProvider implements LLMProvider {
      */
     public void setStreaming(boolean streaming) {
         this.isStreaming = streaming;
+    }
+
+    /**
+     * Gets whether the LLM call runs on a background thread.
+     *
+     * @return {@code true} if the call runs on a background thread,
+     *         {@code false} if it runs on the thread that asks for the response
+     */
+    public boolean isBackgroundExecution() {
+        return backgroundExecution.isEnabled();
+    }
+
+    /**
+     * Sets whether to run the LLM call on a background thread. The default is
+     * {@code false}, which runs it on the thread that asks for the response —
+     * the UI thread, for a prompt triggered from the browser. The setting has
+     * no effect in streaming mode, where the response already arrives on the
+     * LLM client's own threads.
+     * <p>
+     * A non-streaming call blocks for the whole turn, every tool call included.
+     * On the UI thread that means holding the session lock until the turn ends,
+     * so nothing the turn produces reaches the browser and the application
+     * appears frozen. Set this to {@code true} to run the call on a background
+     * thread instead: the request completes immediately, the user's message and
+     * the assistant placeholder render, and the response is added when it
+     * arrives.
+     * <p>
+     * This requires two things from the application:
+     * <ul>
+     * <li><b>A way to deliver the response.</b> Annotate the application shell
+     * or UI class with {@code @Push}, or enable polling with
+     * {@link UI#setPollInterval(int)}. Manual push mode is not enough on its
+     * own, because nothing calls {@code ui.push()} for you. A warning is logged
+     * when neither is active.</li>
+     * <li><b>Thread-safe tools.</b> On a background thread Vaadin thread locals
+     * such as {@link UI#getCurrent()} and framework contexts such as Spring
+     * Security's {@code SecurityContext} are not bound, and UI components must
+     * not be accessed directly. Wrap component access in {@code ui.access()},
+     * or capture what you need in
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+     * which still runs on the UI thread. This is the same requirement streaming
+     * mode already has.</li>
+     * </ul>
+     *
+     * @param backgroundExecution
+     *            {@code true} to run the call on a background thread,
+     *            {@code false} to run it on the thread that asks for the
+     *            response
+     */
+    public void setBackgroundExecution(boolean backgroundExecution) {
+        this.backgroundExecution.setEnabled(backgroundExecution);
     }
 
     @Override
@@ -369,15 +439,5 @@ public class SpringAILLMProvider implements LLMProvider {
             return JacksonUtils.createObjectNode();
         }
         return JacksonUtils.readTree(arguments);
-    }
-
-    private static void checkPushConfiguration() {
-        var ui = UI.getCurrent();
-        if (ui != null && PushMode.DISABLED
-                .equals(ui.getPushConfiguration().getPushMode())) {
-            LOGGER.warn("Push is not enabled. Streaming LLM responses "
-                    + "require @Push annotation or programmatic push "
-                    + "configuration to update the UI in real-time.");
-        }
     }
 }
