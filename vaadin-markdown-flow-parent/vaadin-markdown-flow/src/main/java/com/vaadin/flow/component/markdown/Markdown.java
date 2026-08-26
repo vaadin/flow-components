@@ -35,7 +35,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 24.8
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-alpha11")
+@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-alpha13")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
@@ -118,6 +118,56 @@ public class Markdown extends Component implements HasSize {
      */
     public SignalBinding<String> bindContent(Signal<String> contentSignal) {
         return contentSupport.bind(contentSignal);
+    }
+
+    /**
+     * Sets whether single line breaks ("soft breaks") within a paragraph are
+     * rendered as line breaks, the same way chat and message-style Markdown
+     * behaves.
+     * <p>
+     * By default, this is {@code false}, following the original Markdown
+     * specification where single line breaks are ignored and a blank line is
+     * required to start a new paragraph.
+     *
+     * @param lineBreaks
+     *            {@code true} to render single line breaks as line breaks,
+     *            {@code false} otherwise
+     * @since 25.3
+     */
+    public void setLineBreaks(boolean lineBreaks) {
+        getElement().setProperty("lineBreaks", lineBreaks);
+    }
+
+    /**
+     * Gets whether single line breaks ("soft breaks") within a paragraph are
+     * rendered as line breaks.
+     *
+     * @return {@code true} if single line breaks are rendered as line breaks,
+     *         {@code false} otherwise
+     * @since 25.3
+     */
+    public boolean isLineBreaks() {
+        return getElement().getProperty("lineBreaks", false);
+    }
+
+    /**
+     * Binds the line breaks state to the given signal. While the binding is
+     * active, calling {@link #setLineBreaks(boolean)} will throw a
+     * {@code BindingActiveException}. A {@code null} signal value is treated as
+     * {@code false}.
+     *
+     * @param lineBreaksSignal
+     *            the signal providing the line breaks state, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.3
+     */
+    public SignalBinding<Boolean> bindLineBreaks(
+            Signal<Boolean> lineBreaksSignal) {
+        Objects.requireNonNull(lineBreaksSignal, "Signal cannot be null");
+        return getElement().bindProperty("lineBreaks", lineBreaksSignal
+                .map(value -> value == null ? Boolean.FALSE : value), null);
     }
 
     @Override

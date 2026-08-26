@@ -42,9 +42,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -64,6 +66,7 @@ import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import tools.jackson.databind.JsonNode;
 
 class AIOrchestratorTest {
@@ -89,7 +92,7 @@ class AIOrchestratorTest {
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
-        logger.clear();
+        logger.clearAll();
     }
 
     @Test
@@ -2930,14 +2933,15 @@ class AIOrchestratorTest {
     @Test
     void builder_claimsAllResources_toPreventSharing() throws Exception {
         // Builder with-methods that do NOT configure a shareable resource —
-        // value types, listeners, tools, and restored conversation state. Any
-        // other with-method is treated as configuring a resource that build()
-        // must claim. If you add a new resource with-method (component,
-        // controller, ...), do not add it here — ensure build() claims it.
+        // value types, listeners and other callbacks, tools, and restored
+        // conversation state. Any other with-method is treated as configuring
+        // a resource that build() must claim. If you add a new resource
+        // with-method (component, controller, ...), do not add it here —
+        // ensure build() claims it.
         Set<String> nonResourceSetters = Set.of("withTools", "withUserName",
-                "withAssistantName", "withRequestListener",
-                "withAttachmentClickListener", "withResponseListener",
-                "withHistory", "withMetadata");
+                "withAssistantName", "withRequestInterceptor",
+                "withRequestListener", "withAttachmentClickListener",
+                "withResponseListener", "withHistory", "withMetadata");
 
         // Provider is set via the factory method, not a with-method.
         assertClaimed(null, LLMProvider.class);
@@ -3132,6 +3136,374 @@ class AIOrchestratorTest {
         var controller = Mockito.mock(AIController.class);
         Mockito.when(controller.getTools()).thenReturn(List.of());
         return controller;
+    }
+
+    @Test
+    void prompt_providerRunsOnCallerThread_completesTurnOnCallerThread() {
+        var listenerThread = new AtomicReference<Thread>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(
+                        event -> listenerThread.set(Thread.currentThread()))
+                .build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertSame(Thread.currentThread(), listenerThread.get(),
+                "A provider that does not schedule itself must keep the turn "
+                        + "on the caller thread");
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_completesTurnOffCallerThread()
+            throws Exception {
+        var turnEnded = new CountDownLatch(1);
+        var listenerThread = new AtomicReference<Thread>();
+        var responseText = new AtomicReference<String>();
+        // Stands in for a provider with background execution enabled: the
+        // orchestrator is given no say in where the turn runs.
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response")
+                        .subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    listenerThread.set(Thread.currentThread());
+                    responseText.set(event.getResponse());
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn never completed");
+        Assertions.assertNotSame(Thread.currentThread(), listenerThread.get(),
+                "A self-scheduling provider must carry the turn without the "
+                        + "orchestrator configuring anything");
+        Assertions.assertEquals("Response", responseText.get());
+        Assertions.assertEquals("Response", orchestrator.getHistory()
+                .get(orchestrator.getHistory().size() - 1).content());
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_returnsWhileTurnStillRunning()
+            throws Exception {
+        var providerStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    providerStarted.countDown();
+                    try {
+                        // Timed so a prompt() that blocks on the turn fails
+                        // the count assertion below instead of deadlocking:
+                        // the release latch only opens after prompt() has
+                        // returned.
+                        release.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("Hello");
+
+        // prompt() has returned; the turn must still be in progress.
+        Assertions.assertTrue(providerStarted.await(5, TimeUnit.SECONDS),
+                "The provider was never invoked");
+        Assertions.assertEquals(1, turnEnded.getCount(),
+                "prompt() must return while the turn is still running");
+
+        release.countDown();
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn never completed after release");
+    }
+
+    @Test
+    void prompt_duringSelfScheduledTurn_secondPromptDropped() throws Exception {
+        var providerStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    providerStarted.countDown();
+                    try {
+                        release.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(providerStarted.await(5, TimeUnit.SECONDS),
+                "The provider was never invoked");
+
+        // The caller thread is free while the turn runs, so a second prompt
+        // reaches the busy guard instead of queueing on the session lock.
+        orchestrator.prompt("Second");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("another request is already in progress"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "A prompt sent during a running turn must be dropped with a "
+                        + "warning");
+        Mockito.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+
+        release.countDown();
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The first turn never completed after release");
+        Assertions.assertTrue(
+                orchestrator.getHistory().stream().noneMatch(
+                        message -> "Second".equals(message.content())),
+                "A dropped prompt must not enter the conversation history");
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_completedTurnAllowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var streamCalls = new AtomicInteger();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    streamCalls.incrementAndGet();
+                    return Flux.just("Response")
+                            .subscribeOn(Schedulers.boundedElastic());
+                });
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    firstEvent.compareAndSet(null, event);
+                    firstDone.countDown();
+                }).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never completed");
+        Assertions.assertTrue(firstEvent.get().getError().isEmpty(),
+                "The first turn was expected to complete successfully, got: "
+                        + firstEvent.get().getError());
+
+        // The busy flag is released in the stream's doFinally, which runs
+        // just after the response listener on the background thread — poll
+        // until the next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = streamCalls.get() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A completed self-scheduled turn must release the busy flag "
+                        + "so the next prompt is processed");
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_streamErrorAllowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var streamCalls = new AtomicInteger();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    streamCalls.incrementAndGet();
+                    return Flux
+                            .<String> error(new RuntimeException("API Error"))
+                            .subscribeOn(Schedulers.boundedElastic());
+                });
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    firstEvent.compareAndSet(null, event);
+                    firstDone.countDown();
+                }).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never ended");
+        Assertions.assertTrue(firstEvent.get().getError().isPresent(),
+                "The first turn was expected to fail with the stream error");
+
+        // Same doFinally timing as on the success path — poll until the
+        // next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = streamCalls.get() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A failed self-scheduled turn must release the busy flag so "
+                        + "the next prompt is processed");
+    }
+
+    @Test
+    void prompt_uiDetachedMidTurn_completesQuietly() throws Exception {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        var listenerError = new AtomicReference<Throwable>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(event -> {
+                    listenerError.set(event.getError().orElse(null));
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        // Detach the UI while the provider is still working, then let the
+        // turn finish.
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        Assertions.assertNull(listenerError.get(),
+                "A detached UI must not surface as a turn error");
+        Assertions.assertEquals("Response", orchestrator.getHistory()
+                .get(orchestrator.getHistory().size() - 1).content());
+        // The orchestrator logs from the Reactor thread; only the
+        // all-thread view can see (or miss) those events.
+        Assertions.assertTrue(
+                logger.getAllLoggingEvents().stream()
+                        .noneMatch(event -> event.getMessage()
+                                .contains("Error during LLM streaming")),
+                "A detached UI must not be logged as a streaming error");
+    }
+
+    @Test
+    void prompt_uiDetachedMidTurn_streamErrorCompletesQuietly()
+            throws Exception {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        var listenerError = new AtomicReference<Throwable>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.error(new RuntimeException("API Error"));
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(event -> {
+                    listenerError.set(event.getError().orElse(null));
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        // Detach the UI while the provider is still working, then let the
+        // stream fail.
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        Assertions.assertNotNull(listenerError.get(),
+                "The listener must still receive the stream error");
+        Assertions.assertEquals("API Error", listenerError.get().getMessage(),
+                "The original stream error must not be replaced by a detach "
+                        + "failure");
+        // The orchestrator logs from the Reactor thread; only the
+        // all-thread view can see (or miss) those events. The real stream
+        // error is still logged, exactly once and with the original cause;
+        // the deliberate DEBUG log of the skipped UI update is the only
+        // event allowed to carry the detach exception.
+        var streamErrors = logger
+                .getAllLoggingEvents().stream().filter(event -> event
+                        .getMessage().contains("Error during LLM streaming"))
+                .toList();
+        Assertions.assertEquals(1, streamErrors.size(),
+                "The stream error must be logged exactly once");
+        Assertions.assertEquals("API Error",
+                streamErrors.getFirst().getThrowable()
+                        .map(Throwable::getMessage).orElse(null),
+                "The logged stream error must carry the original cause, not "
+                        + "a detach failure");
+        Assertions.assertTrue(
+                logger.getAllLoggingEvents().stream()
+                        .filter(event -> event.getLevel() != Level.DEBUG)
+                        .noneMatch(event -> event.getThrowable()
+                                .filter(UIDetachedException.class::isInstance)
+                                .isPresent()),
+                "Handling the error on a detached UI must not log a "
+                        + "UIDetachedException above debug level");
+    }
+
+    @Test
+    void prompt_uiDetachedMidTurn_skipsControllerOnResponse() throws Exception {
+        var controller = mockController();
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withController(controller)
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("Hello");
+
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        // The listener fires just before the controller hook would run on
+        // the same thread — after() covers that window.
+        Mockito.verify(controller, Mockito.after(500).never())
+                .onResponse(Mockito.any());
     }
 
     private AIOrchestrator orchestratorWith(AIController controller) {

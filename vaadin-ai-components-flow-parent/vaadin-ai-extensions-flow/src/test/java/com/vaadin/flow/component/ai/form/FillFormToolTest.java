@@ -2175,6 +2175,11 @@ class FillFormToolTest {
             }
 
             @Override
+            public String sourceInstructions() {
+                return "";
+            }
+
+            @Override
             public String executeFill(JsonNode arguments) {
                 throw toThrow;
             }

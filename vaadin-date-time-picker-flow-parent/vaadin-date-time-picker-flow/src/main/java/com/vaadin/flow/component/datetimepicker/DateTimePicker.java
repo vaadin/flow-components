@@ -20,6 +20,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Locale;
@@ -103,7 +104,7 @@ class DateTimePickerTimePicker
  * @since 1.0
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-alpha11")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-alpha13")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -681,6 +682,54 @@ public class DateTimePicker
         double stepsValue = getElement().getProperty("step", 0.0);
 
         return StepsUtil.convertStepsValueToDuration(stepsValue);
+    }
+
+    /**
+     * Gets the time that is filled in automatically when the user selects a
+     * date while the time field is empty. Defaults to {@code null}.
+     *
+     * @return the default time, or {@code null} if no default time is set
+     * @see #setDefaultTime(LocalTime)
+     * @since 25.3
+     */
+    public LocalTime getDefaultTime() {
+        String defaultTime = getElement().getProperty("defaultTime");
+        return defaultTime == null || defaultTime.isEmpty() ? null
+                : LocalTime.parse(defaultTime);
+    }
+
+    /**
+     * Sets the time that is filled in automatically when the user selects a
+     * date while the time field is empty. Defaults to {@code null}, in which
+     * case selecting a date leaves the time field empty and the component has
+     * no value until a time is entered as well.
+     * <p>
+     * The default time is only filled in for a date that the user selects or
+     * types, never for a value set with {@link #setValue(LocalDateTime)}. A
+     * time that the user has already entered is never overwritten.
+     * <p>
+     * The filled in time uses the precision defined by
+     * {@link #setStep(Duration)}, a more precise time is truncated. A time
+     * outside the range defined by {@link #setMin(LocalDateTime)} and
+     * {@link #setMax(LocalDateTime)} is filled in as is and makes the component
+     * invalid.
+     * <p>
+     * The default time itself will be truncated to millisecond precision, as
+     * that is the maximum that the time picker supports. This means that
+     * {@link #getDefaultTime()} might return a different value than what was
+     * passed in.
+     *
+     * @param defaultTime
+     *            the default time, or {@code null} to remove the default time
+     * @since 25.3
+     */
+    public void setDefaultTime(LocalTime defaultTime) {
+        if (defaultTime == null) {
+            getElement().removeProperty("defaultTime");
+        } else {
+            getElement().setProperty("defaultTime",
+                    defaultTime.truncatedTo(ChronoUnit.MILLIS).toString());
+        }
     }
 
     /**

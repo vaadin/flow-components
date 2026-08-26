@@ -23,6 +23,13 @@ tsconfig.json
 !**/test/tsconfig.json
 !vaadin-grid-flow-parent/vaadin-grid-flow/tsconfig.json
 !vaadin-combo-box-flow-parent/vaadin-combo-box-flow/tsconfig.json
+!vaadin-virtual-list-flow-parent/vaadin-virtual-list-flow/tsconfig.json
+!vaadin-date-picker-flow-parent/vaadin-date-picker-flow/tsconfig.json
+!vaadin-time-picker-flow-parent/vaadin-time-picker-flow/tsconfig.json
+!vaadin-menu-bar-flow-parent/vaadin-menu-bar-flow/tsconfig.json
+!vaadin-context-menu-flow-parent/vaadin-context-menu-flow/tsconfig.json
+!vaadin-map-flow-parent/vaadin-map-flow/tsconfig.json
+!vaadin-upload-flow-parent/vaadin-upload-flow/tsconfig.json
 webpack.*
 vite.generated.ts
 /vite.config.ts
@@ -32,6 +39,7 @@ node_modules
 !/package.json
 !/package-lock.json
 pnpm*
+.pnpm-store
 .npmrc
 error-screenshots
 

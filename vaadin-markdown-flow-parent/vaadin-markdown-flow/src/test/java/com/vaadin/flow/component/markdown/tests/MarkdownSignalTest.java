@@ -32,11 +32,13 @@ class MarkdownSignalTest extends AbstractSignalsTest {
     private Markdown markdown;
     private ValueSignal<String> contentSignal;
     private Signal<String> computedSignal;
+    private ValueSignal<Boolean> lineBreaksSignal;
 
     @BeforeEach
     void setup() {
         contentSignal = new ValueSignal<>("**foo**");
         computedSignal = Signal.computed(() -> contentSignal.get() + " bar");
+        lineBreaksSignal = new ValueSignal<>(true);
     }
 
     @AfterEach
@@ -152,6 +154,38 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
         contentSignal.set("**baz**");
         Assertions.assertEquals("**baz** bar", markdown.getContent());
+    }
+
+    @Test
+    void bindLineBreaks_signalDrivesLineBreaks() {
+        markdown = new Markdown();
+        markdown.bindLineBreaks(lineBreaksSignal);
+        ui.add(markdown);
+
+        Assertions.assertTrue(markdown.isLineBreaks());
+
+        lineBreaksSignal.set(false);
+        Assertions.assertFalse(markdown.isLineBreaks());
+    }
+
+    @Test
+    void bindLineBreaks_nullSignalValue_lineBreaksDisabled() {
+        markdown = new Markdown();
+        markdown.bindLineBreaks(lineBreaksSignal);
+        ui.add(markdown);
+
+        lineBreaksSignal.set(null);
+        Assertions.assertFalse(markdown.isLineBreaks());
+    }
+
+    @Test
+    void bindLineBreaks_setLineBreaks_throwsBindingActiveException() {
+        markdown = new Markdown();
+        markdown.bindLineBreaks(lineBreaksSignal);
+        ui.add(markdown);
+
+        Assertions.assertThrows(BindingActiveException.class,
+                () -> markdown.setLineBreaks(false));
     }
 
     private void assertUpdateMarkdownCall(Component component, String content,

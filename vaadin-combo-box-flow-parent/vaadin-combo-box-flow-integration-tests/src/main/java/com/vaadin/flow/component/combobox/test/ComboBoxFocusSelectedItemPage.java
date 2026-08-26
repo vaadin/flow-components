@@ -20,11 +20,13 @@ import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
@@ -38,6 +40,15 @@ public class ComboBoxFocusSelectedItemPage extends Div {
     private static final String LAZY_WITH_PROVIDER = "lazy-with-provider";
     private static final String IN_MEMORY = "in-memory";
     private static final String LAZY_TOGGLE_OFF = "lazy-toggle-off";
+    private static final String CLIENT_FILTER = "client-filter";
+
+    // Fits into a single page, so that the combo box filters on the client and
+    // the server never learns about the filter. "Banana 5" is at index 15 of
+    // all items, and at index 5 among the items matching a "B" filter.
+    private static final List<String> CLIENT_FILTER_ITEMS = Stream
+            .concat(IntStream.range(0, 10).mapToObj(i -> "Apple " + i),
+                    IntStream.range(0, 20).mapToObj(i -> "Banana " + i))
+            .toList();
 
     public ComboBoxFocusSelectedItemPage() {
         ComboBox<String> withProvider = lazyCombo(LAZY_WITH_PROVIDER);
@@ -67,6 +78,20 @@ public class ComboBoxFocusSelectedItemPage extends Div {
                             getElement().removeChild(toggleOff.getElement());
                             getElement().appendChild(toggleOff.getElement());
                         }));
+        addSeparator();
+
+        ComboBox<String> clientFilter = new ComboBox<>();
+        clientFilter.setId(CLIENT_FILTER);
+        clientFilter.setItems(CLIENT_FILTER_ITEMS);
+        clientFilter.setFocusSelectedItem(true);
+        clientFilter.setValue("Banana 5");
+        Span clientFilterValue = new Span(clientFilter.getValue());
+        clientFilterValue.setId(CLIENT_FILTER + "-value");
+        clientFilter.addValueChangeListener(event -> clientFilterValue
+                .setText(String.valueOf(event.getValue())));
+        addSection(
+                "In-memory combo that filters on the client, toggle on, preset Banana 5",
+                clientFilter, clientFilterValue);
     }
 
     private ComboBox<String> lazyCombo(String id) {
@@ -107,10 +132,10 @@ public class ComboBoxFocusSelectedItemPage extends Div {
     }
 
     private void addSection(String title, ComboBox<String> combo,
-            NativeButton... controls) {
+            Component... controls) {
         add(new Paragraph(title));
         add(combo);
-        for (NativeButton control : controls) {
+        for (Component control : controls) {
             add(control);
         }
     }

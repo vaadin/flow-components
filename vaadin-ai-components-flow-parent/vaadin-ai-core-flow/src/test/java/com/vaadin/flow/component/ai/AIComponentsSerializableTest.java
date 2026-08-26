@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -132,6 +133,54 @@ class AIComponentsSerializableTest extends ClassesSerializableTest {
         Assertions.assertEquals("msg-1", restoredHistory.get(0).messageId());
         Assertions.assertEquals("Hi there", restoredHistory.get(1).content());
         Assertions.assertTrue(attachmentsCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    void serialization_roundTrip_preservesRequestInterceptor()
+            throws Throwable {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withRequestInterceptor(event -> event
+                        .setUserMessage("processed " + event.getUserMessage()))
+                .build();
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        deserialized.reconnect(newProvider).apply();
+
+        deserialized.prompt("original");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("processed original",
+                captor.getValue().userMessage());
+    }
+
+    @Test
+    void serialization_whilePostponed_reconnectAcceptsNewPrompts()
+            throws Throwable {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withRequestInterceptor(event -> {
+                    if ("first".equals(event.getUserMessage())) {
+                        event.postpone(Duration.ofMinutes(5));
+                    }
+                }).build();
+        orchestrator.prompt("first");
+
+        var deserialized = serializeAndDeserialize(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        deserialized.reconnect(newProvider).apply();
+
+        deserialized.prompt("second");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals("second", captor.getValue().userMessage());
     }
 
     @Test

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -89,6 +90,17 @@ public class DateTimePickerPage extends Div {
         picker5.setId("date-time-picker-high-precision-initial-value");
 
         add(new Hr(), new H1("Set initial value with high precision"), picker5);
+
+        // Default time
+        Div message6 = createMessageDiv("message-default-time");
+
+        DateTimePicker picker6 = new DateTimePicker();
+        picker6.setId("date-time-picker-default-time");
+        picker6.setDefaultTime(LocalTime.of(9, 0));
+        picker6.addValueChangeListener(
+                event -> updateMessage(message6, picker6));
+
+        add(new Hr(), new H1("Default time"), picker6, message6);
     }
 
     private void updateMessage(Div message, DateTimePicker dateTimePicker) {

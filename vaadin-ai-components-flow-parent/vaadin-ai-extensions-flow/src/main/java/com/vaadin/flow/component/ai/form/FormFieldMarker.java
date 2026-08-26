@@ -8,8 +8,10 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Locale;
 import java.util.Optional;
 
+import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -41,7 +43,7 @@ import tools.jackson.databind.node.ObjectNode;
  * inject the badge into — stays inert on the client, so a non-Vaadin field
  * never shows a marker.
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha11")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha13")
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 
@@ -68,6 +70,24 @@ final class FormFieldMarker {
         if (!json.equals(marker.getPropertyRaw("i18n"))) {
             marker.setPropertyJson("i18n", json);
         }
+    }
+
+    /**
+     * Sets the confidence level the field's marker shows, or clears the
+     * indicator when {@code confidence} is {@code null}. A missing level means
+     * the model did not judge itself, not that it was unsure, so the marker
+     * then shows no indicator rather than a doubtful one. A no-op when the
+     * field has no marker.
+     */
+    static void setConfidence(Element field, ConfidenceLevel confidence) {
+        find(field).ifPresent(marker -> {
+            if (confidence == null) {
+                marker.removeProperty("confidence");
+            } else {
+                marker.setProperty("confidence",
+                        confidence.name().toLowerCase(Locale.ROOT));
+            }
+        });
     }
 
     /**

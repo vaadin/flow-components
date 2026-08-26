@@ -121,6 +121,46 @@ abstract class ComboBoxBaseTest {
     }
 
     @Test
+    void setPartialMatchMode_getPartialMatchMode() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        Assertions.assertEquals(PartialMatchMode.NONE,
+                comboBox.getPartialMatchMode());
+
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
+        Assertions.assertEquals("first-match",
+                comboBox.getElement().getProperty("partialMatchMode"));
+        Assertions.assertEquals(PartialMatchMode.FIRST_MATCH,
+                comboBox.getPartialMatchMode());
+    }
+
+    @Test
+    void setPartialMatchModeNull_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> comboBox.setPartialMatchMode(null));
+    }
+
+    @Test
+    void allowCustomValue_setPartialMatchMode_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setAllowCustomValue(true);
+        Assertions.assertThrows(IllegalStateException.class, () -> comboBox
+                .setPartialMatchMode(PartialMatchMode.FIRST_MATCH));
+        Assertions.assertDoesNotThrow(
+                () -> comboBox.setPartialMatchMode(PartialMatchMode.NONE));
+    }
+
+    @Test
+    void partialMatchMode_setAllowCustomValue_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> comboBox.setAllowCustomValue(true));
+        Assertions
+                .assertDoesNotThrow(() -> comboBox.setAllowCustomValue(false));
+    }
+
+    @Test
     void setEnabled() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         comboBox.setEnabled(true);

@@ -49,7 +49,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 24.5
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "25.3.0-alpha11")
+@NpmPackage(value = "@vaadin/popover", version = "25.3.0-alpha13")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasAriaRole,
@@ -747,12 +747,12 @@ public class Popover extends Component implements HasAriaLabel, HasAriaRole,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
         targetDetachRegistration = target.addDetachListener(e -> {
             removeFromUiIfAutoAdded();
         });
+        target.getUI().ifPresent(this::onTargetAttach);
     }
 
     private void removeFromUiIfAutoAdded() {

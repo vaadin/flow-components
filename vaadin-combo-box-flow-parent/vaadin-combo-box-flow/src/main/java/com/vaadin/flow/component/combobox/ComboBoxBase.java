@@ -334,14 +334,82 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
+     * <p>
+     * Custom values cannot be used together with
+     * {@link #setPartialMatchMode(PartialMatchMode)}. Enabling custom values
+     * while the partial match mode is other than {@link PartialMatchMode#NONE}
+     * throws an exception.
      *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
+     * @throws IllegalStateException
+     *             when enabling custom values while the partial match mode is
+     *             other than {@link PartialMatchMode#NONE}
      * @see #addCustomValueSetListener(ComponentEventListener)
      */
     public void setAllowCustomValue(boolean allowCustomValue) {
+        if (allowCustomValue
+                && getPartialMatchMode() != PartialMatchMode.NONE) {
+            throw new IllegalStateException("""
+                    Custom values cannot be allowed when partial match mode \
+                    is used. Disable it with \
+                    setPartialMatchMode(PartialMatchMode.NONE) first.""");
+        }
         getElement().setProperty("allowCustomValue", allowCustomValue);
+    }
+
+    /**
+     * Gets the mode that controls which item is automatically set to be
+     * selected, for example on Enter, when the typed filter only partially
+     * matches its label. Defaults to {@link PartialMatchMode#NONE}.
+     *
+     * @return the mode, not {@code null}
+     * @see #setPartialMatchMode(PartialMatchMode)
+     * @since 25.3
+     */
+    public PartialMatchMode getPartialMatchMode() {
+        return PartialMatchMode
+                .fromClientName(getElement().getProperty("partialMatchMode"));
+    }
+
+    /**
+     * Sets the mode that controls which item is automatically set to be
+     * selected, for example on Enter, when the typed filter only partially
+     * matches its label. The item that will be selected is highlighted in the
+     * dropdown while typing.
+     * <p>
+     * Defaults to {@link PartialMatchMode#NONE}, which means that an item is
+     * automatically set to be selected only when the filter matches its label
+     * exactly. In general, an exact match is always set to be selected and
+     * takes precedence over partial matches, regardless of the mode.
+     * <p>
+     * A partial match is only applied while the dropdown is open. For example,
+     * when auto-open is disabled with {@link #setAutoOpen(boolean)}, typing
+     * does not highlight a match or set it to be selected until the dropdown is
+     * opened.
+     * <p>
+     * This feature cannot be used together with custom values, because a
+     * partial match is also a valid custom value. Setting a mode other than
+     * {@link PartialMatchMode#NONE} while custom values are allowed with
+     * {@link #setAllowCustomValue(boolean)} throws an exception.
+     *
+     * @param mode
+     *            the mode to set, not {@code null}
+     * @throws IllegalStateException
+     *             when setting a mode other than {@link PartialMatchMode#NONE}
+     *             while custom values are allowed
+     * @since 25.3
+     */
+    public void setPartialMatchMode(PartialMatchMode mode) {
+        Objects.requireNonNull(mode, "The mode cannot be null");
+        if (mode != PartialMatchMode.NONE && isAllowCustomValue()) {
+            throw new IllegalStateException("""
+                    Partial match mode cannot be used when custom values are \
+                    allowed. Disable custom values with \
+                    setAllowCustomValue(false) first.""");
+        }
+        getElement().setProperty("partialMatchMode", mode.getClientName());
     }
 
     /**
@@ -1265,7 +1333,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Use this method when none of the {@code setItems} methods are applicable,
      * e.g. when having a data provider with filter that cannot be transformed
      * to {@code DataProvider<T, Void>}.
-     * 
+     *
      * @since 24.2
      */
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
@@ -1445,7 +1513,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 23.2.12
      */
     protected void validate() {

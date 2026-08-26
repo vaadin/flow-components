@@ -69,6 +69,15 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    public void showHiddenItem_hoverOverItem_tooltipDisplayed() {
+        clickElementWithJs("show-item-3");
+
+        var buttons = menuBar.getButtons();
+        buttons.get(buttons.size() - 1).hover();
+        Assert.assertEquals("Item 3 / Tooltip", menuBarTooltip.getText());
+    }
+
+    @Test
     public void updateTooltip_updatedTooltipDisplayed() {
         clickElementWithJs("update-tooltips");
 

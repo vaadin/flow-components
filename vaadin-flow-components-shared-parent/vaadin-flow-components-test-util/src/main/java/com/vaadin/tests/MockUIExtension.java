@@ -54,8 +54,22 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     private VaadinService service;
 
     @Override
-    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     public void beforeEach(ExtensionContext context) {
+        setUp();
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) {
+        tearDown();
+    }
+
+    /**
+     * Sets up a UI for testing. Only use this method directly in contexts where
+     * registering the extension is not possible, for example when using
+     * {@link org.junit.jupiter.api.DynamicTest}.
+     */
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    public void setUp() {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
                 .mock(DeploymentConfiguration.class);
@@ -72,13 +86,13 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         VaadinSession.setCurrent(session);
     }
 
-    @Override
-    public void afterEach(ExtensionContext context) {
-        cleanup();
-    }
-
+    /**
+     * Tears down a UI that was previously set up. Only use this method directly
+     * in contexts where registering the extension is not possible, for example
+     * when using {@link org.junit.jupiter.api.DynamicTest}.
+     */
     @SuppressWarnings("checkstyle:UiSetCurrentCheck")
-    private void cleanup() {
+    public void tearDown() {
         removeAll();
         UI.setCurrent(null);
         VaadinSession.setCurrent(null);
@@ -97,14 +111,14 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * Clears the current the UI.
      */
     public void clearUI() {
-        cleanup();
+        tearDown();
     }
 
     /**
      * Replaces the current UI with a new instance.
      */
     public void replaceUI() {
-        cleanup();
+        tearDown();
         beforeEach(null);
     }
 

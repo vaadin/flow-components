@@ -49,7 +49,7 @@ public class Example extends Component
   of other components.
 - `@JsModule("@vaadin/{name}/src/vaadin-{name}.js")` — loads the web component
   module.
-- `@JsModule("./vaadin-{name}/{name}Connector.js")` — optional connector.
+- `@JsModule("./vaadin-{name}/{name}Connector.ts")` — optional connector.
 
 ## The Element API
 
@@ -69,8 +69,16 @@ getElement().appendChild(child.getElement());                                   
 
 Add a connector only when bridging `DataCommunicator`, renderers, or dynamic
 DOM needs custom JS. Place it in a component-named subfolder,
-`src/main/resources/META-INF/frontend/vaadin-{name}/{name}Connector.js`, and
-load it with `@JsModule("./vaadin-{name}/{name}Connector.js")`.
+`src/main/resources/META-INF/frontend/vaadin-{name}/{name}Connector.ts`, and
+load it with `@JsModule("./vaadin-{name}/{name}Connector.ts")`.
+
+Write connectors in TypeScript. Public API types come from the `@vaadin` npm
+packages, resolved from the integration tests module's `node_modules` through
+a `tsconfig.json` in the component module root (copy one from an existing
+module and add a matching `!...tsconfig.json` negation to the root
+`.gitignore`). Private API the connector relies on is declared in type-only
+`.d.ts` files that ship next to the connector. `node scripts/wtr.js {component}`
+type-checks the connector against the tsconfig, in CI as well.
 
 Use the `initLazy` + `$connector`-guard pattern, and initialise it in the
 attach handler:
@@ -99,11 +107,11 @@ connector must re-initialise each time; running it once in the constructor
 leaves the second client element without a connector.
 
 Typical connectors: `vaadin-combo-box/comboBoxConnector.ts` (lazy
-`dataProvider` ↔ `DataCommunicator`), `contextMenuConnector.js` /
-`menuBarConnector.js` (nested menu structure), `flow-component-renderer.js`
-(server components inside cells). Some older connectors still sit directly
-under `META-INF/frontend/` — that placement is legacy; new files always go in a
-component-named subfolder.
+`dataProvider` ↔ `DataCommunicator`), `vaadin-context-menu/contextMenuConnector.ts` /
+`vaadin-menu-bar/menubarConnector.ts` (nested menu structure),
+`flow-component-renderer.js` (server components inside cells). Some older
+connectors still sit directly under `META-INF/frontend/` — that placement is
+legacy; new files always go in a component-named subfolder.
 
 ## Property synchronization & trust (security)
 

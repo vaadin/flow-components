@@ -22,9 +22,11 @@ import com.vaadin.flow.component.ComponentEvent;
  *       // Localize an item in myGrid.<br>
  *     });<br>
  * </code>
- * 
+ *
  * @since 1.0
+ * @deprecated Deprecated without replacement.
  */
+@Deprecated(since = "25.3", forRemoval = true)
 public class CrudI18nUpdatedEvent extends ComponentEvent<Crud<?>> {
 
     private final CrudI18n i18n;

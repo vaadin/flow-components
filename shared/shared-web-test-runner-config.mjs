@@ -8,7 +8,7 @@ import { junitReporter } from '@web/test-runner-junit-reporter';
  * A plugin that serves frontend files imported from `frontend/generated/jar-resources`
  * from their original source in a component module's `META-INF/frontend` when it exists,
  * instead of the stale build-time copy. The request URL stays in the flat `jar-resources`
- * namespace, so cross-module sibling imports (e.g. `./contextMenuConnector.js`) continue
+ * namespace, so cross-module imports (e.g. `../vaadin-context-menu/contextMenuConnector.ts`) continue
  * to resolve the same way Flow's flattening makes them.
  *
  * @param {string[]} sourceDirs Absolute paths to `META-INF/frontend` directories to look up
