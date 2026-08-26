@@ -1,6 +1,6 @@
 import * as Gestures from '@vaadin/component-base/src/gestures.js';
 import type { ContextMenu } from '@vaadin/context-menu/src/vaadin-context-menu.js';
-import type { ContextMenuTarget, OpenEvent } from './vaadin-context-menu-types.js';
+import type { ContextMenuTarget, OpenEvent } from './vaadin-context-menu-target-types.js';
 
 /**
  * contextMenuTargetConnector listens for the event that opens a context menu on

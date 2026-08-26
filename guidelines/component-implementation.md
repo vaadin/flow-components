@@ -107,7 +107,7 @@ connector must re-initialise each time; running it once in the constructor
 leaves the second client element without a connector.
 
 Typical connectors: `vaadin-combo-box/comboBoxConnector.ts` (lazy
-`dataProvider` ↔ `DataCommunicator`), `contextMenuConnector.js` /
+`dataProvider` ↔ `DataCommunicator`), `vaadin-context-menu/contextMenuConnector.ts` /
 `vaadin-menu-bar/menubarConnector.ts` (nested menu structure),
 `flow-component-renderer.js` (server components inside cells). Some older
 connectors still sit directly under `META-INF/frontend/` — that placement is

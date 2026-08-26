@@ -10,12 +10,10 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "useDefineForClassFields": false,
-    // The connector imports the context menu module's contextMenuConnector.js,
-    // which Flow resolves from the folder all jar frontend resources are merged
-    // into. Treating both modules' frontend folders as one virtual root lets
-    // the compiler resolve the import the same way. allowJs is required for
-    // the compiler to accept the plain JavaScript file.
-    "allowJs": true,
+    // The connector imports the context menu module's connector, which Flow
+    // resolves from the folder all jar frontend resources are merged into.
+    // Treating both modules' frontend folders as one virtual root lets the
+    // compiler resolve the import, and the item types, the same way.
     "rootDirs": [
       "src/main/resources/META-INF/frontend",
       "../../vaadin-context-menu-flow-parent/vaadin-context-menu-flow/src/main/resources/META-INF/frontend"

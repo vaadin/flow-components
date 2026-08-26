@@ -1,35 +1,58 @@
-function getContainer(appId, nodeId) {
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+import type {
+  FlowContextMenu,
+  FlowContextMenuItem,
+  FlowContextMenuItemComponent
+} from './vaadin-context-menu-types.js';
+
+function getContainer(appId: string, nodeId: number): Element | undefined {
   try {
     return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
   } catch (error) {
     console.error('Could not get node %s from app %s', nodeId, appId);
     console.error(error);
+    return undefined;
   }
 }
 
 /**
- * Initializes the connector for a context menu element.
- *
- * @param {HTMLElement} contextMenu
- * @param {string} appId
+ * contextMenuConnector is a communication layer between ContextMenu's flow
+ * component (server-side) and web component (client-side).
  */
-function initLazy(contextMenu, appId) {
-  if (contextMenu.$connector) {
-    return;
+export class ContextMenuConnector {
+  readonly #contextMenu: FlowContextMenu;
+  readonly #appId: string;
+
+  constructor(contextMenu: FlowContextMenu, appId: string) {
+    this.#contextMenu = contextMenu;
+    this.#appId = appId;
   }
 
-  contextMenu.$connector = {
-    /**
-     * Generates and assigns the items to the context menu.
-     *
-     * @param {number} nodeId
-     */
-    generateItems(nodeId) {
-      const items = generateItemsTree(appId, nodeId);
+  /**
+   * Generates and assigns the items to the context menu.
+   */
+  generateItems(nodeId: number): void {
+    this.#contextMenu.items = generateItemsTree(this.#appId, nodeId);
+  }
+}
 
-      contextMenu.items = items;
-    }
-  };
+function initLazy(contextMenu: FlowContextMenu, appId: string): void {
+  // Init the connector only once for the context menu
+  contextMenu.$connector ??= new ContextMenuConnector(contextMenu, appId);
 }
 
 /**
@@ -38,21 +61,19 @@ function initLazy(contextMenu, appId) {
  * whose root node is identified by the `nodeId` argument.
  *
  * The app id is required to access the store of Flow DOM nodes.
- *
- * @param {string} appId
- * @param {number} nodeId
  */
-function generateItemsTree(appId, nodeId) {
+export function generateItemsTree(appId: string, nodeId: number): FlowContextMenuItem[] | undefined {
   const container = getContainer(appId, nodeId);
   if (!container) {
     return;
   }
 
-  return Array.from(container.children).map((child) => {
+  return Array.from(container.children).map((element) => {
+    const child = element as FlowContextMenuItemComponent;
     // Use getters to provide up to date values for the web component when
     // the menu is rendered or tooltip is shown without regenerating items.
-    let children;
-    const item = {
+    let children: FlowContextMenuItem[] | undefined;
+    const item: FlowContextMenuItem = {
       component: child,
       get checked() {
         return child._checked;
@@ -99,12 +120,9 @@ function generateItemsTree(appId, nodeId) {
  * The items array reflects the new checked state through a getter, but a menu
  * that stays open after a click does not re-render its items, so the attribute
  * is toggled directly to show the checkmark immediately.
- *
- * @param {HTMLElement} component
- * @param {boolean} checked
  */
-function setChecked(component, checked) {
-  if (component._item && component._item.keepOpen) {
+export function setChecked(component: FlowContextMenuItemComponent, checked: boolean): void {
+  if (component._item?.keepOpen) {
     component.toggleAttribute('menu-item-checked', checked);
   }
 }

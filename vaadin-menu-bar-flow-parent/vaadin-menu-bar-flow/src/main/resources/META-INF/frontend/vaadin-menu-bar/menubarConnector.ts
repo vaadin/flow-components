@@ -14,7 +14,7 @@
  * the License.
  */
 // Resolved from the folder Flow merges all jar frontend resources into
-import '../contextMenuConnector.js';
+import '../vaadin-context-menu/contextMenuConnector.ts';
 import type { FlowMenuBar, FlowMenuBarItem } from './vaadin-menu-bar-types.js';
 
 /**
