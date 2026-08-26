@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -612,6 +614,22 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_withStreamingAndAutomaticPush_doesNotLogWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+
+        var request = createSimpleRequest("Hello");
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockSimpleChatResponse("Hello")));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "Automatic push delivers the response, so no warning is "
+                        + "expected");
+    }
+
+    @Test
     void stream_withNonStreamingAndPushDisabled_doesNotLogWarning() {
         provider.setStreaming(false);
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
@@ -678,6 +696,40 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingWithBackgroundExecution_subscribeReturnsWhileCallStillRunning()
+            throws Exception {
+        provider.setStreaming(false);
+        provider.setBackgroundExecution(true);
+        var callStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var completed = new CountDownLatch(1);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenAnswer(invocation -> {
+                    callStarted.countDown();
+                    // Timed so an implementation that blocks the subscriber
+                    // fails the count assertion below instead of deadlocking:
+                    // the release latch only opens after subscribe() has
+                    // returned.
+                    release.await(5, TimeUnit.SECONDS);
+                    return mockSimpleChatResponse("Response");
+                });
+
+        provider.stream(createSimpleRequest("Hello")).subscribe(token -> {
+        }, error -> {
+        }, completed::countDown);
+
+        Assertions.assertTrue(callStarted.await(5, TimeUnit.SECONDS),
+                "The model was never called");
+        Assertions.assertEquals(1, completed.getCount(),
+                "subscribe() must return while the blocking call is still "
+                        + "running");
+
+        release.countDown();
+        Assertions.assertTrue(completed.await(5, TimeUnit.SECONDS),
+                "The response never completed after release");
+    }
+
+    @Test
     void stream_nonStreamingWithBackgroundExecution_pushDisabled_logsWarning() {
         provider.setStreaming(false);
         provider.setBackgroundExecution(true);
@@ -718,6 +770,15 @@ class SpringAILLMProviderTest {
 
         Assertions.assertEquals(tokens, results);
     }
+
+    // No dispatch-thread variant of the streaming inertness test here: the
+    // Spring AI ChatClient schedules its streaming call on its own
+    // boundedElastic thread regardless of the background execution setting,
+    // so "the setting does not reschedule a streaming response" has no
+    // observable thread difference on this stack. The LangChain4j test
+    // covers that contract; stream_streamingWithBackgroundExecution_
+    // returnsStreamedTokens above covers this provider's inertness
+    // behaviorally.
 
     /**
      * Records the thread the blocking chat model call runs on and answers with

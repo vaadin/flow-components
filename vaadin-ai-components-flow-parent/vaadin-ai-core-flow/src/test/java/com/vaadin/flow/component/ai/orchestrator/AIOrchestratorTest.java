@@ -45,6 +45,7 @@ import org.mockito.Mockito;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -3186,6 +3187,176 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_providerSchedulesItself_returnsWhileTurnStillRunning()
+            throws Exception {
+        var providerStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    providerStarted.countDown();
+                    try {
+                        // Timed so a prompt() that blocks on the turn fails
+                        // the count assertion below instead of deadlocking:
+                        // the release latch only opens after prompt() has
+                        // returned.
+                        release.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("Hello");
+
+        // prompt() has returned; the turn must still be in progress.
+        Assertions.assertTrue(providerStarted.await(5, TimeUnit.SECONDS),
+                "The provider was never invoked");
+        Assertions.assertEquals(1, turnEnded.getCount(),
+                "prompt() must return while the turn is still running");
+
+        release.countDown();
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn never completed after release");
+    }
+
+    @Test
+    void prompt_duringSelfScheduledTurn_secondPromptDropped() throws Exception {
+        var providerStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    providerStarted.countDown();
+                    try {
+                        release.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.next("Response");
+                    sink.complete();
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> turnEnded.countDown()).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(providerStarted.await(5, TimeUnit.SECONDS),
+                "The provider was never invoked");
+
+        // The caller thread is free while the turn runs, so a second prompt
+        // reaches the busy guard instead of queueing on the session lock.
+        orchestrator.prompt("Second");
+
+        var warning = logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("another request is already in progress"))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "A prompt sent during a running turn must be dropped with a "
+                        + "warning");
+        Mockito.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+
+        release.countDown();
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The first turn never completed after release");
+        Assertions.assertTrue(
+                orchestrator.getHistory().stream().noneMatch(
+                        message -> "Second".equals(message.content())),
+                "A dropped prompt must not enter the conversation history");
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_completedTurnAllowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var streamCalls = new AtomicInteger();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    streamCalls.incrementAndGet();
+                    return Flux.just("Response")
+                            .subscribeOn(Schedulers.boundedElastic());
+                });
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    firstEvent.compareAndSet(null, event);
+                    firstDone.countDown();
+                }).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never completed");
+        Assertions.assertTrue(firstEvent.get().getError().isEmpty(),
+                "The first turn was expected to complete successfully, got: "
+                        + firstEvent.get().getError());
+
+        // The busy flag is released in the stream's doFinally, which runs
+        // just after the response listener on the background thread — poll
+        // until the next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = streamCalls.get() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A completed self-scheduled turn must release the busy flag "
+                        + "so the next prompt is processed");
+    }
+
+    @Test
+    void prompt_providerSchedulesItself_streamErrorAllowsNextPrompt()
+            throws Exception {
+        var firstDone = new CountDownLatch(1);
+        var firstEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var streamCalls = new AtomicInteger();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    streamCalls.incrementAndGet();
+                    return Flux
+                            .<String> error(new RuntimeException("API Error"))
+                            .subscribeOn(Schedulers.boundedElastic());
+                });
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    firstEvent.compareAndSet(null, event);
+                    firstDone.countDown();
+                }).build();
+        orchestrator.prompt("First");
+        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+                "First turn never ended");
+        Assertions.assertTrue(firstEvent.get().getError().isPresent(),
+                "The first turn was expected to fail with the stream error");
+
+        // Same doFinally timing as on the success path — poll until the
+        // next prompt is accepted.
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        var accepted = false;
+        while (!accepted && System.nanoTime() < deadline) {
+            orchestrator.prompt("Second");
+            accepted = streamCalls.get() >= 2;
+            if (!accepted) {
+                Thread.sleep(10);
+            }
+        }
+        Assertions.assertTrue(accepted,
+                "A failed self-scheduled turn must release the busy flag so "
+                        + "the next prompt is processed");
+    }
+
+    @Test
     void prompt_uiDetachedMidTurn_completesQuietly() throws Exception {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
@@ -3230,6 +3401,57 @@ class AIOrchestratorTest {
                         .noneMatch(event -> event.getMessage()
                                 .contains("Error during LLM streaming")),
                 "A detached UI must not be logged as a streaming error");
+    }
+
+    @Test
+    void prompt_uiDetachedMidTurn_streamErrorCompletesQuietly()
+            throws Exception {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var detached = new CountDownLatch(1);
+        var turnEnded = new CountDownLatch(1);
+        var listenerError = new AtomicReference<Throwable>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.<String> create(sink -> {
+                    try {
+                        detached.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sink.error(new RuntimeException("API Error"));
+                }).subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(event -> {
+                    listenerError.set(event.getError().orElse(null));
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        // Detach the UI while the provider is still working, then let the
+        // stream fail.
+        ui.getUI().getInternals().setSession(null);
+        detached.countDown();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The turn must still end after the UI detached");
+        Assertions.assertNotNull(listenerError.get(),
+                "The listener must still receive the stream error");
+        Assertions.assertEquals("API Error", listenerError.get().getMessage(),
+                "The original stream error must not be replaced by a detach "
+                        + "failure");
+        Assertions
+                .assertTrue(
+                        logger.getLoggingEvents().stream()
+                                .noneMatch(event -> event.getThrowable().filter(
+                                        UIDetachedException.class::isInstance)
+                                        .isPresent()),
+                        "Handling the error on a detached UI must not raise a "
+                                + "UIDetachedException");
     }
 
     @Test

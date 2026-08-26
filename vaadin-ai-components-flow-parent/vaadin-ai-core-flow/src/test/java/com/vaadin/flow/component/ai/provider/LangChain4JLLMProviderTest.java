@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -673,6 +675,40 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingWithBackgroundExecution_subscribeReturnsWhileCallStillRunning()
+            throws Exception {
+        provider.setBackgroundExecution(true);
+        var callStarted = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var completed = new CountDownLatch(1);
+        var response = mockSimpleResponse("Response");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenAnswer(invocation -> {
+                    callStarted.countDown();
+                    // Timed so an implementation that blocks the subscriber
+                    // fails the count assertion below instead of deadlocking:
+                    // the release latch only opens after subscribe() has
+                    // returned.
+                    release.await(5, TimeUnit.SECONDS);
+                    return response;
+                });
+
+        provider.stream(createSimpleRequest("Hello")).subscribe(token -> {
+        }, error -> {
+        }, completed::countDown);
+
+        Assertions.assertTrue(callStarted.await(5, TimeUnit.SECONDS),
+                "The model was never called");
+        Assertions.assertEquals(1, completed.getCount(),
+                "subscribe() must return while the blocking call is still "
+                        + "running");
+
+        release.countDown();
+        Assertions.assertTrue(completed.await(5, TimeUnit.SECONDS),
+                "The response never completed after release");
+    }
+
+    @Test
     void stream_nonStreamingWithBackgroundExecution_pushDisabled_logsWarning() {
         provider.setBackgroundExecution(true);
         ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
@@ -684,6 +720,114 @@ class LangChain4JLLMProviderTest {
 
         Assertions.assertTrue(hasDeliveryWarning(),
                 "A background turn needs push or polling to reach the browser");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_manualPush_logsWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.MANUAL);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasDeliveryWarning(),
+                "Manual push does not deliver the response on its own, so the "
+                        + "warning is expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_pollingEnabled_doesNotLogWarning() {
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        ui.getUI().setPollInterval(500);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "Polling delivers the response, so no warning is expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_automaticPush_doesNotLogWarning() {
+        Mockito.when(ui.getService().ensurePushAvailable()).thenReturn(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "Automatic push delivers the response, so no warning is "
+                        + "expected");
+    }
+
+    @Test
+    void stream_nonStreamingWithBackgroundExecution_noCurrentUi_completesWithoutWarning() {
+        provider.setBackgroundExecution(true);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        // A programmatic call outside a request has no current UI; the turn
+        // must run normally and the delivery check must skip quietly.
+        ui.clearUI();
+        var results = provider.stream(createSimpleRequest("Hello"))
+                .collectList().block();
+        Assertions.assertEquals(List.of("Hi there"), results);
+
+        Assertions.assertFalse(hasDeliveryWarning(),
+                "There is no UI whose delivery could be blocked, so no "
+                        + "warning is expected");
+    }
+
+    @Test
+    void stream_withBackgroundExecution_repeatedTurns_logsWarningOnce() {
+        provider.setBackgroundExecution(true);
+        ui.getUI().getPushConfiguration().setPushMode(PushMode.DISABLED);
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+        provider.stream(createSimpleRequest("Hello again")).collectList()
+                .block();
+
+        Assertions.assertEquals(1, deliveryWarningCount(),
+                "Expected exactly one delivery warning across two turns");
+    }
+
+    @Test
+    void stream_streamingWithBackgroundExecution_callsModelOnSubscribingThread() {
+        streamingProvider.setBackgroundExecution(true);
+        var callThread = new AtomicReference<Thread>();
+        Mockito.doAnswer(invocation -> {
+            callThread.set(Thread.currentThread());
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hi");
+            var aiMessage = Mockito.mock(AiMessage.class);
+            Mockito.when(aiMessage.hasToolExecutionRequests())
+                    .thenReturn(false);
+            var response = Mockito.mock(ChatResponse.class);
+            Mockito.when(response.aiMessage()).thenReturn(aiMessage);
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(createSimpleRequest("Hello")).collectList()
+                .block();
+
+        Assertions.assertSame(Thread.currentThread(), callThread.get(),
+                "A streaming response already arrives asynchronously and must "
+                        + "not be rescheduled");
     }
 
     /**
@@ -704,6 +848,13 @@ class LangChain4JLLMProviderTest {
     private boolean hasDeliveryWarning() {
         return logger.getLoggingEvents().stream().anyMatch(event -> event
                 .getMessage().contains("neither automatic push nor polling"));
+    }
+
+    private long deliveryWarningCount() {
+        return logger.getLoggingEvents().stream()
+                .filter(event -> event.getMessage()
+                        .contains("neither automatic push nor polling"))
+                .count();
     }
 
     @Test
