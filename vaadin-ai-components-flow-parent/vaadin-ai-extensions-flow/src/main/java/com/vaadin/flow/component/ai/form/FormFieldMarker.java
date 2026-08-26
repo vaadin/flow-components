@@ -189,7 +189,7 @@ final class FormFieldMarker {
      * popover between the message and the revert control. Node-valued
      * properties have no place in Flow's state tree, so the assignment is a
      * script and does not survive a re-attach on its own — see
-     * {@link #reassignContent(Element, Element)}.
+     * {@link #reassignContent(Element)}.
      */
     private static void assignContent(Element marker, Element wrapper) {
         marker.executeJs("this.content = $0;", wrapper);
