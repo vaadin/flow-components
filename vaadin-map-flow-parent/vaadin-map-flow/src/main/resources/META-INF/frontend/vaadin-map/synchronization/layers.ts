@@ -10,16 +10,27 @@
 import ImageLayer from 'ol/layer/Image';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
-import { createOptions } from './util.js';
+import type Layer from 'ol/layer/Layer';
+import type ImageSource from 'ol/source/Image';
+import type { MapSyncContext } from '../vaadin-map-types.js';
+import type {
+  FeatureLayerChange,
+  ImageLayerChange,
+  LayerChange,
+  TileLayerChange,
+  VectorLayerChange
+} from './synchronization-types.js';
+import { createOptions } from './util.ts';
 
-function synchronizeLayer(target, source, _context) {
+function synchronizeLayer(target: Layer | undefined, source: LayerChange): Layer {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/layer/Layer');
   }
 
   target.setOpacity(source.opacity);
   target.setVisible(source.visible);
-  target.setZIndex(source.zIndex || undefined);
+  // OL declares setZIndex to require a number, but treats undefined as unsetting the z-index
+  target.setZIndex((source.zIndex || undefined) as unknown as number);
   target.setMinZoom(source.minZoom || -Infinity);
   target.setMaxZoom(source.maxZoom || Infinity);
   target.setBackground(source.background || undefined);
@@ -27,7 +38,11 @@ function synchronizeLayer(target, source, _context) {
   return target;
 }
 
-export function synchronizeTileLayer(target, source, context) {
+export function synchronizeTileLayer(
+  target: TileLayer | undefined,
+  source: TileLayerChange,
+  context: MapSyncContext
+): TileLayer {
   if (!target) {
     target = new TileLayer(
       createOptions({
@@ -43,7 +58,11 @@ export function synchronizeTileLayer(target, source, context) {
   return target;
 }
 
-export function synchronizeVectorLayer(target, source, context) {
+export function synchronizeVectorLayer(
+  target: VectorLayer | undefined,
+  source: VectorLayerChange,
+  context: MapSyncContext
+): VectorLayer {
   if (!target) {
     target = new VectorLayer(
       createOptions({
@@ -60,10 +79,14 @@ export function synchronizeVectorLayer(target, source, context) {
   return target;
 }
 
-export function synchronizeFeatureLayer(target, source, context) {
+export function synchronizeFeatureLayer(
+  target: VectorLayer | undefined,
+  source: FeatureLayerChange,
+  context: MapSyncContext
+): VectorLayer {
   target = synchronizeVectorLayer(target, source, context);
 
-  const clusterStyle = context.lookup.get(source.clusterStyle);
+  const clusterStyle = context.lookup.get(source.clusterStyle!);
 
   target.setStyle((feature) => {
     const size = feature.get('features').length;
@@ -93,7 +116,11 @@ export function synchronizeFeatureLayer(target, source, context) {
   return target;
 }
 
-export function synchronizeImageLayer(target, source, context) {
+export function synchronizeImageLayer(
+  target: ImageLayer<ImageSource> | undefined,
+  source: ImageLayerChange,
+  context: MapSyncContext
+): ImageLayer<ImageSource> {
   if (!target) {
     target = new ImageLayer(
       createOptions({

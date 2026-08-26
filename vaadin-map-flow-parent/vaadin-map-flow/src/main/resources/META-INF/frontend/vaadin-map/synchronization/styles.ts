@@ -12,34 +12,51 @@ import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 import Text from 'ol/style/Text';
 import { Icon } from 'ol/style';
-import { convertEnumValue, convertToCoordinateArray, convertToSizeArray, createOptions } from './util';
+import type { IconOrigin } from 'ol/style/Icon';
+import type { ColorLike } from 'ol/colorlike';
+import type ImageStyle from 'ol/style/Image';
+import type { MapSyncContext } from '../vaadin-map-types.js';
+import type {
+  FillChange,
+  IconChange,
+  ImageStyleChange,
+  StrokeChange,
+  StyleChange,
+  TextStyleChange
+} from './synchronization-types.js';
+import { convertEnumValue, convertToCoordinateArray, convertToSizeArray, createOptions } from './util.ts';
 
-export function synchronizeFill(target, source, context) {
+export function synchronizeFill(target: Fill | undefined, source: FillChange, context: MapSyncContext): Fill {
   if (!target) {
     target = new Fill();
   }
 
-  target.setColor(source.color);
+  target.setColor(source.color ?? null);
 
   context.connector.forceRender();
 
   return target;
 }
 
-export function synchronizeStroke(target, source, context) {
+export function synchronizeStroke(target: Stroke | undefined, source: StrokeChange, context: MapSyncContext): Stroke {
   if (!target) {
     target = new Stroke();
   }
 
-  target.setColor(source.color);
-  target.setWidth(source.width);
+  // OL declares Stroke.setColor to require a color, but treats undefined as unsetting the color
+  target.setColor((source.color ?? undefined) as ColorLike);
+  target.setWidth(source.width ?? undefined);
 
   context.connector.forceRender();
 
   return target;
 }
 
-function synchronizeImageStyle(target, source, _context) {
+function synchronizeImageStyle(
+  target: ImageStyle | undefined,
+  source: ImageStyleChange,
+  _context?: MapSyncContext
+): ImageStyle {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/style/Image');
   }
@@ -52,17 +69,17 @@ function synchronizeImageStyle(target, source, _context) {
   return target;
 }
 
-export function synchronizeIcon(target, source, context) {
+export function synchronizeIcon(target: Icon | undefined, source: IconChange, context: MapSyncContext): Icon {
   if (!target) {
     const src = source.img || source.src;
     target = new Icon(
       createOptions({
         ...source,
         img: undefined,
-        src,
+        src: src ?? undefined,
         imgSize: source.imgSize ? convertToSizeArray(source.imgSize) : undefined,
         anchor: source.anchor ? convertToCoordinateArray(source.anchor) : undefined,
-        anchorOrigin: source.anchorOrigin ? convertEnumValue(source.anchorOrigin) : undefined
+        anchorOrigin: source.anchorOrigin ? (convertEnumValue(source.anchorOrigin) as IconOrigin) : undefined
       })
     );
   }
@@ -73,18 +90,18 @@ export function synchronizeIcon(target, source, context) {
   return target;
 }
 
-export function synchronizeText(target, source, context) {
+export function synchronizeText(target: Text | undefined, source: TextStyleChange, context: MapSyncContext): Text {
   if (!target) {
     target = new Text();
   }
-  target.setFont(source.font);
+  target.setFont(source.font ?? undefined);
   target.setOffsetX((source.offset && source.offset.x) || 0);
   target.setOffsetY((source.offset && source.offset.y) || 0);
   target.setScale(source.scale);
   target.setRotation(source.rotation);
   target.setRotateWithView(source.rotateWithView);
-  target.setTextAlign(source.textAlign ? convertEnumValue(source.textAlign) : undefined);
-  target.setTextBaseline(source.textBaseline ? convertEnumValue(source.textBaseline) : undefined);
+  target.setTextAlign(source.textAlign ? (convertEnumValue(source.textAlign) as CanvasTextAlign) : undefined);
+  target.setTextBaseline(source.textBaseline ? (convertEnumValue(source.textBaseline) as CanvasTextBaseline) : undefined);
   target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
   target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
   target.setBackgroundFill(source.backgroundFill ? context.lookup.get(source.backgroundFill) : undefined);
@@ -96,7 +113,7 @@ export function synchronizeText(target, source, context) {
   return target;
 }
 
-export function synchronizeStyle(target, source, context) {
+export function synchronizeStyle(target: Style | undefined, source: StyleChange, context: MapSyncContext): Style {
   if (!target) {
     target = new Style();
   }
