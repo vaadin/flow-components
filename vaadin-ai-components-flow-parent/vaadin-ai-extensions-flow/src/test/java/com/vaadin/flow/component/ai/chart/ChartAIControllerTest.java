@@ -170,6 +170,19 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateConfiguration_invalidConfigJson_relaysParseError() {
+            var tool = findTool(controller.getTools(),
+                    "update_chart_configuration");
+
+            String result = tool.execute(
+                    json("{\"configuration\": \"not a json object\"}"));
+            Assertions.assertTrue(
+                    result.contains("Invalid chart configuration JSON"),
+                    "The parse failure reason should reach the model: "
+                            + result);
+        }
+
+        @Test
         void updateData_validatesQueriesEagerly() {
             databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
 
