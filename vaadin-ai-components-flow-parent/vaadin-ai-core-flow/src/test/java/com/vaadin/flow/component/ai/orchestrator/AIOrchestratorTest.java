@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -91,7 +92,7 @@ class AIOrchestratorTest {
         mockFileReceiver = Mockito.mock(AIFileReceiver.class);
         Mockito.when(mockFileReceiver.takeAttachments())
                 .thenReturn(Collections.emptyList());
-        logger.clear();
+        logger.clearAll();
     }
 
     @Test
@@ -3396,8 +3397,10 @@ class AIOrchestratorTest {
                 "A detached UI must not surface as a turn error");
         Assertions.assertEquals("Response", orchestrator.getHistory()
                 .get(orchestrator.getHistory().size() - 1).content());
+        // The orchestrator logs from the Reactor thread; only the
+        // all-thread view can see (or miss) those events.
         Assertions.assertTrue(
-                logger.getLoggingEvents().stream()
+                logger.getAllLoggingEvents().stream()
                         .noneMatch(event -> event.getMessage()
                                 .contains("Error during LLM streaming")),
                 "A detached UI must not be logged as a streaming error");
@@ -3444,14 +3447,30 @@ class AIOrchestratorTest {
         Assertions.assertEquals("API Error", listenerError.get().getMessage(),
                 "The original stream error must not be replaced by a detach "
                         + "failure");
-        Assertions
-                .assertTrue(
-                        logger.getLoggingEvents().stream()
-                                .noneMatch(event -> event.getThrowable().filter(
-                                        UIDetachedException.class::isInstance)
-                                        .isPresent()),
-                        "Handling the error on a detached UI must not raise a "
-                                + "UIDetachedException");
+        // The orchestrator logs from the Reactor thread; only the
+        // all-thread view can see (or miss) those events. The real stream
+        // error is still logged, exactly once and with the original cause;
+        // the deliberate DEBUG log of the skipped UI update is the only
+        // event allowed to carry the detach exception.
+        var streamErrors = logger
+                .getAllLoggingEvents().stream().filter(event -> event
+                        .getMessage().contains("Error during LLM streaming"))
+                .toList();
+        Assertions.assertEquals(1, streamErrors.size(),
+                "The stream error must be logged exactly once");
+        Assertions.assertEquals("API Error",
+                streamErrors.getFirst().getThrowable()
+                        .map(Throwable::getMessage).orElse(null),
+                "The logged stream error must carry the original cause, not "
+                        + "a detach failure");
+        Assertions.assertTrue(
+                logger.getAllLoggingEvents().stream()
+                        .filter(event -> event.getLevel() != Level.DEBUG)
+                        .noneMatch(event -> event.getThrowable()
+                                .filter(UIDetachedException.class::isInstance)
+                                .isPresent()),
+                "Handling the error on a detached UI must not log a "
+                        + "UIDetachedException above debug level");
     }
 
     @Test
