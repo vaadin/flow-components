@@ -2938,6 +2938,34 @@ class FormAIControllerTest {
         }
 
         @Test
+        void sameContentInstanceIsNotDetachedOnRemark() {
+            // Reusing the content the wrapper already carries must leave it
+            // in place: emptying the wrapper and putting the same component
+            // back would detach and re-attach it, tearing down and rebuilding
+            // whatever the application hung on its attach.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var detaches = new AtomicInteger();
+            content.addDetachListener(event -> detaches.incrementAndGet());
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(0, detaches.get(),
+                    "Re-marking with the same content instance must not "
+                            + "detach it from the wrapper");
+        }
+
+        @Test
         void removedProviderClearsContentOnNextFill() {
             // Content from an earlier fill must not describe a later one the
             // provider no longer covers.
@@ -3085,6 +3113,12 @@ class FormAIControllerTest {
                     .stream().filter(e -> e.getLevel() == Level.WARN).toList();
             Assertions.assertEquals(1, warnings.size(),
                     "The rejected content must be logged; got: " + warnings);
+            Assertions.assertTrue(
+                    warnings.getFirst().getMessage()
+                            .contains("already has a parent"),
+                    "The warning must name the parent as the reason, so a "
+                            + "rejected component is told apart from a "
+                            + "provider that threw; got: " + warnings);
         }
 
         @Test
@@ -3193,6 +3227,28 @@ class FormAIControllerTest {
             Assertions.assertEquals(List.of(), markersOn(field),
                     "The marker that only carried the working state must go "
                             + "at turn end");
+        }
+
+        @Test
+        void clearingContentOfFieldWhoseMarkerIsGoneDoesNotThrow() {
+            // The marker lives in the field's own element children, which an
+            // application rebuilding the field's DOM can take with it. The
+            // mark then outlives its marker, so clearing it must stay the
+            // no-op the marker API promises rather than fail the user's edit.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> new Div());
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            requireMarkerOn(field).removeFromParent();
+
+            Assertions.assertDoesNotThrow(() -> field.setValue("user edit"),
+                    "Clearing the mark of a field that lost its marker must "
+                            + "not throw");
         }
 
         @Test
