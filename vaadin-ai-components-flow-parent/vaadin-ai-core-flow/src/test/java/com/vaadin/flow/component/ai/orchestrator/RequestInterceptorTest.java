@@ -45,6 +45,7 @@ import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Tests for {@link RequestInterceptor}: the content handed to it, the effect of
@@ -597,6 +598,47 @@ class RequestInterceptorTest {
 
         Assertions.assertEquals(1, responseEvents.size());
         Assertions.assertTrue(responseEvents.getFirst().getError().isEmpty());
+    }
+
+    @Test
+    void postponedPrompt_selfSchedulingProvider_completesTurnAfterProceed()
+            throws Exception {
+        // The scenario behind provider background execution: a postponed
+        // prompt resumes and the provider schedules the turn itself. The
+        // resumed turn must run and end normally. Two mock-session limits
+        // shape the test: the session lock is permanently held by the test
+        // thread, so both the resume and the turn's ui.access updates must
+        // avoid foreign-thread lock acquisition — proceed() runs on the test
+        // thread and no message list is attached. The cross-thread resume
+        // with a live message list is covered by the manual catalog's C4.
+        var turnEnded = new CountDownLatch(1);
+        var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response")
+                        .subscribeOn(Schedulers.boundedElastic()));
+        var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withRequestInterceptor(event -> continuation
+                        .set(event.postpone(Duration.ofMinutes(1))))
+                .withResponseListener(event -> {
+                    responseEvents.add(event);
+                    turnEnded.countDown();
+                }).build();
+
+        orchestrator.prompt("Hello");
+        Mockito.verify(mockProvider, Mockito.never())
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+
+        continuation.get().proceed();
+
+        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+                "The resumed turn never completed");
+        Assertions.assertEquals(1, responseEvents.size());
+        Assertions.assertTrue(responseEvents.getFirst().getError().isEmpty(),
+                "The resumed turn was expected to complete successfully");
+        Assertions.assertEquals("Response",
+                responseEvents.getFirst().getResponse());
     }
 
     @Test
