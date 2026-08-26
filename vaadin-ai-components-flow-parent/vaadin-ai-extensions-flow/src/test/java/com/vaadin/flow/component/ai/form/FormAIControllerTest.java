@@ -3415,7 +3415,6 @@ class FormAIControllerTest {
         private static Element wrapperOn(Component field) {
             return requireMarkerOn(field).getNode()
                     .getFeatureIfInitialized(VirtualChildrenList.class)
-                    .filter(list -> list.size() > 0)
                     .map(list -> Element.get(list.get(0))).orElse(null);
         }
 

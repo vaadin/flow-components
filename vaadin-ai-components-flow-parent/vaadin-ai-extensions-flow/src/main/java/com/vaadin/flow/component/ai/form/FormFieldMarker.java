@@ -174,12 +174,13 @@ final class FormFieldMarker {
     /**
      * @return the content wrapper among the marker's virtual children — the
      *         only virtual child it ever gets — or {@code null} when none was
-     *         created yet
+     *         created yet. Appending the wrapper is the only thing that ever
+     *         creates the list and nothing removes it again, so an initialized
+     *         list always holds the wrapper.
      */
     private static Element findWrapper(Element marker) {
         return marker.getNode()
                 .getFeatureIfInitialized(VirtualChildrenList.class)
-                .filter(list -> list.size() > 0)
                 .map(list -> Element.get(list.get(0))).orElse(null);
     }
 
