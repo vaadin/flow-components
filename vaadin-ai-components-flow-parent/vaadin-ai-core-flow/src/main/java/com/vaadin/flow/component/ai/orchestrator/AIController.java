@@ -66,14 +66,17 @@ public interface AIController {
     }
 
     /**
-     * Called through {@code ui.access()} — with the session lock held and
-     * Vaadin thread locals bound, though not necessarily on a request thread —
-     * when the turn ends: normally when the LLM stream has completed,
+     * Called when the turn ends: normally when the LLM stream has completed,
      * successfully or with an error, but also when the turn fails before a
-     * stream ever opens. Fires at most once per prompt: a prompt rejected by
-     * the {@link RequestInterceptor} and a postponed prompt abandoned because
-     * its UI was detached end without firing it, and a turn whose UI is
-     * detached when it ends skips the hook (it requires {@code ui.access()}).
+     * stream ever opens. The call runs through {@code ui.access()}, so the
+     * session lock is held and Vaadin thread locals are bound — though not
+     * necessarily on a request thread.
+     * <p>
+     * Fires at most once per prompt. A prompt rejected by the
+     * {@link RequestInterceptor} ends without firing it, as does a postponed
+     * prompt abandoned because its UI was detached. A turn whose UI is detached
+     * when it ends also skips the hook, which requires {@code ui.access()}.
+     * </p>
      * <p>
      * On success {@code error} is {@code null}; use the call to commit staged
      * state or run deferred UI updates. On failure {@code error} carries the

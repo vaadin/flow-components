@@ -59,9 +59,10 @@ import tools.jackson.databind.JsonNode;
  * <b>Streaming vs. non-streaming:</b> Streaming is enabled by default. To
  * disable it, call {@link #setStreaming(boolean) setStreaming(false)}.
  * Streaming mode pushes partial responses to the UI as they arrive, which
- * requires server push to be enabled. Annotate your UI class or application
- * shell with {@code @Push}, or configure push programmatically, before using
- * streaming mode. A warning is logged at runtime if push is not enabled.
+ * requires automatic server push or polling to deliver them. Annotate your UI
+ * class or application shell with {@code @Push}, or enable polling with
+ * {@code UI.setPollInterval()}, before using streaming mode. A warning is
+ * logged at runtime when neither is active.
  * </p>
  * <p>
  * <b>Blocking the request thread:</b> in non-streaming mode the LLM call blocks
@@ -156,6 +157,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * Gets whether streaming mode is used.
      *
      * @return {@code true} if streaming mode is used, {@code false} otherwise
+     * @since 25.3
      */
     public boolean isStreaming() {
         return isStreaming;
@@ -177,6 +179,7 @@ public class SpringAILLMProvider implements LLMProvider {
      *
      * @return {@code true} if the call runs on a background thread,
      *         {@code false} if it runs on the thread that asks for the response
+     * @since 25.3
      */
     public boolean isBackgroundExecution() {
         return backgroundExecution.isEnabled();
@@ -197,7 +200,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * the assistant placeholder render, and the response is added when it
      * arrives.
      * <p>
-     * This requires two things from the application:
+     * This requires three things from the application:
      * <ul>
      * <li><b>A way to deliver the response.</b> Annotate the application shell
      * or UI class with {@code @Push}, or enable polling with
@@ -212,12 +215,29 @@ public class SpringAILLMProvider implements LLMProvider {
      * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
      * which still runs on the UI thread. This is the same requirement streaming
      * mode already has.</li>
+     *
+     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
+     * time. Without background execution, a message submitted while a turn is
+     * running waits for the session lock and is processed when the turn ends;
+     * with it, the submit is rejected and dropped with a warning — and a
+     * connected input has already cleared its text. Disable the input while a
+     * turn is running, for example from
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
+     * and
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
      * </ul>
+     *
+     * <p>
+     * Like the streaming mode, the setting is not preserved when the session is
+     * serialized: an application that restores sessions must re-apply it when
+     * it recreates the provider.
+     * </p>
      *
      * @param backgroundExecution
      *            {@code true} to run the call on a background thread,
      *            {@code false} to run it on the thread that asks for the
      *            response
+     * @since 25.3
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);

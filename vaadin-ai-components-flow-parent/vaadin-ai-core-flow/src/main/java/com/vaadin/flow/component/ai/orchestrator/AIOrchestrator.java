@@ -1443,10 +1443,16 @@ public class AIOrchestrator implements Serializable {
          * response text is empty or a partial stream that was received before
          * the failure.
          * <p>
-         * The listener is called from a background thread (Reactor scheduler).
-         * It is safe to perform blocking I/O (e.g. database writes) directly.
-         * To update Vaadin UI components from this listener, use
-         * {@code ui.access()}.
+         * The thread the listener runs on depends on the provider: with a
+         * streaming provider, or when the provider runs the turn on a
+         * background thread (background execution), it is called from a
+         * background thread where blocking I/O (e.g. database writes) is safe.
+         * With a non-streaming provider that does not schedule itself, the
+         * whole turn — this listener included — runs on the thread that
+         * triggered the prompt, where blocking prolongs the current request. To
+         * update Vaadin UI components from this listener, use
+         * {@code ui.access()}. See {@link ResponseListener} for the full
+         * threading contract.
          * <p>
          * The listener is not called when history is restored via
          * {@link #withHistory(List, Map)}.
