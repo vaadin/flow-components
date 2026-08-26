@@ -21,7 +21,9 @@ import com.vaadin.flow.component.ai.common.ValueSource;
  * in document order, after every field's post-turn value has been applied. A
  * field whose post-turn value equals its pre-turn value (by
  * {@link Objects#equals(Object, Object)}) does not produce an event. No events
- * fire when the turn ended in error.
+ * fire when the turn ended in error. The same event is passed to the
+ * {@link FieldMarkerPopoverContentProvider} when the controller marks the
+ * field.
  *
  * @since 25.3
  */
