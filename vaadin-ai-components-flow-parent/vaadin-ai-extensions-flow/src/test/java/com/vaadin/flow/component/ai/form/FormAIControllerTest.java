@@ -38,6 +38,7 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
@@ -2796,6 +2797,36 @@ class FormAIControllerTest {
                     contentScriptsOn(drainPendingJs(), wrapper).size(),
                     "The wrapper must be assigned to the marker's content "
                             + "property");
+        }
+
+        @Test
+        void providerCanSupplyPlainTextContent() {
+            // A Text component is a bare text node: it has no tag the client
+            // could create an in-memory virtual child from, so only the
+            // wrapper — a regular div carrying it as an ordinary child — can
+            // deliver it.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(
+                            change -> new Text("plain text"));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The marker must carry a content wrapper");
+            Assertions.assertEquals("plain text", wrapper.getText(),
+                    "The wrapper must carry the text node as its child");
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(List.of(), warnings,
+                    "Plain text content must be applied without warnings");
         }
 
         @Test

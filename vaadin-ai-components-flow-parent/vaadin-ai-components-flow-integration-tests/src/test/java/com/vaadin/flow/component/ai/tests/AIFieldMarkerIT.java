@@ -97,6 +97,21 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void runTurn_popoverRendersPlainTextContent() {
+        // A Text component is a bare text node with no element of its own —
+        // only the marker's content wrapper can carry it to the client, so
+        // its text appearing in the popover proves the wrapper mechanism.
+        runTurn();
+
+        var marker = waitForMarker(confident);
+        Assert.assertTrue(
+                "The popover must render the plain text supplied by the "
+                        + "provider",
+                textContentOf(marker.$("vaadin-popover").first())
+                        .contains(AIFieldMarkerPage.TEXT_CONTENT));
+    }
+
+    @Test
     public void runTurn_unchangedFieldIsNotMarked() {
         runTurn();
 

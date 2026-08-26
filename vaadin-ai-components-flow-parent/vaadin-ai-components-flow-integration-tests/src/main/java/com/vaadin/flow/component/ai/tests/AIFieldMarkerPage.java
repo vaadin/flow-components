@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
@@ -50,6 +51,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
 
     static final String CONTENT_ID = "marker-content";
     static final String CONTENT_TEXT = "Source: invoice.pdf";
+    static final String TEXT_CONTENT = "Recognized from the packing list";
 
     static final String NAME_VALUE = "Ada Lovelace";
     static final String COMPANY_VALUE = "Analytical Engines Ltd.";
@@ -96,12 +98,17 @@ public class AIFieldMarkerPage extends VerticalLayout {
                 .setConfidence(new FieldMarkerI18n.Confidence()
                         .setHigh(CONFIDENCE_HIGH)));
         controller.setFieldMarkerPopoverContentProvider(change -> {
-            if (change.getField() != name) {
-                return null;
+            if (change.getField() == name) {
+                var content = new Span(CONTENT_TEXT);
+                content.setId(CONTENT_ID);
+                return content;
             }
-            var content = new Span(CONTENT_TEXT);
-            content.setId(CONTENT_ID);
-            return content;
+            if (change.getField() == confident) {
+                // A bare text node, no element of its own — exercises content
+                // that cannot exist client-side outside the marker's wrapper.
+                return new Text(TEXT_CONTENT);
+            }
+            return null;
         });
 
         var startTurn = new NativeButton("Start turn",
