@@ -1046,16 +1046,16 @@ public class FormAIController implements AIController {
 
     /**
      * The state carried by a field's mark: the combined registration of the
-     * listeners {@link #markField} installs, the value the marker's revert
+     * listeners {@link #markField} installs, and the value the marker's revert
      * control restores — the field's value from before the AI's first change to
-     * it — and the content component currently shown in the marker's popover,
-     * if any. Stored on the field component under {@link #FIELD_MARK_KEY}; its
-     * presence is what makes a field "marked". The record is immutable, so a
-     * content change replaces the whole mark while keeping the registration and
-     * revert value.
+     * it. Stored on the field component under {@link #FIELD_MARK_KEY}; its
+     * presence is what makes a field "marked". The popover content the
+     * {@link #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
+     * provider} supplies is not part of the mark: {@link FormFieldMarker} keeps
+     * it on the marker element itself.
      */
-    private record FieldMark(Registration registration, Object revertValue,
-            Component content) implements Serializable {
+    private record FieldMark(Registration registration,
+            Object revertValue) implements Serializable {
     }
 
     /**
@@ -1111,12 +1111,17 @@ public class FormAIController implements AIController {
                     unmarkField(field);
                 }
             });
-            var attach = component
-                    .addAttachListener(event -> reapplyMarkerContent(field));
+            // Re-asserts the marker's popover content on the client when the
+            // field re-enters the DOM: the marker and its content wrapper are
+            // re-created verbatim from the state tree, but the script handing
+            // the wrapper to the marker is not. Captures only the element, so
+            // the mark stays serializable without the controller.
+            var attach = component.addAttachListener(
+                    event -> FormFieldMarker.reassignContent(element));
             ComponentUtil.setData(component, FIELD_MARK_KEY,
                     new FieldMark(
                             Registration.combine(revert, valueChange, attach),
-                            change.getOldValue(), null));
+                            change.getOldValue()));
         }
         FormFieldMarker.add(element, fieldMarkerI18n);
         // Applied on every mark so a value the AI's write path never set —
@@ -1135,40 +1140,32 @@ public class FormAIController implements AIController {
      * every marking, so a re-filled field's content is rebuilt for the new
      * change and content never outlives the fill it described — including
      * clearing content left from an earlier fill when the provider was removed
-     * in between. Without a provider, and no earlier content to clear, this is
-     * a no-op, so applications not using the feature see no client traffic from
-     * it.
+     * in between. {@link FormFieldMarker#setContent} keeps the content on the
+     * marker element itself, so applications whose provider never supplies
+     * content for the field see no client traffic from it.
      * <p>
-     * A component that already has a parent is rejected here, before anything
-     * is mutated, rather than left to {@code appendVirtualChild}'s own check:
-     * its exception would abort the marking of the remaining fields and silence
-     * the turn's change listeners. Logged like a throwing provider, so both
-     * failure modes surface the same way while the field still gets its mark.
-     * The check runs after the identity comparison, which covers the one
-     * legitimate parented case — the component this mark already carries.
+     * A component that already has a parent is rejected: appending it to the
+     * marker's popover would silently move it out of wherever the application
+     * keeps it. Logged like a throwing provider, so both failure modes surface
+     * the same way while the field still gets its mark. The check exempts the
+     * one legitimate parented case — the content the marker already shows.
      */
     private void applyMarkerContent(FieldValueChangeEvent change) {
-        var field = change.getField();
-        var mark = getMark(field);
+        var element = ((Component) change.getField()).getElement();
         var content = createMarkerContent(change);
-        if (mark.content() == content) {
-            return;
-        }
-        if (content != null && content.getElement().getParentNode() != null) {
-            LOGGER.warn(
-                    "Field-marker popover content provider returned a component "
-                            + "that already has a parent; the field is marked without "
-                            + "content. Return a fresh component for every call.");
-            if (mark.content() == null) {
-                return;
+        if (content != null) {
+            var parent = content.getElement().getParentNode();
+            if (parent != null && !parent
+                    .equals(FormFieldMarker.contentWrapperOf(element))) {
+                LOGGER.warn(
+                        "Field-marker popover content provider returned a component "
+                                + "that already has a parent; the field is marked without "
+                                + "content. Return a fresh component for every call.");
+                content = null;
             }
-            content = null;
         }
-        FormFieldMarker.setContent(((Component) field).getElement(),
-                mark.content() == null ? null : mark.content().getElement(),
+        FormFieldMarker.setContent(element,
                 content == null ? null : content.getElement());
-        ComponentUtil.setData((Component) field, FIELD_MARK_KEY, new FieldMark(
-                mark.registration(), mark.revertValue(), content));
     }
 
     /**
@@ -1193,22 +1190,6 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Re-asserts the marker content of a re-attached field on the client. The
-     * marker element and the content component are re-created verbatim from the
-     * state tree, but the script handing the content to the marker is not — see
-     * {@link FormFieldMarker#reassignContent}. Static, so the attach listener
-     * that calls it captures only the field, keeping the mark serializable
-     * without the controller.
-     */
-    private static void reapplyMarkerContent(HasValue<?, ?> field) {
-        var mark = getMark(field);
-        if (mark != null && mark.content() != null) {
-            FormFieldMarker.reassignContent(((Component) field).getElement(),
-                    mark.content().getElement());
-        }
-    }
-
-    /**
      * Clears the field's marker along with the state {@link #markField}
      * recorded for it. A no-op when the field is not marked.
      *
@@ -1223,14 +1204,11 @@ public class FormAIController implements AIController {
         if (mark != null) {
             mark.registration().remove();
             ComponentUtil.setData(component, FIELD_MARK_KEY, null);
-            if (mark.content() != null) {
-                // Release the content with the mark: a marker retained for
-                // the working state must not carry stale content, and the
-                // component must be parentless for the provider to hand out
-                // again.
-                FormFieldMarker.setContent(element, mark.content().getElement(),
-                        null);
-            }
+            // Release the content with the mark: the component must be
+            // parentless for the provider to hand out again, and a marker
+            // retained for the working state must not keep showing stale
+            // content.
+            FormFieldMarker.setContent(element, null);
         }
         // A field in the "AI is working" state still needs its marker to carry
         // the shimmer; the badge is hidden for the duration anyway, and

@@ -75,9 +75,10 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
 
     @Test
     public void runTurn_popoverRendersContentSuppliedByProvider() {
-        // The content component travels as a virtual child, so the only way
-        // it can appear in the DOM at all is through the marker's `content`
-        // property — its presence inside the popover proves the whole chain.
+        // The content travels in a wrapper element sent as a virtual child,
+        // so the only way it can appear in the DOM at all is through the
+        // marker's `content` property — its presence inside the popover
+        // proves the whole chain.
         runTurn();
 
         var marker = waitForMarker(name);

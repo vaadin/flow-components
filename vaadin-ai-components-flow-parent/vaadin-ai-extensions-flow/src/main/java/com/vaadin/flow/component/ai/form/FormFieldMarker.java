@@ -16,6 +16,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -101,60 +102,94 @@ final class FormFieldMarker {
 
     /**
      * Replaces the custom content shown in the popover of the field's marker.
-     * The content element travels as a virtual child of the marker element — it
-     * has no place among the marker's DOM children, which the web component's
-     * own rendering manages — and is handed to the web component through its
-     * {@code content} property, which renders it into the popover. A
-     * {@code null} content restores the popover's default parts. A no-op when
-     * the field has no marker.
-     * <p>
-     * This class keeps no state, so the caller tracks the previously applied
-     * content element and passes it back in to be released. The new content
-     * must not have a parent — {@link Element#appendVirtualChild} rejects a
-     * parented element.
+     * The content lives in a wrapper element that travels as a virtual child of
+     * the marker element — it has no place among the marker's DOM children,
+     * which the web component's own rendering manages — and is handed to the
+     * web component through its {@code content} property, which renders it into
+     * the popover. The wrapper is created and bound on the first content and
+     * stays for the marker's lifetime; replacing content only swaps the
+     * wrapper's children, detaching the previous content so it is free for the
+     * provider to hand out again. A {@code null} content empties and hides the
+     * wrapper, restoring the popover's default parts — or, with no wrapper ever
+     * created, is a complete no-op, so a marker never given content costs no
+     * client traffic. Content the wrapper already carries is left untouched. A
+     * no-op when the field has no marker.
      *
      * @param field
      *            the field whose marker gets the content, not {@code null}
-     * @param previousContent
-     *            the content element applied before, or {@code null} when there
-     *            was none
      * @param content
-     *            the content element to apply, or {@code null} to clear
+     *            the content element to show, or {@code null} to clear
      */
-    static void setContent(Element field, Element previousContent,
-            Element content) {
-        find(field).ifPresent(marker -> {
-            if (previousContent != null
-                    && marker.equals(previousContent.getParent())) {
-                marker.removeVirtualChild(previousContent);
+    static void setContent(Element field, Element content) {
+        var marker = find(field).orElse(null);
+        if (marker == null) {
+            return;
+        }
+        var wrapper = findWrapper(marker);
+        if (wrapper == null) {
+            if (content == null) {
+                return;
             }
-            if (content != null) {
-                marker.appendVirtualChild(content);
-            }
-            assignContent(marker, content);
-        });
+            wrapper = new Element("div");
+            marker.appendVirtualChild(wrapper);
+            assignContent(marker, wrapper);
+        }
+        if (content != null && wrapper.equals(content.getParent())) {
+            return;
+        }
+        wrapper.removeAllChildren();
+        if (content != null) {
+            wrapper.appendChild(content);
+        }
+        wrapper.setVisible(content != null);
+    }
+
+    /**
+     * @return the wrapper element carrying the custom popover content of the
+     *         field's marker, or {@code null} when no content was ever set on
+     *         it
+     */
+    static Element contentWrapperOf(Element field) {
+        return find(field).map(FormFieldMarker::findWrapper).orElse(null);
     }
 
     /**
      * Re-asserts the {@code content} property on the field's marker after the
      * field was detached and re-attached. Flow re-creates the marker element
-     * and the content element it carries verbatim, but the property assignment
-     * is a one-off script, so it must run again for the new client elements. A
-     * no-op when the field has no marker.
+     * and the wrapper it carries verbatim, but the property assignment is a
+     * one-off script, so it must run again for the new client elements. A no-op
+     * when the field has no marker or the marker no wrapper.
      */
-    static void reassignContent(Element field, Element content) {
-        find(field).ifPresent(marker -> assignContent(marker, content));
+    static void reassignContent(Element field) {
+        find(field).ifPresent(marker -> {
+            var wrapper = findWrapper(marker);
+            if (wrapper != null) {
+                assignContent(marker, wrapper);
+            }
+        });
     }
 
     /**
-     * Hands {@code content} to the web component, which renders it into the
+     * @return the content wrapper among the marker's virtual children — the
+     *         only virtual child it ever gets — or {@code null} when none was
+     *         created yet
+     */
+    private static Element findWrapper(Element marker) {
+        return marker.getNode()
+                .getFeatureIfInitialized(VirtualChildrenList.class)
+                .filter(list -> list.size() > 0)
+                .map(list -> Element.get(list.get(0))).orElse(null);
+    }
+
+    /**
+     * Hands the content wrapper to the web component, which renders it into the
      * popover between the message and the revert control. Node-valued
      * properties have no place in Flow's state tree, so the assignment is a
      * script and does not survive a re-attach on its own — see
      * {@link #reassignContent(Element, Element)}.
      */
-    private static void assignContent(Element marker, Element content) {
-        marker.executeJs("this.content = $0;", content);
+    private static void assignContent(Element marker, Element wrapper) {
+        marker.executeJs("this.content = $0;", wrapper);
     }
 
     /**

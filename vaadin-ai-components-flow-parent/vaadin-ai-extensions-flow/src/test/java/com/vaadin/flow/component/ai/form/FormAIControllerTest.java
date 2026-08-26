@@ -52,6 +52,7 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
@@ -2762,10 +2763,11 @@ class FormAIControllerTest {
 
         @Test
         void providerContentIsCarriedByMarkerAndHandedToClient() {
-            // The content component must travel as a virtual child of the
-            // marker — never as a DOM child, whose slot the web component's
-            // own rendering owns — and reach the web component through a
-            // `content` property assignment.
+            // The content travels in a wrapper element — a virtual child of
+            // the marker, never a DOM child, whose slot the web component's
+            // own rendering owns — that reaches the web component through a
+            // `content` property assignment; the content component itself is
+            // a regular child of the wrapper.
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
@@ -2778,16 +2780,21 @@ class FormAIControllerTest {
             controller.onResponse(null);
 
             var marker = requireMarkerOn(field);
-            Assertions.assertTrue(content.getElement().isVirtualChild(),
-                    "The content element must be a virtual child");
-            Assertions.assertEquals(marker, content.getElement().getParent(),
-                    "The content element must be carried by the marker");
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The marker must carry a content wrapper");
+            Assertions.assertTrue(wrapper.isVirtualChild(),
+                    "The wrapper must be a virtual child");
+            Assertions.assertEquals(marker, wrapper.getParent(),
+                    "The wrapper must be carried by the marker");
+            Assertions.assertEquals(wrapper, content.getElement().getParent(),
+                    "The content must be a child of the wrapper");
             Assertions.assertEquals(0, marker.getChildCount(),
                     "The content must not appear among the marker's DOM "
                             + "children");
             Assertions.assertEquals(1,
-                    contentScriptsOn(drainPendingJs(), content).size(),
-                    "The content must be assigned to the marker's content "
+                    contentScriptsOn(drainPendingJs(), wrapper).size(),
+                    "The wrapper must be assigned to the marker's content "
                             + "property");
         }
 
@@ -2854,12 +2861,14 @@ class FormAIControllerTest {
 
             var marker = requireMarkerOn(field);
             Assertions.assertNull(first.getElement().getParentNode(),
-                    "The replaced content must be released from the marker");
-            Assertions.assertEquals(marker, second.getElement().getParent(),
-                    "The new content must be carried by the marker");
-            Assertions.assertEquals(1,
-                    contentScriptsOn(drainPendingJs(), second).size(),
-                    "The new content must be assigned to the marker");
+                    "The replaced content must be released from the wrapper");
+            Assertions.assertEquals(wrapperOn(field),
+                    second.getElement().getParent(),
+                    "The new content must be carried by the wrapper");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(), marker),
+                    "Replacing content must not queue another assignment — "
+                            + "the wrapper stays bound");
         }
 
         @Test
@@ -2887,9 +2896,9 @@ class FormAIControllerTest {
                             requireMarkerOn(field)),
                     "Re-marking with the same content instance must not queue "
                             + "another assignment");
-            Assertions.assertEquals(requireMarkerOn(field),
+            Assertions.assertEquals(wrapperOn(field),
                     content.getElement().getParent(),
-                    "The content must still be carried by the marker");
+                    "The content must still be carried by the wrapper");
         }
 
         @Test
@@ -2914,11 +2923,57 @@ class FormAIControllerTest {
             controller.onResponse(null);
 
             Assertions.assertNull(content.getElement().getParentNode(),
-                    "The stale content must be released from the marker");
-            Assertions.assertEquals(1,
+                    "The stale content must be released from the wrapper");
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The wrapper must stay for the marker's lifetime");
+            Assertions.assertFalse(wrapper.isVisible(),
+                    "The emptied wrapper must be hidden so the popover shows "
+                            + "only its built-in parts");
+            Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
-                            requireMarkerOn(field)).size(),
-                    "The marker's content property must be cleared");
+                            requireMarkerOn(field)),
+                    "Clearing content must not queue another assignment");
+        }
+
+        @Test
+        void restoredProviderReusesWrapperOnNextFill() {
+            // The wrapper stays for the marker's lifetime: content coming back
+            // after a fill without any must reuse it — shown again, with no
+            // new property assignment.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+
+            controller.setFieldMarkerPopoverContentProvider(null);
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+            var wrapper = wrapperOn(field);
+            drainPendingJs();
+
+            controller.setFieldMarkerPopoverContentProvider(change -> content);
+            controller.onRequest();
+            field.setValue("three");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(wrapper, wrapperOn(field),
+                    "The mark must keep its wrapper across content changes");
+            Assertions.assertTrue(wrapper.isVisible(),
+                    "The wrapper must be shown again with the new content");
+            Assertions.assertEquals(wrapper, content.getElement().getParent(),
+                    "The content must be carried by the reused wrapper");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Reusing the wrapper must not queue another assignment");
         }
 
         @Test
@@ -3080,10 +3135,16 @@ class FormAIControllerTest {
             Assertions.assertNull(content.getElement().getParentNode(),
                     "The content must be released although the marker stays "
                             + "for the working state");
-            Assertions.assertEquals(1,
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The wrapper must stay for the marker's lifetime");
+            Assertions.assertFalse(wrapper.isVisible(),
+                    "The retained marker's wrapper must be hidden so the "
+                            + "popover shows only its built-in parts");
+            Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
-                            requireMarkerOn(field)).size(),
-                    "The retained marker's content property must be cleared");
+                            requireMarkerOn(field)),
+                    "Clearing content must not queue another assignment");
 
             controller.onResponse(null);
 
@@ -3094,7 +3155,7 @@ class FormAIControllerTest {
 
         @Test
         void reattachReassignsMarkerContent() {
-            // Flow re-creates the marker and the content element from the
+            // Flow re-creates the marker and the content wrapper from the
             // state tree when the field re-enters the DOM, but the property
             // assignment is a one-off script — it must be queued again.
             var field = new TestField();
@@ -3107,14 +3168,15 @@ class FormAIControllerTest {
             controller.onRequest();
             field.setValue("filled");
             controller.onResponse(null);
+            var wrapper = wrapperOn(field);
             drainPendingJs();
 
             form.remove(field);
             form.add(field);
 
             Assertions.assertEquals(1,
-                    contentScriptsOn(drainPendingJs(), content).size(),
-                    "A re-attach must re-assign the content to the marker");
+                    contentScriptsOn(drainPendingJs(), wrapper).size(),
+                    "A re-attach must re-assign the wrapper to the marker");
         }
 
         @Test
@@ -3234,14 +3296,29 @@ class FormAIControllerTest {
         private static final String CONTENT_ASSIGNMENT = "this.content = $0";
 
         /**
-         * @return the content-assignment scripts queued with the given content
+         * @return the content-assignment scripts queued with the given wrapper
          *         element as a parameter
          */
         private static List<String> contentScriptsOn(
-                List<PendingJavaScriptInvocation> dump, HasElement content) {
-            return scriptsOn(dump, content).stream().filter(
-                    expression -> expression.contains(CONTENT_ASSIGNMENT))
+                List<PendingJavaScriptInvocation> dump, Element wrapper) {
+            return dump.stream()
+                    .filter(p -> p.getInvocation().getParameters()
+                            .contains(wrapper))
+                    .map(p -> p.getInvocation().getExpression())
+                    .filter(expression -> expression
+                            .contains(CONTENT_ASSIGNMENT))
                     .toList();
+        }
+
+        /**
+         * @return the content wrapper element the field's marker carries as a
+         *         virtual child, or {@code null} when the marker has none
+         */
+        private static Element wrapperOn(Component field) {
+            return requireMarkerOn(field).getNode()
+                    .getFeatureIfInitialized(VirtualChildrenList.class)
+                    .filter(list -> list.size() > 0)
+                    .map(list -> Element.get(list.get(0))).orElse(null);
         }
 
         /**
