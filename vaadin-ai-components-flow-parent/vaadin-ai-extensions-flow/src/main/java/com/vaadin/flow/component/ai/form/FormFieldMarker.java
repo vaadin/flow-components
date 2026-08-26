@@ -15,6 +15,7 @@ import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 
@@ -131,6 +132,7 @@ final class FormFieldMarker {
                 return;
             }
             wrapper = new Element("div");
+            wrapper.getStyle().setDisplay(Style.Display.CONTENTS);
             marker.appendVirtualChild(wrapper);
             assignContent(marker, wrapper);
         }

@@ -2788,6 +2788,11 @@ class FormAIControllerTest {
                     "The wrapper must be a virtual child");
             Assertions.assertEquals(marker, wrapper.getParent(),
                     "The wrapper must be carried by the marker");
+            Assertions.assertEquals("contents",
+                    wrapper.getStyle().get("display"),
+                    "The wrapper must not generate a box of its own, so it "
+                            + "cannot interfere with the application's "
+                            + "styling of the content");
             Assertions.assertEquals(wrapper, content.getElement().getParent(),
                     "The content must be a child of the wrapper");
             Assertions.assertEquals(0, marker.getChildCount(),
@@ -2958,9 +2963,12 @@ class FormAIControllerTest {
             var wrapper = wrapperOn(field);
             Assertions.assertNotNull(wrapper,
                     "The wrapper must stay for the marker's lifetime");
+            Assertions.assertEquals(0, wrapper.getChildCount(),
+                    "The wrapper must be emptied so the popover shows only "
+                            + "its built-in parts");
             Assertions.assertFalse(wrapper.isVisible(),
-                    "The emptied wrapper must be hidden so the popover shows "
-                            + "only its built-in parts");
+                    "The emptied wrapper must be invisible so its updates "
+                            + "are not sent to the client");
             Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
                             requireMarkerOn(field)),
@@ -2998,7 +3006,7 @@ class FormAIControllerTest {
             Assertions.assertEquals(wrapper, wrapperOn(field),
                     "The mark must keep its wrapper across content changes");
             Assertions.assertTrue(wrapper.isVisible(),
-                    "The wrapper must be shown again with the new content");
+                    "The wrapper must be visible again with the new content");
             Assertions.assertEquals(wrapper, content.getElement().getParent(),
                     "The content must be carried by the reused wrapper");
             Assertions.assertEquals(List.of(),
@@ -3169,9 +3177,12 @@ class FormAIControllerTest {
             var wrapper = wrapperOn(field);
             Assertions.assertNotNull(wrapper,
                     "The wrapper must stay for the marker's lifetime");
-            Assertions.assertFalse(wrapper.isVisible(),
-                    "The retained marker's wrapper must be hidden so the "
+            Assertions.assertEquals(0, wrapper.getChildCount(),
+                    "The retained marker's wrapper must be emptied so the "
                             + "popover shows only its built-in parts");
+            Assertions.assertFalse(wrapper.isVisible(),
+                    "The emptied wrapper must be invisible so its updates "
+                            + "are not sent to the client");
             Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
                             requireMarkerOn(field)),
