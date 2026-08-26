@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -47,6 +48,8 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -1716,6 +1719,116 @@ class SpringAILLMProviderTest {
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
         Assertions.assertEquals(0, receivedArgs.size());
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(chatResponseWithMetadata("Let me load the",
+                        "max_tokens", 1200, 8));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Let me load the"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals(ResponseMetadata.FinishReason.LENGTH,
+                metadata.finishReason());
+        Assertions.assertEquals("max_tokens", metadata.rawFinishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithTerminalChunkMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("Hel", null),
+                        chatResponseWithMetadata("lo", "stop", 100, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hel", "lo"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals(ResponseMetadata.FinishReason.STOP,
+                metadata.finishReason());
+        Assertions.assertEquals("stop", metadata.rawFinishReason());
+        Assertions.assertEquals(120, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse("plain", null));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    @Test
+    void metadataSink_notOverridden_returnsNoOpConsumer() {
+        var request = createSimpleRequest("Hello");
+
+        Assertions.assertNotNull(request.metadataSink());
+        Assertions
+                .assertDoesNotThrow(() -> request.metadataSink().accept(null));
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<ResponseMetadata> collected) {
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
+            }
+        };
+    }
+
+    private static ChatResponse chatResponseWithMetadata(String text,
+            String finishReason, int inputTokens, int outputTokens) {
+        var generation = new Generation(new AssistantMessage(text),
+                ChatGenerationMetadata.builder().finishReason(finishReason)
+                        .build());
+        return ChatResponse.builder().generations(List.of(generation))
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
     }
 
     @Test

@@ -18,6 +18,9 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 import java.util.Optional;
 
+import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ResponseMetadata;
+
 /**
  * Listener for LLM response events.
  * <p>
@@ -79,10 +82,13 @@ public interface ResponseListener extends Serializable {
     class ResponseEvent implements Serializable {
         private final String response;
         private final Throwable error;
+        private final ResponseMetadata metadata;
 
-        ResponseEvent(String response, Throwable error) {
+        ResponseEvent(String response, Throwable error,
+                ResponseMetadata metadata) {
             this.response = response;
             this.error = error;
+            this.metadata = metadata;
         }
 
         /**
@@ -105,6 +111,19 @@ public interface ResponseListener extends Serializable {
          */
         public Optional<Throwable> getError() {
             return Optional.ofNullable(error);
+        }
+
+        /**
+         * Gets the metadata the provider reported for this turn, such as the
+         * finish reason and token usage. Returns an empty optional when the
+         * provider reported none — a custom {@link LLMProvider} that does not
+         * publish metadata, or a turn that failed before any was observed.
+         *
+         * @return the response metadata, or empty when the provider reported
+         *         none
+         */
+        public Optional<ResponseMetadata> getMetadata() {
+            return Optional.ofNullable(metadata);
         }
     }
 }

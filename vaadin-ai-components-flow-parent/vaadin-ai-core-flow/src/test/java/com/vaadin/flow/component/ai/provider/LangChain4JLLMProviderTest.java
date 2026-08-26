@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -60,6 +61,8 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
 import tools.jackson.databind.JsonNode;
 
 class LangChain4JLLMProviderTest {
@@ -1627,6 +1630,144 @@ class LangChain4JLLMProviderTest {
             @Override
             public String execute(JsonNode arguments) {
                 return executor.apply(arguments);
+            }
+        };
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Truncated");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.LENGTH);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(1200, 8, 1208));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Truncated"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals(ResponseMetadata.FinishReason.LENGTH,
+                metadata.finishReason());
+        Assertions.assertEquals("LENGTH", metadata.rawFinishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingToolRoundTrips_accumulatesTokenUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(finalResponse.tokenUsage())
+                .thenReturn(new TokenUsage(200, 20, 220));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals(ResponseMetadata.FinishReason.STOP,
+                metadata.finishReason(), "The reason that ended the turn wins");
+        Assertions.assertEquals(300, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(330, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Hello World");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hello ");
+            handler.onPartialResponse("World");
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = streamingProvider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hello ", "World"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals(ResponseMetadata.FinishReason.STOP,
+                metadata.finishReason());
+        Assertions.assertEquals(55, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("plain");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
+            List<ResponseMetadata> collected) {
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
             }
         };
     }

@@ -57,6 +57,8 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
@@ -449,8 +451,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private void handleResponse(ChatExecutionContext context,
             ChatResponse response) {
+        context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
+            context.publishMetadata();
             context.getSink().complete();
             return;
         }
@@ -465,8 +469,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
+            context.publishMetadata();
             context.getSink().complete();
         }
+    }
+
+    private static ResponseMetadata.FinishReason toFinishReason(
+            FinishReason finishReason) {
+        return switch (finishReason) {
+        case STOP -> ResponseMetadata.FinishReason.STOP;
+        case LENGTH -> ResponseMetadata.FinishReason.LENGTH;
+        case CONTENT_FILTER -> ResponseMetadata.FinishReason.CONTENT_FILTER;
+        case TOOL_EXECUTION -> ResponseMetadata.FinishReason.TOOL_CALLS;
+        default -> ResponseMetadata.FinishReason.OTHER;
+        };
     }
 
     private static ToolExecutionResultMessage executeToolRequest(
@@ -580,6 +596,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final FluxSink<String> sink;
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
+        private FinishReason lastFinishReason;
+        private TokenUsage accumulatedUsage;
 
         ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
                 ChatMemory chatMemory, ToolContext toolContext) {
@@ -587,6 +605,38 @@ public class LangChain4JLLMProvider implements LLMProvider {
             this.sink = sink;
             this.chatMemory = chatMemory;
             this.toolContext = toolContext;
+        }
+
+        /**
+         * Records the metadata of one model round trip. The reason that ends
+         * the turn wins; token usage accumulates across the round trips.
+         */
+        void observeMetadata(ChatResponse response) {
+            if (response.finishReason() != null) {
+                lastFinishReason = response.finishReason();
+            }
+            var usage = response.tokenUsage();
+            if (usage != null) {
+                accumulatedUsage = accumulatedUsage == null ? usage
+                        : accumulatedUsage.add(usage);
+            }
+        }
+
+        void publishMetadata() {
+            if (lastFinishReason == null && accumulatedUsage == null) {
+                return;
+            }
+            var finishReason = lastFinishReason == null ? null
+                    : toFinishReason(lastFinishReason);
+            var rawFinishReason = lastFinishReason == null ? null
+                    : lastFinishReason.name();
+            var tokenUsage = accumulatedUsage == null ? null
+                    : new ResponseMetadata.TokenUsage(
+                            accumulatedUsage.inputTokenCount(),
+                            accumulatedUsage.outputTokenCount(),
+                            accumulatedUsage.totalTokenCount());
+            request.metadataSink().accept(new ResponseMetadata(finishReason,
+                    rawFinishReason, tokenUsage));
         }
 
         LLMRequest getRequest() {

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -393,7 +394,10 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            var chatResponses = getPromptSpec(request).stream().chatResponse();
+            var collector = new ResponseMetadataCollector();
+            var chatResponses = getPromptSpec(request).stream().chatResponse()
+                    .doOnNext(collector::observe).doOnComplete(
+                            () -> collector.publishTo(request.metadataSink()));
             return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
@@ -495,15 +499,76 @@ public class SpringAILLMProvider implements LLMProvider {
         return Flux.create(sink -> {
             try {
                 var promptSpec = getPromptSpec(request);
-                var response = promptSpec.call().content();
-                if (response != null && !response.isEmpty()) {
-                    sink.next(response);
+                var response = promptSpec.call().chatResponse();
+                if (response != null) {
+                    var collector = new ResponseMetadataCollector();
+                    collector.observe(response);
+                    collector.publishTo(request.metadataSink());
+                    var text = getAssistantText(response);
+                    if (!text.isEmpty()) {
+                        sink.next(text);
+                    }
                 }
                 sink.complete();
             } catch (Exception e) {
                 sink.error(e);
             }
         });
+    }
+
+    /**
+     * Collects response metadata across the chunks of a turn. The last reported
+     * finish reason and token usage win: the terminal chunk carries the reason
+     * that ended the turn, and frameworks that report usage do so cumulatively
+     * on the final chunk that carries it.
+     */
+    private static class ResponseMetadataCollector {
+
+        private String rawFinishReason;
+        private ResponseMetadata.TokenUsage tokenUsage;
+
+        void observe(ChatResponse response) {
+            var raw = getRawFinishReason(response);
+            if (raw != null) {
+                rawFinishReason = raw;
+            }
+            var usage = getTokenUsage(response);
+            if (usage != null) {
+                tokenUsage = usage;
+            }
+        }
+
+        void publishTo(Consumer<ResponseMetadata> metadataSink) {
+            if (rawFinishReason == null && tokenUsage == null) {
+                return;
+            }
+            metadataSink.accept(new ResponseMetadata(
+                    ResponseMetadata.normalizeFinishReason(rawFinishReason),
+                    rawFinishReason, tokenUsage));
+        }
+
+        private static String getRawFinishReason(ChatResponse response) {
+            var result = response.getResult();
+            if (result == null) {
+                return null;
+            }
+            var reason = result.getMetadata().getFinishReason();
+            return reason == null || reason.isBlank() ? null : reason;
+        }
+
+        private static ResponseMetadata.TokenUsage getTokenUsage(
+                ChatResponse response) {
+            var usage = response.getMetadata().getUsage();
+            if (usage == null) {
+                return null;
+            }
+            var total = usage.getTotalTokens();
+            if (total == null || total <= 0) {
+                return null;
+            }
+            return new ResponseMetadata.TokenUsage(usage.getPromptTokens(),
+                    usage.getCompletionTokens(), total);
+        }
     }
 
     private Media[] buildMedia(LLMRequest request) {

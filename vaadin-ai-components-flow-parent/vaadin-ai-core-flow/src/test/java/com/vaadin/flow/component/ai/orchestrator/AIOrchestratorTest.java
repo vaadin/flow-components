@@ -51,6 +51,7 @@ import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ResponseMetadata;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
 import com.vaadin.flow.component.ai.ui.AIMessage;
@@ -1852,6 +1853,56 @@ class AIOrchestratorTest {
         Assertions.assertTrue(capturedEvent.get().getError().isEmpty(),
                 "Success path must carry an empty error optional, got: "
                         + capturedEvent.get().getError());
+    }
+
+    @Test
+    void responseListener_providerPublishesMetadata_eventCarriesIt() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var metadata = new ResponseMetadata(
+                ResponseMetadata.FinishReason.LENGTH, "max_tokens",
+                new ResponseMetadata.TokenUsage(1200, 8, 1208));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    LLMProvider.LLMRequest request = invocation.getArgument(0);
+                    request.metadataSink().accept(metadata);
+                    return Flux.just("Let me load the");
+                });
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertNotNull(capturedEvent.get());
+        Assertions.assertSame(metadata,
+                capturedEvent.get().getMetadata().orElse(null),
+                "Metadata published by the provider must reach the event");
+    }
+
+    @Test
+    void responseListener_providerPublishesNoMetadata_eventMetadataEmpty() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("ok"));
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertNotNull(capturedEvent.get());
+        Assertions.assertTrue(capturedEvent.get().getMetadata().isEmpty(),
+                "No published metadata must surface as an empty optional");
     }
 
     @Test
