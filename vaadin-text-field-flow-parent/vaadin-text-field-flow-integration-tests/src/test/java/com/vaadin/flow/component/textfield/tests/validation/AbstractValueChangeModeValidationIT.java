@@ -51,6 +51,9 @@ public abstract class AbstractValueChangeModeValidationIT<T extends HasValidatio
     }
 
     protected void assertValidationResults(String... expectedResults) {
+        // Wait for validation to be run
+        waitUntil(e -> !getValidationResults().isEmpty());
+
         Assert.assertEquals(Arrays.asList(expectedResults),
                 getValidationResults());
         resetValidationLog();
