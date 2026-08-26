@@ -7,7 +7,7 @@
         <version>3.0.3</version>
     </parent>
     <artifactId>flow-components-bom</artifactId>
-    <version>25.3-SNAPSHOT</version>
+    <version>26.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Flow Components Bill of Materials</name>
     <description>Flow Components Bill of Materials</description>
