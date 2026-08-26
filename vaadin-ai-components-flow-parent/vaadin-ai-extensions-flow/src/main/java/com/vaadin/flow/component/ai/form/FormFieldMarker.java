@@ -43,7 +43,7 @@ import tools.jackson.databind.node.ObjectNode;
  * inject the badge into — stays inert on the client, so a non-Vaadin field
  * never shows a marker.
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha14")
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 
