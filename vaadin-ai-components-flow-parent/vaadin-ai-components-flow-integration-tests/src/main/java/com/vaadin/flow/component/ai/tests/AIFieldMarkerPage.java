@@ -34,8 +34,8 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The controller is configured with {@link FieldMarkerI18n} texts that differ
  * from the web component's defaults, so a test can tell the texts sent by the
- * server apart from the built-in ones, and with a field-marker content provider
- * that adds a recognizable node to the name field's popover only.
+ * server apart from the built-in ones, and with a field-marker popover content
+ * provider that adds a recognizable node to the name field's popover only.
  *
  * @author Vaadin Ltd
  */
@@ -95,7 +95,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
                 .setBadgeTooltip(BADGE_TOOLTIP)
                 .setConfidence(new FieldMarkerI18n.Confidence()
                         .setHigh(CONFIDENCE_HIGH)));
-        controller.setFieldMarkerContentProvider(change -> {
+        controller.setFieldMarkerPopoverContentProvider(change -> {
             if (change.getField() != name) {
                 return null;
             }

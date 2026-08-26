@@ -161,10 +161,10 @@ import tools.jackson.databind.JsonNode;
  * the user edits the field. Marking is the controller's own doing end to end;
  * an application that does not want it turns it off with
  * {@link #setFieldMarkerEnabled(boolean)}. A
- * {@link #setFieldMarkerContentProvider(FieldMarkerContentProvider) content
- * provider} can add application content to each marker's popover — for example
- * the {@link FieldValueChangeEvent#getFieldSource() source data} behind the
- * value. A listener registered through
+ * {@link #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
+ * popover content provider} can add application content to the popover each
+ * marker opens — for example the {@link FieldValueChangeEvent#getFieldSource()
+ * source data} behind the value. A listener registered through
  * {@link #addFieldValueChangeListener(FieldValueChangeListener)} fires once per
  * field whose value changed during a successful turn, for applications that
  * need to react to the AI's edits beyond the marker.
@@ -321,7 +321,7 @@ public class FormAIController implements AIController {
 
     private FieldMarkerI18n fieldMarkerI18n;
     private boolean fieldMarkerEnabled = true;
-    private FieldMarkerContentProvider fieldMarkerContentProvider;
+    private FieldMarkerPopoverContentProvider fieldMarkerPopoverContentProvider;
     private boolean sourceTrackingEnabled;
     /**
      * Application-supplied wordings for confidence levels, overriding
@@ -1002,21 +1002,21 @@ public class FormAIController implements AIController {
      *
      * @return the content provider, or {@code null} when the popover shows only
      *         its built-in parts
-     * @see #setFieldMarkerContentProvider(FieldMarkerContentProvider)
+     * @see #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
      * @since 25.3
      */
-    public FieldMarkerContentProvider getFieldMarkerContentProvider() {
-        return fieldMarkerContentProvider;
+    public FieldMarkerPopoverContentProvider getFieldMarkerPopoverContentProvider() {
+        return fieldMarkerPopoverContentProvider;
     }
 
     /**
-     * Sets a provider that supplies extra content for the popover of the AI
-     * field marker, shown between the explanation message and the revert
-     * control. Use it to show what the AI based a value on — for example the
-     * {@link FieldValueChangeEvent#getFieldSource() source data} reported when
-     * {@link #setSourceTrackingEnabled(boolean) source tracking} is on.
-     * Defaults to {@code null}, meaning the popover shows only its built-in
-     * parts.
+     * Sets a provider that supplies extra content for the popover that opens
+     * when the AI field marker badge is clicked, shown between the explanation
+     * message and the revert control. Use it to show what the AI based a value
+     * on — for example the {@link FieldValueChangeEvent#getFieldSource() source
+     * data} reported when {@link #setSourceTrackingEnabled(boolean) source
+     * tracking} is on. Defaults to {@code null}, meaning the popover shows only
+     * its built-in parts.
      * <p>
      * The provider is called whenever the controller marks a field: once per
      * field whose value changed during a successful turn, with the same event
@@ -1033,14 +1033,14 @@ public class FormAIController implements AIController {
      * component that already has a parent is rejected: a warning is logged and
      * the field is marked without extra content.
      *
-     * @param fieldMarkerContentProvider
+     * @param fieldMarkerPopoverContentProvider
      *            the provider to use, or {@code null} to show no extra content
      * @return this controller, for chaining
      * @since 25.3
      */
-    public FormAIController setFieldMarkerContentProvider(
-            FieldMarkerContentProvider fieldMarkerContentProvider) {
-        this.fieldMarkerContentProvider = fieldMarkerContentProvider;
+    public FormAIController setFieldMarkerPopoverContentProvider(
+            FieldMarkerPopoverContentProvider fieldMarkerPopoverContentProvider) {
+        this.fieldMarkerPopoverContentProvider = fieldMarkerPopoverContentProvider;
         return this;
     }
 
@@ -1130,7 +1130,7 @@ public class FormAIController implements AIController {
 
     /**
      * Applies the content the
-     * {@link #setFieldMarkerContentProvider(FieldMarkerContentProvider)
+     * {@link #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
      * provider} supplies for the change to the field's marker popover. Runs on
      * every marking, so a re-filled field's content is rebuilt for the new
      * change and content never outlives the fill it described — including
@@ -1155,9 +1155,10 @@ public class FormAIController implements AIController {
             return;
         }
         if (content != null && content.getElement().getParentNode() != null) {
-            LOGGER.warn("Field-marker content provider returned a component "
-                    + "that already has a parent; the field is marked without "
-                    + "content. Return a fresh component for every call.");
+            LOGGER.warn(
+                    "Field-marker popover content provider returned a component "
+                            + "that already has a parent; the field is marked without "
+                            + "content. Return a fresh component for every call.");
             if (mark.content() == null) {
                 return;
             }
@@ -1178,13 +1179,15 @@ public class FormAIController implements AIController {
      * @return the content to show, or {@code null} for none
      */
     private Component createMarkerContent(FieldValueChangeEvent change) {
-        if (fieldMarkerContentProvider == null) {
+        if (fieldMarkerPopoverContentProvider == null) {
             return null;
         }
         try {
-            return fieldMarkerContentProvider.createContent(change);
+            return fieldMarkerPopoverContentProvider.createContent(change);
         } catch (Exception ex) {
-            LOGGER.warn("Field-marker content provider threw an exception", ex);
+            LOGGER.warn(
+                    "Field-marker popover content provider threw an exception",
+                    ex);
             return null;
         }
     }

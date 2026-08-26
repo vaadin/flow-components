@@ -13,16 +13,16 @@ import java.io.Serializable;
 import com.vaadin.flow.component.Component;
 
 /**
- * Creates the extra content a {@link FormAIController} shows in the popover of
- * the AI field marker, between the explanation message and the revert control.
- * Register it through
- * {@link FormAIController#setFieldMarkerContentProvider(FieldMarkerContentProvider)}.
+ * Creates the extra content a {@link FormAIController} shows in the popover
+ * that opens when the AI field marker badge is clicked, between the explanation
+ * message and the revert control. Register it through
+ * {@link FormAIController#setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)}.
  *
  * @author Vaadin Ltd
  * @since 25.3
  */
 @FunctionalInterface
-public interface FieldMarkerContentProvider extends Serializable {
+public interface FieldMarkerPopoverContentProvider extends Serializable {
 
     /**
      * Creates the content component for one field the controller is marking.

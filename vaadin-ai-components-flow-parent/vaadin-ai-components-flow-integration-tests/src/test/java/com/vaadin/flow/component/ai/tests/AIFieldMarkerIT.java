@@ -29,8 +29,8 @@ import com.vaadin.tests.AbstractComponentIT;
  * applies to the fields it filled reaches the browser and works there: the
  * {@code vaadin-ai-field-marker} module is loaded, the marker renders the texts
  * the server sent, the popover renders the content supplied by the field-marker
- * content provider, the "AI is working" state reaches the field, and reverting
- * from the marker's popover restores the field's value on the server.
+ * popover content provider, the "AI is working" state reaches the field, and
+ * reverting from the marker's popover restores the field's value on the server.
  * <p>
  * The scenario matrix around marking — which fields get marked, when a mark is
  * cleared, what a revert restores — is covered by {@code FormAIControllerTest}

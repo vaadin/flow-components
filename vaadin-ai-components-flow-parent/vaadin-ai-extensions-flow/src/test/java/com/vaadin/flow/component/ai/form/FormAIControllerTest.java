@@ -2745,17 +2745,18 @@ class FormAIControllerTest {
         }
 
         @Test
-        void contentProviderDefaultsToNull() {
+        void popoverContentProviderDefaultsToNull() {
             var controller = new FormAIController(new Div(new TestField()));
 
-            Assertions.assertNull(controller.getFieldMarkerContentProvider(),
-                    "No content provider must be set by default");
+            Assertions.assertNull(
+                    controller.getFieldMarkerPopoverContentProvider(),
+                    "No popover content provider must be set by default");
 
-            FieldMarkerContentProvider provider = change -> null;
-            controller.setFieldMarkerContentProvider(provider);
+            FieldMarkerPopoverContentProvider provider = change -> null;
+            controller.setFieldMarkerPopoverContentProvider(provider);
 
             Assertions.assertSame(provider,
-                    controller.getFieldMarkerContentProvider(),
+                    controller.getFieldMarkerPopoverContentProvider(),
                     "The getter must reflect the set provider");
         }
 
@@ -2770,7 +2771,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("filled");
@@ -2815,7 +2816,7 @@ class FormAIControllerTest {
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> null);
+                    .setFieldMarkerPopoverContentProvider(change -> null);
 
             controller.onRequest();
             field.setValue("filled");
@@ -2839,7 +2840,7 @@ class FormAIControllerTest {
             var second = new Div();
             var next = new AtomicReference<Component>(first);
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> next.get());
+                    .setFieldMarkerPopoverContentProvider(change -> next.get());
 
             controller.onRequest();
             field.setValue("one");
@@ -2870,7 +2871,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("one");
@@ -2900,14 +2901,14 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("one");
             controller.onResponse(null);
             drainPendingJs();
 
-            controller.setFieldMarkerContentProvider(null);
+            controller.setFieldMarkerPopoverContentProvider(null);
             controller.onRequest();
             field.setValue("two");
             controller.onResponse(null);
@@ -2929,7 +2930,7 @@ class FormAIControllerTest {
             var form = new Div(field);
             ui.add(form);
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> {
+                    .setFieldMarkerPopoverContentProvider(change -> {
                         throw new IllegalStateException("boom");
                     });
 
@@ -2964,7 +2965,7 @@ class FormAIControllerTest {
             var attached = new Div();
             ui.add(attached);
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(
+                    .setFieldMarkerPopoverContentProvider(
                             change -> change.getField() == first ? attached
                                     : null);
             var events = new ArrayList<FieldValueChangeEvent>();
@@ -3023,7 +3024,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("filled");
@@ -3042,7 +3043,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("filled");
@@ -3066,7 +3067,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("filled");
@@ -3101,7 +3102,7 @@ class FormAIControllerTest {
             ui.add(form);
             var content = new Div();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> content);
+                    .setFieldMarkerPopoverContentProvider(change -> content);
 
             controller.onRequest();
             field.setValue("filled");
@@ -3139,7 +3140,7 @@ class FormAIControllerTest {
         }
 
         @Test
-        void contentProviderRunsBeforeChangeListeners() {
+        void popoverContentProviderRunsBeforeChangeListeners() {
             // The listener Javadoc promises the marking — content included —
             // is done by the time listeners run, so a listener can rely on
             // the popover being complete.
@@ -3148,7 +3149,7 @@ class FormAIControllerTest {
             ui.add(form);
             var calls = new ArrayList<String>();
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> {
+                    .setFieldMarkerPopoverContentProvider(change -> {
                         calls.add("provider");
                         return null;
                     });
@@ -3164,14 +3165,14 @@ class FormAIControllerTest {
         }
 
         @Test
-        void contentProviderNotCalledWhenMarkerDisabled() {
+        void popoverContentProviderNotCalledWhenMarkerDisabled() {
             var field = new TestField();
             var form = new Div(field);
             ui.add(form);
             var calls = new AtomicInteger();
             var controller = new FormAIController(form)
                     .setFieldMarkerEnabled(false)
-                    .setFieldMarkerContentProvider(change -> {
+                    .setFieldMarkerPopoverContentProvider(change -> {
                         calls.incrementAndGet();
                         return null;
                     });
@@ -3193,7 +3194,7 @@ class FormAIControllerTest {
             var field = new TestField();
             var form = new Div(field);
             var controller = new FormAIController(form)
-                    .setFieldMarkerContentProvider(change -> new Div());
+                    .setFieldMarkerPopoverContentProvider(change -> new Div());
 
             controller.onRequest();
             field.setValue("filled");
