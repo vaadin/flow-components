@@ -48,13 +48,16 @@ import java.util.Optional;
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
  * <p>
- * <b>Threading:</b> the listener is called from whichever thread ends the turn:
- * a blocking-tolerant Reactor thread for stream completion, stream errors, and
- * interception timeouts — blocking I/O (e.g. database writes) is safe there —
- * the UI thread for synchronous failures, where blocking delays the current
- * request, or the application's own thread when it completes a postponed
- * prompt. To update Vaadin UI components from this listener, use
- * {@code ui.access()}.
+ * <b>Threading:</b> the listener is called from whichever thread ends the turn.
+ * Stream completion and stream errors arrive on a background thread — where
+ * blocking I/O (e.g. database writes) is safe — unless the provider runs the
+ * turn on the thread that triggered the prompt, in which case the listener runs
+ * there too and blocking prolongs the current request. That is the case for a
+ * non-streaming provider with background execution disabled, which is the
+ * default. Interception timeouts arrive on a blocking-tolerant Reactor thread,
+ * synchronous failures on the UI thread, and a postponed prompt completes on
+ * the application's own thread. To update Vaadin UI components from this
+ * listener, use {@code ui.access()}.
  * 
  * @since 25.2
  */
