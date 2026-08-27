@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,6 +176,21 @@ class SpringAILLMProviderTest {
                 .thenThrow(new RuntimeException("API error"));
         Assertions.assertThrows(RuntimeException.class,
                 () -> provider.stream(request).blockFirst());
+    }
+
+    @Test
+    void stream_nonStreamingChatModelThrowsException_propagatesError() {
+        provider.setStreaming(false);
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("API error");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenThrow(originalError);
+        // Bounded block: a swallowed error would leave the sink open
+        // forever instead of failing the test
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request)
+                        .blockFirst(Duration.ofSeconds(5)));
+        Assertions.assertSame(originalError, thrown);
     }
 
     @Test
@@ -345,6 +361,30 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals("Summary", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
+    }
+
+    @Test
+    void stream_withInvalidUtf8TextAttachment_replacesInvalidSequences() {
+        provider.setStreaming(false);
+        // Lone continuation byte: not decodable as UTF-8. Text attachments
+        // are decoded leniently, so it is replaced instead of rejected.
+        var attachment = new AIAttachment("broken.txt", "text/plain",
+                new byte[] { 0x41, (byte) 0x80, 0x42 });
+        var request = new TestLLMRequest("Summarize this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat("Summary");
+
+        var result = provider.stream(request).blockFirst();
+        Assertions.assertEquals("Summary", result);
+
+        var userMessage = capturePrompt().getInstructions().stream()
+                .filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast).findFirst().orElseThrow();
+        Assertions.assertEquals(1, userMessage.getMedia().size());
+        var text = String.valueOf(userMessage.getMedia().getFirst().getData());
+        Assertions.assertTrue(text.contains("A\uFFFDB"),
+                "Invalid UTF-8 should be replaced, but got: " + text);
     }
 
     @Test
@@ -873,6 +913,29 @@ class SpringAILLMProviderTest {
     void setHistory_withNullHistory_throwsNullPointerException() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> provider.setHistory(null, Collections.emptyMap()));
+    }
+
+    @Test
+    void setHistory_withNullHistory_keepsExistingHistory() {
+        provider.setStreaming(false);
+        provider.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER,
+                        "Previous question", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+
+        mockSimpleChat("Response");
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var messages = capturePrompt().getInstructions();
+        Assertions.assertTrue(
+                messages.stream()
+                        .anyMatch(msg -> msg instanceof UserMessage && Objects
+                                .equals(msg.getText(), "Previous question")),
+                "A rejected history must not clear the existing one, but got: "
+                        + messages);
     }
 
     @Test
@@ -1449,6 +1512,35 @@ class SpringAILLMProviderTest {
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
         Assertions.assertEquals(0, receivedArgs.size());
+    }
+
+    @Test
+    void stream_withExplicitTool_nullOrBlankArguments_passesEmptyObject() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var callback = toolCallbacks.getFirst();
+
+        Assertions.assertEquals("ok", callback.call(null));
+        Assertions.assertEquals("ok", callback.call("  "));
+        Assertions.assertEquals(2, receivedArgs.size());
+        var allEmptyObjects = receivedArgs.stream().allMatch(
+                args -> args.isObject() && args.propertyNames().isEmpty());
+        Assertions.assertTrue(allEmptyObjects,
+                "Missing arguments should be parsed as an empty object");
     }
 
     @Test

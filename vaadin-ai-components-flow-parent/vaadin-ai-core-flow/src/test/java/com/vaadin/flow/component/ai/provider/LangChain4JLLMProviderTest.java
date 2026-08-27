@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.provider;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -168,6 +169,25 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_streamingModelReportsError_propagatesError() {
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("Stream error");
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onError(originalError);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        // Bounded block: a swallowed error would leave the sink open
+        // forever instead of failing the test
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> streamingProvider.stream(request)
+                        .blockFirst(Duration.ofSeconds(5)));
+        Assertions.assertSame(originalError, thrown);
+    }
+
+    @Test
     void stream_emptyTextResponse_returnsEmpty() {
         var request = createSimpleRequest("Hello");
         var response = mockSimpleResponse("");
@@ -273,6 +293,35 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_withNullAiMessage_keepsChatMemoryUsable() {
+        var nullAiResponse = Mockito.mock(ChatResponse.class);
+        Mockito.when(nullAiResponse.aiMessage()).thenReturn(null);
+        var secondResponse = mockSimpleResponse("Second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(nullAiResponse, secondResponse);
+
+        // Bounded blocks: completing the turn is what is under test here, so
+        // a missing terminal signal must fail instead of hanging
+        provider.stream(createSimpleRequest("First")).collectList()
+                .block(Duration.ofSeconds(5));
+        var results = provider.stream(createSimpleRequest("Second question"))
+                .collectList().block(Duration.ofSeconds(5));
+
+        Assertions.assertEquals(List.of("Second"), results);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var messages = captor.getAllValues().get(1).messages();
+        Assertions.assertEquals(2, messages.size(),
+                "A response without an AI message must not add that message to "
+                        + "chat memory, but got: " + messages);
+        var memoryTexts = getUserMessageContents(captor.getAllValues().get(1),
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("First", "Second question"),
+                memoryTexts, "Both user turns should still be in chat memory");
+    }
+
+    @Test
     void stream_withMaxMessagesLimit_dropsOldestMessages() {
         var requestCount = 20;
 
@@ -345,6 +394,26 @@ class LangChain4JLLMProviderTest {
                 .anyMatch(text -> text.contains(textContent));
 
         Assertions.assertTrue(textContentPreserved);
+    }
+
+    @Test
+    void stream_withInvalidUtf8TextAttachment_replacesInvalidSequences() {
+        // Lone continuation byte: not decodable as UTF-8. Text attachments
+        // are decoded leniently, so it is replaced instead of rejected.
+        var attachment = new AIAttachment("broken.txt", "text/plain",
+                new byte[] { 0x41, (byte) 0x80, 0x42 });
+        var request = new TestLLMRequest("Summarize this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat(request, "Summary");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertTrue(
+                texts.stream().anyMatch(text -> text.contains("A\uFFFDB")),
+                "Invalid UTF-8 should be replaced, but got: " + texts);
     }
 
     @Test
@@ -927,6 +996,27 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void setHistory_withNullHistory_keepsExistingHistory() {
+        provider.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER,
+                        "Previous question", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+
+        mockSimpleChat(createSimpleRequest("Follow-up"), "Response");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var texts = getUserMessageContents(captor.getValue(), TextContent.class)
+                .stream().map(TextContent::text).toList();
+        Assertions.assertTrue(texts.contains("Previous question"),
+                "A rejected history must not clear the existing one, but got: "
+                        + texts);
+    }
+
+    @Test
     void setHistory_exceedingMaxMessages_evictsOldest() {
         var history = new ArrayList<ChatMessage>();
         for (int i = 0; i < 20; i++) {
@@ -1163,6 +1253,94 @@ class LangChain4JLLMProviderTest {
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
         Assertions.assertTrue(toolResults.getFirst().text()
                 .startsWith("Error executing tool:"));
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_createsToolWithParameters() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertNotNull(parameters,
+                "The declared schema should be passed to the model");
+        Assertions.assertEquals(List.of("city"),
+                List.copyOf(parameters.properties().keySet()));
+    }
+
+    @Test
+    void stream_withExplicitToolSchemaWithRequired_createsToolWithRequiredParameters() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"},"
+                        + "\"unit\":{\"type\":\"string\"}},\"required\":[\"city\"]}",
+                args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertEquals(List.of("city"), parameters.required());
+    }
+
+    @Test
+    void stream_withExplicitTool_nullOrBlankArguments_passesEmptyObject() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", null);
+        var response2 = mockSimpleResponseWithTool("myTool", "  ");
+        var response3 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2, response3);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(2, receivedArgs.size(),
+                "Both missing and blank arguments should reach the executor");
+        var allEmptyObjects = receivedArgs.stream().allMatch(
+                args -> args.isObject() && args.propertyNames().isEmpty());
+        Assertions.assertTrue(allEmptyObjects,
+                "Missing arguments should be parsed as an empty object");
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(2));
+        Assertions.assertEquals(2, toolResults.size(),
+                "Both tool calls should have produced a result, but got: "
+                        + toolResults);
+        var allSucceeded = toolResults.stream()
+                .allMatch(result -> "ok".equals(result.text()));
+        Assertions.assertTrue(allSucceeded,
+                "Both tool calls should have succeeded, but got: "
+                        + toolResults);
     }
 
     @Test
