@@ -61,8 +61,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("deprecation")
-@NpmPackage(value = "@vaadin/radio-group", version = "23.6.4")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.6.4")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.6.5")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.6.5")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
