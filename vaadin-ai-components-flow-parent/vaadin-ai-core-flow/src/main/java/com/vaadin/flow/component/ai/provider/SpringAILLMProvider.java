@@ -73,12 +73,13 @@ import tools.jackson.databind.JsonNode;
  * user's message renders while the LLM works.
  * </p>
  * <p>
- * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance. History
- * restoration (via {@link #setHistory(List, Map)}) is only supported when using
- * the {@link #SpringAILLMProvider(ChatModel)} constructor; the
- * {@link #SpringAILLMProvider(ChatClient)} constructor does not provide access
- * to the internal chat memory.
+ * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
+ * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
+ * saved conversation into it. To share conversation history across components,
+ * reuse the same provider instance. With the
+ * {@link #SpringAILLMProvider(ChatClient)} constructor the application owns the
+ * chat memory, so restoring the LLM's context is up to the application and
+ * {@link #setHistory(List, Map)} does nothing.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -124,9 +125,17 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Constructor with a chat client. Note: When using this constructor,
-     * conversation memory must be configured externally in the
-     * {@link ChatClient}.
+     * Constructor with a chat client. Conversation memory must be configured on
+     * the {@link ChatClient} itself, for example with a
+     * {@link MessageChatMemoryAdvisor} and a default
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter.
+     * <p>
+     * The application owns that memory, so {@link #setHistory(List, Map)} does
+     * nothing on a provider created this way. A conversation loaded from
+     * external storage must be written into the {@link ChatMemory} before the
+     * client is passed here. Passing the same conversation to
+     * {@code AIOrchestrator.Builder.withHistory(List, Map)} still restores the
+     * message list and the orchestrator's own history snapshot.
      *
      * @param chatClient
      *            the chat client, not {@code null}
@@ -243,6 +252,15 @@ public class SpringAILLMProvider implements LLMProvider {
         this.backgroundExecution.setEnabled(backgroundExecution);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Restores the conversation into the provider's own chat memory. Does
+     * nothing when the provider was created with the
+     * {@link #SpringAILLMProvider(ChatClient) ChatClient} constructor, because
+     * the application owns the chat memory in that case and is expected to have
+     * populated it before passing the client in.
+     */
     @Override
     public void setHistory(List<ChatMessage> history,
             Map<String, List<AIAttachment>> attachmentsByMessageId) {
@@ -250,9 +268,11 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
         if (!hasManagedMemory) {
-            throw new UnsupportedOperationException(
-                    "Chat history restoration is not supported when using the ChatClient constructor. "
-                            + "Use the ChatModel constructor instead.");
+            LOGGER.debug("Skipping history restoration: the provider was "
+                    + "created with a ChatClient whose chat memory the "
+                    + "application owns. Populate that memory before passing "
+                    + "the client to the provider.");
+            return;
         }
         chatMemory.clear(CONVERSATION_ID);
         var messages = history.stream().map(message -> {

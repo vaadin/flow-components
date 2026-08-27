@@ -36,7 +36,10 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -913,13 +916,70 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
+    void setHistory_withChatClientConstructor_isNoOp() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
-        var history = new ArrayList<ChatMessage>();
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> chatClientProvider.setHistory(history,
+        chatClientProvider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Old message", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Old answer", null,
+                        null));
+
+        Assertions.assertDoesNotThrow(() -> chatClientProvider
+                .setHistory(history, Collections.emptyMap()));
+
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockSimpleChatResponse("Response"));
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assertions.assertFalse(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+    }
+
+    @Test
+    void chatClientConstructor_withPreloadedChatMemory_sendsHistoryToModel() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        chatMemory.add("conv-1", List.of(new UserMessage("Old message"),
+                new AssistantMessage("Old answer")));
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultAdvisors(a -> a
+                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                                .build())
+                        .param(ChatMemory.CONVERSATION_ID, "conv-1"))
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockSimpleChatResponse("Response"));
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assertions.assertTrue(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+        Assertions.assertTrue(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old answer")));
+        Assertions.assertTrue(messages.stream().anyMatch(
+                msg -> Objects.equals(msg.getText(), "New question")));
+    }
+
+    @Test
+    void setHistory_withChatClientConstructor_nullHistoryStillThrows() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> chatClientProvider.setHistory(null,
                         Collections.emptyMap()));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> chatClientProvider.setHistory(List.of(), null));
     }
 
     @Test
