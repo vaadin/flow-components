@@ -53,6 +53,20 @@ public interface LLMProvider {
      * become available from the LLM. The provider manages conversation history
      * internally, so each call to this method adds to the ongoing conversation
      * context.
+     * <p>
+     * <b>Threading:</b> this method is called on the thread that triggers the
+     * prompt, and the returned stream is subscribed to on that same thread. An
+     * implementation whose LLM call blocks must therefore schedule that call
+     * itself — for example with
+     * {@code subscribeOn(Schedulers.boundedElastic())} — otherwise it occupies
+     * the UI thread and holds the session lock for the whole turn, and nothing
+     * the turn produces reaches the browser until it ends. The built-in
+     * providers expose this as a {@code setBackgroundExecution(boolean)}
+     * setting, since running the turn on the request thread is the simpler
+     * default when a turn is short.
+     * <p>
+     * Callers only consume the stream and do not schedule it, so whether a turn
+     * runs in the background is decided entirely by the implementation.
      *
      * @param request
      *            the LLM request containing user message, system prompt,
@@ -253,6 +267,13 @@ public interface LLMProvider {
          * message to the LLM so it can correct its next attempt; any other
          * runtime exception is caught, logged, and replaced with a generic
          * error message so internal details are not leaked.
+         * </p>
+         * <p>
+         * May be invoked from a background thread — with a streaming provider,
+         * or with background execution enabled — where Vaadin thread locals
+         * such as {@code UI.getCurrent()} are not bound. Wrap UI component
+         * access in {@code ui.access()}, or work on state captured in
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}.
          * </p>
          *
          * @param arguments

@@ -15,7 +15,9 @@ import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -24,7 +26,8 @@ import tools.jackson.databind.node.ObjectNode;
  * the {@code vaadin-ai-field-marker} web component, which annotates a field as
  * AI-filled and offers a popover to review and revert the value. It also
  * toggles the field's "AI is working" shimmer ({@link #setWorking}) shown while
- * a fill is in progress. The annotations on this class load the web component
+ * a fill is in progress, and applies the application-supplied popover content
+ * ({@link #setContent}). The annotations on this class load the web component
  * on the client.
  * <p>
  * The web component manages the annotation through its own element lifecycle:
@@ -43,7 +46,7 @@ import tools.jackson.databind.node.ObjectNode;
  * inject the badge into — stays inert on the client, so a non-Vaadin field
  * never shows a marker.
  */
-@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-alpha14")
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 
@@ -96,6 +99,100 @@ final class FormFieldMarker {
      */
     static void remove(Element field) {
         find(field).ifPresent(Element::removeFromParent);
+    }
+
+    /**
+     * Replaces the custom content shown in the popover of the field's marker.
+     * The content lives in a wrapper element that travels as a virtual child of
+     * the marker element — it has no place among the marker's DOM children,
+     * which the web component's own rendering manages — and is handed to the
+     * web component through its {@code content} property, which renders it into
+     * the popover. The wrapper is created and bound on the first content and
+     * stays for the marker's lifetime; replacing content only swaps the
+     * wrapper's children, detaching the previous content so it is free for the
+     * provider to hand out again. A {@code null} content empties and hides the
+     * wrapper, restoring the popover's default parts — or, with no wrapper ever
+     * created, is a complete no-op, so a marker never given content costs no
+     * client traffic. Content the wrapper already carries is left untouched. A
+     * no-op when the field has no marker.
+     *
+     * @param field
+     *            the field whose marker gets the content, not {@code null}
+     * @param content
+     *            the content element to show, or {@code null} to clear
+     */
+    static void setContent(Element field, Element content) {
+        var marker = find(field).orElse(null);
+        if (marker == null) {
+            return;
+        }
+        var wrapper = findWrapper(marker);
+        if (wrapper == null) {
+            if (content == null) {
+                return;
+            }
+            wrapper = new Element("div");
+            wrapper.getStyle().setDisplay(Style.Display.CONTENTS);
+            marker.appendVirtualChild(wrapper);
+            assignContent(marker, wrapper);
+        }
+        if (content != null && wrapper.equals(content.getParent())) {
+            return;
+        }
+        wrapper.removeAllChildren();
+        if (content != null) {
+            wrapper.appendChild(content);
+        }
+        wrapper.setVisible(content != null);
+    }
+
+    /**
+     * @return the wrapper element carrying the custom popover content of the
+     *         field's marker, or {@code null} when no content was ever set on
+     *         it
+     */
+    static Element contentWrapperOf(Element field) {
+        return find(field).map(FormFieldMarker::findWrapper).orElse(null);
+    }
+
+    /**
+     * Re-asserts the {@code content} property on the field's marker after the
+     * field was detached and re-attached. Flow re-creates the marker element
+     * and the wrapper it carries verbatim, but the property assignment is a
+     * one-off script, so it must run again for the new client elements. A no-op
+     * when the field has no marker or the marker no wrapper.
+     */
+    static void reassignContent(Element field) {
+        find(field).ifPresent(marker -> {
+            var wrapper = findWrapper(marker);
+            if (wrapper != null) {
+                assignContent(marker, wrapper);
+            }
+        });
+    }
+
+    /**
+     * @return the content wrapper among the marker's virtual children — the
+     *         only virtual child it ever gets — or {@code null} when none was
+     *         created yet. Appending the wrapper is the only thing that ever
+     *         creates the list and nothing removes it again, so an initialized
+     *         list always holds the wrapper.
+     */
+    private static Element findWrapper(Element marker) {
+        return marker.getNode()
+                .getFeatureIfInitialized(VirtualChildrenList.class)
+                .map(list -> Element.get(list.get(0))).orElse(null);
+    }
+
+    /**
+     * Hands the content wrapper to the web component, which renders it into the
+     * popover between the message and the revert control. Node-valued
+     * properties have no place in Flow's state tree, so the assignment is a
+     * script and does not survive a re-attach on its own — see
+     * {@link #reassignContent(Element)}.
+     */
+    private static void assignContent(Element marker, Element wrapper) {
+        marker.executeJs("this.content = $0;", wrapper);
     }
 
     /**

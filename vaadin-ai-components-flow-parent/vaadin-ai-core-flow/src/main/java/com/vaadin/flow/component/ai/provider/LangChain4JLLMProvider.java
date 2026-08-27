@@ -33,7 +33,6 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.shared.communication.PushMode;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -76,10 +75,17 @@ import tools.jackson.databind.JsonNode;
  * {@link #LangChain4JLLMProvider(StreamingChatModel)} for streaming, or a
  * {@link ChatModel} to {@link #LangChain4JLLMProvider(ChatModel)} for
  * non-streaming. Streaming mode pushes partial responses to the UI as they
- * arrive, which requires server push to be enabled. Annotate your UI class or
- * application shell with {@code @Push}, or configure push programmatically,
- * before using a streaming model. A warning is logged at runtime if push is not
- * enabled.
+ * arrive, which requires automatic server push or polling to deliver them.
+ * Annotate your UI class or application shell with {@code @Push}, or enable
+ * polling with {@code UI.setPollInterval()}, before using a streaming model. A
+ * warning is logged at runtime when neither is active.
+ * </p>
+ * <p>
+ * <b>Blocking the request thread:</b> a {@link ChatModel} call blocks the
+ * thread that subscribes to the response, which is the UI thread for a prompt
+ * triggered from the browser. Call {@link #setBackgroundExecution(boolean)
+ * setBackgroundExecution(true)} to run the call on a background thread instead,
+ * so the request completes and the user's message renders while the LLM works.
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
@@ -104,6 +110,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
     private final transient ChatMemory chatMemory;
+    private final BackgroundExecution backgroundExecution = new BackgroundExecution(
+            LangChain4JLLMProvider.class);
 
     /**
      * Constructor with a streaming chat model.
@@ -143,7 +151,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         Objects.requireNonNull(request, "Request must not be null");
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
-        return Flux.create(sink -> {
+        var response = Flux.<String> create(sink -> {
             try {
                 var userMessage = buildUserMessage(request);
                 chatMemory.add(userMessage);
@@ -156,6 +164,78 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 sink.error(e);
             }
         }, FluxSink.OverflowStrategy.BUFFER);
+        return streamingChatModel != null
+                ? backgroundExecution.applyToStreamingResponse(response)
+                : backgroundExecution.applyToBlockingResponse(response);
+    }
+
+    /**
+     * Gets whether the LLM call runs on a background thread.
+     *
+     * @return {@code true} if the call runs on a background thread,
+     *         {@code false} if it runs on the thread that asks for the response
+     * @since 25.3
+     */
+    public boolean isBackgroundExecution() {
+        return backgroundExecution.isEnabled();
+    }
+
+    /**
+     * Sets whether to run the LLM call on a background thread. The default is
+     * {@code false}, which runs it on the thread that asks for the response —
+     * the UI thread, for a prompt triggered from the browser. The setting has
+     * no effect with a {@link StreamingChatModel}, whose response already
+     * arrives on the LLM client's own threads.
+     * <p>
+     * A {@link ChatModel} call blocks for the whole turn, every tool call
+     * included. On the UI thread that means holding the session lock until the
+     * turn ends, so nothing the turn produces reaches the browser and the
+     * application appears frozen. Set this to {@code true} to run the call on a
+     * background thread instead: the request completes immediately, the user's
+     * message and the assistant placeholder render, and the response is added
+     * when it arrives.
+     * <p>
+     * This requires three things from the application:
+     * <ul>
+     * <li><b>A way to deliver the response.</b> Annotate the application shell
+     * or UI class with {@code @Push}, or enable polling with
+     * {@link UI#setPollInterval(int)}. Manual push mode is not enough on its
+     * own, because nothing calls {@code ui.push()} for you. A warning is logged
+     * when neither is active.</li>
+     * <li><b>Thread-safe tools.</b> On a background thread Vaadin thread locals
+     * such as {@link UI#getCurrent()} and framework contexts such as Spring
+     * Security's {@code SecurityContext} are not bound, and UI components must
+     * not be accessed directly. Wrap component access in {@code ui.access()},
+     * or capture what you need in
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+     * which still runs on the UI thread. This is the same requirement a
+     * {@link StreamingChatModel} already has.</li>
+     *
+     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
+     * time. Without background execution, a message submitted while a turn is
+     * running waits for the session lock and is processed when the turn ends;
+     * with it, the submit is rejected and dropped with a warning — and a
+     * connected input has already cleared its text. Disable the input while a
+     * turn is running, for example from
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
+     * and
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
+     * </ul>
+     *
+     * <p>
+     * Like the streaming mode, the setting is not preserved when the session is
+     * serialized: an application that restores sessions must re-apply it when
+     * it recreates the provider.
+     * </p>
+     *
+     * @param backgroundExecution
+     *            {@code true} to run the call on a background thread,
+     *            {@code false} to run it on the thread that asks for the
+     *            response
+     * @since 25.3
+     */
+    public void setBackgroundExecution(boolean backgroundExecution) {
+        this.backgroundExecution.setEnabled(backgroundExecution);
     }
 
     @Override
@@ -300,7 +380,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
-            checkPushConfiguration();
             executeStreamingChat(messages, context);
         } else {
             executeNonStreamingChat(messages, context);
@@ -479,16 +558,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             AIAttachment attachment) {
         var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
         return VideoContent.from(base64, attachment.mimeType());
-    }
-
-    private static void checkPushConfiguration() {
-        var ui = UI.getCurrent();
-        if (ui != null && PushMode.DISABLED
-                .equals(ui.getPushConfiguration().getPushMode())) {
-            LOGGER.warn("Push is not enabled. Streaming LLM responses "
-                    + "require @Push annotation or programmatic push "
-                    + "configuration to update the UI in real-time.");
-        }
     }
 
     /**

@@ -38,6 +38,7 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
@@ -52,6 +53,7 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.internal.nodefeature.VirtualChildrenList;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
@@ -2744,10 +2746,635 @@ class FormAIControllerTest {
             Assertions.assertEquals("filled", events.get(0).getNewValue());
         }
 
-        // The read-only re-assert is the controller's only server-invoked
-        // script, so tests dump the UI's pending JavaScript invocations to
-        // pin exactly when it is queued. The dump is destructive, so tests
-        // inspecting more than one field must filter a single drained list.
+        @Test
+        void popoverContentProviderDefaultsToNull() {
+            var controller = new FormAIController(new Div(new TestField()));
+
+            Assertions.assertNull(
+                    controller.getFieldMarkerPopoverContentProvider(),
+                    "No popover content provider must be set by default");
+
+            FieldMarkerPopoverContentProvider provider = change -> null;
+            controller.setFieldMarkerPopoverContentProvider(provider);
+
+            Assertions.assertSame(provider,
+                    controller.getFieldMarkerPopoverContentProvider(),
+                    "The getter must reflect the set provider");
+        }
+
+        @Test
+        void providerContentIsCarriedByMarkerAndHandedToClient() {
+            // The content travels in a wrapper element — a virtual child of
+            // the marker, never a DOM child, whose slot the web component's
+            // own rendering owns — that reaches the web component through a
+            // `content` property assignment; the content component itself is
+            // a regular child of the wrapper.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            var marker = requireMarkerOn(field);
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The marker must carry a content wrapper");
+            Assertions.assertTrue(wrapper.isVirtualChild(),
+                    "The wrapper must be a virtual child");
+            Assertions.assertEquals(marker, wrapper.getParent(),
+                    "The wrapper must be carried by the marker");
+            Assertions.assertEquals("contents",
+                    wrapper.getStyle().get("display"),
+                    "The wrapper must not generate a box of its own, so it "
+                            + "cannot interfere with the application's "
+                            + "styling of the content");
+            Assertions.assertEquals(wrapper, content.getElement().getParent(),
+                    "The content must be a child of the wrapper");
+            Assertions.assertEquals(0, marker.getChildCount(),
+                    "The content must not appear among the marker's DOM "
+                            + "children");
+            Assertions.assertEquals(1,
+                    contentScriptsOn(drainPendingJs(), wrapper).size(),
+                    "The wrapper must be assigned to the marker's content "
+                            + "property");
+        }
+
+        @Test
+        void providerCanSupplyPlainTextContent() {
+            // A Text component is a bare text node: it has no tag the client
+            // could create an in-memory virtual child from, so only the
+            // wrapper — a regular div carrying it as an ordinary child — can
+            // deliver it.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(
+                            change -> new Text("plain text"));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The marker must carry a content wrapper");
+            Assertions.assertEquals("plain text", wrapper.getText(),
+                    "The wrapper must carry the text node as its child");
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(List.of(), warnings,
+                    "Plain text content must be applied without warnings");
+        }
+
+        @Test
+        void noProviderQueuesNoContentScript() {
+            // Applications not using the feature must not pay for it with
+            // client traffic on every marking.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Without a provider, no content script must be queued");
+        }
+
+        @Test
+        void providerReturningNullAddsNoContent() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> null);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "A provider returning null must not queue a content "
+                            + "script");
+        }
+
+        @Test
+        void refillReplacesMarkerContent() {
+            // A re-filled field's content describes the new fill; the previous
+            // content component must be released, not stacked.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var first = new Div();
+            var second = new Div();
+            var next = new AtomicReference<Component>(first);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> next.get());
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            next.set(second);
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+
+            var marker = requireMarkerOn(field);
+            Assertions.assertNull(first.getElement().getParentNode(),
+                    "The replaced content must be released from the wrapper");
+            Assertions.assertEquals(wrapperOn(field),
+                    second.getElement().getParent(),
+                    "The new content must be carried by the wrapper");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(), marker),
+                    "Replacing content must not queue another assignment — "
+                            + "the wrapper stays bound");
+        }
+
+        @Test
+        void sameContentInstanceIsNotReapplied() {
+            // A provider that keeps one component per field must not cause a
+            // re-assignment on every turn.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Re-marking with the same content instance must not queue "
+                            + "another assignment");
+            Assertions.assertEquals(wrapperOn(field),
+                    content.getElement().getParent(),
+                    "The content must still be carried by the wrapper");
+        }
+
+        @Test
+        void sameContentInstanceIsNotDetachedOnRemark() {
+            // Reusing the content the wrapper already carries must leave it
+            // in place: emptying the wrapper and putting the same component
+            // back would detach and re-attach it, tearing down and rebuilding
+            // whatever the application hung on its attach.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var detaches = new AtomicInteger();
+            content.addDetachListener(event -> detaches.incrementAndGet());
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(0, detaches.get(),
+                    "Re-marking with the same content instance must not "
+                            + "detach it from the wrapper");
+        }
+
+        @Test
+        void removedProviderClearsContentOnNextFill() {
+            // Content from an earlier fill must not describe a later one the
+            // provider no longer covers.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            controller.setFieldMarkerPopoverContentProvider(null);
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The stale content must be released from the wrapper");
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The wrapper must stay for the marker's lifetime");
+            Assertions.assertEquals(0, wrapper.getChildCount(),
+                    "The wrapper must be emptied so the popover shows only "
+                            + "its built-in parts");
+            Assertions.assertFalse(wrapper.isVisible(),
+                    "The emptied wrapper must be invisible so its updates "
+                            + "are not sent to the client");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Clearing content must not queue another assignment");
+        }
+
+        @Test
+        void restoredProviderReusesWrapperOnNextFill() {
+            // The wrapper stays for the marker's lifetime: content coming back
+            // after a fill without any must reuse it — shown again, with no
+            // new property assignment.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("one");
+            controller.onResponse(null);
+
+            controller.setFieldMarkerPopoverContentProvider(null);
+            controller.onRequest();
+            field.setValue("two");
+            controller.onResponse(null);
+            var wrapper = wrapperOn(field);
+            drainPendingJs();
+
+            controller.setFieldMarkerPopoverContentProvider(change -> content);
+            controller.onRequest();
+            field.setValue("three");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(wrapper, wrapperOn(field),
+                    "The mark must keep its wrapper across content changes");
+            Assertions.assertTrue(wrapper.isVisible(),
+                    "The wrapper must be visible again with the new content");
+            Assertions.assertEquals(wrapper, content.getElement().getParent(),
+                    "The content must be carried by the reused wrapper");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Reusing the wrapper must not queue another assignment");
+        }
+
+        @Test
+        void throwingProviderStillMarksFieldWithoutContent() {
+            // A misbehaving provider must not cost the user the marker — or
+            // the revert control it carries.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> {
+                        throw new IllegalStateException("boom");
+                    });
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            var marker = requireMarkerOn(field);
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(), marker),
+                    "A throwing provider must be treated as returning no "
+                            + "content");
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(1, warnings.size(),
+                    "The provider failure must be logged; got: " + warnings);
+        }
+
+        @Test
+        void attachedProviderContentMarksFieldWithoutContentAndTurnGoesOn() {
+            // A provider handing out a component that already sits somewhere
+            // must be rejected like a throwing provider: logged, the field
+            // marked without content — and above all the rest of the turn
+            // must go on, marking the remaining fields and firing the change
+            // events.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var first = new TestField();
+            var second = new TestField();
+            var form = new Div(first, second);
+            ui.add(form);
+            var attached = new Div();
+            ui.add(attached);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(
+                            change -> change.getField() == first ? attached
+                                    : null);
+            var events = new ArrayList<FieldValueChangeEvent>();
+            controller.addFieldValueChangeListener(events::add);
+
+            controller.onRequest();
+            first.setValue("one");
+            second.setValue("two");
+            controller.onResponse(null);
+
+            var marker = requireMarkerOn(first);
+            requireMarkerOn(second);
+            Assertions.assertEquals(2, events.size(),
+                    "The change listeners must still fire for the whole turn");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(), marker),
+                    "The attached component must not be applied as content");
+            Assertions.assertEquals(ui.getElement(),
+                    attached.getElement().getParent(),
+                    "The rejected component must be left where it was");
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(1, warnings.size(),
+                    "The rejected content must be logged; got: " + warnings);
+            Assertions.assertTrue(
+                    warnings.getFirst().getMessage()
+                            .contains("already has a parent"),
+                    "The warning must name the parent as the reason, so a "
+                            + "rejected component is told apart from a "
+                            + "provider that threw; got: " + warnings);
+        }
+
+        @Test
+        void markingWithoutProviderLogsNoWarning() {
+            // Having no provider is the default, not a failure — marking
+            // must not spam a warning per marked field.
+            TestLoggerFactory.getTestLogger(FormAIController.class).clearAll();
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            requireMarkerOn(field);
+            var warnings = TestLoggerFactory
+                    .getTestLogger(FormAIController.class).getLoggingEvents()
+                    .stream().filter(e -> e.getLevel() == Level.WARN).toList();
+            Assertions.assertEquals(List.of(), warnings,
+                    "Marking without a provider must not log warnings");
+        }
+
+        @Test
+        void userEditReleasesMarkerContent() {
+            // The content goes away with the mark: once the user edits the
+            // field, the marker and the content it carried are gone.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            field.setValue("user edit");
+
+            Assertions.assertEquals(List.of(), markersOn(field));
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The content must be released from the discarded marker");
+        }
+
+        @Test
+        void revertReleasesMarkerContent() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            fireRevert(field);
+
+            Assertions.assertEquals(List.of(), markersOn(field));
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The content must be released from the discarded marker");
+        }
+
+        @Test
+        void revertDuringTurnReleasesContentFromRetainedMarker() {
+            // A revert while a later turn runs keeps the marker for the
+            // working state, but the mark — and with it the content — is
+            // cleared. The retained marker must not keep carrying a content
+            // component that nothing tracks anymore.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            controller.onRequest();
+            fireRevert(field);
+
+            Assertions.assertNull(content.getElement().getParentNode(),
+                    "The content must be released although the marker stays "
+                            + "for the working state");
+            var wrapper = wrapperOn(field);
+            Assertions.assertNotNull(wrapper,
+                    "The wrapper must stay for the marker's lifetime");
+            Assertions.assertEquals(0, wrapper.getChildCount(),
+                    "The retained marker's wrapper must be emptied so the "
+                            + "popover shows only its built-in parts");
+            Assertions.assertFalse(wrapper.isVisible(),
+                    "The emptied wrapper must be invisible so its updates "
+                            + "are not sent to the client");
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "Clearing content must not queue another assignment");
+
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of(), markersOn(field),
+                    "The marker that only carried the working state must go "
+                            + "at turn end");
+        }
+
+        @Test
+        void clearingContentOfFieldWhoseMarkerIsGoneDoesNotThrow() {
+            // The marker lives in the field's own element children, which an
+            // application rebuilding the field's DOM can take with it. The
+            // mark then outlives its marker, so clearing it must stay the
+            // no-op the marker API promises rather than fail the user's edit.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> new Div());
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            requireMarkerOn(field).removeFromParent();
+
+            Assertions.assertDoesNotThrow(() -> field.setValue("user edit"),
+                    "Clearing the mark of a field that lost its marker must "
+                            + "not throw");
+        }
+
+        @Test
+        void reattachReassignsMarkerContent() {
+            // Flow re-creates the marker and the content wrapper from the
+            // state tree when the field re-enters the DOM, but the property
+            // assignment is a one-off script — it must be queued again.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var content = new Div();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> content);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            var wrapper = wrapperOn(field);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            Assertions.assertEquals(1,
+                    contentScriptsOn(drainPendingJs(), wrapper).size(),
+                    "A re-attach must re-assign the wrapper to the marker");
+        }
+
+        @Test
+        void reattachWithoutContentQueuesNoScript() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var controller = new FormAIController(form);
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            drainPendingJs();
+
+            form.remove(field);
+            form.add(field);
+
+            Assertions.assertEquals(List.of(),
+                    contentScriptsOwnedBy(drainPendingJs(),
+                            requireMarkerOn(field)),
+                    "A mark without content must not queue a content script "
+                            + "on re-attach");
+        }
+
+        @Test
+        void popoverContentProviderRunsBeforeChangeListeners() {
+            // The listener Javadoc promises the marking — content included —
+            // is done by the time listeners run, so a listener can rely on
+            // the popover being complete.
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var calls = new ArrayList<String>();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> {
+                        calls.add("provider");
+                        return null;
+                    });
+            controller.addFieldValueChangeListener(
+                    event -> calls.add("listener"));
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(List.of("provider", "listener"), calls,
+                    "The provider must run before the change listeners");
+        }
+
+        @Test
+        void popoverContentProviderNotCalledWhenMarkerDisabled() {
+            var field = new TestField();
+            var form = new Div(field);
+            ui.add(form);
+            var calls = new AtomicInteger();
+            var controller = new FormAIController(form)
+                    .setFieldMarkerEnabled(false)
+                    .setFieldMarkerPopoverContentProvider(change -> {
+                        calls.incrementAndGet();
+                        return null;
+                    });
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+
+            Assertions.assertEquals(0, calls.get(),
+                    "With marking off there is no popover to fill, so the "
+                            + "provider must not be called");
+        }
+
+        @Test
+        void markWithContentSerializesWithoutController() {
+            // The content component and the attach listener re-asserting it
+            // persist on the field, so they must not capture the controller
+            // any more than the mark's other listeners do.
+            var field = new TestField();
+            var form = new Div(field);
+            var controller = new FormAIController(form)
+                    .setFieldMarkerPopoverContentProvider(change -> new Div());
+
+            controller.onRequest();
+            field.setValue("filled");
+            controller.onResponse(null);
+            Assertions.assertEquals(1, markersOn(field).size());
+
+            Assertions.assertDoesNotThrow(() -> {
+                try (var out = new ObjectOutputStream(
+                        OutputStream.nullOutputStream())) {
+                    out.writeObject(form);
+                }
+            }, "Serializing a marked field with content must not reach the "
+                    + "controller");
+        }
+
+        // The controller's server-invoked scripts — the read-only re-assert
+        // and the marker content assignment — are asserted by dumping the
+        // UI's pending JavaScript invocations to pin exactly when each is
+        // queued. The dump is destructive, so tests inspecting more than one
+        // field must filter a single drained list.
         private List<PendingJavaScriptInvocation> drainPendingJs() {
             ui.getInternals().getStateTree()
                     .runExecutionsBeforeClientResponse();
@@ -2762,6 +3389,49 @@ class FormAIControllerTest {
                     .filter(p -> p.getInvocation().getParameters()
                             .contains(target.getElement()))
                     .map(p -> p.getInvocation().getExpression()).toList();
+        }
+
+        private static final String CONTENT_ASSIGNMENT = "this.content = $0";
+
+        /**
+         * @return the content-assignment scripts queued with the given wrapper
+         *         element as a parameter
+         */
+        private static List<String> contentScriptsOn(
+                List<PendingJavaScriptInvocation> dump, Element wrapper) {
+            return dump.stream()
+                    .filter(p -> p.getInvocation().getParameters()
+                            .contains(wrapper))
+                    .map(p -> p.getInvocation().getExpression())
+                    .filter(expression -> expression
+                            .contains(CONTENT_ASSIGNMENT))
+                    .toList();
+        }
+
+        /**
+         * @return the content wrapper element the field's marker carries as a
+         *         virtual child, or {@code null} when the marker has none
+         */
+        private static Element wrapperOn(Component field) {
+            return requireMarkerOn(field).getNode()
+                    .getFeatureIfInitialized(VirtualChildrenList.class)
+                    .map(list -> Element.get(list.get(0))).orElse(null);
+        }
+
+        /**
+         * @return the content-assignment scripts queued with the given marker
+         *         element as {@code this}. Unlike {@link #contentScriptsOn},
+         *         matches by the invocation's owner, so it also catches an
+         *         assignment whose parameter is {@code null} — the
+         *         content-clearing form.
+         */
+        private static List<String> contentScriptsOwnedBy(
+                List<PendingJavaScriptInvocation> dump, Element marker) {
+            return dump.stream().filter(p -> p.getOwner() == marker.getNode())
+                    .map(p -> p.getInvocation().getExpression())
+                    .filter(expression -> expression
+                            .contains(CONTENT_ASSIGNMENT))
+                    .toList();
         }
 
         // Dispatch the marker's revert event server-side so tests can drive
