@@ -124,6 +124,11 @@ public interface LLMProvider {
          * vendor-specific annotations (e.g., LangChain4j's {@code @Tool},
          * Spring AI's {@code @Tool}) that the provider can introspect and
          * convert to native tool definitions.
+         * <p>
+         * These tools are executed by the vendor framework itself, so its own
+         * error handling decides what reaches the LLM when a tool throws; the
+         * {@link ToolException} contract only applies to the tools returned by
+         * {@link #explicitTools()}.
          *
          * @return array of tool objects, never {@code null} but may be empty
          */

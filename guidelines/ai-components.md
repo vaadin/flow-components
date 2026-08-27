@@ -112,7 +112,11 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `DatabaseProvider`/`ToolSpec`, only with deliberately-safe text. Any other
   exception is caught, logged, and replaced with a generic string so SQL,
   schema names, or paths never leak. Tool failures are returned as strings
-  to the model, never thrown.
+  to the model, never thrown. This contract covers only framework-agnostic
+  `ToolSpec` tools; vendor-annotated tools (LangChain4j/Spring AI `@Tool`)
+  are executed by the vendor framework, whose default error handling relays
+  the raw message of any exception to the model — they are deliberately out
+  of scope, so route error-sensitive tools through `ToolSpec`.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 

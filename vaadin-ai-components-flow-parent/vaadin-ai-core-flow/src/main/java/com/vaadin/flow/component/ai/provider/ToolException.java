@@ -30,6 +30,16 @@ package com.vaadin.flow.component.ai.provider;
  * Any other exception thrown from tool code is caught, logged, and replaced
  * with a generic error message before reaching the LLM, so internal details are
  * not leaked.
+ * <p>
+ * This contract applies only to tools defined through the framework-agnostic
+ * {@link LLMProvider.ToolSpec} API — the tools registered by
+ * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
+ * implementations and by {@link DatabaseProvider}-backed tools. Tools defined
+ * with vendor-specific annotations (LangChain4j's or Spring AI's {@code @Tool})
+ * are executed by the vendor framework itself, whose own error handling decides
+ * what reaches the LLM — by default both frameworks relay the raw message of
+ * any exception, so neither the verbatim-forwarding nor the generic-replacement
+ * behavior described above applies to them.
  *
  * @author Vaadin Ltd
  * @since 25.3
