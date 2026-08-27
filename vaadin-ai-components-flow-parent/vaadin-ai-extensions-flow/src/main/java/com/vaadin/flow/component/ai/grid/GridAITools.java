@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 
 import tools.jackson.databind.JsonNode;
 
@@ -45,18 +46,6 @@ public final class GridAITools {
     }
 
     /**
-     * Signals a validation failure whose message is safe to pass back to the
-     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
-     * detail (SQL fragments, schema names, file paths) and must be replaced
-     * with a generic message before being returned.
-     */
-    private static final class ValidationException extends RuntimeException {
-        ValidationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * Callback interface for grid state access and mutation.
      */
     public interface Callbacks extends Serializable {
@@ -74,7 +63,10 @@ public final class GridAITools {
         /**
          * Handles a SQL query for the given grid. Implementations should
          * validate the query and store it for deferred rendering. Should throw
-         * if the grid is not found or the query is invalid.
+         * if the grid is not found or the query is invalid: a
+         * {@link ToolException} relays its message to the LLM so it can correct
+         * the query, any other exception is replaced with a generic error
+         * message.
          *
          * @param gridId
          *            the grid ID
@@ -105,11 +97,10 @@ public final class GridAITools {
             return ids.iterator().next();
         }
         if (ids.isEmpty()) {
-            throw new ValidationException("No grids available.");
+            throw new ToolException("No grids available.");
         }
-        throw new ValidationException(
-                "gridId is required when multiple grids exist. "
-                        + "Available grid IDs: " + ids);
+        throw new ToolException("gridId is required when multiple grids exist. "
+                + "Available grid IDs: " + ids);
     }
 
     /**
@@ -153,7 +144,7 @@ public final class GridAITools {
                     LOGGER.info("get_grid_state called");
                     var gridId = resolveGridId(arguments, callbacks);
                     return callbacks.getState(gridId);
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("get_grid_state validation failed", e);
                     return "Error getting grid state: " + e.getMessage();
                 } catch (Exception e) {
@@ -166,7 +157,8 @@ public final class GridAITools {
 
     /**
      * Creates a tool that updates the grid data with a SQL query. If the
-     * handler throws, the error is returned to the LLM.
+     * handler throws a {@link ToolException}, its message is returned to the
+     * LLM; any other exception is replaced with a generic error.
      *
      * @param callbacks
      *            the callbacks for grid mutation, not {@code null}
@@ -235,7 +227,7 @@ public final class GridAITools {
                     callbacks.updateData(gridId, query);
                     return "Grid '" + gridId
                             + "' data update queued successfully";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_grid_data validation failed", e);
                     return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {

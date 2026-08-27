@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -1540,6 +1541,78 @@ class SpringAILLMProviderTest {
                 args -> args.isObject() && args.propertyNames().isEmpty());
         Assertions.assertTrue(allEmptyObjects,
                 "Missing arguments should be parsed as an empty object");
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessage() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                result);
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool.", result);
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_logsError() {
+        provider.setStreaming(false);
+        var toolFailure = new RuntimeException("internal detail");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw toolFailure;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        toolCallbacks.getFirst().call("{}");
+
+        // The generic result hides the failure from the LLM, so the log is
+        // the only place where the actual error is visible.
+        var error = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.ERROR
+                        && event.getThrowable().orElse(null) == toolFailure)
+                .findFirst();
+        Assertions.assertTrue(error.isPresent(),
+                "Expected the tool failure to be logged");
     }
 
     @Test

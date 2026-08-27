@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -182,21 +183,29 @@ public class ChartAIController implements AIController {
 
             @Override
             public void updateConfiguration(String chartId, String configJson) {
-                // Parse eagerly to validate. If the JSON contains
-                // invalid values, the exception propagates back to the
-                // LLM as an error so it can fix the configuration.
-                ChartConfigurationParser.parse(configJson);
+                // Parse eagerly so an invalid configuration is rejected
+                // within the turn. The configuration is authored by the
+                // model itself, so the parse failure reason is safe to
+                // relay via ToolException, letting the model fix its own
+                // payload instead of retrying it unchanged.
+                try {
+                    ChartConfigurationParser.parse(configJson);
+                } catch (IllegalArgumentException e) {
+                    throw new ToolException(e.getMessage(), e);
+                }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingConfigurationJson(configJson);
             }
 
             @Override
             public void updateData(String chartId, List<String> queries) {
-                // Execute queries eagerly to validate them. If a query
-                // is invalid, the exception propagates back to the LLM
-                // as an error so it can fix the query. Results are
-                // discarded here; they will be re-executed at render
-                // time in ChartRenderer.
+                // Execute queries eagerly so an invalid query is
+                // rejected within the turn. A DatabaseProvider that
+                // throws ToolException gets its message relayed to the
+                // LLM so it can fix the query; any other exception is
+                // replaced with a generic error. Results are discarded
+                // here; they will be re-executed at render time in
+                // ChartRenderer.
                 for (String q : queries) {
                     databaseProvider.executeQuery(q);
                 }

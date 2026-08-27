@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -169,6 +170,19 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateConfiguration_invalidConfigJson_relaysParseError() {
+            var tool = findTool(controller.getTools(),
+                    "update_chart_configuration");
+
+            String result = tool.execute(
+                    json("{\"configuration\": \"not a json object\"}"));
+            Assertions.assertTrue(
+                    result.contains("Invalid chart configuration JSON"),
+                    "The parse failure reason should reach the model: "
+                            + result);
+        }
+
+        @Test
         void updateData_validatesQueriesEagerly() {
             databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
 
@@ -179,6 +193,33 @@ class ChartAIControllerTest {
             String result = tool
                     .execute(json("{\"queries\": [\"SELECT invalid\"]}"));
             Assertions.assertTrue(result.contains("Error"));
+        }
+
+        @Test
+        void updateData_providerThrowsToolException_relaysMessage() {
+            databaseProvider.throwOnExecute = new ToolException(
+                    "Unknown column 'foo'");
+
+            var tool = findTool(controller.getTools(),
+                    "update_chart_data_source");
+
+            String result = tool
+                    .execute(json("{\"queries\": [\"SELECT foo\"]}"));
+            Assertions.assertEquals(
+                    "Error updating chart data: Unknown column 'foo'", result);
+        }
+
+        @Test
+        void updateData_providerThrowsUnexpectedException_returnsGenericError() {
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "internal detail");
+
+            var tool = findTool(controller.getTools(),
+                    "update_chart_data_source");
+
+            String result = tool
+                    .execute(json("{\"queries\": [\"SELECT foo\"]}"));
+            Assertions.assertEquals("Error updating chart data.", result);
         }
 
         @Test
