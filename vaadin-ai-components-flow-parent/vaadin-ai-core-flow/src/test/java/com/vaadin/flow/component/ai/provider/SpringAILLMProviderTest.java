@@ -382,7 +382,7 @@ class SpringAILLMProviderTest {
                 .map(UserMessage.class::cast).findFirst().orElseThrow();
         Assertions.assertEquals(1, userMessage.getMedia().size());
         var text = String.valueOf(userMessage.getMedia().getFirst().getData());
-        Assertions.assertTrue(text.contains("A�B"),
+        Assertions.assertTrue(text.contains("A\uFFFDB"),
                 "Invalid UTF-8 should be replaced, but got: " + text);
     }
 

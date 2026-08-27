@@ -299,9 +299,12 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(nullAiResponse, secondResponse);
 
-        provider.stream(createSimpleRequest("First")).collectList().block();
+        // Bounded blocks: completing the turn is what is under test here, so
+        // a missing terminal signal must fail instead of hanging
+        provider.stream(createSimpleRequest("First")).collectList()
+                .block(Duration.ofSeconds(5));
         var results = provider.stream(createSimpleRequest("Second question"))
-                .collectList().block();
+                .collectList().block(Duration.ofSeconds(5));
 
         Assertions.assertEquals(List.of("Second"), results);
 
@@ -309,8 +312,12 @@ class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var messages = captor.getAllValues().get(1).messages();
         Assertions.assertEquals(2, messages.size(),
-                "A response without an AI message must not leave anything in "
+                "A response without an AI message must not add that message to "
                         + "chat memory, but got: " + messages);
+        var memoryTexts = getUserMessageContents(captor.getAllValues().get(1),
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("First", "Second question"),
+                memoryTexts, "Both user turns should still be in chat memory");
     }
 
     @Test
@@ -1325,9 +1332,12 @@ class LangChain4JLLMProviderTest {
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
         var toolResults = getToolExecutionResults(captor.getAllValues().get(2));
-        Assertions.assertTrue(
-                toolResults.stream()
-                        .allMatch(result -> "ok".equals(result.text())),
+        Assertions.assertEquals(2, toolResults.size(),
+                "Both tool calls should have produced a result, but got: "
+                        + toolResults);
+        var allSucceeded = toolResults.stream()
+                .allMatch(result -> "ok".equals(result.text()));
+        Assertions.assertTrue(allSucceeded,
                 "Both tool calls should have succeeded, but got: "
                         + toolResults);
     }
