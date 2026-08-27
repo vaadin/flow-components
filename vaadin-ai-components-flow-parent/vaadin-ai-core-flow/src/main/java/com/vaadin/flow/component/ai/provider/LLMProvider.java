@@ -183,6 +183,31 @@ public interface LLMProvider {
     interface ToolSpec {
 
         /**
+         * JSON Schema for a tool that takes no parameters. Declares a single
+         * optional {@code reason} property that the tool ignores, so the LLM
+         * always has a well-formed, non-empty object to send as arguments.
+         * <p>
+         * Use this instead of {@code null} or a schema with an empty
+         * {@code properties} object: without a declared property, models
+         * disagree on what to send as arguments — some send an empty string —
+         * and some LLM APIs (for example Anthropic models on Amazon Bedrock)
+         * reject the request that replays such a tool call.
+         * </p>
+         *
+         * @since 25.3
+         */
+        String NO_PARAMETERS_SCHEMA = """
+                {
+                  "type": "object",
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "description": "Optional note on why this tool is being called. Ignored by the tool."
+                    }
+                  }
+                }""";
+
+        /**
          * Gets the unique name of this tool. The name must contain only
          * alphanumeric characters, underscores, and hyphens, with a maximum
          * length of 64 characters (matching the pattern
@@ -253,9 +278,18 @@ public interface LLMProvider {
          * keywords such as {@code format}, {@code pattern}, or {@code $ref}
          * that not every LLM provider accepts.
          * </p>
+         * <p>
+         * For a tool that takes no parameters, return
+         * {@link #NO_PARAMETERS_SCHEMA} rather than {@code null} or a schema
+         * with an empty {@code properties} object — see the constant's
+         * documentation for why. The built-in providers substitute
+         * {@link #NO_PARAMETERS_SCHEMA} for a {@code null} or blank return
+         * value, but an empty {@code properties} object is passed through
+         * as-is.
+         * </p>
          *
-         * @return the JSON Schema string, or {@code null} if the tool takes no
-         *         parameters
+         * @return the JSON Schema string, or {@link #NO_PARAMETERS_SCHEMA} if
+         *         the tool takes no parameters
          */
         String getParametersSchema();
 

@@ -55,6 +55,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.MockUIExtension;
 
@@ -1616,7 +1617,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_withExplicitToolNullSchema_usesEmptySchema() {
+    void stream_withExplicitToolNullSchema_substitutesNoParametersSchema() {
         provider.setStreaming(false);
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");
@@ -1635,8 +1636,83 @@ class SpringAILLMProviderTest {
         var toolDef = toolCallbacks.getFirst().getToolDefinition();
         Assertions.assertEquals("simpleTool", toolDef.name());
         Assertions.assertEquals("A simple tool", toolDef.description());
-        // Should have a default empty schema
-        Assertions.assertNotNull(toolDef.inputSchema());
+        assertNoParametersSchema(toolDef.inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolBlankSchema_substitutesNoParametersSchema() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                "   ", args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        assertNoParametersSchema(
+                toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_passesSchemaThroughVerbatim() {
+        provider.setStreaming(false);
+        var userSchema = "{\"type\":\"object\",\"properties\":{\"city\":"
+                + "{\"type\":\"string\"}},\"required\":[\"city\"]}";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                userSchema, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        Assertions.assertEquals(userSchema,
+                toolCallbacks.getFirst().getToolDefinition().inputSchema(),
+                "A declared schema must reach the tool definition unmodified");
+    }
+
+    @Test
+    void stream_withExplicitToolEmptyPropertiesSchema_passesSchemaThroughVerbatim() {
+        // Substitution is limited to null/blank schemas: a syntactically
+        // valid schema authored by the user is passed through as-is, even
+        // when its properties object is empty.
+        provider.setStreaming(false);
+        var userSchema = "{\"type\":\"object\",\"properties\":{}}";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                userSchema, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        Assertions.assertEquals(userSchema,
+                toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    /**
+     * Asserts the schema is the non-empty no-parameters shape: an object with
+     * at least one property, all of them optional. A tool without a declared
+     * property makes models disagree on what to send as arguments, and some LLM
+     * APIs reject the request that replays such a tool call.
+     */
+    private static void assertNoParametersSchema(String inputSchema) {
+        var schema = JacksonUtils.readTree(inputSchema);
+        Assertions.assertEquals("object", schema.path("type").asString());
+        Assertions.assertTrue(schema.path("properties").size() > 0,
+                "Schema must declare at least one property, got: " + schema);
+        Assertions.assertEquals(0, schema.path("required").size(),
+                "All declared properties must be optional, got: " + schema);
     }
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,

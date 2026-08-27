@@ -338,9 +338,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
         var schema = tool.getParametersSchema();
-        if (schema != null && !schema.isBlank()) {
-            builder.parameters(parseParametersSchema(schema));
+        if (schema == null || schema.isBlank()) {
+            // A tool without a declared schema breaks some LLM APIs —
+            // see ToolSpec.NO_PARAMETERS_SCHEMA.
+            schema = LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA;
         }
+        builder.parameters(parseParametersSchema(schema));
         return builder.build();
     }
 
@@ -371,8 +374,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
             return schemaBuilder.build();
         } catch (Exception e) {
             LOGGER.warn("Failed to parse tool parameters schema, "
-                    + "using empty schema", e);
-            return JsonObjectSchema.builder().build();
+                    + "using no-parameters schema", e);
+            // The constant is a well-formed literal, so this cannot recurse.
+            return parseParametersSchema(
+                    LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA);
         }
     }
 
