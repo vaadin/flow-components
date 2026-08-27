@@ -158,7 +158,7 @@ class RowTest {
 
     @Test
     void redrawCallsRedraw() throws Exception {
-        UI ui = new UI();
+        UI ui = FunctionCallerTest.createUI();
         Board board = new Board();
         ui.add(board);
 
