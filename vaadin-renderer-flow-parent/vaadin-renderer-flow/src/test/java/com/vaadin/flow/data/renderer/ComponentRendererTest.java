@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -30,6 +31,7 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.VaadinSession;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -68,6 +70,9 @@ class ComponentRendererTest {
     void componentRenderer_parentAttachedBeforeChild() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
+        // Scheduling a JavaScript invocation on an attached element requires
+        // the owning UI to have a session
+        internals.setSession(Mockito.mock(VaadinSession.class));
 
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 e -> (new TestDiv()));
@@ -104,6 +109,9 @@ class ComponentRendererTest {
     void componentRenderer_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
+        // Scheduling a JavaScript invocation on an attached element requires
+        // the owning UI to have a session
+        internals.setSession(Mockito.mock(VaadinSession.class));
 
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 e -> (new TestDiv()));
