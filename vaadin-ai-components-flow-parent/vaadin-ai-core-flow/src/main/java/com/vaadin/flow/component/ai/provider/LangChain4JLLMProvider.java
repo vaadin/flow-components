@@ -474,17 +474,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
     }
 
-    private static ResponseMetadata.FinishReason toFinishReason(
-            FinishReason finishReason) {
-        return switch (finishReason) {
-        case STOP -> ResponseMetadata.FinishReason.STOP;
-        case LENGTH -> ResponseMetadata.FinishReason.LENGTH;
-        case CONTENT_FILTER -> ResponseMetadata.FinishReason.CONTENT_FILTER;
-        case TOOL_EXECUTION -> ResponseMetadata.FinishReason.TOOL_CALLS;
-        default -> ResponseMetadata.FinishReason.OTHER;
-        };
-    }
-
     private static ToolExecutionResultMessage executeToolRequest(
             ToolExecutor toolExecutor, ToolExecutionRequest toolExecRequest) {
         String result;
@@ -627,16 +616,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 return;
             }
             var finishReason = lastFinishReason == null ? null
-                    : toFinishReason(lastFinishReason);
-            var rawFinishReason = lastFinishReason == null ? null
                     : lastFinishReason.name();
             var tokenUsage = accumulatedUsage == null ? null
                     : new ResponseMetadata.TokenUsage(
                             accumulatedUsage.inputTokenCount(),
                             accumulatedUsage.outputTokenCount(),
                             accumulatedUsage.totalTokenCount());
-            request.metadataSink().accept(new ResponseMetadata(finishReason,
-                    rawFinishReason, tokenUsage));
+            request.metadataSink()
+                    .accept(new ResponseMetadata(finishReason, tokenUsage));
         }
 
         LLMRequest getRequest() {

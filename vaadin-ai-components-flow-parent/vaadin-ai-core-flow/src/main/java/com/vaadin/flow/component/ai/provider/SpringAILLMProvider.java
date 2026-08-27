@@ -524,13 +524,13 @@ public class SpringAILLMProvider implements LLMProvider {
      */
     private static class ResponseMetadataCollector {
 
-        private String rawFinishReason;
+        private String finishReason;
         private ResponseMetadata.TokenUsage tokenUsage;
 
         void observe(ChatResponse response) {
-            var raw = getRawFinishReason(response);
-            if (raw != null) {
-                rawFinishReason = raw;
+            var reason = getFinishReason(response);
+            if (reason != null) {
+                finishReason = reason;
             }
             var usage = getTokenUsage(response);
             if (usage != null) {
@@ -539,15 +539,13 @@ public class SpringAILLMProvider implements LLMProvider {
         }
 
         void publishTo(Consumer<ResponseMetadata> metadataSink) {
-            if (rawFinishReason == null && tokenUsage == null) {
+            if (finishReason == null && tokenUsage == null) {
                 return;
             }
-            metadataSink.accept(new ResponseMetadata(
-                    ResponseMetadata.normalizeFinishReason(rawFinishReason),
-                    rawFinishReason, tokenUsage));
+            metadataSink.accept(new ResponseMetadata(finishReason, tokenUsage));
         }
 
-        private static String getRawFinishReason(ChatResponse response) {
+        private static String getFinishReason(ChatResponse response) {
             var result = response.getResult();
             if (result == null) {
                 return null;

@@ -1861,8 +1861,7 @@ class AIOrchestratorTest {
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(mockMessage);
-        var metadata = new ResponseMetadata(
-                ResponseMetadata.FinishReason.LENGTH, "max_tokens",
+        var metadata = new ResponseMetadata("max_tokens",
                 new ResponseMetadata.TokenUsage(1200, 8, 1208));
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))

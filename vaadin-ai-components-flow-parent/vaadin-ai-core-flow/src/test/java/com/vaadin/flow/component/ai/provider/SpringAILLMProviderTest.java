@@ -1738,9 +1738,7 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(1, collected.size(),
                 "Provider should publish the response metadata once");
         var metadata = collected.getFirst();
-        Assertions.assertEquals(ResponseMetadata.FinishReason.LENGTH,
-                metadata.finishReason());
-        Assertions.assertEquals("max_tokens", metadata.rawFinishReason());
+        Assertions.assertEquals("max_tokens", metadata.finishReason());
         Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
         Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
         Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
@@ -1760,9 +1758,7 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(1, collected.size(),
                 "Provider should publish the response metadata once");
         var metadata = collected.getFirst();
-        Assertions.assertEquals(ResponseMetadata.FinishReason.STOP,
-                metadata.finishReason());
-        Assertions.assertEquals("stop", metadata.rawFinishReason());
+        Assertions.assertEquals("stop", metadata.finishReason());
         Assertions.assertEquals(120, metadata.tokenUsage().totalTokens());
     }
 
