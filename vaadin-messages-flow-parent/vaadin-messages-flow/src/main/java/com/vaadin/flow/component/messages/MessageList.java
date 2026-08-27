@@ -33,6 +33,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -55,8 +56,8 @@ import com.vaadin.flow.signals.Signal;
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
 @NpmPackage(value = "@vaadin/message-list", version = "25.3.0-alpha14")
-public class MessageList extends Component
-        implements HasStyle, HasSize, LocaleChangeObserver {
+public class MessageList extends Component implements HasStyle, HasSize,
+        LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 
     private static final String ITEMS_BINDING = "items";
 

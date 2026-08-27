@@ -337,9 +337,9 @@ public class MessageListItem implements Serializable {
     }
 
     /*
-     * The following theme-related methods are copied from the HasTheme
-     * interface, because the interface is compatible only with components. For
-     * more detailed reasoning, see the discussion in:
+     * The following theme-related methods are copied from the HasTheme and
+     * HasThemeVariant interfaces, because those interfaces are compatible only
+     * with components. For more detailed reasoning, see the discussion in:
      * https://github.com/vaadin/flow-components/pull/979#discussion_r634097080
      */
 
@@ -380,6 +380,81 @@ public class MessageListItem implements Serializable {
      */
     public boolean hasThemeName(String themeName) {
         return themeNames.contains(themeName);
+    }
+
+    /**
+     * Adds theme variants to this message. The variants only take effect when
+     * the message list uses {@link MessageListVariant#BUBBLE}.
+     *
+     * @param variants
+     *            the theme variants to add
+     * @since 25.3
+     */
+    public void addThemeVariants(MessageListItemVariant... variants) {
+        addThemeNames(getVariantNames(variants));
+    }
+
+    /**
+     * Removes theme variants from this message.
+     *
+     * @param variants
+     *            the theme variants to remove
+     * @since 25.3
+     */
+    public void removeThemeVariants(MessageListItemVariant... variants) {
+        removeThemeNames(getVariantNames(variants));
+    }
+
+    /**
+     * Sets the theme variants of this message. This method overwrites any
+     * previously set theme variants, as well as any theme names added with
+     * {@link #addThemeNames(String...)}.
+     *
+     * @param variants
+     *            the theme variants to set
+     * @since 25.3
+     */
+    public void setThemeVariants(MessageListItemVariant... variants) {
+        themeNames.clear();
+        addThemeVariants(variants);
+    }
+
+    /**
+     * Adds or removes the given theme variant for this message.
+     *
+     * @param variant
+     *            the theme variant to add or remove, not <code>null</code>
+     * @param set
+     *            <code>true</code> to add the theme variant, <code>false</code>
+     *            to remove it
+     * @since 25.3
+     */
+    public void setThemeVariant(MessageListItemVariant variant, boolean set) {
+        if (set) {
+            addThemeVariants(variant);
+        } else {
+            removeThemeVariants(variant);
+        }
+    }
+
+    /**
+     * Checks if the message has the given theme variant.
+     *
+     * @param variant
+     *            the theme variant to check for
+     * @return <code>true</code> if the message has the given theme variant,
+     *         <code>false</code> otherwise
+     * @since 25.3
+     */
+    public boolean hasThemeVariant(MessageListItemVariant variant) {
+        return hasThemeName(variant.getVariantName());
+    }
+
+    private static String[] getVariantNames(
+            MessageListItemVariant... variants) {
+        return Arrays.stream(variants)
+                .map(MessageListItemVariant::getVariantName)
+                .toArray(String[]::new);
     }
 
     // Used only for Jackson serialization
