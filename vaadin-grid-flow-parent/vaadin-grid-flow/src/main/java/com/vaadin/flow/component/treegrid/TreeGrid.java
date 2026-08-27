@@ -310,9 +310,10 @@ public class TreeGrid<T> extends Grid<T>
         if (dataProvider instanceof HierarchicalDataProvider) {
             this.setDataProvider((HierarchicalDataProvider) dataProvider);
         } else {
-            throw new IllegalArgumentException(
-                    "TreeGrid only accepts hierarchical data providers. "
-                            + "An example of interface to be used: HierarchicalDataProvider");
+            throw new IllegalArgumentException("""
+                    TreeGrid only accepts hierarchical data providers. \
+                    An example of interface to be used: HierarchicalDataProvider
+                    """);
         }
     }
 
@@ -344,9 +345,11 @@ public class TreeGrid<T> extends Grid<T>
     public GridLazyDataView<T> setItems(
             BackEndDataProvider<T, Void> dataProvider) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider
+                        """);
     }
 
     /**
@@ -370,9 +373,11 @@ public class TreeGrid<T> extends Grid<T>
     public GridLazyDataView<T> setItems(
             CallbackDataProvider.FetchCallback<T, Void> fetchCallback) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider
+                        """);
     }
 
     /**
@@ -396,9 +401,11 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider
+                        """);
     }
 
     /**
@@ -421,9 +428,11 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public GridListDataView<T> setItems(T... items) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider
+                        """);
     }
 
     /**
@@ -446,9 +455,11 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public GridListDataView<T> setItems(Collection<T> items) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider
+                        """);
     }
 
     /**

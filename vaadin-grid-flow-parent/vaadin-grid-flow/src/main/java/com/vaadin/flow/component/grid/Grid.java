@@ -2420,9 +2420,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void checkForBeanGrid() {
         if (propertySet == null) {
             throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid that isn't constructed from a bean type. "
-                            + "To construct Grid from a bean type, please provide a beanType argument"
-                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                    """
+                            This method can't be used for a Grid that isn't constructed from a bean type. \
+                            To construct Grid from a bean type, please provide a beanType argument\
+                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)
+                            """);
         }
     }
 
@@ -3355,11 +3357,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public SingleSelect<Grid<T>, T> asSingleSelect() {
         GridSelectionModel<T> model = getSelectionModel();
         if (!(model instanceof GridSingleSelectionModel)) {
-            throw new IllegalStateException(
-                    "Grid is not in single select mode, "
-                            + "it needs to be explicitly set to such with "
-                            + "setSelectionMode(SelectionMode.SINGLE) before "
-                            + "being able to use single selection features.");
+            throw new IllegalStateException("""
+                    Grid is not in single select mode, \
+                    it needs to be explicitly set to such with \
+                    setSelectionMode(SelectionMode.SINGLE) before \
+                    being able to use single selection features.
+                    """);
         }
         return ((GridSingleSelectionModel<T>) model).asSingleSelect();
     }
@@ -3377,10 +3380,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public MultiSelect<Grid<T>, T> asMultiSelect() {
         GridSelectionModel<T> model = getSelectionModel();
         if (!(model instanceof GridMultiSelectionModel)) {
-            throw new IllegalStateException("Grid is not in multi select mode, "
-                    + "it needs to be explicitly set to such with "
-                    + "setSelectionMode(SelectionMode.MULTI) before "
-                    + "being able to use multi selection features.");
+            throw new IllegalStateException("""
+                    Grid is not in multi select mode, \
+                    it needs to be explicitly set to such with \
+                    setSelectionMode(SelectionMode.MULTI) before \
+                    being able to use multi selection features.
+                    """);
         }
         return ((GridMultiSelectionModel<T>) model).asMultiSelect();
     }
@@ -4014,13 +4019,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
-                    "Attempted to fetch more items from server than allowed in one go. "
-                            + "Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) "
-                            + "when you have a large amount of items (not only to cover this issue but also "
-                            + "to avoid performance bottlenecks resulting from transferring the full item data "
-                            + "set at once and then rendering an excess amount of DOM elements). If for some "
-                            + "reason this is not an option, increase the page size of the grid so that rendering "
-                            + "every item at once doesn't result in a request for over 10 pages.");
+                    """
+                            Attempted to fetch more items from server than allowed in one go. \
+                            Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) \
+                            when you have a large amount of items (not only to cover this issue but also \
+                            to avoid performance bottlenecks resulting from transferring the full item data \
+                            set at once and then rendering an excess amount of DOM elements). If for some \
+                            reason this is not an option, increase the page size of the grid so that rendering \
+                            every item at once doesn't result in a request for over 10 pages.
+                            """);
         }
         getDataCommunicator().setViewportRange(start, length);
     }

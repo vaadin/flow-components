@@ -90,11 +90,12 @@ public class FooterRow extends AbstractRow<FooterCell> {
     @Override
     public FooterCell join(Collection<FooterCell> cells) {
         if (layer.getGrid().getColumnLayers().indexOf(layer) == 0) {
-            throw new UnsupportedOperationException(
-                    "Cells cannot be joined on the top-most footer row. "
-                            + "This row is used as the default row for setting column "
-                            + "footers, so each cell in it should have maximum one "
-                            + "related column.");
+            throw new UnsupportedOperationException("""
+                    Cells cannot be joined on the top-most footer row. \
+                    This row is used as the default row for setting column \
+                    footers, so each cell in it should have maximum one \
+                    related column.
+                    """);
         }
         return super.join(cells);
     }

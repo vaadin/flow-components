@@ -161,10 +161,11 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     protected void removeCell(AbstractColumn<?> columnComponent) {
         CELL cellToRemove = cells.stream()
                 .filter(cell -> cell.getColumn().equals(columnComponent))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "removeCell() should never be called for a column component "
-                                + "that doesn't have a corresponding cell in this row."));
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        """
+                                removeCell() should never be called for a column component \
+                                that doesn't have a corresponding cell in this row.
+                                """));
         cells.remove(cellToRemove);
     }
 
@@ -198,9 +199,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                             && parent.get() instanceof AbstractColumn) {
                         return getCellFor((AbstractColumn<?>) parent.get());
                     } else {
-                        throw new IllegalArgumentException(
-                                "Cannot find a cell from this row that would "
-                                        + "correspond to the given column");
+                        throw new IllegalArgumentException("""
+                                Cannot find a cell from this row that would \
+                                correspond to the given column
+                                """);
                     }
                 });
     }
@@ -282,9 +284,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     public CELL join(Collection<CELL> cells) {
         Grid<?> grid = layer.getGrid();
         if (!isOutmostRow()) {
-            throw new IllegalArgumentException(
-                    "Cells can be joined only on the top-most HeaderRow "
-                            + "or the bottom-most FooterRow.");
+            throw new IllegalArgumentException("""
+                    Cells can be joined only on the top-most HeaderRow \
+                    or the bottom-most FooterRow.
+                    """);
         }
         if (cells.size() < 2) {
             throw new IllegalArgumentException("Cannot join less than 2 cells");
@@ -358,8 +361,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                     .anyMatch(col -> !bottomColumnsToJoin.contains(col));
             if (otherColumnsJoined) {
                 throw new IllegalArgumentException(
-                        "This set of cells can not be joined because of the hierarchical "
-                                + "column group structure of the client-side web component.");
+                        """
+                                This set of cells can not be joined because of the hierarchical \
+                                column group structure of the client-side web component.
+                                """);
             }
         }
         return layers.size();
