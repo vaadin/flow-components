@@ -280,7 +280,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      *             if it's not possible to join the given cells
      */
     public CELL join(Collection<CELL> cells) {
-        Grid<?> grid = layer.getGrid();
+        GridBase<?, ?> grid = layer.getGrid();
         if (!isOutmostRow()) {
             throw new IllegalArgumentException(
                     "Cells can be joined only on the top-most HeaderRow "
@@ -393,7 +393,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     private CELL moveColumnLayerAndJoinCells(Collection<CELL> cellsToJoin,
             List<AbstractColumn<?>> columnsToJoin,
             List<Column<?>> bottomColumnsToJoin, List<ColumnLayer> layers,
-            int layerInsertIndex, Grid<?> grid) {
+            int layerInsertIndex, GridBase<?, ?> grid) {
         grid.removeColumnLayer(layer);
         layerInsertIndex--;
 

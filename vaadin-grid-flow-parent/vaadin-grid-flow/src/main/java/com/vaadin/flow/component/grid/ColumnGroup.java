@@ -42,7 +42,7 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
      * @param columns
      *            the columns to group
      */
-    public ColumnGroup(Grid<?> grid, AbstractColumn<?>... columns) {
+    public ColumnGroup(GridBase<?, ?> grid, AbstractColumn<?>... columns) {
         this(grid, Arrays.asList(columns));
     }
 
@@ -55,7 +55,8 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
      * @param columns
      *            the columns to group
      */
-    public ColumnGroup(Grid<?> grid, Collection<AbstractColumn<?>> columns) {
+    public ColumnGroup(GridBase<?, ?> grid,
+            Collection<AbstractColumn<?>> columns) {
         super(grid);
         columns.forEach(
                 column -> getElement().appendChild(column.getElement()));

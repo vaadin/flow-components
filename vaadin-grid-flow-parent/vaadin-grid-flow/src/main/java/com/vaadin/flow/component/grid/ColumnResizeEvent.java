@@ -33,7 +33,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
  * @since 4.1
  */
 @DomEvent("column-drag-resize")
-public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
+public class ColumnResizeEvent<T> extends ComponentEvent<GridBase<?, T>> {
 
     private final String resizedColumnKey;
 
@@ -51,7 +51,7 @@ public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
      *            action
      *
      */
-    public ColumnResizeEvent(Grid<T> source, boolean fromClient,
+    public ColumnResizeEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.resizedColumnKey") String resizedColumnKey) {
         super(source, fromClient);
         this.resizedColumnKey = resizedColumnKey;

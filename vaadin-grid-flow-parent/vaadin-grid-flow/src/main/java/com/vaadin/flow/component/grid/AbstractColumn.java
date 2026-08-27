@@ -35,7 +35,7 @@ import com.vaadin.flow.internal.HtmlUtils;
 abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T> {
 
-    protected final Grid<?> grid;
+    protected final GridBase<?, ?> grid;
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
 
@@ -52,7 +52,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * @param grid
      *            the grid that is the owner of this column
      */
-    public AbstractColumn(Grid<?> grid) {
+    public AbstractColumn(GridBase<?, ?> grid) {
         this.grid = grid;
 
         // Needed to update node ids when refreshing with @PreserveOnRefresh.
@@ -67,7 +67,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      *
      * @return the grid which owns this column
      */
-    public Grid<?> getGrid() {
+    public GridBase<?, ?> getGrid() {
         return grid;
     }
 

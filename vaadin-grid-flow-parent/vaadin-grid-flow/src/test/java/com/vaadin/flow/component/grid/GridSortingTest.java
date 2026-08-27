@@ -371,7 +371,7 @@ class GridSortingTest {
 
     private void callSortersChanged(ArrayNode json) {
         try {
-            Method method = Grid.class.getDeclaredMethod("sortersChanged",
+            Method method = GridBase.class.getDeclaredMethod("sortersChanged",
                     ArrayNode.class);
             method.setAccessible(true);
             method.invoke(grid, json);

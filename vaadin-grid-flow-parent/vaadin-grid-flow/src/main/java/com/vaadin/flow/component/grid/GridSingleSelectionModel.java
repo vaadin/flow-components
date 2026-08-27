@@ -30,8 +30,8 @@ import com.vaadin.flow.shared.Registration;
  *            the type of items in grid
  * @since 1.0
  */
-public interface GridSingleSelectionModel<T>
-        extends GridSelectionModel<T>, SelectionModel.Single<Grid<T>, T> {
+public interface GridSingleSelectionModel<T> extends GridSelectionModel<T>,
+        SelectionModel.Single<GridBase<?, T>, T> {
 
     /**
      * Gets a wrapper to use this single selection model as a single select in
@@ -39,7 +39,7 @@ public interface GridSingleSelectionModel<T>
      *
      * @return the single select wrapper
      */
-    SingleSelect<Grid<T>, T> asSingleSelect();
+    SingleSelect<GridBase<?, T>, T> asSingleSelect();
 
     /**
      * Adds a selection listener that will be called when the selection is
@@ -50,5 +50,5 @@ public interface GridSingleSelectionModel<T>
      * @return a registration for the listener
      */
     Registration addSingleSelectionListener(
-            SingleSelectionListener<Grid<T>, T> listener);
+            SingleSelectionListener<GridBase<?, T>, T> listener);
 }

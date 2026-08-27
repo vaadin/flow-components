@@ -37,9 +37,9 @@ import com.vaadin.flow.component.Component;
  * @author Vaadin Ltd
  */
 class GridColumnOrderHelper<T> {
-    private final Grid<T> grid;
+    private final GridBase<?, T> grid;
 
-    GridColumnOrderHelper(Grid<T> grid) {
+    GridColumnOrderHelper(GridBase<?, T> grid) {
         this.grid = Objects.requireNonNull(grid);
     }
 
@@ -327,7 +327,7 @@ class GridColumnOrderHelper<T> {
                 return Collections
                         .singleton(((Grid.Column) component).getInternalId());
             }
-            if (component instanceof Grid
+            if (component instanceof GridBase
                     || component instanceof AbstractColumn) {
                 return component.getChildren()
                         .filter(col -> col instanceof AbstractColumn)
@@ -336,7 +336,7 @@ class GridColumnOrderHelper<T> {
             }
             throw new IllegalArgumentException(
                     "Parameter component: invalid value " + component
-                            + ": must be Grid or AbstractColumn");
+                            + ": must be GridBase or AbstractColumn");
         }
     }
 

@@ -33,7 +33,7 @@ import com.vaadin.flow.component.EventData;
  * @since 21.0
  */
 @DomEvent("grid-cell-focus")
-public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
+public class CellFocusEvent<T> extends ComponentEvent<GridBase<?, T>> {
 
     private final transient T item;
     private final Grid.Column<T> column;
@@ -47,7 +47,7 @@ public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {
      * @param fromClient
      *            <code>true</code> if the event originated from the client
      */
-    public CellFocusEvent(Grid<T> source, boolean fromClient,
+    public CellFocusEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.itemKey") String itemKey,
             @EventData("event.detail.internalColumnId") String internalColumnId,
             @EventData("event.detail.section") String sectionName) {

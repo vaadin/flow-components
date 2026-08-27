@@ -33,7 +33,7 @@ import java.util.List;
  */
 class ColumnLayer implements Serializable {
 
-    private Grid<?> grid;
+    private GridBase<?, ?> grid;
     private List<AbstractColumn<?>> columns;
 
     private HeaderRow headerRow;
@@ -46,7 +46,7 @@ class ColumnLayer implements Serializable {
      * @param grid
      *            the grid that has the columns
      */
-    ColumnLayer(Grid<?> grid) {
+    ColumnLayer(GridBase<?, ?> grid) {
         this.grid = grid;
         this.columns = new ArrayList<>();
     }
@@ -60,7 +60,7 @@ class ColumnLayer implements Serializable {
      * @param columns
      *            the columns belonging to this layer
      */
-    ColumnLayer(Grid<?> grid, List<AbstractColumn<?>> columns) {
+    ColumnLayer(GridBase<?, ?> grid, List<AbstractColumn<?>> columns) {
         this.grid = grid;
         this.columns = columns;
     }
@@ -193,7 +193,7 @@ class ColumnLayer implements Serializable {
      *
      * @return the grid that owns this layer
      */
-    protected Grid<?> getGrid() {
+    protected GridBase<?, ?> getGrid() {
         return grid;
     }
 

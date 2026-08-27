@@ -17,7 +17,7 @@ package com.vaadin.flow.component.grid.editor;
 
 import java.util.EventObject;
 
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridBase;
 
 /**
  * Base class for events fired in {@link Editor}.
@@ -61,7 +61,7 @@ public abstract class EditorEvent<T> extends EventObject {
      *
      * @return the editors' grid
      */
-    public Grid<T> getGrid() {
+    public GridBase<?, T> getGrid() {
         return getSource().getGrid();
     }
 

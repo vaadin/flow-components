@@ -278,7 +278,7 @@ class BeanGridSortingTest {
             ArrayNode array = JacksonUtils.createArrayNode();
             array.add(json);
 
-            Method method = Grid.class.getDeclaredMethod("sortersChanged",
+            Method method = GridBase.class.getDeclaredMethod("sortersChanged",
                     ArrayNode.class);
             method.setAccessible(true);
             method.invoke(grid, array);

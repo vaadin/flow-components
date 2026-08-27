@@ -17,7 +17,7 @@ package com.vaadin.flow.component.grid.editor;
 
 import java.io.Serializable;
 
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridBase;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
 
@@ -165,7 +165,7 @@ public interface Editor<T> extends Serializable {
      *
      * @return the grid which owns the editor
      */
-    Grid<T> getGrid();
+    GridBase<?, T> getGrid();
 
     /**
      * Adds an editor save {@code listener}. {@link EditorSaveEvent} is called

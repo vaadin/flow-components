@@ -24,6 +24,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridBase;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -39,7 +40,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @DomEvent("grid-dragstart")
-public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
+public class GridDragStartEvent<T> extends ComponentEvent<GridBase<?, T>> {
 
     private final List<T> draggedItems;
 
@@ -55,7 +56,7 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
      *            Event details from {@code detail}.
      * @since 25.0
      */
-    public GridDragStartEvent(Grid<T> source, boolean fromClient,
+    public GridDragStartEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail") ObjectNode details) {
         super(source, fromClient);
         JsonNode items = details.get("draggedItems");

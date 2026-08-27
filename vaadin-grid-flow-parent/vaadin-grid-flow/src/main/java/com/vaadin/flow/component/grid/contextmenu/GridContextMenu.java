@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridBase;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -53,14 +54,14 @@ public class GridContextMenu<T> extends
     public static class GridContextMenuItemClickEvent<T>
             extends ComponentEvent<GridMenuItem<T>> {
 
-        private Grid<T> grid;
+        private GridBase<?, T> grid;
         private transient Optional<T> item;
 
         @SuppressWarnings("unchecked")
         GridContextMenuItemClickEvent(GridMenuItem<T> source,
                 boolean fromClient) {
             super(source, fromClient);
-            grid = (Grid<T>) getSource().getContextMenu().getTarget();
+            grid = (GridBase<?, T>) getSource().getContextMenu().getTarget();
             item = Optional.ofNullable(grid.getDataCommunicator().getKeyMapper()
                     .get(grid.getElement()
                             .getProperty("_contextMenuTargetItemKey")));
@@ -71,7 +72,7 @@ public class GridContextMenu<T> extends
          *
          * @return the Grid that the context menu is connected to.
          */
-        public Grid<T> getGrid() {
+        public GridBase<?, T> getGrid() {
             return grid;
         }
 
@@ -93,7 +94,7 @@ public class GridContextMenu<T> extends
     public static class GridContextMenuOpenedEvent<T>
             extends OpenedChangeEvent<GridContextMenu<T>> {
 
-        private final Grid<T> grid;
+        private final GridBase<?, T> grid;
         private final transient Optional<T> item;
         private final transient Optional<String> columnId;
 
@@ -101,7 +102,7 @@ public class GridContextMenu<T> extends
         public GridContextMenuOpenedEvent(GridContextMenu<T> source,
                 boolean fromClient) {
             super(source, fromClient);
-            grid = (Grid<T>) getSource().getTarget();
+            grid = (GridBase<?, T>) getSource().getTarget();
             item = Optional.ofNullable(grid.getDataCommunicator().getKeyMapper()
                     .get(grid.getElement()
                             .getProperty("_contextMenuTargetItemKey")));
@@ -148,7 +149,7 @@ public class GridContextMenu<T> extends
      *            the target component for this context menu
      * @see #setTarget(Component)
      */
-    public GridContextMenu(Grid<T> target) {
+    public GridContextMenu(GridBase<?, T> target) {
         this();
         setTarget(target);
     }
@@ -161,9 +162,9 @@ public class GridContextMenu<T> extends
      */
     @Override
     public void setTarget(Component target) {
-        if (target != null && !(target instanceof Grid<?>)) {
+        if (target != null && !(target instanceof GridBase<?, ?>)) {
             throw new IllegalArgumentException(
-                    "Only an instance of Grid can be used as the target for GridContextMenu. "
+                    "Only an instance of GridBase, such as Grid or TreeGrid, can be used as the target for GridContextMenu. "
                             + "Use ContextMenu for any other component.");
         }
         super.setTarget(target);
@@ -264,7 +265,7 @@ public class GridContextMenu<T> extends
      */
     @Override
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
-        Grid<T> grid = (Grid<T>) getTarget();
+        GridBase<?, T> grid = (GridBase<?, T>) getTarget();
         String key = eventDetail.get("key").asString();
 
         if (getDynamicContentHandler() != null) {

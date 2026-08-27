@@ -78,7 +78,7 @@ public class ItemDoubleClickEvent<T> extends ItemClickEvent<T> {
      *
      * @since 4.1
      */
-    public ItemDoubleClickEvent(Grid<T> source, boolean fromClient,
+    public ItemDoubleClickEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.itemKey") String itemKey,
             @EventData("event.detail.internalColumnId") String internalColumnId,
             @EventData("event.detail.screenX") int screenX,

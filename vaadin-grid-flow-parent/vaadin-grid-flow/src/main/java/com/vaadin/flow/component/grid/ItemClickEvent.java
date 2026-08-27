@@ -32,7 +32,7 @@ import com.vaadin.flow.component.EventData;
  * @since 2.1
  */
 @DomEvent("item-click")
-public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
+public class ItemClickEvent<T> extends ClickEvent<GridBase<?, T>> {
 
     private final T item;
 
@@ -82,7 +82,7 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *
      * @since 4.1
      */
-    public ItemClickEvent(Grid<T> source, boolean fromClient,
+    public ItemClickEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.itemKey") String itemKey,
             @EventData("event.detail.internalColumnId") String internalColumnId,
             @EventData("event.detail.screenX") int screenX,

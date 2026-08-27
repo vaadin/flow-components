@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridBase;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -42,7 +43,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @DomEvent("grid-drop")
-public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
+public class GridDropEvent<T> extends ComponentEvent<GridBase<?, T>> {
 
     private final T dropTargetItem;
     private final GridDropLocation dropLocation;
@@ -65,7 +66,7 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
      *            Drag data from {@code detail.dragData}.
      * @since 25.0
      */
-    public GridDropEvent(Grid<T> source, boolean fromClient,
+    public GridDropEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.dropTargetItem") ObjectNode item,
             @EventData("event.detail.dropLocation") String dropLocation,
             @EventData("event.detail.dragData") ArrayNode dragData) {

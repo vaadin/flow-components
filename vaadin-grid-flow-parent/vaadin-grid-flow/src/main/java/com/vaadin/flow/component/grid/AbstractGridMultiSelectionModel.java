@@ -74,7 +74,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      *            reference to the grid for which this selection model is
      *            created
      */
-    public AbstractGridMultiSelectionModel(Grid<T> grid) {
+    public AbstractGridMultiSelectionModel(GridBase<?, T> grid) {
         super(grid);
         selected = new LinkedHashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
@@ -99,7 +99,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
 
-    private void insertSelectionColumn(Grid<T> grid,
+    private void insertSelectionColumn(GridBase<?, T> grid,
             GridSelectionColumn selectionColumn) {
         grid.getElement().insertChild(0, selectionColumn.getElement());
     }
@@ -117,6 +117,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void selectFromClient(T item) {
         boolean selectable = getGrid().isItemSelectable(item);
@@ -127,11 +128,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Set<T> oldSelection = getSelectedItems();
         selected.put(getItemId(item), item);
 
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+        fireSelectionEvent(new MultiSelectionEvent(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
-        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
-                getGrid(), item, true, selectionColumn.isShiftKeyDown()));
+        ClientItemToggleEvent<T> itemToggleEvent = new ClientItemToggleEvent<>(
+                getGrid(), item, true, selectionColumn.isShiftKeyDown());
+        ComponentUtil.fireEvent(getGrid(), itemToggleEvent);
 
         if (!isSelectAllCheckboxVisible()) {
             // Skip changing the state of Select All checkbox if it was
@@ -147,6 +149,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         : selected.size() > 0 && selected.size() < size);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void deselectFromClient(T item) {
         boolean selectable = getGrid().isItemSelectable(item);
@@ -157,11 +160,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Set<T> oldSelection = getSelectedItems();
         selected.remove(getItemId(item));
 
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+        fireSelectionEvent(new MultiSelectionEvent(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
-        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
-                getGrid(), item, false, selectionColumn.isShiftKeyDown()));
+        ClientItemToggleEvent<T> itemToggleEvent = new ClientItemToggleEvent<>(
+                getGrid(), item, false, selectionColumn.isShiftKeyDown());
+        ComponentUtil.fireEvent(getGrid(), itemToggleEvent);
 
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);
@@ -259,18 +263,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     @Override
-    public MultiSelect<Grid<T>, T> asMultiSelect() {
-        return new MultiSelect<Grid<T>, T>() {
+    public MultiSelect<GridBase<?, T>, T> asMultiSelect() {
+        return new MultiSelect<GridBase<?, T>, T>() {
 
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public Registration addValueChangeListener(
-                    ValueChangeListener<? super ComponentValueChangeEvent<Grid<T>, Set<T>>> listener) {
+                    ValueChangeListener<? super ComponentValueChangeEvent<GridBase<?, T>, Set<T>>> listener) {
                 Objects.requireNonNull(listener, "listener cannot be null");
 
                 ComponentEventListener componentEventListener = event -> listener
                         .valueChanged(
-                                (ComponentValueChangeEvent<Grid<T>, Set<T>>) event);
+                                (ComponentValueChangeEvent<GridBase<?, T>, Set<T>>) event);
 
                 return ComponentUtil.addListener(getGrid(),
                         MultiSelectionEvent.class, componentEventListener);
@@ -278,7 +282,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
             @Override
             public Registration addSelectionListener(
-                    MultiSelectionListener<Grid<T>, T> listener) {
+                    MultiSelectionListener<GridBase<?, T>, T> listener) {
                 return addMultiSelectionListener(listener);
             }
 
@@ -321,7 +325,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Registration addSelectionListener(
-            SelectionListener<Grid<T>, T> listener) {
+            SelectionListener<GridBase<?, T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
@@ -331,7 +335,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Registration addMultiSelectionListener(
-            MultiSelectionListener<Grid<T>, T> listener) {
+            MultiSelectionListener<GridBase<?, T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
@@ -419,7 +423,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
      *            the selection event to fire
      */
     protected abstract void fireSelectionEvent(
-            SelectionEvent<Grid<T>, T> event);
+            SelectionEvent<GridBase<?, T>, T> event);
 
     protected void clientSelectAll() {
         // ignore call if the checkbox is hidden
@@ -502,6 +506,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         doUpdateSelection(addedItemsMap, removedItemsMap, userOriginated);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
 
@@ -518,7 +523,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
                 getGrid()::doClientSideDeselection);
 
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+        fireSelectionEvent(new MultiSelectionEvent(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
 
         long size = getDataProviderSize();

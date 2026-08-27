@@ -38,7 +38,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 4.1
  */
 @DomEvent("column-reorder-all-columns")
-public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
+public class ColumnReorderEvent<T> extends ComponentEvent<GridBase<?, T>> {
 
     /**
      * The new order of the columns. Unmodifiable.
@@ -60,7 +60,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *
      * @since 25.0
      */
-    public ColumnReorderEvent(Grid<T> source, boolean fromClient,
+    public ColumnReorderEvent(GridBase<?, T> source, boolean fromClient,
             @EventData("event.detail.columns") ArrayNode columnIDs) {
         this(source, fromClient,
                 getSortedByIds(source.getColumns(), columnIDs));
@@ -79,7 +79,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *            the newly ordered Grid columns. Not null, may be empty.
      *
      */
-    public ColumnReorderEvent(Grid<T> source, boolean fromClient,
+    public ColumnReorderEvent(GridBase<?, T> source, boolean fromClient,
             List<Grid.Column<T>> columns) {
         super(source, fromClient);
         this.columns = Collections.unmodifiableList(new ArrayList<>(columns)); // defensive

@@ -33,7 +33,7 @@ class GridMultiSelectionWithIdProviderTest {
     private Person AARON;
 
     private Grid<Person> grid;
-    private SelectionListener<Grid<Person>, Person> selectionListenerMock;
+    private SelectionListener<GridBase<?, Person>, Person> selectionListenerMock;
 
     @SuppressWarnings("unchecked")
     @BeforeEach

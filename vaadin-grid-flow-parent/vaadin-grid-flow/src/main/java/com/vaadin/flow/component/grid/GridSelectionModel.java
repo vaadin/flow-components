@@ -24,7 +24,8 @@ import com.vaadin.flow.data.selection.SelectionModel;
  *            the grid bean type
  * @since 1.0
  */
-public interface GridSelectionModel<T> extends SelectionModel<Grid<T>, T> {
+public interface GridSelectionModel<T>
+        extends SelectionModel<GridBase<?, T>, T> {
 
     /**
      * Handles the selection of an item that originates from the client.

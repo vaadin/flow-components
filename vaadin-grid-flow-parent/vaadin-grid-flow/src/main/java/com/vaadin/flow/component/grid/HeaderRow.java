@@ -122,7 +122,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      * @return the merged cell
      */
     public HeaderCell join(Collection<HeaderCell> cells) {
-        Grid<?> grid = layer.getGrid();
+        GridBase<?, ?> grid = layer.getGrid();
         if (equals(grid.getDefaultHeaderRow())) {
             throw new UnsupportedOperationException(
                     "Cells cannot be joined on the first created header row. "

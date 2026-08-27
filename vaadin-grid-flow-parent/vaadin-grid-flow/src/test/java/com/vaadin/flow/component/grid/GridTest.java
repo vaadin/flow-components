@@ -143,7 +143,7 @@ class GridTest {
     private void callSetViewportRange(Grid<String> grid, int start,
             int length) {
         try {
-            Method method = Grid.class.getDeclaredMethod("setViewportRange",
+            Method method = GridBase.class.getDeclaredMethod("setViewportRange",
                     int.class, int.class);
             method.setAccessible(true);
             method.invoke(grid, start, length);

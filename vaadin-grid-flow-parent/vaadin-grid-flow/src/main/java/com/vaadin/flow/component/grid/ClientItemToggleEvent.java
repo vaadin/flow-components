@@ -33,7 +33,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
  * @see GridMultiSelectionModel#addClientItemToggleListener(com.vaadin.flow.component.ComponentEventListener)
  * @since 24.7
  */
-public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
+public class ClientItemToggleEvent<T> extends ComponentEvent<GridBase<?, T>> {
     private final T item;
     private final boolean isSelected;
     private final boolean isShiftKey;
@@ -51,8 +51,8 @@ public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
      *            {@code true} if the shift key was pressed when the item was
      *            toggled
      */
-    public ClientItemToggleEvent(Grid<T> source, T item, boolean isSelected,
-            boolean isShiftKey) {
+    public ClientItemToggleEvent(GridBase<?, T> source, T item,
+            boolean isSelected, boolean isShiftKey) {
         super(source, true);
         this.item = item;
         this.isSelected = isSelected;

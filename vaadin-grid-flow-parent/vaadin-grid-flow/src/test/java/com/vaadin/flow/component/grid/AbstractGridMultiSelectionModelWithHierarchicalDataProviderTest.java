@@ -278,7 +278,8 @@ class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
                 (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
-    private <T> GridSelectionColumn getGridSelectionColumn(Grid<T> grid) {
+    private <T> GridSelectionColumn getGridSelectionColumn(
+            GridBase<?, T> grid) {
         Component child = grid.getChildren().findFirst().orElseThrow(
                 () -> new IllegalStateException("Grid does not have a child"));
         if (!(child instanceof GridSelectionColumn)) {

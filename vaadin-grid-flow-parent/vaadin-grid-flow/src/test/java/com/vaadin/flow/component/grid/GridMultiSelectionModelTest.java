@@ -476,8 +476,8 @@ class GridMultiSelectionModelTest {
 
         Grid<String> grid = new Grid<>();
 
-        AtomicReference<MultiSelectionEvent<Grid<String>, String>> event = new AtomicReference<>();
-        MultiSelectionListener<Grid<String>, String> selectionListener = evt -> {
+        AtomicReference<MultiSelectionEvent<GridBase<?, String>, String>> event = new AtomicReference<>();
+        MultiSelectionListener<GridBase<?, String>, String> selectionListener = evt -> {
             assertNull(event.get());
             event.set(evt);
         };
@@ -486,7 +486,7 @@ class GridMultiSelectionModelTest {
                 grid) {
             @Override
             protected void fireSelectionEvent(
-                    SelectionEvent<Grid<String>, String> event) {
+                    SelectionEvent<GridBase<?, String>, String> event) {
             }
         };
         model = Mockito.spy(model);
@@ -497,8 +497,9 @@ class GridMultiSelectionModelTest {
 
         model.addMultiSelectionListener(selectionListener);
 
-        selectionListener.selectionChange(new MultiSelectionEvent<>(grid,
-                model.asMultiSelect(), Collections.emptySet(), true));
+        selectionListener.selectionChange(
+                new MultiSelectionEvent<>((GridBase<?, String>) grid,
+                        model.asMultiSelect(), Collections.emptySet(), true));
 
         assertEquals(grid, event.get().getSource());
         assertEquals(new LinkedHashSet<>(asSet(value)), event.get().getValue());

@@ -24,8 +24,8 @@ import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
+import com.vaadin.flow.component.grid.GridBase;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertySet;
@@ -57,7 +57,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     private T edited;
     private boolean isBuffered;
 
-    public EditorImpl(Grid<T> grid, PropertySet<T> propertySet) {
+    public EditorImpl(GridBase<?, T> grid, PropertySet<T> propertySet) {
         super(grid);
 
         if (propertySet != null) {
@@ -175,7 +175,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     @Override
-    public Grid<T> getGrid() {
+    public GridBase<?, T> getGrid() {
         return super.getGrid();
     }
 

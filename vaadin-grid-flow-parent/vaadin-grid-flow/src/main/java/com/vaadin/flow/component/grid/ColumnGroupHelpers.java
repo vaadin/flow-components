@@ -42,7 +42,7 @@ class ColumnGroupHelpers {
      * @return the new column groups that wrap the given columns
      */
     public static List<AbstractColumn<?>> wrapInSeparateColumnGroups(
-            Collection<AbstractColumn<?>> cols, Grid<?> grid) {
+            Collection<AbstractColumn<?>> cols, GridBase<?, ?> grid) {
         return cols.stream().map(col -> wrapSingleColumn(col, grid))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -57,7 +57,7 @@ class ColumnGroupHelpers {
      *            the columns to wrap
      * @return the new column group that wraps the given columns
      */
-    public static ColumnGroup wrapInColumnGroup(Grid<?> grid,
+    public static ColumnGroup wrapInColumnGroup(GridBase<?, ?> grid,
             AbstractColumn<?>... columns) {
         ColumnGroup group = wrapSingleColumn(columns[0], grid);
         for (int i = 1; i < columns.length; i++) {
@@ -76,7 +76,7 @@ class ColumnGroupHelpers {
      *            the columns to wrap
      * @return the new column group that wraps the given columns
      */
-    public static ColumnGroup wrapInColumnGroup(Grid<?> grid,
+    public static ColumnGroup wrapInColumnGroup(GridBase<?, ?> grid,
             List<AbstractColumn<?>> columns) {
         return wrapInColumnGroup(grid,
                 columns.toArray(new AbstractColumn<?>[columns.size()]));
@@ -93,7 +93,7 @@ class ColumnGroupHelpers {
      * @return the new column group that wraps the column
      */
     private static ColumnGroup wrapSingleColumn(AbstractColumn<?> column,
-            Grid<?> grid) {
+            GridBase<?, ?> grid) {
 
         Element parent = column.getElement().getParent();
         int index = parent.indexOfChild(column.getElement());

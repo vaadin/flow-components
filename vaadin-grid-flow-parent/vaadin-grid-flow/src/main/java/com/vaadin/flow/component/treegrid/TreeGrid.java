@@ -28,19 +28,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
-import com.vaadin.flow.component.grid.dataview.GridDataView;
-import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.grid.GridBase;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
-import com.vaadin.flow.data.provider.BackEndDataProvider;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
@@ -73,7 +68,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
 @JsModule("./vaadin-grid/treeGridConnector.ts")
-public class TreeGrid<T> extends Grid<T>
+public class TreeGrid<T> extends GridBase<TreeGrid<T>, T>
         implements HasHierarchicalDataProvider<T> {
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
@@ -291,19 +286,19 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid only supports hierarchical data providers. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
+     * Tree grid only supports hierarchical data providers, so the given data
+     * provider must be an instance of {@link HierarchicalDataProvider}.
+     * Otherwise, an {@link IllegalArgumentException} is thrown.
      *
      * @param dataProvider
      *            the data provider
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
+     * @throws IllegalArgumentException
+     *             if the data provider is not a
+     *             {@link HierarchicalDataProvider}
+     * @see #setDataProvider(HierarchicalDataProvider)
+     * @see #setItems(Collection, ValueProvider)
+     * @see #setItems(Stream, ValueProvider)
+     * @see #setTreeData(TreeData)
      */
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
@@ -323,192 +318,9 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support data views. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param dataProvider
-     *            the data provider
-     * @return the data view
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridLazyDataView<T> setItems(
-            BackEndDataProvider<T, Void> dataProvider) {
-        throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
-    }
-
-    /**
-     * Tree grid supports only hierarchical data so use another method instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param fetchCallback
-     *            the fetch callback
-     * @return the data view
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridLazyDataView<T> setItems(
-            CallbackDataProvider.FetchCallback<T, Void> fetchCallback) {
-        throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
-    }
-
-    /**
-     * Tree grid supports only hierarchical data providers so use another method
-     * instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param dataProvider
-     *            the data provider
-     * @return the data view
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
-        throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
-    }
-
-    /**
-     * Tree grid supports only hierarchical data so use another method instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param items
-     *            the items to display, not {@code null}
-     * @return the data view
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridListDataView<T> setItems(T... items) {
-        throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
-    }
-
-    /**
-     * Tree grid supports only hierarchical data, so use another method instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param items
-     *            the items to display, not {@code null}
-     * @return the data view
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridListDataView<T> setItems(Collection<T> items) {
-        throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
-    }
-
-    /**
-     * Tree grid does not support list data view.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @return exception is thrown
-     * @deprecated not supported
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridListDataView<T> getListDataView() {
-        throw new UnsupportedOperationException(
-                "TreeGrid does not support list data view.");
-    }
-
-    /**
-     * Tree grid does not support list data view.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @return exception is thrown
-     * @deprecated not supported
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridLazyDataView<T> getLazyDataView() {
-        throw new UnsupportedOperationException(
-                "TreeGrid does not support lazy data view.");
-    }
-
-    /**
-     * Tree grid does not support list data view.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @return exception is thrown
-     * @deprecated not supported
-     * @since 18.0
-     */
-    @Deprecated
-    @Override
-    public GridDataView<T> getGenericDataView() {
-        throw new UnsupportedOperationException(
-                "TreeGrid does not support generic data view.");
-    }
-
-    /**
-     * Adds a new Hierarchy column to this {@link Grid} with a value provider.
-     * The value is converted to String when sent to the client by using
-     * {@link String#valueOf(Object)}.
+     * Adds a new Hierarchy column to this {@code TreeGrid} with a value
+     * provider. The value is converted to String when sent to the client by
+     * using {@link String#valueOf(Object)}.
      * <p>
      * Hierarchy column is rendered by using 'vaadin-grid-tree-toggle' web
      * component.

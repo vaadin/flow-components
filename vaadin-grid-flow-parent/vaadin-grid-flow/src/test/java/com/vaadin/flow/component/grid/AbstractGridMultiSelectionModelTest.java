@@ -542,7 +542,7 @@ class AbstractGridMultiSelectionModelTest {
         AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
                 .getSelectionModel();
 
-        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+        SelectionListener<GridBase<?, String>, String> selectionListenerSpy = Mockito
                 .spy(SelectionListener.class);
         selectionModel.addSelectionListener(selectionListenerSpy);
 
@@ -571,7 +571,7 @@ class AbstractGridMultiSelectionModelTest {
 
         selectionModel.selectFromClient("Item 0");
 
-        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+        SelectionListener<GridBase<?, String>, String> selectionListenerSpy = Mockito
                 .spy(SelectionListener.class);
         selectionModel.addSelectionListener(selectionListenerSpy);
 

@@ -34,7 +34,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 public interface GridMultiSelectionModel<T>
-        extends GridSelectionModel<T>, SelectionModel.Multi<Grid<T>, T> {
+        extends GridSelectionModel<T>, SelectionModel.Multi<GridBase<?, T>, T> {
 
     /**
      * State for showing the select all checkbox in the grid's default header
@@ -80,7 +80,7 @@ public interface GridMultiSelectionModel<T>
      *
      * @return the multiselect wrapper
      */
-    MultiSelect<Grid<T>, T> asMultiSelect();
+    MultiSelect<GridBase<?, T>, T> asMultiSelect();
 
     /**
      * Adds a selection listener that will be called when the selection is
@@ -91,7 +91,7 @@ public interface GridMultiSelectionModel<T>
      * @return a registration for the listener
      */
     Registration addMultiSelectionListener(
-            MultiSelectionListener<Grid<T>, T> listener);
+            MultiSelectionListener<GridBase<?, T>, T> listener);
 
     /**
      * Adds a client item toggle listener that will be called when the user
@@ -148,7 +148,7 @@ public interface GridMultiSelectionModel<T>
      * with unknown item count, meaning that no count callback has been
      * provided. It will also not be shown if the grid is configured to use
      * conditional selection via
-     * {@link Grid#setItemSelectableProvider(SerializablePredicate)}
+     * {@link GridBase#setItemSelectableProvider(SerializablePredicate)}
      *
      * @return {@code true} if the checkbox will be visible with the current
      *         settings

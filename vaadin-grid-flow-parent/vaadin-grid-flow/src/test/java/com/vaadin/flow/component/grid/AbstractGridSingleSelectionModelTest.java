@@ -30,7 +30,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 class AbstractGridSingleSelectionModelTest {
     private Grid<TestEntity> grid;
     private CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider;
-    private SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock;
+    private SelectionListener<GridBase<?, TestEntity>, TestEntity> selectionListenerMock;
 
     private final TestEntity entity1 = new TestEntity(1, "Name");
     private final TestEntity entity2 = new TestEntity(2, "Name");
