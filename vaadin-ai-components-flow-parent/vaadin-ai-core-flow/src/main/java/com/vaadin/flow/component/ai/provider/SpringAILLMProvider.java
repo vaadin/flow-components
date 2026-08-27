@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.MemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -259,7 +261,9 @@ public class SpringAILLMProvider implements LLMProvider {
      * nothing when the provider was created with the
      * {@link #SpringAILLMProvider(ChatClient) ChatClient} constructor, because
      * the application owns the chat memory in that case and is expected to have
-     * populated it before passing the client in.
+     * populated it before passing the client in. A warning is logged if that
+     * client has no chat memory at all, since the restored conversation can
+     * then never reach the LLM.
      */
     @Override
     public void setHistory(List<ChatMessage> history,
@@ -268,10 +272,7 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
         if (!hasManagedMemory) {
-            LOGGER.debug("Skipping history restoration: the provider was "
-                    + "created with a ChatClient whose chat memory the "
-                    + "application owns. Populate that memory before passing "
-                    + "the client to the provider.");
+            warnIfClientMemoryUnusable();
             return;
         }
         chatMemory.clear(CONVERSATION_ID);
@@ -283,6 +284,57 @@ public class SpringAILLMProvider implements LLMProvider {
             return toVendorMessage(message, attachments);
         }).toList();
         chatMemory.add(CONVERSATION_ID, messages);
+    }
+
+    /**
+     * Reports a client that cannot hold the conversation the application asked
+     * to restore. The provider cannot populate an application-owned chat
+     * memory, but it can tell that a client carrying no memory advisor, or one
+     * whose memory has no conversation to read, will never see the restored
+     * messages -- the first case forgets every turn, the second fails each
+     * prompt inside the advisor. Both are worth a warning at the point where
+     * the application asks for a restore that cannot happen.
+     * <p>
+     * Only clients built by {@link ChatClient#builder(ChatModel)} can be
+     * inspected. Anything else is left alone, since a custom implementation may
+     * carry the conversation in its own way.
+     */
+    private void warnIfClientMemoryUnusable() {
+        if (!(chatClient
+                .prompt() instanceof DefaultChatClientRequestSpec requestSpec)) {
+            LOGGER.debug("Skipping history restoration: the provider was "
+                    + "created with a ChatClient whose chat memory the "
+                    + "application owns, and whose configuration cannot be "
+                    + "inspected.");
+            return;
+        }
+        if (requestSpec.getAdvisors().stream()
+                .noneMatch(MemoryAdvisor.class::isInstance)) {
+            LOGGER.warn("History restoration was requested, but the "
+                    + "ChatClient given to this provider has no chat memory "
+                    + "advisor, so the LLM will see neither the restored "
+                    + "conversation nor the turns that follow. Add for "
+                    + "example a MessageChatMemoryAdvisor to the client, and "
+                    + "load the restored conversation into its ChatMemory "
+                    + "before passing the client to the provider.");
+            return;
+        }
+        if (requestSpec.getAdvisorParams()
+                .get(ChatMemory.CONVERSATION_ID) == null) {
+            LOGGER.warn("History restoration was requested, but the "
+                    + "ChatClient given to this provider has no default "
+                    + "{} advisor parameter, so its memory advisor has no "
+                    + "conversation to read and every prompt will fail. Set "
+                    + "the parameter on the client, for example with "
+                    + "ChatClient.Builder.defaultAdvisors(advisors -> "
+                    + "advisors.param(ChatMemory.CONVERSATION_ID, id)).",
+                    ChatMemory.CONVERSATION_ID);
+            return;
+        }
+        LOGGER.debug("Skipping history restoration: the provider was created "
+                + "with a ChatClient whose chat memory the application owns. "
+                + "Populate that memory before passing the client to the "
+                + "provider.");
     }
 
     private static org.springframework.ai.chat.messages.Message toVendorMessage(

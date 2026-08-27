@@ -35,6 +35,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
@@ -969,6 +970,58 @@ class SpringAILLMProviderTest {
                 .anyMatch(msg -> Objects.equals(msg.getText(), "Old answer")));
         Assertions.assertTrue(messages.stream().anyMatch(
                 msg -> Objects.equals(msg.getText(), "New question")));
+    }
+
+    @Test
+    void setHistory_chatClientWithoutMemoryAdvisor_warns() {
+        var chatClientProvider = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(1, warningCount("no chat memory advisor"));
+    }
+
+    @Test
+    void setHistory_chatClientWithoutConversationId_warns() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        var chatClientProvider = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel)
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(1, warningCount("conversation to read"));
+    }
+
+    @Test
+    void setHistory_chatClientWithConfiguredMemory_doesNotWarn() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        var chatClientProvider = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel)
+                .defaultAdvisors(a -> a
+                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                                .build())
+                        .param(ChatMemory.CONVERSATION_ID, "conv-1"))
+                .build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(0, warningCount(""));
+    }
+
+    private long warningCount(String phrase) {
+        return logger.getLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.WARN)
+                .filter(event -> event.getMessage().contains(phrase)).count();
     }
 
     @Test
