@@ -666,9 +666,9 @@ public class TreeGrid<T> extends Grid<T>
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
                     """
-                            This method can't be used for a Grid that isn't constructed from a bean type. \
-                            To construct Grid from a bean type, please provide a beanType argument\
-                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
+                            This method can't be used for a TreeGrid that isn't constructed from a bean type. \
+                            To construct TreeGrid from a bean type, please provide a beanType argument \
+                            to the constructor: TreeGrid<Person> treeGrid = new TreeGrid<>(Person.class)\
                             """);
         }
         resetColumns(hierarchyPropertyName, valueProvider, propertyNames);
@@ -705,9 +705,9 @@ public class TreeGrid<T> extends Grid<T>
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
                     """
-                            This method can't be used for a Grid that isn't constructed from a bean type. \
-                            To construct Grid from a bean type, please provide a beanType argument\
-                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
+                            This method can't be used for a TreeGrid that isn't constructed from a bean type. \
+                            To construct TreeGrid from a bean type, please provide a beanType argument \
+                            to the constructor: TreeGrid<Person> treeGrid = new TreeGrid<>(Person.class)\
                             """);
         }
         Objects.requireNonNull(propertyName,
@@ -720,7 +720,7 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(String.format(
                     """
                             There is no such hierarchy property name in the beanType used \
-                            for construction of the grid:\
+                            for construction of the TreeGrid: \
                             Trying to get '%s' from '%s'\
                             """,
                     propertyName, getPropertySet()));
