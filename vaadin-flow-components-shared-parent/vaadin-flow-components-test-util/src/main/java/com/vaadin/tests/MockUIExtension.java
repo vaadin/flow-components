@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -32,8 +33,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 /**
  * JUnit extension to set up a UI and VaadinSession for testing.
@@ -52,6 +55,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     private UI ui;
     private VaadinSession session;
     private VaadinService service;
+    private VaadinContext context;
 
     @Override
     public void beforeEach(ExtensionContext context) {
@@ -76,6 +80,20 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
         Mockito.when(service.getDeploymentConfiguration())
                 .thenReturn(deploymentConfig);
+        context = Mockito.mock(VaadinContext.class);
+        var applicationConfiguration = Mockito
+                .mock(ApplicationConfiguration.class);
+        Mockito.when(applicationConfiguration.isProductionMode())
+                .thenReturn(false);
+        // ApplicationConfiguration.get(context) reads the configuration
+        // through the (Class, Supplier) getAttribute overload — match that
+        // exact shape, otherwise the mock returns null and every caller
+        // resolving the configuration (Binder validation, session
+        // serialization) fails with a NullPointerException.
+        Mockito.when(context.getAttribute(
+                ArgumentMatchers.eq(ApplicationConfiguration.class),
+                ArgumentMatchers.any())).thenReturn(applicationConfiguration);
+        Mockito.when(service.getContext()).thenReturn(context);
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 
@@ -144,6 +162,20 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      */
     public VaadinService getService() {
         return service;
+    }
+
+    /**
+     * Get the VaadinContext instance that the mocked {@link VaadinService}
+     * returns.
+     * <p>
+     * Note that this returns a Mockito mock, so it supports stubbing and
+     * verification. An {@link ApplicationConfiguration} attribute is stubbed on
+     * it already.
+     *
+     * @return the VaadinContext instance
+     */
+    public VaadinContext getContext() {
+        return context;
     }
 
     /**
