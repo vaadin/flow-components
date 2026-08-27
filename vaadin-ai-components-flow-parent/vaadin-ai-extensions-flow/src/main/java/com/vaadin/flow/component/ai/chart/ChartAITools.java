@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 
 import tools.jackson.databind.JsonNode;
 
@@ -49,6 +50,10 @@ public final class ChartAITools {
     /**
      * Callback interface that chart tool consumers must implement to provide
      * chart state access and mutation operations.
+     * <p>
+     * A {@link ToolException} thrown from a callback relays its message to the
+     * LLM so it can correct its next attempt; any other exception is replaced
+     * with a generic error message.
      */
     public interface Callbacks extends Serializable {
 
@@ -183,18 +188,6 @@ public final class ChartAITools {
     }
 
     /**
-     * Signals a validation failure whose message is safe to pass back to the
-     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
-     * detail (SQL fragments, schema names, file paths) and must be replaced
-     * with a generic message before being returned.
-     */
-    private static final class ValidationException extends RuntimeException {
-        ValidationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * Resolves the chart ID from the tool arguments. If {@code chartId} is not
      * provided and there is exactly one chart, that chart's ID is used as the
      * default.
@@ -202,7 +195,7 @@ public final class ChartAITools {
     private static String resolveChartId(JsonNode args, Callbacks callbacks) {
         var ids = callbacks.getChartIds();
         if (ids.isEmpty()) {
-            throw new ValidationException("No charts available.");
+            throw new ToolException("No charts available.");
         }
         if (ids.size() == 1) {
             return ids.iterator().next();
@@ -211,7 +204,7 @@ public final class ChartAITools {
         if (idNode != null && ids.contains(idNode.asString())) {
             return idNode.asString();
         }
-        throw new ValidationException(
+        throw new ToolException(
                 "chartId is required when multiple charts exist. "
                         + "Available chart IDs: " + ids);
     }
@@ -267,7 +260,7 @@ public final class ChartAITools {
                     LOGGER.info("get_chart_state called");
                     String chartId = resolveChartId(arguments, callbacks);
                     return callbacks.getState(chartId);
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("get_chart_state validation failed", e);
                     return "Error getting chart state: " + e.getMessage();
                 } catch (Exception e) {
@@ -528,7 +521,7 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' configuration updated. Changes will be applied when the request completes.";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_chart_configuration validation failed",
                             e);
                     return "Error updating chart configuration: "
@@ -679,7 +672,7 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_chart_data_source validation failed",
                             e);
                     return "Error updating chart data: " + e.getMessage();

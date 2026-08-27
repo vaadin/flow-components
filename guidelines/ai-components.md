@@ -106,10 +106,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good
   render.
-- Error hygiene toward the model: forward only deliberately-safe validation
-  messages verbatim; replace any other exception with a generic string so
-  SQL, schema names, or paths never leak. Tool failures are returned as
-  strings to the model, never thrown.
+- Error hygiene toward the model: only the message of a
+  `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
+  forwarded verbatim — throw it, from built-in tool code or an application's
+  `DatabaseProvider`/`ToolSpec`, only with deliberately-safe text. Any other
+  exception is caught, logged, and replaced with a generic string so SQL,
+  schema names, or paths never leak. Tool failures are returned as strings
+  to the model, never thrown. This contract covers only framework-agnostic
+  `ToolSpec` tools; vendor-annotated tools (LangChain4j/Spring AI `@Tool`)
+  are executed by the vendor framework, whose default error handling relays
+  the raw message of any exception to the model — they are deliberately out
+  of scope, so route error-sensitive tools through `ToolSpec`.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 

@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -1340,6 +1341,104 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(allSucceeded,
                 "Both tool calls should have succeeded, but got: "
                         + toolResults);
+    }
+
+    @Test
+    void stream_withExplicitTool_malformedJsonArguments_relaysParserMessage() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "ok");
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "not json");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertTrue(toolResults.getFirst().text()
+                .startsWith("Error executing tool: invalid JSON arguments: "));
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessageToModel() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
+        Assertions.assertEquals("Error executing tool.",
+                toolResults.getFirst().text());
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_logsError() {
+        var toolFailure = new RuntimeException("internal detail");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw toolFailure;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        // The generic result hides the failure from the LLM, so the log is
+        // the only place where the actual error is visible.
+        var error = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.ERROR
+                        && event.getThrowable().orElse(null) == toolFailure)
+                .findFirst();
+        Assertions.assertTrue(error.isPresent(),
+                "Expected the tool failure to be logged");
     }
 
     @Test
