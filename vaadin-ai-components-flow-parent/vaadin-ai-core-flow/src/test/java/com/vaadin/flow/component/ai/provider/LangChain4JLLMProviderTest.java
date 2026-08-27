@@ -1720,6 +1720,46 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("STOP", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutAiMessage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(response.finishReason())
+                .thenReturn(FinishReason.CONTENT_FILTER);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(30, 0, 30));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A turn that ends without a message still reports why");
+        Assertions.assertEquals("CONTENT_FILTER",
+                collected.getFirst().finishReason());
+        Assertions.assertEquals(30,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
     void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
         var collected = new ArrayList<ResponseMetadata>();
         var request = requestWithMetadataSink("Hello", List.of(), collected);

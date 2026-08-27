@@ -1763,6 +1763,27 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(null)
+                                .build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("stop", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
     void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
         provider.setStreaming(false);
         var collected = new ArrayList<ResponseMetadata>();
