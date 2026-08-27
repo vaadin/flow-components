@@ -1038,6 +1038,43 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(1, debugCount("cannot be inspected"));
     }
 
+    @Test
+    void setHistory_chatClientRejectingPrompt_doesNotThrowAndDoesNotWarn() {
+        var chatClientProvider = new SpringAILLMProvider(
+                clientRejectingPrompt());
+
+        Assertions
+                .assertDoesNotThrow(
+                        () -> chatClientProvider.setHistory(
+                                List.of(new ChatMessage(ChatMessage.Role.USER,
+                                        "Hi", null, null)),
+                                Collections.emptyMap()));
+
+        Assertions.assertEquals(0, warningCount(""));
+        Assertions.assertEquals(1,
+                debugCount("provider was created with a ChatClient"));
+        Assertions.assertEquals(1,
+                debugCount("did not accept a bare prompt()"));
+        Assertions.assertEquals(1, debugCount(""),
+                "Expected the rejected inspection to be reported once");
+    }
+
+    /**
+     * A client that refuses the bare {@code prompt()} the inspection uses. Only
+     * {@code prompt} throws, so logging and equality on the proxy still work.
+     */
+    private static ChatClient clientRejectingPrompt() {
+        return (ChatClient) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.class }, (proxy, method, args) -> {
+                    if (method.getName().equals("prompt")) {
+                        throw new UnsupportedOperationException(
+                                "prompt() requires an explicit prompt");
+                    }
+                    return null;
+                });
+    }
+
     /**
      * Wraps a client so that its request spec is no longer Spring AI's own
      * implementation, which is how an application-provided ChatClient looks to
