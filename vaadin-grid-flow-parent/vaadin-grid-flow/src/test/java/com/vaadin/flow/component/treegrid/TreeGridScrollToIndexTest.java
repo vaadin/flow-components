@@ -60,6 +60,19 @@ class TreeGridScrollToIndexTest {
     }
 
     @Test
+    void flattenedHierarchyFormat_scrollToSingleIndex_doesNotThrow() {
+        treeGrid.setDataProvider(
+                new TreeDataProvider<>(treeData, HierarchyFormat.FLATTENED));
+        treeGrid.scrollToIndex(5);
+    }
+
+    @Test
+    void scrollToEmptyIndexPath_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> treeGrid.scrollToIndex());
+    }
+
+    @Test
     void scrollToIndex_afterAttach_schedulesJsExecution() {
         ui.add(treeGrid);
         treeGrid.scrollToIndex(5);

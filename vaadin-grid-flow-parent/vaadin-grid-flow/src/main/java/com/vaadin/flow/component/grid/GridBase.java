@@ -3719,15 +3719,6 @@ public abstract class GridBase<TComponent extends GridBase<TComponent, T>, T>
     }
 
     /**
-     * Scrolls to the given row index. Scrolls so that the row is shown at the
-     * start of the visible area whenever possible.
-     *
-     * @param rowIndex
-     *            zero based index of the item to scroll to in the current view.
-     */
-    public abstract void scrollToIndex(int rowIndex);
-
-    /**
      * Scrolls to the last data row of the grid.
      */
     public abstract void scrollToEnd();
@@ -3745,9 +3736,7 @@ public abstract class GridBase<TComponent extends GridBase<TComponent, T>, T>
      *
      * @since 4.1
      */
-    public void scrollToStart() {
-        scrollToIndex(0);
-    }
+    public abstract void scrollToStart();
 
     /**
      * Scrolls the grid horizontally to make the column with the given index

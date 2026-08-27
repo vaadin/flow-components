@@ -764,35 +764,7 @@ public class TreeGrid<T> extends GridBase<TreeGrid<T>, T>
     }
 
     /**
-     * Scrolls to the index of an item so that the row is shown at the start of
-     * the visible area whenever possible. The way the {@code index} parameter
-     * is interpreted depends on the
-     * {@link HierarchicalDataProvider#getHierarchyFormat() hierarchy format} of
-     * the current data provider:
-     * <p>
-     * {@link HierarchyFormat#NESTED}: the index refers to an item in the root
-     * level. To reach items in deeper levels, use
-     * {@link #scrollToIndex(int...)}, which accepts a hierarchical path.
-     * <p>
-     * {@link HierarchyFormat#FLATTENED}: the index refers to an item in the
-     * entire flattened tree, not only the root level, allowing items at any
-     * expanded level to be reached with this method.
-     * <p>
-     * If the index exceeds the valid range, scrolling stops at the last
-     * available item.
-     *
-     * @param index
-     *            zero based index of the item to scroll to
-     * @since 20.0.5
-     */
-    @Override
-    public void scrollToIndex(int index) {
-        scheduleScrollExecution(
-                () -> getElement().executeJs("this.scrollToIndex($0);", index));
-    }
-
-    /**
-     * Scrolls to a nested item specified by its hierarchical path.
+     * Scrolls to an item specified by its hierarchical path.
      * <p>
      * The hierarchical path is an array of zero-based indexes, where each index
      * refers to a child of the item at the previous index. Scrolling continues
@@ -804,36 +776,47 @@ public class TreeGrid<T> extends GridBase<TreeGrid<T>, T>
      * level. If that item is expanded, it will then try to scroll to the item
      * at index 1 among its children, and so forth.
      * <p>
-     * This method is only supported for data providers that use
-     * {@link HierarchyFormat#NESTED}. For {@link HierarchyFormat#FLATTENED},
-     * use {@link #scrollToIndex(int)} with a flat index instead.
+     * If an index exceeds the valid range, scrolling stops at the last
+     * available item.
+     * <p>
+     * Paths with multiple indexes are only supported for data providers that
+     * use {@link HierarchyFormat#NESTED}. For
+     * {@link HierarchyFormat#FLATTENED}, pass a single index that refers to an
+     * item in the entire flattened tree, allowing items at any expanded level
+     * to be reached.
      *
      * @param path
      *            an array of indexes representing the path to the target item
      * @throws IllegalArgumentException
      *             if the path is empty
      * @throws UnsupportedOperationException
-     *             if the data provider uses a hierarchy format other than
+     *             if the path contains more than one index and the data
+     *             provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
      * @since 24.1
      */
     public void scrollToIndex(int... path) {
-        if (!getDataProvider().getHierarchyFormat()
-                .equals(HierarchyFormat.NESTED)) {
-            throw new UnsupportedOperationException(
-                    """
-                            scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
-                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
-                            """);
-        }
-
         if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
 
+        if (path.length > 1 && !getDataProvider().getHierarchyFormat()
+                .equals(HierarchyFormat.NESTED)) {
+            throw new UnsupportedOperationException(
+                    """
+                            scrollToIndex(int...) with multiple indexes is supported only for data providers that use HierarchyFormat.NESTED. \
+                            For HierarchyFormat.FLATTENED, pass a single flat index instead.
+                            """);
+        }
+
         scheduleScrollExecution(() -> getElement()
                 .executeJs("this.scrollToIndex(...$0);", path));
+    }
+
+    @Override
+    public void scrollToStart() {
+        scrollToIndex(0);
     }
 
     @Override

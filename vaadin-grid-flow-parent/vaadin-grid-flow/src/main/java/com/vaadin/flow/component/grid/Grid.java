@@ -1691,7 +1691,6 @@ public class Grid<T> extends GridBase<Grid<T>, T>
      *            zero based index of the item to scroll to in the current view.
      * @since 4.1
      */
-    @Override
     public void scrollToIndex(int rowIndex) {
         setViewportRangeByIndex(rowIndex);
 
@@ -1759,6 +1758,11 @@ public class Grid<T> extends GridBase<Grid<T>, T>
 
         scheduleScrollExecution(() -> getElement()
                 .callJsFunction("$connector.scrollToItem", itemKey, itemIndex));
+    }
+
+    @Override
+    public void scrollToStart() {
+        scrollToIndex(0);
     }
 
     /**
