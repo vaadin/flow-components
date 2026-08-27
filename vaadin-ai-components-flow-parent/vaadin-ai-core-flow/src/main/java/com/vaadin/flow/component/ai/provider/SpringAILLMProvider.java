@@ -80,8 +80,11 @@ import tools.jackson.databind.JsonNode;
  * saved conversation into it. To share conversation history across components,
  * reuse the same provider instance. With the
  * {@link #SpringAILLMProvider(ChatClient)} constructor the application owns the
- * chat memory, so restoring the LLM's context is up to the application and
- * {@link #setHistory(List, Map)} does nothing.
+ * chat memory, so giving the LLM its context is up to the application and
+ * {@link #setHistory(List, Map)} does nothing. Restoring a conversation through
+ * {@code AIOrchestrator.Builder.withHistory(List, Map)} still matters on that
+ * path: the message list the user sees and the orchestrator's own conversation
+ * history are restored by the orchestrator, not by the provider.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -265,7 +268,9 @@ public class SpringAILLMProvider implements LLMProvider {
      * client is missing the chat memory configuration the conversation would
      * need. Whether the memory actually holds the conversation is not visible
      * to the provider, so a client configured correctly but never loaded is
-     * indistinguishable from one that was.
+     * indistinguishable from one that was. Doing nothing here does not reduce
+     * what the caller restores: an orchestrator rebuilds the message list and
+     * its own conversation history itself.
      */
     @Override
     public void setHistory(List<ChatMessage> history,
