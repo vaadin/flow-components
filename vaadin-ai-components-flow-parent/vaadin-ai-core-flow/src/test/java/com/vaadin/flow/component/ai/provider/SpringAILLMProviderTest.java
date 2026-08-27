@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -982,6 +983,8 @@ class SpringAILLMProviderTest {
                 Collections.emptyMap());
 
         Assertions.assertEquals(1, warningCount("no chat memory advisor"));
+        Assertions.assertEquals(1, warningCount(""),
+                "Expected the missing-advisor warning to be the only one");
     }
 
     @Test
@@ -998,6 +1001,8 @@ class SpringAILLMProviderTest {
                 Collections.emptyMap());
 
         Assertions.assertEquals(1, warningCount("conversation to read"));
+        Assertions.assertEquals(0, debugCount("Skipping history restoration"),
+                "Expected the warning to replace the debug line, not precede it");
     }
 
     @Test
@@ -1018,9 +1023,58 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(0, warningCount(""));
     }
 
+    @Test
+    void setHistory_chatClientNotInspectable_logsDebugOnly() {
+        var chatClientProvider = new SpringAILLMProvider(
+                uninspectableClient(ChatClient.builder(mockChatModel).build()));
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(0, warningCount(""));
+        Assertions.assertEquals(1,
+                debugCount("provider was created with a ChatClient"));
+        Assertions.assertEquals(1, debugCount("cannot be inspected"));
+    }
+
+    /**
+     * Wraps a client so that its request spec is no longer Spring AI's own
+     * implementation, which is how an application-provided ChatClient looks to
+     * the provider. The spec has too many methods to delegate by hand, so a
+     * proxy stands in for a hand-written implementation.
+     */
+    private static ChatClient uninspectableClient(ChatClient delegate) {
+        return (ChatClient) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.class }, (proxy, method, args) -> {
+                    var result = method.invoke(delegate, args);
+                    if (result instanceof ChatClient.ChatClientRequestSpec spec) {
+                        return uninspectableSpec(spec);
+                    }
+                    return result;
+                });
+    }
+
+    private static ChatClient.ChatClientRequestSpec uninspectableSpec(
+            ChatClient.ChatClientRequestSpec delegate) {
+        return (ChatClient.ChatClientRequestSpec) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.ChatClientRequestSpec.class },
+                (proxy, method, args) -> method.invoke(delegate, args));
+    }
+
+    private long debugCount(String phrase) {
+        return countEvents(Level.DEBUG, phrase);
+    }
+
     private long warningCount(String phrase) {
+        return countEvents(Level.WARN, phrase);
+    }
+
+    private long countEvents(Level level, String phrase) {
         return logger.getLoggingEvents().stream()
-                .filter(event -> event.getLevel() == Level.WARN)
+                .filter(event -> event.getLevel() == level)
                 .filter(event -> event.getMessage().contains(phrase)).count();
     }
 
