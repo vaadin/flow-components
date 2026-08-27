@@ -13,12 +13,13 @@
     // The connector imports the plain JavaScript synchronization modules,
     // which allowJs makes the compiler accept without type-checking them
     "allowJs": true,
-    // Resolve @vaadin and ol package types from the integration tests module,
-    // whose node_modules is populated by the Maven frontend build
+    // Resolve @vaadin, ol and proj4 package types from the integration tests
+    // module, whose node_modules is populated by the Maven frontend build
     "paths": {
       "@vaadin/*": ["../vaadin-map-flow-integration-tests/node_modules/@vaadin/*"],
       "ol": ["../vaadin-map-flow-integration-tests/node_modules/ol"],
-      "ol/*": ["../vaadin-map-flow-integration-tests/node_modules/ol/*"]
+      "ol/*": ["../vaadin-map-flow-integration-tests/node_modules/ol/*"],
+      "proj4": ["../vaadin-map-flow-integration-tests/node_modules/proj4"]
     }
   },
   "include": ["src/main/resources/META-INF/frontend/**/*"]
