@@ -31,7 +31,7 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
 
         assertPendingInvocations(ui, "return $0.foo()");
@@ -40,7 +40,7 @@ public class FunctionCallerTest {
     @Test
     void callsFunctionAfterAttach_invokedOnce() throws Exception {
         Html html = new Html("<div>foo</div>");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
@@ -55,7 +55,7 @@ public class FunctionCallerTest {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
@@ -67,7 +67,7 @@ public class FunctionCallerTest {
     void trackingPropertyRemoved() throws Exception {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
 
         String trackingProperty = "CALLONCE_foo";
@@ -76,11 +76,21 @@ public class FunctionCallerTest {
         Assertions.assertFalse(html.getElement().hasProperty(trackingProperty));
     }
 
+    /**
+     * Creates a UI with a mocked session. Scheduling a JavaScript invocation on
+     * an attached element requires the owning UI to have a session.
+     *
+     * @return the UI
+     */
+    public static UI createUI() {
+        UI ui = new UI();
+        ui.getInternals().setSession(Mockito.mock(VaadinSession.class));
+        return ui;
+    }
+
     public static void assertPendingInvocations(UI ui, String expectedJS)
             throws Exception {
         UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
         internals.getStateTree().runExecutionsBeforeClientResponse();
         Method method = UIInternals.class
                 .getDeclaredMethod("getPendingJavaScriptInvocations");

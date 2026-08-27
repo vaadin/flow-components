@@ -23,8 +23,6 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -45,8 +43,6 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -778,7 +774,6 @@ class FillFormToolTest {
         // enough — some rules only make sense across multiple fields (e.g.
         // "if format=Lightning, length<=10"). The rejection is keyed on a
         // sentinel id since the rule isn't bound to one specific field.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var binder = new Binder<>(TwoFieldBean.class);
@@ -827,7 +822,6 @@ class FillFormToolTest {
         // bean-level read). A field's binding-level validation status handler
         // is exactly what the binder calls to light up that field, so a
         // handler that never fires proves the field was not marked.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var untouchedField = new LabeledStringField();
@@ -875,7 +869,6 @@ class FillFormToolTest {
     void fillForm_binderLevelCrossFieldValidatorPassDoesNotEmitRejection() {
         // Symmetric guard: when the cross-field validator passes, no sentinel
         // rejection appears in the response.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var binder = new Binder<>(TwoFieldBean.class);
@@ -1064,7 +1057,6 @@ class FillFormToolTest {
         // post-write pass: beanErrors must swallow the throw and return an
         // empty (never null) list so doFill can still format a response for
         // the rest of the turn.
-        stubVaadinContext();
         var field = new LabeledStringField();
         var binder = new Binder<>(TwoFieldBean.class);
         binder.forField(field).bind("format");
@@ -2038,27 +2030,6 @@ class FillFormToolTest {
         var controller = new FormAIController(form, binder);
         controller.onRequest();
         return controller;
-    }
-
-    /**
-     * Stubs {@code service.getContext()} and the
-     * {@link ApplicationConfiguration} attribute on the
-     * {@link MockUIExtension}'s mocked {@code VaadinService} so
-     * {@code Binder.setBean(...)} can resolve its I18N / production-mode
-     * lookups without tripping over Mockito's default {@code null} return. Only
-     * the cross-field-validator tests that call {@code setBean} need this.
-     */
-    private void stubVaadinContext() {
-        var context = Mockito.mock(VaadinContext.class);
-        var appConfig = Mockito.mock(ApplicationConfiguration.class);
-        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
-        // ApplicationConfiguration.get(context) uses the (Class, Supplier)
-        // getAttribute overload internally — match that exact shape, otherwise
-        // the mock returns null and DefaultBindingExceptionHandler NPEs.
-        Mockito.when(context.getAttribute(
-                ArgumentMatchers.eq(ApplicationConfiguration.class),
-                ArgumentMatchers.any())).thenReturn(appConfig);
-        Mockito.when(ui.getService().getContext()).thenReturn(context);
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
