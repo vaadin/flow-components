@@ -25,7 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -55,7 +54,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     private UI ui;
     private VaadinSession session;
     private VaadinService service;
-    private VaadinContext context;
+    private VaadinContext vaadinContext;
 
     @Override
     public void beforeEach(ExtensionContext context) {
@@ -80,20 +79,27 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
         Mockito.when(service.getDeploymentConfiguration())
                 .thenReturn(deploymentConfig);
-        context = Mockito.mock(VaadinContext.class);
+        vaadinContext = Mockito.mock(VaadinContext.class);
         var applicationConfiguration = Mockito
                 .mock(ApplicationConfiguration.class);
+        // Derive from the deployment configuration so a test that re-stubs
+        // production mode there gets a consistent answer on both lookup
+        // paths.
         Mockito.when(applicationConfiguration.isProductionMode())
-                .thenReturn(false);
-        // ApplicationConfiguration.get(context) reads the configuration
-        // through the (Class, Supplier) getAttribute overload — match that
-        // exact shape, otherwise the mock returns null and every caller
-        // resolving the configuration (Binder validation, session
-        // serialization) fails with a NullPointerException.
-        Mockito.when(context.getAttribute(
-                ArgumentMatchers.eq(ApplicationConfiguration.class),
-                ArgumentMatchers.any())).thenReturn(applicationConfiguration);
-        Mockito.when(service.getContext()).thenReturn(context);
+                .thenAnswer(query -> deploymentConfig.isProductionMode());
+        // Mockito does not run real default methods on mocks, so the
+        // delegating one-arg getAttribute(Class) overload must be stubbed
+        // separately from the two-arg one that
+        // ApplicationConfiguration.get(context) calls. An unstubbed overload
+        // returns null and every caller resolving the configuration (Binder
+        // validation, session serialization) fails with a
+        // NullPointerException.
+        Mockito.when(vaadinContext.getAttribute(
+                Mockito.eq(ApplicationConfiguration.class), Mockito.any()))
+                .thenReturn(applicationConfiguration);
+        Mockito.when(vaadinContext.getAttribute(ApplicationConfiguration.class))
+                .thenReturn(applicationConfiguration);
+        Mockito.when(service.getContext()).thenReturn(vaadinContext);
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 
@@ -175,7 +181,7 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * @return the VaadinContext instance
      */
     public VaadinContext getContext() {
-        return context;
+        return vaadinContext;
     }
 
     /**
