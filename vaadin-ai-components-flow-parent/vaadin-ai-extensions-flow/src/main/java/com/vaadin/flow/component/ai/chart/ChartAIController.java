@@ -41,7 +41,9 @@ import tools.jackson.databind.JsonNode;
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
  * tools to the LLM. Workflow instructions are delivered through the description
  * of the {@code get_chart_instructions} tool, which the LLM reads as part of
- * the tool manifest.
+ * the tool manifest. The controller's workflow tells the model that where an
+ * application's system prompt conflicts with it, the system prompt wins, so a
+ * step can be adjusted without subclassing.
  * </p>
  *
  * <pre>
