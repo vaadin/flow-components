@@ -1908,6 +1908,54 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_streamingAcrossToolRoundTrips_publishesCumulativeUsage() {
+        // The default ChatClient consumes the tool-call round trip internally
+        // and re-emits the follow-up round with usage already accumulated
+        // across the round trips, so the last observed usage covers the whole
+        // turn. This test pins that behavior — the collector's last-wins
+        // accounting depends on it.
+        var collected = new ArrayList<ResponseMetadata>();
+        var tool = createExplicitTool("doSomething", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("invoke tool", List.of(tool),
+                collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(toolCallResponseWithUsage(30, 10)))
+                .thenReturn(Flux.just(
+                        chatResponseWithMetadata("done", "stop", 50, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        var metadata = collected.getLast();
+        Assertions.assertEquals("stop", metadata.finishReason());
+        Assertions.assertEquals(80, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingResendsGrowingUsageTally_lastValueWins() {
+        // Some backends resend a growing cumulative tally on every chunk
+        // instead of reporting the counts once at the end; the published
+        // usage must be the final tally, not a sum of the resends.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(
+                        Flux.just(chatResponseWithMetadata("Hel", null, 30, 4),
+                                chatResponseWithMetadata("lo", null, 30, 9),
+                                chatResponseWithMetadata("!", "stop", 30, 12)));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(30, usage.inputTokens());
+        Assertions.assertEquals(12, usage.outputTokens());
+        Assertions.assertEquals(42, usage.totalTokens());
+    }
+
+    @Test
     void metadataSink_notOverridden_returnsNoOpConsumer() {
         var request = createSimpleRequest("Hello");
 
@@ -1917,6 +1965,12 @@ class SpringAILLMProviderTest {
     }
 
     private static LLMRequest requestWithMetadataSink(String message,
+            List<ResponseMetadata> collected) {
+        return requestWithMetadataSink(message, List.of(), collected);
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
             List<ResponseMetadata> collected) {
         return new LLMRequest() {
             @Override
@@ -1940,6 +1994,11 @@ class SpringAILLMProviderTest {
             }
 
             @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
             public Consumer<ResponseMetadata> metadataSink() {
                 return collected::add;
             }
@@ -1948,10 +2007,23 @@ class SpringAILLMProviderTest {
 
     private static ChatResponse chatResponseWithMetadata(String text,
             String finishReason, int inputTokens, int outputTokens) {
+        var generationMetadata = finishReason == null
+                ? ChatGenerationMetadata.NULL
+                : ChatGenerationMetadata.builder().finishReason(finishReason)
+                        .build();
         var generation = new Generation(new AssistantMessage(text),
-                ChatGenerationMetadata.builder().finishReason(finishReason)
-                        .build());
+                generationMetadata);
         return ChatResponse.builder().generations(List.of(generation))
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
+    }
+
+    private static ChatResponse toolCallResponseWithUsage(int inputTokens,
+            int outputTokens) {
+        var response = mockChatResponseWithPendingToolCall();
+        return ChatResponse.builder().generations(response.getResults())
                 .metadata(ChatResponseMetadata.builder()
                         .usage(new DefaultUsage(inputTokens, outputTokens))
                         .build())
