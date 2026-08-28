@@ -115,23 +115,7 @@ final class FormAITools {
     }
 
     /**
-     * Thrown by a {@link Callbacks} implementation to surface a curated message
-     * to the LLM. The exception {@link #getMessage() message} is forwarded
-     * verbatim as the tool's error output, so callers must ensure it is safe to
-     * expose: no PII, no internal identifiers other than what the LLM already
-     * sent, no third-party error text. For any uncontrolled failure throw a
-     * regular {@link RuntimeException} instead — the tool will log it and
-     * return a generic error.
-     */
-    public static class ToolException extends RuntimeException {
-
-        public ToolException(String llmFacingMessage) {
-            super(llmFacingMessage);
-        }
-    }
-
-    /**
-     * Creates the {@code get_form_state} tool spec. Takes no parameters and
+     * Creates the {@code get_form_state} tool spec. Ignores its arguments and
      * returns a JSON document listing every visible field with its id, merged
      * description, type metadata (type/format/pattern/enum/queryable/array/
      * items), and current value.
