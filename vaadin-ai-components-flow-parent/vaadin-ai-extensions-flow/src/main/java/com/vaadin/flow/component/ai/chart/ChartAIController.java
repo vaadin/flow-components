@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -52,14 +53,15 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponse(Throwable)} on the success path, avoiding partial state
- * and multiple redraws during a multi-tool LLM turn. The chart state is stored
- * directly on the {@link Chart} component, so it survives serialization.
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * chart state is stored directly on the {@link Chart} component, so it survives
+ * serialization.
  * </p>
  * <p>
- * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
- * pending changes are discarded and the chart keeps its last
- * successfully-rendered state.
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the chart keeps its
+ * last successfully-rendered state.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -310,7 +312,8 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public void onResponse(Throwable error) {
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
         ChartEntry entry = ChartEntry.get(chart);
         if (error != null) {
             if (entry != null) {

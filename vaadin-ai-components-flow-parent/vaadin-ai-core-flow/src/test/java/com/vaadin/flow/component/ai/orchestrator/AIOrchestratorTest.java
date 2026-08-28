@@ -452,7 +452,7 @@ class AIOrchestratorTest {
         orchestrator.prompt("do it");
 
         Mockito.verify(fakeTool).execute(Mockito.any());
-        Mockito.verify(controller).onResponse(null);
+        Mockito.verify(controller).onResponse(noError());
     }
 
     @Test
@@ -2013,7 +2013,7 @@ class AIOrchestratorTest {
                     throw new RuntimeException("listener died");
                 }).build().prompt("Hello");
 
-        Mockito.verify(controller).onResponse(streamError);
+        Mockito.verify(controller).onResponse(errorIs(streamError));
     }
 
     // --- AIController tests ---
@@ -2069,7 +2069,8 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponse(Throwable error) {
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                var error = event.getError().orElse(null);
                 if (error != null) {
                     return;
                 }
@@ -2109,7 +2110,8 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponse(Throwable error) {
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                var error = event.getError().orElse(null);
                 if (error != null) {
                     return;
                 }
@@ -2160,7 +2162,8 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponse(Throwable error) {
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                var error = event.getError().orElse(null);
                 if (error != null) {
                     return;
                 }
@@ -2196,7 +2199,8 @@ class AIOrchestratorTest {
             }
 
             @Override
-            public void onResponse(Throwable error) {
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                var error = event.getError().orElse(null);
                 if (error != null) {
                     return;
                 }
@@ -2268,8 +2272,8 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponse(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponse(null);
+        Mockito.verify(controller).onResponse(errorIs(thrown));
+        Mockito.verify(controller, Mockito.never()).onResponse(noError());
     }
 
     @Test
@@ -2283,8 +2287,8 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponse(timeout);
-        Mockito.verify(controller, Mockito.never()).onResponse(null);
+        Mockito.verify(controller).onResponse(errorIs(timeout));
+        Mockito.verify(controller, Mockito.never()).onResponse(noError());
     }
 
     @Test
@@ -2301,8 +2305,8 @@ class AIOrchestratorTest {
 
         Mockito.verify(mockProvider, Mockito.never())
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
-        Mockito.verify(controller).onResponse(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponse(null);
+        Mockito.verify(controller).onResponse(errorIs(thrown));
+        Mockito.verify(controller, Mockito.never()).onResponse(noError());
     }
 
     @Test
@@ -2427,7 +2431,7 @@ class AIOrchestratorTest {
 
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponse(streamError);
+        Mockito.verify(controller).onResponse(errorIs(streamError));
         var logged = logger.getLoggingEvents().stream().filter(event -> event
                 .getMessage().equals("Error in controller onResponse"))
                 .findFirst();
@@ -2468,8 +2472,8 @@ class AIOrchestratorTest {
                 () -> orchestrator.prompt("Hello"));
         Assertions.assertSame(thrown, caught);
 
-        Mockito.verify(controller).onResponse(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponse(null);
+        Mockito.verify(controller).onResponse(errorIs(thrown));
+        Mockito.verify(controller, Mockito.never()).onResponse(noError());
     }
 
     @Test
@@ -2503,8 +2507,8 @@ class AIOrchestratorTest {
         Mockito.verify(mockProvider, Mockito.times(2))
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
         Mockito.verify(controller)
-                .onResponse(Mockito.any(IllegalStateException.class));
-        Mockito.verify(controller).onResponse(null);
+                .onResponse(errorOfType(IllegalStateException.class));
+        Mockito.verify(controller).onResponse(noError());
     }
 
     @Test
@@ -2525,8 +2529,8 @@ class AIOrchestratorTest {
                 () -> orchestrator.prompt("Hello"));
         Assertions.assertSame(thrown, caught);
 
-        Mockito.verify(controller).onResponse(thrown);
-        Mockito.verify(controller, Mockito.never()).onResponse(null);
+        Mockito.verify(controller).onResponse(errorIs(thrown));
+        Mockito.verify(controller, Mockito.never()).onResponse(noError());
     }
 
     @Test
@@ -2560,11 +2564,79 @@ class AIOrchestratorTest {
         var controller = mockController();
         orchestratorWith(controller).prompt("Hello");
 
-        Mockito.verify(controller).onResponse(null);
+        Mockito.verify(controller).onResponse(noError());
         // No failure-side fire — error arg never carries a Throwable on a
         // successful turn.
         Mockito.verify(controller, Mockito.never())
-                .onResponse(Mockito.any(Throwable.class));
+                .onResponse(errorOfType(Throwable.class));
+    }
+
+    @Test
+    void controllerOnResponse_receivesProviderMetadata() {
+        // The controller is where staged state is committed, so a turn that
+        // stopped at the output limit has to be distinguishable there — an
+        // error alone cannot express it, since such a turn ends without one.
+        stubAddMessage();
+        var metadata = new ResponseMetadata("max_tokens",
+                new ResponseMetadata.TokenUsage(1200, 8, 1208));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    LLMProvider.LLMRequest request = invocation.getArgument(0);
+                    request.metadataSink().accept(metadata);
+                    return Flux.just("Truncated");
+                });
+
+        var captured = new AtomicReference<ResponseListener.ResponseEvent>();
+        var controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                captured.set(event);
+            }
+        };
+        orchestratorWith(controller).prompt("Hello");
+
+        Assertions.assertNotNull(captured.get(),
+                "onResponse must fire for the controller");
+        Assertions.assertSame(metadata,
+                captured.get().getMetadata().orElse(null),
+                "Provider metadata must reach the controller, not just the "
+                        + "response listener");
+    }
+
+    @Test
+    void controllerOnResponse_failedTurnCarriesErrorInEvent() {
+        // The single hook has to express failure as well as the old
+        // Throwable parameter did.
+        stubAddMessage();
+        var streamError = new IllegalStateException("stream blew up");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+
+        var captured = new AtomicReference<ResponseListener.ResponseEvent>();
+        var controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onResponse(ResponseListener.ResponseEvent event) {
+                captured.set(event);
+            }
+        };
+        orchestratorWith(controller).prompt("Hello");
+
+        Assertions.assertNotNull(captured.get());
+        Assertions.assertSame(streamError,
+                captured.get().getError().orElse(null),
+                "The failure cause must reach the controller");
     }
 
     @Test
@@ -3638,4 +3710,23 @@ class AIOrchestratorTest {
     private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
+
+    /** Matches a turn outcome that ended without an error. */
+    private static ResponseListener.ResponseEvent noError() {
+        return Mockito.argThat(e -> e != null && e.getError().isEmpty());
+    }
+
+    /** Matches a turn outcome carrying exactly the given error instance. */
+    private static ResponseListener.ResponseEvent errorIs(Throwable expected) {
+        return Mockito.argThat(
+                e -> e != null && e.getError().orElse(null) == expected);
+    }
+
+    /** Matches a turn outcome whose error is of the given type. */
+    private static ResponseListener.ResponseEvent errorOfType(
+            Class<? extends Throwable> type) {
+        return Mockito.argThat(e -> e != null
+                && e.getError().filter(type::isInstance).isPresent());
+    }
+
 }

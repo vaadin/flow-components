@@ -892,10 +892,11 @@ public class AIOrchestrator implements Serializable {
 
     private void fireResponseListener(String responseText, Throwable error,
             UI ui, ResponseMetadata metadata) {
+        var event = new ResponseListener.ResponseEvent(responseText, error,
+                metadata);
         if (responseListener != null) {
             try {
-                responseListener.onResponse(new ResponseListener.ResponseEvent(
-                        responseText, error, metadata));
+                responseListener.onResponse(event);
             } catch (Exception e) {
                 LOGGER.error("Error in response listener", e);
             }
@@ -903,7 +904,7 @@ public class AIOrchestrator implements Serializable {
         if (controller != null) {
             accessIfAttached(ui, () -> {
                 try {
-                    controller.onResponse(error);
+                    controller.onResponse(event);
                 } catch (Exception e) {
                     LOGGER.error("Error in controller onResponse", e);
                     // Append a separate assistant message instead of
@@ -1451,7 +1452,7 @@ public class AIOrchestrator implements Serializable {
          * recommended hook for persisting conversation state (via
          * {@link AIOrchestrator#getHistory()}), triggering follow-up actions,
          * or surfacing errors to the user. Same lifecycle moment as
-         * {@link AIController#onResponse(Throwable)}.
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)}.
          * <p>
          * On success the response text may be empty if the model emitted only
          * tool calls or otherwise stopped without producing visible content.
@@ -1503,9 +1504,10 @@ public class AIOrchestrator implements Serializable {
          * context is added for that turn — useful for "context only when X"
          * patterns. If the supplier throws, the turn is aborted via the normal
          * error path: the assistant placeholder is updated to a generic error
-         * message, {@link AIController#onResponse(Throwable)} fires with the
-         * thrown exception, and the exception propagates to the caller of the
-         * prompt entry point.
+         * message,
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} fires
+         * with the thrown exception, and the exception propagates to the caller
+         * of the prompt entry point.
          * <p>
          * Passing {@code null} disables session context entirely, including the
          * built-in default. By default, the orchestrator installs a supplier

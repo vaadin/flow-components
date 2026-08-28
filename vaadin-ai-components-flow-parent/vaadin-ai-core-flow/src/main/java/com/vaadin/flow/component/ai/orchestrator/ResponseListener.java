@@ -29,7 +29,8 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * the turn fails before a stream ever opens. It fires at most once per prompt:
  * a prompt rejected by the {@link RequestInterceptor} and a postponed prompt
  * abandoned because its UI was detached end without firing it. The same
- * lifecycle moment as {@link AIController#onResponse(Throwable)}. Use it to
+ * lifecycle moment as
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Use it to
  * persist conversation state (via {@link AIOrchestrator#getHistory()}), trigger
  * follow-up actions, or surface errors to the user.
  * <p>
@@ -84,7 +85,20 @@ public interface ResponseListener extends Serializable {
         private final Throwable error;
         private final ResponseMetadata metadata;
 
-        ResponseEvent(String response, Throwable error,
+        /**
+         * Creates a turn-outcome event. The orchestrator builds this for every
+         * turn; it is public so an application can construct one when unit
+         * testing an {@link AIController} implementation.
+         *
+         * @param response
+         *            the assistant's response text, not {@code null}
+         * @param error
+         *            the cause of failure, or {@code null} on success
+         * @param metadata
+         *            the provider's metadata for the turn, or {@code null} when
+         *            none was reported
+         */
+        public ResponseEvent(String response, Throwable error,
                 ResponseMetadata metadata) {
             this.response = response;
             this.error = error;

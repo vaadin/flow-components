@@ -221,7 +221,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn is running, for example from
      * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
      * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(ResponseListener.ResponseEvent)}.</li>
      * </ul>
      *
      * <p>

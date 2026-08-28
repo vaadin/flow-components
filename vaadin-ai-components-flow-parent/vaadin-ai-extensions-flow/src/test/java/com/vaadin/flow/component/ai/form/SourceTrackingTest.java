@@ -24,6 +24,7 @@ import org.slf4j.event.Level;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.PageRegion;
 import com.vaadin.flow.component.ai.common.SourceExtract;
@@ -584,7 +585,7 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
 
@@ -600,7 +601,7 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
@@ -619,7 +620,7 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
             field.setValue("Acme");
@@ -639,15 +640,15 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
             fill(controller, field, trackedValue("Acme"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("cascaded");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("Acme");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
                     "A source stale at turn end must not be returned when a "
@@ -703,7 +704,7 @@ class SourceTrackingTest {
             controller.addFieldValueChangeListener(events::add);
 
             fill(controller, field, trackedValue("Acme"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(events.isEmpty(),
                     "Writing the value the field already had must not fire a "
@@ -743,7 +744,7 @@ class SourceTrackingTest {
             var field = new TestField();
             field.setValue("persisted");
             var controller = controllerFor(field);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             controller.restoreFieldSource(field,
                     new ValueSource(ConfidenceLevel.MEDIUM, null));
 
@@ -782,7 +783,7 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, events.size());
             var source = events.get(0).getFieldSource().orElseThrow();
@@ -798,7 +799,7 @@ class SourceTrackingTest {
             controller.addFieldValueChangeListener(events::add);
 
             fill(controller, field, "\"plain\"");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, events.size());
             Assertions.assertTrue(events.get(0).getFieldSource().isEmpty());
@@ -816,7 +817,7 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"),
@@ -829,7 +830,7 @@ class SourceTrackingTest {
             var controller = trackingControllerFor(field);
 
             fill(controller, field, "\"plain\"");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "A value with no reported source must show no indicator");
@@ -844,7 +845,7 @@ class SourceTrackingTest {
 
             fill(controller, field, """
                     {"value": "Acme", "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "A source without a level must show no indicator");
@@ -861,7 +862,7 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
@@ -869,7 +870,7 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "low",
                      "extracts": [{"text": "re-read"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals("low",
                     markerOn(field).getProperty("confidence"),
@@ -886,14 +887,14 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
             controller.onRequest();
             fill(controller, field, """
                     {"value": "Acme", "extracts": [{"text": "re-read"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "The kept marker must drop the level the new source does "
@@ -910,11 +911,11 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             fill(controller, field, "\"Acme\"");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "The kept marker must drop its level when the rewrite "
@@ -928,11 +929,11 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "first", "confidence": "medium",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             fill(controller, field, "\"second\"");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "A refill without a source must clear the indicator the "
@@ -951,13 +952,13 @@ class SourceTrackingTest {
             fill(controller, field, """
                     {"value": "Acme", "confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
             controller.onRequest();
             field.setValue("cascaded");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
                     "A cascaded value must drop the level the previous fill "

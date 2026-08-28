@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -60,14 +61,15 @@ import tools.jackson.databind.JsonNode;
  * </ul>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponse(Throwable)} on the success path, avoiding partial state
- * and multiple redraws during a multi-tool LLM turn. The grid state is stored
- * directly on the {@link Grid} component, so it survives serialization.
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * grid state is stored directly on the {@link Grid} component, so it survives
+ * serialization.
  * </p>
  * <p>
- * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
- * pending changes are discarded and the grid keeps its last
- * successfully-rendered state.
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the grid keeps its
+ * last successfully-rendered state.
  * </p>
  * <p>
  * <b>Serialization:</b> This controller is not serialized with the
@@ -214,7 +216,8 @@ public class GridAIController implements AIController {
     }
 
     @Override
-    public void onResponse(Throwable error) {
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
         var entry = GridEntry.get(grid);
         if (error != null) {
             if (entry != null) {
