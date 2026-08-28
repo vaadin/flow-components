@@ -129,7 +129,7 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
                             Cells cannot be joined on the first created header row. \
                             This row is used as the default row for setting column \
                             headers and for displaying sorting indicators, so each cell \
-                            in it should have maximum one related column.
+                            in it should have maximum one related column.\
                             """);
         }
         return super.join(cells);

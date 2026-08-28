@@ -211,7 +211,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
                     """
                             Editor doesn't have a binder. It's needed to be set explicitly. \
                             An example of setting the Binder: \
-                            Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)
+                            Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)\
                             """);
         }
 

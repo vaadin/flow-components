@@ -310,10 +310,11 @@ public class TreeGrid<T> extends Grid<T>
         if (dataProvider instanceof HierarchicalDataProvider) {
             this.setDataProvider((HierarchicalDataProvider) dataProvider);
         } else {
-            throw new IllegalArgumentException("""
-                    TreeGrid only accepts hierarchical data providers. \
-                    An example of interface to be used: HierarchicalDataProvider
-                    """);
+            throw new IllegalArgumentException(
+                    """
+                            TreeGrid only accepts hierarchical data providers. \
+                            An example of interface to be used: HierarchicalDataProvider\
+                            """);
         }
     }
 
@@ -348,7 +349,7 @@ public class TreeGrid<T> extends Grid<T>
                 """
                         TreeGrid only accepts hierarchical data providers. \
                         Use another setDataProvider/setItems method instead with hierarchical data.\
-                        An example of interface to be used: HierarchicalDataProvider
+                        An example of interface to be used: HierarchicalDataProvider\
                         """);
     }
 
@@ -376,7 +377,7 @@ public class TreeGrid<T> extends Grid<T>
                 """
                         TreeGrid only accepts hierarchical data providers. \
                         Use another setDataProvider/setItems method instead with hierarchical data.\
-                        An example of interface to be used: HierarchicalDataProvider
+                        An example of interface to be used: HierarchicalDataProvider\
                         """);
     }
 
@@ -404,7 +405,7 @@ public class TreeGrid<T> extends Grid<T>
                 """
                         TreeGrid only accepts hierarchical data providers. \
                         Use another setDataProvider/setItems method instead with hierarchical data.\
-                        An example of interface to be used: HierarchicalDataProvider
+                        An example of interface to be used: HierarchicalDataProvider\
                         """);
     }
 
@@ -431,7 +432,7 @@ public class TreeGrid<T> extends Grid<T>
                 """
                         TreeGrid only accepts hierarchical data providers. \
                         Use another setDataProvider/setItems method instead with hierarchical data.\
-                        An example of interface to be used: HierarchicalDataProvider
+                        An example of interface to be used: HierarchicalDataProvider\
                         """);
     }
 
@@ -458,7 +459,7 @@ public class TreeGrid<T> extends Grid<T>
                 """
                         TreeGrid only accepts hierarchical data providers. \
                         Use another setDataProvider/setItems method instead with hierarchical data.\
-                        An example of interface to be used: HierarchicalDataProvider
+                        An example of interface to be used: HierarchicalDataProvider\
                         """);
     }
 
@@ -667,7 +668,7 @@ public class TreeGrid<T> extends Grid<T>
                     """
                             This method can't be used for a Grid that isn't constructed from a bean type. \
                             To construct Grid from a bean type, please provide a beanType argument\
-                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)
+                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
                             """);
         }
         resetColumns(hierarchyPropertyName, valueProvider, propertyNames);
@@ -706,7 +707,7 @@ public class TreeGrid<T> extends Grid<T>
                     """
                             This method can't be used for a Grid that isn't constructed from a bean type. \
                             To construct Grid from a bean type, please provide a beanType argument\
-                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)
+                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
                             """);
         }
         Objects.requireNonNull(propertyName,
@@ -720,7 +721,7 @@ public class TreeGrid<T> extends Grid<T>
                     """
                             There is no such hierarchy property name in the beanType used \
                             for construction of the grid:\
-                            Trying to get '%s' from '%s'
+                            Trying to get '%s' from '%s'\
                             """,
                     propertyName, getPropertySet()));
         }
@@ -1028,7 +1029,7 @@ public class TreeGrid<T> extends Grid<T>
             throw new UnsupportedOperationException(
                     """
                             scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
-                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
+                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.\
                             """);
         }
 
@@ -1070,7 +1071,7 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(String.format(
                     """
                             Requested viewport size (%d items) exceeds security limit (%d items max). \
-                            Consider reducing the grid height or increasing the page size to at least %d if it's a valid request.
+                            Consider reducing the grid height or increasing the page size to at least %d if it's a valid request.\
                             """,
                     padding, maxAllowedItems, (int) Math.ceil(padding / 10.0)));
         }

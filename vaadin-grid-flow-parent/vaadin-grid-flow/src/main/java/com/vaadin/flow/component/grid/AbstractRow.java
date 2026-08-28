@@ -164,7 +164,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                 .findFirst().orElseThrow(() -> new IllegalStateException(
                         """
                                 removeCell() should never be called for a column component \
-                                that doesn't have a corresponding cell in this row.
+                                that doesn't have a corresponding cell in this row.\
                                 """));
         cells.remove(cellToRemove);
     }
@@ -201,7 +201,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                     } else {
                         throw new IllegalArgumentException("""
                                 Cannot find a cell from this row that would \
-                                correspond to the given column
+                                correspond to the given column\
                                 """);
                     }
                 });
@@ -286,7 +286,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         if (!isOutmostRow()) {
             throw new IllegalArgumentException("""
                     Cells can be joined only on the top-most HeaderRow \
-                    or the bottom-most FooterRow.
+                    or the bottom-most FooterRow.\
                     """);
         }
         if (cells.size() < 2) {
@@ -363,7 +363,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                 throw new IllegalArgumentException(
                         """
                                 This set of cells can not be joined because of the hierarchical \
-                                column group structure of the client-side web component.
+                                column group structure of the client-side web component.\
                                 """);
             }
         }

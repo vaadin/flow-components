@@ -94,7 +94,7 @@ public class FooterRow extends AbstractRow<FooterCell> {
                     Cells cannot be joined on the top-most footer row. \
                     This row is used as the default row for setting column \
                     footers, so each cell in it should have maximum one \
-                    related column.
+                    related column.\
                     """);
         }
         return super.join(cells);

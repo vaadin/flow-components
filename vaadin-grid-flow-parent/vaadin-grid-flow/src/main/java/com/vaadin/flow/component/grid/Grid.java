@@ -2423,7 +2423,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     """
                             This method can't be used for a Grid that isn't constructed from a bean type. \
                             To construct Grid from a bean type, please provide a beanType argument\
-                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)
+                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
                             """);
         }
     }
@@ -3361,7 +3361,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     Grid is not in single select mode, \
                     it needs to be explicitly set to such with \
                     setSelectionMode(SelectionMode.SINGLE) before \
-                    being able to use single selection features.
+                    being able to use single selection features.\
                     """);
         }
         return ((GridSingleSelectionModel<T>) model).asSingleSelect();
@@ -3384,7 +3384,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     Grid is not in multi select mode, \
                     it needs to be explicitly set to such with \
                     setSelectionMode(SelectionMode.MULTI) before \
-                    being able to use multi selection features.
+                    being able to use multi selection features.\
                     """);
         }
         return ((GridMultiSelectionModel<T>) model).asMultiSelect();
@@ -4026,7 +4026,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             to avoid performance bottlenecks resulting from transferring the full item data \
                             set at once and then rendering an excess amount of DOM elements). If for some \
                             reason this is not an option, increase the page size of the grid so that rendering \
-                            every item at once doesn't result in a request for over 10 pages.
+                            every item at once doesn't result in a request for over 10 pages.\
                             """);
         }
         getDataCommunicator().setViewportRange(start, length);

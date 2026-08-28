@@ -165,7 +165,7 @@ public class GridContextMenu<T> extends
             throw new IllegalArgumentException(
                     """
                             Only an instance of Grid can be used as the target for GridContextMenu. \
-                            Use ContextMenu for any other component.
+                            Use ContextMenu for any other component.\
                             """);
         }
         super.setTarget(target);
