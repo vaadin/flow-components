@@ -1884,6 +1884,35 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void responseListener_streamFails_eventCarriesMetadataObservedBeforeError() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var metadata = new ResponseMetadata("tool_use",
+                new ResponseMetadata.TokenUsage(40, 10, 50));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    LLMProvider.LLMRequest request = invocation.getArgument(0);
+                    request.metadataSink().accept(metadata);
+                    return Flux.error(new RuntimeException("API Error"));
+                });
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hi");
+
+        Assertions.assertTrue(capturedEvent.get().getError().isPresent());
+        Assertions.assertSame(metadata,
+                capturedEvent.get().getMetadata().orElse(null),
+                "The failure event must carry the metadata observed before "
+                        + "the error");
+    }
+
+    @Test
     void responseListener_providerPublishesNoMetadata_eventMetadataEmpty() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),

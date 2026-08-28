@@ -454,7 +454,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
-            context.publishMetadata();
             context.getSink().complete();
             return;
         }
@@ -469,7 +468,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
-            context.publishMetadata();
             context.getSink().complete();
         }
     }
@@ -597,10 +595,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         /**
-         * Records the metadata of one model round trip. The reason that ends
-         * the turn wins; token usage accumulates across the round trips.
+         * Records the metadata of one model round trip and passes the state
+         * known so far to the metadata sink right away, so that a turn whose
+         * later round trip fails has still reported what the earlier ones cost.
+         * The reason that ends the turn wins; token usage accumulates across
+         * the round trips.
          */
         void observeMetadata(ChatResponse response) {
+            if (response.finishReason() == null
+                    && response.tokenUsage() == null) {
+                // Nothing new in this round trip, nothing to re-publish.
+                return;
+            }
             if (response.finishReason() != null) {
                 lastFinishReason = response.finishReason();
             }
@@ -609,9 +615,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 accumulatedUsage = accumulatedUsage == null ? usage
                         : accumulatedUsage.add(usage);
             }
+            publishMetadata();
         }
 
-        void publishMetadata() {
+        private void publishMetadata() {
             if (lastFinishReason == null && accumulatedUsage == null) {
                 return;
             }

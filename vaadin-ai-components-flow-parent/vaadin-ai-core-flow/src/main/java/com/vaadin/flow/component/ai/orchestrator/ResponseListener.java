@@ -115,12 +115,14 @@ public interface ResponseListener extends Serializable {
 
         /**
          * Gets the metadata the provider reported for this turn, such as the
-         * finish reason and token usage. Returns an empty optional when the
+         * finish reason and token usage. On a failed turn this is what was
+         * observed before the failure. Returns an empty optional when the
          * provider reported none — a custom {@link LLMProvider} that does not
          * publish metadata, or a turn that failed before any was observed.
          *
          * @return the response metadata, or empty when the provider reported
          *         none
+         * @since 25.3
          */
         public Optional<ResponseMetadata> getMetadata() {
             return Optional.ofNullable(metadata);

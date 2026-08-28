@@ -1863,6 +1863,51 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_streamingErrorsAfterMetadataChunk_metadataStillPublished() {
+        // The failed turn was still billed for what ran before the error; the
+        // sink must have received everything observed up to that point.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux
+                        .just(chatResponseWithMetadata("Hi", "tool_use", 40,
+                                10))
+                        .concatWith(Flux.error(
+                                new RuntimeException("network broken"))));
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("tool_use", metadata.finishReason());
+        Assertions.assertEquals(50, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutTotal_totalDerivedFromComponents() {
+        // A backend that reports prompt and completion counts but no total
+        // still reported the usage; it must not be discarded.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(ChatResponse.builder()
+                        .generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder()
+                                .usage(new DefaultUsage(100, 20, null)).build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertEquals(120, usage.totalTokens());
+    }
+
+    @Test
     void metadataSink_notOverridden_returnsNoOpConsumer() {
         var request = createSimpleRequest("Hello");
 

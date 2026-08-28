@@ -1682,14 +1682,43 @@ class LangChain4JLLMProviderTest {
         var results = provider.stream(request).collectList().block();
 
         Assertions.assertEquals(List.of("done"), results);
-        Assertions.assertEquals(1, collected.size(),
-                "Provider should publish the response metadata once");
-        var metadata = collected.getFirst();
+        Assertions.assertEquals(2, collected.size(),
+                "Each round trip publishes the state known so far");
+        Assertions.assertEquals(110,
+                collected.getFirst().tokenUsage().totalTokens(),
+                "The first snapshot carries the first round trip alone");
+        var metadata = collected.getLast();
         Assertions.assertEquals("STOP", metadata.finishReason(),
                 "The reason that ended the turn wins");
         Assertions.assertEquals(300, metadata.tokenUsage().inputTokens());
         Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
         Assertions.assertEquals(330, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_secondToolRoundTripFails_firstRoundMetadataStillPublished() {
+        // The failed turn was still billed for the round trips that ran; the
+        // sink must have received what was observed before the failure.
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse)
+                .thenThrow(new RuntimeException("API down"));
+
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("TOOL_EXECUTION", metadata.finishReason());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
     }
 
     @Test

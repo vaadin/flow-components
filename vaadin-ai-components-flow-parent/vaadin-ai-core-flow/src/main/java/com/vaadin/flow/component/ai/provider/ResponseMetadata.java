@@ -21,9 +21,11 @@ import java.io.Serializable;
  * Metadata about an LLM response, published by an {@link LLMProvider} through
  * {@link LLMProvider.LLMRequest#metadataSink()} when the model reports it.
  * <p>
- * The metadata describes the whole turn: when the turn contains tool-call round
- * trips, the finish reason is the one that ended the turn and the token usage
- * covers all round trips, as far as the underlying framework reports it.
+ * The metadata describes the turn as far as the provider has observed it: when
+ * the turn contains tool-call round trips, the finish reason is the latest one
+ * observed and the token usage covers the round trips so far, as far as the
+ * underlying framework reports them. On a turn that completes normally the last
+ * published instance therefore describes the whole turn.
  * </p>
  *
  * @param finishReason

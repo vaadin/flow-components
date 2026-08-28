@@ -394,10 +394,10 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            var collector = new ResponseMetadataCollector();
+            var collector = new ResponseMetadataCollector(
+                    request.metadataSink());
             var chatResponses = getPromptSpec(request).stream().chatResponse()
-                    .doOnNext(collector::observe).doOnComplete(
-                            () -> collector.publishTo(request.metadataSink()));
+                    .doOnNext(collector::observe);
             return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
@@ -505,9 +505,8 @@ public class SpringAILLMProvider implements LLMProvider {
                             + "may indicate an upstream error swallowed by "
                             + "the client.");
                 } else {
-                    var collector = new ResponseMetadataCollector();
-                    collector.observe(response);
-                    collector.publishTo(request.metadataSink());
+                    new ResponseMetadataCollector(request.metadataSink())
+                            .observe(response);
                     warnOnAbnormalCompletion(response);
                     var text = getAssistantText(response);
                     if (!text.isEmpty()) {
@@ -545,30 +544,35 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Collects response metadata across the chunks of a turn. The last reported
-     * finish reason and token usage win: the terminal chunk carries the reason
-     * that ended the turn, and frameworks that report usage do so cumulatively
-     * on the final chunk that carries it.
+     * Collects response metadata across the chunks of a turn and passes each
+     * new state of knowledge to the metadata sink right away, so that a turn
+     * that fails or times out midway has still reported what was observed
+     * before the failure. The last reported finish reason and token usage win:
+     * the terminal chunk carries the reason that ended the turn, and frameworks
+     * that report usage do so cumulatively on the final chunk that carries it.
      */
     private static class ResponseMetadataCollector {
 
+        private final Consumer<ResponseMetadata> metadataSink;
         private String finishReason;
         private ResponseMetadata.TokenUsage tokenUsage;
 
+        ResponseMetadataCollector(Consumer<ResponseMetadata> metadataSink) {
+            this.metadataSink = metadataSink;
+        }
+
         void observe(ChatResponse response) {
             var reason = getFinishReason(response);
+            var usage = getTokenUsage(response);
+            if (reason == null && usage == null) {
+                // Nothing new on this chunk, nothing to re-publish.
+                return;
+            }
             if (reason != null) {
                 finishReason = reason;
             }
-            var usage = getTokenUsage(response);
             if (usage != null) {
                 tokenUsage = usage;
-            }
-        }
-
-        void publishTo(Consumer<ResponseMetadata> metadataSink) {
-            if (finishReason == null && tokenUsage == null) {
-                return;
             }
             metadataSink.accept(new ResponseMetadata(finishReason, tokenUsage));
         }
@@ -588,12 +592,22 @@ public class SpringAILLMProvider implements LLMProvider {
             if (usage == null) {
                 return null;
             }
-            var total = usage.getTotalTokens();
-            if (total == null || total <= 0) {
+            var input = positiveOrNull(usage.getPromptTokens());
+            var output = positiveOrNull(usage.getCompletionTokens());
+            var total = positiveOrNull(usage.getTotalTokens());
+            if (total == null && input != null && output != null) {
+                // A backend that reports the components but no total still
+                // reported the usage; derive rather than discard it.
+                total = input + output;
+            }
+            if (input == null && output == null && total == null) {
                 return null;
             }
-            return new ResponseMetadata.TokenUsage(usage.getPromptTokens(),
-                    usage.getCompletionTokens(), total);
+            return new ResponseMetadata.TokenUsage(input, output, total);
+        }
+
+        private static Integer positiveOrNull(Integer count) {
+            return count == null || count <= 0 ? null : count;
         }
     }
 
