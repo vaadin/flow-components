@@ -1802,6 +1802,58 @@ class LangChain4JLLMProviderTest {
                 "No finish reason and no usage means nothing to publish");
     }
 
+    @Test
+    void stream_turnEndsWithoutFinishReason_logsWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "Expected a warning about the missing finish reason");
+    }
+
+    @Test
+    void stream_turnEndsWithFinishReason_noMissingFinishReasonWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "A turn with a reported finish reason must not warn");
+    }
+
+    @Test
+    void stream_finishReasonOnlyOnFinalToolRoundTrip_noMissingFinishReasonWarning() {
+        // Some models report the reason only on the round trip that ends the
+        // turn; earlier tool round trips without one are not abnormal.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "The reason on the final round trip covers the turn");
+    }
+
+    private boolean hasMissingFinishReasonWarning() {
+        return logger.getLoggingEvents().stream()
+                .anyMatch(event -> event.getMessage().contains(
+                        "without the model reporting a finish " + "reason"));
+    }
+
     private static LLMRequest requestWithMetadataSink(String message,
             List<LLMProvider.ToolSpec> explicitTools,
             List<ResponseMetadata> collected) {

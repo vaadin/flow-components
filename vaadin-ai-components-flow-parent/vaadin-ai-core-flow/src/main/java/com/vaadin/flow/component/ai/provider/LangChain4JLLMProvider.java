@@ -454,6 +454,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
+            warnOnMissingFinishReason(context);
             context.getSink().complete();
             return;
         }
@@ -468,8 +469,27 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
+            warnOnMissingFinishReason(context);
             context.getSink().complete();
         }
+    }
+
+    /**
+     * Warns when a turn completes without the model ever reporting a finish
+     * reason. This provider drives the tool-calling loop itself, so unlike
+     * {@code SpringAILLMProvider} a turn cannot end with tool calls still
+     * pending; a missing finish reason is the one terminal state left that may
+     * indicate a silent abnormal termination.
+     */
+    private static void warnOnMissingFinishReason(
+            ChatExecutionContext context) {
+        if (context.sawFinishReason()) {
+            return;
+        }
+        LOGGER.warn("LLM turn ended without the model reporting a finish "
+                + "reason. This may indicate a silent abnormal termination "
+                + "such as an upstream error; if the response appears "
+                + "truncated this warning is the signal.");
     }
 
     private static ToolExecutionResultMessage executeToolRequest(
@@ -631,6 +651,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
                             accumulatedUsage.totalTokenCount());
             request.metadataSink()
                     .accept(new ResponseMetadata(finishReason, tokenUsage));
+        }
+
+        boolean sawFinishReason() {
+            return lastFinishReason != null;
         }
 
         LLMRequest getRequest() {
