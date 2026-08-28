@@ -61,6 +61,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
@@ -2537,6 +2538,31 @@ class AIOrchestratorTest {
                     "Description must mention '" + anchor + "', got: "
                             + description);
         }
+    }
+
+    @Test
+    void sessionContextTool_declaresOptionalOnlyParameterSchema() {
+        // A tool without a declared property makes models disagree on what
+        // to send as arguments, and some LLM APIs reject the request that
+        // replays such a tool call.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        var schema = JacksonUtils.readTree(captor.getValue().explicitTools()
+                .getFirst().getParametersSchema());
+        Assertions.assertEquals("object", schema.path("type").asString());
+        Assertions.assertTrue(schema.path("properties").size() > 0,
+                "Schema must declare at least one property, got: " + schema);
+        Assertions.assertEquals(0, schema.path("required").size(),
+                "All declared properties must be optional, got: " + schema);
     }
 
     @Test

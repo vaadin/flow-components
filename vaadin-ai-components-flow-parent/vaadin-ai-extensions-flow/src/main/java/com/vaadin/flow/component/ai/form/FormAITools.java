@@ -115,7 +115,7 @@ final class FormAITools {
     }
 
     /**
-     * Creates the {@code get_form_state} tool spec. Takes no parameters and
+     * Creates the {@code get_form_state} tool spec. Ignores its arguments and
      * returns a JSON document listing every visible field with its id, merged
      * description, type metadata (type/format/pattern/enum/queryable/array/
      * items), and current value.
@@ -141,11 +141,7 @@ final class FormAITools {
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                            "type": "object",
-                            "properties": {}
-                        }""";
+                return NO_PARAMETERS_SCHEMA;
             }
 
             @Override
