@@ -1541,6 +1541,71 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(originalError, thrown);
     }
 
+    @Test
+    void stream_nonStreamingEndsWithPendingToolCalls_logsWarning() {
+        // The turn stopped between asking for a tool and answering with its
+        // result — the silent truncation that is otherwise invisible. Needs a
+        // client whose own tool execution is disabled, since the default one
+        // would run the tool and ask for another round.
+        var toolAdvisorBuilder = ToolCallingAdvisor.builder()
+                .toolExecutionEligibilityChecker(response -> false);
+        var chatClient = ChatClient.builder(mockChatModel,
+                ObservationRegistry.NOOP, null, null, toolAdvisorBuilder)
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponseWithPendingToolCall());
+
+        chatClientProvider.stream(createSimpleRequest("invoke tool"))
+                .collectList().block();
+
+        assertWarningLogged("tool calls still pending");
+    }
+
+    @Test
+    void stream_nonStreamingWithoutFinishReason_logsWarning() {
+        provider.setStreaming(false);
+        mockSimpleChatWithoutFinishReason("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertWarningLogged("without a finish reason");
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReason_noAbnormalWarning() {
+        provider.setStreaming(false);
+        mockSimpleChat("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertNoWarningLogged("tool calls still pending");
+        assertNoWarningLogged("without a finish reason");
+    }
+
+    private void mockSimpleChatWithoutFinishReason(String responseText) {
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse(responseText, null));
+    }
+
+    private void assertWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.WARN)
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected a warning containing: " + phrase);
+    }
+
+    private void assertNoWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(),
+                "Expected no warning containing: " + phrase);
+    }
+
     private void assertAbnormalTerminationWarningLogged() {
         // The warning is emitted from a Reactor scheduler thread (Spring
         // AI's chatResponse pipeline), so we have to query across all

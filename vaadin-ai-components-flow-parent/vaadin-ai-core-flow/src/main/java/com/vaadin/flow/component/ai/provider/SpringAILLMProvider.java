@@ -500,10 +500,15 @@ public class SpringAILLMProvider implements LLMProvider {
             try {
                 var promptSpec = getPromptSpec(request);
                 var response = promptSpec.call().chatResponse();
-                if (response != null) {
+                if (response == null) {
+                    LOGGER.warn("LLM call returned no response at all, which "
+                            + "may indicate an upstream error swallowed by "
+                            + "the client.");
+                } else {
                     var collector = new ResponseMetadataCollector();
                     collector.observe(response);
                     collector.publishTo(request.metadataSink());
+                    warnOnAbnormalCompletion(response);
                     var text = getAssistantText(response);
                     if (!text.isEmpty()) {
                         sink.next(text);
@@ -514,6 +519,29 @@ public class SpringAILLMProvider implements LLMProvider {
                 sink.error(e);
             }
         });
+    }
+
+    /**
+     * Warns when a non-streaming turn did not end in a state a completed turn
+     * can end in. Spring AI runs the tool-calling loop inside its own call and
+     * hands back only the final response, so tool calls still pending on it
+     * mean the loop stopped before the model produced its answer. The streaming
+     * path has the same checks built into
+     * {@link #warnOnMissingFinishReason(Flux)}.
+     */
+    private static void warnOnAbnormalCompletion(ChatResponse response) {
+        var finishReason = ResponseMetadataCollector.getFinishReason(response);
+        if (response.hasToolCalls()) {
+            LOGGER.warn("LLM call ended with tool calls still pending "
+                    + "(finish reason: {}). The tool-calling loop stopped "
+                    + "before the model produced its answer, so the response "
+                    + "is incomplete.", finishReason);
+        } else if (finishReason == null) {
+            LOGGER.warn("LLM call ended without a finish reason. This may "
+                    + "indicate a silent abnormal termination such as an "
+                    + "upstream error; if the response appears truncated "
+                    + "this warning is the signal.");
+        }
     }
 
     /**
