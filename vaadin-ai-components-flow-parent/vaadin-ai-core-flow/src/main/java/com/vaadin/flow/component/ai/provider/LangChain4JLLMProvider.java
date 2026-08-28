@@ -639,9 +639,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         private void publishMetadata() {
-            if (lastFinishReason == null && accumulatedUsage == null) {
-                return;
-            }
             var finishReason = lastFinishReason == null ? null
                     : lastFinishReason.name();
             var tokenUsage = accumulatedUsage == null ? null
