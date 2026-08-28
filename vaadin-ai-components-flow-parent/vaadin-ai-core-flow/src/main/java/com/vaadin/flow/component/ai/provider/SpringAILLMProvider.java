@@ -547,10 +547,13 @@ public class SpringAILLMProvider implements LLMProvider {
             @Override
             public ToolDefinition getToolDefinition() {
                 var schema = tool.getParametersSchema();
+                // A tool without a declared schema breaks some LLM APIs —
+                // see ToolSpec.NO_PARAMETERS_SCHEMA.
                 return DefaultToolDefinition.builder().name(tool.getName())
                         .description(tool.getDescription())
-                        .inputSchema(schema != null ? schema
-                                : "{\"type\":\"object\",\"properties\":{}}")
+                        .inputSchema(schema != null && !schema.isBlank()
+                                ? schema
+                                : LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA)
                         .build();
             }
 

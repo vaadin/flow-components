@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,6 +57,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import tools.jackson.databind.JsonNode;
@@ -1442,7 +1444,7 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void stream_withExplicitToolNullSchema_createsToolWithoutParameters() {
+    void stream_withExplicitToolNullSchema_substitutesNoParametersSchema() {
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");
 
@@ -1460,7 +1462,118 @@ class LangChain4JLLMProviderTest {
         var spec = captor.getValue().toolSpecifications().getFirst();
         Assertions.assertEquals("simpleTool", spec.name());
         Assertions.assertEquals("A simple tool", spec.description());
-        Assertions.assertNull(spec.parameters());
+        assertNoParametersSchema(spec.parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolBlankSchema_substitutesNoParametersSchema() {
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                "   ", args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        assertNoParametersSchema(
+                captor.getValue().toolSpecifications().getFirst().parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_substitutesNoParametersSchema() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        assertNoParametersSchema(
+                captor.getValue().toolSpecifications().getFirst().parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_preservesDeclaredProperties() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":"
+                        + "{\"type\":\"string\"}},\"required\":[\"city\"]}",
+                args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertEquals(Set.of("city"),
+                parameters.properties().keySet(),
+                "A declared schema's properties must reach the tool "
+                        + "specification unmodified");
+        Assertions.assertEquals(List.of("city"), parameters.required());
+    }
+
+    @Test
+    void stream_withExplicitToolEmptyPropertiesSchema_passesSchemaThrough() {
+        // Substitution is limited to null/blank schemas: a syntactically
+        // valid schema authored by the user is passed through as-is, even
+        // when its properties object is empty.
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{}}", args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response = mockSimpleResponse("OK");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var parameters = captor.getValue().toolSpecifications().getFirst()
+                .parameters();
+        Assertions.assertNotNull(parameters);
+        Assertions.assertTrue(parameters.properties().isEmpty(),
+                "An explicit empty-properties schema must not be rewritten, "
+                        + "got: " + parameters);
+    }
+
+    /**
+     * Asserts the parameters are the non-empty no-parameters shape: at least
+     * one property, all of them optional. A tool without a declared property
+     * makes models disagree on what to send as arguments, and some LLM APIs
+     * reject the request that replays such a tool call.
+     */
+    private static void assertNoParametersSchema(JsonObjectSchema parameters) {
+        Assertions.assertNotNull(parameters);
+        Assertions.assertFalse(parameters.properties().isEmpty(),
+                "Schema must declare at least one property, got: "
+                        + parameters);
+        Assertions.assertTrue(
+                parameters.required() == null
+                        || parameters.required().isEmpty(),
+                "All declared properties must be optional, got: " + parameters);
     }
 
     @Test
