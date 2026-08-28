@@ -50,6 +50,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.metadata.DefaultUsage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -1908,6 +1909,54 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingUsageWithZeroTotal_totalDerivedFromComponents() {
+        // A backend that reports the components but leaves the total at zero
+        // still reported the usage; the total must be derived, not dropped.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(120,
+                collected.getLast().tokenUsage().totalTokens(),
+                "An unreported total must be derived from the components");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutInputTokens_publishesOutputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(0, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertNull(usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the input count");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutOutputTokens_publishesInputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 0, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertNull(usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the output count");
+    }
+
+    @Test
     void stream_streamingAcrossToolRoundTrips_publishesCumulativeUsage() {
         // The default ChatClient consumes the tool-call round trip internally
         // and re-emits the follow-up round with usage already accumulated
@@ -2003,6 +2052,16 @@ class SpringAILLMProviderTest {
                 return collected::add;
             }
         };
+    }
+
+    private void mockCallWithUsage(Usage usage) {
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(usage)
+                                .build())
+                        .build());
     }
 
     private static ChatResponse chatResponseWithMetadata(String text,

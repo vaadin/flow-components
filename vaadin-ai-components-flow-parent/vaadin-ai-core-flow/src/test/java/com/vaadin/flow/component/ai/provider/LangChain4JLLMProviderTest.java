@@ -1803,6 +1803,62 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_nonStreamingWithUsageButNoFinishReason_publishesUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "Reported usage is worth publishing on its own");
+        Assertions.assertNull(collected.getFirst().finishReason());
+        Assertions.assertEquals(55,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingLastRoundTripReportsNothingNew_doesNotRepublish() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A round trip that reports neither a reason nor usage must "
+                        + "not re-publish the earlier state");
+    }
+
+    @Test
+    void stream_turnEndsWithoutAiMessageAndWithoutFinishReason_logsWarning() {
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "A turn that ends without a message and without a finish "
+                        + "reason must warn");
+    }
+
+    @Test
     void stream_turnEndsWithoutFinishReason_logsWarning() {
         var response = mockSimpleResponse("Done");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
