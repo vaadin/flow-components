@@ -11,6 +11,8 @@ type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel
 
 type Component = HTMLElement & { [key: string]: Renderer | undefined };
 
+type ClientActionFunction = (event: Event, context: { item: any; index: number; key: string }) => void;
+
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
 
@@ -24,6 +26,10 @@ _window.Vaadin = _window.Vaadin || {};
  * @param returnChannel A channel to the server.
  * Calling it will end up invoking a handler in the server-side LitRenderer.
  * @param clientCallables A list of function names that can be called from within the template literal.
+ * @param clientActions A list of client-side action names that can be called from within the template literal.
+ * @param clientActionsFactory Returns the client-side action functions, positionally matching clientActions.
+ * Each is called as action(event, context) with the row the event came from as context, and runs entirely
+ * on the client - inside the browser event handler, so the user gesture is still valid.
  * @param propertyNamespace LitRenderer-specific namespace for properties.
  * Needed to avoid property name collisions between renderers.
  */
@@ -34,8 +40,11 @@ _window.Vaadin.setLitRenderer = (
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
   propertyNamespace: string,
-  appId: string
+  appId: string,
+  clientActions: string[] = [],
+  clientActionsFactory?: () => ClientActionFunction[]
 ) => {
+  const clientActionFunctions = clientActionsFactory ? clientActionsFactory() : [];
   const callablesCreator = (itemKey: string) => {
     return clientCallables.map((clientCallable) => (...args: any[]) => {
       if (itemKey !== undefined) {
@@ -43,6 +52,11 @@ _window.Vaadin.setLitRenderer = (
       }
     });
   };
+  // Bound per rendered item: the action itself is one server-side binding for
+  // the whole renderer, and the context is what tells it which item fired it.
+  const actionsCreator = (item: any, index: number, itemKey: string) =>
+    clientActionFunctions.map((action) => (event: Event) => action(event, { item, index, key: itemKey }));
+
   const fnArgs = [
     'html',
     'root',
@@ -53,12 +67,27 @@ _window.Vaadin.setLitRenderer = (
     'item',
     'index',
     ...clientCallables,
+    ...clientActions,
     `return html\`${templateExpression}\``
   ];
   const htmlGenerator = new Function(...fnArgs);
   const renderFunction = (root: RenderRoot, model: ItemModel, itemKey: string) => {
     const { item, index } = model;
-    render(htmlGenerator(html, root, live, appId, itemKey, model, item, index, ...callablesCreator(itemKey)), root);
+    render(
+      htmlGenerator(
+        html,
+        root,
+        live,
+        appId,
+        itemKey,
+        model,
+        item,
+        index,
+        ...callablesCreator(itemKey),
+        ...actionsCreator(item, index, itemKey)
+      ),
+      root
+    );
   };
 
   const renderer: Renderer = (root, _, model) => {

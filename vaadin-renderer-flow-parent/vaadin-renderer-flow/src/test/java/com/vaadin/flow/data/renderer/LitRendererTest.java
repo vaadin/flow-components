@@ -15,10 +15,18 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.trigger.ClientValue;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
@@ -72,4 +80,80 @@ class LitRendererTest {
         Assertions.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
+    @Test
+    void clientAction_oneBindingSendsTheActionFunctionToTheClient() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+
+        LitRenderer<String> renderer = LitRenderer.<String> of(
+                "<span>${item.email}</span><button @click=${copy}>Copy</button>")
+                .withProperty("email", ValueProvider.identity())
+                .withClientAction("copy", Clipboard.write()
+                        .text(ClientValue.itemProperty("email")));
+
+        renderer.render(container.getElement(), new KeyMapper<>(), "renderer");
+        ui.getUI().getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("setLitRenderer"))
+                .findFirst().orElseThrow().getParameters();
+
+        // The action names the template can call, and the functions behind
+        // them: one function for the whole renderer, not one per item.
+        Assertions.assertEquals("[\"copy\"]", parameters.get(6).toString());
+        JsFunction actions = (JsFunction) parameters.get(7);
+        Assertions.assertEquals("return [$0]", actions.getBody());
+
+        JsFunction copy = (JsFunction) actions.getCaptures().get(0);
+        Assertions.assertEquals(List.of("event", "context"),
+                copy.getArgumentNames());
+        Assertions.assertTrue(
+                copy.getBody().contains("window.Vaadin.Flow.clipboard"),
+                "expected a clipboard write, got: " + copy.getBody());
+
+        // The copied value is read from the item the action fired for, so the
+        // same function serves every rendered row.
+        JsFunction text = (JsFunction) copy.getCaptures().get(0);
+        Assertions.assertEquals("return context[$0][$1]", text.getBody());
+        Assertions.assertEquals(List.of("item", "email"), text.getCaptures());
+    }
+
+    @Test
+    void noClientActions_clientStillGetsAnEmptyBundle() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+
+        LitRenderer.<String> of("<span>${item}</span>")
+                .render(container.getElement(), new KeyMapper<>(), "renderer");
+        ui.getUI().getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        List<Object> parameters = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("setLitRenderer"))
+                .findFirst().orElseThrow().getParameters();
+
+        Assertions.assertEquals("[]", parameters.get(6).toString());
+        Assertions.assertEquals("return []",
+                ((JsFunction) parameters.get(7)).getBody());
+    }
+
+    @Test
+    void doNotAllowClientActionNamesWithSpaces() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withClientAction("illegal name",
+                        Clipboard.write().text(ClientValue.of("x"))));
+    }
+
+    @Test
+    void doNotAllowClientActionNameAlreadyUsedByAFunction() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> LitRenderer.of("").withFunction("copy", item -> {
+                }).withClientAction("copy",
+                        Clipboard.write().text(ClientValue.of("x"))));
+    }
 }
