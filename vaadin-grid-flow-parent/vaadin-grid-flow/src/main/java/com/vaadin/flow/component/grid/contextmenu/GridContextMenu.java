@@ -163,8 +163,10 @@ public class GridContextMenu<T> extends
     public void setTarget(Component target) {
         if (target != null && !(target instanceof Grid<?>)) {
             throw new IllegalArgumentException(
-                    "Only an instance of Grid can be used as the target for GridContextMenu. "
-                            + "Use ContextMenu for any other component.");
+                    """
+                            Only an instance of Grid can be used as the target for GridContextMenu. \
+                            Use ContextMenu for any other component.\
+                            """);
         }
         super.setTarget(target);
     }
