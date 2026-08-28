@@ -138,6 +138,11 @@ public interface LLMProvider {
          * vendor-specific annotations (e.g., LangChain4j's {@code @Tool},
          * Spring AI's {@code @Tool}) that the provider can introspect and
          * convert to native tool definitions.
+         * <p>
+         * These tools are executed by the vendor framework itself, so its own
+         * error handling decides what reaches the LLM when a tool throws; the
+         * {@link ToolException} contract only applies to the tools returned by
+         * {@link #explicitTools()}.
          *
          * @return array of tool objects, never {@code null} but may be empty
          */
@@ -258,7 +263,10 @@ public interface LLMProvider {
          * Executes the tool with the given arguments.
          * <p>
          * Implementations should return a human-readable result string on
-         * success. On failure, they may throw any runtime exception.
+         * success. On failure, throw a {@link ToolException} to pass its
+         * message to the LLM so it can correct its next attempt; any other
+         * runtime exception is caught, logged, and replaced with a generic
+         * error message so internal details are not leaked.
          * </p>
          * <p>
          * May be invoked from a background thread — with a streaming provider,

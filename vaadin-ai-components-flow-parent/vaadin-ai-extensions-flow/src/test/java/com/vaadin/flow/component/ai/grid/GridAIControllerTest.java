@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -132,6 +133,23 @@ class GridAIControllerTest {
                 .orElseThrow();
         var result = tool.execute(json("{\"query\": \"INVALID\"}"));
         Assertions.assertTrue(result.contains("Error"));
+    }
+
+    @Test
+    void updateDataTool_providerThrowsToolException_relaysMessage() {
+        dbProvider.executeException = new ToolException("Unknown column 'foo'");
+        var tool = findTool("update_grid_data");
+        var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
+        Assertions.assertEquals(
+                "Error updating grid data: Unknown column 'foo'", result);
+    }
+
+    @Test
+    void updateDataTool_providerThrowsUnexpectedException_returnsGenericError() {
+        dbProvider.executeException = new RuntimeException("internal detail");
+        var tool = findTool("update_grid_data");
+        var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
+        Assertions.assertEquals("Error updating grid data.", result);
     }
 
     @Test
@@ -989,6 +1007,7 @@ class GridAIControllerTest {
         private String schema = "test schema";
         private List<Map<String, Object>> queryResults = List.of();
         private boolean throwOnExecute = false;
+        private RuntimeException executeException;
         private final List<String> executedQueries = new ArrayList<>();
 
         @Override
@@ -999,6 +1018,9 @@ class GridAIControllerTest {
         @Override
         public List<Map<String, Object>> executeQuery(String sql) {
             executedQueries.add(sql);
+            if (executeException != null) {
+                throw executeException;
+            }
             if (throwOnExecute) {
                 throw new RuntimeException("Query execution failed");
             }

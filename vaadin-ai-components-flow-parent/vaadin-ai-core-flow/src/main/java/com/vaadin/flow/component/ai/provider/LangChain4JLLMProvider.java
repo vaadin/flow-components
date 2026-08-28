@@ -297,9 +297,21 @@ public class LangChain4JLLMProvider implements LLMProvider {
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
             toolExecutors.put(tool.getName(), (execReq, memoryId) -> tool
-                    .execute(parseArguments(execReq.arguments())));
+                    .execute(parseExplicitToolArguments(execReq.arguments())));
         }
         return toolExecutors;
+    }
+
+    private static JsonNode parseExplicitToolArguments(String arguments) {
+        try {
+            return parseArguments(arguments);
+        } catch (Exception e) {
+            // The malformed JSON came from the model itself, so the parser
+            // message is safe to relay and lets the model repair its next
+            // attempt.
+            throw new ToolException("invalid JSON arguments: " + e.getMessage(),
+                    e);
+        }
     }
 
     private ToolExecutor getToolExecutor(Object toolObject, Method method) {
@@ -460,8 +472,13 @@ public class LangChain4JLLMProvider implements LLMProvider {
         } else {
             try {
                 result = toolExecutor.execute(toolExecRequest, null);
-            } catch (Exception e) {
+            } catch (ToolException e) {
+                LOGGER.warn("Tool '{}' failed: {}", toolExecRequest.name(),
+                        e.getMessage(), e);
                 result = "Error executing tool: " + e.getMessage();
+            } catch (Exception e) {
+                LOGGER.error("Tool '{}' failed", toolExecRequest.name(), e);
+                result = "Error executing tool.";
             }
         }
         return ToolExecutionResultMessage.from(toolExecRequest, result);
