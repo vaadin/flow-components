@@ -65,6 +65,16 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- The response stream carries text only; everything else the model said
+  about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
+  A provider publishes whenever it learns more — each publish carries the
+  state of the turn so far and replaces the previous one, so a turn that
+  fails midway has still reported what was observed. Finish reasons are
+  passed through as the model worded them: never map them to a Vaadin enum
+  or branch on their content, since every vendor uses its own vocabulary
+  and keeps adding to it. Checks that must tell a completed turn from a
+  truncated one use structure instead — a missing finish reason, or tool
+  calls still pending.
 
 ## Threading
 
