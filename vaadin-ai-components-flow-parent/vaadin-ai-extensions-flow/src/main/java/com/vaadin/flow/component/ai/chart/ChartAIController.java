@@ -133,6 +133,9 @@ public class ChartAIController implements AIController {
             styling for specific series, matched by name
             - Call get_plot_options_schema(chartType) to discover available properties
             - Example: {"series": [{"name": "South", "type": "column", "yAxis": 1}]}
+
+            If the system prompt carries its own instructions, follow them; where \
+            they conflict with this workflow, the system prompt wins.
             """;
 
     private final Chart chart;

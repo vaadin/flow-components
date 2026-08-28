@@ -125,6 +125,8 @@ public class GridAIController implements AIController {
             IMPORTANT:
             - Call get_grid_state() and update_grid_data() in the SAME response
             - Do NOT stop after get_grid_state()
+            - If the system prompt carries its own instructions, follow them; where
+              they conflict with this workflow, the system prompt wins
             """;
 
     private final Grid<AIDataRow> grid;

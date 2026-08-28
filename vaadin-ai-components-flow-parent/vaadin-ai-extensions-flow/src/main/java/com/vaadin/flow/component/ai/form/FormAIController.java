@@ -284,6 +284,8 @@ public class FormAIController implements AIController {
             spans multiple fields (e.g. start date must precede end date). \
             Adjust the offending fields on the next fill_form call; do not \
             try to write to "__form__" itself.
+            - If the system prompt carries its own instructions, follow them; \
+            where they conflict with this workflow, the system prompt wins.
             """;
 
     private final Component fieldContainer;
