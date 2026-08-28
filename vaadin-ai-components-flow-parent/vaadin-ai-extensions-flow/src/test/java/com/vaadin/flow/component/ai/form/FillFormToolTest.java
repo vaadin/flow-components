@@ -43,6 +43,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.tests.MockUIExtension;
 
@@ -712,6 +713,45 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_bindingValidatorThrowingToolException_relaysMessage() {
+        // A binder validator runs from the value-change listener that
+        // setValue fires, so a ToolException it throws surfaces on the write
+        // branch of applyValue rather than in the later validation pass. Its
+        // sanctioned message must reach the LLM as the rejection reason.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field)
+                .withValidator((Validator<String>) (value, context) -> {
+                    throw new ToolException(
+                            "name is reserved for internal accounts");
+                }).bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var result = fillFormResult(controller, payload(field, "\"root\""));
+
+        Assertions.assertEquals("name is reserved for internal accounts",
+                rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_bindingValidatorThrowingRuntimeException_staysSilent() {
+        // The counterpart: an uncontrolled validator failure stays curated,
+        // so unsanctioned exception text cannot reach the model.
+        var field = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(field).withValidator(v -> {
+            throw new IllegalStateException("internal-validator-detail");
+        }, "unused").bind("name");
+        var controller = controllerForBound(binder, field);
+
+        var raw = fillFormPayload(controller, payload(field, "\"root\""));
+
+        Assertions.assertFalse(raw.contains("internal-validator-detail"),
+                "Unsanctioned validator text must not reach the LLM; got: "
+                        + raw);
+    }
+
+    @Test
     void fillForm_bindingValidatorRejectionLeavesValueInField() {
         var field = new LabeledStringField();
         var binder = new Binder<>(TestBean.class);
@@ -1252,6 +1292,52 @@ class FillFormToolTest {
 
         Assertions.assertEquals("Error: field 'foo' is no longer addressable",
                 result);
+    }
+
+    @Test
+    void fillForm_converterThrowingToolException_relaysMessageAsReason() {
+        // A ToolException raised while converting the LLM's value is the
+        // application saying "this text is safe, tell the model why". It must
+        // become the per-field rejection reason instead of the curated
+        // fallback, otherwise the model has nothing to correct and resubmits
+        // the same value.
+        var field = new ToolExceptionConverterField();
+        var controller = controllerFor(field);
+
+        var args = JacksonUtils.createObjectNode();
+        args.putNull(idOf(field));
+        var result = fillFormResult(controller, args);
+
+        Assertions.assertEquals("clearing this field needs a reason code",
+                rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_fieldWriteThrowingToolException_relaysMessageAsReason() {
+        // Same contract on the write branch: a field that refuses a value with
+        // a ToolException gets its message relayed rather than replaced with
+        // "Field rejected the value."
+        var field = new ToolExceptionOnWriteField();
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Initech\""));
+
+        Assertions.assertEquals("value must be one of: ACME, GLOBEX",
+                rejectionReason(result, idOf(field)));
+    }
+
+    @Test
+    void fillForm_fieldWriteThrowingRuntimeException_keepsCuratedReason() {
+        // The counterpart: an uncontrolled failure must still be curated, so
+        // exception text the application never sanctioned cannot reach the
+        // model.
+        var field = new RuntimeExceptionOnWriteField();
+        var controller = controllerFor(field);
+
+        var result = fillFormResult(controller, payload(field, "\"Initech\""));
+
+        Assertions.assertEquals("Field rejected the value.",
+                rejectionReason(result, idOf(field)));
     }
 
     @Test
@@ -1992,6 +2078,74 @@ class FillFormToolTest {
         @Override
         public String getEmptyValue() {
             throw new RuntimeException("internal-detail-from-getemptyvalue");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field whose {@link #getEmptyValue} throws a {@link ToolException} —
+     * exercises the converter branch of {@code applyValue} with text the
+     * application has marked safe for the model.
+     */
+    @com.vaadin.flow.component.Tag("tool-exception-converter-field")
+    private static class ToolExceptionConverterField extends
+            com.vaadin.flow.component.AbstractField<ToolExceptionConverterField, String> {
+        ToolExceptionConverterField() {
+            super("");
+        }
+
+        @Override
+        public String getEmptyValue() {
+            throw new ToolException("clearing this field needs a reason code");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field whose {@link #setValue} throws a {@link ToolException} — exercises
+     * the write branch of {@code applyValue}.
+     */
+    @com.vaadin.flow.component.Tag("tool-exception-set-value-field")
+    private static class ToolExceptionOnWriteField extends
+            com.vaadin.flow.component.AbstractField<ToolExceptionOnWriteField, String> {
+        ToolExceptionOnWriteField() {
+            super("");
+        }
+
+        @Override
+        public void setValue(String value) {
+            throw new ToolException("value must be one of: ACME, GLOBEX");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field whose {@link #setValue} throws an uncontrolled exception — the
+     * counterpart to {@link ToolExceptionOnWriteField}, pinning that
+     * unsanctioned text stays curated.
+     */
+    @com.vaadin.flow.component.Tag("runtime-exception-set-value-field")
+    private static class RuntimeExceptionOnWriteField extends
+            com.vaadin.flow.component.AbstractField<RuntimeExceptionOnWriteField, String> {
+        RuntimeExceptionOnWriteField() {
+            super("");
+        }
+
+        @Override
+        public void setValue(String value) {
+            throw new IllegalStateException("internal-detail-from-setvalue");
         }
 
         @Override

@@ -1784,6 +1784,13 @@ public class FormAIController implements AIController {
                 Thread.currentThread().interrupt();
                 return "Error: fill interrupted.";
             } catch (ExecutionException ex) {
+                // Unwrap so a ToolException thrown by application code on the
+                // UI thread — a Binder validator, a converter, a field —
+                // keeps its LLM-facing message instead of being replaced
+                // with the generic string.
+                if (ex.getCause() instanceof ToolException toolException) {
+                    throw toolException;
+                }
                 LOGGER.warn("fill_form execution failed", ex.getCause());
                 return "Error: fill failed.";
             }
@@ -1902,6 +1909,15 @@ public class FormAIController implements AIController {
                 rejected.add(
                         new RejectedEntry(field.id(), value, ex.getMessage()));
                 return false;
+            } catch (ToolException ex) {
+                // The application sanctioned this text for the model, so it
+                // becomes the rejection reason instead of the curated
+                // fallback — the LLM needs to know why to fix the value.
+                LOGGER.warn("Converter reported user-facing error for field {}",
+                        field.id(), ex);
+                rejected.add(
+                        new RejectedEntry(field.id(), value, ex.getMessage()));
+                return false;
             } catch (Exception ex) {
                 // Anything other than RejectedValueException is an uncontrolled
                 // converter failure — surface a curated rejection so a single
@@ -1916,6 +1932,13 @@ public class FormAIController implements AIController {
             HasValue raw = field.field();
             try {
                 raw.setValue(converted);
+            } catch (ToolException ex) {
+                // As above: text the application marked safe to relay.
+                LOGGER.warn("Field reported user-facing error for field {}",
+                        field.id(), ex);
+                rejected.add(
+                        new RejectedEntry(field.id(), value, ex.getMessage()));
+                return false;
             } catch (Exception ex) {
                 LOGGER.debug("setValue rejected for field {}: {}", field.id(),
                         ex.getMessage());
