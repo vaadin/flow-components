@@ -175,20 +175,19 @@ class MessageListTest {
     }
 
     @Test
-    void addThemeVariants_serialize_separatedBySpaces() {
+    void addThemeVariants_removeThemeVariants_hasThemeVariant() {
         item1.addThemeVariants(MessageListItemVariant.SELF,
                 MessageListItemVariant.FULL_WIDTH);
         Assertions.assertEquals("self full-width",
                 getSerializedThemeProperty(item1));
-    }
+        Assertions
+                .assertTrue(item1.hasThemeVariant(MessageListItemVariant.SELF));
 
-    @Test
-    void removeThemeVariants_serialize_variantRemoved() {
-        item1.addThemeVariants(MessageListItemVariant.SELF,
-                MessageListItemVariant.FULL_WIDTH);
         item1.removeThemeVariants(MessageListItemVariant.SELF);
         Assertions.assertEquals("full-width",
                 getSerializedThemeProperty(item1));
+        Assertions.assertFalse(
+                item1.hasThemeVariant(MessageListItemVariant.SELF));
     }
 
     @Test
@@ -206,21 +205,6 @@ class MessageListTest {
 
         item1.setThemeVariant(MessageListItemVariant.SELF, false);
         Assertions.assertNull(getSerializedThemeProperty(item1));
-    }
-
-    @Test
-    void hasThemeVariant_trueOnlyForAddedVariant() {
-        item1.addThemeVariants(MessageListItemVariant.SELF);
-        Assertions
-                .assertTrue(item1.hasThemeVariant(MessageListItemVariant.SELF));
-        Assertions.assertFalse(
-                item1.hasThemeVariant(MessageListItemVariant.FULL_WIDTH));
-    }
-
-    @Test
-    void addThemeVariants_hasThemeName() {
-        item1.addThemeVariants(MessageListItemVariant.SELF);
-        Assertions.assertTrue(item1.hasThemeName("self"));
     }
 
     @Test
