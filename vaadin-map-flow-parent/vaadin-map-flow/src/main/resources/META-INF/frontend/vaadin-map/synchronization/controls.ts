@@ -2,10 +2,10 @@ import Attribution from 'ol/control/Attribution.js';
 import ScaleLine from 'ol/control/ScaleLine.js';
 import Zoom from 'ol/control/Zoom.js';
 import type { Units } from 'ol/control/ScaleLine.js';
-import type { MapChangeBase, ScaleLineChange } from './synchronization-types.js';
+import { AttributionControlChange, ScaleLineChange, ZoomControlChange } from './synchronization-types.js';
 import { convertEnumValue, createOptions } from './util.ts';
 
-export function synchronizeAttribution(target: Attribution | undefined, source: MapChangeBase): Attribution {
+export function synchronizeAttribution(target: Attribution | undefined, source: AttributionControlChange): Attribution {
   if (!target) {
     target = new Attribution(createOptions(source) as object);
   }
@@ -25,7 +25,7 @@ export function synchronizeScaleLine(target: ScaleLine | undefined, source: Scal
   return new ScaleLine(options);
 }
 
-export function synchronizeZoom(target: Zoom | undefined, source: MapChangeBase): Zoom {
+export function synchronizeZoom(target: Zoom | undefined, source: ZoomControlChange): Zoom {
   if (!target) {
     target = new Zoom(createOptions(source) as object);
   }
