@@ -101,7 +101,9 @@ export function synchronizeText(target: Text | undefined, source: TextStyleChang
   target.setRotation(source.rotation);
   target.setRotateWithView(source.rotateWithView);
   target.setTextAlign(source.textAlign ? (convertEnumValue(source.textAlign) as CanvasTextAlign) : undefined);
-  target.setTextBaseline(source.textBaseline ? (convertEnumValue(source.textBaseline) as CanvasTextBaseline) : undefined);
+  target.setTextBaseline(
+    source.textBaseline ? (convertEnumValue(source.textBaseline) as CanvasTextBaseline) : undefined
+  );
   target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
   target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
   target.setBackgroundFill(source.backgroundFill ? context.lookup.get(source.backgroundFill) : undefined);
