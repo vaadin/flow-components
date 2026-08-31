@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.MemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -73,12 +75,16 @@ import tools.jackson.databind.JsonNode;
  * user's message renders while the LLM works.
  * </p>
  * <p>
- * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance. History
- * restoration (via {@link #setHistory(List, Map)}) is only supported when using
- * the {@link #SpringAILLMProvider(ChatModel)} constructor; the
- * {@link #SpringAILLMProvider(ChatClient)} constructor does not provide access
- * to the internal chat memory.
+ * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
+ * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
+ * saved conversation into it. To share conversation history across components,
+ * reuse the same provider instance. With the
+ * {@link #SpringAILLMProvider(ChatClient)} constructor the application owns the
+ * chat memory, so giving the LLM its context is up to the application and
+ * {@link #setHistory(List, Map)} does nothing. Restoring a conversation through
+ * {@code AIOrchestrator.Builder.withHistory(List, Map)} still matters on that
+ * path: the message list the user sees and the orchestrator's own conversation
+ * history are restored by the orchestrator, not by the provider.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -124,9 +130,17 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Constructor with a chat client. Note: When using this constructor,
-     * conversation memory must be configured externally in the
-     * {@link ChatClient}.
+     * Constructor with a chat client. Conversation memory must be configured on
+     * the {@link ChatClient} itself, for example with a
+     * {@link MessageChatMemoryAdvisor} and a default
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter.
+     * <p>
+     * The application owns that memory, so {@link #setHistory(List, Map)} does
+     * nothing on a provider created this way. A conversation loaded from
+     * external storage must be written into the {@link ChatMemory} before the
+     * client is passed here. Passing the same conversation to
+     * {@code AIOrchestrator.Builder.withHistory(List, Map)} still restores the
+     * message list and the orchestrator's own history snapshot.
      *
      * @param chatClient
      *            the chat client, not {@code null}
@@ -243,6 +257,21 @@ public class SpringAILLMProvider implements LLMProvider {
         this.backgroundExecution.setEnabled(backgroundExecution);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Restores the conversation into the provider's own chat memory. Does
+     * nothing when the provider was created with the
+     * {@link #SpringAILLMProvider(ChatClient) ChatClient} constructor, because
+     * the application owns the chat memory in that case and is expected to have
+     * populated it before passing the client in. A warning is logged when that
+     * client is missing the chat memory configuration the conversation would
+     * need. Whether the memory actually holds the conversation is not visible
+     * to the provider, so a client configured correctly but never loaded is
+     * indistinguishable from one that was. Doing nothing here does not reduce
+     * what the caller restores: an orchestrator rebuilds the message list and
+     * its own conversation history itself.
+     */
     @Override
     public void setHistory(List<ChatMessage> history,
             Map<String, List<AIAttachment>> attachmentsByMessageId) {
@@ -250,9 +279,8 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
         if (!hasManagedMemory) {
-            throw new UnsupportedOperationException(
-                    "Chat history restoration is not supported when using the ChatClient constructor. "
-                            + "Use the ChatModel constructor instead.");
+            warnIfClientMemoryUnusable();
+            return;
         }
         chatMemory.clear(CONVERSATION_ID);
         var messages = history.stream().map(message -> {
@@ -263,6 +291,89 @@ public class SpringAILLMProvider implements LLMProvider {
             return toVendorMessage(message, attachments);
         }).toList();
         chatMemory.add(CONVERSATION_ID, messages);
+    }
+
+    /**
+     * Reports a client that cannot hold the conversation the application asked
+     * to restore. The provider cannot populate an application-owned chat
+     * memory, but it can tell that a client carrying no memory advisor, or one
+     * whose memory has no conversation to read, is very likely to never see the
+     * restored messages -- the first case forgets every turn, the second fails
+     * each prompt inside the standard advisor. Both are worth a warning at the
+     * point where the application asks for a restore that cannot happen.
+     * Neither is certain, since a client can carry the conversation in ways
+     * this check cannot see, so both messages say what was observed rather than
+     * promising the outcome.
+     * <p>
+     * Only clients built by {@link ChatClient#builder(ChatModel)} can be
+     * inspected. Anything else is left alone, since a custom implementation may
+     * carry the conversation in its own way.
+     */
+    private void warnIfClientMemoryUnusable() {
+        var requestSpec = inspectableRequestSpec();
+        if (requestSpec == null) {
+            // inspectableRequestSpec() logged why it could not be read
+            return;
+        }
+        if (requestSpec.getAdvisors().stream()
+                .noneMatch(MemoryAdvisor.class::isInstance)) {
+            LOGGER.warn("History restoration was requested, but no chat "
+                    + "memory advisor was found on the ChatClient given to "
+                    + "this provider. Unless that client keeps the "
+                    + "conversation some other way, the LLM will see neither "
+                    + "the restored conversation nor the turns that follow. "
+                    + "Add for example a MessageChatMemoryAdvisor to the "
+                    + "client, and load the restored conversation into its "
+                    + "ChatMemory before passing the client to the provider.");
+            return;
+        }
+        if (requestSpec.getAdvisorParams()
+                .get(ChatMemory.CONVERSATION_ID) == null) {
+            LOGGER.warn("History restoration was requested, but the "
+                    + "ChatClient given to this provider has no default "
+                    + "{} advisor parameter. Unless something sets it per "
+                    + "request, its memory advisor has no conversation to "
+                    + "read and every prompt will fail. Set the parameter on "
+                    + "the client, for example with "
+                    + "ChatClient.Builder.defaultAdvisors(advisors -> "
+                    + "advisors.param(ChatMemory.CONVERSATION_ID, id)).",
+                    ChatMemory.CONVERSATION_ID);
+            return;
+        }
+        LOGGER.debug("Skipping history restoration: the provider was created "
+                + "with a ChatClient whose chat memory the application owns. "
+                + "Populate that memory before passing the client to the "
+                + "provider.");
+    }
+
+    /**
+     * Returns the client's request spec when it is Spring AI's own
+     * implementation, or {@code null} -- after logging why -- when the client
+     * cannot be read. Inspection is only a diagnostic, so a client that rejects
+     * a bare {@link ChatClient#prompt()} must not break the restore it is being
+     * asked about.
+     *
+     * @return the request spec to inspect, or {@code null} if there is none to
+     *         read
+     */
+    private DefaultChatClientRequestSpec inspectableRequestSpec() {
+        try {
+            if (chatClient
+                    .prompt() instanceof DefaultChatClientRequestSpec spec) {
+                return spec;
+            }
+        } catch (RuntimeException e) {
+            LOGGER.debug("Skipping history restoration: the provider was "
+                    + "created with a ChatClient whose chat memory the "
+                    + "application owns, and which did not accept a bare "
+                    + "prompt() for inspection.", e);
+            return null;
+        }
+        LOGGER.debug("Skipping history restoration: the provider was "
+                + "created with a ChatClient whose chat memory the "
+                + "application owns, and whose configuration cannot be "
+                + "inspected.");
+        return null;
     }
 
     private static org.springframework.ai.chat.messages.Message toVendorMessage(
