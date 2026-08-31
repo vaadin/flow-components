@@ -383,8 +383,7 @@ public class MessageListItem implements Serializable {
     }
 
     /**
-     * Adds theme variants to this message. The variants only take effect when
-     * the message list uses {@link MessageListVariant#BUBBLE}.
+     * Adds theme variants to this message.
      *
      * @param variants
      *            the theme variants to add

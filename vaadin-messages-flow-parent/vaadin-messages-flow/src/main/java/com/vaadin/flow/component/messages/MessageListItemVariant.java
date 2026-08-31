@@ -19,8 +19,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for a single message inside a
- * {@link MessageList}. Both variants only take effect when the message list
- * uses {@link MessageListVariant#BUBBLE}.
+ * {@link MessageList}.
  *
  * @see MessageListItem#addThemeVariants(MessageListItemVariant...)
  * @since 25.3
@@ -28,12 +27,14 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum MessageListItemVariant implements ThemeVariant {
     /**
      * Shows the message as sent by the current user, and hides the avatar and
-     * the name of the message.
+     * the name of the message. Only takes effect when the message list uses
+     * {@link MessageListVariant#BUBBLE}.
      */
     SELF("self"),
     /**
      * Removes the bubble and the width restriction from the message, for an
-     * assistant or AI response.
+     * assistant or AI response. Only takes effect when the message list uses
+     * {@link MessageListVariant#BUBBLE}.
      */
     FULL_WIDTH("full-width");
 

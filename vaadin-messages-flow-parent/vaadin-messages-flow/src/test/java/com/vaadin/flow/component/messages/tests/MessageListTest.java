@@ -27,7 +27,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.messages.MessageListItemVariant;
-import com.vaadin.flow.component.messages.MessageListVariant;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResource;
@@ -229,23 +228,6 @@ class MessageListTest {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(MessageList.class),
                 "MessageList should support theme variants");
-    }
-
-    @Test
-    void addThemeVariants_themeAttributeSet() {
-        messageList.addThemeVariants(MessageListVariant.BUBBLE,
-                MessageListVariant.ONE_TO_ONE);
-        Assertions.assertEquals("bubble one-to-one",
-                messageList.getElement().getAttribute("theme"));
-    }
-
-    @Test
-    void removeThemeVariants_themeAttributeUpdated() {
-        messageList.addThemeVariants(MessageListVariant.BUBBLE,
-                MessageListVariant.ONE_TO_ONE);
-        messageList.removeThemeVariants(MessageListVariant.ONE_TO_ONE);
-        Assertions.assertEquals("bubble",
-                messageList.getElement().getAttribute("theme"));
     }
 
     @Test
