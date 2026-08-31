@@ -37,10 +37,14 @@ export type FlowTimePicker = Omit<TimePicker, 'i18n'> & FlowTimePickerInternals;
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      timepickerConnector: { initLazy(timePicker: FlowTimePicker): void };
-    };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    timepickerConnector: { initLazy(timePicker: FlowTimePicker): void };
   }
 }

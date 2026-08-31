@@ -70,9 +70,9 @@ export interface ContextMenuConnectorApi {
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector. The namespace is a separate
-  // interface so that a module importing this one, such as the menu bar, can
-  // add its own members to it.
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
     Flow: VaadinFlow;
   }
@@ -80,6 +80,11 @@ declare global {
   interface VaadinFlow {
     contextMenuConnector: ContextMenuConnectorApi;
     /** The store of Flow DOM nodes, keyed by app id */
-    clients: Record<string, { getByNodeId(nodeId: number): Element | undefined }>;
+    clients: Record<string, VaadinFlowClient>;
+  }
+
+  /** The Flow client of an app instance on the page */
+  interface VaadinFlowClient {
+    getByNodeId(nodeId: number): HTMLElement | null;
   }
 }
