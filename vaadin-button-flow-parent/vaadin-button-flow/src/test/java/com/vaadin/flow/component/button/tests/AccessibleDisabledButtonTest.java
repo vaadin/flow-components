@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -31,15 +30,11 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 class AccessibleDisabledButtonTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS);
 
     private Button button = Mockito.spy(Button.class);
 
@@ -58,20 +53,7 @@ class AccessibleDisabledButtonTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void accessibleButtonsDisabled_focusListenerDisabled() {
-        featureFlagExtension.disableFeature();
-
-        button.addFocusListener(mockFocusListener);
-
-        fakeClientDomEvent(button, "focus");
-
-        Mockito.verify(mockFocusListener, Mockito.never())
-                .onComponentEvent(Mockito.any());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void accessibleButtonsEnabled_focusListenerEnabled() {
+    void focusListenerActiveWhenDisabled() {
         button.addFocusListener(mockFocusListener);
 
         fakeClientDomEvent(button, "focus");
@@ -82,20 +64,7 @@ class AccessibleDisabledButtonTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void accessibleButtonsDisabled_blurListenerDisabled() {
-        featureFlagExtension.disableFeature();
-
-        button.addBlurListener(mockBlurListener);
-
-        fakeClientDomEvent(button, "blur");
-
-        Mockito.verify(mockBlurListener, Mockito.never())
-                .onComponentEvent(Mockito.any());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void accessibleButtonsEnabled_blurListenerEnabled() {
+    void blurListenerActiveWhenDisabled() {
         button.addBlurListener(mockBlurListener);
 
         fakeClientDomEvent(button, "blur");
@@ -105,26 +74,7 @@ class AccessibleDisabledButtonTest {
     }
 
     @Test
-    void accessibleButtonsDisabled_focusShortcutDisabled() {
-        featureFlagExtension.disableFeature();
-
-        button.addFocusShortcut(Key.KEY_A);
-        ui.add(button);
-        ui.fakeClientCommunication();
-
-        var keydownEvent = new KeyDownEvent(button, "A"); // actual key of the
-                                                          // event doesn't
-                                                          // matter with this
-                                                          // test setup, as the
-                                                          // filtering happens
-                                                          // on the client side
-        ComponentUtil.fireEvent(ui.getUI(), keydownEvent);
-
-        Mockito.verify(button, Mockito.never()).focus();
-    }
-
-    @Test
-    void accessibleButtonsEnabled_focusShortcutEnabled() {
+    void focusShortcutActiveWhenDisabled() {
         button.addFocusShortcut(Key.KEY_A);
         ui.add(button);
         ui.fakeClientCommunication();
