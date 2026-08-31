@@ -29,9 +29,16 @@ import java.io.Serializable;
  * </p>
  *
  * @param finishReason
- *            why the model stopped, as reported by the underlying framework
- *            (e.g. {@code "max_tokens"}); the value is vendor-specific, and
- *            {@code null} when the model did not report a reason
+ *            why the model stopped, as reported by the underlying framework, or
+ *            {@code null} when no reason was reported. The vocabulary and the
+ *            casing depend on the provider, not only on the model:
+ *            {@link SpringAILLMProvider} relays the model's own word, so an
+ *            OpenAI turn cut off at the output limit arrives as
+ *            {@code "max_tokens"}, while {@link LangChain4JLLMProvider} reports
+ *            the name of the LangChain4j {@code FinishReason} constant the
+ *            value was mapped to before Vaadin saw it, so the same turn arrives
+ *            as {@code "LENGTH"}. Code that compares against particular values
+ *            has to account for the provider it runs on.
  * @param tokenUsage
  *            the token usage of the turn, or {@code null} when unknown
  *

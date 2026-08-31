@@ -70,10 +70,14 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   A provider publishes whenever it learns more — each publish carries the
   state of the turn so far and replaces the previous one, so a turn that
   fails midway has still reported what was observed. Finish reasons are
-  passed through as the model worded them: never map them to a Vaadin enum
-  or branch on their content, since every vendor uses its own vocabulary
-  and keeps adding to it. Checks that must tell a completed turn from a
-  truncated one use structure instead — a missing finish reason, or tool
+  relayed as the underlying framework words them and are never mapped to a
+  Vaadin enum, since every vendor uses its own vocabulary and keeps adding
+  to it. That makes the value provider-dependent rather than model-dependent
+  — LangChain4j maps the model's word to its own `FinishReason` enum before
+  we see it, so the same truncation reads `max_tokens` through Spring AI and
+  `LENGTH` through LangChain4j. Framework code therefore never branches on
+  the content of a finish reason: checks that must tell a completed turn from
+  a truncated one use structure instead — a missing finish reason, or tool
   calls still pending.
 
 ## Threading

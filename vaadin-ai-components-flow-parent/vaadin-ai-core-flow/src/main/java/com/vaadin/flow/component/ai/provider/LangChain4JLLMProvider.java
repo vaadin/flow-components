@@ -647,6 +647,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         private void publishMetadata() {
+            // LangChain4j maps the model's own word to its FinishReason enum
+            // before handing the response over, so the constant name is the
+            // most faithful value left to publish — see ResponseMetadata,
+            // which documents the difference to SpringAILLMProvider.
             var finishReason = lastFinishReason == null ? null
                     : lastFinishReason.name();
             var tokenUsage = accumulatedUsage == null ? null
