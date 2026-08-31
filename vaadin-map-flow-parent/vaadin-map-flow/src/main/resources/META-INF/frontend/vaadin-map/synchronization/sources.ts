@@ -14,19 +14,40 @@ import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from 'ol/source/OSM';
 import TileWMS from 'ol/source/TileWMS';
 import VectorSource from 'ol/source/Vector';
 import XYZ from 'ol/source/XYZ';
-import { createOptions, synchronizeCollection } from './util.js';
+import type Feature from 'ol/Feature';
+import type Source from 'ol/source/Source';
+import type TileSource from 'ol/source/Tile';
+import type UrlTile from 'ol/source/UrlTile';
+import type TileImage from 'ol/source/TileImage';
+import type ImageSource from 'ol/source/Image';
+import type { MapSyncContext } from '../vaadin-map-types.js';
+import type {
+  ClusterSourceChange,
+  ImageWMSSourceChange,
+  OSMSourceChange,
+  SourceChange,
+  TileWMSSourceChange,
+  UrlTileSourceChange,
+  VectorSourceChange,
+  XYZSourceChange
+} from './synchronization-types.js';
+import { createOptions, synchronizeCollection } from './util.ts';
 
-function synchronizeSource(target, source, _context) {
+function synchronizeSource(target: Source | undefined, source: SourceChange, _context?: MapSyncContext): Source {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/source/Source');
   }
 
-  target.setAttributions(source.attributions);
+  target.setAttributions(source.attributions ?? undefined);
 
   return target;
 }
 
-function synchronizeTileSource(target, source, context) {
+function synchronizeTileSource(
+  target: TileSource | undefined,
+  source: SourceChange,
+  context: MapSyncContext
+): TileSource {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/source/Tile');
   }
@@ -35,7 +56,11 @@ function synchronizeTileSource(target, source, context) {
   return target;
 }
 
-function synchronizeUrlTileSource(target, source, context) {
+function synchronizeUrlTileSource(
+  target: UrlTile | undefined,
+  source: UrlTileSourceChange,
+  context: MapSyncContext
+): UrlTile {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/source/UrlTile');
   }
@@ -49,7 +74,11 @@ function synchronizeUrlTileSource(target, source, context) {
   return target;
 }
 
-function synchronizeTileImageSource(target, source, context) {
+function synchronizeTileImageSource(
+  target: TileImage | undefined,
+  source: UrlTileSourceChange,
+  context: MapSyncContext
+): TileImage {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/source/TileImage');
   }
@@ -58,7 +87,11 @@ function synchronizeTileImageSource(target, source, context) {
   return target;
 }
 
-export function synchronizeTileWMSSource(target, source, context) {
+export function synchronizeTileWMSSource(
+  target: TileWMS | undefined,
+  source: TileWMSSourceChange,
+  context: MapSyncContext
+): TileWMS {
   if (!target) {
     target = new TileWMS(createOptions(source));
   }
@@ -67,7 +100,7 @@ export function synchronizeTileWMSSource(target, source, context) {
   return target;
 }
 
-export function synchronizeXYZSource(target, source, context) {
+export function synchronizeXYZSource(target: XYZ | undefined, source: XYZSourceChange, context: MapSyncContext): XYZ {
   if (!target) {
     target = new XYZ(createOptions(source));
   }
@@ -76,7 +109,7 @@ export function synchronizeXYZSource(target, source, context) {
   return target;
 }
 
-export function synchronizeOSMSource(target, source, context) {
+export function synchronizeOSMSource(target: OSM | undefined, source: OSMSourceChange, context: MapSyncContext): OSM {
   if (!target) {
     target = new OSM(createOptions(source));
   }
@@ -90,7 +123,11 @@ export function synchronizeOSMSource(target, source, context) {
   return target;
 }
 
-function synchronizeImageSource(target, source, context) {
+function synchronizeImageSource(
+  target: ImageSource | undefined,
+  source: SourceChange,
+  context: MapSyncContext
+): ImageSource {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/source/Image');
   }
@@ -99,7 +136,11 @@ function synchronizeImageSource(target, source, context) {
   return target;
 }
 
-export function synchronizeImageWMSSource(target, source, context) {
+export function synchronizeImageWMSSource(
+  target: ImageWMS | undefined,
+  source: ImageWMSSourceChange,
+  context: MapSyncContext
+): ImageWMS {
   if (!target) {
     target = new ImageWMS(createOptions(source));
   }
@@ -113,33 +154,41 @@ export function synchronizeImageWMSSource(target, source, context) {
   return target;
 }
 
-export function synchronizeVectorSource(target, source, context) {
+export function synchronizeVectorSource(
+  target: VectorSource | undefined,
+  source: VectorSourceChange,
+  context: MapSyncContext
+): VectorSource {
   if (!target) {
     target = new VectorSource(
       createOptions({
         ...source,
-        features: new Collection()
+        features: new Collection<Feature>()
       })
     );
   }
   synchronizeSource(target, source, context);
-  synchronizeCollection(target.getFeaturesCollection(), source.features, context);
+  synchronizeCollection(target.getFeaturesCollection()!, source.features, context);
 
   return target;
 }
 
-export function synchronizeCluster(target, source, context) {
+export function synchronizeCluster(
+  target: Cluster | undefined,
+  source: ClusterSourceChange,
+  context: MapSyncContext
+): Cluster {
   if (!target) {
     target = new Cluster(
       createOptions({
         ...source,
-        source: new VectorSource({ features: new Collection() })
+        source: new VectorSource({ features: new Collection<Feature>() })
       })
     );
   }
   target.setDistance(source.distance);
   target.setMinDistance(source.minDistance);
-  synchronizeCollection(target.getSource().getFeaturesCollection(), source.features, context);
+  synchronizeCollection(target.getSource()!.getFeaturesCollection()!, source.features, context);
 
   return target;
 }
