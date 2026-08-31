@@ -1876,8 +1876,8 @@ class SpringAILLMProviderTest {
                         .concatWith(Flux.error(
                                 new RuntimeException("network broken"))));
 
-        Assertions.assertThrows(RuntimeException.class,
-                () -> provider.stream(request).collectList().block());
+        var response = provider.stream(request).collectList();
+        Assertions.assertThrows(RuntimeException.class, response::block);
 
         var metadata = collected.getLast();
         Assertions.assertEquals("tool_use", metadata.finishReason());

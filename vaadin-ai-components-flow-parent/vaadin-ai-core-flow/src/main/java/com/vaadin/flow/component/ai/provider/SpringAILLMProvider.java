@@ -33,6 +33,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.content.Media;
@@ -588,13 +589,18 @@ public class SpringAILLMProvider implements LLMProvider {
 
         private static ResponseMetadata.TokenUsage getTokenUsage(
                 ChatResponse response) {
-            var usage = response.getMetadata().getUsage();
-            if (usage == null) {
-                return null;
-            }
-            var input = positiveOrNull(usage.getPromptTokens());
-            var output = positiveOrNull(usage.getCompletionTokens());
-            var total = positiveOrNull(usage.getTotalTokens());
+            // Read through an Optional rather than dereferencing: a model
+            // reports either no usage object at all or one that leaves the
+            // counts it does not know at zero, and both mean the same thing
+            // here. Spring AI's own models always attach a usage object, but
+            // an application's ChatModel is free not to.
+            var usage = Optional.ofNullable(response.getMetadata().getUsage());
+            var input = usage.map(Usage::getPromptTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var output = usage.map(Usage::getCompletionTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var total = usage.map(Usage::getTotalTokens)
+                    .filter(count -> count > 0).orElse(null);
             if (total == null && input != null && output != null) {
                 // A backend that reports the components but no total still
                 // reported the usage; derive rather than discard it.
@@ -604,10 +610,6 @@ public class SpringAILLMProvider implements LLMProvider {
                 return null;
             }
             return new ResponseMetadata.TokenUsage(input, output, total);
-        }
-
-        private static Integer positiveOrNull(Integer count) {
-            return count == null || count <= 0 ? null : count;
         }
     }
 

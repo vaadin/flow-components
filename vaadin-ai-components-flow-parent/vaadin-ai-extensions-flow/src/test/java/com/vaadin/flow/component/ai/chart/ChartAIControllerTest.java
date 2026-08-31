@@ -251,8 +251,9 @@ class ChartAIControllerTest {
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
 
+            var event = AITurnEvents.success();
             var ex = Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(AITurnEvents.success()));
+                    () -> controller.onResponse(event));
             Assertions.assertEquals("Render failure", ex.getMessage());
         }
 
@@ -385,8 +386,9 @@ class ChartAIControllerTest {
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(AITurnEvents.success()));
+                    () -> controller.onResponse(event));
 
             // Render threw before setQueries could commit, so the chart
             // stays in its previous (uninitialized) state.
@@ -589,8 +591,9 @@ class ChartAIControllerTest {
 
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(AITurnEvents.success()));
+                    () -> controller.onResponse(event));
 
             Assertions.assertNull(captured.get());
         }
@@ -794,8 +797,9 @@ class ChartAIControllerTest {
 
             // Errors propagate regardless of attach state so the
             // orchestrator can still surface them in the chat UI.
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(AITurnEvents.success()));
+                    () -> controller.onResponse(event));
         }
 
         @Test

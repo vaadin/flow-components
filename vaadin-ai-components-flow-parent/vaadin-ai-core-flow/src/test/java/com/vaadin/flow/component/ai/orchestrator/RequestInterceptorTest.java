@@ -1274,11 +1274,6 @@ class RequestInterceptorTest {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
 
-    /** Matches a turn outcome that ended without an error. */
-    private static ResponseListener.ResponseEvent noError() {
-        return Mockito.argThat(e -> e != null && e.getError().isEmpty());
-    }
-
     /** Matches a turn outcome carrying exactly the given error instance. */
     private static ResponseListener.ResponseEvent errorIs(Throwable expected) {
         return Mockito.argThat(

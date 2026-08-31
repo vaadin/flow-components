@@ -207,8 +207,9 @@ class ChartRenderingTest {
 
             // Exception propagates so the orchestrator can surface it to
             // the user, but pending state must still be cleared.
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(AITurnEvents.success()));
+                    () -> controller.onResponse(event));
 
             // Pending state should be cleared despite the error: a
             // subsequent call with no pending state is a no-op and

@@ -195,8 +195,9 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(AITurnEvents.success()));
+                () -> controller.onResponse(event));
 
         Assertions.assertNull(controller.getState());
     }
@@ -373,8 +374,9 @@ class GridAIControllerTest {
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(AITurnEvents.success()));
+                () -> controller.onResponse(event));
 
         // Previous successful query should be retained
         Assertions.assertEquals("SELECT a FROM good",
@@ -414,8 +416,9 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(AITurnEvents.success()));
+                () -> controller.onResponse(event));
 
         Assertions.assertNull(captured.get());
     }
