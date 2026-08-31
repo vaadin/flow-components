@@ -548,6 +548,20 @@ class GridAIControllerTest {
         Assertions.assertTrue(result.contains("get_grid_state"));
     }
 
+    @Test
+    void instructionsTool_declaresOptionalOnlyParameterSchema() {
+        // A tool without a declared property makes models disagree on what
+        // to send as arguments, and some LLM APIs reject the request that
+        // replays such a tool call.
+        var schema = json(
+                findTool("get_grid_instructions").getParametersSchema());
+        Assertions.assertEquals("object", schema.path("type").asString());
+        Assertions.assertTrue(schema.path("properties").size() > 0,
+                "Schema must declare at least one property, got: " + schema);
+        Assertions.assertEquals(0, schema.path("required").size(),
+                "All declared properties must be optional, got: " + schema);
+    }
+
     // --- stripGroupPrefix ---
 
     @Nested

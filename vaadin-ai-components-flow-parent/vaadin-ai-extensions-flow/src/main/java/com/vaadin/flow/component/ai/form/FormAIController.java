@@ -1301,7 +1301,7 @@ public class FormAIController implements AIController {
 
             @Override
             public String getParametersSchema() {
-                return null;
+                return NO_PARAMETERS_SCHEMA;
             }
 
             @Override
