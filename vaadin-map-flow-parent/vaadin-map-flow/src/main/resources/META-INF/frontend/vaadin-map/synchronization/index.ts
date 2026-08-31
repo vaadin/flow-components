@@ -15,13 +15,24 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
-import { synchronizeAttribution, synchronizeScaleLine, synchronizeZoom } from './controls.js';
+import type OlMap from 'ol/Map';
+import type { FlowFeature, MapSyncChange, MapSyncContext } from '../vaadin-map-types.js';
+import type {
+  FeatureChange,
+  LineStringChange,
+  MapChange,
+  MapSynchronizer,
+  PointChange,
+  PolygonChange,
+  ViewChange
+} from './synchronization-types.js';
+import { synchronizeAttribution, synchronizeScaleLine, synchronizeZoom } from './controls.ts';
 import {
   synchronizeFeatureLayer,
   synchronizeImageLayer,
   synchronizeTileLayer,
   synchronizeVectorLayer
-} from './layers.js';
+} from './layers.ts';
 import {
   synchronizeCluster,
   synchronizeImageWMSSource,
@@ -29,9 +40,9 @@ import {
   synchronizeTileWMSSource,
   synchronizeVectorSource,
   synchronizeXYZSource
-} from './sources.js';
-import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle, synchronizeText } from './styles.js';
-import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
+} from './sources.ts';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle, synchronizeText } from './styles.ts';
+import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.ts';
 
 /**
  * Fallback text style to use for features that don't have a custom one
@@ -43,7 +54,7 @@ const fallbackTextStyle = new Text({
   stroke: new Stroke({ color: '#fff', width: 3 })
 });
 
-function synchronizeMap(target, source, context) {
+function synchronizeMap(target: OlMap | undefined, source: MapChange, context: MapSyncContext): OlMap {
   if (!target) {
     throw new Error('Existing map instance must be provided');
   }
@@ -55,7 +66,7 @@ function synchronizeMap(target, source, context) {
   return target;
 }
 
-function synchronizeView(target, source, _context) {
+function synchronizeView(target: View | undefined, source: ViewChange, _context?: MapSyncContext): View {
   if (!target) {
     target = new View({
       projection: source.projection
@@ -71,7 +82,11 @@ function synchronizeView(target, source, _context) {
   return target;
 }
 
-function synchronizeLineString(target, source, _context) {
+function synchronizeLineString(
+  target: LineString | undefined,
+  source: LineStringChange,
+  _context?: MapSyncContext
+): LineString {
   if (!target) {
     target = new LineString(source.coordinates.map((coord) => convertToCoordinateArray(coord)));
   }
@@ -81,7 +96,7 @@ function synchronizeLineString(target, source, _context) {
   return target;
 }
 
-function synchronizePoint(target, source, _context) {
+function synchronizePoint(target: Point | undefined, source: PointChange, _context?: MapSyncContext): Point {
   if (!target) {
     target = new Point(convertToCoordinateArray(source.coordinates));
   }
@@ -91,7 +106,7 @@ function synchronizePoint(target, source, _context) {
   return target;
 }
 
-function synchronizePolygon(target, source, _context) {
+function synchronizePolygon(target: Polygon | undefined, source: PolygonChange, _context?: MapSyncContext): Polygon {
   if (!target) {
     target = new Polygon(convertToGeoJSONCoordinateArray(source.coordinates));
   }
@@ -101,7 +116,7 @@ function synchronizePolygon(target, source, _context) {
   return target;
 }
 
-function synchronizeFeature(target, source, context) {
+function synchronizeFeature(target: FlowFeature | undefined, source: FeatureChange, context: MapSyncContext): Feature {
   if (!target) {
     target = new Feature();
   }
@@ -137,7 +152,7 @@ function synchronizeFeature(target, source, context) {
   return target;
 }
 
-const synchronizerLookup = {
+const synchronizerLookup: Record<string, MapSynchronizer> = {
   'ol/Feature': synchronizeFeature,
   'ol/Map': synchronizeMap,
   'ol/View': synchronizeView,
@@ -184,9 +199,9 @@ const synchronizerLookup = {
  *
  * @param updatedObject The configuration object to synchronize from
  * @param context The map-specific context for the synchronization
- * @returns {*}
+ * @returns the synchronized OL instance
  */
-export function synchronize(updatedObject, context) {
+export function synchronize(updatedObject: MapSyncChange, context: MapSyncContext): unknown {
   const type = updatedObject.type;
 
   if (!type) {
