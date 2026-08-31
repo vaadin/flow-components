@@ -342,8 +342,9 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * Calling {@link Reconnector#apply()} replays the existing conversation
      * history onto the new provider so it has full context for subsequent
-     * prompts. The UI is not modified -- message list, input, and file receiver
-     * components retain their state across serialization.
+     * prompts, unless the provider manages its conversation memory outside the
+     * orchestrator. The UI is not modified -- message list, input, and file
+     * receiver components retain their state across serialization.
      * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
@@ -1041,7 +1042,10 @@ public class AIOrchestrator implements Serializable {
          * Applies the reconnection, restoring the provider, tools, and
          * conversation history on the new provider. The existing conversation
          * history is replayed onto the new provider's memory so that it has
-         * full context for subsequent prompts.
+         * full context for subsequent prompts. A provider that manages its
+         * conversation memory outside the orchestrator ignores the replay, in
+         * which case the application must restore that memory itself before
+         * passing the provider in.
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
@@ -1518,6 +1522,12 @@ public class AIOrchestrator implements Serializable {
          * conversation context (including multimodal content), the message list
          * UI with attachment thumbnails, and the internal message ID mappings
          * for attachment click handling.
+         * <p>
+         * A provider that manages its conversation memory outside the
+         * orchestrator ignores the provider part of the restore, so the
+         * application must load that memory itself. The message list, the
+         * attachment mappings, and the {@link AIOrchestrator#getHistory()}
+         * snapshot are restored either way.
          * <p>
          * The attachment map is keyed by {@link ChatMessage#messageId()} and
          * contains the list of {@link AIAttachment} objects for each message.
