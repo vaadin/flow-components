@@ -27,18 +27,31 @@ import java.io.Serializable;
  * underlying framework reports them. On a turn that completes normally the last
  * published instance therefore describes the whole turn.
  * </p>
+ * <p>
+ * <b>Finish reason vocabulary.</b> Every model vendor words the reason
+ * differently and keeps adding values: a turn cut off at the output limit is
+ * {@code "length"} on OpenAI and {@code "max_tokens"} on Anthropic. Nothing
+ * here maps those onto a fixed set of Vaadin values, because such a set goes
+ * stale the moment a vendor adds one. Compare only against the values
+ * documented for the model you call, and treat an unrecognized value as unknown
+ * rather than as an error.
+ * </p>
+ * <p>
+ * {@link LangChain4JLLMProvider} is a step further removed, and shows why the
+ * mapping is left alone: LangChain4j collapses the vendor's word onto its own
+ * five-constant {@code FinishReason} enum before Vaadin sees the response, so
+ * the value is that constant's name and both examples above arrive as
+ * {@code "LENGTH"}. The collapsing is per integration and loses whatever it
+ * does not recognize — an unrecognized value reaches this record as
+ * {@code null} through its OpenAI integration and as {@code "OTHER"} through
+ * its Anthropic one. Use {@link SpringAILLMProvider} where the application
+ * needs the model's own word.
+ * </p>
  *
  * @param finishReason
- *            why the model stopped, as reported by the underlying framework, or
- *            {@code null} when no reason was reported. The vocabulary and the
- *            casing depend on the provider, not only on the model:
- *            {@link SpringAILLMProvider} relays the model's own word, so an
- *            OpenAI turn cut off at the output limit arrives as
- *            {@code "max_tokens"}, while {@link LangChain4JLLMProvider} reports
- *            the name of the LangChain4j {@code FinishReason} constant the
- *            value was mapped to before Vaadin saw it, so the same turn arrives
- *            as {@code "LENGTH"}. Code that compares against particular values
- *            has to account for the provider it runs on.
+ *            why the model stopped, worded as the underlying framework reports
+ *            it — the vocabulary depends on both the model and the provider,
+ *            see above — or {@code null} when no reason was reported
  * @param tokenUsage
  *            the token usage of the turn, or {@code null} when unknown
  *

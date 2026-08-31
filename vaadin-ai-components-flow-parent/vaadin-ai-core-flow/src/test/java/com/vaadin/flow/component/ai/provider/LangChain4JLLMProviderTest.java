@@ -1929,9 +1929,8 @@ class LangChain4JLLMProviderTest {
     }
 
     private boolean hasMissingFinishReasonWarning() {
-        return logger.getLoggingEvents().stream()
-                .anyMatch(event -> event.getMessage().contains(
-                        "without the model reporting a finish " + "reason"));
+        return logger.getLoggingEvents().stream().anyMatch(
+                event -> event.getMessage().contains("no finish reason"));
     }
 
     private static LLMRequest requestWithMetadataSink(String message,

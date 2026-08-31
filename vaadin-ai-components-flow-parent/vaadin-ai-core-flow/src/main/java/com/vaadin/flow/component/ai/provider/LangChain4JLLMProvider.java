@@ -488,16 +488,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * This provider drives the tool-calling loop itself, so unlike
      * {@code SpringAILLMProvider} a turn cannot end with tool calls still
      * pending; a missing finish reason is the one terminal state left that may
-     * indicate a silent abnormal termination.
+     * indicate a silent abnormal termination. It does not prove the model
+     * reported nothing: LangChain4j also leaves the reason unset when its
+     * integration does not recognize the value the model sent.
      */
     private static void warnOnMissingFinishReason(ChatResponse response) {
         if (response.finishReason() != null) {
             return;
         }
-        LOGGER.warn("LLM turn ended without the model reporting a finish "
-                + "reason. This may indicate a silent abnormal termination "
-                + "such as an upstream error; if the response appears "
-                + "truncated this warning is the signal.");
+        LOGGER.warn("LLM turn ended with no finish reason for its final "
+                + "round trip. Either the model reported none, which may "
+                + "indicate a silent abnormal termination such as an upstream "
+                + "error, or LangChain4j dropped a value its integration does "
+                + "not recognize; if the response appears truncated this "
+                + "warning is the signal.");
     }
 
     private static ToolExecutionResultMessage executeToolRequest(
@@ -647,10 +651,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         private void publishMetadata() {
-            // LangChain4j maps the model's own word to its FinishReason enum
-            // before handing the response over, so the constant name is the
-            // most faithful value left to publish — see ResponseMetadata,
-            // which documents the difference to SpringAILLMProvider.
+            // LangChain4j collapses the model's own word onto its
+            // FinishReason enum before handing the response over — per
+            // integration, and losing whatever it does not recognize — so the
+            // constant name is the most faithful value left to publish. See
+            // ResponseMetadata, which documents what that costs.
             var finishReason = lastFinishReason == null ? null
                     : lastFinishReason.name();
             var tokenUsage = accumulatedUsage == null ? null
