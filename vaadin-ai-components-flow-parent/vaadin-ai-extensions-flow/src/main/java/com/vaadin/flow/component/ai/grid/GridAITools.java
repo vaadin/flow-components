@@ -183,16 +183,18 @@ public final class GridAITools {
                         - ALWAYS give every column a human-readable AS alias
                         - Do NOT use LIMIT or OFFSET — the grid handles pagination
                         - Use double quotes for aliases with spaces or dots
-                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+                        - Use ONLY tables and columns from get_database_schema()
+                        Shape (placeholders, not real names):
+                        SELECT ColumnA AS "Readable A", ColumnB AS "Readable B" FROM TableName
 
                         COLUMN GROUPING (only when the user asks for grouping):
                         When the user mentions "grouped under X" in their request:
                         1. Select ONLY the columns mentioned for grouping
                         2. Alias each column as "X.ReadableName" (with the group prefix and a dot)
                         3. Do NOT include columns that are not part of a group
-                        Example request: "product and category grouped under Product"
-                        Correct SQL: SELECT product AS "Product.Name", category AS "Product.Category" FROM sales
-                        Result: A "Product" header spanning both columns.
+                        Example request: "ColumnA and ColumnB grouped under GroupName"
+                        Correct SQL: SELECT ColumnA AS "GroupName.Readable A", ColumnB AS "GroupName.Readable B" FROM TableName
+                        Result: A "GroupName" header spanning both columns.
                         Do NOT use "X.Name" format unless the user asks for grouping.
                         """;
             }
