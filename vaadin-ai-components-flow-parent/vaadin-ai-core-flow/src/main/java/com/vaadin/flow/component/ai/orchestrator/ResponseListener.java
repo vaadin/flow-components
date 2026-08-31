@@ -97,6 +97,7 @@ public interface ResponseListener extends Serializable {
          * @param metadata
          *            the provider's metadata for the turn, or {@code null} when
          *            none was reported
+         * @since 25.3
          */
         public ResponseEvent(String response, Throwable error,
                 ResponseMetadata metadata) {
