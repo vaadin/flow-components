@@ -1904,6 +1904,30 @@ class LangChain4JLLMProviderTest {
                 "The reason on the final round trip covers the turn");
     }
 
+    @Test
+    void stream_finalToolRoundTripWithoutFinishReason_logsWarning() {
+        // The turn ended on a round trip the model said nothing about. The
+        // TOOL_EXECUTION reason from the earlier round trip describes that
+        // round trip, not how the turn ended, so it must not silence the
+        // warning.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "A turn ending on a round trip with no finish reason must "
+                        + "warn even when an earlier round trip reported one");
+    }
+
     private boolean hasMissingFinishReasonWarning() {
         return logger.getLoggingEvents().stream()
                 .anyMatch(event -> event.getMessage().contains(

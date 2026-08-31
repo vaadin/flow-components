@@ -454,7 +454,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
-            warnOnMissingFinishReason(context);
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
             return;
         }
@@ -469,21 +469,29 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
-            warnOnMissingFinishReason(context);
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
         }
     }
 
     /**
-     * Warns when a turn completes without the model ever reporting a finish
-     * reason. This provider drives the tool-calling loop itself, so unlike
+     * Warns when the round trip that ends the turn carries no finish reason.
+     * <p>
+     * Only that round trip counts. A reason reported by an earlier round trip
+     * describes why <i>that</i> round trip stopped — {@code TOOL_EXECUTION},
+     * typically — and says nothing about how the turn ended, so it must not
+     * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
+     * terminal-chunk check likewise ignores a reason that arrives with tool
+     * calls still pending. Called only from the two points where the turn ends,
+     * so the response passed in is by construction the terminal one.
+     * <p>
+     * This provider drives the tool-calling loop itself, so unlike
      * {@code SpringAILLMProvider} a turn cannot end with tool calls still
      * pending; a missing finish reason is the one terminal state left that may
      * indicate a silent abnormal termination.
      */
-    private static void warnOnMissingFinishReason(
-            ChatExecutionContext context) {
-        if (context.sawFinishReason()) {
+    private static void warnOnMissingFinishReason(ChatResponse response) {
+        if (response.finishReason() != null) {
             return;
         }
         LOGGER.warn("LLM turn ended without the model reporting a finish "
@@ -648,10 +656,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
                             accumulatedUsage.totalTokenCount());
             request.metadataSink()
                     .accept(new ResponseMetadata(finishReason, tokenUsage));
-        }
-
-        boolean sawFinishReason() {
-            return lastFinishReason != null;
         }
 
         LLMRequest getRequest() {
