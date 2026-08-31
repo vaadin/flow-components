@@ -42,14 +42,18 @@ export interface MapFeatureInfo {
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      mapConnector: {
-        init(mapElement: FlowMap): void;
-        setUserProjection(projection: string): void;
-        defineProjection(projection: string, wksDefinition: string): void;
-      };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    mapConnector: {
+      init(mapElement: FlowMap): void;
+      setUserProjection(projection: string): void;
+      defineProjection(projection: string, wksDefinition: string): void;
     };
   }
 }

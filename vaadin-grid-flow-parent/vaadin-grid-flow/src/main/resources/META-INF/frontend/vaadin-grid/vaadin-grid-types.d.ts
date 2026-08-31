@@ -120,12 +120,16 @@ export type FlowTreeGrid = FlowGrid & FlowTreeGridInternals;
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connectors
+  // with the Flow namespace used by the connectors. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      gridConnector: { initLazy(grid: FlowGrid): void };
-      treeGridConnector: { initLazy(grid: FlowTreeGrid): void };
-    };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    gridConnector: { initLazy(grid: FlowGrid): void };
+    treeGridConnector: { initLazy(grid: FlowTreeGrid): void };
   }
 }
 
