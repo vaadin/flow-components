@@ -118,12 +118,16 @@ public class GridAIController implements AIController {
 
             WORKFLOW:
             Complete the user's request in a SINGLE response by calling all needed tools.
-            1. Call get_grid_state() to see what's already configured
-            2. Call get_database_schema() to learn the exact table and column names
-            3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+            1. Call get_database_schema() to learn the exact table and column names
+            2. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+
+            Call get_grid_state() only when the request changes what is already
+            shown (for example "sort by date" or "add a column"). Write the new
+            query from the schema rather than editing the previous one, so every
+            column keeps the table qualifier the schema gives it.
 
             IMPORTANT:
-            - Call get_grid_state() and update_grid_data() in the SAME response
+            - Always finish the response with update_grid_data()
             - Do NOT stop after get_grid_state()
             """;
 
