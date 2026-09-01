@@ -1258,6 +1258,7 @@ class LangChain4JLLMProviderTest {
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
         Assertions.assertTrue(toolResults.getFirst().text()
                 .startsWith("Error executing tool:"));
+        assertNoJavaInternals(toolResults.getFirst().text());
     }
 
     @Test
@@ -1366,8 +1367,89 @@ class LangChain4JLLMProviderTest {
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
-        Assertions.assertTrue(toolResults.getFirst().text()
+        var result = toolResults.getFirst().text();
+        Assertions.assertTrue(result
                 .startsWith("Error executing tool: invalid JSON arguments: "));
+        Assertions.assertTrue(result.contains("Unrecognized token"),
+                "The parser diagnostic should be relayed so the model can "
+                        + "repair its next attempt, but got: " + result);
+        assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitTool_nonObjectJsonArguments_reportsExpectedShape() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        // A model that has nothing to fill may send an empty string. That is
+        // valid JSON, so it parses, but it is not the object a tool expects.
+        var response1 = mockSimpleResponseWithTool("myTool", "\"\"");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(0, receivedArgs.size());
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var result = getToolExecutionResults(captor.getAllValues().get(1))
+                .getFirst().text();
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> "ok");
+
+        var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool", "[1, 2]");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var result = getToolExecutionResults(captor.getAllValues().get(1))
+                .getFirst().text();
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+    }
+
+    /**
+     * Asserts that a tool result carries nothing from the Java runtime. Such a
+     * result goes straight back to the model, so a raw exception message would
+     * both waste tokens and leak internals.
+     */
+    private static void assertNoJavaInternals(String result) {
+        for (var leak : List.of("tools.jackson", "cannot be cast",
+                "ClassLoader", "java.lang.", "[Source:")) {
+            Assertions.assertFalse(result.contains(leak),
+                    "Tool result relayed to the model must not contain '" + leak
+                            + "', but got: " + result);
+        }
     }
 
     @Test
