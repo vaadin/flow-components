@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -41,7 +42,9 @@ import tools.jackson.databind.JsonNode;
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
  * tools to the LLM. Workflow instructions are delivered through the description
  * of the {@code get_chart_instructions} tool, which the LLM reads as part of
- * the tool manifest.
+ * the tool manifest. The controller's workflow tells the model that where an
+ * application's system prompt conflicts with it, the system prompt wins, so a
+ * step can be adjusted without subclassing.
  * </p>
  *
  * <pre>
@@ -52,14 +55,15 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponse(Throwable)} on the success path, avoiding partial state
- * and multiple redraws during a multi-tool LLM turn. The chart state is stored
- * directly on the {@link Chart} component, so it survives serialization.
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * chart state is stored directly on the {@link Chart} component, so it survives
+ * serialization.
  * </p>
  * <p>
- * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
- * pending changes are discarded and the chart keeps its last
- * successfully-rendered state.
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the chart keeps its
+ * last successfully-rendered state.
  * </p>
  * <p>
  * Data conversion from SQL query results to chart series is handled by a
@@ -133,6 +137,9 @@ public class ChartAIController implements AIController {
             styling for specific series, matched by name
             - Call get_plot_options_schema(chartType) to discover available properties
             - Example: {"series": [{"name": "South", "type": "column", "yAxis": 1}]}
+
+            If the system prompt carries its own instructions, follow them; where \
+            they conflict with this workflow, the system prompt wins.
             """;
 
     private final Chart chart;
@@ -310,7 +317,8 @@ public class ChartAIController implements AIController {
     }
 
     @Override
-    public void onResponse(Throwable error) {
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
         ChartEntry entry = ChartEntry.get(chart);
         if (error != null) {
             if (entry != null) {

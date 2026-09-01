@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -128,7 +129,8 @@ public class AIFieldMarkerPage extends VerticalLayout {
             // shows its confidence level.
             controller.restoreFieldSource(confident,
                     new ValueSource(ConfidenceLevel.HIGH, null));
-            controller.onResponse(null);
+            controller.onResponse(
+                    new ResponseListener.ResponseEvent("", null, null));
         });
         finishTurn.setId("finish-turn");
 

@@ -391,7 +391,7 @@ class RequestInterceptorTest {
                 () -> orchestrator.prompt("Hello"));
 
         Mockito.verify(controller, Mockito.never()).onRequest();
-        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller).onResponse(errorIs(thrown));
     }
 
     @Test
@@ -1065,7 +1065,7 @@ class RequestInterceptorTest {
         }
 
         Mockito.verify(controller)
-                .onResponse(Mockito.isA(TimeoutException.class));
+                .onResponse(errorOfType(TimeoutException.class));
     }
 
     @Test
@@ -1273,4 +1273,18 @@ class RequestInterceptorTest {
     private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
+
+    /** Matches a turn outcome carrying exactly the given error instance. */
+    private static ResponseListener.ResponseEvent errorIs(Throwable expected) {
+        return Mockito.argThat(
+                e -> e != null && e.getError().orElse(null) == expected);
+    }
+
+    /** Matches a turn outcome whose error is of the given type. */
+    private static ResponseListener.ResponseEvent errorOfType(
+            Class<? extends Throwable> type) {
+        return Mockito.argThat(e -> e != null
+                && e.getError().filter(type::isInstance).isPresent());
+    }
+
 }

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -34,7 +35,9 @@ import tools.jackson.databind.JsonNode;
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
  * tools to the LLM. Workflow instructions are delivered through the description
  * of the {@code get_grid_instructions} tool, which the LLM reads as part of the
- * tool manifest.
+ * tool manifest. The controller's workflow tells the model that where an
+ * application's system prompt conflicts with it, the system prompt wins, so a
+ * step can be adjusted without subclassing.
  *
  * <pre>
  * var grid = new Grid&lt;AIDataRow&gt;();
@@ -60,14 +63,15 @@ import tools.jackson.databind.JsonNode;
  * </ul>
  * <p>
  * State changes requested by the LLM are deferred and applied in
- * {@link #onResponse(Throwable)} on the success path, avoiding partial state
- * and multiple redraws during a multi-tool LLM turn. The grid state is stored
- * directly on the {@link Grid} component, so it survives serialization.
+ * {@link #onResponse(ResponseListener.ResponseEvent)} on the success path,
+ * avoiding partial state and multiple redraws during a multi-tool LLM turn. The
+ * grid state is stored directly on the {@link Grid} component, so it survives
+ * serialization.
  * </p>
  * <p>
- * If the LLM turn fails, {@link #onResponse(Throwable)} fires with the cause —
- * pending changes are discarded and the grid keeps its last
- * successfully-rendered state.
+ * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
+ * fires with the cause — pending changes are discarded and the grid keeps its
+ * last successfully-rendered state.
  * </p>
  * <p>
  * <b>Serialization:</b> This controller is not serialized with the
@@ -118,13 +122,19 @@ public class GridAIController implements AIController {
 
             WORKFLOW:
             Complete the user's request in a SINGLE response by calling all needed tools.
-            1. Call get_grid_state() to see what's already configured
-            2. Call get_database_schema() to learn the exact table and column names
-            3. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+            1. Call get_database_schema() to learn the exact table and column names
+            2. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+
+            Call get_grid_state() only when the request changes what is already
+            shown (for example "sort by date" or "add a column"). Write the new
+            query from the schema rather than editing the previous one, so every
+            column keeps the table qualifier the schema gives it.
 
             IMPORTANT:
-            - Call get_grid_state() and update_grid_data() in the SAME response
+            - Always finish the response with update_grid_data()
             - Do NOT stop after get_grid_state()
+            - If the system prompt carries its own instructions, follow them; where
+              they conflict with this workflow, the system prompt wins
             """;
 
     private final Grid<AIDataRow> grid;
@@ -210,7 +220,8 @@ public class GridAIController implements AIController {
     }
 
     @Override
-    public void onResponse(Throwable error) {
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
         var entry = GridEntry.get(grid);
         if (error != null) {
             if (entry != null) {

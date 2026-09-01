@@ -36,6 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -50,6 +51,7 @@ import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ResponseMetadata;
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
 import com.vaadin.flow.component.ai.ui.AIMessage;
@@ -342,8 +344,9 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * Calling {@link Reconnector#apply()} replays the existing conversation
      * history onto the new provider so it has full context for subsequent
-     * prompts. The UI is not modified -- message list, input, and file receiver
-     * components retain their state across serialization.
+     * prompts, unless the provider manages its conversation memory outside the
+     * orchestrator. The UI is not modified -- message list, input, and file
+     * receiver components retain their state across serialization.
      * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
@@ -431,7 +434,8 @@ public class AIOrchestrator implements Serializable {
     }
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
-            AIMessage assistantMessage, UI ui) {
+            AIMessage assistantMessage, UI ui,
+            AtomicReference<ResponseMetadata> metadataHolder) {
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
@@ -456,7 +460,7 @@ public class AIOrchestrator implements Serializable {
                 accessIfAttached(ui,
                         () -> assistantMessage.setText(userMessage));
             }
-            fireResponseListener("", error, ui);
+            fireResponseListener("", error, ui, metadataHolder.get());
         }, () -> {
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
@@ -464,7 +468,7 @@ public class AIOrchestrator implements Serializable {
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
             }
-            fireResponseListener(responseText, null, ui);
+            fireResponseListener(responseText, null, ui, metadataHolder.get());
             LOGGER.debug("LLM streaming completed successfully");
         });
     }
@@ -550,7 +554,9 @@ public class AIOrchestrator implements Serializable {
                 controller.onRequest();
             }
 
-            var request = buildRequest(userMessage, attachments);
+            var metadataHolder = new AtomicReference<ResponseMetadata>();
+            var request = buildRequest(userMessage, attachments,
+                    metadataHolder);
             LOGGER.debug("Processing prompt with {} attachments",
                     attachments.size());
 
@@ -569,7 +575,8 @@ public class AIOrchestrator implements Serializable {
                 itemToMessageId.put(userAIMessage, messageId);
             }
 
-            streamResponseToMessage(request, assistantMessage, ui);
+            streamResponseToMessage(request, assistantMessage, ui,
+                    metadataHolder);
         } catch (Throwable t) { // NOSONAR — Throwable to surface UI on any
                                 // throw
             // Single update — stream errors are async and never reach this
@@ -729,7 +736,8 @@ public class AIOrchestrator implements Serializable {
     }
 
     private LLMProvider.LLMRequest buildRequest(String userMessage,
-            List<AIAttachment> attachments) {
+            List<AIAttachment> attachments,
+            AtomicReference<ResponseMetadata> metadataHolder) {
         final var effectiveSystemPrompt = systemPrompt != null
                 && !systemPrompt.isBlank() ? systemPrompt.trim() : null;
         var controllerTools = controller != null
@@ -761,6 +769,11 @@ public class AIOrchestrator implements Serializable {
             @Override
             public List<LLMProvider.ToolSpec> explicitTools() {
                 return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return metadataHolder::set;
             }
         };
     }
@@ -874,10 +887,16 @@ public class AIOrchestrator implements Serializable {
 
     private void fireResponseListener(String responseText, Throwable error,
             UI ui) {
+        fireResponseListener(responseText, error, ui, null);
+    }
+
+    private void fireResponseListener(String responseText, Throwable error,
+            UI ui, ResponseMetadata metadata) {
+        var event = new ResponseListener.ResponseEvent(responseText, error,
+                metadata);
         if (responseListener != null) {
             try {
-                responseListener.onResponse(new ResponseListener.ResponseEvent(
-                        responseText, error));
+                responseListener.onResponse(event);
             } catch (Exception e) {
                 LOGGER.error("Error in response listener", e);
             }
@@ -885,7 +904,7 @@ public class AIOrchestrator implements Serializable {
         if (controller != null) {
             accessIfAttached(ui, () -> {
                 try {
-                    controller.onResponse(error);
+                    controller.onResponse(event);
                 } catch (Exception e) {
                     LOGGER.error("Error in controller onResponse", e);
                     // Append a separate assistant message instead of
@@ -1041,7 +1060,10 @@ public class AIOrchestrator implements Serializable {
          * Applies the reconnection, restoring the provider, tools, and
          * conversation history on the new provider. The existing conversation
          * history is replayed onto the new provider's memory so that it has
-         * full context for subsequent prompts.
+         * full context for subsequent prompts. A provider that manages its
+         * conversation memory outside the orchestrator ignores the replay, in
+         * which case the application must restore that memory itself before
+         * passing the provider in.
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
@@ -1430,7 +1452,7 @@ public class AIOrchestrator implements Serializable {
          * recommended hook for persisting conversation state (via
          * {@link AIOrchestrator#getHistory()}), triggering follow-up actions,
          * or surfacing errors to the user. Same lifecycle moment as
-         * {@link AIController#onResponse(Throwable)}.
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)}.
          * <p>
          * On success the response text may be empty if the model emitted only
          * tool calls or otherwise stopped without producing visible content.
@@ -1482,9 +1504,10 @@ public class AIOrchestrator implements Serializable {
          * context is added for that turn — useful for "context only when X"
          * patterns. If the supplier throws, the turn is aborted via the normal
          * error path: the assistant placeholder is updated to a generic error
-         * message, {@link AIController#onResponse(Throwable)} fires with the
-         * thrown exception, and the exception propagates to the caller of the
-         * prompt entry point.
+         * message,
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} fires
+         * with the thrown exception, and the exception propagates to the caller
+         * of the prompt entry point.
          * <p>
          * Passing {@code null} disables session context entirely, including the
          * built-in default. By default, the orchestrator installs a supplier
@@ -1518,6 +1541,12 @@ public class AIOrchestrator implements Serializable {
          * conversation context (including multimodal content), the message list
          * UI with attachment thumbnails, and the internal message ID mappings
          * for attachment click handling.
+         * <p>
+         * A provider that manages its conversation memory outside the
+         * orchestrator ignores the provider part of the restore, so the
+         * application must load that memory itself. The message list, the
+         * attachment mappings, and the {@link AIOrchestrator#getHistory()}
+         * snapshot are restored either way.
          * <p>
          * The attachment map is keyed by {@link ChatMessage#messageId()} and
          * contains the list of {@link AIAttachment} objects for each message.

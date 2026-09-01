@@ -26,6 +26,24 @@ export interface MapSyncChange {
   [key: string]: unknown;
 }
 
+/**
+ * Lookup for the OL instances used in the map's configuration, keyed by their
+ * unique ids. The lookup stores heterogeneous OL instances whose types are
+ * only known at runtime, so `get` returns `any`.
+ */
+export interface MapLookup {
+  get(id: string): any;
+  put(id: string, instance: object): void;
+}
+
+/** The map-specific context passed to the synchronization functions */
+export interface MapSyncContext {
+  synchronize(change: MapSyncChange, context: MapSyncContext): unknown;
+  lookup: MapLookup;
+  mapElement: FlowMap;
+  connector: MapConnector;
+}
+
 /** Options for the `zoomToFit` method, passed to the OL `View.fit` method */
 export interface MapZoomToFitOptions {
   padding?: number;
@@ -42,14 +60,18 @@ export interface MapFeatureInfo {
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      mapConnector: {
-        init(mapElement: FlowMap): void;
-        setUserProjection(projection: string): void;
-        defineProjection(projection: string, wksDefinition: string): void;
-      };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    mapConnector: {
+      init(mapElement: FlowMap): void;
+      setUserProjection(projection: string): void;
+      defineProjection(projection: string, wksDefinition: string): void;
     };
   }
 }

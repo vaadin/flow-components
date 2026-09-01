@@ -8,6 +8,11 @@
  * license.
  */
 import VectorSource from 'ol/source/Vector';
+import type Feature from 'ol/Feature';
+import type { FeatureLike } from 'ol/Feature';
+import type OlMap from 'ol/Map';
+import type Layer from 'ol/layer/Layer';
+import type { MapFeatureInfo, MapLookup } from './vaadin-map-types.js';
 
 /**
  * Simple lookup for OL instances that are used by Map.
@@ -17,16 +22,14 @@ import VectorSource from 'ol/source/Vector';
  * This should only be used as a fallback if a browser does not support
  * weak references and finalization registry.
  */
-class SimpleLookup {
-  constructor() {
-    this.map = new Map();
-  }
+class SimpleLookup implements MapLookup {
+  private map = new Map<string, object>();
 
-  get(id) {
+  get(id: string): any {
     return this.map.get(id);
   }
 
-  put(id, instance) {
+  put(id: string, instance: object): void {
     this.map.set(id, instance);
   }
 }
@@ -38,22 +41,21 @@ class SimpleLookup {
  * finalization registry to remove weak references from the lookup when
  * instances are garbage collected.
  */
-class WeakReferenceLookup {
-  constructor() {
-    this.map = new Map();
-    // Create registry that notifies when a reference is garbage collected,
-    // the callback removes the WeakRef entry from the map
-    this.registry = new FinalizationRegistry((id) => {
-      this.map.delete(id);
-    });
-  }
+class WeakReferenceLookup implements MapLookup {
+  private map = new Map<string, WeakRef<object>>();
 
-  get(id) {
+  // Create registry that notifies when a reference is garbage collected,
+  // the callback removes the WeakRef entry from the map
+  private registry = new FinalizationRegistry<string>((id) => {
+    this.map.delete(id);
+  });
+
+  get(id: string): any {
     const weakRef = this.map.get(id);
     return weakRef ? weakRef.deref() : undefined;
   }
 
-  put(id, instance) {
+  put(id: string, instance: object): void {
     // Check if there's an existing entry
     const existingRef = this.map.get(id);
     if (existingRef) {
@@ -71,13 +73,12 @@ class WeakReferenceLookup {
   }
 }
 
-const supportsWeakReferenceLookup = window.WeakRef && window.FinalizationRegistry;
+const supportsWeakReferenceLookup = typeof WeakRef !== 'undefined' && typeof FinalizationRegistry !== 'undefined';
 
 /**
  * Creates a lookup that is supported by the browser
- * @returns {WeakReferenceLookup|SimpleLookup}
  */
-export function createLookup() {
+export function createLookup(): MapLookup {
   return supportsWeakReferenceLookup ? new WeakReferenceLookup() : new SimpleLookup();
 }
 
@@ -85,31 +86,29 @@ export function createLookup() {
  * Returns information about a feature within an OpenLayers map instance.
  * Includes whether the feature is a cluster or a single feature, and
  * which layer and source it belongs to.
- * @param map
- * @param feature
- * @returns {{feature: *, layer: *, source: *, isCluster: boolean}}
  */
-export function getFeatureInfo(map, feature) {
+export function getFeatureInfo(map: OlMap, feature: FeatureLike): MapFeatureInfo {
   const layer = map
     .getLayers()
     .getArray()
-    .find((layer) => {
-      const source = layer.getSource && layer.getSource();
+    .find((candidate) => {
+      const source = (candidate as Layer).getSource && (candidate as Layer).getSource();
       const isVectorSource = source && source instanceof VectorSource;
-      return isVectorSource && source.getFeatures().includes(feature);
-    });
-  const source = layer && layer.getSource();
+      return isVectorSource && source.getFeatures().includes(feature as Feature);
+    }) as Layer | undefined;
+  const source = (layer && layer.getSource()) ?? undefined;
 
   // Unwrap single feature from cluster
-  const clusterFeatures = feature.get('features');
+  let resolvedFeature = feature as Feature;
+  const clusterFeatures = resolvedFeature.get('features') as Feature[] | undefined;
   if (Array.isArray(clusterFeatures) && clusterFeatures.length === 1) {
-    feature = clusterFeatures[0];
+    resolvedFeature = clusterFeatures[0];
   }
 
   const isCluster = Array.isArray(clusterFeatures) && clusterFeatures.length > 1;
 
   return {
-    feature,
+    feature: resolvedFeature,
     layer,
     source,
     isCluster
