@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -161,6 +162,26 @@ public interface LLMProvider {
          */
         default List<ToolSpec> explicitTools() {
             return List.of();
+        }
+
+        /**
+         * Gets the consumer that receives metadata about the model's response,
+         * such as the finish reason and token usage. A provider that observes
+         * such metadata passes it to this consumer as the turn progresses —
+         * each call carries everything observed so far and replaces the value
+         * of any earlier call, so a turn that fails midway has still reported
+         * what was observed before the failure. A provider that observes no
+         * metadata never calls the consumer. The default implementation
+         * discards the metadata.
+         *
+         * @return the metadata consumer, never {@code null}
+         * @since 25.3
+         */
+        default Consumer<ResponseMetadata> metadataSink() {
+            return metadata -> {
+                // Discarded by default; the request creator overrides this to
+                // receive the metadata.
+            };
         }
     }
 
