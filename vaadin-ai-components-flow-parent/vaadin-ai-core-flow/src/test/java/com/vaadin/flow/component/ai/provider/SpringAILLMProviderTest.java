@@ -1784,6 +1784,7 @@ class SpringAILLMProviderTest {
         var result = toolCallbacks.getFirst().call("Not json");
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        assertNoJavaInternals(result);
         Assertions.assertEquals(0, receivedArgs.size());
     }
 
@@ -1847,7 +1848,7 @@ class SpringAILLMProviderTest {
      */
     private static void assertNoJavaInternals(String result) {
         for (var leak : List.of("tools.jackson", "cannot be cast",
-                "ClassLoader", "java.lang.")) {
+                "ClassLoader", "java.lang.", "[Source:")) {
             Assertions.assertFalse(result.contains(leak),
                     "Tool result relayed to the model must not contain '" + leak
                             + "', but got: " + result);

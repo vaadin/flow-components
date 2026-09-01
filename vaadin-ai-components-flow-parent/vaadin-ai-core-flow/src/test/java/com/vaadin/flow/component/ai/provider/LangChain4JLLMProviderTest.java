@@ -1258,6 +1258,7 @@ class LangChain4JLLMProviderTest {
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
         Assertions.assertTrue(toolResults.getFirst().text()
                 .startsWith("Error executing tool:"));
+        assertNoJavaInternals(toolResults.getFirst().text());
     }
 
     @Test
@@ -1366,8 +1367,13 @@ class LangChain4JLLMProviderTest {
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var toolResults = getToolExecutionResults(captor.getAllValues().get(1));
-        Assertions.assertTrue(toolResults.getFirst().text()
+        var result = toolResults.getFirst().text();
+        Assertions.assertTrue(result
                 .startsWith("Error executing tool: invalid JSON arguments: "));
+        Assertions.assertTrue(result.contains("Unrecognized token"),
+                "The parser diagnostic should be relayed so the model can "
+                        + "repair its next attempt, but got: " + result);
+        assertNoJavaInternals(result);
     }
 
     @Test
@@ -1439,7 +1445,7 @@ class LangChain4JLLMProviderTest {
      */
     private static void assertNoJavaInternals(String result) {
         for (var leak : List.of("tools.jackson", "cannot be cast",
-                "ClassLoader", "java.lang.")) {
+                "ClassLoader", "java.lang.", "[Source:")) {
             Assertions.assertFalse(result.contains(leak),
                     "Tool result relayed to the model must not contain '" + leak
                             + "', but got: " + result);

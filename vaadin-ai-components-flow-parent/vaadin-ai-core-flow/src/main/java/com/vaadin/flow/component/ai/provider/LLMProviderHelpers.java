@@ -25,6 +25,8 @@ import java.util.Objects;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.internal.JacksonUtils;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -115,13 +117,22 @@ final class LLMProviderHelpers {
      *            blank
      * @return the parsed arguments, never {@code null}
      * @throws IllegalArgumentException
-     *             if the arguments parse to something other than a JSON object
+     *             if the arguments are not valid JSON or parse to something
+     *             other than a JSON object
      */
     public static ObjectNode parseToolArguments(String arguments) {
         if (arguments == null || arguments.isBlank()) {
             return JacksonUtils.createObjectNode();
         }
-        var parsed = JacksonUtils.getMapper().readTree(arguments);
+        JsonNode parsed;
+        try {
+            parsed = JacksonUtils.getMapper().readTree(arguments);
+        } catch (JacksonException e) {
+            // The message that goes back to the model keeps the parser
+            // diagnostic it can repair from, but not the location suffix
+            // full of Java library internals.
+            throw new IllegalArgumentException(e.getOriginalMessage(), e);
+        }
         if (!parsed.isObject()) {
             // Reported instead of letting the ObjectNode cast fail, so the
             // message that goes back to the model names the shape it should
