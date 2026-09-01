@@ -66,10 +66,10 @@ import com.vaadin.flow.function.SerializableConsumer;
  * <p>
  * Throwing from the interceptor aborts the prompt the same way as a rejection,
  * except that the exception is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(Throwable)}, and propagates to the caller of
- * the prompt entry point. Throw only for failures; use
- * {@link RequestInterceptEvent#reject(String) reject} for expected validation
- * outcomes.
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)}, and
+ * propagates to the caller of the prompt entry point. Throw only for failures;
+ * use {@link RequestInterceptEvent#reject(String) reject} for expected
+ * validation outcomes.
  * <p>
  * <b>Threading:</b> the interceptor is called on the UI thread under the
  * session lock, and unless the prompt is postponed its result is used as soon
@@ -111,8 +111,9 @@ import com.vaadin.flow.function.SerializableConsumer;
  *
  * A failure after postponing — {@link RequestContinuation#fail} or the timeout
  * — is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(Throwable)} only; it cannot propagate to the
- * caller of the prompt entry point, which has long returned.
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)} only; it
+ * cannot propagate to the caller of the prompt entry point, which has long
+ * returned.
  * <p>
  * <b>Serialization:</b> the interceptor is stored on the serializable
  * orchestrator and survives session serialization with it — unlike the LLM
@@ -418,10 +419,10 @@ public interface RequestInterceptor extends Serializable {
         /**
          * Aborts the postponed prompt: nothing is sent or shown, and the cause
          * is reported to the {@link ResponseListener} and
-         * {@link AIController#onResponse(Throwable)}. Safe to call when the UI
-         * is already detached: the {@link ResponseListener} is still notified,
-         * only the UI-bound controller hook is skipped. A no-op when the prompt
-         * has already been completed or timed out.
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Safe
+         * to call when the UI is already detached: the {@link ResponseListener}
+         * is still notified, only the UI-bound controller hook is skipped. A
+         * no-op when the prompt has already been completed or timed out.
          *
          * @param cause
          *            the failure to report, not {@code null}

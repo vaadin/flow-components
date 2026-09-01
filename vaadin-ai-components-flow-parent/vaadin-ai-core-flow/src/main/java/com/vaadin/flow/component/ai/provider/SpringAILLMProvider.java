@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.content.Media;
@@ -238,7 +240,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * turn is running, for example from
      * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
      * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(ResponseListener.ResponseEvent)}.</li>
      * </ul>
      *
      * <p>
@@ -393,7 +395,10 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            var chatResponses = getPromptSpec(request).stream().chatResponse();
+            var collector = new ResponseMetadataCollector(
+                    request.metadataSink());
+            var chatResponses = getPromptSpec(request).stream().chatResponse()
+                    .doOnNext(collector::observe);
             return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
@@ -495,15 +500,117 @@ public class SpringAILLMProvider implements LLMProvider {
         return Flux.create(sink -> {
             try {
                 var promptSpec = getPromptSpec(request);
-                var response = promptSpec.call().content();
-                if (response != null && !response.isEmpty()) {
-                    sink.next(response);
+                var response = promptSpec.call().chatResponse();
+                if (response == null) {
+                    LOGGER.warn("LLM call returned no response at all, which "
+                            + "may indicate an upstream error swallowed by "
+                            + "the client.");
+                } else {
+                    new ResponseMetadataCollector(request.metadataSink())
+                            .observe(response);
+                    warnOnAbnormalCompletion(response);
+                    var text = getAssistantText(response);
+                    if (!text.isEmpty()) {
+                        sink.next(text);
+                    }
                 }
                 sink.complete();
             } catch (Exception e) {
                 sink.error(e);
             }
         });
+    }
+
+    /**
+     * Warns when a non-streaming turn did not end in a state a completed turn
+     * can end in. Spring AI runs the tool-calling loop inside its own call and
+     * hands back only the final response, so tool calls still pending on it
+     * mean the loop stopped before the model produced its answer. The streaming
+     * path has the same checks built into
+     * {@link #warnOnMissingFinishReason(Flux)}.
+     */
+    private static void warnOnAbnormalCompletion(ChatResponse response) {
+        var finishReason = ResponseMetadataCollector.getFinishReason(response);
+        if (response.hasToolCalls()) {
+            LOGGER.warn("LLM call ended with tool calls still pending "
+                    + "(finish reason: {}). The tool-calling loop stopped "
+                    + "before the model produced its answer, so the response "
+                    + "is incomplete.", finishReason);
+        } else if (finishReason == null) {
+            LOGGER.warn("LLM call ended without a finish reason. This may "
+                    + "indicate a silent abnormal termination such as an "
+                    + "upstream error; if the response appears truncated "
+                    + "this warning is the signal.");
+        }
+    }
+
+    /**
+     * Collects response metadata across the chunks of a turn and passes each
+     * new state of knowledge to the metadata sink right away, so that a turn
+     * that fails or times out midway has still reported what was observed
+     * before the failure. The last reported finish reason and token usage win:
+     * the terminal chunk carries the reason that ended the turn, and frameworks
+     * that report usage do so cumulatively on the final chunk that carries it.
+     */
+    private static class ResponseMetadataCollector {
+
+        private final Consumer<ResponseMetadata> metadataSink;
+        private String finishReason;
+        private ResponseMetadata.TokenUsage tokenUsage;
+
+        ResponseMetadataCollector(Consumer<ResponseMetadata> metadataSink) {
+            this.metadataSink = metadataSink;
+        }
+
+        void observe(ChatResponse response) {
+            var reason = getFinishReason(response);
+            var usage = getTokenUsage(response);
+            if (reason == null && usage == null) {
+                // Nothing new on this chunk, nothing to re-publish.
+                return;
+            }
+            if (reason != null) {
+                finishReason = reason;
+            }
+            if (usage != null) {
+                tokenUsage = usage;
+            }
+            metadataSink.accept(new ResponseMetadata(finishReason, tokenUsage));
+        }
+
+        private static String getFinishReason(ChatResponse response) {
+            var result = response.getResult();
+            if (result == null) {
+                return null;
+            }
+            var reason = result.getMetadata().getFinishReason();
+            return reason == null || reason.isBlank() ? null : reason;
+        }
+
+        private static ResponseMetadata.TokenUsage getTokenUsage(
+                ChatResponse response) {
+            // Read through an Optional rather than dereferencing: a model
+            // reports either no usage object at all or one that leaves the
+            // counts it does not know at zero, and both mean the same thing
+            // here. Spring AI's own models always attach a usage object, but
+            // an application's ChatModel is free not to.
+            var usage = Optional.ofNullable(response.getMetadata().getUsage());
+            var input = usage.map(Usage::getPromptTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var output = usage.map(Usage::getCompletionTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var total = usage.map(Usage::getTotalTokens)
+                    .filter(count -> count > 0).orElse(null);
+            if (total == null && input != null && output != null) {
+                // A backend that reports the components but no total still
+                // reported the usage; derive rather than discard it.
+                total = input + output;
+            }
+            if (input == null && output == null && total == null) {
+                return null;
+            }
+            return new ResponseMetadata.TokenUsage(input, output, total);
+        }
     }
 
     private Media[] buildMedia(LLMRequest request) {

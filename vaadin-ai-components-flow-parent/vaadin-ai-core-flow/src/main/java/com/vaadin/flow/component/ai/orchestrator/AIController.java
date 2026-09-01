@@ -57,9 +57,10 @@ public interface AIController {
      * before the commit step: the conversation history is unchanged, the
      * request listener is not notified, the LLM stream is not opened, the
      * assistant placeholder is updated to a generic error message,
-     * {@link #onResponse(Throwable)} fires with the thrown exception so
-     * per-turn state captured before the throw can still be released, and the
-     * exception propagates back to the caller of the prompt entry point.
+     * {@link #onResponse(ResponseListener.ResponseEvent)} fires with the thrown
+     * exception so per-turn state captured before the throw can still be
+     * released, and the exception propagates back to the caller of the prompt
+     * entry point.
      * </p>
      */
     default void onRequest() {
@@ -78,23 +79,34 @@ public interface AIController {
      * when it ends also skips the hook, which requires {@code ui.access()}.
      * </p>
      * <p>
-     * On success {@code error} is {@code null}; use the call to commit staged
-     * state or run deferred UI updates. On failure {@code error} carries the
-     * cause (stream error, timeout, or any throw on the prompt path before the
-     * stream opens); release per-turn state captured in {@code onRequest}
-     * (locks, pending writes, snapshots) and discard the staged work. Note that
-     * a failure before {@link #onRequest()} — for example a throwing
-     * {@link RequestInterceptor} — also fires this method, so it can run
-     * without a preceding {@code onRequest} call.
+     * On success {@link ResponseListener.ResponseEvent#getError()} is empty;
+     * use the call to commit staged state or run deferred UI updates. On
+     * failure it carries the cause (stream error, timeout, or any throw on the
+     * prompt path before the stream opens); release per-turn state captured in
+     * {@code onRequest} (locks, pending writes, snapshots) and discard the
+     * staged work. Note that a failure before {@link #onRequest()} — for
+     * example a throwing {@link RequestInterceptor} — also fires this method,
+     * so it can run without a preceding {@code onRequest} call.
+     * </p>
+     * <p>
+     * An error is not the only abnormal ending. A turn cut off at the model's
+     * output limit ends with no error at all, and
+     * {@link ResponseListener.ResponseEvent#getMetadata()} carries the finish
+     * reason that tells the two apart — committing staged state on such a turn
+     * applies work the model never finished describing. The finish reason is
+     * the underlying framework's own word, so a controller that acts on it
+     * decides which values matter to it; see
+     * {@link com.vaadin.flow.component.ai.provider.ResponseMetadata}.
      * </p>
      * <p>
      * The default does nothing. Exceptions thrown from the hook are caught and
      * logged; Errors propagate.
      * </p>
      *
-     * @param error
-     *            the cause of failure, or {@code null} on success
+     * @param event
+     *            the outcome of the turn — response text, error, and provider
+     *            metadata — never {@code null}
      */
-    default void onResponse(Throwable error) {
+    default void onResponse(ResponseListener.ResponseEvent event) {
     }
 }

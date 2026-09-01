@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -60,6 +61,8 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
 import tools.jackson.databind.JsonNode;
 
 class LangChain4JLLMProviderTest {
@@ -1627,6 +1630,341 @@ class LangChain4JLLMProviderTest {
             @Override
             public String execute(JsonNode arguments) {
                 return executor.apply(arguments);
+            }
+        };
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Truncated");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.LENGTH);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(1200, 8, 1208));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Truncated"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("LENGTH", metadata.finishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingToolRoundTrips_accumulatesTokenUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(finalResponse.tokenUsage())
+                .thenReturn(new TokenUsage(200, 20, 220));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        Assertions.assertEquals(2, collected.size(),
+                "Each round trip publishes the state known so far");
+        Assertions.assertEquals(110,
+                collected.getFirst().tokenUsage().totalTokens(),
+                "The first snapshot carries the first round trip alone");
+        var metadata = collected.getLast();
+        Assertions.assertEquals("STOP", metadata.finishReason(),
+                "The reason that ended the turn wins");
+        Assertions.assertEquals(300, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(330, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_secondToolRoundTripFails_firstRoundMetadataStillPublished() {
+        // The failed turn was still billed for the round trips that ran; the
+        // sink must have received what was observed before the failure.
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse)
+                .thenThrow(new RuntimeException("API down"));
+
+        var response = provider.stream(request).collectList();
+        Assertions.assertThrows(RuntimeException.class, response::block);
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("TOOL_EXECUTION", metadata.finishReason());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Hello World");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("Hello ");
+            handler.onPartialResponse("World");
+            handler.onCompleteResponse(response);
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        var results = streamingProvider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hello ", "World"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("STOP", metadata.finishReason());
+        Assertions.assertEquals(55, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("STOP", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutAiMessage_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(response.finishReason())
+                .thenReturn(FinishReason.CONTENT_FILTER);
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(30, 0, 30));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A turn that ends without a message still reports why");
+        Assertions.assertEquals("CONTENT_FILTER",
+                collected.getFirst().finishReason());
+        Assertions.assertEquals(30,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("plain");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    @Test
+    void stream_nonStreamingWithUsageButNoFinishReason_publishesUsage() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", List.of(), collected);
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.tokenUsage())
+                .thenReturn(new TokenUsage(50, 5, 55));
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "Reported usage is worth publishing on its own");
+        Assertions.assertNull(collected.getFirst().finishReason());
+        Assertions.assertEquals(55,
+                collected.getFirst().tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingLastRoundTripReportsNothingNew_doesNotRepublish() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), collected);
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        Mockito.when(toolResponse.tokenUsage())
+                .thenReturn(new TokenUsage(100, 10, 110));
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A round trip that reports neither a reason nor usage must "
+                        + "not re-publish the earlier state");
+    }
+
+    @Test
+    void stream_turnEndsWithoutAiMessageAndWithoutFinishReason_logsWarning() {
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.aiMessage()).thenReturn(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "A turn that ends without a message and without a finish "
+                        + "reason must warn");
+    }
+
+    @Test
+    void stream_turnEndsWithoutFinishReason_logsWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "Expected a warning about the missing finish reason");
+    }
+
+    @Test
+    void stream_turnEndsWithFinishReason_noMissingFinishReasonWarning() {
+        var response = mockSimpleResponse("Done");
+        Mockito.when(response.finishReason()).thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "A turn with a reported finish reason must not warn");
+    }
+
+    @Test
+    void stream_finishReasonOnlyOnFinalToolRoundTrip_noMissingFinishReasonWarning() {
+        // Some models report the reason only on the round trip that ends the
+        // turn; earlier tool round trips without one are not abnormal.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(finalResponse.finishReason())
+                .thenReturn(FinishReason.STOP);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertFalse(hasMissingFinishReasonWarning(),
+                "The reason on the final round trip covers the turn");
+    }
+
+    @Test
+    void stream_finalToolRoundTripWithoutFinishReason_logsWarning() {
+        // The turn ended on a round trip the model said nothing about. The
+        // TOOL_EXECUTION reason from the earlier round trip describes that
+        // round trip, not how the turn ended, so it must not silence the
+        // warning.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("Call tool",
+                List.of(explicitTool), new ArrayList<>());
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(toolResponse.finishReason())
+                .thenReturn(FinishReason.TOOL_EXECUTION);
+        var finalResponse = mockSimpleResponse("done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse).thenReturn(finalResponse);
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(hasMissingFinishReasonWarning(),
+                "A turn ending on a round trip with no finish reason must "
+                        + "warn even when an earlier round trip reported one");
+    }
+
+    private boolean hasMissingFinishReasonWarning() {
+        return logger.getLoggingEvents().stream().anyMatch(
+                event -> event.getMessage().contains("no finish reason"));
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
+            List<ResponseMetadata> collected) {
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
             }
         };
     }

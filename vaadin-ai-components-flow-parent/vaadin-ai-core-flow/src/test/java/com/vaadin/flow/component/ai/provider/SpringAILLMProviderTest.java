@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -47,6 +48,9 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.DefaultUsage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -1538,6 +1542,71 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(originalError, thrown);
     }
 
+    @Test
+    void stream_nonStreamingEndsWithPendingToolCalls_logsWarning() {
+        // The turn stopped between asking for a tool and answering with its
+        // result — the silent truncation that is otherwise invisible. Needs a
+        // client whose own tool execution is disabled, since the default one
+        // would run the tool and ask for another round.
+        var toolAdvisorBuilder = ToolCallingAdvisor.builder()
+                .toolExecutionEligibilityChecker(response -> false);
+        var chatClient = ChatClient.builder(mockChatModel,
+                ObservationRegistry.NOOP, null, null, toolAdvisorBuilder)
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponseWithPendingToolCall());
+
+        chatClientProvider.stream(createSimpleRequest("invoke tool"))
+                .collectList().block();
+
+        assertWarningLogged("tool calls still pending");
+    }
+
+    @Test
+    void stream_nonStreamingWithoutFinishReason_logsWarning() {
+        provider.setStreaming(false);
+        mockSimpleChatWithoutFinishReason("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertWarningLogged("without a finish reason");
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReason_noAbnormalWarning() {
+        provider.setStreaming(false);
+        mockSimpleChat("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertNoWarningLogged("tool calls still pending");
+        assertNoWarningLogged("without a finish reason");
+    }
+
+    private void mockSimpleChatWithoutFinishReason(String responseText) {
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse(responseText, null));
+    }
+
+    private void assertWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.WARN)
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected a warning containing: " + phrase);
+    }
+
+    private void assertNoWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(),
+                "Expected no warning containing: " + phrase);
+    }
+
     private void assertAbnormalTerminationWarningLogged() {
         // The warning is emitted from a Reactor scheduler thread (Spring
         // AI's chatResponse pipeline), so we have to query across all
@@ -1716,6 +1785,308 @@ class SpringAILLMProviderTest {
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
         Assertions.assertEquals(0, receivedArgs.size());
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(chatResponseWithMetadata("Let me load the",
+                        "max_tokens", 1200, 8));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Let me load the"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("max_tokens", metadata.finishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithTerminalChunkMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("Hel", null),
+                        chatResponseWithMetadata("lo", "stop", 100, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hel", "lo"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("stop", metadata.finishReason());
+        Assertions.assertEquals(120, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(null)
+                                .build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("stop", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse("plain", null));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    @Test
+    void stream_streamingErrorsAfterMetadataChunk_metadataStillPublished() {
+        // The failed turn was still billed for what ran before the error; the
+        // sink must have received everything observed up to that point.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux
+                        .just(chatResponseWithMetadata("Hi", "tool_use", 40,
+                                10))
+                        .concatWith(Flux.error(
+                                new RuntimeException("network broken"))));
+
+        var response = provider.stream(request).collectList();
+        Assertions.assertThrows(RuntimeException.class, response::block);
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("tool_use", metadata.finishReason());
+        Assertions.assertEquals(50, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutTotal_totalDerivedFromComponents() {
+        // A backend that reports prompt and completion counts but no total
+        // still reported the usage; it must not be discarded.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(ChatResponse.builder()
+                        .generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder()
+                                .usage(new DefaultUsage(100, 20, null)).build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertEquals(120, usage.totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithZeroTotal_totalDerivedFromComponents() {
+        // A backend that reports the components but leaves the total at zero
+        // still reported the usage; the total must be derived, not dropped.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(120,
+                collected.getLast().tokenUsage().totalTokens(),
+                "An unreported total must be derived from the components");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutInputTokens_publishesOutputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(0, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertNull(usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the input count");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutOutputTokens_publishesInputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 0, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertNull(usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the output count");
+    }
+
+    @Test
+    void stream_streamingAcrossToolRoundTrips_publishesCumulativeUsage() {
+        // The default ChatClient consumes the tool-call round trip internally
+        // and re-emits the follow-up round with usage already accumulated
+        // across the round trips, so the last observed usage covers the whole
+        // turn. This test pins that behavior — the collector's last-wins
+        // accounting depends on it.
+        var collected = new ArrayList<ResponseMetadata>();
+        var tool = createExplicitTool("doSomething", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("invoke tool", List.of(tool),
+                collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(toolCallResponseWithUsage(30, 10)))
+                .thenReturn(Flux.just(
+                        chatResponseWithMetadata("done", "stop", 50, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        var metadata = collected.getLast();
+        Assertions.assertEquals("stop", metadata.finishReason());
+        Assertions.assertEquals(80, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingResendsGrowingUsageTally_lastValueWins() {
+        // Some backends resend a growing cumulative tally on every chunk
+        // instead of reporting the counts once at the end; the published
+        // usage must be the final tally, not a sum of the resends.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(
+                        Flux.just(chatResponseWithMetadata("Hel", null, 30, 4),
+                                chatResponseWithMetadata("lo", null, 30, 9),
+                                chatResponseWithMetadata("!", "stop", 30, 12)));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(30, usage.inputTokens());
+        Assertions.assertEquals(12, usage.outputTokens());
+        Assertions.assertEquals(42, usage.totalTokens());
+    }
+
+    @Test
+    void metadataSink_notOverridden_returnsNoOpConsumer() {
+        var request = createSimpleRequest("Hello");
+
+        Assertions.assertNotNull(request.metadataSink());
+        Assertions
+                .assertDoesNotThrow(() -> request.metadataSink().accept(null));
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<ResponseMetadata> collected) {
+        return requestWithMetadataSink(message, List.of(), collected);
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
+            List<ResponseMetadata> collected) {
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
+            }
+        };
+    }
+
+    private void mockCallWithUsage(Usage usage) {
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(usage)
+                                .build())
+                        .build());
+    }
+
+    private static ChatResponse chatResponseWithMetadata(String text,
+            String finishReason, int inputTokens, int outputTokens) {
+        var generationMetadata = finishReason == null
+                ? ChatGenerationMetadata.NULL
+                : ChatGenerationMetadata.builder().finishReason(finishReason)
+                        .build();
+        var generation = new Generation(new AssistantMessage(text),
+                generationMetadata);
+        return ChatResponse.builder().generations(List.of(generation))
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
+    }
+
+    private static ChatResponse toolCallResponseWithUsage(int inputTokens,
+            int outputTokens) {
+        var response = mockChatResponseWithPendingToolCall();
+        return ChatResponse.builder().generations(response.getResults())
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
     }
 
     @Test
