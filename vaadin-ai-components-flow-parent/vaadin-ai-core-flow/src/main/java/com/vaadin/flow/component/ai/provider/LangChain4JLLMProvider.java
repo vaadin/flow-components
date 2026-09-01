@@ -306,11 +306,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private static JsonNode parseExplicitToolArguments(String arguments) {
         try {
-            return parseArguments(arguments);
+            return LLMProviderHelpers.parseToolArguments(arguments);
         } catch (Exception e) {
-            // The malformed JSON came from the model itself, so the parser
-            // message is safe to relay and lets the model repair its next
-            // attempt.
+            // The bad arguments came from the model itself, so the message is
+            // safe to relay and lets the model repair its next attempt.
             throw new ToolException("invalid JSON arguments: " + e.getMessage(),
                     e);
         }
@@ -347,13 +346,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         builder.parameters(parseParametersSchema(schema));
         return builder.build();
-    }
-
-    private static JsonNode parseArguments(String arguments) {
-        if (arguments == null || arguments.isBlank()) {
-            return JacksonUtils.createObjectNode();
-        }
-        return JacksonUtils.readTree(arguments);
     }
 
     private static JsonObjectSchema parseParametersSchema(String schemaJson) {

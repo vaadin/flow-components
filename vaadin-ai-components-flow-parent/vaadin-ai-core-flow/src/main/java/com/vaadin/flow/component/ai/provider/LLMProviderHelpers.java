@@ -23,6 +23,11 @@ import java.util.Base64;
 import java.util.Objects;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Utility methods for LLM provider implementations.
@@ -95,5 +100,46 @@ final class LLMProviderHelpers {
                 "Attachment content type must not be null");
         Objects.requireNonNull(attachment.data(),
                 "Attachment data must not be null");
+    }
+
+    /**
+     * Parses the arguments a model sent for a tool call into the object a
+     * {@link LLMProvider.ToolSpec} expects.
+     * <p>
+     * Missing arguments become an empty object, so a tool that takes no
+     * parameters is callable whether or not the model sends anything. Anything
+     * else must parse as a JSON object: a model that has nothing to fill
+     * sometimes sends a bare value such as {@code ""} instead, which is valid
+     * JSON but carries no arguments.
+     *
+     * @param arguments
+     *            the raw argument JSON from the model, may be {@code null} or
+     *            blank
+     * @return the parsed arguments, never {@code null}
+     * @throws IllegalArgumentException
+     *             if the arguments are not valid JSON or parse to something
+     *             other than a JSON object
+     */
+    public static ObjectNode parseToolArguments(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            return JacksonUtils.createObjectNode();
+        }
+        JsonNode parsed;
+        try {
+            parsed = JacksonUtils.getMapper().readTree(arguments);
+        } catch (JacksonException e) {
+            // The message that goes back to the model keeps the parser
+            // diagnostic it can repair from, but not the location suffix
+            // full of Java library internals.
+            throw new IllegalArgumentException(e.getOriginalMessage(), e);
+        }
+        if (!parsed.isObject()) {
+            // Reported instead of letting the ObjectNode cast fail, so the
+            // message that goes back to the model names the shape it should
+            // send rather than a Java class cast.
+            throw new IllegalArgumentException(
+                    "expected a JSON object, but got " + parsed.getNodeType());
+        }
+        return (ObjectNode) parsed;
     }
 }

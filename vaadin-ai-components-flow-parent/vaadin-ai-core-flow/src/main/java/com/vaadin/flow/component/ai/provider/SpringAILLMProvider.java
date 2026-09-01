@@ -48,7 +48,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
-import com.vaadin.flow.internal.JacksonUtils;
 
 import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
@@ -668,11 +667,11 @@ public class SpringAILLMProvider implements LLMProvider {
             public String call(String arguments) {
                 JsonNode parsed;
                 try {
-                    parsed = parseArguments(arguments);
+                    parsed = LLMProviderHelpers.parseToolArguments(arguments);
                 } catch (Exception e) {
-                    // The malformed JSON came from the model itself, so
-                    // the parser message is safe to relay and lets the
-                    // model repair its next attempt.
+                    // The bad arguments came from the model itself, so the
+                    // message is safe to relay and lets the model repair its
+                    // next attempt.
                     LOGGER.warn("Tool '{}' received malformed JSON arguments",
                             tool.getName(), e);
                     return "Error executing tool: invalid JSON arguments: "
@@ -692,10 +691,4 @@ public class SpringAILLMProvider implements LLMProvider {
         };
     }
 
-    private static JsonNode parseArguments(String arguments) {
-        if (arguments == null || arguments.isBlank()) {
-            return JacksonUtils.createObjectNode();
-        }
-        return JacksonUtils.readTree(arguments);
-    }
 }
