@@ -44,6 +44,7 @@ import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.data.binder.Binder;
@@ -1349,7 +1350,8 @@ public class FormAIController implements AIController {
     }
 
     @Override
-    public void onResponse(Throwable error) {
+    public void onResponse(ResponseListener.ResponseEvent event) {
+        var error = event.getError().orElse(null);
         try {
             var changes = collectFieldValueChanges(error);
             // Marking before clearing the working state lets a changed field

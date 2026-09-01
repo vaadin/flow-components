@@ -40,6 +40,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.CompositeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
@@ -350,7 +351,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(new Div(a, b));
 
             controller.onRequest();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertFalse(a.isReadOnly());
             Assertions.assertFalse(b.isReadOnly());
@@ -368,7 +369,7 @@ class FormAIControllerTest {
                     new Div(editable, appReadOnly));
 
             controller.onRequest();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertFalse(editable.isReadOnly());
             Assertions.assertTrue(appReadOnly.isReadOnly(),
@@ -958,7 +959,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("John");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, events.size(), "Listener must fire "
                     + "exactly once for the single changed field");
@@ -979,7 +980,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             // No setValue between request and response.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(0, invocations.get(),
                     "Listener must not be called when no field changed");
@@ -995,7 +996,8 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("partial");
-            controller.onResponse(new RuntimeException("boom"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("boom")));
 
             Assertions.assertEquals(0, invocations.get(),
                     "Listener must not fire when the turn ended in error, "
@@ -1012,7 +1014,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             changed.setValue("X");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, events.size(),
                     "Only the changed field must produce an event; got: "
@@ -1037,7 +1039,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             visible.setValue("primary");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(containsEventFor(events, visible));
             Assertions.assertFalse(containsEventFor(events, ignored),
@@ -1052,7 +1054,7 @@ class FormAIControllerTest {
             Assertions.assertDoesNotThrow(() -> {
                 controller.onRequest();
                 field.setValue("any");
-                controller.onResponse(null);
+                controller.onResponse(AITurnEvents.success());
             }, "Lifecycle must run without a listener registered");
         }
 
@@ -1068,7 +1070,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("anything");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertFalse(field.isReadOnly(),
                     "Field must be unlocked even if a listener threw");
@@ -1089,7 +1091,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             primary.setValue("driver");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(2, events.size(),
                     "Both the driver and cascaded fields must produce events; "
@@ -1109,7 +1111,7 @@ class FormAIControllerTest {
             controller.onRequest();
             // Same content, different Set instance — Objects.equals true.
             field.setValue(Set.of("b", "a"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(events.isEmpty(),
                     "A multi-select set equal to its previous value must "
@@ -1126,7 +1128,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue(Set.of("a", "c"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var event = eventFor(events, field);
             Assertions.assertEquals(Set.of("a", "b"), event.getOldValue());
@@ -1147,7 +1149,7 @@ class FormAIControllerTest {
             third.setValue("c");
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(first, second, third),
                     events.stream().map(FieldValueChangeEvent::getField)
@@ -1165,7 +1167,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue(LocalDate.of(2026, 1, 1));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var event = eventFor(events, field);
             Assertions.assertNull(event.getOldValue(),
@@ -1187,7 +1189,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue(null);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var event = eventFor(events, field);
             Assertions.assertEquals(LocalDate.of(2026, 1, 1),
@@ -1207,7 +1209,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("X");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, first.size(),
                     "First listener must fire once for the changed field");
@@ -1236,7 +1238,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals(1, calls.get(),
                     "Listener must fire while registered");
 
@@ -1244,7 +1246,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("second");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals(1, calls.get(),
                     "Listener must not fire after Registration.remove()");
         }
@@ -1265,7 +1267,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("X");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, followingCalls.get(),
                     "An exception from one listener must not prevent the "
@@ -1293,7 +1295,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(2, throwerCalls.get(),
                     "The throwing listener must still be invoked for every "
@@ -1322,7 +1324,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("X");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, selfRemovingCalls.get(),
                     "Self-removing listener fires for the dispatch in which "
@@ -1332,7 +1334,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("Y");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, selfRemovingCalls.get(),
                     "Self-removing listener must not fire after the turn "
@@ -1361,7 +1363,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             primary.setValue("driver");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var event = eventFor(events, conditional);
             Assertions.assertEquals("", event.getOldValue(),
@@ -1389,7 +1391,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             primary.setValue("driver");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var event = eventFor(events, conditional);
             Assertions.assertEquals("preset", event.getOldValue(),
@@ -1414,7 +1416,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             primary.setValue("driver");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertFalse(containsEventFor(events, conditional),
                     "Revealing a hidden field without changing its value "
@@ -1436,7 +1438,7 @@ class FormAIControllerTest {
             controller.onRequest();
             controlling.setValue("business"); // reveals the conditional field
             conditional.setValue("cost-center-42"); // AI fills the revealed one
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(containsEventFor(events, conditional),
                     "A field revealed and filled within the same turn must "
@@ -1462,7 +1464,7 @@ class FormAIControllerTest {
             controller.onRequest();
             controlling.setValue("business"); // adds the new field to the form
             added.setValue("cost-center-42"); // AI fills the newly-added field
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(containsEventFor(events, added),
                     "A field added to the form and filled within the same "
@@ -1488,7 +1490,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             controlling.setValue("business"); // adds the new field, no write
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertFalse(containsEventFor(events, added),
                     "A field added mid-turn but never written must not "
@@ -1510,7 +1512,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(2, events.size(),
                     "Expected two events for two changed fields");
@@ -1540,7 +1542,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of("A:a", "B:a", "A:b", "B:b"), order,
                     "Listeners must visit each event in registration order, "
@@ -1568,7 +1570,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("from-llm");
             second.setValue("from-llm-too");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var secondEvent = eventFor(events, second);
             Assertions.assertEquals("", secondEvent.getOldValue(),
@@ -1602,7 +1604,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(0, lateCalls.get(),
                     "Listener registered mid-dispatch must not receive any "
@@ -1610,7 +1612,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             first.setValue("c");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, lateCalls.get(),
                     "Listener registered in the previous turn must receive "
@@ -1638,7 +1640,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("a");
             second.setValue("b");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(first, second), calls,
                     "A listener that removes itself during event 1 must "
@@ -1694,7 +1696,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals(1, markersOn(field).size());
 
             Assertions.assertDoesNotThrow(() -> {
@@ -1717,12 +1719,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("ai");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             field.setValue("user edit"); // clears the marker
 
             controller.onRequest();
             field.setValue("ai again");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A turn after the marker was cleared must leave the field "
@@ -1741,7 +1743,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             form.remove(field);
             form.add(field);
 
@@ -1761,7 +1763,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             field.setValue("user edit");
             form.remove(field);
             form.add(field);
@@ -1784,7 +1786,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(inner),
                     field.getChildren().toList(),
@@ -1806,7 +1808,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(i18nOn(field).isEmpty(),
                     "An unconfigured controller must set no texts; got: "
@@ -1825,7 +1827,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var i18n = i18nOn(field);
 
             Assertions.assertEquals("Vain viesti",
@@ -1850,7 +1852,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var confidence = i18nOn(field).get("confidence");
 
             Assertions.assertEquals("Epävarma",
@@ -1874,7 +1876,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var confidence = i18nOn(field).get("confidence");
 
             Assertions.assertEquals("Epävarma",
@@ -1898,7 +1900,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(i18nOn(field).isEmpty(),
                     "An empty i18n must set no texts; got: " + i18nOn(field));
@@ -1918,7 +1920,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var i18n = i18nOn(field);
 
             Assertions.assertEquals("Tekoäly täytti tämän kentän",
@@ -1941,13 +1943,13 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.setFieldMarkerI18n(
                     new FieldMarkerI18n().setMessage("Päivitetty viesti"));
             controller.onRequest();
             field.setValue("second");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size());
             Assertions.assertEquals("Päivitetty viesti",
@@ -1967,7 +1969,7 @@ class FormAIControllerTest {
             controller.onRequest();
             keep.setValue("filled");
             edited.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             edited.setValue("user edit");
 
@@ -2038,7 +2040,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A changed field must stay marked after the turn");
@@ -2059,7 +2061,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(form);
 
             controller.onRequest();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(), markersOn(field),
                     "An unchanged field must be left without a marker");
@@ -2077,10 +2079,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
-            controller.onResponse(null); // second turn changes nothing
+            controller.onResponse(AITurnEvents.success()); // second turn
+                                                           // changes nothing
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A turn that changes nothing must not clear an existing "
@@ -2097,7 +2100,8 @@ class FormAIControllerTest {
             var controller = new FormAIController(form);
 
             controller.onRequest();
-            controller.onResponse(new RuntimeException("boom"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("boom")));
 
             Assertions.assertEquals(List.of(), markersOn(field),
                     "The working state must clear even when the turn fails");
@@ -2114,10 +2118,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
-            controller.onResponse(new RuntimeException("boom"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("boom")));
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A failed turn must leave an existing mark in place");
@@ -2154,7 +2159,7 @@ class FormAIControllerTest {
             var controller = new FormAIController(form);
 
             controller.onRequest();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             form.remove(field);
             form.add(field);
 
@@ -2176,7 +2181,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             form.remove(field);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             form.add(field);
 
             Assertions.assertEquals(List.of(), markersOn(field),
@@ -2222,7 +2227,7 @@ class FormAIControllerTest {
             readOnly.setValue("filled");
             readOnly.setReadOnly(true);
             drainPendingJs(); // isolate the scripts queued at turn end
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var dump = drainPendingJs();
             var scripts = scriptsOn(dump, readOnly);
@@ -2249,7 +2254,7 @@ class FormAIControllerTest {
             controller.onRequest();
             field.setReadOnly(true); // no AI write to the field
             drainPendingJs();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var scripts = scriptsOn(drainPendingJs(), field);
             Assertions.assertEquals(1, scripts.size(),
@@ -2272,7 +2277,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             drainPendingJs();
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(),
                     scriptsOn(drainPendingJs(), field),
@@ -2292,7 +2297,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             fireRevert(field);
@@ -2312,7 +2317,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A field changed during a turn must be marked "
@@ -2332,7 +2337,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             changed.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(changed).size());
             Assertions.assertEquals(List.of(), markersOn(untouched),
@@ -2360,7 +2365,7 @@ class FormAIControllerTest {
             trigger.setValue("business");
             revealed.setVisible(true);
             revealed.setValue("cascaded");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(revealed).size(),
                     "A field revealed and filled during the turn must be "
@@ -2378,7 +2383,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("ai");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by user");
 
@@ -2397,11 +2402,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("second"); // AI write while a turn is in progress
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "An AI write during a turn must not clear the marker");
@@ -2418,7 +2423,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("ai");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             field.setValue("first edit"); // clears the marker
 
             field.setValue("second edit");
@@ -2442,7 +2447,7 @@ class FormAIControllerTest {
             field.setValue("old");
             controller.onRequest();
             field.setValue("new");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2467,11 +2472,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest(); // snapshots "filled"
             fireRevert(field); // restores "original" mid-turn
-            controller.onResponse(null); // the AI writes nothing
+            controller.onResponse(AITurnEvents.success()); // the AI writes
+                                                           // nothing
 
             Assertions.assertEquals("original", field.getValue());
             Assertions.assertEquals(List.of(), markersOn(field),
@@ -2492,12 +2498,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             fireRevert(field); // restores "original" mid-turn
             field.setValue("second"); // the AI writes the field again
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size());
             fireRevert(field);
@@ -2519,11 +2525,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("second");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2546,13 +2552,13 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first ai value");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             field.setValue("user typed"); // clears the marker
 
             controller.onRequest();
             field.setValue("second ai value");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2575,11 +2581,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("detour");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("original"); // the AI puts the original value back
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2600,7 +2606,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue(42.0);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2622,11 +2628,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue(42.0);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue(43.0);
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -2662,7 +2668,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(), markersOn(field),
                     "With automatic marking off, a changed field must be "
@@ -2688,7 +2694,7 @@ class FormAIControllerTest {
                             + "marking setting");
 
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(), markersOn(field),
                     "The marker that only carried the working state must go at "
@@ -2707,12 +2713,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("first");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.setFieldMarkerEnabled(false);
             controller.onRequest();
             field.setValue("second");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "A mark from an earlier turn must survive the opt-out");
@@ -2730,12 +2736,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("unmarked");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.setFieldMarkerEnabled(true);
             controller.onRequest();
             field.setValue("marked");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, markersOn(field).size(),
                     "Re-enabling automatic marking must mark the changes "
@@ -2756,7 +2762,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(1, events.size(),
                     "The change listener must fire regardless of the automatic "
@@ -2797,7 +2803,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var marker = requireMarkerOn(field);
             var wrapper = wrapperOn(field);
@@ -2839,7 +2845,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var wrapper = wrapperOn(field);
             Assertions.assertNotNull(wrapper,
@@ -2864,7 +2870,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
@@ -2882,7 +2888,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
@@ -2906,13 +2912,13 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("one");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             drainPendingJs();
 
             next.set(second);
             controller.onRequest();
             field.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var marker = requireMarkerOn(field);
             Assertions.assertNull(first.getElement().getParentNode(),
@@ -2939,12 +2945,12 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("one");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             drainPendingJs();
 
             controller.onRequest();
             field.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(),
                     contentScriptsOwnedBy(drainPendingJs(),
@@ -2973,11 +2979,11 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("one");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.onRequest();
             field.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(0, detaches.get(),
                     "Re-marking with the same content instance must not "
@@ -2997,13 +3003,13 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("one");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             drainPendingJs();
 
             controller.setFieldMarkerPopoverContentProvider(null);
             controller.onRequest();
             field.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(content.getElement().getParentNode(),
                     "The stale content must be released from the wrapper");
@@ -3036,19 +3042,19 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("one");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             controller.setFieldMarkerPopoverContentProvider(null);
             controller.onRequest();
             field.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var wrapper = wrapperOn(field);
             drainPendingJs();
 
             controller.setFieldMarkerPopoverContentProvider(change -> content);
             controller.onRequest();
             field.setValue("three");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(wrapper, wrapperOn(field),
                     "The mark must keep its wrapper across content changes");
@@ -3077,7 +3083,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var marker = requireMarkerOn(field);
             Assertions.assertEquals(List.of(),
@@ -3115,7 +3121,7 @@ class FormAIControllerTest {
             controller.onRequest();
             first.setValue("one");
             second.setValue("two");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var marker = requireMarkerOn(first);
             requireMarkerOn(second);
@@ -3152,7 +3158,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             requireMarkerOn(field);
             var warnings = TestLoggerFactory
@@ -3175,7 +3181,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             field.setValue("user edit");
 
             Assertions.assertEquals(List.of(), markersOn(field));
@@ -3194,7 +3200,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             fireRevert(field);
 
@@ -3218,7 +3224,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             drainPendingJs();
 
             controller.onRequest();
@@ -3241,7 +3247,7 @@ class FormAIControllerTest {
                             requireMarkerOn(field)),
                     "Clearing content must not queue another assignment");
 
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of(), markersOn(field),
                     "The marker that only carried the working state must go "
@@ -3262,7 +3268,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             requireMarkerOn(field).removeFromParent();
 
             Assertions.assertDoesNotThrow(() -> field.setValue("user edit"),
@@ -3284,7 +3290,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             var wrapper = wrapperOn(field);
             drainPendingJs();
 
@@ -3305,7 +3311,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             drainPendingJs();
 
             form.remove(field);
@@ -3337,7 +3343,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(List.of("provider", "listener"), calls,
                     "The provider must run before the change listeners");
@@ -3358,7 +3364,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(0, calls.get(),
                     "With marking off there is no popover to fill, so the "
@@ -3377,7 +3383,7 @@ class FormAIControllerTest {
 
             controller.onRequest();
             field.setValue("filled");
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals(1, markersOn(field).size());
 
             Assertions.assertDoesNotThrow(() -> {

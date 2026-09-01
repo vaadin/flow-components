@@ -65,6 +65,22 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- The response stream carries text only; everything else the model said
+  about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
+  A provider publishes whenever it learns more — each publish carries the
+  state of the turn so far and replaces the previous one, so a turn that
+  fails midway has still reported what was observed. Finish reasons are
+  relayed as the underlying framework words them and are never mapped to a
+  Vaadin enum: every vendor words them differently and keeps adding values
+  (the same truncation is `length` on OpenAI and `max_tokens` on Anthropic),
+  so any fixed set of our own would go stale. LangChain4j shows what mapping
+  costs — it collapses the vendor's word onto a five-constant enum before we
+  see it, per integration and losing what it does not recognize, so an
+  unrecognized value arrives as `null` from its OpenAI integration and as
+  `OTHER` from its Anthropic one. Framework code therefore never branches on
+  the content of a finish reason: checks that must tell a completed turn from
+  a truncated one use structure instead — a missing finish reason, or tool
+  calls still pending.
 
 ## Threading
 

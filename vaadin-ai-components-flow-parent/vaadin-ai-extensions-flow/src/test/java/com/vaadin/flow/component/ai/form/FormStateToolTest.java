@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
@@ -248,7 +249,7 @@ class FormStateToolTest {
                     "Application-read-only field must stay flagged, got: "
                             + fields.get(1));
         } finally {
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
         }
     }
 

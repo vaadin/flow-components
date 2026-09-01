@@ -57,6 +57,8 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
@@ -219,7 +221,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn is running, for example from
      * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
      * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(ResponseListener.ResponseEvent)}.</li>
      * </ul>
      *
      * <p>
@@ -449,8 +451,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private void handleResponse(ChatExecutionContext context,
             ChatResponse response) {
+        context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
             return;
         }
@@ -465,8 +469,39 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
         }
+    }
+
+    /**
+     * Warns when the round trip that ends the turn carries no finish reason.
+     * <p>
+     * Only that round trip counts. A reason reported by an earlier round trip
+     * describes why <i>that</i> round trip stopped — {@code TOOL_EXECUTION},
+     * typically — and says nothing about how the turn ended, so it must not
+     * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
+     * terminal-chunk check likewise ignores a reason that arrives with tool
+     * calls still pending. Called only from the two points where the turn ends,
+     * so the response passed in is by construction the terminal one.
+     * <p>
+     * This provider drives the tool-calling loop itself, so unlike
+     * {@code SpringAILLMProvider} a turn cannot end with tool calls still
+     * pending; a missing finish reason is the one terminal state left that may
+     * indicate a silent abnormal termination. It does not prove the model
+     * reported nothing: LangChain4j also leaves the reason unset when its
+     * integration does not recognize the value the model sent.
+     */
+    private static void warnOnMissingFinishReason(ChatResponse response) {
+        if (response.finishReason() != null) {
+            return;
+        }
+        LOGGER.warn("LLM turn ended with no finish reason for its final "
+                + "round trip. Either the model reported none, which may "
+                + "indicate a silent abnormal termination such as an upstream "
+                + "error, or LangChain4j dropped a value its integration does "
+                + "not recognize; if the response appears truncated this "
+                + "warning is the signal.");
     }
 
     private static ToolExecutionResultMessage executeToolRequest(
@@ -580,6 +615,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final FluxSink<String> sink;
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
+        private FinishReason lastFinishReason;
+        private TokenUsage accumulatedUsage;
 
         ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
                 ChatMemory chatMemory, ToolContext toolContext) {
@@ -587,6 +624,47 @@ public class LangChain4JLLMProvider implements LLMProvider {
             this.sink = sink;
             this.chatMemory = chatMemory;
             this.toolContext = toolContext;
+        }
+
+        /**
+         * Records the metadata of one model round trip and passes the state
+         * known so far to the metadata sink right away, so that a turn whose
+         * later round trip fails has still reported what the earlier ones cost.
+         * The reason that ends the turn wins; token usage accumulates across
+         * the round trips.
+         */
+        void observeMetadata(ChatResponse response) {
+            if (response.finishReason() == null
+                    && response.tokenUsage() == null) {
+                // Nothing new in this round trip, nothing to re-publish.
+                return;
+            }
+            if (response.finishReason() != null) {
+                lastFinishReason = response.finishReason();
+            }
+            var usage = response.tokenUsage();
+            if (usage != null) {
+                accumulatedUsage = accumulatedUsage == null ? usage
+                        : accumulatedUsage.add(usage);
+            }
+            publishMetadata();
+        }
+
+        private void publishMetadata() {
+            // LangChain4j collapses the model's own word onto its
+            // FinishReason enum before handing the response over — per
+            // integration, and losing whatever it does not recognize — so the
+            // constant name is the most faithful value left to publish. See
+            // ResponseMetadata, which documents what that costs.
+            var finishReason = lastFinishReason == null ? null
+                    : lastFinishReason.name();
+            var tokenUsage = accumulatedUsage == null ? null
+                    : new ResponseMetadata.TokenUsage(
+                            accumulatedUsage.inputTokenCount(),
+                            accumulatedUsage.outputTokenCount(),
+                            accumulatedUsage.totalTokenCount());
+            request.metadataSink()
+                    .accept(new ResponseMetadata(finishReason, tokenUsage));
         }
 
         LLMRequest getRequest() {
