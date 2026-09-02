@@ -1793,7 +1793,8 @@ class SpringAILLMProviderTest {
         provider.setStreaming(false);
         var receivedArgs = new ArrayList<JsonNode>();
         var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> {
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
                     receivedArgs.add(args);
                     return "ok";
                 });
@@ -1806,8 +1807,8 @@ class SpringAILLMProviderTest {
 
         var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
                 .getOptions()).getToolCallbacks();
-        // A model that has nothing to fill may send an empty string. That is
-        // valid JSON, so it parses, but it is not the object a tool expects.
+        // An empty string is valid JSON, so it parses, but it is not the
+        // object a tool with declared parameters expects.
         var result = toolCallbacks.getFirst().call("\"\"");
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
@@ -1822,7 +1823,8 @@ class SpringAILLMProviderTest {
     void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
         provider.setStreaming(false);
         var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> "ok");
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "ok");
 
         var request = new TestLLMRequestWithExplicitTools("Call tool", null,
                 Collections.emptyList(), new Object[0], List.of(explicitTool));
@@ -1839,6 +1841,37 @@ class SpringAILLMProviderTest {
                 "The model should be told what shape to send, but got: "
                         + result);
         assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_malformedArgumentsStillExecute() {
+        // A model that has nothing to fill sometimes sends an empty string —
+        // the very case the placeholder schema works around. A tool that
+        // declared no parameters ignores its arguments by contract, so it
+        // must run rather than bounce an error back to the model.
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("\"\"");
+
+        Assertions.assertEquals("done", result);
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
     }
 
     /**
@@ -2297,6 +2330,37 @@ class SpringAILLMProviderTest {
                 .getOptions()).getToolCallbacks();
         assertNoParametersSchema(
                 toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        // The model may fill the placeholder schema that was substituted for
+        // the missing one; a tool that declared no parameters must not see
+        // that.
+        var result = toolCallbacks.getFirst()
+                .call("{\"reason\":\"checking the form\"}");
+
+        Assertions.assertEquals("done", result);
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
     }
 
     @Test

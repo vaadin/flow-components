@@ -48,6 +48,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.AttachmentContentType;
 import com.vaadin.flow.component.ai.common.ChatMessage;
+import com.vaadin.flow.internal.JacksonUtils;
 
 import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
@@ -652,30 +653,40 @@ public class SpringAILLMProvider implements LLMProvider {
         return new ToolCallback() {
             @Override
             public ToolDefinition getToolDefinition() {
-                var schema = tool.getParametersSchema();
                 // A tool without a declared schema breaks some LLM APIs —
-                // see ToolSpec.NO_PARAMETERS_SCHEMA.
+                // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA.
                 return DefaultToolDefinition.builder().name(tool.getName())
                         .description(tool.getDescription())
-                        .inputSchema(schema != null && !schema.isBlank()
-                                ? schema
-                                : LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA)
+                        .inputSchema(LLMProviderHelpers.hasParameters(tool)
+                                ? tool.getParametersSchema()
+                                : LLMProviderHelpers.NO_PARAMETERS_SCHEMA)
                         .build();
             }
 
             @Override
             public String call(String arguments) {
                 JsonNode parsed;
-                try {
-                    parsed = LLMProviderHelpers.parseToolArguments(arguments);
-                } catch (Exception e) {
-                    // The bad arguments came from the model itself, so the
-                    // message is safe to relay and lets the model repair its
-                    // next attempt.
-                    LOGGER.warn("Tool '{}' received malformed JSON arguments",
-                            tool.getName(), e);
-                    return "Error executing tool: invalid JSON arguments: "
-                            + e.getMessage();
+                if (!LLMProviderHelpers.hasParameters(tool)) {
+                    // The model saw the placeholder schema; the tool declared
+                    // no parameters, so it receives none. Decided before
+                    // parsing, so the tool stays callable even on the
+                    // malformed arguments — an empty string, say — that the
+                    // placeholder schema exists to work around.
+                    parsed = JacksonUtils.createObjectNode();
+                } else {
+                    try {
+                        parsed = LLMProviderHelpers
+                                .parseToolArguments(arguments);
+                    } catch (Exception e) {
+                        // The bad arguments came from the model itself, so
+                        // the message is safe to relay and lets the model
+                        // repair its next attempt.
+                        LOGGER.warn(
+                                "Tool '{}' received malformed JSON arguments",
+                                tool.getName(), e);
+                        return "Error executing tool: invalid JSON arguments: "
+                                + e.getMessage();
+                    }
                 }
                 try {
                     return tool.execute(parsed);
