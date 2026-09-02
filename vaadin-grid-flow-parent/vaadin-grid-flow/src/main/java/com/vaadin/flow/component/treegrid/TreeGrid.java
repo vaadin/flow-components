@@ -111,14 +111,8 @@ public class TreeGrid<T> extends Grid<T>
 
     @Override
     protected void initConnector() {
-        // Using Page.executeJs to ensure this runs before any other
-        // executeJs calls scheduled on the component that require the
-        // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.treeGridConnector.initLazy($0)",
-                        getElement());
+        getElement().addJsInitializer(
+                "window.Vaadin.Flow.treeGridConnector.initLazy(this)");
     }
 
     /**

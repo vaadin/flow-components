@@ -50,7 +50,6 @@ import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.internal.AllowInert;
@@ -72,7 +71,6 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.SignalBinding;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -278,6 +276,11 @@ public class DatePicker
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
+
+        // Registered first so that the connector is initialized before any
+        // connector call the rest of the constructor may schedule
+        getElement().addJsInitializer(
+                "window.Vaadin.Flow.datepickerConnector.initLazy(this)");
 
         getElement().setProperty("manualValidation", true);
 
@@ -935,7 +938,6 @@ public class DatePicker
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        initConnector();
         requestI18nUpdate();
         // Work requested while detached must not carry over to a freshly
         // created client element, which has no config and an empty cache.
@@ -944,12 +946,6 @@ public class DatePicker
         if (hasDateMetadataConfig()) {
             requestConfigUpdate();
         }
-    }
-
-    private void initConnector() {
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
-                getElement()));
     }
 
     /**
@@ -1053,11 +1049,6 @@ public class DatePicker
                     i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
         }
         return i18nObject;
-    }
-
-    void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     @Override

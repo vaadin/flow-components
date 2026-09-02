@@ -1776,6 +1776,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
+        // Registered first so that the connector is initialized before any
+        // connector call the rest of the constructor may schedule
+        initConnector();
         this.dataCommunicatorBuilder = dataCommunicatorBuilder;
         arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
@@ -1858,15 +1861,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
+    /**
+     * Registers the JavaScript initializer that creates this grid's client-side
+     * connector. Called once from the constructor, which means the instance is
+     * not fully constructed yet and there is no UI available.
+     * <p>
+     * For internal use only. May be renamed or removed in a future release.
+     */
     protected void initConnector() {
-        // Using Page.executeJs to ensure this runs before any other
-        // executeJs calls scheduled on the component that require the
-        // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
-                        getElement());
+        getElement().addJsInitializer(
+                "window.Vaadin.Flow.gridConnector.initLazy(this)");
     }
 
     /**
@@ -4111,7 +4115,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        initConnector();
         updateClientSorterDirections();
         updateClientSelectionMode();
         if (getDataProvider() != null) {

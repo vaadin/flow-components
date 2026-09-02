@@ -32,7 +32,9 @@ When a Flow component calls client-side JavaScript, always call through the comp
 
 When a Flow component only calls a named method on a web component, prefer `callJsFunction` over `executeJs`.
 
-When server-side code initializes persistent client-side JavaScript via `Element.executeJs()` (e.g. initializing a connector, adding a listener) it must happen in the component's attach hook (`onAttach` override or attach listener). Flow recreates client elements on detach/re-attach and the attach handler guarantees the script is re-applied for every new element. The exceptions are one-time state sync fixes (e.g. force client property to a value when Flow's property tracking would not sync otherwise).
+When server-side code installs persistent client-side JavaScript (e.g. initializing a connector, adding a native event listener), register it with `Element.addJsInitializer()` in the component's constructor, before anything else the constructor may schedule. Flow re-runs the initializer for every client element it creates for the component, and registering it first guarantees the connector exists before any connector call scheduled later, including calls made from setters while the component is still detached. If the installed JavaScript needs to be torn down, return a cleanup function from the expression.
+
+Only initialize client-side JavaScript from the attach hook (`onAttach` override or attach listener) with `Element.executeJs()` when the expression needs a value that exists only once attached, such as the app id from `event.getUI()`. The attach hook stays the place for re-syncing server state to a freshly created client element (e.g. marking a configuration dirty) and for one-time state sync fixes. Components written before `addJsInitializer()` existed may still initialize client-side scripts from the attach hook; that is not a violation on its own, only new or reworked code should follow the rule above.
 
 When code clears an element property, prefer `getElement().removeProperty(name)` over `getElement().setProperty(name, null)`.
 

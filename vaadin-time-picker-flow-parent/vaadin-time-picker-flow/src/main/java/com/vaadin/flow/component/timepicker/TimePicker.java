@@ -219,6 +219,11 @@ public class TimePicker
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
 
+        // Registered first so that the connector is initialized before any
+        // connector call the rest of the constructor may schedule
+        getElement().addJsInitializer(
+                "window.Vaadin.Flow.timepickerConnector.initLazy(this)");
+
         // Initialize property value unless it has already been set from a
         // template
         if ((getElement().getProperty("value") == null
@@ -704,16 +709,7 @@ public class TimePicker
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        initConnector();
         requestLocaleUpdate();
-    }
-
-    private void initConnector() {
-        // can't run this with getElement().executeJs(...) since then
-        // setLocale might be called before this causing client side error
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
-                getElement()));
     }
 
     /**

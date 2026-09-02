@@ -54,6 +54,11 @@ public abstract class MapBase extends Component
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
+        // Registered first so that the connector is initialized before any
+        // connector call the rest of the constructor may schedule
+        getElement()
+                .addJsInitializer("window.Vaadin.Flow.mapConnector.init(this)");
+
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
@@ -89,7 +94,6 @@ public abstract class MapBase extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         // Ensure the full configuration is synced when (re-)attaching the
         // component
         configuration.deepMarkAsDirty();

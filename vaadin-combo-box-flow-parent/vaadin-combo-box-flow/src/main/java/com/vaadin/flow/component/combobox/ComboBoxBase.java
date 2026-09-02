@@ -178,6 +178,11 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
 
+        // Registered first so that the connector is initialized before any
+        // connector call the rest of the constructor may schedule
+        getElement().addJsInitializer(
+                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
+
         getElement().setProperty("manualValidation", true);
 
         // Extracted as implementation to fix serialization issue:
@@ -694,7 +699,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        initConnector();
         dataController.onAttach();
     }
 
@@ -1488,11 +1492,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     protected void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 
     @Override
