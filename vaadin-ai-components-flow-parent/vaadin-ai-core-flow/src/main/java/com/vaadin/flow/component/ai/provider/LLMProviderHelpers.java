@@ -45,10 +45,12 @@ final class LLMProviderHelpers {
      * string — and at least Anthropic models on Amazon Bedrock reject the
      * request that replays such a tool call.
      * <p>
-     * The placeholder never reaches the tool: a provider that substitutes this
-     * schema also passes an empty arguments object to
-     * {@link LLMProvider.ToolSpec#execute}, so the property declared here is
-     * free to change.
+     * The placeholder never reaches a tool: whenever a provider sends this
+     * schema in place of the tool's own — including the LangChain4j fallback
+     * for a declared schema that fails to parse — it skips argument parsing and
+     * invokes {@link LLMProvider.ToolSpec#execute} with an empty object,
+     * whatever the model sent. The property declared here is therefore free to
+     * change.
      */
     public static final String NO_PARAMETERS_SCHEMA = """
             {

@@ -278,7 +278,8 @@ public interface LLMProvider {
          * For a tool that takes no parameters, return {@code null}. The
          * built-in providers then declare a placeholder schema to the LLM —
          * some LLM APIs misbehave when a tool declares no properties at all —
-         * and pass an empty arguments object to {@link #execute(JsonNode)}.
+         * and always invoke {@link #execute(JsonNode)} with an empty arguments
+         * object, whatever the model sends.
          * </p>
          *
          * @return the JSON Schema string, or {@code null} if the tool takes no

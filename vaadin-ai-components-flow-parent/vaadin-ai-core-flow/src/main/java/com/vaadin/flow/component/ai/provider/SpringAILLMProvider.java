@@ -666,22 +666,27 @@ public class SpringAILLMProvider implements LLMProvider {
             @Override
             public String call(String arguments) {
                 JsonNode parsed;
-                try {
-                    parsed = LLMProviderHelpers.parseToolArguments(arguments);
-                } catch (Exception e) {
-                    // The bad arguments came from the model itself, so the
-                    // message is safe to relay and lets the model repair its
-                    // next attempt.
-                    LOGGER.warn("Tool '{}' received malformed JSON arguments",
-                            tool.getName(), e);
-                    return "Error executing tool: invalid JSON arguments: "
-                            + e.getMessage();
-                }
                 if (!LLMProviderHelpers.hasParameters(tool)) {
-                    // The model saw the placeholder schema and may have
-                    // filled it; the tool declared no parameters, so it
-                    // receives none.
+                    // The model saw the placeholder schema; the tool declared
+                    // no parameters, so it receives none. Decided before
+                    // parsing, so the tool stays callable even on the
+                    // malformed arguments — an empty string, say — that the
+                    // placeholder schema exists to work around.
                     parsed = JacksonUtils.createObjectNode();
+                } else {
+                    try {
+                        parsed = LLMProviderHelpers
+                                .parseToolArguments(arguments);
+                    } catch (Exception e) {
+                        // The bad arguments came from the model itself, so
+                        // the message is safe to relay and lets the model
+                        // repair its next attempt.
+                        LOGGER.warn(
+                                "Tool '{}' received malformed JSON arguments",
+                                tool.getName(), e);
+                        return "Error executing tool: invalid JSON arguments: "
+                                + e.getMessage();
+                    }
                 }
                 try {
                     return tool.execute(parsed);

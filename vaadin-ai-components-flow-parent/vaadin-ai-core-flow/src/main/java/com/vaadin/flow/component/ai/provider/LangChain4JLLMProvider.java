@@ -298,18 +298,34 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
+            var placeholderSchema = usesPlaceholderSchema(tool);
             toolExecutors.put(tool.getName(), (execReq, memoryId) -> {
-                var arguments = parseExplicitToolArguments(execReq.arguments());
-                if (!LLMProviderHelpers.hasParameters(tool)) {
-                    // The model saw the placeholder schema and may have
-                    // filled it; the tool declared no parameters, so it
-                    // receives none.
-                    arguments = JacksonUtils.createObjectNode();
+                if (placeholderSchema) {
+                    // The model saw the placeholder schema; the tool did not
+                    // declare a usable one, so it receives no arguments.
+                    // Decided before parsing, so the tool stays callable even
+                    // on the malformed arguments — an empty string, say —
+                    // that the placeholder schema exists to work around.
+                    return tool.execute(JacksonUtils.createObjectNode());
                 }
-                return tool.execute(arguments);
+                return tool.execute(
+                        parseExplicitToolArguments(execReq.arguments()));
             });
         }
         return toolExecutors;
+    }
+
+    /**
+     * Whether the schema sent to the LLM for this tool is
+     * {@link LLMProviderHelpers#NO_PARAMETERS_SCHEMA} rather than the tool's
+     * own: the tool declares no schema, or declares one that does not parse.
+     * Every such tool gets an empty arguments object at execution time, so
+     * whatever the model filled the placeholder with never reaches a tool.
+     */
+    private static boolean usesPlaceholderSchema(LLMProvider.ToolSpec tool) {
+        return !LLMProviderHelpers.hasParameters(tool)
+                || parseParametersSchemaOrNull(
+                        tool.getParametersSchema()) == null;
     }
 
     private static JsonNode parseExplicitToolArguments(String arguments) {
@@ -346,16 +362,37 @@ public class LangChain4JLLMProvider implements LLMProvider {
             LLMProvider.ToolSpec tool) {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
-        // A tool without a declared schema breaks some LLM APIs —
-        // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA.
-        var schema = LLMProviderHelpers.hasParameters(tool)
-                ? tool.getParametersSchema()
-                : LLMProviderHelpers.NO_PARAMETERS_SCHEMA;
-        builder.parameters(parseParametersSchema(schema));
+        JsonObjectSchema parameters = null;
+        if (LLMProviderHelpers.hasParameters(tool)) {
+            parameters = parseParametersSchemaOrNull(
+                    tool.getParametersSchema());
+            if (parameters == null) {
+                LOGGER.warn(
+                        "Failed to parse the parameters schema of tool '{}', "
+                                + "using the no-parameters schema",
+                        tool.getName());
+            }
+        }
+        if (parameters == null) {
+            // A tool without a usable schema breaks some LLM APIs —
+            // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA. The constant is a
+            // well-formed literal, so this parse cannot return null.
+            parameters = parseParametersSchemaOrNull(
+                    LLMProviderHelpers.NO_PARAMETERS_SCHEMA);
+        }
+        builder.parameters(parameters);
         return builder.build();
     }
 
-    private static JsonObjectSchema parseParametersSchema(String schemaJson) {
+    /**
+     * Parses a JSON Schema string into the LangChain4j schema object, or
+     * returns {@code null} when the string does not parse. Logs nothing: the
+     * caller decides whether a failure is worth a warning, since the check runs
+     * both when building the tool specification and when deciding the arguments
+     * handed to the executor.
+     */
+    private static JsonObjectSchema parseParametersSchemaOrNull(
+            String schemaJson) {
         try {
             JsonNode root = JacksonUtils.readTree(schemaJson);
             var schemaBuilder = JsonObjectSchema.builder();
@@ -374,11 +411,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
             return schemaBuilder.build();
         } catch (Exception e) {
-            LOGGER.warn("Failed to parse tool parameters schema, "
-                    + "using no-parameters schema", e);
-            // The constant is a well-formed literal, so this cannot recurse.
-            return parseParametersSchema(
-                    LLMProviderHelpers.NO_PARAMETERS_SCHEMA);
+            LOGGER.debug("Tool parameters schema failed to parse", e);
+            return null;
         }
     }
 
