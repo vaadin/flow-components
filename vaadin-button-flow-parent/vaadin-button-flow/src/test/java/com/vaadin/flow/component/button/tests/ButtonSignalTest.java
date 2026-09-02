@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.BindingActiveException;
@@ -224,6 +225,16 @@ class ButtonSignalTest extends AbstractSignalsTest {
 
         Assertions.assertThrows(IllegalStateException.class,
                 () -> button.setDisableOnClick(true));
+    }
+
+    @Test
+    void setDisableOnClickMode_enabledBindingActive_throws() {
+        button = new Button("foo");
+        UI.getCurrent().add(button);
+        button.bindEnabled(new ValueSignal<>(true));
+
+        Assertions.assertThrows(IllegalStateException.class, () -> button
+                .setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE));
     }
 
     @Test
