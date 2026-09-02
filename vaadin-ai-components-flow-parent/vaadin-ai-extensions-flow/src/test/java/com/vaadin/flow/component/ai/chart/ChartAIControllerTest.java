@@ -116,19 +116,13 @@ class ChartAIControllerTest {
         }
 
         @Test
-        void declaresOptionalOnlyParameterSchema() {
-            // A tool without a declared property makes models disagree on
-            // what to send as arguments, and some LLM APIs reject the
-            // request that replays such a tool call.
-            var schema = json(
+        void declaresNoParameters() {
+            // A null schema tells the provider the tool takes no parameters;
+            // the provider substitutes its placeholder schema in the LLM
+            // request.
+            Assertions.assertNull(
                     findTool(controller.getTools(), "get_chart_instructions")
                             .getParametersSchema());
-            Assertions.assertEquals("object", schema.path("type").asString());
-            Assertions.assertTrue(schema.path("properties").size() > 0,
-                    "Schema must declare at least one property, got: "
-                            + schema);
-            Assertions.assertEquals(0, schema.path("required").size(),
-                    "All declared properties must be optional, got: " + schema);
         }
     }
 

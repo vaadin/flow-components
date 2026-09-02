@@ -298,8 +298,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
-            toolExecutors.put(tool.getName(), (execReq, memoryId) -> tool
-                    .execute(parseExplicitToolArguments(execReq.arguments())));
+            toolExecutors.put(tool.getName(), (execReq, memoryId) -> {
+                var arguments = parseExplicitToolArguments(execReq.arguments());
+                if (!LLMProviderHelpers.hasParameters(tool)) {
+                    // The model saw the placeholder schema and may have
+                    // filled it; the tool declared no parameters, so it
+                    // receives none.
+                    arguments = JacksonUtils.createObjectNode();
+                }
+                return tool.execute(arguments);
+            });
         }
         return toolExecutors;
     }
@@ -338,12 +346,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
             LLMProvider.ToolSpec tool) {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
-        var schema = tool.getParametersSchema();
-        if (schema == null || schema.isBlank()) {
-            // A tool without a declared schema breaks some LLM APIs —
-            // see ToolSpec.NO_PARAMETERS_SCHEMA.
-            schema = LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA;
-        }
+        // A tool without a declared schema breaks some LLM APIs —
+        // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA.
+        var schema = LLMProviderHelpers.hasParameters(tool)
+                ? tool.getParametersSchema()
+                : LLMProviderHelpers.NO_PARAMETERS_SCHEMA;
         builder.parameters(parseParametersSchema(schema));
         return builder.build();
     }
@@ -371,7 +378,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     + "using no-parameters schema", e);
             // The constant is a well-formed literal, so this cannot recurse.
             return parseParametersSchema(
-                    LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA);
+                    LLMProviderHelpers.NO_PARAMETERS_SCHEMA);
         }
     }
 

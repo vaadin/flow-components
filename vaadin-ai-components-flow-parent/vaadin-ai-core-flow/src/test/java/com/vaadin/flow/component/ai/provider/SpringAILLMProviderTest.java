@@ -1792,8 +1792,8 @@ class SpringAILLMProviderTest {
     void stream_withExplicitTool_nonObjectJsonArguments_reportsExpectedShape() {
         provider.setStreaming(false);
         var receivedArgs = new ArrayList<JsonNode>();
-        var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
                     receivedArgs.add(args);
                     return "ok";
                 });
@@ -1821,8 +1821,8 @@ class SpringAILLMProviderTest {
     @Test
     void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
         provider.setStreaming(false);
-        var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> "ok");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "ok");
 
         var request = new TestLLMRequestWithExplicitTools("Call tool", null,
                 Collections.emptyList(), new Object[0], List.of(explicitTool));
@@ -2297,6 +2297,37 @@ class SpringAILLMProviderTest {
                 .getOptions()).getToolCallbacks();
         assertNoParametersSchema(
                 toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        // The model may fill the placeholder schema that was substituted for
+        // the missing one; a tool that declared no parameters must not see
+        // that.
+        var result = toolCallbacks.getFirst()
+                .call("{\"reason\":\"checking the form\"}");
+
+        Assertions.assertEquals("done", result);
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
     }
 
     @Test

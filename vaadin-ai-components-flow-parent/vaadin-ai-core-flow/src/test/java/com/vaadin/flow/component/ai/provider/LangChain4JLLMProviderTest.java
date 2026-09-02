@@ -1379,8 +1379,8 @@ class LangChain4JLLMProviderTest {
     @Test
     void stream_withExplicitTool_nonObjectJsonArguments_reportsExpectedShape() {
         var receivedArgs = new ArrayList<JsonNode>();
-        var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> {
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
                     receivedArgs.add(args);
                     return "ok";
                 });
@@ -1413,8 +1413,8 @@ class LangChain4JLLMProviderTest {
 
     @Test
     void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
-        var explicitTool = createExplicitTool("myTool", "A test tool",
-                LLMProvider.ToolSpec.NO_PARAMETERS_SCHEMA, args -> "ok");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "ok");
 
         var request = new TestLLMRequestWithExplicitTools("Call my tool", null,
                 Collections.emptyList(), new Object[0], List.of(explicitTool));
@@ -1588,6 +1588,63 @@ class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel).chat(captor.capture());
         assertNoParametersSchema(
                 captor.getValue().toolSpecifications().getFirst().parameters());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        // The model may fill the placeholder schema that was substituted for
+        // the missing one; a tool that declared no parameters must not see
+        // that.
+        var response1 = mockSimpleResponseWithTool("simpleTool",
+                "{\"reason\":\"checking the form\"}");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
+    }
+
+    @Test
+    void stream_withExplicitToolMalformedSchema_executeReceivesArguments() {
+        // Only a tool that declared no schema at all gets its arguments
+        // emptied; a tool whose declared schema failed to parse still meant
+        // to receive what the model sends.
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "not json", args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+
+        var response1 = mockSimpleResponseWithTool("myTool",
+                "{\"city\":\"Helsinki\"}");
+        var response2 = mockSimpleResponse("Done");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response1, response2);
+
+        provider.stream(request).blockFirst();
+
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertEquals("Helsinki",
+                receivedArgs.getFirst().get("city").asString());
     }
 
     @Test
