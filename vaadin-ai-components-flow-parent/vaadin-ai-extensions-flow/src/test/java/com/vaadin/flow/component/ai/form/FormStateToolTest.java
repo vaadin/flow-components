@@ -1249,41 +1249,28 @@ class FormStateToolTest {
     }
 
     @Test
-    void getFormStateSchemaIsStaticAndDeclaresOnlyOptionalParameters() {
-        // A schema with no properties makes models disagree on what to send
-        // as arguments, and some LLM APIs reject the request that replays
-        // such a tool call — so the tool declares an optional property it
-        // ignores. The schema stays static so providers that cache prompt
-        // prefixes hit the cache on every subsequent prompt.
+    void getFormStateDeclaresNoParameters() {
+        // A null schema tells the provider the tool takes no parameters; the
+        // provider substitutes a static placeholder schema in the LLM
+        // request, so providers that cache prompt prefixes hit the cache on
+        // every subsequent prompt.
         var controller = new FormAIController(new Div(new TestField()));
 
-        var schema = findTool(controller.getTools(), "get_form_state")
-                .getParametersSchema();
-        var node = json(schema);
-
-        Assertions.assertEquals("object", node.path("type").asString());
-        Assertions.assertTrue(node.path("properties").size() > 0,
-                "Schema must declare at least one property, got: " + node);
-        Assertions.assertEquals(0, node.path("required").size(),
-                "All declared properties must be optional, got: " + node);
-        Assertions.assertEquals(schema,
-                findTool(controller.getTools(), "get_form_state")
-                        .getParametersSchema(),
-                "Schema must be byte-identical across calls");
+        Assertions.assertNull(findTool(controller.getTools(), "get_form_state")
+                .getParametersSchema());
     }
 
     @Test
-    void getFormStateIgnoresDeclaredOptionalArguments() {
+    void getFormStateIgnoresUnexpectedArguments() {
         var controller = new FormAIController(new Div(new TestField()));
         var tool = findTool(controller.getTools(), "get_form_state");
 
         var args = JacksonUtils.createObjectNode();
-        json(tool.getParametersSchema()).path("properties").propertyNames()
-                .forEach(name -> args.put(name, "ignored"));
+        args.put("unexpected", "ignored");
 
         Assertions.assertEquals(tool.execute(JacksonUtils.createObjectNode()),
                 tool.execute(args),
-                "Declared optional properties must not affect the result");
+                "Unexpected arguments must not affect the result");
     }
 
     @Test

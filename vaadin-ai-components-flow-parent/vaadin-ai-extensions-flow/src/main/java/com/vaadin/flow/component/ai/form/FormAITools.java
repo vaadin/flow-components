@@ -141,7 +141,7 @@ final class FormAITools {
 
             @Override
             public String getParametersSchema() {
-                return NO_PARAMETERS_SCHEMA;
+                return null;
             }
 
             @Override

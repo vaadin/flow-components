@@ -37,6 +37,48 @@ import tools.jackson.databind.node.ObjectNode;
 final class LLMProviderHelpers {
 
     /**
+     * JSON Schema substituted when a tool declares no parameters, i.e.
+     * {@link LLMProvider.ToolSpec#getParametersSchema()} returns {@code null}
+     * or blank. Declares a single optional {@code reason} property so the LLM
+     * always has a well-formed, non-empty object to send as arguments: without
+     * a declared property, models disagree on what to send — some send an empty
+     * string — and at least Anthropic models on Amazon Bedrock reject the
+     * request that replays such a tool call.
+     * <p>
+     * The placeholder never reaches a tool: whenever a provider sends this
+     * schema in place of the tool's own — including the LangChain4j fallback
+     * for a declared schema that fails to parse — it skips argument parsing and
+     * invokes {@link LLMProvider.ToolSpec#execute} with an empty object,
+     * whatever the model sent. The property declared here is therefore free to
+     * change.
+     */
+    public static final String NO_PARAMETERS_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "description": "Optional note on why this tool is being called. Ignored by the tool."
+                }
+              }
+            }""";
+
+    /**
+     * Tells whether a tool declares parameters. A tool whose schema is
+     * {@code null} or blank takes none: the provider declares
+     * {@link #NO_PARAMETERS_SCHEMA} to the LLM in its place and passes an empty
+     * arguments object to the tool.
+     *
+     * @param tool
+     *            the tool to check
+     * @return {@code true} if the tool declares a parameters schema
+     */
+    public static boolean hasParameters(LLMProvider.ToolSpec tool) {
+        var schema = tool.getParametersSchema();
+        return schema != null && !schema.isBlank();
+    }
+
+    /**
      * Decodes byte array as UTF-8 text.
      *
      * @param data
