@@ -550,8 +550,13 @@ public class AIOrchestrator implements Serializable {
         var assistantMessage = createAssistantMessagePlaceholder();
 
         try {
+            var messageId = UUID.randomUUID().toString();
+            // One event for both hooks: the user message, assigned messageId,
+            // and attachments (empty list when none).
+            var requestEvent = new RequestListener.RequestEvent(userMessage,
+                    messageId, attachments);
             if (controller != null) {
-                controller.onRequest();
+                controller.onRequest(requestEvent);
             }
 
             var metadataHolder = new AtomicReference<ResponseMetadata>();
@@ -560,14 +565,8 @@ public class AIOrchestrator implements Serializable {
             LOGGER.debug("Processing prompt with {} attachments",
                     attachments.size());
 
-            var messageId = UUID.randomUUID().toString();
             if (requestListener != null) {
-                // Fires on every prompt with the user message, assigned
-                // messageId, and attachments (empty list when none) — the
-                // generic "request being submitted" hook for listener users,
-                // counterpart to AIController.onRequest().
-                requestListener.onRequest(new RequestListener.RequestEvent(
-                        userMessage, messageId, List.copyOf(attachments)));
+                requestListener.onRequest(requestEvent);
             }
             conversationHistory.add(new ChatMessage(ChatMessage.Role.USER,
                     userMessage, messageId, Instant.now()));
@@ -1402,8 +1401,8 @@ public class AIOrchestrator implements Serializable {
          * Sets a listener that is called on every prompt, just before the LLM
          * stream opens. The listener receives the user message, the assigned
          * {@code messageId}, and the attachments included with the message
-         * (empty list when none). Same lifecycle moment as
-         * {@link AIController#onRequest()}.
+         * (empty list when none). Same lifecycle moment and same event as
+         * {@link AIController#onRequest(RequestListener.RequestEvent)}.
          * <p>
          * Typical use: persist attachment data in your own storage keyed by
          * {@code messageId}, so the same id can be used later to look the
