@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.form;
 
 import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -642,11 +643,11 @@ class SourceTrackingTest {
             fill(controller, field, trackedValue("Acme"));
             controller.onResponse(AITurnEvents.success());
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             field.setValue("cascaded");
             controller.onResponse(AITurnEvents.success());
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             field.setValue("Acme");
             controller.onResponse(AITurnEvents.success());
 
@@ -666,7 +667,7 @@ class SourceTrackingTest {
             fill(controller, field, trackedValue("Acme"));
             field.setValue("edited by hand");
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             fill(controller, field, "\"Acme\"");
 
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
@@ -866,7 +867,7 @@ class SourceTrackingTest {
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             fill(controller, field, """
                     {"value": "Acme", "confidence": "low",
                      "extracts": [{"text": "re-read"}]}""");
@@ -891,7 +892,7 @@ class SourceTrackingTest {
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             fill(controller, field, """
                     {"value": "Acme", "extracts": [{"text": "re-read"}]}""");
             controller.onResponse(AITurnEvents.success());
@@ -913,7 +914,7 @@ class SourceTrackingTest {
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             fill(controller, field, "\"Acme\"");
             controller.onResponse(AITurnEvents.success());
 
@@ -931,7 +932,7 @@ class SourceTrackingTest {
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             fill(controller, field, "\"second\"");
             controller.onResponse(AITurnEvents.success());
 
@@ -956,7 +957,7 @@ class SourceTrackingTest {
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
-            controller.onRequest();
+            controller.onRequest(requestEvent());
             field.setValue("cascaded");
             controller.onResponse(AITurnEvents.success());
 
@@ -984,7 +985,7 @@ class SourceTrackingTest {
         var form = new Div(fields);
         ui.add(form);
         var controller = new FormAIController(form);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         return controller;
     }
 

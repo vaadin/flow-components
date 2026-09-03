@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.orchestrator;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 
@@ -24,9 +25,9 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  * Listener for request submission events.
  * <p>
  * The listener is called on every prompt, just before the LLM stream opens —
- * the same lifecycle moment as {@link AIController#onRequest()}. Use it to
- * persist the outbound request (the user message, any attachments) or to
- * correlate the assigned {@code messageId} with downstream events such as
+ * the same lifecycle moment as {@link AIController#onRequest(RequestEvent)}.
+ * Use it to persist the outbound request (the user message, any attachments) or
+ * to correlate the assigned {@code messageId} with downstream events such as
  * {@link AttachmentClickListener} and the {@code messageId} stored in
  * {@link com.vaadin.flow.component.ai.common.ChatMessage#messageId()}.
  * <p>
@@ -51,18 +52,39 @@ public interface RequestListener extends Serializable {
      * Event fired just before the LLM stream opens for a prompt. Carries the
      * user message, the assigned {@code messageId} that will be stored on the
      * resulting {@link com.vaadin.flow.component.ai.common.ChatMessage}, and
-     * the attachments included with the message (empty list when none).
+     * the attachments included with the message (empty list when none). The
+     * same event is passed to {@link AIController#onRequest(RequestEvent)
+     * AIController.onRequest}.
      */
     class RequestEvent implements Serializable {
         private final String userMessage;
         private final String messageId;
         private final List<AIAttachment> attachments;
 
-        RequestEvent(String userMessage, String messageId,
+        /**
+         * Creates a request event. The orchestrator builds this for every turn;
+         * it is public so an application can construct one when unit testing an
+         * {@link AIController} implementation.
+         *
+         * @param userMessage
+         *            the user message being submitted, not {@code null}
+         * @param messageId
+         *            the unique identifier assigned to the message, not
+         *            {@code null}
+         * @param attachments
+         *            the attachments included with the message, not
+         *            {@code null}; copied, so later changes to the given list
+         *            do not affect the event
+         * @since 25.3
+         */
+        public RequestEvent(String userMessage, String messageId,
                 List<AIAttachment> attachments) {
-            this.userMessage = userMessage;
-            this.messageId = messageId;
-            this.attachments = attachments;
+            this.userMessage = Objects.requireNonNull(userMessage,
+                    "userMessage must not be null");
+            this.messageId = Objects.requireNonNull(messageId,
+                    "messageId must not be null");
+            this.attachments = List.copyOf(Objects.requireNonNull(attachments,
+                    "attachments must not be null"));
         }
 
         /**

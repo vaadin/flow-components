@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -233,7 +234,8 @@ class FormStateToolTest {
         readOnly.setReadOnly(true);
         var controller = new FormAIController(new Div(editable, readOnly));
 
-        controller.onRequest(); // locks the editable field read-only
+        controller.onRequest(requestEvent()); // locks the editable field
+                                              // read-only
         try {
             var fields = formStateFields(controller);
 

@@ -2230,9 +2230,63 @@ class AIOrchestratorTest {
         orchestratorWith(controller).prompt("Hello");
 
         var inOrder = Mockito.inOrder(controller, mockProvider);
-        inOrder.verify(controller).onRequest();
+        inOrder.verify(controller).onRequest(Mockito.any());
         inOrder.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void builder_withController_onRequestReceivesSameEventAsRequestListener() {
+        stubAddMessage();
+        Mockito.when(mockFileReceiver.takeAttachments())
+                .thenReturn(List.of(createAttachment("a.txt")));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var controllerEvent = new AtomicReference<RequestListener.RequestEvent>();
+        var listenerEvent = new AtomicReference<RequestListener.RequestEvent>();
+        var controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequest(RequestListener.RequestEvent event) {
+                controllerEvent.set(event);
+            }
+        };
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withController(controller)
+                .withRequestListener(listenerEvent::set).build();
+
+        orchestrator.prompt("Hello");
+
+        var event = controllerEvent.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertSame(event, listenerEvent.get());
+        Assertions.assertEquals("Hello", event.getUserMessage());
+        Assertions.assertEquals(1, event.getAttachments().size());
+        Assertions.assertEquals("a.txt",
+                event.getAttachments().getFirst().name());
+        Assertions.assertEquals(event.getMessageId(),
+                orchestrator.getHistory().getFirst().messageId());
+    }
+
+    @Test
+    void requestEvent_copiesAttachmentsAndIsUnmodifiable() {
+        var attachments = new ArrayList<AIAttachment>();
+        attachments.add(createAttachment("a.txt"));
+
+        var event = new RequestListener.RequestEvent("Hello", "msg-1",
+                attachments);
+        attachments.add(createAttachment("b.txt"));
+
+        Assertions.assertEquals(1, event.getAttachments().size());
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> event.getAttachments().clear());
     }
 
     @SuppressWarnings("unchecked")
@@ -2255,7 +2309,7 @@ class AIOrchestratorTest {
         captor.getValue().accept("Hi from input");
 
         var inOrder = Mockito.inOrder(controller, mockProvider);
-        inOrder.verify(controller).onRequest();
+        inOrder.verify(controller).onRequest(Mockito.any());
         inOrder.verify(mockProvider)
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
@@ -2295,7 +2349,7 @@ class AIOrchestratorTest {
         stubAddMessage();
         var thrown = new RuntimeException("controller refused");
         var controller = mockController();
-        Mockito.doThrow(thrown).when(controller).onRequest();
+        Mockito.doThrow(thrown).when(controller).onRequest(Mockito.any());
 
         var orchestrator = orchestratorWith(controller);
         var caught = Assertions.assertThrows(RuntimeException.class,
@@ -2356,7 +2410,7 @@ class AIOrchestratorTest {
         // must skip the setText update without an NPE.
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller refused"))
-                .when(controller).onRequest();
+                .when(controller).onRequest(Mockito.any());
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withController(controller).build();
@@ -2376,7 +2430,7 @@ class AIOrchestratorTest {
         var attachmentListener = Mockito.mock(RequestListener.class);
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller refused"))
-                .when(controller).onRequest();
+                .when(controller).onRequest(Mockito.any());
 
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
@@ -2404,7 +2458,7 @@ class AIOrchestratorTest {
 
         var thrown = new RuntimeException("simulated onRequestStart failure");
         var controller = mockController();
-        Mockito.doThrow(thrown).when(controller).onRequest();
+        Mockito.doThrow(thrown).when(controller).onRequest(Mockito.any());
 
         var orchestrator = orchestratorWith(controller);
         Assertions.assertThrows(RuntimeException.class,
