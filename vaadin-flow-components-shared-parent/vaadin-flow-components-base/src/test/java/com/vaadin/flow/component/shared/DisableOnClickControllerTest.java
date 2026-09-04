@@ -169,6 +169,20 @@ class DisableOnClickControllerTest {
         Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
     }
 
+    @Test
+    void detachedBeforeResponse_attachedToAnotherUi_setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setEnabled(false);
+        component.getElement().removeFromTree();
+        ui.fakeClientCommunication();
+
+        ui.replaceUI();
+        ui.add(component);
+        ui.fakeClientCommunication();
+
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
     private List<Object> dumpClientSideDisabledValues() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)

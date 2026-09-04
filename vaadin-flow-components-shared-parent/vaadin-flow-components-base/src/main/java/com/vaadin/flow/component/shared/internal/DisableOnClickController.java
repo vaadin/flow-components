@@ -58,6 +58,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
 
+        component.addDetachListener((event) -> clientUpdateScheduled = false);
+
         ComponentUtil.addListener(component, ClickEvent.class,
                 (ComponentEventListener) (event -> {
                     if (isDisableOnClick()) {
