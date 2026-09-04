@@ -13,6 +13,7 @@
     <modules>
         <module>vaadin-ai-core-flow</module>
         <module>vaadin-ai-extensions-flow</module>
+        <module>vaadin-ai-components-flow-benchmark</module>
     </modules>
     <dependencies/>
     <profiles>

@@ -181,7 +181,7 @@ server-side only):
   repo. Both published modules need the Mockito java-agent `surefire.argLine`
   (already in the poms) because `EnableFeatureFlagExtension` uses
   `mockStatic`.
-- No test ever uses a real LLM or API key. Unit tests mock `LLMProvider`
+- No unit or integration test uses a real LLM or API key. Unit tests mock `LLMProvider`
   (`Flux.just(...)` + `ArgumentCaptor<LLMRequest>` to assert the built
   request); provider tests mock the vendor model types and hand-build
   responses; IT views define small provider classes inline — an echo
@@ -192,6 +192,14 @@ server-side only):
   matrix belongs in unit tests asserting server-side state (see
   `AIFieldMarkerIT` vs `FormAIControllerTest` for the established split).
 - Log-output assertions use the `slf4j-test` `TestLogger`.
+- The only place a real LLM is used is the unpublished
+  `vaadin-ai-components-flow-benchmark` module. Its JUnit scenarios drive the
+  controllers server-side through `AIOrchestrator` with a LangChain4j
+  provider, score the resulting state deterministically (field values, rows
+  returned by the produced SQL, chart type and series), and repeat each
+  scenario to absorb nondeterminism. The suite is skipped unless
+  `AI_BENCHMARK_MODEL` is set, so it never runs in PR validation; see the
+  module README for configuration and output.
 
 ## Other conventions
 
