@@ -182,7 +182,7 @@ class DisableOnClickControllerTest {
 
         ui.replaceUI();
         ui.add(component);
-        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
 
         component.setEnabled(true);
         Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
@@ -334,6 +334,69 @@ class DisableOnClickControllerTest {
 
         parent.add(component);
         ui.fakeClientCommunication();
+        Assertions.assertTrue(component.isEnabled());
+    }
+
+    @Test
+    void untilResponse_listenerDetachesComponent_enabledAfterAttachAndRoundTrip() {
+        component.addClickListener(event -> parent.remove(component));
+        component.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+
+        component.click();
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(component.isEnabled());
+
+        parent.add(component);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+        Assertions.assertTrue(component.isEnabled());
+    }
+
+    @Test
+    void untilResponse_listenerDetachesComponent_attachedToAnotherUi_enabledAfterRoundTrip() {
+        component.addClickListener(event -> parent.remove(component));
+        component.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+
+        component.click();
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(component.isEnabled());
+
+        // Simulates what @PreserveOnRefresh does before moving components to
+        // the UI created for the reloaded page
+        component.getElement().removeFromTree(false);
+        ui.replaceUI();
+        ui.add(component);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+        Assertions.assertTrue(component.isEnabled());
+    }
+
+    @Test
+    void untilResponse_detachedAndAttachedMultipleTimes_clientSideEnabledOnce() {
+        component.addClickListener(event -> parent.remove(component));
+        component.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+
+        component.click();
+        // Several detach / attach cycles within the same round trip
+        parent.add(component);
+        parent.remove(component);
+        parent.add(component);
+        parent.remove(component);
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(component.isEnabled());
+
+        // And across round trips
+        parent.add(component);
+        parent.remove(component);
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(component.isEnabled());
+
+        parent.add(component);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+        Assertions.assertTrue(component.isEnabled());
+
+        // Nothing left pending: further round trips and cycles do nothing
+        parent.remove(component);
+        parent.add(component);
+        Assertions.assertEquals(List.of(), dumpClientSideDisabledValues());
         Assertions.assertTrue(component.isEnabled());
     }
 

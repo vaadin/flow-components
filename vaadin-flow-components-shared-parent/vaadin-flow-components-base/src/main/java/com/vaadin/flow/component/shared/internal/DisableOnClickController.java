@@ -25,6 +25,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -48,8 +50,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     private final C component;
     private boolean disableOnClick = false;
     private DisableOnClickMode disableOnClickMode = DisableOnClickMode.UNTIL_ENABLED;
-    private boolean clientUpdateScheduled = false;
-    private boolean enableScheduled = false;
+    private final BeforeClientResponseAction clientUpdate;
+    private final BeforeClientResponseAction enable;
     private boolean updatingEnabled = false;
 
     /**
@@ -61,8 +63,11 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
-
-        component.addDetachListener((event) -> clientUpdateScheduled = false);
+        clientUpdate = new BeforeClientResponseAction(component,
+                () -> component.getElement().executeJs("this.disabled = $0",
+                        !component.isEnabled()));
+        enable = new BeforeClientResponseAction(component,
+                () -> setEnabledInternal(true));
 
         ComponentUtil.addListener(component, ClickEvent.class,
                 (ComponentEventListener) (event -> {
@@ -72,7 +77,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
                         // disabled property is updated, which results in a
                         // single update with the final state.
                         if (disableOnClickMode == DisableOnClickMode.UNTIL_RESPONSE) {
-                            scheduleEnable();
+                            enable.schedule();
                         }
                         setEnabledInternal(false);
                     }
@@ -146,23 +151,14 @@ public class DisableOnClickController<C extends Component & HasEnabled>
         if (!updatingEnabled) {
             // The enabled state was set explicitly by application code, so
             // don't override it after the round trip.
-            enableScheduled = false;
+            enable.cancel();
         }
         // If the component is disabled and re-enabled during the same round
         // trip, Flow will not detect any changes and the client side component
         // would not be enabled again. The property is updated before the
         // response so that the effective state at that point is used, for
         // example when a parent is disabled or enabled in the same round trip.
-        if (clientUpdateScheduled) {
-            return;
-        }
-        clientUpdateScheduled = true;
-        component.getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(component, context -> {
-                    clientUpdateScheduled = false;
-                    component.getElement().executeJs("this.disabled = $0",
-                            !component.isEnabled());
-                }));
+        clientUpdate.schedule();
     }
 
     private void setEnabledInternal(boolean enabled) {
@@ -174,14 +170,56 @@ public class DisableOnClickController<C extends Component & HasEnabled>
         }
     }
 
-    private void scheduleEnable() {
-        enableScheduled = true;
-        component.getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(component, context -> {
-                    if (enableScheduled) {
-                        enableScheduled = false;
-                        setEnabledInternal(true);
-                    }
-                }));
+    /**
+     * Runs an action once before the client response, even if the component is
+     * detached and attached again in between, possibly to another UI.
+     * <p>
+     * {@link UI#beforeClientResponse} is bound to the UI the component is
+     * attached to when the action is registered, and the action is dropped if
+     * the component is not attached to that same UI when the response is sent.
+     * This class instead registers the action whenever the component is
+     * attached, removes the registration whenever it is detached, and stops
+     * doing so once the action has run or has been cancelled.
+     */
+    private static class BeforeClientResponseAction implements Serializable {
+
+        private final Component component;
+        private final SerializableRunnable action;
+        private Registration attachRegistration;
+
+        BeforeClientResponseAction(Component component,
+                SerializableRunnable action) {
+            this.component = component;
+            this.action = action;
+        }
+
+        /**
+         * Schedules the action to run before the next client response while the
+         * component is attached. Does nothing if the action is already
+         * scheduled.
+         */
+        void schedule() {
+            if (attachRegistration != null) {
+                return;
+            }
+            attachRegistration = component.whenAttached(
+                    ui -> ui.beforeClientResponse(component, context -> {
+                        cancel();
+                        action.run();
+                    }));
+        }
+
+        /**
+         * Cancels the scheduled action. Does nothing if the action is not
+         * scheduled.
+         */
+        void cancel() {
+            if (attachRegistration == null) {
+                return;
+            }
+            Registration registration = attachRegistration;
+            attachRegistration = null;
+            registration.remove();
+        }
     }
 }
