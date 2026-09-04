@@ -280,7 +280,7 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     @Override
     public void setEnabled(boolean enabled) {
         HasComponents.super.setEnabled(enabled);
-        disableOnClickController.onSetEnabled(enabled);
+        disableOnClickController.onSetEnabled();
     }
 
     /**
