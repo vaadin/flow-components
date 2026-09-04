@@ -29,6 +29,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
@@ -49,6 +50,7 @@ public class ButtonView extends Div {
         createDisabledButton();
         createButtonWithDisableOnClick();
         createButtonWithDisableOnClickThatEnablesInSameRoundTrip();
+        createButtonWithDisableOnClickUntilResponse();
         createButtonWithDisableOnClickThatIsHidden();
         createButtonWithDisableOnClickAndPointerEventsAuto();
         createButtonsWithShortcuts();
@@ -243,6 +245,27 @@ public class ButtonView extends Div {
         button.setId("disable-on-click-re-enable-button");
         addCard("Button disabled on click and re-enabled in same roundtrip",
                 button);
+    }
+
+    private void createButtonWithDisableOnClickUntilResponse() {
+        Div clickCount = new Div();
+        clickCount.setId("disable-on-click-until-response-count");
+        AtomicInteger count = new AtomicInteger();
+
+        Button button = new Button("Disabled on click until response",
+                event -> {
+                    try {
+                        // Simulate a slow request so that the disabled state
+                        // can be observed on the client side
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    clickCount.setText(String.valueOf(count.incrementAndGet()));
+                });
+        button.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+        button.setId("disable-on-click-until-response-button");
+        addCard("Button disabled on click until response", button, clickCount);
     }
 
     private void createButtonWithDisableOnClickThatIsHidden() {
