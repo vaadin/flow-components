@@ -46,6 +46,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
 
     private final C component;
     private boolean disableOnClick = false;
+    private boolean clientUpdateScheduled = false;
 
     /**
      * Creates a new controller for the given component.
@@ -95,18 +96,29 @@ public class DisableOnClickController<C extends Component & HasEnabled>
 
     /**
      * Forces the client-side component's {@code disabled} property to be
-     * updated immediately.
+     * updated before the response is sent to the client, so that it matches the
+     * component's effective enabled state, including whether any parent is
+     * disabled.
      * <p>
      * This method should be called from the component's
-     * {@link HasEnabled#setEnabled} method.
-     *
-     * @param enabled
-     *            value to set
+     * {@link HasEnabled#setEnabled} method, after the enabled state has been
+     * updated.
      */
-    public void onSetEnabled(boolean enabled) {
-        // If the component is then disabled and re-enabled during the same
-        // round trip, Flow will not detect any changes and the client side
-        // component would not be enabled again.
-        component.getElement().executeJs("this.disabled = $0", !enabled);
+    public void onSetEnabled() {
+        // If the component is disabled and re-enabled during the same round
+        // trip, Flow will not detect any changes and the client side component
+        // would not be enabled again. The property is updated before the
+        // response so that the effective state at that point is used, for
+        // example when a parent is disabled or enabled in the same round trip.
+        if (clientUpdateScheduled) {
+            return;
+        }
+        clientUpdateScheduled = true;
+        component.getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(component, context -> {
+                    clientUpdateScheduled = false;
+                    component.getElement().executeJs("this.disabled = $0",
+                            !component.isEnabled());
+                }));
     }
 }
