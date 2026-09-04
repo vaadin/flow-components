@@ -1,5 +1,6 @@
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
+import { setOrRemoveAttribute } from '@vaadin/component-base/src/dom-utils.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
@@ -692,17 +693,8 @@ export class GridConnector {
       return;
     }
 
-    const { table } = this.#grid.$;
-    switch (this.#selectionMode) {
-      case 'SINGLE':
-        table.setAttribute('aria-multiselectable', 'false');
-        break;
-      case 'MULTI':
-        table.setAttribute('aria-multiselectable', 'true');
-        break;
-      default:
-        table.removeAttribute('aria-multiselectable');
-    }
+    const multiSelectable = { SINGLE: 'false', MULTI: 'true', NONE: null }[this.#selectionMode];
+    setOrRemoveAttribute(this.#grid.$.table, 'aria-multiselectable', multiSelectable);
   }
 
   #preventRowUpdates(callback: () => void): void {
