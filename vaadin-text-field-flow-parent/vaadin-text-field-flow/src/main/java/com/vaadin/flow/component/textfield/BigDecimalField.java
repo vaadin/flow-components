@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.shared.HasSelection;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
@@ -88,7 +89,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
-        implements HasThemeVariant<TextFieldVariant> {
+        implements HasSelection, HasThemeVariant<TextFieldVariant> {
 
     private BigDecimalFieldI18n i18n;
 
