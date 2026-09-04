@@ -6,7 +6,7 @@ import type { Grid, GridDefaultItem } from '@vaadin/grid/src/vaadin-grid.js';
 import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
 import type { GridSorterDefinition } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
-import type { GridCellActivateEvent, GridItemModel } from '@vaadin/grid/src/vaadin-grid-mixin.js';
+import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
 import type { DataProviderController } from '@vaadin/component-base/src/data-provider-controller/data-provider-controller.js';
 import type { GridConnector } from './gridConnector.js';
 
@@ -67,6 +67,7 @@ export type FlowDataProviderController = DataProviderController<Item | undefined
  */
 export interface FlowGridInternals {
   $: { scroller: HTMLElement; table: HTMLElement; header: HTMLElement; footer: HTMLElement };
+  ready(): void;
   $connector: GridConnector;
   $server: GridServer;
   __deselectDisallowed: boolean;
@@ -80,19 +81,14 @@ export interface FlowGridInternals {
   _previousSorters: GridSorterDefinition[];
   _shouldLoadAllRenderedRowsAfterPageLoad: boolean;
   _sorters: GridSorter[];
-  __a11yUpdateMutiSelectable(): void;
   __a11yUpdateRowSelected(row: HTMLElement, selected: boolean): void;
   __applySorters(...args: unknown[]): void;
-  __getRowModel(row: FlowGridRow): GridItemModel<Item>;
   __updateRow(row: HTMLElement, ...args: unknown[]): void;
   __updateVirtualizerElement(...args: unknown[]): void;
   __updateVisibleRows(start?: number, end?: number): void;
-  _createPropertyObserver(property: string, methodName: string): void;
   _getActiveSorters(): GridSorter[];
-  _getColumnsInOrder(): GridColumn<Item>[];
   _getRenderedRows(): FlowGridRow[];
   _isDetailsOpened(item: Item | undefined): boolean;
-  _isSelected(item: Item): boolean;
   isItemSelectable(item: Item | null | undefined): boolean;
   _mapSorters(): GridSorterDefinition[];
   getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): { key: string; columnId: string };
