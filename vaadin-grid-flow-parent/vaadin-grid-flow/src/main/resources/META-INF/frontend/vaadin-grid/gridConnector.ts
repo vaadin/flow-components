@@ -319,7 +319,7 @@ export class GridConnector {
     this.#selectionMode = mode;
     this.#selectedKeys = {};
     this.#grid.selectedItems = [];
-    this.#grid.__a11yUpdateMutiSelectable();
+    this.#updateAriaMultiSelectable();
   }
 
   setHeaderRenderer(
@@ -369,10 +369,7 @@ export class GridConnector {
   scrollToItem(itemKey: string, ...args: number[]): void {
     const grid = this.#grid;
 
-    const targetRow = grid._getRenderedRows().find((row) => {
-      const { item } = grid.__getRowModel(row);
-      return grid.getItemId(item) === itemKey;
-    });
+    const targetRow = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
     if (targetRow && this.#isRowFullyInViewport(targetRow)) {
       return;
     }
@@ -386,6 +383,11 @@ export class GridConnector {
    */
   #patchGrid(): void {
     const grid = this.#grid;
+
+    grid.ready = () => {
+      Object.getPrototypeOf(grid).ready.call(grid);
+      this.#updateAriaMultiSelectable();
+    };
 
     // The grid requests a page only when a row from that page gets rendered,
     // which is too late to keep up while scrolling and leads to blank rows.
@@ -443,29 +445,6 @@ export class GridConnector {
 
       Object.getPrototypeOf(grid).__a11yUpdateRowSelected.call(grid, row, selected);
     };
-
-    /*
-     * Manage aria-multiselectable attribute depending on the selection mode.
-     * see more: https://github.com/vaadin/web-components/issues/1536
-     * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
-     */
-    grid.__a11yUpdateMutiSelectable = () => {
-      if (!grid.$) {
-        return;
-      }
-
-      switch (this.#selectionMode) {
-        case 'SINGLE':
-          grid.$.table.setAttribute('aria-multiselectable', 'false');
-          break;
-        case 'MULTI':
-          grid.$.table.setAttribute('aria-multiselectable', 'true');
-          break;
-        default:
-          grid.$.table.removeAttribute('aria-multiselectable');
-      }
-    };
-    grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
 
     // This method is overridden to prevent the grid web component from
     // automatically excluding columns from sorting when they get hidden.
@@ -555,7 +534,7 @@ export class GridConnector {
     grid.addEventListener('dblclick', (e) => this.#fireClickEvent(e, 'item-double-click'));
 
     grid.addEventListener('column-resize', (e) => {
-      const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
+      const cols = grid._columnTree.at(-1)!.filter((col) => !col.hidden);
 
       cols.forEach((col) => {
         col.dispatchEvent(new CustomEvent('column-drag-resize'));
@@ -606,7 +585,7 @@ export class GridConnector {
     grid.addEventListener('grid-dragstart', (e) => {
       const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
 
-      if (grid._isSelected(draggedItems[0])) {
+      if (this.#selectedKeys[draggedItems[0].key]) {
         // Dragging selected (possibly multiple) items
         if (grid.__selectionDragData) {
           Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
@@ -700,6 +679,29 @@ export class GridConnector {
         event.internalColumnId = eventContext.column._flowId;
       }
       grid.dispatchEvent(new CustomEvent(eventName, { detail: event }));
+    }
+  }
+
+  /*
+   * Manage aria-multiselectable attribute depending on the selection mode.
+   * see more: https://github.com/vaadin/web-components/issues/1536
+   * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+   */
+  #updateAriaMultiSelectable(): void {
+    if (!this.#grid.$) {
+      return;
+    }
+
+    const { table } = this.#grid.$;
+    switch (this.#selectionMode) {
+      case 'SINGLE':
+        table.setAttribute('aria-multiselectable', 'false');
+        break;
+      case 'MULTI':
+        table.setAttribute('aria-multiselectable', 'true');
+        break;
+      default:
+        table.removeAttribute('aria-multiselectable');
     }
   }
 
