@@ -24,7 +24,6 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -55,9 +54,6 @@ import com.vaadin.flow.signals.Signal;
 /**
  * Breadcrumbs is a component for displaying a navigation trail that shows the
  * user's location within a hierarchy of pages.
- * <p>
- * This component is experimental and needs to be enabled with the
- * {@code com.vaadin.experimental.breadcrumbsComponent} feature flag.
  *
  * @author Vaadin Ltd
  * @since 25.2
@@ -267,8 +263,6 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
-
         if (mode == Mode.ROUTER) {
             registerNavigationListener(attachEvent.getUI());
         }
@@ -432,15 +426,6 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
                 .resolvePageTitle(reference.navigationTarget(),
                         reference.routeParameters(), queryParameters)
                 .orElse("");
-    }
-
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        if (!featureFlags.isEnabled(
-                BreadcrumbsFeatureFlagProvider.BREADCRUMBS_COMPONENT)) {
-            throw new ExperimentalFeatureException();
-        }
     }
 
     /**
