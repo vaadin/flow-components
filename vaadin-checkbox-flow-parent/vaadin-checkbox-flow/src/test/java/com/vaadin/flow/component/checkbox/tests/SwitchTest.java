@@ -29,6 +29,11 @@ class SwitchTest {
     final MockUIExtension ui = new MockUIExtension();
 
     @Test
+    void attach_doesNotThrow() {
+        Assertions.assertDoesNotThrow(() -> ui.add(new Switch()));
+    }
+
+    @Test
     void initialValue() {
         Switch field = new Switch();
         Assertions.assertFalse(field.getValue());
