@@ -259,6 +259,7 @@ public class ButtonView extends Div {
                         // can be observed on the client side
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     }
                     clickCount.setText(String.valueOf(count.incrementAndGet()));
