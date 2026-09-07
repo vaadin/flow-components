@@ -475,7 +475,7 @@ public class Button extends Component
     @Override
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
-        disableOnClickController.onSetEnabled(enabled);
+        disableOnClickController.onSetEnabled();
     }
 
     /**
