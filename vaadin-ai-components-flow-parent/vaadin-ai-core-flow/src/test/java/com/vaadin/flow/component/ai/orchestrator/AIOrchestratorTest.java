@@ -2289,6 +2289,23 @@ class AIOrchestratorTest {
                 () -> event.getAttachments().clear());
     }
 
+    @Test
+    void requestEvent_rejectsNullArguments() {
+        var attachments = List.of(createAttachment("a.txt"));
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RequestListener.RequestEvent(null, "msg-1",
+                        attachments));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RequestListener.RequestEvent("Hello", null,
+                        attachments));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RequestListener.RequestEvent("Hello", "msg-1", null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new RequestListener.RequestEvent("Hello", "msg-1",
+                        Collections.singletonList(null)));
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void inputSubmit_callsOnRequestStartBeforeStream() {

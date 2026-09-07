@@ -75,6 +75,10 @@ public interface RequestListener extends Serializable {
          *            the attachments included with the message, not
          *            {@code null}; copied, so later changes to the given list
          *            do not affect the event
+         * @throws NullPointerException
+         *             if {@code userMessage}, {@code messageId} or
+         *             {@code attachments} is {@code null}, or
+         *             {@code attachments} contains {@code null} elements
          * @since 25.3
          */
         public RequestEvent(String userMessage, String messageId,
