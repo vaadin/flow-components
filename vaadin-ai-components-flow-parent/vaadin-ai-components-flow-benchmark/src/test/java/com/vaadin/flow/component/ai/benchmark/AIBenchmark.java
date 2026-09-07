@@ -22,7 +22,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -60,10 +62,17 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
  * for the scenario to pass, default 0.67</li>
  * </ul>
  * Every scenario appends one JSON line to {@code target/ai-benchmark.jsonl} so
- * runs can be compared against a baseline.
+ * runs can be compared against a baseline. Under TeamCity (detected from
+ * {@code TEAMCITY_VERSION}) each scenario and each test class also reports its
+ * pass rate as a build statistic, keyed by scenario and model, so the values
+ * show up as graphs over time.
+ * <p>
+ * Register the extension as a {@code static} field: the per-class statistic is
+ * reported from the class-level callback, which JUnit only invokes for
+ * statically registered extensions.
  */
-public final class AIBenchmark
-        implements BeforeEachCallback, AfterEachCallback {
+public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
+        AfterEachCallback, AfterAllCallback {
 
     /** Environment variable naming the model to benchmark. */
     public static final String MODEL_VARIABLE = "AI_BENCHMARK_MODEL";
@@ -72,6 +81,7 @@ public final class AIBenchmark
     private static final String BASE_URL_VARIABLE = "AI_BENCHMARK_BASE_URL";
     private static final String RUNS_VARIABLE = "AI_BENCHMARK_RUNS";
     private static final String MIN_PASS_RATE_VARIABLE = "AI_BENCHMARK_MIN_PASS_RATE";
+    private static final String TEAMCITY_VARIABLE = "TEAMCITY_VERSION";
     private static final Path REPORT = Path.of("target", "ai-benchmark.jsonl");
     private static final Duration TURN_TIMEOUT = Duration.ofMinutes(3);
 
@@ -93,7 +103,10 @@ public final class AIBenchmark
     private final EnableFeatureFlagExtension featureFlag = new EnableFeatureFlagExtension(
             AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
+    private String subject;
     private String scenario;
+    private int classRuns;
+    private int classPassed;
 
     /**
      * One attempt of a scenario: builds fresh components, runs the
@@ -105,17 +118,32 @@ public final class AIBenchmark
     }
 
     @Override
+    public void beforeAll(ExtensionContext context) {
+        // "FormAIControllerBenchmark" reports as "FormAIController"
+        subject = context.getRequiredTestClass().getSimpleName()
+                .replaceAll("Benchmark$", "");
+        classRuns = 0;
+        classPassed = 0;
+    }
+
+    @Override
     public void beforeEach(ExtensionContext context) {
         featureFlag.beforeEach(context);
         ui.beforeEach(context);
-        scenario = context.getRequiredTestClass().getSimpleName() + "."
-                + context.getRequiredTestMethod().getName();
+        scenario = subject + "." + context.getRequiredTestMethod().getName();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
         ui.afterEach(context);
         featureFlag.afterEach(context);
+    }
+
+    @Override
+    public void afterAll(ExtensionContext context) {
+        if (classRuns > 0) {
+            reportStatistic(subject, classPassed / (double) classRuns);
+        }
     }
 
     /**
@@ -141,8 +169,11 @@ public final class AIBenchmark
         }
         var passed = runs - failures.size();
         var passRate = passed / (double) runs;
+        classRuns += runs;
+        classPassed += passed;
         LOGGER.info("{}: {}/{} runs passed", scenario, passed, runs);
         appendReport(runs, passed, failures);
+        reportStatistic(scenario, passRate);
         if (passRate < minPassRate) {
             Assertions.fail(String.format(
                     "%s passed %d/%d runs, below the minimum pass rate %.2f%n%s",
@@ -273,6 +304,28 @@ public final class AIBenchmark
                     baseUrl.orElse("api.openai.com"));
         }
         return chatModel;
+    }
+
+    /**
+     * Prints a TeamCity build statistic so the pass rate is graphed over
+     * builds. The key carries the model so each benchmarked model gets its own
+     * series. Silent outside TeamCity.
+     */
+    private static void reportStatistic(String key, double passRate) {
+        if (variable(TEAMCITY_VARIABLE).isEmpty()) {
+            return;
+        }
+        var fullKey = key + "." + variable(MODEL_VARIABLE).orElse("unknown");
+        // Service messages are read from the build log by TeamCity, so they
+        // must go to stdout as-is rather than through the logger.
+        System.out.printf(
+                "##teamcity[buildStatisticValue key='%s' value='%.3f']%n",
+                escapeServiceMessage(fullKey), passRate);
+    }
+
+    private static String escapeServiceMessage(String value) {
+        return value.replace("|", "||").replace("'", "|'").replace("[", "|[")
+                .replace("]", "|]").replace("\n", "|n").replace("\r", "|r");
     }
 
     private void appendReport(int runs, int passed, List<String> failures) {

@@ -28,7 +28,7 @@ import com.vaadin.flow.data.binder.Binder;
 class FormAIControllerBenchmark {
 
     @RegisterExtension
-    AIBenchmark bench = new AIBenchmark();
+    static AIBenchmark bench = new AIBenchmark();
 
     /** Bean behind the form; property names double as field descriptions. */
     public static class Contact {

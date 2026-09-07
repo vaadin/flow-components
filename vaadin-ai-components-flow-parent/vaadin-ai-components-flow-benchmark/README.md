@@ -49,6 +49,23 @@ Compare the file from a run before and after a prompt change to see the effect.
 A scenario fails the build only when its pass rate is below
 `AI_BENCHMARK_MIN_PASS_RATE`.
 
+### TeamCity
+
+When `TEAMCITY_VERSION` is set (TeamCity sets it in every build), the run also
+prints a build statistic per scenario and per controller, keyed by name and
+model, with the pass rate as the value:
+
+```
+##teamcity[buildStatisticValue key='GridAIController.filtersAndSortsInOneRequest.gpt-4.1-mini' value='1.000']
+##teamcity[buildStatisticValue key='GridAIController.gpt-4.1-mini' value='0.667']
+```
+
+TeamCity graphs these over builds, which is the intended way to track the
+effect of prompt changes. For a scheduled build, set
+`AI_BENCHMARK_MIN_PASS_RATE=0` so the build stays green and the graphs carry
+the signal, and raise `AI_BENCHMARK_RUNS` to five or more so the rate moves in
+smaller steps.
+
 ## Writing a scenario
 
 A scenario is a plain `@Test` that hands one attempt to `AIBenchmark.score`.

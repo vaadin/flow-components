@@ -27,7 +27,7 @@ import com.vaadin.flow.component.grid.Grid;
 class GridAIControllerBenchmark {
 
     @RegisterExtension
-    AIBenchmark bench = new AIBenchmark();
+    static AIBenchmark bench = new AIBenchmark();
 
     @Test
     void filtersAndSortsInOneRequest() {

@@ -32,7 +32,7 @@ class ChartAIControllerBenchmark {
             3200.0, "North America", 2100.0, "Asia", 900.0);
 
     @RegisterExtension
-    AIBenchmark bench = new AIBenchmark();
+    static AIBenchmark bench = new AIBenchmark();
 
     @Test
     void salesByRegionAsPieChart() {
