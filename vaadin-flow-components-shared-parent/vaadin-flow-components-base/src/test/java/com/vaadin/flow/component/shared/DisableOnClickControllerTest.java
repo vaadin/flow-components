@@ -15,26 +15,39 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.tests.MockUIExtension;
 
 class DisableOnClickControllerTest {
 
+    @RegisterExtension
+    final MockUIExtension ui = new MockUIExtension();
+
+    private TestParent parent;
     private TestComponent component;
 
     @BeforeEach
     void setup() {
+        parent = new TestParent();
         component = new TestComponent();
+        parent.add(component);
+        ui.add(parent);
+        ui.fakeClientCommunication();
     }
 
     @Test
@@ -88,6 +101,101 @@ class DisableOnClickControllerTest {
         Assertions.assertTrue(component.isEnabled());
     }
 
+    @Test
+    void setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setEnabled(false);
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
+
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void setEnabled_noChange_clientSideDisabledPropertyUpdated() {
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void disabledAndEnabledInSameRoundTrip_clientSideEnabledOnce() {
+        component.setEnabled(false);
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void click_clickListenerEnablesComponent_clientSideEnabled() {
+        component.addClickListener(event -> event.getSource().setEnabled(true));
+        component.setDisableOnClick(true);
+        component.click();
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void parentDisabled_setEnabled_clientSideStaysDisabled() {
+        parent.setEnabled(false);
+        ui.fakeClientCommunication();
+
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void parentDisabled_setEnabledAndParentEnabledInSameRoundTrip_clientSideEnabled() {
+        parent.setEnabled(false);
+        ui.fakeClientCommunication();
+
+        component.setEnabled(true);
+        parent.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void parentDisabledInSameRoundTrip_setEnabled_clientSideDisabled() {
+        component.setEnabled(true);
+        parent.setEnabled(false);
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void detached_setEnabled_clientSideUpdatedAfterAttach() {
+        parent.remove(component);
+        ui.fakeClientCommunication();
+
+        component.setEnabled(false);
+        Assertions.assertEquals(List.of(), dumpClientSideDisabledValues());
+
+        parent.add(component);
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void detachedBeforeResponse_attachedToAnotherUi_setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setEnabled(false);
+        component.getElement().removeFromTree();
+        ui.fakeClientCommunication();
+
+        ui.replaceUI();
+        ui.add(component);
+        ui.fakeClientCommunication();
+
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    private List<Object> dumpClientSideDisabledValues() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("this.disabled = $0"))
+                .map(invocation -> invocation.getParameters().get(0)).toList();
+    }
+
+    @Tag("test-parent")
+    private static class TestParent extends Component
+            implements HasComponents, HasEnabled {
+    }
+
     @Tag("test")
     private static class TestComponent extends Component
             implements HasEnabled, ClickNotifier<TestComponent> {
@@ -112,7 +220,7 @@ class DisableOnClickControllerTest {
         @Override
         public void setEnabled(boolean enabled) {
             HasEnabled.super.setEnabled(enabled);
-            disableOnClickController.onSetEnabled(enabled);
+            disableOnClickController.onSetEnabled();
         }
     }
 }
