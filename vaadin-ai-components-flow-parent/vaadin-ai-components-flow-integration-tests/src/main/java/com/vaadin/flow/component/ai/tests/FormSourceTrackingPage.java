@@ -15,16 +15,11 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
-import java.util.stream.Collectors;
-
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.ai.common.PageRegion;
-import com.vaadin.flow.component.ai.common.SourceExtract;
-import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.LangChain4JLLMProvider;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -57,9 +52,17 @@ public class FormSourceTrackingPage extends VerticalLayout {
 
         var controller = new FormAIController(form);
         controller.setSourceTrackingEnabled(true);
-        controller.setFieldMarkerPopoverContentProvider(change -> change
-                .getFieldSource().map(FormSourceTrackingPage::describe)
-                .map(Span::new).orElse(null));
+        controller.setFieldMarkerPopoverContentProvider(change -> {
+            return change.getFieldSource().map(source -> {
+                var content = new Div();
+                content.add(new Div(source.confidence() + " confidence, read from:"));
+
+                for (var extract : source.extracts()) {
+                    content.add(new Div('"' + extract.text() + '"'));
+                }
+                return content;
+            }).orElse(null);
+        });
 
         var model = OpenAiStreamingChatModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
@@ -81,26 +84,5 @@ public class FormSourceTrackingPage extends VerticalLayout {
         inputRow.expand(input);
 
         add(form, messages, new UploadFileList(uploads), inputRow);
-    }
-
-    /**
-     * @return the reported source as text: how sure the model was, and the
-     *         snippets it says it read
-     */
-    private static String describe(ValueSource source) {
-        return "%s confidence, read from %s".formatted(source.confidence(),
-                source.extracts().stream().map(FormSourceTrackingPage::describe)
-                        .collect(Collectors.joining("; ")));
-    }
-
-    /**
-     * @return one snippet as text, with its place in the document when the
-     *         model reported one
-     */
-    private static String describe(SourceExtract extract) {
-        var place = extract.location() instanceof PageRegion region
-                ? " (page " + region.page() + ")"
-                : "";
-        return '"' + extract.text() + '"' + place;
     }
 }
