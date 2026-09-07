@@ -359,9 +359,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
      * covers the page and swallows clicks meant for the sheet.
      */
     private void waitForDialogToClose() {
-        waitUntil(driver -> $("vaadin-dialog").all().stream()
-                .noneMatch(dialog -> dialog.hasAttribute("opened")
-                        || dialog.hasAttribute("closing")));
+        waitUntil(driver -> !$("vaadin-dialog").withAttribute("opened").exists()
+                && !$("vaadin-dialog").withAttribute("closing").exists());
     }
 
     public void setLocale(Locale locale) {
