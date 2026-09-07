@@ -52,17 +52,17 @@ import com.vaadin.flow.function.SerializableConsumer;
  * </pre>
  * <p>
  * The interceptor runs before the prompt has any effect: before the message
- * appears in the message list, before {@link AIController#onRequest()
- * controller} and {@link RequestListener} hooks, before the conversation
- * history entry, and before the LLM request is built. Everything downstream
- * sees only the processed content. A silently rejected prompt leaves no trace
- * in the UI or the history; rejecting with a user-facing message shows the
- * original prompt and the reason in the message list only — never in the
- * history or a request. Note that attachments pending in a configured file
- * receiver have already been taken from it when the interceptor runs, so they
- * are not resubmitted with the next prompt if this one is rejected, dropped, or
- * fails after being postponed. Prompts whose original text is blank are dropped
- * before the interceptor runs.
+ * appears in the message list, before
+ * {@link AIController#onRequest(RequestListener.RequestEvent) controller} and
+ * {@link RequestListener} hooks, before the conversation history entry, and
+ * before the LLM request is built. Everything downstream sees only the
+ * processed content. A silently rejected prompt leaves no trace in the UI or
+ * the history; rejecting with a user-facing message shows the original prompt
+ * and the reason in the message list only — never in the history or a request.
+ * Note that attachments pending in a configured file receiver have already been
+ * taken from it when the interceptor runs, so they are not resubmitted with the
+ * next prompt if this one is rejected, dropped, or fails after being postponed.
+ * Prompts whose original text is blank are dropped before the interceptor runs.
  * <p>
  * Throwing from the interceptor aborts the prompt the same way as a rejection,
  * except that the exception is reported to the {@link ResponseListener} and
@@ -262,9 +262,10 @@ public interface RequestInterceptor extends Serializable {
         /**
          * Rejects the prompt without user-facing feedback: nothing is sent to
          * the LLM, nothing is added to the message list or the conversation
-         * history, and neither {@link AIController#onRequest() controller} nor
-         * {@link RequestListener} hooks fire. Rejection is final — later
-         * content changes do not undo it.
+         * history, and neither
+         * {@link AIController#onRequest(RequestListener.RequestEvent)
+         * controller} nor {@link RequestListener} hooks fire. Rejection is
+         * final — later content changes do not undo it.
          *
          * @throws IllegalStateException
          *             if a postponed prompt has already been completed

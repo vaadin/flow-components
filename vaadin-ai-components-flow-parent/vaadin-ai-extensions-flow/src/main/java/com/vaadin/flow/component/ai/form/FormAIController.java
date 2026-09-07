@@ -44,6 +44,7 @@ import com.vaadin.flow.component.ai.form.FormAITools.FormFieldDescriptor;
 import com.vaadin.flow.component.ai.form.FormValueConverter.RejectedValueException;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.orchestrator.RequestListener;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -541,9 +542,10 @@ public class FormAIController implements AIController {
     /**
      * Rebuilds the fixed-options bindings on {@code hints} from the original
      * item list and the current state of {@code field} / {@code explicit}.
-     * Invoked at registration and again on every {@link #onRequest()} so the
-     * labeler captured in {@link FormFieldHints#itemLabelGenerator} reflects
-     * the field's current {@code setItemLabelGenerator(...)}.
+     * Invoked at registration and again on every
+     * {@link #onRequest(RequestListener.RequestEvent)} so the labeler captured
+     * in {@link FormFieldHints#itemLabelGenerator} reflects the field's current
+     * {@code setItemLabelGenerator(...)}.
      */
     private static void rebindFixedOptions(FormFieldHints hints,
             HasValue<?, ?> field, ItemLabelGenerator<?> explicit,
@@ -620,7 +622,8 @@ public class FormAIController implements AIController {
      * otherwise the field's own {@code getItemLabelGenerator()} (via
      * {@link FormValueConverter#renderItem}, which also covers the
      * {@link String#valueOf} fallback). Called once per turn at
-     * {@link #onRequest()} so a swap on the field between turns is picked up.
+     * {@link #onRequest(RequestListener.RequestEvent)} so a swap on the field
+     * between turns is picked up.
      */
     private static Function<Object, String> resolveItemLabeler(
             HasValue<?, ?> field, ItemLabelGenerator<?> explicit) {
@@ -1326,7 +1329,7 @@ public class FormAIController implements AIController {
     }
 
     @Override
-    public void onRequest() {
+    public void onRequest(RequestListener.RequestEvent event) {
         turn.filling = true;
         // Refresh the field set so fields added or removed between turns
         // are picked up.

@@ -301,14 +301,14 @@ public interface LLMProvider {
          * or with background execution enabled — where Vaadin thread locals
          * such as {@code UI.getCurrent()} are not bound. Wrap UI component
          * access in {@code ui.access()}, or work on state captured in
-         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}.
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest}.
          * </p>
          * <p>
          * An unbound thread local returns {@code null} rather than throwing, so
          * a tool that reads one without checking does not fail — it proceeds
          * with a missing value and can return a confidently wrong answer the
          * LLM has no way to recognize as wrong. Capture what the tool needs in
-         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest},
          * which always runs on the UI thread, rather than reading thread locals
          * here.
          * </p>
