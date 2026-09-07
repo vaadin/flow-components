@@ -390,7 +390,7 @@ class RequestInterceptorTest {
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("Hello"));
 
-        Mockito.verify(controller, Mockito.never()).onRequest();
+        Mockito.verify(controller, Mockito.never()).onRequest(Mockito.any());
         Mockito.verify(controller).onResponse(errorIs(thrown));
     }
 
@@ -441,7 +441,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("Hello");
 
-        Mockito.verify(controller, Mockito.never()).onRequest();
+        Mockito.verify(controller, Mockito.never()).onRequest(Mockito.any());
     }
 
     @Test
@@ -459,7 +459,7 @@ class RequestInterceptorTest {
         var inOrder = Mockito.inOrder(interceptor, controller);
         inOrder.verify(interceptor).intercept(
                 Mockito.any(RequestInterceptor.RequestInterceptEvent.class));
-        inOrder.verify(controller).onRequest();
+        inOrder.verify(controller).onRequest(Mockito.any());
     }
 
     @Test
