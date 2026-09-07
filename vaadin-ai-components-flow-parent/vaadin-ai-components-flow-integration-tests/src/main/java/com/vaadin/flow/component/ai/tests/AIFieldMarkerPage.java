@@ -15,11 +15,15 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
+import com.vaadin.flow.component.ai.orchestrator.RequestListener;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -113,7 +117,9 @@ public class AIFieldMarkerPage extends VerticalLayout {
         });
 
         var startTurn = new NativeButton("Start turn",
-                event -> controller.onRequest());
+                event -> controller.onRequest(
+                        new RequestListener.RequestEvent("Start turn",
+                                UUID.randomUUID().toString(), List.of())));
         startTurn.setId("start-turn");
 
         var finishTurn = new NativeButton("Finish turn", event -> {
