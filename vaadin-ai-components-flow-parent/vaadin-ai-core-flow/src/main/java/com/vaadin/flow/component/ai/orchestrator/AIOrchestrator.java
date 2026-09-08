@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -179,13 +178,6 @@ public class AIOrchestrator implements Serializable {
             CLAIMED_INSTANCES.remove(instance);
         }
     }
-
-    /**
-     * Name of the built-in tool that exposes per-turn session context to the
-     * LLM. Reserved — applications should not register their own tool with this
-     * name.
-     */
-    static final String SESSION_CONTEXT_TOOL_NAME = "get_session_context";
 
     private transient LLMProvider provider;
     private final String systemPrompt;
@@ -742,10 +734,10 @@ public class AIOrchestrator implements Serializable {
             AtomicReference<ResponseMetadata> metadataHolder) {
         final var effectiveSystemPrompt = systemPrompt != null
                 && !systemPrompt.isBlank() ? systemPrompt.trim() : null;
-        var controllerTools = controller != null
+        final var explicitTools = controller != null
                 && controller.getTools() != null ? controller.getTools()
                         : List.<LLMProvider.ToolSpec> of();
-        final var explicitTools = mergeWithContextTool(controllerTools);
+        final var sessionContext = resolveSessionContext();
         return new LLMProvider.LLMRequest() {
 
             @Override
@@ -774,6 +766,11 @@ public class AIOrchestrator implements Serializable {
             }
 
             @Override
+            public String sessionContext() {
+                return sessionContext;
+            }
+
+            @Override
             public Consumer<ResponseMetadata> metadataSink() {
                 return metadataHolder::set;
             }
@@ -781,44 +778,26 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
-     * Resolves the configured {@link Supplier} for session context and, if it
-     * returns non-empty content, prepends a {@value #SESSION_CONTEXT_TOOL_NAME}
-     * tool that carries that content in its description. The resolved string is
-     * captured in the per-turn tool instance so {@code execute()} can return it
-     * without re-invoking the supplier off the UI thread.
+     * Resolves the configured session context supplier for this turn. The
+     * content travels in {@link LLMProvider.LLMRequest#sessionContext()} and
+     * the provider appends it to the user message, at the very end of the
+     * prompt. That placement is deliberate: LLM providers cache the prompt
+     * prefix in the order tools, system prompt, messages, so per-turn content
+     * carried by a tool description or the system prompt would invalidate the
+     * whole cache on every turn.
      * <p>
      * A supplier that throws aborts the turn — the exception propagates through
      * {@link #buildRequest} and is handled by the existing error path in
      * {@link #processUserInput}.
+     *
+     * @return the context for this turn, or {@code null} when there is none
      */
-    private List<LLMProvider.ToolSpec> mergeWithContextTool(
-            List<LLMProvider.ToolSpec> controllerTools) {
+    private String resolveSessionContext() {
         if (contextSupplier == null) {
-            return controllerTools;
+            return null;
         }
         var resolved = contextSupplier.get();
-        if (resolved == null || resolved.isBlank()) {
-            return controllerTools;
-        }
-        var contextTool = buildSessionContextTool(resolved);
-        var merged = new ArrayList<LLMProvider.ToolSpec>(
-                controllerTools.size() + 1);
-        merged.add(contextTool);
-        merged.addAll(controllerTools);
-        return List.copyOf(merged);
-    }
-
-    /**
-     * Builds the per-turn {@value #SESSION_CONTEXT_TOOL_NAME} tool. The
-     * resolved content is baked into the description so the LLM sees it just
-     * from listing the available tools — no separate call is normally needed.
-     * {@link LLMProvider.ToolSpec#execute} returns the same content so a model
-     * that does call the tool gets exactly what the description already
-     * carries.
-     */
-    private static LLMProvider.ToolSpec buildSessionContextTool(
-            String content) {
-        return new SessionContextTool(content);
+        return resolved == null || resolved.isBlank() ? null : resolved;
     }
 
     private static final DateTimeFormatter DEFAULT_CONTEXT_DATE_TIME_FORMAT = DateTimeFormatter
@@ -839,52 +818,6 @@ public class AIOrchestrator implements Serializable {
                     now.format(DEFAULT_CONTEXT_DATE_TIME_FORMAT), dayOfWeek,
                     now.getZone().getId());
         };
-    }
-
-    /**
-     * Per-turn {@link LLMProvider.ToolSpec} that surfaces the resolved session
-     * context. {@link Serializable} so the orchestrator's per-turn explicit
-     * tools list does not break the serialization round-trip test even though
-     * tools themselves are rebuilt on every turn.
-     */
-    private static final class SessionContextTool
-            implements LLMProvider.ToolSpec, Serializable {
-        private final String content;
-        private final String description;
-
-        SessionContextTool(String content) {
-            this.content = content;
-            this.description = """
-                    Read for current session context. If a date/time is \
-                    included below, use it to resolve relative phrases in \
-                    the user's prompt — "today", "tomorrow", "yesterday", \
-                    "next Friday", "in two weeks", "end of next month", \
-                    etc. — into ISO date / date-time / time strings.
-
-                    Captured at the start of this turn:
-
-                    """ + content;
-        }
-
-        @Override
-        public String getName() {
-            return SESSION_CONTEXT_TOOL_NAME;
-        }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public String getParametersSchema() {
-            return null;
-        }
-
-        @Override
-        public String execute(JsonNode arguments) {
-            return content;
-        }
     }
 
     private void fireResponseListener(String responseText, Throwable error,
@@ -949,11 +882,6 @@ public class AIOrchestrator implements Serializable {
                                 + VALID_TOOL_NAME_PATTERN.pattern() + ").");
             }
             validateParametersSchema(tool);
-            if (SESSION_CONTEXT_TOOL_NAME.equals(name)) {
-                LOGGER.warn(
-                        "Tool name '{}' is reserved for the built-in session context tool",
-                        name);
-            }
             if (!seen.add(name)) {
                 LOGGER.warn(
                         "Duplicate tool name '{}': previous tool will be replaced",
@@ -1167,7 +1095,9 @@ public class AIOrchestrator implements Serializable {
      * context. Defaults to a current-date-and-time supplier so the LLM can
      * interpret relative date/time references; pass {@code null} to disable, or
      * a custom supplier to include tenant, locale, page state, or anything else
-     * worth keeping out of the system prompt.</li>
+     * worth keeping out of the system prompt. The context is appended to the
+     * user message of the turn, so the system prompt and the tool definitions
+     * stay identical from turn to turn.</li>
      * </ul>
      * <p>
      * Both Flow components ({@link MessageInput}, {@link MessageList},
@@ -1529,6 +1459,15 @@ public class AIOrchestrator implements Serializable {
          * Sets the supplier of free-form session context the LLM sees on every
          * turn. The supplier is invoked once per turn on the UI thread when the
          * request is being built.
+         * <p>
+         * The context reaches the provider as
+         * {@link LLMProvider.LLMRequest#sessionContext()}, and the built-in
+         * providers append it to the user message of that turn, after the
+         * user's own text. This keeps the system prompt and the tool
+         * definitions identical from turn to turn, so an LLM provider that
+         * caches the prompt prefix keeps serving them from its cache. The
+         * message list and {@link AIOrchestrator#getHistory()} carry the user's
+         * text only.
          * <p>
          * The supplier may return any string the application wants the LLM to
          * have on hand — current date and time, the active tenant, the user's

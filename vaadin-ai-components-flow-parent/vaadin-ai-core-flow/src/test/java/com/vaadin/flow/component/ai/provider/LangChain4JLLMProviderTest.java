@@ -1791,6 +1791,39 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(names.contains("getHumidity"));
     }
 
+    @Test
+    void stream_withSessionContext_appendsContextToUserMessageText() {
+        var request = new TestLLMRequestWithSessionContext("Hello",
+                "Tenant: acme");
+        var response = mockSimpleResponse("Hi");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        var text = userMessage.singleText();
+        Assertions.assertTrue(text.startsWith("Hello\n\n<session_context>"),
+                "Context must follow the user's text; got: " + text);
+        Assertions.assertTrue(text.contains("Tenant: acme"), text);
+    }
+
+    @Test
+    void stream_withoutSessionContext_sendsUserMessageTextAsIs() {
+        var response = mockSimpleResponse("Hi");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        provider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userMessage = (UserMessage) captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Hello", userMessage.singleText());
+    }
+
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<JsonNode, String> executor) {
@@ -2208,6 +2241,24 @@ class LangChain4JLLMProviderTest {
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
             List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithSessionContext(String userMessage,
+            String sessionContext) implements LLMRequest {
+        @Override
+        public List<AIAttachment> attachments() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String systemPrompt() {
+            return null;
+        }
+
+        @Override
+        public Object[] tools() {
+            return new Object[0];
+        }
     }
 
     private static class SampleToolsClass {

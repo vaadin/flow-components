@@ -1666,6 +1666,35 @@ class SpringAILLMProviderTest {
                 List.of(new Generation(assistantMessage, metadata)));
     }
 
+    @Test
+    void stream_withSessionContext_appendsContextToUserMessageText() {
+        provider.setStreaming(false);
+        var request = new TestLLMRequestWithSessionContext("Hello",
+                "Tenant: acme");
+        mockSimpleChat("Hi");
+
+        provider.stream(request).blockFirst();
+
+        var userMessage = (UserMessage) capturePrompt().getInstructions()
+                .getFirst();
+        var text = userMessage.getText();
+        Assertions.assertTrue(text.startsWith("Hello\n\n<session_context>"),
+                "Context must follow the user's text; got: " + text);
+        Assertions.assertTrue(text.contains("Tenant: acme"), text);
+    }
+
+    @Test
+    void stream_withoutSessionContext_sendsUserMessageTextAsIs() {
+        provider.setStreaming(false);
+        mockSimpleChat("Hi");
+
+        provider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var userMessage = (UserMessage) capturePrompt().getInstructions()
+                .getFirst();
+        Assertions.assertEquals("Hello", userMessage.getText());
+    }
+
     private static LLMRequest createSimpleRequest(String message) {
         return new TestLLMRequest(message, null, Collections.emptyList(),
                 new Object[0]);
@@ -2466,6 +2495,24 @@ class SpringAILLMProviderTest {
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
             List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithSessionContext(String userMessage,
+            String sessionContext) implements LLMRequest {
+        @Override
+        public List<AIAttachment> attachments() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String systemPrompt() {
+            return null;
+        }
+
+        @Override
+        public Object[] tools() {
+            return new Object[0];
+        }
     }
 
     private static class SampleToolsClass {

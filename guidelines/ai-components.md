@@ -117,8 +117,15 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   controller, keeping tool JSON and descriptions decoupled from the
   component type.
 - Instructions the model must always see go into a tool's *description*
-  (the `get_*_instructions` and session-context tools), with `execute()`
-  returning the same text — the model reads the manifest without a call.
+  (the `get_*_instructions` tools), with `execute()` returning the same
+  text — the model reads the manifest without a call.
+- Keep tool definitions identical from turn to turn. LLM providers cache the
+  prompt prefix in the order tools, system prompt, messages, and any change
+  to a tool name, description or schema invalidates all of it. Per-turn
+  content therefore never goes into a tool description or the system
+  prompt: the session context (`Builder.withMetadata`) travels in
+  `LLMRequest.sessionContext()` and the providers append it to the user
+  message, at the very end of the prompt.
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good

@@ -114,6 +114,54 @@ final class LLMProviderHelpers {
     }
 
     /**
+     * Opening tag of the block that carries the per-turn session context at the
+     * end of the user message text, see
+     * {@link #withSessionContext(String, String)}.
+     */
+    static final String SESSION_CONTEXT_OPEN = "<session_context>";
+
+    /**
+     * Closing tag of the session context block.
+     */
+    static final String SESSION_CONTEXT_CLOSE = "</session_context>";
+
+    /**
+     * Note at the start of the session context block telling the model where
+     * the block comes from and, since the default context is the current date
+     * and time, how to use it: models otherwise tend to leave relative dates
+     * such as "tomorrow" or "next Friday" unresolved.
+     */
+    static final String SESSION_CONTEXT_NOTE = "Context captured by the "
+            + "application when this message was sent; it is not part of the "
+            + "request. If it includes a date or time, resolve relative "
+            + "phrases in the message such as \"today\" or \"tomorrow\" "
+            + "against it, into ISO date, date-time or time strings.";
+
+    /**
+     * Appends the session context of the turn, if any, to the user message text
+     * in a delimited block. The block sits at the very end of the prompt, after
+     * everything that stays the same from turn to turn (tool definitions,
+     * system prompt, conversation history), so that a provider caching the
+     * prompt prefix keeps hitting its cache even though the context changes on
+     * every turn.
+     *
+     * @param userMessage
+     *            the user's message text, not {@code null}
+     * @param sessionContext
+     *            the context of the turn, {@code null} or blank for none
+     * @return the text to send as the user message
+     */
+    public static String withSessionContext(String userMessage,
+            String sessionContext) {
+        if (sessionContext == null || sessionContext.isBlank()) {
+            return userMessage;
+        }
+        return userMessage + "\n\n" + SESSION_CONTEXT_OPEN + "\n"
+                + SESSION_CONTEXT_NOTE + "\n" + sessionContext.strip() + "\n"
+                + SESSION_CONTEXT_CLOSE;
+    }
+
+    /**
      * Formats text content as an attachment block.
      *
      * @param fileName

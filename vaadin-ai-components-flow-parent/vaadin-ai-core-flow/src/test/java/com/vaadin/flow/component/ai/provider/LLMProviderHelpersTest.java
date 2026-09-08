@@ -25,6 +25,42 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 class LLMProviderHelpersTest {
 
     @Test
+    void withSessionContext_appendsDelimitedBlockAfterUserText() {
+        var result = LLMProviderHelpers.withSessionContext("Hello",
+                "Tenant: acme");
+
+        Assertions.assertTrue(result.startsWith("Hello\n\n<session_context>\n"),
+                "Context block must follow the user's text; got: " + result);
+        Assertions.assertTrue(
+                result.endsWith("\nTenant: acme\n</session_context>"),
+                "Context must be the last thing in the block; got: " + result);
+    }
+
+    @Test
+    void withSessionContext_carriesRelativeDateGuidance() {
+        // Real LLMs often leave date fields empty when the user writes
+        // "tomorrow" or "next Friday" unless something tells them to anchor
+        // relative phrases against the date the context carries. Pin the
+        // phrases that close that gap; a regression here re-opens it.
+        var result = LLMProviderHelpers.withSessionContext("Hello",
+                "Current server date and time: 2026-05-28T17:42+03:00");
+
+        for (var anchor : new String[] { "relative", "tomorrow", "ISO",
+                "phrase" }) {
+            Assertions.assertTrue(result.contains(anchor),
+                    "Block must mention '" + anchor + "', got: " + result);
+        }
+    }
+
+    @Test
+    void withSessionContext_withoutContext_returnsUserTextUnchanged() {
+        Assertions.assertEquals("Hello",
+                LLMProviderHelpers.withSessionContext("Hello", null));
+        Assertions.assertEquals("Hello",
+                LLMProviderHelpers.withSessionContext("Hello", "   "));
+    }
+
+    @Test
     void decodeAsUtf8_withValidUtf8_strictMode_returnsDecodedString() {
         var data = getValidUtf8Data();
         var input = new String(data, StandardCharsets.UTF_8);
