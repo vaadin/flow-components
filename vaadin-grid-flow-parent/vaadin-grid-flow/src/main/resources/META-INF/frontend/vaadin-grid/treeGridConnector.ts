@@ -33,20 +33,11 @@ function initLazy(grid: FlowTreeGrid) {
 
   window.Vaadin.Flow.gridConnector.initLazy(grid);
 
-  grid._dataProviderController._shouldLoadCachePage = function (cache, page) {
-    // `$server.setViewportRangeByIndexPath` sends a preloaded viewport range based on
-    // the provided index path and `padding` parameter. Applying the new range clears
-    // the old range, which is still visible because the actual scroll happens only
-    // after all connector calls in that update are processed. This check prevents
-    // the old range from being unnecessarily re-requested while the new range is
-    // still being processed, which could cause flickering.
-    return !grid.__pendingScrollToIndexes;
-  };
-
   grid.scrollToIndex = async function (...indexes) {
-    grid.__pendingScrollToIndexes = indexes;
-
     if (!grid.clientHeight || !grid._columnTree || grid._dataProviderController.isLoading()) {
+      // Not ready yet. The web component retries from __scrollToPendingIndexes
+      // once a page has loaded or the grid has become visible.
+      grid.__pendingScrollToIndexes = indexes;
       return;
     }
 
@@ -55,7 +46,12 @@ function initLazy(grid: FlowTreeGrid) {
     const flatIndex = await grid.$server.setViewportRangeByIndexPath(indexes, padding);
     grid._scrollToFlatIndex(flatIndex);
 
-    delete grid.__pendingScrollToIndexes;
+    // While the preloaded range was being applied, the rows of the old range
+    // were still rendered and requested their pages again. Now that the grid
+    // has scrolled, those requests are stale. Resolve them so that the
+    // rendered rows are re-checked against the cache and the debounced
+    // server request gets cancelled.
+    grid.$connector.resolvePendingCallbacks();
 
     return flatIndex;
   };
