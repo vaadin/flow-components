@@ -32,9 +32,11 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 
 class MessageListUserTest {
@@ -48,18 +50,24 @@ class MessageListUserTest {
 
     private MessageList messageList;
     private MessageListUser alice;
-    private DownloadHandler imageHandler;
+    private InputStreamDownloadHandler imageHandler;
 
     @BeforeEach
     void setup() {
         messageList = new MessageList();
         alice = new MessageListUser("Alice");
-        imageHandler = DownloadHandler
-                .fromInputStream(event -> new DownloadResponse(
-                        new ByteArrayInputStream(
-                                "image".getBytes(StandardCharsets.UTF_8)),
-                        "alice.png", "image/png", 5));
+        imageHandler = createImageHandler();
         ui.add(messageList);
+    }
+
+    @Test
+    void createWithNameAndImage_getNameAndImage() {
+        var user = new MessageListUser("Alice",
+                "https://example.com/alice.png");
+
+        Assertions.assertEquals("Alice", user.getName());
+        Assertions.assertEquals("https://example.com/alice.png",
+                user.getImage());
     }
 
     @Test
@@ -234,6 +242,151 @@ class MessageListUserTest {
         Assertions.assertEquals("typing",
                 serialized.get("className").asString());
         Assertions.assertEquals(5, serialized.size());
+    }
+
+    @Test
+    void setImageHandler_replaceHandler_previousImageNoLongerServed() {
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+        var previousImageUrl = alice.getImage();
+
+        alice.setImageHandler(createImageHandler());
+
+        assertImageIsServed(alice.getImage());
+        Assertions.assertTrue(resolveImage(previousImageUrl).isEmpty(),
+                "Expected the previous image resource to be unregistered");
+    }
+
+    @Test
+    void setImage_setImageHandler_notInMessageList_imageUrlRemoved() {
+        alice.setImage("https://example.com/alice.png");
+
+        alice.setImageHandler(imageHandler);
+
+        Assertions.assertNull(alice.getImage());
+    }
+
+    @Test
+    void setImageHandler_servedInline() {
+        alice.setImageHandler(imageHandler);
+
+        Assertions.assertTrue(imageHandler.isInline(),
+                "Expected the image to be served inline");
+    }
+
+    @Test
+    void removeFromMessageList_imageNoLongerServed() {
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+        var imageUrl = alice.getImage();
+
+        messageList.setTypingUsers();
+
+        Assertions.assertNull(alice.getImage());
+        Assertions.assertTrue(resolveImage(imageUrl).isEmpty(),
+                "Expected the image resource to be unregistered");
+    }
+
+    @Test
+    void removeFromMessageList_messageListReattached_imageNotServedAgain() {
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+        messageList.setTypingUsers();
+
+        ui.remove(messageList);
+        ui.add(messageList);
+
+        Assertions.assertNull(alice.getImage());
+    }
+
+    @Test
+    void moveToAnotherMessageList_previousListDetached_imageStillServed() {
+        var otherList = new MessageList();
+        ui.add(otherList);
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+
+        otherList.setTypingUsers(alice);
+        ui.remove(messageList);
+
+        assertImageIsServed(alice.getImage());
+    }
+
+    @Test
+    void setImageHandler_detachedMessageList_imageUrlSentToClientAfterAttach() {
+        var detachedList = new MessageList();
+        alice.setImageHandler(imageHandler);
+        detachedList.setTypingUsers(alice);
+
+        ui.add(detachedList);
+
+        Assertions.assertEquals(alice.getImage(),
+                serializedTypingUser(detachedList).get("img").asString());
+    }
+
+    @Test
+    void setImageHandler_null_whileTyping_typingUsersPropertyUpdated() {
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+
+        alice.setImageHandler(null);
+
+        Assertions.assertFalse(serializedTypingUser(messageList).has("img"));
+    }
+
+    @Test
+    void setImage_whileTyping_typingUsersPropertyUpdated() {
+        messageList.setTypingUsers(alice);
+
+        alice.setImage("https://example.com/alice.png");
+
+        Assertions.assertEquals("https://example.com/alice.png",
+                serializedTypingUser(messageList).get("img").asString());
+    }
+
+    @Test
+    void setUserProperties_whileTyping_typingUsersPropertyUpdated() {
+        messageList.setTypingUsers(alice);
+
+        alice.setName("Alice Adams");
+        Assertions.assertEquals("Alice Adams",
+                serializedTypingUser(messageList).get("name").asString());
+
+        alice.setAbbreviation("AA");
+        Assertions.assertEquals("AA",
+                serializedTypingUser(messageList).get("abbr").asString());
+
+        alice.setColorIndex(2);
+        Assertions.assertEquals(2,
+                serializedTypingUser(messageList).get("colorIndex").asInt());
+
+        alice.addClassNames("typing");
+        Assertions.assertEquals("typing",
+                serializedTypingUser(messageList).get("className").asString());
+
+        alice.removeClassNames("typing");
+        Assertions.assertFalse(
+                serializedTypingUser(messageList).has("className"));
+    }
+
+    @Test
+    void serializedUser_omitsUnsetProperties() {
+        var serialized = JacksonUtils.beanToJson(alice);
+
+        Assertions.assertEquals("Alice", serialized.get("name").asString());
+        Assertions.assertEquals(1, serialized.size());
+    }
+
+    private InputStreamDownloadHandler createImageHandler() {
+        return DownloadHandler.fromInputStream(event -> new DownloadResponse(
+                new ByteArrayInputStream(
+                        "image".getBytes(StandardCharsets.UTF_8)),
+                "alice.png", "image/png", 5));
+    }
+
+    private JsonNode serializedTypingUser(MessageList messageList) {
+        return ((ArrayNode) messageList.getElement()
+                .getPropertyRaw("_usersTyping")).get(0);
     }
 
     private void assertImageIsServed(String imageUrl) {
