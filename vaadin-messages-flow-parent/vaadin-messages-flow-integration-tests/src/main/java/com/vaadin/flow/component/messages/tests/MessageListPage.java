@@ -35,6 +35,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 @Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
 
+    // A 1x1 transparent GIF, so that the avatar image loads without the test
+    // depending on a served resource
+    static final String TYPING_USER_IMAGE = "data:image/gif;base64,"
+            + "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
     public MessageListPage() {
         UI.getCurrent().setLocale(Locale.ENGLISH);
 
@@ -136,6 +141,27 @@ public class MessageListPage extends Div {
                     "typing-user-img"));
             messageList.setTypingUsers(alice);
         });
+
+        var carol = new MessageListUser();
+        carol.setName("Carol");
+        carol.setAbbreviation("CA");
+        carol.setImage(TYPING_USER_IMAGE);
+        carol.setColorIndex(4);
+        carol.addClassNames("carol", "typing");
+
+        var dave = new MessageListUser("Dave", TYPING_USER_IMAGE);
+
+        addButton("showTypingWithUserProperties",
+                () -> messageList.setTypingUsers(carol));
+        addButton("updateTypingUserProperties", () -> {
+            carol.setName("Carol Carter");
+            carol.setAbbreviation("CC");
+            carol.setImage(null);
+            carol.setColorIndex(5);
+            carol.removeClassNames("typing");
+        });
+        addButton("showTypingWithImageUrl",
+                () -> messageList.setTypingUsers(dave));
 
         // Output section for test verification
         Div outputSection = new Div();

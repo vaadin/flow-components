@@ -419,7 +419,7 @@ public class MessageListIT extends AbstractComponentIT {
     @Test
     public void showTypingWithImageHandler_avatarImageLoaded() {
         clickElementWithJs("showTypingWithImageHandler");
-        var avatar = getTypingIndicator().$("vaadin-avatar").first();
+        var avatar = getTypingUserAvatar();
 
         var imageUrl = avatar.getPropertyString("img");
         Assert.assertNotNull("Expected an avatar image URL", imageUrl);
@@ -428,10 +428,71 @@ public class MessageListIT extends AbstractComponentIT {
                 imageUrl.startsWith("VAADIN/dynamic"));
 
         // The image only decodes if the download handler is actually served
-        waitUntil(driver -> (Boolean) executeScript("""
-                const img = arguments[0].shadowRoot.querySelector('img');
-                return !!(img && img.complete && img.naturalWidth > 0);
-                """, avatar));
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
+    }
+
+    @Test
+    public void showTypingWithUserProperties_userPropertiesRenderedOnAvatar() {
+        clickElementWithJs("showTypingWithUserProperties");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Carol"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Carol",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar abbreviation", "CA",
+                avatar.getPropertyString("abbr"));
+        Assert.assertEquals("Unexpected avatar image",
+                MessageListPage.TYPING_USER_IMAGE,
+                avatar.getPropertyString("img"));
+        Assert.assertEquals("Unexpected avatar color index", Integer.valueOf(4),
+                avatar.getPropertyInteger("colorIndex"));
+        Assert.assertTrue("Expected the class names of the user on the avatar",
+                avatar.getClassNames().containsAll(List.of("carol", "typing")));
+
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
+    }
+
+    @Test
+    public void showTypingWithUserProperties_updateUser_avatarUpdated() {
+        clickElementWithJs("showTypingWithUserProperties");
+
+        clickElementWithJs("updateTypingUserProperties");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Carol Carter"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Carol Carter",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar abbreviation", "CC",
+                avatar.getPropertyString("abbr"));
+        Assert.assertFalse("Expected the avatar image to be removed",
+                isAvatarImageVisible(avatar));
+        Assert.assertEquals("Unexpected avatar color index", Integer.valueOf(5),
+                avatar.getPropertyInteger("colorIndex"));
+        Assert.assertTrue("Expected the remaining class name on the avatar",
+                avatar.hasClassName("carol"));
+        Assert.assertFalse("Expected the removed class name to be gone",
+                avatar.hasClassName("typing"));
+    }
+
+    @Test
+    public void showTypingWithImageUrl_nameAndImageRenderedOnAvatar() {
+        clickElementWithJs("showTypingWithImageUrl");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Dave"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Dave",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar image",
+                MessageListPage.TYPING_USER_IMAGE,
+                avatar.getPropertyString("img"));
+
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
     }
 
     @Test
@@ -454,6 +515,24 @@ public class MessageListIT extends AbstractComponentIT {
         var query = messageList.$(TestBenchElement.class).withAttribute("slot",
                 "typing-indicator");
         return query.exists() ? query.first() : null;
+    }
+
+    private TestBenchElement getTypingUserAvatar() {
+        return getTypingIndicator().$("vaadin-avatar").first();
+    }
+
+    private boolean isAvatarImageVisible(TestBenchElement avatar) {
+        return (Boolean) executeScript("""
+                const img = arguments[0].shadowRoot.querySelector('img');
+                return !!img && !img.hidden;
+                """, avatar);
+    }
+
+    private boolean isAvatarImageLoaded(TestBenchElement avatar) {
+        return (Boolean) executeScript("""
+                const img = arguments[0].shadowRoot.querySelector('img');
+                return !!(img && img.complete && img.naturalWidth > 0);
+                """, avatar);
     }
 
     private String getTypingIndicatorText() {
