@@ -80,23 +80,22 @@ import com.vaadin.flow.function.SerializableConsumer;
  * {@link RequestContinuation}.
  * <p>
  * <b>Postponing:</b> while a prompt is postponed nothing is shown in the UI and
- * further prompts are ignored, so show a pending indicator and disable the
- * input before scheduling the work, and clean up when completing the
- * continuation. Server push must be enabled — e.g. with
- * {@link com.vaadin.flow.component.page.Push @Push} on the application shell
- * class — for the resumed turn to reach the browser without user interaction.
- * Capture the {@link com.vaadin.flow.component.UI UI} before scheduling the
- * work and wrap component changes made from the completing thread in
- * {@code ui.access(...)}:
+ * further prompts are ignored, so show a pending indicator before scheduling
+ * the work and hide it when completing the continuation. Server push must be
+ * enabled — e.g. with {@link com.vaadin.flow.component.page.Push @Push} on the
+ * application shell class — for the resumed turn to reach the browser without
+ * user interaction. Capture the {@link com.vaadin.flow.component.UI UI} before
+ * scheduling the work and wrap component changes made from the completing
+ * thread in {@code ui.access(...)}:
  *
  * <pre>
  * .withRequestInterceptor(event -&gt; {
  *     var continuation = event.postpone(Duration.ofSeconds(10));
  *     var ui = UI.getCurrent();
- *     input.setEnabled(false);
+ *     progressBar.setVisible(true);
  *     moderationService.checkAsync(event.getUserMessage())
  *             .whenComplete((verdict, error) -&gt; {
- *                 ui.access(() -&gt; input.setEnabled(true));
+ *                 ui.access(() -&gt; progressBar.setVisible(false));
  *                 if (error != null) {
  *                     continuation.fail(error);
  *                     return;
