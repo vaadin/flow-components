@@ -272,6 +272,16 @@ class MessageListTypingIndicatorTest {
     }
 
     @Test
+    void featureFlagChecked_featureDisabledLater_doesNotThrowAgain() {
+        messageList.setTypingUsers(new MessageListUser("Alice"));
+
+        featureFlagExtension.disableFeature();
+
+        Assertions.assertDoesNotThrow(
+                () -> messageList.setTypingUsers(new MessageListUser("Bob")));
+    }
+
+    @Test
     void featureDisabled_detachedList_throwsOnAttach() {
         featureFlagExtension.disableFeature();
         var detachedList = new MessageList();

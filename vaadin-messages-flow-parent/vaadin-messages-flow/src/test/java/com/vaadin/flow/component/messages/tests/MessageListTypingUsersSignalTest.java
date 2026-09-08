@@ -110,8 +110,11 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindTypingUsers_nullSignal_throws() {
-        Assertions.assertThrows(NullPointerException.class,
+        var exception = Assertions.assertThrows(NullPointerException.class,
                 () -> messageList.bindTypingUsers(null));
+
+        Assertions.assertTrue(
+                exception.getMessage().contains("Signal cannot be null"));
     }
 
     @Test
