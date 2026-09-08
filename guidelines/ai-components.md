@@ -65,6 +65,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- Provider chat memory holds the user messages and the assistant's final
+  answer of each turn. Tool calls and results are sent to the model only
+  within their own turn, with both built-in providers, so a controller must
+  not rely on the model remembering a previous turn's tool result; the
+  instruction tools already tell the model to read the state again each
+  turn.
 - The response stream carries text only; everything else the model said
   about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the
@@ -145,11 +151,10 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
   against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
   the same as Spring AI's) and fails the turn with the public
-  `ToolCallLimitExceededException`. The check runs before the tool-requesting
-  message enters chat memory and before any tool of that round runs, so memory
-  never holds a tool request without its result and the next turn continues
-  from the last completed round; a cancelled turn likewise stops calling the
-  model and the tools. `SpringAILLMProvider` adds no cap of its own: Spring AI
+  `ToolCallLimitExceededException`. The check runs before any tool of that
+  round runs, and the tool traffic of the failed turn is discarded with it, so
+  the next turn continues from the chat memory as the last completed turn
+  left it; a cancelled turn likewise stops calling the model and the tools. `SpringAILLMProvider` adds no cap of its own: Spring AI
   bounds the loop itself, and ends such a turn normally with the finish reason
   `toolCallLimitExceeded` rather than with an error.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password

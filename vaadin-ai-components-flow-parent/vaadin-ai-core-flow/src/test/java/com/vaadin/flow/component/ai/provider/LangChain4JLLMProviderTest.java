@@ -1835,6 +1835,45 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals("Hello", userMessage.singleText());
     }
 
+    @Test
+    void stream_toolCallsAndResults_notReplayedOnLaterTurns() {
+        // Tool traffic is only needed by the round trips of its own turn.
+        // Replaying it later would resend every past tool result on every
+        // request, while the model is told to fetch the state again anyway.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        var secondTurnResponse = mockSimpleResponse("second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, finalResponse, secondTurnResponse);
+
+        provider.stream(request).collectList().block();
+        provider.stream(createSimpleRequest("Next question")).collectList()
+                .block();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var withinTurn = captor.getAllValues().get(1);
+        Assertions.assertEquals(1, getToolExecutionResults(withinTurn).size(),
+                "The follow-up round trip of the same turn sees the tool result");
+        var secondTurnRequest = captor.getAllValues().get(2);
+        var secondTurn = secondTurnRequest.messages();
+        Assertions.assertEquals(3, secondTurn.size(),
+                "Second turn should carry user, final answer, user; got: "
+                        + secondTurn);
+        Assertions.assertTrue(
+                getToolExecutionResults(secondTurnRequest).isEmpty(),
+                "Tool results must not be replayed on a later turn");
+        Assertions.assertTrue(
+                secondTurn.stream().filter(AiMessage.class::isInstance)
+                        .map(AiMessage.class::cast)
+                        .noneMatch(AiMessage::hasToolExecutionRequests),
+                "Tool calls must not be replayed on a later turn");
+    }
+
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<JsonNode, String> executor) {
@@ -2325,15 +2364,13 @@ class LangChain4JLLMProviderTest {
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
-        // The refused request is not in memory: the completed round's
-        // request and result are followed directly by the new user message
+        // The failed turn left only its user message in memory: neither
+        // the refused request nor the completed round's tool traffic follow
+        // it, and there is no final answer to keep
         var messages = captor.getAllValues().get(2).messages();
-        Assertions.assertEquals(4, messages.size());
-        Assertions.assertInstanceOf(UserMessage.class, messages.get(0));
-        Assertions.assertInstanceOf(AiMessage.class, messages.get(1));
-        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
-                messages.get(2));
-        Assertions.assertInstanceOf(UserMessage.class, messages.get(3));
+        Assertions.assertEquals(2, messages.size());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance));
     }
 
     @Test
@@ -2519,8 +2556,8 @@ class LangChain4JLLMProviderTest {
         Mockito.verify(mockChatModel, Mockito.times(1))
                 .chat(Mockito.any(ChatRequest.class));
 
-        // The round that ran is complete in memory, so the next turn follows
-        // its tool result
+        // The cancelled turn's tool traffic is discarded with it, so the
+        // next turn follows the user message that started it
         Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
                 .chat(Mockito.any(ChatRequest.class));
         provider.stream(createSimpleRequest("Second")).collectList()
@@ -2528,10 +2565,9 @@ class LangChain4JLLMProviderTest {
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var messages = captor.getAllValues().get(1).messages();
-        Assertions.assertEquals(4, messages.size());
-        Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
-                messages.get(2));
-        Assertions.assertInstanceOf(UserMessage.class, messages.get(3));
+        Assertions.assertEquals(2, messages.size());
+        Assertions.assertTrue(
+                messages.stream().allMatch(UserMessage.class::isInstance));
     }
 
     @Test
