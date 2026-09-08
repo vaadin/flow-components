@@ -1677,10 +1677,9 @@ class SpringAILLMProviderTest {
 
         var userMessage = (UserMessage) capturePrompt().getInstructions()
                 .getFirst();
-        var text = userMessage.getText();
-        Assertions.assertTrue(text.startsWith("Hello\n\n<session_context>"),
-                "Context must follow the user's text; got: " + text);
-        Assertions.assertTrue(text.contains("Tenant: acme"), text);
+        Assertions.assertEquals(
+                LLMProviderHelpers.withSessionContext("Hello", "Tenant: acme"),
+                userMessage.getText());
     }
 
     @Test

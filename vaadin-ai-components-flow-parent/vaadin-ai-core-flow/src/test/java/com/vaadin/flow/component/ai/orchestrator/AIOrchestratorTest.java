@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
@@ -2728,6 +2729,9 @@ class AIOrchestratorTest {
         Assertions.assertTrue(context.contains("Current server date and time:"),
                 "Default supplier should render a date/time line; got: "
                         + context);
+        Assertions.assertTrue(captor.getValue().explicitTools().isEmpty(),
+                "Session context must not be delivered as a tool; got: "
+                        + captor.getValue().explicitTools());
     }
 
     @Test
@@ -2760,17 +2764,24 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withSessionContext_historyAndMessageListKeepUserText() {
+    void prompt_withSessionContext_keepsUserFacingTextClean() {
+        // The context is for the provider only: what the user sees, what a
+        // RequestListener is told, and what getHistory() returns must stay
+        // the text the user actually wrote.
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
+        var received = new ArrayList<String>();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList)
-                .withMetadata(() -> "Tenant: acme").build();
+                .withMetadata(() -> "Tenant: acme").withRequestListener(
+                        event -> received.add(event.getUserMessage()))
+                .build();
         orchestrator.prompt("Hello");
 
+        Assertions.assertEquals(List.of("Hello"), received);
         Assertions.assertEquals("Hello",
                 orchestrator.getHistory().getFirst().content());
         Mockito.verify(mockMessageList).addMessage(Mockito.eq("Hello"),
@@ -2798,55 +2809,38 @@ class AIOrchestratorTest {
 
     @Test
     void prompt_withNullContext_omitsSessionContext() {
-        stubAddMessage();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withMetadata(null).build();
-        orchestrator.prompt("Hello");
-
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
-        Mockito.verify(mockProvider).stream(captor.capture());
-        Assertions.assertNull(captor.getValue().sessionContext(),
-                "withMetadata(null) should suppress the built-in context");
+        assertNoSessionContext(builder -> builder.withMetadata(null));
     }
 
     @Test
     void prompt_withMetadataSupplierReturningBlank_omitsSessionContext() {
-        stubAddMessage();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withMetadata(() -> "   ")
-                .build();
-        orchestrator.prompt("Hello");
-
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
-        Mockito.verify(mockProvider).stream(captor.capture());
-        Assertions.assertNull(captor.getValue().sessionContext(),
-                "Empty/blank supplier output should suppress the context for that turn");
+        assertNoSessionContext(builder -> builder.withMetadata(() -> "   "));
     }
 
     @Test
     void prompt_withMetadataSupplierReturningNull_omitsSessionContext() {
+        assertNoSessionContext(builder -> builder.withMetadata(() -> null));
+    }
+
+    /**
+     * Prompts an orchestrator configured by {@code configure} and asserts that
+     * the request it sent carried no session context.
+     */
+    private void assertNoSessionContext(
+            UnaryOperator<AIOrchestrator.Builder> configure) {
         stubAddMessage();
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withMetadata(() -> null)
+        var orchestrator = configure.apply(AIOrchestrator
+                .builder(mockProvider, null).withMessageList(mockMessageList))
                 .build();
         orchestrator.prompt("Hello");
 
         var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
         Mockito.verify(mockProvider).stream(captor.capture());
-        Assertions.assertNull(captor.getValue().sessionContext(),
-                "Null supplier output should suppress the context for that turn");
+        Assertions.assertNull(captor.getValue().sessionContext());
     }
 
     @Test

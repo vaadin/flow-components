@@ -126,21 +126,23 @@ final class LLMProviderHelpers {
     static final String SESSION_CONTEXT_CLOSE = "</session_context>";
 
     /**
-     * Note at the start of the session context block telling the model where
-     * the block comes from and, since the default context is the current date
-     * and time, how to use it: models otherwise tend to leave relative dates
-     * such as "tomorrow" or "next Friday" unresolved.
+     * Note at the start of the session context block. It tells the model that
+     * the block is application-supplied rather than the user's words and, since
+     * the default context is the current date and time, how to use it: models
+     * otherwise tend to leave relative dates such as "tomorrow" or "next
+     * Friday" unresolved.
      */
-    static final String SESSION_CONTEXT_NOTE = "Context captured by the "
-            + "application when this message was sent; it is not part of the "
-            + "request. If it includes a date or time, resolve relative "
-            + "phrases in the message such as \"today\" or \"tomorrow\" "
+    static final String SESSION_CONTEXT_NOTE = "Context supplied by the "
+            + "application when this message was sent, not written by the "
+            + "user. If it includes a date or time, resolve relative phrases "
+            + "in the message (\"today\", \"tomorrow\", \"yesterday\", "
+            + "\"next Friday\", \"in two weeks\", \"end of next month\") "
             + "against it, into ISO date, date-time or time strings.";
 
     /**
      * Appends the session context of the turn, if any, to the user message text
-     * in a delimited block. The block sits at the very end of the prompt, after
-     * everything that stays the same from turn to turn (tool definitions,
+     * in a delimited block. The block ends the user message text, which comes
+     * after everything that stays the same from turn to turn (tool definitions,
      * system prompt, conversation history), so that a provider caching the
      * prompt prefix keeps hitting its cache even though the context changes on
      * every turn.

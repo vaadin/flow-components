@@ -1804,10 +1804,9 @@ class LangChain4JLLMProviderTest {
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel).chat(captor.capture());
         var userMessage = (UserMessage) captor.getValue().messages().getFirst();
-        var text = userMessage.singleText();
-        Assertions.assertTrue(text.startsWith("Hello\n\n<session_context>"),
-                "Context must follow the user's text; got: " + text);
-        Assertions.assertTrue(text.contains("Tenant: acme"), text);
+        Assertions.assertEquals(
+                LLMProviderHelpers.withSessionContext("Hello", "Tenant: acme"),
+                userMessage.singleText());
     }
 
     @Test

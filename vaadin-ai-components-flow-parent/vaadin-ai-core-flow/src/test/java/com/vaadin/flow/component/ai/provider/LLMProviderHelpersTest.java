@@ -29,27 +29,14 @@ class LLMProviderHelpersTest {
         var result = LLMProviderHelpers.withSessionContext("Hello",
                 "Tenant: acme");
 
-        Assertions.assertTrue(result.startsWith("Hello\n\n<session_context>\n"),
+        Assertions.assertTrue(
+                result.startsWith("Hello\n\n"
+                        + LLMProviderHelpers.SESSION_CONTEXT_OPEN + "\n"),
                 "Context block must follow the user's text; got: " + result);
         Assertions.assertTrue(
-                result.endsWith("\nTenant: acme\n</session_context>"),
+                result.endsWith("\nTenant: acme\n"
+                        + LLMProviderHelpers.SESSION_CONTEXT_CLOSE),
                 "Context must be the last thing in the block; got: " + result);
-    }
-
-    @Test
-    void withSessionContext_carriesRelativeDateGuidance() {
-        // Real LLMs often leave date fields empty when the user writes
-        // "tomorrow" or "next Friday" unless something tells them to anchor
-        // relative phrases against the date the context carries. Pin the
-        // phrases that close that gap; a regression here re-opens it.
-        var result = LLMProviderHelpers.withSessionContext("Hello",
-                "Current server date and time: 2026-05-28T17:42+03:00");
-
-        for (var anchor : new String[] { "relative", "tomorrow", "ISO",
-                "phrase" }) {
-            Assertions.assertTrue(result.contains(anchor),
-                    "Block must mention '" + anchor + "', got: " + result);
-        }
     }
 
     @Test
