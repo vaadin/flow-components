@@ -27,7 +27,12 @@ then
 fi
 
 args="$args -ntp -B $quiet"
-verify="verify -Dvaadin.pnpm.enable"
+## Install frontend dependencies with npm, not pnpm: Flow's generated vite
+## config imports transitive deps (rollup) directly, which only resolves in a
+## flat node_modules. `-Dvaadin.pnpm.enable` would make Flow install them with
+## whatever pnpm `npx` resolves from the registry, and pnpm >= 11 no longer
+## produces that layout.
+verify="verify"
 
 ## compute modules that were modified in this PR
 if [ -z "$modules" -a -n "$PR" ]
@@ -151,6 +156,12 @@ fi
 cmd="npm install --silent --quiet --no-progress"
 tcLog "Install NPM packages - $cmd"
 $cmd || exit 1
+
+## Remove the generated merged module, otherwise files left by a previous build
+## (node_modules, package.json, pnpm-lock.yaml, vite config) are reused as is
+cmd="rm -rf integration-tests"
+tcLog "Remove generated IT module - $cmd"
+$cmd || tcStatus 1 "Removing integration-tests failed"
 
 ## Create the integration-tests by coping all module ITs
 cmd="node scripts/mergeITs.js "`echo $elements`
