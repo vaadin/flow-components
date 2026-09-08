@@ -142,6 +142,8 @@ When adding new published Maven modules to the project (a `-flow` or `-testbench
 
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
 
+A module pins the npm versions of the packages it ships in a versions file of its own, `META-INF/VAADIN/versions/<artifactId>-versions.json`, which Flow reads from every jar on the classpath. The file is generated during the build by `scripts/generatePinnedNpmVersions.js` from the module's `@NpmPackage` annotations, so the version is only ever written in the annotation. Do not add the file to `src/main/resources`, and do not declare the same package in the platform's `versions.json`.
+
 ## Miscellaneous
 
 Components and integration test fixtures must not use `Label` or `NativeLabel` just to display text. Labels must only be used when they are associated with an input.
