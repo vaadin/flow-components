@@ -213,15 +213,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * which still runs on the UI thread. This is the same requirement a
      * {@link StreamingChatModel} already has.</li>
      *
-     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
-     * time. Without background execution, a message submitted while a turn is
+     * <li><b>One prompt at a time.</b> The orchestrator processes one prompt at
+     * a time. Without background execution, a message submitted while a turn is
      * running waits for the session lock and is processed when the turn ends;
      * with it, the submit is rejected and dropped with a warning — and a
-     * connected input has already cleared its text. Disable the input while a
-     * turn is running, for example from
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest}
-     * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(ResponseListener.ResponseEvent)}.</li>
+     * connected input has already cleared its text.</li>
      * </ul>
      *
      * <p>
