@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.messages.testbench.MessageElement;
 import com.vaadin.flow.component.messages.testbench.MessageListElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-messages/message-list-test")
@@ -340,6 +341,127 @@ public class MessageListIT extends AbstractComponentIT {
         // Event includes item's userName, attachment name, and mime type
         Assert.assertEquals("User | chart.svg | image/svg+xml",
                 clickedAttachment.getText());
+    }
+
+    @Test
+    public void showTyping_typingIndicatorRendered() {
+        clickElementWithJs("showTyping");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Alice"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("Typing"));
+    }
+
+    @Test
+    public void showTyping_typingIndicatorNotIncludedInMessages() {
+        clickElementWithJs("showTyping");
+
+        Assert.assertEquals("Typing indicator must not be listed as a message",
+                2, messageList.getMessageElements().size());
+    }
+
+    @Test
+    public void showTwoTyping_bothTypingUsersRendered() {
+        clickElementWithJs("showTwoTyping");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Alice", "Bob"),
+                messageList.getTypingUserNames());
+    }
+
+    @Test
+    public void hideTyping_typingIndicatorRemoved() {
+        clickElementWithJs("showTyping");
+        Assert.assertNotNull(getTypingIndicator());
+
+        clickElementWithJs("hideTyping");
+
+        Assert.assertNull("Expected no typing indicator", getTypingIndicator());
+        Assert.assertTrue(messageList.getTypingUserNames().isEmpty());
+    }
+
+    @Test
+    public void setI18n_showTyping_typingIndicatorTextTranslated() {
+        clickElementWithJs("setI18n");
+        clickElementWithJs("showTyping");
+
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("is thinking"));
+    }
+
+    @Test
+    public void showTyping_setI18n_visibleTypingIndicatorTextTranslated() {
+        clickElementWithJs("showTyping");
+        Assert.assertTrue("Expected the default text",
+                getTypingIndicatorText().contains("Typing"));
+
+        clickElementWithJs("setI18n");
+
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("is thinking"));
+    }
+
+    @Test
+    public void showTyping_setEllipsisType_visibleTypingIndicatorUpdated() {
+        clickElementWithJs("showTyping");
+        Assert.assertEquals("Expected the default type", "",
+                getTypingIndicatorType());
+
+        clickElementWithJs("setEllipsisTypingIndicator");
+        Assert.assertEquals("Unexpected typing indicator type", "ellipsis",
+                getTypingIndicatorType());
+
+        clickElementWithJs("setDefaultTypingIndicator");
+        Assert.assertEquals("Expected the default type", "",
+                getTypingIndicatorType());
+    }
+
+    @Test
+    public void showTypingWithImageHandler_avatarImageLoaded() {
+        clickElementWithJs("showTypingWithImageHandler");
+        var avatar = getTypingIndicator().$("vaadin-avatar").first();
+
+        var imageUrl = avatar.getPropertyString("img");
+        Assert.assertNotNull("Expected an avatar image URL", imageUrl);
+        Assert.assertTrue(
+                "Image URL should start with 'VAADIN/dynamic', was " + imageUrl,
+                imageUrl.startsWith("VAADIN/dynamic"));
+
+        // The image only decodes if the download handler is actually served
+        waitUntil(driver -> (Boolean) executeScript("""
+                const img = arguments[0].shadowRoot.querySelector('img');
+                return !!(img && img.complete && img.naturalWidth > 0);
+                """, avatar));
+    }
+
+    @Test
+    public void showTyping_reattachList_typingIndicatorRestored() {
+        clickElementWithJs("showTyping");
+        clickElementWithJs("detachList");
+        clickElementWithJs("attachList");
+
+        messageList = $(MessageListElement.class).first();
+        Assert.assertEquals("Expected the typing indicator to be restored",
+                List.of("Alice"), messageList.getTypingUserNames());
+    }
+
+    /**
+     * Gets the element rendered as the typing indicator, or {@code null} if no
+     * user is typing. Intentionally relies on how the web component renders the
+     * indicator, as the public TestBench API only exposes the user names.
+     */
+    private TestBenchElement getTypingIndicator() {
+        var query = messageList.$(TestBenchElement.class).withAttribute("slot",
+                "typing-indicator");
+        return query.exists() ? query.first() : null;
+    }
+
+    private String getTypingIndicatorText() {
+        return getTypingIndicator().getPropertyString("textContent");
+    }
+
+    private String getTypingIndicatorType() {
+        return getTypingIndicator().getDomAttribute("typing-indicator");
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {

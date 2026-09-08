@@ -23,7 +23,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
+import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResource;
@@ -108,6 +111,30 @@ public class MessageListPage extends Div {
         addButton("addAttachmentToFirstItem", () -> {
             foo.addAttachment(new MessageListItem.Attachment("agenda.pdf",
                     "#agenda.pdf", "application/pdf"));
+        });
+
+        var alice = new MessageListUser("Alice");
+        alice.setColorIndex(2);
+        var bob = new MessageListUser("Bob");
+        bob.setColorIndex(3);
+
+        addButton("showTyping", () -> messageList.setTypingUsers(alice));
+        addButton("showTwoTyping",
+                () -> messageList.setTypingUsers(alice, bob));
+        addButton("hideTyping", () -> messageList.setTypingUsers());
+        addButton("setI18n", () -> messageList.setI18n(
+                new MessageListI18n().setTypingIndicatorText("is thinking")));
+        addButton("setEllipsisTypingIndicator",
+                () -> messageList.setTypingIndicatorType(
+                        MessageListTypingIndicatorType.ELLIPSIS));
+        addButton("setDefaultTypingIndicator",
+                () -> messageList.setTypingIndicatorType(
+                        MessageListTypingIndicatorType.DEFAULT));
+        addButton("showTypingWithImageHandler", () -> {
+            alice.setImageHandler(DownloadHandler.forClassResource(getClass(),
+                    "/META-INF/resources/images/avatar.png",
+                    "typing-user-img"));
+            messageList.setTypingUsers(alice);
         });
 
         // Output section for test verification
