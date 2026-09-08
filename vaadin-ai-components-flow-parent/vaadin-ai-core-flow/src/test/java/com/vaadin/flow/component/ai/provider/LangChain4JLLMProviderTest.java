@@ -1791,6 +1791,45 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(names.contains("getHumidity"));
     }
 
+    @Test
+    void stream_toolCallsAndResults_notReplayedOnLaterTurns() {
+        // Tool traffic is only needed by the round trips of its own turn.
+        // Replaying it later would resend every past tool result on every
+        // request, while the model is told to fetch the state again anyway.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        var finalResponse = mockSimpleResponse("done");
+        var secondTurnResponse = mockSimpleResponse("second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse, finalResponse, secondTurnResponse);
+
+        provider.stream(request).collectList().block();
+        provider.stream(createSimpleRequest("Next question")).collectList()
+                .block();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
+        var withinTurn = captor.getAllValues().get(1);
+        Assertions.assertEquals(1, getToolExecutionResults(withinTurn).size(),
+                "The follow-up round trip of the same turn sees the tool result");
+        var secondTurnRequest = captor.getAllValues().get(2);
+        var secondTurn = secondTurnRequest.messages();
+        Assertions.assertEquals(3, secondTurn.size(),
+                "Second turn should carry user, final answer, user; got: "
+                        + secondTurn);
+        Assertions.assertTrue(
+                getToolExecutionResults(secondTurnRequest).isEmpty(),
+                "Tool results must not be replayed on a later turn");
+        Assertions.assertTrue(
+                secondTurn.stream().filter(AiMessage.class::isInstance)
+                        .map(AiMessage.class::cast)
+                        .noneMatch(AiMessage::hasToolExecutionRequests),
+                "Tool calls must not be replayed on a later turn");
+    }
+
     private static LLMProvider.ToolSpec createExplicitTool(String name,
             String description, String parametersSchema,
             java.util.function.Function<JsonNode, String> executor) {

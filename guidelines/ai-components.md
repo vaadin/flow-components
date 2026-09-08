@@ -65,6 +65,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- Provider chat memory holds the user messages and the assistant's final
+  answer of each turn. Tool calls and results are sent to the model only
+  within their own turn, with both built-in providers, so a controller must
+  not rely on the model remembering a previous turn's tool result; the
+  instruction tools already tell the model to read the state again each
+  turn.
 - The response stream carries text only; everything else the model said
   about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the
