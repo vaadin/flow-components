@@ -13,29 +13,29 @@
  * The script is automatically run in the Maven build of the modules shipping a
  * versions file.
  *
- * Usage:
- *   node generatePinnedNpmVersions.js <source-dir> <output-file> [mode]
+ * The packages are pinned for the Lit mode, as the web components of a Flow
+ * component are what a Lit application installs; a React application gets them
+ * from `@vaadin/react-components` instead.
  *
- * The mode is the Vaadin mode the packages apply to, `lit` by default, as the
- * web components of a Flow component are what a Lit application installs; a
- * React application gets them from `@vaadin/react-components` instead.
+ * Usage:
+ *   node generatePinnedNpmVersions.js <source-dir> <output-file>
  *
  * Example
  *   node ../../scripts/generatePinnedNpmVersions.js src/main/java \
- *     target/classes/META-INF/VAADIN/versions/vaadin-text-field-versions.json
+ *     target/classes/META-INF/VAADIN/versions/vaadin-text-field-flow-versions.json
  */
 
 const fs = require('fs');
 const path = require('path');
 
-if (process.argv.length < 4 || process.argv.length > 5) {
-  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file> [mode]');
+if (process.argv.length !== 4) {
+  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file>');
   process.exit(1);
 }
 
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
-const mode = process.argv[4] || 'lit';
+const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
 
@@ -101,13 +101,6 @@ npmNames.forEach((npmName) => {
 });
 
 const content = `${JSON.stringify(versions, null, 4)}\n`;
-
-// Leave the file alone when it already says this, so that a rebuild does not
-// touch it needlessly
-if (fs.existsSync(outputFile) && fs.readFileSync(outputFile, 'utf8') === content) {
-  console.log(`Pinned npm versions of ${outputFile} are up to date, skipping`);
-  process.exit(0);
-}
 
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
