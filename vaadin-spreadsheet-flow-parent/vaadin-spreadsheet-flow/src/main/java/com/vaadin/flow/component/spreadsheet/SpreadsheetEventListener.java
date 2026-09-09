@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEventListener;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * @since 23.1
@@ -31,151 +31,208 @@ public class SpreadsheetEventListener
         this.handler = spreadsheetHandler;
     }
 
-    private int toInt(ArrayNode o, int pos) {
-        return o == null ? 0 : o.get(pos).intValue();
+    private int toInt(ObjectNode o, String field) {
+        JsonNode value = o == null ? null : o.get(field);
+        return value == null || value.isNull() ? 0 : value.intValue();
     }
 
-    private String toStr(ArrayNode o, int pos) {
-        return o == null ? null : o.get(pos).asString();
+    private String toStr(ObjectNode o, String field) {
+        JsonNode value = o == null ? null : o.get(field);
+        return value == null || value.isNull() ? null : value.asString();
     }
 
-    private boolean toBool(ArrayNode o, int pos) {
-        return o == null ? null : o.get(pos).asBoolean();
+    private boolean toBool(ObjectNode o, String field) {
+        JsonNode value = o == null ? null : o.get(field);
+        return value != null && value.asBoolean();
     }
 
-    private HashMap<Integer, Float> toMapFloat(ArrayNode o, int pos) {
+    /**
+     * Zip two parallel arrays — indexes and their new sizes — into the map the
+     * resize handlers take. The client sends them separately because that is
+     * the natural shape on the JavaScript side.
+     */
+    private HashMap<Integer, Float> toFloatMap(ObjectNode o, String indexField,
+            String valueField) {
         HashMap<Integer, Float> m = new HashMap<>();
-        if (o == null) {
+        JsonNode indexes = o == null ? null : o.get(indexField);
+        JsonNode values = o == null ? null : o.get(valueField);
+        if (indexes == null || values == null) {
             return m;
         }
-        ArrayNode jso = (ArrayNode) o.get(pos);
-        for (int i = 0; i < jso.size(); i++) {
-            JsonNode value = jso.get(i);
-            if (value.isNumber()) {
-                m.put(i, (float) value.asDouble());
-            }
+        for (int i = 0; i < Math.min(indexes.size(), values.size()); i++) {
+            m.put(indexes.get(i).intValue(), (float) values.get(i).asDouble());
         }
         return m;
     }
 
-    private HashMap<Integer, Integer> toMapInt(ArrayNode o, int pos) {
+    private HashMap<Integer, Integer> toIntMap(ObjectNode o, String indexField,
+            String valueField) {
         HashMap<Integer, Integer> m = new HashMap<>();
-        if (o == null) {
+        JsonNode indexes = o == null ? null : o.get(indexField);
+        JsonNode values = o == null ? null : o.get(valueField);
+        if (indexes == null || values == null) {
             return m;
         }
-        ArrayNode jso = (ArrayNode) o.get(pos);
-        for (int i = 0; i < jso.size(); i++) {
-            JsonNode value = jso.get(i);
-            if (value.isNumber()) {
-                m.put(i, value.asInt());
-            }
+        for (int i = 0; i < Math.min(indexes.size(), values.size()); i++) {
+            m.put(indexes.get(i).intValue(), values.get(i).intValue());
         }
         return m;
+    }
+
+    /** Smallest value in an index array, or 0 when it is empty. */
+    private int minIndex(ObjectNode o, String field) {
+        JsonNode indexes = o == null ? null : o.get(field);
+        if (indexes == null || indexes.isEmpty()) {
+            return 0;
+        }
+        int min = Integer.MAX_VALUE;
+        for (JsonNode n : indexes) {
+            min = Math.min(min, n.intValue());
+        }
+        return min;
+    }
+
+    /** Largest value in an index array, or 0 when it is empty. */
+    private int maxIndex(ObjectNode o, String field) {
+        JsonNode indexes = o == null ? null : o.get(field);
+        if (indexes == null || indexes.isEmpty()) {
+            return 0;
+        }
+        int max = 0;
+        for (JsonNode n : indexes) {
+            max = Math.max(max, n.intValue());
+        }
+        return max;
     }
 
     @Override
     public void onComponentEvent(Spreadsheet.SpreadsheetEvent event) {
         String type = event.getType();
-        ArrayNode pars = (ArrayNode) event.getData();
+        JsonNode data = event.getData();
+        // The client sends one named object per event; the field names are
+        // the ones declared in rpc-client-to-server.ts. Reading by name
+        // rather than by index means a field added or reordered on either
+        // side can no longer silently shift every argument along.
+        ObjectNode pars = data instanceof ObjectNode ? (ObjectNode) data : null;
 
         LOGGER.debug(type + " " + (pars == null ? "null" : pars.toString()));
 
         if ("onConnectorInit".equals(type)) {
             handler.onConnectorInit();
         } else if ("contextMenuOpenOnSelection".equals(type)) {
-            handler.contextMenuOpenOnSelection(toInt(pars, 0), toInt(pars, 1));
+            handler.contextMenuOpenOnSelection(toInt(pars, "row"),
+                    toInt(pars, "column"));
         } else if ("actionOnCurrentSelection".equals(type)) {
-            handler.actionOnCurrentSelection(toStr(pars, 0));
+            handler.actionOnCurrentSelection(toStr(pars, "actionKey"));
         } else if ("rowHeaderContextMenuOpen".equals(type)) {
-            handler.rowHeaderContextMenuOpen(toInt(pars, 0));
+            handler.rowHeaderContextMenuOpen(toInt(pars, "rowIndex"));
         } else if ("actionOnRowHeader".equals(type)) {
-            handler.actionOnRowHeader(toStr(pars, 0));
+            handler.actionOnRowHeader(toStr(pars, "actionKey"));
         } else if ("columnHeaderContextMenuOpen".equals(type)) {
-            handler.columnHeaderContextMenuOpen(toInt(pars, 0));
+            handler.columnHeaderContextMenuOpen(toInt(pars, "columnIndex"));
         } else if ("actionOnColumnHeader".equals(type)) {
-            handler.actionOnColumnHeader(toStr(pars, 0));
+            handler.actionOnColumnHeader(toStr(pars, "actionKey"));
         } else if ("onSheetScroll".equals(type)) {
-            handler.onSheetScroll(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3));
+            handler.onSheetScroll(toInt(pars, "firstRow"),
+                    toInt(pars, "firstColumn"), toInt(pars, "lastRow"),
+                    toInt(pars, "lastColumn"));
         } else if ("sheetAddressChanged".equals(type)) {
-            handler.sheetAddressChanged(toStr(pars, 0));
+            handler.sheetAddressChanged(toStr(pars, "value"));
         } else if ("cellSelected".equals(type)) {
-            handler.cellSelected(toInt(pars, 0), toInt(pars, 1),
-                    toBool(pars, 2));
+            handler.cellSelected(toInt(pars, "row"), toInt(pars, "column"),
+                    toBool(pars, "oldSelectionRangeDiscarded"));
         } else if ("cellRangeSelected".equals(type)) {
-            handler.cellRangeSelected(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3));
+            handler.cellRangeSelected(toInt(pars, "row1"), toInt(pars, "col1"),
+                    toInt(pars, "row2"), toInt(pars, "col2"));
         } else if ("cellAddedToSelectionAndSelected".equals(type)) {
-            handler.cellAddedToSelectionAndSelected(toInt(pars, 0),
-                    toInt(pars, 1));
+            handler.cellAddedToSelectionAndSelected(toInt(pars, "row"),
+                    toInt(pars, "column"));
         } else if ("cellsAddedToRangeSelection".equals(type)) {
-            handler.cellsAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3));
+            handler.cellsAddedToRangeSelection(toInt(pars, "row1"),
+                    toInt(pars, "col1"), toInt(pars, "row2"),
+                    toInt(pars, "col2"));
         } else if ("rowSelected".equals(type)) {
-            handler.rowSelected(toInt(pars, 0), toInt(pars, 1));
+            handler.rowSelected(toInt(pars, "row"),
+                    toInt(pars, "firstColumnIndex"));
         } else if ("rowAddedToRangeSelection".equals(type)) {
-            handler.rowAddedToRangeSelection(toInt(pars, 0), toInt(pars, 1));
+            handler.rowAddedToRangeSelection(toInt(pars, "row"),
+                    toInt(pars, "firstColumnIndex"));
         } else if ("columnSelected".equals(type)) {
-            handler.columnSelected(toInt(pars, 0), toInt(pars, 1));
+            handler.columnSelected(toInt(pars, "column"),
+                    toInt(pars, "firstRowIndex"));
         } else if ("columnAddedToSelection".equals(type)) {
-            handler.columnAddedToSelection(toInt(pars, 0), toInt(pars, 1));
+            // Note the argument order: this one takes the row index first,
+            // unlike columnSelected above.
+            handler.columnAddedToSelection(toInt(pars, "firstRowIndex"),
+                    toInt(pars, "column"));
         } else if ("selectionIncreasePainted".equals(type)) {
-            handler.selectionIncreasePainted(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3));
+            handler.selectionIncreasePainted(toInt(pars, "r1"),
+                    toInt(pars, "c1"), toInt(pars, "r2"), toInt(pars, "c2"));
         } else if ("selectionDecreasePainted".equals(type)) {
-            handler.selectionDecreasePainted(toInt(pars, 0), toInt(pars, 1));
+            handler.selectionDecreasePainted(toInt(pars, "row"),
+                    toInt(pars, "col"));
         } else if ("cellValueEdited".equals(type)) {
-            handler.cellValueEdited(toInt(pars, 0), toInt(pars, 1),
-                    toStr(pars, 2));
+            handler.cellValueEdited(toInt(pars, "row"), toInt(pars, "col"),
+                    toStr(pars, "value"));
         } else if ("sheetSelected".equals(type)) {
-            handler.sheetSelected(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2));
+            handler.sheetSelected(toInt(pars, "sheetIndex"),
+                    toInt(pars, "scrollLeft"), toInt(pars, "scrollTop"));
         } else if ("sheetRenamed".equals(type)) {
-            handler.sheetRenamed(toInt(pars, 0), toStr(pars, 1));
+            handler.sheetRenamed(toInt(pars, "sheetIndex"),
+                    toStr(pars, "newName"));
         } else if ("sheetCreated".equals(type)) {
-            handler.sheetCreated(toInt(pars, 0), toInt(pars, 1));
+            handler.sheetCreated(toInt(pars, "scrollLeft"),
+                    toInt(pars, "scrollTop"));
         } else if ("cellRangePainted".equals(type)) {
-            handler.cellRangePainted(toInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4),
-                    toInt(pars, 5));
+            handler.cellRangePainted(toInt(pars, "selectedCellRow"),
+                    toInt(pars, "selectedCellColumn"), toInt(pars, "row1"),
+                    toInt(pars, "col1"), toInt(pars, "row2"),
+                    toInt(pars, "col2"));
         } else if ("deleteSelectedCells".equals(type)) {
             handler.deleteSelectedCells();
         } else if ("linkCellClicked".equals(type)) {
-            handler.linkCellClicked(toInt(pars, 0), toInt(pars, 1));
+            handler.linkCellClicked(toInt(pars, "row"), toInt(pars, "column"));
         } else if ("rowsResized".equals(type)) {
-            handler.rowsResized(toMapFloat(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+            // The client reports which rows changed and their new heights;
+            // the affected span doubles as the range to refresh.
+            handler.rowsResized(toFloatMap(pars, "rowIndexes", "newHeights"),
+                    minIndex(pars, "rowIndexes"), 1,
+                    maxIndex(pars, "rowIndexes"), 1);
         } else if ("columnResized".equals(type)) {
-            handler.columnResized(toMapInt(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2), toInt(pars, 3), toInt(pars, 4));
+            handler.columnResized(toIntMap(pars, "colIndexes", "newWidths"), 1,
+                    minIndex(pars, "colIndexes"), 1,
+                    maxIndex(pars, "colIndexes"));
         } else if ("onRowAutofit".equals(type)) {
-            handler.onRowAutofit(toInt(pars, 0));
+            handler.onRowAutofit(toInt(pars, "rowIndex"));
         } else if ("onColumnAutofit".equals(type)) {
-            handler.onColumnAutofit(toInt(pars, 0));
+            handler.onColumnAutofit(toInt(pars, "columnIndex"));
         } else if ("onUndo".equals(type)) {
             handler.onUndo();
         } else if ("onRedo".equals(type)) {
             handler.onRedo();
         } else if ("setCellStyleWidthRatios".equals(type)) {
-            handler.setCellStyleWidthRatios(toMapFloat(pars, 0));
+            handler.setCellStyleWidthRatios(
+                    toFloatMap(pars, "styleIndexes", "ratios"));
         } else if ("protectedCellWriteAttempted".equals(type)) {
             handler.protectedCellWriteAttempted();
         } else if ("onPaste".equals(type)) {
-            handler.onPaste(toStr(pars, 0));
+            handler.onPaste(toStr(pars, "text"));
         } else if ("clearSelectedCellsOnCut".equals(type)) {
             handler.clearSelectedCellsOnCut();
         } else if ("updateCellComment".equals(type)) {
-            handler.updateCellComment(toStr(pars, 0), toInt(pars, 1),
-                    toInt(pars, 2));
+            handler.updateCellComment(toStr(pars, "text"), toInt(pars, "col"),
+                    toInt(pars, "row"));
         } else if ("groupingCollapsed".equals(type)) {
-            handler.setGroupingCollapsed(toBool(pars, 0), toInt(pars, 1),
-                    toBool(pars, 2));
+            handler.setGroupingCollapsed(toBool(pars, "cols"),
+                    toInt(pars, "colIndex"), toBool(pars, "collapsed"));
         } else if ("levelHeaderClicked".equals(type)) {
-            handler.levelHeaderClicked(toBool(pars, 0), toInt(pars, 1));
+            handler.levelHeaderClicked(toBool(pars, "cols"),
+                    toInt(pars, "level"));
         } else if ("popupButtonClick".equals(type)) {
-            handler.onPopupButtonClick(toInt(pars, 0), toInt(pars, 1));
+            handler.onPopupButtonClick(toInt(pars, "row"),
+                    toInt(pars, "column"));
         } else if ("popupClose".equals(type)) {
-            handler.onPopupClose(toInt(pars, 0), toInt(pars, 1));
+            handler.onPopupClose(toInt(pars, "row"), toInt(pars, "column"));
         } else if ("contextMenuClosed".equals(type)) {
             handler.contextMenuClosed();
         }
