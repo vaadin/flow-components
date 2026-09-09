@@ -29,15 +29,17 @@ public class TestHelper {
      *            the Spreadsheet component
      * @param eventName
      *            the name of the event
-     * @param jsonDataArray
-     *            the data of the event as a JSON array, for example "[1, 1, 0]"
+     * @param jsonData
+     *            the data of the event as a JSON object, for example
+     *            {@code {"row": 1, "column": 1}}. Field names are the ones
+     *            declared in rpc-client-to-server.ts.
      */
     public static void fireClientEvent(Spreadsheet spreadsheet,
-            String eventName, String jsonDataArray) {
+            String eventName, String jsonData) {
         try {
             ComponentUtil.fireEvent(spreadsheet,
                     new SpreadsheetEvent(spreadsheet, true, eventName,
-                            JacksonUtils.getMapper().readTree(jsonDataArray)));
+                            JacksonUtils.getMapper().readTree(jsonData)));
         } catch (JacksonException e) {
             throw new RuntimeException(e);
         }

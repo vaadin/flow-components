@@ -335,37 +335,41 @@ class GroupingTest {
     private void setActiveSheet(int sheetIndex) {
         spreadsheet.setActiveSheetIndex(sheetIndex);
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[1, 1, 1, 1]");
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 1, \"lastColumn\": 1}");
     }
 
     private void expandRow(int row) {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
-                "[false, " + row + ", false]");
+                "{\"cols\": false, \"colIndex\": " + row
+                        + ", \"collapsed\": false}");
     }
 
     private void collapseRow(int row) {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
-                "[false, " + row + ", true]");
+                "{\"cols\": false, \"colIndex\": " + row
+                        + ", \"collapsed\": true}");
     }
 
     private void expandColumn(int column) {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
-                "[true, " + column + ", false]");
+                "{\"cols\": true, \"colIndex\": " + column
+                        + ", \"collapsed\": false}");
     }
 
     private void collapseColumn(int column) {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
-                "[true, " + column + ", true]");
+                "{\"cols\": true, \"colIndex\": " + column
+                        + ", \"collapsed\": true}");
     }
 
     private void clickRowLevelHeader(int level) {
         TestHelper.fireClientEvent(spreadsheet, "levelHeaderClicked",
-                "[false, " + level + "]");
+                "{\"cols\": false, \"level\": " + level + "}");
     }
 
     private void clickColumnLevelHeader(int level) {
         TestHelper.fireClientEvent(spreadsheet, "levelHeaderClicked",
-                "[true, " + level + "]");
+                "{\"cols\": true, \"level\": " + level + "}");
     }
 
     private final int SHEET4 = 3;

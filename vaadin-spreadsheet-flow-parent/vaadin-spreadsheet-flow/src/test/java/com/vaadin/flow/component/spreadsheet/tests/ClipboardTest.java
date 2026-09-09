@@ -298,16 +298,21 @@ class ClipboardTest {
     }
 
     private void paste(String clipboardContent) {
-        TestHelper.fireClientEvent(spreadsheet, "onPaste", clipboardContent);
+        // Callers pass the pasted text as a one-element JSON array; unwrap
+        // it into the {text} object the client sends.
+        String text = clipboardContent.trim();
+        text = text.substring(1, text.length() - 1);
+        TestHelper.fireClientEvent(spreadsheet, "onPaste",
+                "{\"text\": " + text + "}");
     }
 
     private void undo() {
-        TestHelper.fireClientEvent(spreadsheet, "onUndo", "[]");
+        TestHelper.fireClientEvent(spreadsheet, "onUndo", "{}");
     }
 
     private void cut() {
         TestHelper.fireClientEvent(spreadsheet, "clearSelectedCellsOnCut",
-                "[]");
+                "{}");
     }
 
     private void lockSheet() {

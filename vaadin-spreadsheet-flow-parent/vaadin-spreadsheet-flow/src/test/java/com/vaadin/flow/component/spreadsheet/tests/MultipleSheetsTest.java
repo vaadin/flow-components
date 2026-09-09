@@ -161,7 +161,8 @@ class MultipleSheetsTest {
             Assertions.assertEquals("bar", event.getNewSheet().getSheetName());
         });
 
-        TestHelper.fireClientEvent(spreadsheet, "sheetSelected", "[1, 0, 0]");
+        TestHelper.fireClientEvent(spreadsheet, "sheetSelected",
+                "{\"sheetIndex\": 1, \"scrollLeft\": 0, \"scrollTop\": 0}");
         Assertions.assertTrue(listenerInvoked.get());
     }
 

@@ -57,7 +57,7 @@ class CustomComponentsTest {
 
         // Simulate initial scroll with a viewport of 10x10 cells.
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[1, 1, 10, 10]");
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 10, \"lastColumn\": 10}");
     }
 
     @Test
@@ -71,7 +71,7 @@ class CustomComponentsTest {
     void scrollAway_customComponentDetached() {
         // Scroll away from the cell with the custom component.
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[10, 10, 20, 20]");
+                "{\"firstRow\": 10, \"firstColumn\": 10, \"lastRow\": 20, \"lastColumn\": 20}");
 
         // The custom component should be detached.
         Assertions.assertFalse(customComponent.getParent().isPresent());
@@ -117,7 +117,7 @@ class CustomComponentsTest {
 
         // Simulate viewport covering both cells
         TestHelper.fireClientEvent(throwingSpreadsheet, "onSheetScroll",
-                "[1, 1, 10, 10]");
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 10, \"lastColumn\": 10}");
 
         // The good component should still be attached despite the factory
         // throwing for another cell.
@@ -163,7 +163,7 @@ class CustomComponentsTest {
         // First scroll registers the editor in the map via
         // loadCustomComponents().
         TestHelper.fireClientEvent(throwingSpreadsheet, "onSheetScroll",
-                "[1, 1, 10, 10]");
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 10, \"lastColumn\": 10}");
 
         // cellSelected triggers onCellSelected() ->
         // loadCustomEditorOnSelectedCell() which calls
@@ -171,7 +171,8 @@ class CustomComponentsTest {
         // surrounding try-catch, so the exception must be caught inside
         // loadCustomEditorOnSelectedCell() itself.
         Assertions.assertDoesNotThrow(() -> TestHelper.fireClientEvent(
-                throwingSpreadsheet, "cellSelected", "[1, 1, true]"));
+                throwingSpreadsheet, "cellSelected",
+                "{\"row\": 1, \"column\": 1, \"oldSelectionRangeDiscarded\": true}"));
     }
 
 }

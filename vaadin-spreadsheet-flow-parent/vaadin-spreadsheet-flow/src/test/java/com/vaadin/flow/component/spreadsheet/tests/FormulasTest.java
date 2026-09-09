@@ -33,7 +33,7 @@ class FormulasTest {
         // onSheetScroll must be invoked once, otherwise cell comments are not
         // loaded
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[1, 1, 1, 1]");
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 1, \"lastColumn\": 1}");
     }
 
     @Test

@@ -97,12 +97,14 @@ class LockedCellValueTest {
 
     private void fireUpdateCellCommentEvent(int row, int col, String text) {
         TestHelper.fireClientEvent(spreadsheet, "updateCellComment",
-                "[\"" + text + "\", " + col + ", " + row + "]");
+                "{\"text\": \"" + text + "\", \"col\": " + col + ", \"row\": "
+                        + row + "}");
     }
 
     private void fireCellValueEditedEvent(int row, int col, String value) {
         TestHelper.fireClientEvent(spreadsheet, "cellValueEdited",
-                "[" + row + ", " + col + ", \"" + value + "\"]");
+                "{\"row\": " + row + ", \"col\": " + col + ", \"value\": \""
+                        + value + "\"}");
     }
 
     private void lockSheet() {
