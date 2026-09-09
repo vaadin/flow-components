@@ -13,7 +13,7 @@ import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js'
  */
 export class ComboBoxConnector {
   readonly #comboBox: FlowComboBox;
-  readonly #placeholder = new window.Vaadin.ComboBoxPlaceholder();
+  readonly #placeholder = new ComboBoxPlaceholder();
 
   #cache: Record<number, Item[]> = {};
 
