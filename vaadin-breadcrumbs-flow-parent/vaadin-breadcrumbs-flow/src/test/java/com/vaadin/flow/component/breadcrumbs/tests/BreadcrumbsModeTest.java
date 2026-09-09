@@ -28,7 +28,6 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs.Mode;
-import com.vaadin.flow.component.breadcrumbs.BreadcrumbsFeatureFlagProvider;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -51,17 +50,12 @@ import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 class BreadcrumbsModeTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
-
-    @RegisterExtension
-    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
-            BreadcrumbsFeatureFlagProvider.BREADCRUMBS_COMPONENT);
 
     @AfterEach
     void clearCurrentService() {
