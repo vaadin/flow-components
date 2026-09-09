@@ -2168,6 +2168,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.cellDataByKey;
   }
 
+  /** Test-only accessor: resource id to resolved URL. */
+  getResources(): Readonly<Record<string, string>> {
+    return this.resources;
+  }
+
   /** Test-only accessor: the context menu shown on right-click. */
   getContextMenu(): SpreadsheetContextMenu {
     return this.contextMenu;
@@ -2644,23 +2649,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
       namedRanges: this.namedRanges
     };
   }
-  setResources(_host: HTMLElement, jsonString: string): void {
-    // Parse the JSON-serialized resource map (id → URL) so
-    // overlay rendering can resolve image sources. The host
-    // argument is unused — kept for signature compatibility
-    // with the GWT API. Slice 160.
-    if (!jsonString) {
-      this.resources = {};
-      return;
+  setResources(host: HTMLElement, keys: string[] | string): void {
+    // The server sends the resource KEYS here and puts each URL on the host
+    // as a `resource-<key>` attribute, because the URLs are Flow stream
+    // resources minted per element rather than plain strings
+    // (Spreadsheet.setResource). Resolving them means reading the
+    // attributes, not parsing a map out of this argument.
+    const resolved: Record<string, string> = {};
+    for (const key of coerceArray<string>(keys)) {
+      const url = host.getAttribute(`resource-${key}`);
+      if (url) {
+        resolved[key] = url;
+      }
     }
-    try {
-      const parsed = JSON.parse(jsonString) as Record<string, string>;
-      this.resources = parsed ?? {};
-    } catch {
-      // Malformed JSON — keep the previous map; the server
-      // will retry on next push. Don't crash the connector.
-      this.resources = {};
-    }
+    this.resources = resolved;
+    this.scheduleRender();
   }
   setPopupButtons(popupButtons: PopupButtonState[]): void {
     // Store the raw popup-button list. The connector computes

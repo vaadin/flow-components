@@ -172,8 +172,11 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         };
     }
 
-    it('setResources parses the JSON string into the resources map', () => {
-        const { sheet, cleanup } = attachSheet(300, 200);
+    it('resolves each resource URL from its host attribute', () => {
+        // The server sends the resource KEYS and puts each URL on the host as
+        // a `resource-<key>` attribute, because the URLs are Flow stream
+        // resources minted per element rather than plain strings.
+        const { host, sheet, cleanup } = attachSheet(300, 200);
         sheet.setRows(10);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
@@ -181,9 +184,8 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         sheet.setOverlays({
             img1: { type: 'IMAGE', col: 2, row: 2, width: 80, height: 40, dx: 0, dy: 0 },
         });
-        sheet.setResources(sheet.getScrollContainer(), JSON.stringify({
-            img1: '/img/photo.png',
-        }));
+        host.setAttribute('resource-img1', '/img/photo.png');
+        sheet.setResources(host, ['img1']);
         sheet.recomputeViewport();
 
         const state = sheet.getCellGrid().renderState;
@@ -192,16 +194,26 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
-    it('setResources with malformed JSON keeps the resources map empty (no crash)', () => {
-        const { sheet, cleanup } = attachSheet(300, 200);
-        sheet.setResources(sheet.getScrollContainer(), 'not valid {{ json');
-        // No throw + the connector still works.
-        expect(sheet).to.be.instanceOf(Spreadsheet);
+    it('accepts the JSON-serialized key list the server sends', () => {
+        const { host, sheet, cleanup } = attachSheet(300, 200);
+        host.setAttribute('resource-img1', '/img/photo.png');
+        sheet.setResources(host, JSON.stringify(['img1']) as any);
+
+        expect(sheet.getResources().img1).to.equal('/img/photo.png');
+        cleanup();
+    });
+
+    it('skips a key with no attribute rather than inventing a URL', () => {
+        const { host, sheet, cleanup } = attachSheet(300, 200);
+        host.setAttribute('resource-known', '/img/known.png');
+        sheet.setResources(host, ['known', 'missing']);
+
+        expect(sheet.getResources()).to.deep.equal({ known: '/img/known.png' });
         cleanup();
     });
 
     it('cell-grid renders <img.sheet-overlay-image> for each IMAGE overlay', async () => {
-        const { sheet, cleanup } = attachSheet(300, 200);
+        const { host, sheet, cleanup } = attachSheet(300, 200);
         sheet.setRows(10);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
@@ -209,9 +221,8 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         sheet.setOverlays({
             img1: { type: 'IMAGE', col: 1, row: 1, width: 80, height: 40, dx: 0, dy: 0 },
         });
-        sheet.setResources(sheet.getScrollContainer(), JSON.stringify({
-            img1: '/img/photo.png',
-        }));
+        host.setAttribute('resource-img1', '/img/photo.png');
+        sheet.setResources(host, ['img1']);
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
