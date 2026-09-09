@@ -25,6 +25,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -37,6 +40,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
@@ -219,6 +223,16 @@ public class FormAIController implements AIController {
      * shows it, ties its lifecycle to the field rather than to the controller.
      */
     private static final String FIELD_MARK_KEY = "vaadin.ai.form.fieldMark";
+
+    /**
+     * How long {@code fill_form} waits for a fill queued with
+     * {@code ui.access()} to run before giving up and telling the LLM so.
+     * Generous enough that no ordinary UI thread hits it, short enough that a
+     * provider which blocks the lock holder surfaces as an error instead of a
+     * parked thread. Not final so the test for that path does not have to wait
+     * a minute for it.
+     */
+    static int fillAccessTimeoutSeconds = 60; // NOSONAR — see above
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_form_instructions";
 
@@ -1762,12 +1776,9 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            // The fill always hops through ui.access so writes land on the
-            // UI thread with CurrentInstance bound, regardless of whether
-            // the LLM provider invoked the tool from a reactor scheduler
-            // thread (the production path) or directly from the UI thread
-            // itself (in which case ui.access runs the lambda synchronously
-            // and future.get() returns immediately, so the hop is a no-op).
+            // The fill has to land on a thread that holds the session lock,
+            // with CurrentInstance bound. Which hop gets it there depends on
+            // where the LLM provider called the tool from.
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
@@ -1775,6 +1786,17 @@ public class FormAIController implements AIController {
                     .orElseThrow(() -> new IllegalStateException(
                             "fill_form invoked on a controller whose form is not "
                                     + "attached to a UI"));
+            var session = ui.getSession();
+            if (session != null && session.hasLock()) {
+                // The provider called the tool on the very thread it was
+                // handed, which is still inside the prompt call and holds the
+                // session lock. ui.access() would only queue the fill until
+                // that lock is ultimately released, which cannot happen before
+                // this call returns — the wait below would be waiting for
+                // itself. accessSynchronously re-enters the lock and binds
+                // CurrentInstance the same way the queued command would.
+                return fillWhileHoldingLock(ui, arguments);
+            }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
@@ -1784,14 +1806,47 @@ public class FormAIController implements AIController {
                 }
             });
             try {
-                return future.get();
+                // Bounded: the lock holder this fill waits for is another
+                // thread, and a provider that blocks it while waiting for
+                // this tool would otherwise park here forever with nothing
+                // in the log to explain it.
+                return future.get(fillAccessTimeoutSeconds, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 return "Error: fill interrupted.";
+            } catch (TimeoutException ex) {
+                LOGGER.warn(
+                        "fill_form waited {} seconds for the session lock and "
+                                + "gave up. The fill was queued with "
+                                + "ui.access() from a thread that does not "
+                                + "hold the lock, and the thread holding it "
+                                + "never released it — check whether the "
+                                + "LLMProvider blocks the thread it was "
+                                + "handed while a background thread calls "
+                                + "the tool.",
+                        fillAccessTimeoutSeconds);
+                return "Error: fill timed out waiting for the UI thread.";
             } catch (ExecutionException ex) {
                 LOGGER.warn("fill_form execution failed", ex.getCause());
                 return "Error: fill failed.";
             }
+        }
+
+        /**
+         * Runs the fill inline on a thread that already holds the session lock.
+         * Mirrors the queued path's error handling: the command's own failures
+         * are logged and reported to the LLM as a fill failure rather than
+         * propagating out of the tool.
+         */
+        private String fillWhileHoldingLock(UI ui, JsonNode arguments) {
+            var result = new AtomicReference<String>();
+            try {
+                ui.accessSynchronously(() -> result.set(doFill(arguments)));
+            } catch (RuntimeException ex) {
+                LOGGER.warn("fill_form execution failed", ex);
+                return "Error: fill failed.";
+            }
+            return result.get();
         }
 
         private String doFill(JsonNode arguments) {

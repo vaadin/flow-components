@@ -19,11 +19,17 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -45,6 +51,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.Command;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -1824,6 +1831,94 @@ class FillFormToolTest {
     }
 
     @Test
+    @Timeout(20)
+    void fillForm_calledOnTheThreadHoldingTheSessionLockFillsInline() {
+        // A provider that answers synchronously calls the tool on the very
+        // thread it was handed — the one still inside prompt(), holding the
+        // session lock. Real ui.access() only queues the fill until that lock
+        // is ultimately released, which cannot happen before the tool call
+        // returns, so waiting for the queued command would wait for this call
+        // itself. The tool has to notice it already holds the lock and fill
+        // inline.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var result = fillFormResult(controller,
+                payload(field, "\"Ana Torres\""));
+
+        Assertions.assertTrue(success(result),
+                "Fill on the lock-holding thread must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Fill on the lock-holding thread must write the field");
+        Assertions.assertTrue(queued.isEmpty(),
+                "The fill must run inline rather than be queued for a lock "
+                        + "release that cannot come before the tool returns");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_calledOffTheLockHoldingThreadWaitsForTheQueuedFill()
+            throws Exception {
+        // The streaming path: the provider calls the tool from its own
+        // thread while the UI thread holds the lock. The fill must go through
+        // ui.access() and the tool must not answer before the command runs,
+        // so the LLM sees the post-write state.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var toolResult = CompletableFuture
+                .supplyAsync(() -> fillFormPayload(controller,
+                        payload(field, "\"Ana Torres\"")));
+
+        var command = awaitQueuedCommand(queued);
+        Assertions.assertEquals("", field.getValue(),
+                "The fill must wait for the lock holder rather than write "
+                        + "from the calling thread");
+        // What VaadinSession.unlock() does for the queue on ultimate release,
+        // on the thread that holds the lock — here, the test thread.
+        command.execute();
+
+        var result = parseResult(toolResult.get(20, TimeUnit.SECONDS));
+        Assertions.assertTrue(success(result),
+                "Queued fill must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Queued fill must write the field");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_queuedFillThatNeverRunsTimesOutWithAnExplanation()
+            throws Exception {
+        // A provider that keeps the lock holder blocked while a background
+        // thread calls the tool would park that thread for good. Bounded wait
+        // instead, with a message that names the problem.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        queueAccessCommands(); // queued, and never purged
+
+        var original = FormAIController.fillAccessTimeoutSeconds;
+        FormAIController.fillAccessTimeoutSeconds = 1;
+        String raw;
+        try {
+            raw = CompletableFuture
+                    .supplyAsync(() -> fillFormPayload(controller,
+                            payload(field, "\"Ana Torres\"")))
+                    .get(20, TimeUnit.SECONDS);
+        } finally {
+            FormAIController.fillAccessTimeoutSeconds = original;
+        }
+
+        Assertions.assertEquals(
+                "Error: fill timed out waiting for the UI thread.", raw,
+                "A fill that never gets the lock must report the wait, "
+                        + "got: " + raw);
+        Assertions.assertEquals("", field.getValue(),
+                "A timed-out fill must not have written the field");
+    }
+
+    @Test
     void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
         // FormValueConverter.convert delegates to field.getEmptyValue() for
         // JSON null. A field whose getEmptyValue() throws produces an
@@ -2156,6 +2251,46 @@ class FillFormToolTest {
                 throw toThrow;
             }
         };
+    }
+
+    /**
+     * Replaces the mock session's {@code access()} — which runs the command
+     * inline — with the contract a real
+     * {@link com.vaadin.flow.server.VaadinSession} has: the command is queued
+     * and runs only when the session lock is ultimately released, never on the
+     * thread that already holds it. The mock session is locked by the test
+     * thread for the whole test, so that thread stands in for a UI thread
+     * inside {@code prompt()}.
+     *
+     * @return the queue the fills land in, for the test to assert on and to
+     *         drain where a real purge would
+     */
+    private Queue<Command> queueAccessCommands() {
+        var queued = new ConcurrentLinkedQueue<Command>();
+        Mockito.doAnswer(invocation -> {
+            queued.add(invocation.getArgument(0));
+            // Never completed: the caller learns the command ran from the
+            // command itself, exactly as with a real deferred access.
+            return new CompletableFuture<Void>();
+        }).when(ui.getSession()).access(Mockito.any());
+        return queued;
+    }
+
+    /**
+     * Waits for a fill to be queued with {@code ui.access()} by a background
+     * thread and returns it.
+     */
+    private static Command awaitQueuedCommand(Queue<Command> queued)
+            throws InterruptedException {
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (queued.isEmpty() && System.nanoTime() < deadline) {
+            Thread.sleep(5);
+        }
+        var command = queued.poll();
+        Assertions.assertNotNull(command,
+                "fill_form must queue the fill with ui.access() when the "
+                        + "calling thread does not hold the session lock");
+        return command;
     }
 
     /** Minimal valid {@code fill_form} arguments — an empty values object. */
