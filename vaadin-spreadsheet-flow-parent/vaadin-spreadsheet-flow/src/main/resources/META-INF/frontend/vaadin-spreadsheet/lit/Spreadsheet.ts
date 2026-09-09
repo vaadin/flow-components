@@ -1089,25 +1089,38 @@ export class Spreadsheet implements SpreadsheetClientApi {
       altKey: boolean;
     }>
   ): void => {
-    const { col, shiftKey } = e.detail;
+    const { col, shiftKey, ctrlKey, metaKey } = e.detail;
     const rows = this.rows > 0 ? this.rows : 1;
+    this.extendCol = col;
+    this.extendRow = rows;
+    if ((ctrlKey || metaKey) && !shiftKey) {
+      // The whole column joins the selection as a further range.
+      this.selection = addAuxRange(this.selection, col, 1, col, rows);
+      this.recomputeViewport();
+      const data: ColumnSelectedData = { column: col, firstRowIndex: 1 };
+      this.host.dispatchEvent(
+        new CustomEvent('spreadsheet-event', {
+          detail: { type: 'columnAddedToSelection', data },
+          bubbles: true,
+          composed: true
+        })
+      );
+      return;
+    }
     if (shiftKey) {
+      // Extend across columns, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
       this.selection = {
         activeCell: anchor,
         activeRange: normalizedRange(anchor.col, 1, col, rows),
-        auxRanges: []
+        auxRanges: this.selection.auxRanges
       };
-      this.extendCol = col;
-      this.extendRow = rows;
     } else {
       this.selection = {
         activeCell: { col, row: 1 },
         activeRange: normalizedRange(col, 1, col, rows),
         auxRanges: []
       };
-      this.extendCol = col;
-      this.extendRow = rows;
     }
     this.recomputeViewport();
     this.dispatchSelectionEvent();
@@ -1126,25 +1139,38 @@ export class Spreadsheet implements SpreadsheetClientApi {
       altKey: boolean;
     }>
   ): void => {
-    const { row, shiftKey } = e.detail;
+    const { row, shiftKey, ctrlKey, metaKey } = e.detail;
     const cols = this.cols > 0 ? this.cols : 1;
+    this.extendCol = cols;
+    this.extendRow = row;
+    if ((ctrlKey || metaKey) && !shiftKey) {
+      // The whole row joins the selection as a further range.
+      this.selection = addAuxRange(this.selection, 1, row, cols, row);
+      this.recomputeViewport();
+      const data: RowSelectedData = { row, firstColumnIndex: 1 };
+      this.host.dispatchEvent(
+        new CustomEvent('spreadsheet-event', {
+          detail: { type: 'rowAddedToRangeSelection', data },
+          bubbles: true,
+          composed: true
+        })
+      );
+      return;
+    }
     if (shiftKey) {
+      // Extend across rows, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
       this.selection = {
         activeCell: anchor,
         activeRange: normalizedRange(1, anchor.row, cols, row),
-        auxRanges: []
+        auxRanges: this.selection.auxRanges
       };
-      this.extendCol = cols;
-      this.extendRow = row;
     } else {
       this.selection = {
         activeCell: { col: 1, row },
         activeRange: normalizedRange(1, row, cols, row),
         auxRanges: []
       };
-      this.extendCol = cols;
-      this.extendRow = row;
     }
     this.recomputeViewport();
     this.dispatchSelectionEvent();

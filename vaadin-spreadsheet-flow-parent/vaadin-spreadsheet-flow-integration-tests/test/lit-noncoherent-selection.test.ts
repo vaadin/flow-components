@@ -240,3 +240,111 @@ describe('Spreadsheet non-coherent selection — server events', () => {
     expect(ctx.events[0].type).to.equal('cellSelected');
   });
 });
+
+function clickHeader(
+  sheet: Spreadsheet,
+  kind: 'column' | 'row',
+  index: number,
+  mods: { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean } = {}
+): void {
+  const el = kind === 'column' ? sheet.getColumnHeader() : sheet.getRowHeader();
+  el.dispatchEvent(
+    new CustomEvent(`${kind}-header-click`, {
+      detail: {
+        ...(kind === 'column' ? { col: index } : { row: index }),
+        shiftKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        ...mods
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+
+describe('Spreadsheet non-coherent selection — whole rows and columns', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('Ctrl-clicking a second column keeps the first', () => {
+    clickHeader(ctx.sheet, 'column', 2);
+    clickHeader(ctx.sheet, 'column', 4, { ctrlKey: true });
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 2, 5)).to.be.true;
+    expect(isCellSelected(selection, 4, 5)).to.be.true;
+    expect(isCellSelected(selection, 3, 5)).to.be.false;
+  });
+
+  it('Ctrl-clicking a second row keeps the first', () => {
+    clickHeader(ctx.sheet, 'row', 3);
+    clickHeader(ctx.sheet, 'row', 5, { ctrlKey: true });
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 5, 3)).to.be.true;
+    expect(isCellSelected(selection, 5, 5)).to.be.true;
+    expect(isCellSelected(selection, 5, 4)).to.be.false;
+  });
+
+  it('shift-extending rows keeps a row added with Ctrl', () => {
+    clickHeader(ctx.sheet, 'row', 3);
+    clickHeader(ctx.sheet, 'row', 5, { ctrlKey: true });
+    clickHeader(ctx.sheet, 'row', 7, { shiftKey: true });
+
+    const selection = ctx.sheet.getSelection();
+    for (const row of [3, 5, 6, 7]) {
+      expect(isCellSelected(selection, 5, row), `row ${row}`).to.be.true;
+    }
+  });
+
+  it('shift-extending columns keeps a column added with Ctrl', () => {
+    clickHeader(ctx.sheet, 'column', 2);
+    clickHeader(ctx.sheet, 'column', 4, { ctrlKey: true });
+    clickHeader(ctx.sheet, 'column', 6, { shiftKey: true });
+
+    const selection = ctx.sheet.getSelection();
+    for (const col of [2, 4, 5, 6]) {
+      expect(isCellSelected(selection, col, 5), `col ${col}`).to.be.true;
+    }
+  });
+
+  it('a plain column click still discards the previous selection', () => {
+    clickHeader(ctx.sheet, 'column', 2);
+    clickHeader(ctx.sheet, 'column', 4, { ctrlKey: true });
+    clickHeader(ctx.sheet, 'column', 6);
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 6, 5)).to.be.true;
+    expect(isCellSelected(selection, 2, 5)).to.be.false;
+    expect(selection.auxRanges).to.have.length(0);
+  });
+
+  it('Ctrl-clicking a column reports it as added', () => {
+    clickHeader(ctx.sheet, 'column', 2);
+    ctx.events.length = 0;
+    clickHeader(ctx.sheet, 'column', 4, { ctrlKey: true });
+
+    expect(ctx.events).to.have.length(1);
+    expect(ctx.events[0].type).to.equal('columnAddedToSelection');
+    expect(ctx.events[0].data).to.deep.equal({ column: 4, firstRowIndex: 1 });
+  });
+
+  it('Ctrl-clicking a row reports it as added', () => {
+    clickHeader(ctx.sheet, 'row', 3);
+    ctx.events.length = 0;
+    clickHeader(ctx.sheet, 'row', 5, { ctrlKey: true });
+
+    expect(ctx.events).to.have.length(1);
+    expect(ctx.events[0].type).to.equal('rowAddedToRangeSelection');
+    expect(ctx.events[0].data).to.deep.equal({ row: 5, firstColumnIndex: 1 });
+  });
+});
