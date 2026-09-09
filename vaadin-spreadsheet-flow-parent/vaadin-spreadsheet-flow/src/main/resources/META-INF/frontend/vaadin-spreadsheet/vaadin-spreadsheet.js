@@ -405,38 +405,13 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
+    // `_flush()` is the whole ordering guard here. The GWT widget deferred
+    // its first relayout through GWT's scheduler, so this RPC could arrive
+    // before `definedRowHeights` existed and had to be re-queued until it
+    // did. The Lit connector has no such deferred layout — it reads the
+    // row/column arrays it already holds and schedules its own repaint — so
+    // flushing the pending property batch is sufficient.
     this._flush();
-    // The sheet widget's initial relayout is deferred via GWT's scheduler,
-    // so `definedRowHeights` may not yet exist when this RPC arrives in the
-    // same task as the initial property batch (e.g. opening a Dialog that
-    // contains the Spreadsheet). Calling `setSelectedCellAndRange` before
-    // it's populated would throw inside `$scrollAreaIntoView`. Re-queue the
-    // call until the layout state is ready; only the latest pending call is
-    // kept so rapid successive calls collapse to the final selection.
-    if (!this.$connector.spreadsheetWidget.sheetWidget.definedRowHeights) {
-      this._pendingSelection = [name, col, row, c1, c2, r1, r2, scroll];
-      if (!this._pendingSelectionScheduled) {
-        this._pendingSelectionScheduled = true;
-        const applyPending = () => {
-          if (!this.isConnected || !this._pendingSelection) {
-            this._pendingSelectionScheduled = false;
-            this._pendingSelection = null;
-            return;
-          }
-          if (this.$connector.spreadsheetWidget.sheetWidget.definedRowHeights) {
-            const args = this._pendingSelection;
-            this._pendingSelection = null;
-            this._pendingSelectionScheduled = false;
-            this.$connector.setSelectedCellAndRange(...args);
-            return;
-          }
-          setTimeout(applyPending, 10);
-        };
-        setTimeout(applyPending, 10);
-      }
-      return;
-    }
-    this._pendingSelection = null;
     this.$connector.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
