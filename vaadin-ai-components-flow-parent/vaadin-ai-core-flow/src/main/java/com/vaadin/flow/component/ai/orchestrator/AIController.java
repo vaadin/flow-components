@@ -44,13 +44,16 @@ public interface AIController {
 
     /**
      * Called synchronously on the UI thread just before the LLM stream opens.
-     * By the time this method fires, the user message and an empty assistant
-     * placeholder are already in the message list; the turn is committed to the
-     * conversation history and the {@link RequestListener} only after this
-     * method returns successfully. Implementations can prepare for the turn —
-     * locking UI surfaces, snapshotting state the tool definitions depend on,
-     * and so on. Since tools may execute on a background thread, this is the
-     * moment to capture any state that depends on Vaadin thread locals such as
+     * The event carries the user message, the {@code messageId} assigned to it,
+     * and the attachments included with it; it is the same event the
+     * {@link RequestListener} receives for the turn. By the time this method
+     * fires, the user message and an empty assistant placeholder are already in
+     * the message list; the turn is committed to the conversation history and
+     * the {@link RequestListener} only after this method returns successfully.
+     * Implementations can prepare for the turn — locking UI surfaces,
+     * snapshotting state the tool definitions depend on, and so on. Since tools
+     * may execute on a background thread, this is the moment to capture any
+     * state that depends on Vaadin thread locals such as
      * {@code UI.getCurrent()} or {@code VaadinSession.getCurrent()}.
      * <p>
      * The default does nothing. Throwing from this method aborts the turn
@@ -62,8 +65,12 @@ public interface AIController {
      * released, and the exception propagates back to the caller of the prompt
      * entry point.
      * </p>
+     *
+     * @param event
+     *            the request being submitted — user message, message id, and
+     *            attachments — never {@code null}
      */
-    default void onRequest() {
+    default void onRequest(RequestListener.RequestEvent event) {
     }
 
     /**
@@ -84,9 +91,10 @@ public interface AIController {
      * failure it carries the cause (stream error, timeout, or any throw on the
      * prompt path before the stream opens); release per-turn state captured in
      * {@code onRequest} (locks, pending writes, snapshots) and discard the
-     * staged work. Note that a failure before {@link #onRequest()} — for
-     * example a throwing {@link RequestInterceptor} — also fires this method,
-     * so it can run without a preceding {@code onRequest} call.
+     * staged work. Note that a failure before
+     * {@link #onRequest(RequestListener.RequestEvent)} — for example a throwing
+     * {@link RequestInterceptor} — also fires this method, so it can run
+     * without a preceding {@code onRequest} call.
      * </p>
      * <p>
      * An error is not the only abnormal ending. A turn cut off at the model's
