@@ -946,3 +946,88 @@
 [ 2140677ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
 [ 2145161ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
 [ 2145161ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2147777ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=e5a4f856-9797-4bf9-bb48-f486d307dd8e&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2147777ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2150163ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2150163ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2155166ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2155166ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2157132ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=e5a4f856-9797-4bf9-bb48-f486d307dd8e&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2157132ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2160168ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2160168ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2165237ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2165237ms] [WARNING] Heartbeat request returned 403 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2174634ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8090/VAADIN/@fs/Users/ugursaglam/Documents/GitHub/flow-components/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests/node_modules/.vite/deps/react-dom_client.js?v=507724db:14335
+[ 2174643ms] [WARNING] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information. @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2769566ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2769566ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:8090/VAADIN/@vite/client:1002
+[ 2774572ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2774572ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2776027ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2776027ms] [WARNING] Reconnecting because of HEARTBEAT failure @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2776030ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2776031ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2776032ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2779753ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2779753ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2781035ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2781035ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2786039ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2786039ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2789123ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2789124ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2791042ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2791043ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2796046ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2796047ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2796276ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2796276ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2801049ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2801050ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2803903ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2803904ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2806053ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2806054ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2811056ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2811056ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2811692ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2811692ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2816058ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2816058ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2820204ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2820204ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2821061ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2821061ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2826064ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2826065ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2830015ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2830015ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2831067ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2831067ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2836070ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2836070ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2836908ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2836909ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2841074ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2841075ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2843946ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2843947ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2846076ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2846076ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2850944ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2850944ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2851079ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2851079ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2856082ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2856082ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2857328ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2857329ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2861085ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2861085ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2866087ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2866088ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0
+[ 2866088ms] [ERROR] WebSocket connection to 'ws://localhost:8090/VAADIN/push?v-r=push&debug_window&token=70336ead-dd0e-4c38-b004-7a847a1a7607&X-Atmosphere-tracking-id=5741c974-6814-4445-b657-71e2e9d90523&X-Atmosphere-Framework=4.0.1&X-Atmosphere-Transport=websocket&X-Atmosphere-TrackMessageSize=true&Content-Type=application/json;%20charset=UTF-8&X-atmo-protocol=true' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/VAADIN/static/push/vaadinPush.js:1213
+[ 2866088ms] [WARNING] Websocket closed, reason: Connection was closed abnormally (that is, with no close frame being sent). - wasClean: false @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2871090ms] [WARNING] Heartbeat request returned 0 @ http://localhost:8090/VAADIN/@vite/client:532
+[ 2871090ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8090/?v-r=heartbeat&v-uiId=0:0

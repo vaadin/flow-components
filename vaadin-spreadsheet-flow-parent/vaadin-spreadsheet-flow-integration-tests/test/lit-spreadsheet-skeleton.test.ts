@@ -1526,9 +1526,16 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             composed: true,
         }));
 
-        expect(received).to.have.length(1);
-        expect(received[0].type).to.equal('cellRangeSelected');
+        // The anchor goes first: onCellRangeSelected reads the active cell
+        // from the selection the server already holds, so it has to be told
+        // about it before the range arrives.
+        expect(received).to.have.length(2);
+        expect(received[0].type).to.equal('cellSelected');
         expect(received[0].data).to.deep.equal({
+            row: 2, column: 2, oldSelectionRangeDiscarded: true,
+        });
+        expect(received[1].type).to.equal('cellRangeSelected');
+        expect(received[1].data).to.deep.equal({
             row1: 2, col1: 2, row2: 4, col2: 5,
         });
         cleanup();

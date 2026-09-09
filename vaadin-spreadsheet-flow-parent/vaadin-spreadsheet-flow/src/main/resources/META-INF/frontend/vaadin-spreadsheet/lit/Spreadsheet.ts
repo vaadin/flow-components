@@ -1815,9 +1815,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   private dispatchSelectionEvent(): void {
+    const event = buildSelectionEvent(this.selection.activeCell, this.selection.activeRange, this.rows, this.cols);
+    if (event.type === 'cellRangeSelected') {
+      // `onCellRangeSelected` takes only the four corners and reads the
+      // anchor from the selection the server already holds — unlike its
+      // sibling `onCellRangePainted`, which is given a starting point. The
+      // GWT client established that anchor on mousedown, before the drag
+      // produced a range. Without it the server dereferences a null
+      // selectedCellReference.
+      const anchor = this.selection.activeCell;
+      const anchorData: CellSelectedData = {
+        row: anchor.row,
+        column: anchor.col,
+        oldSelectionRangeDiscarded: true
+      };
+      this.host.dispatchEvent(
+        new CustomEvent('spreadsheet-event', {
+          detail: { type: 'cellSelected', data: anchorData },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
-        detail: buildSelectionEvent(this.selection.activeCell, this.selection.activeRange, this.rows, this.cols),
+        detail: event,
         bubbles: true,
         composed: true
       })
