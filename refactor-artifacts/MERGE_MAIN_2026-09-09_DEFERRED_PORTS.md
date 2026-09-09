@@ -111,10 +111,50 @@ context menu — currently `showActions()` is a no-op.
 - `main` added a new IT — `SpreadsheetInShadowRootIT` — that this branch has
   never run.
 
+## Merge hazard worth remembering
+
+Three runtime faults came from the merge splicing main's *signatures and
+comments* onto the branch's *bodies*, across conflict boundaries. None
+produced a conflict marker, and JavaScript has no compiler to catch them:
+
+- `updated()` took main's `changedProperties` parameter while the body still
+  read `_changedProperties` — every property update threw, so no server state
+  reached the connector.
+- `_flush()` vanished (main inlines `performUpdate()` instead) while all 16
+  client-side RPC methods still called `this._flush()` — every server-pushed
+  cell batch threw.
+- `propNames.push(name)` was silently dropped.
+
+The IT suite caught it: 354 broken instead of 301, with the failure shape
+reverting to "nothing renders". Fixed in the commit following the merge.
+
+**Lesson for the next merge of this branch:** after resolving, diff each
+heavily-rewritten file against its pre-merge version and confirm every
+remaining difference is an intended change from main. The Java side was safe
+because the compiler flagged four identical splices; the JS side was not.
+
 ## Verified after the merge
 
 | Tier | Result |
 | --- | --- |
 | Java unit | 1067 pass / 0 fail / 4 skip (was 1058; main added 9) |
 | Frontend wtr | 497 pass / 0 fail, 18 files |
-| IT | re-baseline still owed — the pre-merge figure was 301 of 377 broken |
+| IT | 54 passing — **identical to pre-merge**; 305 of 381 broken (pre-merge: 301 of 377) |
+
+The IT suite is behaviour-neutral across the merge: the passing count is
+unchanged at 54 and the skip count unchanged at 22. The extra broken tests are
+main's three new IT classes, all of which exercise things this branch does not
+have:
+
+| New IT from main | Tests | Why it fails here |
+| --- | --- | --- |
+| `CustomEditorReloadIT` | 9 | the deferred custom-editor port (item 1) |
+| `CustomEditorSelectionIT` | 3 | same |
+| `SpreadsheetInShadowRootIT` | 1 | overlays/`::part()` across nested shadow roots |
+
+So the deferral in item 1 costs exactly 12 IT tests, and they are the tests
+that will verify the port when it happens.
+
+Caveat: this run aborted at the very end when the webdriver died, so
+`HyperlinkIT` (≈9 tests, broken before the merge too) produced no report. The
+true broken figure is ~314 of ~390. The passing count is unaffected.
