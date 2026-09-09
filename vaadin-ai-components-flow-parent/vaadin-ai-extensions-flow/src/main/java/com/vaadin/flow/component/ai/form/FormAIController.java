@@ -40,7 +40,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
@@ -1794,8 +1793,12 @@ public class FormAIController implements AIController {
                 // that lock is ultimately released, which cannot happen before
                 // this call returns — the wait below would be waiting for
                 // itself. accessSynchronously re-enters the lock and binds
-                // CurrentInstance the same way the queued command would.
-                return fillWhileHoldingLock(ui, arguments);
+                // CurrentInstance the same way the queued command would. A
+                // failure propagates out of the tool call, where fill_form's
+                // own catch logs it and reports the fill failure to the LLM.
+                var result = new AtomicReference<String>();
+                ui.accessSynchronously(() -> result.set(doFill(arguments)));
+                return result.get();
             }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
@@ -1830,23 +1833,6 @@ public class FormAIController implements AIController {
                 LOGGER.warn("fill_form execution failed", ex.getCause());
                 return "Error: fill failed.";
             }
-        }
-
-        /**
-         * Runs the fill inline on a thread that already holds the session lock.
-         * Mirrors the queued path's error handling: the command's own failures
-         * are logged and reported to the LLM as a fill failure rather than
-         * propagating out of the tool.
-         */
-        private String fillWhileHoldingLock(UI ui, JsonNode arguments) {
-            var result = new AtomicReference<String>();
-            try {
-                ui.accessSynchronously(() -> result.set(doFill(arguments)));
-            } catch (RuntimeException ex) {
-                LOGGER.warn("fill_form execution failed", ex);
-                return "Error: fill failed.";
-            }
-            return result.get();
         }
 
         private String doFill(JsonNode arguments) {
