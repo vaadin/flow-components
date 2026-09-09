@@ -155,3 +155,54 @@ describe('Spreadsheet server-driven selection — scrolling', () => {
     expect(ctx.sheet.getScrollContainer().scrollLeft).to.equal(0);
   });
 });
+
+describe('Spreadsheet selection overlay — reports where the selection is', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function overlay(): Promise<Element | null> {
+    // setSelectedCellAndRange coalesces its repaint into an animation
+    // frame (slice 183), so wait for the frame before Lit's update.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    const grid = ctx.sheet.getCellGrid();
+    await grid.updateComplete;
+    return grid.shadowRoot!.querySelector('.sheet-selection');
+  }
+
+  it('carries the active cell coordinates', async () => {
+    ctx.sheet.setSelectedCellAndRange('B5', 2, 5, 2, 2, 5, 5, false);
+
+    const el = await overlay();
+    expect(el).to.not.be.null;
+    expect(el!.getAttribute('data-col')).to.equal('2');
+    expect(el!.getAttribute('data-row')).to.equal('5');
+  });
+
+  it('reports the active cell, not a corner of the range', async () => {
+    // Active cell deliberately in the middle of the range.
+    ctx.sheet.setSelectedCellAndRange('B2', 2, 2, 1, 3, 1, 3, false);
+
+    const el = await overlay();
+    expect(el!.getAttribute('data-col')).to.equal('2');
+    expect(el!.getAttribute('data-row')).to.equal('2');
+  });
+
+  it('follows the selection when it moves', async () => {
+    ctx.sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+    await overlay();
+    ctx.sheet.setSelectedCellAndRange('C7', 3, 7, 3, 3, 7, 7, false);
+
+    const el = await overlay();
+    expect(el!.getAttribute('data-col')).to.equal('3');
+    expect(el!.getAttribute('data-row')).to.equal('7');
+  });
+});

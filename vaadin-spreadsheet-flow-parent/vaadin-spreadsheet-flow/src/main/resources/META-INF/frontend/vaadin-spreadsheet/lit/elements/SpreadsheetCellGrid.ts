@@ -845,6 +845,12 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
   const overlayStyle =
     `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + 'position:absolute;pointer-events:none;';
 
+  // The active cell's coordinates ride on the overlay as data-col /
+  // data-row (slice 188). Nothing else in the DOM identifies the active
+  // cell — it renders as a plain `part="cell"`, indistinguishable from
+  // an unselected one — so this is the only way to read "where is the
+  // selection" from outside.
+  //
   // Slice 173: the selection overlay carries `part="cell-range"`
   // so the documented selector
   // `vaadin-spreadsheet::part(cell-range)` can target it. The
@@ -853,7 +859,13 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
   // (s-* names are GWT-era; here we keep them only as internal
   // class names — no part attribute since they aren't documented).
   return html`
-    <div class="sheet-selection" part="cell-range" style=${overlayStyle}>
+    <div
+      class="sheet-selection"
+      part="cell-range"
+      data-col=${selection.activeCell.col}
+      data-row=${selection.activeCell.row}
+      style=${overlayStyle}
+    >
       <div class="s-top"></div>
       <div class="s-left"></div>
       <div class="s-right"></div>

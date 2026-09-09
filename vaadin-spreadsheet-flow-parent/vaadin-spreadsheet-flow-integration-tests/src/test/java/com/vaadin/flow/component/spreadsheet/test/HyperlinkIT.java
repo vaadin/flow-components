@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.flow.component.spreadsheet.test.util.PopupHelper;
@@ -176,48 +177,26 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
     }
 
     public String getSelectedCell() {
-        String elemClass = findElementInShadowRoot(
-                By.cssSelector(".sheet-selection")).getDomAttribute("class");
-
-        int rowStart = elemClass.indexOf("row");
-        if (rowStart == -1) {
+        WebElement overlay = findElementInShadowRoot(
+                By.cssSelector(".sheet-selection"));
+        String col = overlay.getDomAttribute("data-col");
+        String row = overlay.getDomAttribute("data-row");
+        if (col == null || row == null) {
             return "A1";
         }
+        return columnLetters(Integer.parseInt(col)) + row;
+    }
 
-        int k = rowStart + "row".length();
-        String rowNumber = "";
-        while (k < elemClass.length()) {
-            char digit = elemClass.charAt(k);
-            if (digit == ' ') {
-                break;
-            }
-            rowNumber += elemClass.charAt(k);
-            k++;
-        }
-
-        int colStart = elemClass.indexOf("col");
-        k = colStart + "col".length();
-        String colNumberStr = "";
-        while (k < elemClass.length()) {
-            char digit = elemClass.charAt(k);
-            if (digit == ' ') {
-                break;
-            }
-            colNumberStr += elemClass.charAt(k);
-            k++;
-        }
-        int colNumber = Integer.parseInt(colNumberStr);
-        int dividend = colNumber;
-        String columnName = "";
-        int modulo;
-
+    /** Excel column letters for a 1-based column index: 1 -> A, 27 -> AA. */
+    private static String columnLetters(int columnIndex) {
+        StringBuilder letters = new StringBuilder();
+        int dividend = columnIndex;
         while (dividend > 0) {
-            modulo = (dividend - 1) % 26;
-            columnName = ((char) (65 + modulo)) + columnName;
+            int modulo = (dividend - 1) % 26;
+            letters.insert(0, (char) ('A' + modulo));
             dividend = (dividend - modulo) / 26;
         }
-
-        return columnName + rowNumber;
+        return letters.toString();
     }
 
     private void waitUntilSelected(final String expected) {
