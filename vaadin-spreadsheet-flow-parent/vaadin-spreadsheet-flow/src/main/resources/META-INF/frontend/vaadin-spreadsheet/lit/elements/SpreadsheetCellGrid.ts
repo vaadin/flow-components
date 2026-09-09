@@ -183,6 +183,8 @@ export class SpreadsheetCellGrid extends LitElement {
        mirroring the comment triangle in the top-right. */
     .invalidformula-indicator {
       position: absolute;
+      left: 0;
+      top: 0;
       width: 8px;
       height: 8px;
       background: var(--vaadin-spreadsheet-invalidformula-bg, #d32f2f);
@@ -683,11 +685,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // anchored at the cell's top-right when the cell has
       // a comment. Slice 165.
       const invalidIndicator = invalidFormulaCells.has(key)
-        ? html`<div
-            class="invalidformula-indicator"
-            part="invalid-triangle"
-            style="left:${left}px;top:${top}px;"
-          ></div>`
+        ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
         : '';
       const commentIndicator = commentCells.has(key)
         ? html`<div
@@ -707,8 +705,10 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // in firstUpdated() (slice 146) — single source of truth
       // for the cell's coordinate when the event bubbles.
       cells.push(html`
-        <div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}> ${text} </div>
-        ${invalidIndicator} ${commentIndicator}
+        <div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}>
+          ${invalidIndicator}${text}
+        </div>
+        ${commentIndicator}
       `);
     }
   }

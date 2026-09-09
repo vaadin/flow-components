@@ -1535,13 +1535,15 @@ describe('Cell grid — invalid-formula indicator', () => {
         el.remove();
     });
 
-    it('sits in the cell top-left, opposite the comment triangle', async () => {
+    it('lives inside the cell it belongs to', async () => {
+        // A child rather than a sibling: it scrolls and positions with the
+        // cell, and tests can reach it from the cell element.
         const el = await attach(stateWith(['col2 row2']));
 
-        // col 2 starts at x=50, row 2 at y=20.
         const mark = el.shadowRoot!.querySelector<HTMLElement>('.invalidformula-indicator')!;
-        expect(mark.style.left).to.equal('50px');
-        expect(mark.style.top).to.equal('20px');
+        const cell = mark.closest<HTMLElement>('.cell')!;
+        expect(cell.dataset.col).to.equal('2');
+        expect(cell.dataset.row).to.equal('2');
         el.remove();
     });
 });

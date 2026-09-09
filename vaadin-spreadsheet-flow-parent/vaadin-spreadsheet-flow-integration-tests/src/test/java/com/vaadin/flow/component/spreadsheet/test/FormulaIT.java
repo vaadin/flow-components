@@ -176,7 +176,7 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         selectCell("B1");
 
         var invalidFormulaIndicator = getCellElement("A1")
-                .findElement(By.className("cell-invalidformula-triangle"));
+                .findElement(By.className("invalidformula-indicator"));
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mousedown', {bubbles:true}))",
                 invalidFormulaIndicator);

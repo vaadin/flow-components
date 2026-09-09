@@ -48,7 +48,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         deleteRow(spreadsheet, 2);
 
         Assert.assertTrue(findElementsInShadowRoot(
-                By.className("cell-invalidformula-triangle")).isEmpty());
+                By.className("invalidformula-indicator")).isEmpty());
     }
 
     @Test
