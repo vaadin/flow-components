@@ -271,6 +271,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private pendingRenderFrame: number | null = null;
 
+  /**
+   * Whether the server has been told the connector is live and where the
+   * viewport starts. See {@link announceViewportOnce}.
+   */
+  private viewportAnnounced = false;
+
   /** The context menu shown on right-click. Empty until the server answers. */
   private readonly contextMenu: SpreadsheetContextMenu;
 
@@ -1565,6 +1571,43 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * requestAnimationFrame). If profiling reveals server-side
    * pressure, add a debounce here.
    */
+  /**
+   * Complete the startup handshake, once the viewport is known.
+   *
+   * The server only loads overlays, hyperlinks, comments, tables, popup
+   * buttons and custom editors from `loadCells`, and `loadCells` runs off
+   * `onSheetScroll`. Nothing else calls it. Until the client reports a
+   * viewport, none of that content exists — which looks like a sheet that
+   * renders its cells and nothing else.
+   *
+   * `onConnectorInit` first, so the server marks the next scroll as a full
+   * reload rather than diffing against viewport bounds it has never seen.
+   */
+  private announceViewportOnce(): void {
+    if (this.viewportAnnounced) {
+      return;
+    }
+    if (this.rows <= 0 || this.cols <= 0) {
+      // The sheet's size has not arrived yet. Announcing now would report a
+      // viewport that means nothing and the server would load nothing.
+      return;
+    }
+    const viewport = this.cellGrid.renderState.viewport;
+    if (viewport.lastRowIndex < viewport.firstRowIndex || viewport.lastColumnIndex < viewport.firstColumnIndex) {
+      // Nothing measured yet; try again after the next render.
+      return;
+    }
+    this.viewportAnnounced = true;
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'onConnectorInit', data: {} },
+        bubbles: true,
+        composed: true
+      })
+    );
+    this.dispatchSheetScrollEvent();
+  }
+
   private dispatchSheetScrollEvent(): void {
     const viewport = this.cellGrid.renderState.viewport;
     this.host.dispatchEvent(
@@ -1619,6 +1662,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportWidth: this.scrollContainer.clientWidth,
       viewportHeight: this.scrollContainer.clientHeight
     });
+    this.announceViewportOnce();
   }
 
   /**

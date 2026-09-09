@@ -32,6 +32,9 @@ function attachSheet(): { sheet: Spreadsheet; events: any[]; cleanup: () => void
   sheet.setRows(10);
   sheet.setColW(new Array(10).fill(50));
   sheet.setRowH(new Array(10).fill(15));
+  // Get the startup handshake (onConnectorInit + the initial onSheetScroll)
+  // out of the way before any test starts counting events.
+  sheet.recomputeViewport();
 
   const events: any[] = [];
   host.addEventListener('spreadsheet-event', (e) => events.push((e as CustomEvent).detail));

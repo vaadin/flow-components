@@ -255,3 +255,94 @@ describe('Spreadsheet render scheduling — property batches', () => {
     expect(ctx.sheet.getCellGrid().renderState.overlays).to.have.length(1);
   });
 });
+
+describe('Spreadsheet startup handshake', () => {
+  function attachRaw(): { sheet: Spreadsheet; events: any[]; cleanup: () => void } {
+    const host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:300px;';
+    document.body.appendChild(host);
+    const events: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) =>
+      events.push((e as CustomEvent).detail)
+    );
+    const sheet = new Spreadsheet(host);
+    return { sheet, events, cleanup: () => { sheet.dispose(); host.remove(); } };
+  }
+
+  function giveGeometry(sheet: Spreadsheet): void {
+    sheet.setCols(10);
+    sheet.setRows(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(10).fill(15));
+  }
+
+  it('tells the server it is live and where the viewport starts', () => {
+    // The server loads overlays, hyperlinks, comments, tables, popup buttons
+    // and custom editors only from loadCells, and loadCells runs off
+    // onSheetScroll. Without this handshake none of that content ever loads.
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+
+    const types = ctx.events.map((e) => e.type);
+    expect(types).to.include('onConnectorInit');
+    expect(types).to.include('onSheetScroll');
+    ctx.cleanup();
+  });
+
+  it('announces the connector before the viewport', () => {
+    // onConnectorInit marks the next scroll as a full reload; arriving after
+    // the scroll would leave the server diffing against bounds it never saw.
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+
+    const types = ctx.events.map((e) => e.type);
+    expect(types.indexOf('onConnectorInit')).to.be.lessThan(
+      types.indexOf('onSheetScroll')
+    );
+    ctx.cleanup();
+  });
+
+  it('reports the measured viewport bounds', () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+
+    const scroll = ctx.events.find((e) => e.type === 'onSheetScroll');
+    expect(scroll.data.firstRow).to.be.greaterThan(0);
+    expect(scroll.data.firstColumn).to.be.greaterThan(0);
+    expect(scroll.data.lastRow).to.be.greaterThanOrEqual(scroll.data.firstRow);
+    ctx.cleanup();
+  });
+
+  it('announces only once, however many repaints follow', () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+    ctx.sheet.recomputeViewport();
+    ctx.sheet.recomputeViewport();
+
+    const inits = ctx.events.filter((e) => e.type === 'onConnectorInit');
+    expect(inits).to.have.length(1);
+    ctx.cleanup();
+  });
+
+  it('waits for a measurable viewport before announcing', () => {
+    // A zero-size host measures nothing; announcing then would tell the
+    // server an empty range and it would load nothing.
+    const host = document.createElement('div');
+    host.style.cssText = 'width:0px;height:0px;';
+    document.body.appendChild(host);
+    const events: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) =>
+      events.push((e as CustomEvent).detail)
+    );
+    const sheet = new Spreadsheet(host);
+    sheet.recomputeViewport();
+
+    expect(events.map((e) => e.type)).to.not.include('onConnectorInit');
+    sheet.dispose();
+    host.remove();
+  });
+});
