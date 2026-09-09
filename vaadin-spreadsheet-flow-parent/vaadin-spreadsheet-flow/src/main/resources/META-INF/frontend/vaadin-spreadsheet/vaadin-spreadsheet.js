@@ -11,10 +11,6 @@ import { LitElement, html } from 'lit';
 import { Spreadsheet } from './lit/Spreadsheet.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.$connector.resize());
 });
@@ -230,11 +226,10 @@ export class VaadinSpreadsheet extends LitElement {
 
   updated(changedProperties) {
     super.updated(changedProperties);
-
     this._overlays.setAttribute('theme', this.getAttribute('theme'));
     let propNames = [];
     let dirty = false;
-    _changedProperties.forEach((oldValue, name) => {
+    changedProperties.forEach((oldValue, name) => {
       let newVal = this[name];
       if ('dirty' == name) {
         dirty = true;
@@ -349,13 +344,9 @@ export class VaadinSpreadsheet extends LitElement {
       } else if ('showCustomEditorOnFocus' == name) {
         this.$connector.setShowCustomEditorOnFocus(newVal);
       } else {
-        const setter = `set${capitalize(name)}`;
-        if (typeof this.api[setter] === 'function') {
-          this.api[setter](newVal);
-        } else {
-          console.error(`<vaadin-spreadsheet> unsupported property received from server: property=${name}`);
-        }
+        console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }
+      propNames.push(name);
     });
     this.$connector.notifyStateChanges(propNames, this._firstUpdate);
     if (this._firstUpdate) {
@@ -364,12 +355,15 @@ export class VaadinSpreadsheet extends LitElement {
     }
   }
 
-  /* CLIENT SIDE RPC METHODS */
   // Flow can send RPC calls in the same task as the property writes that
   // configure the api, before Lit's microtask-scheduled `updated()` runs to
-  // propagate those properties to the api. Each method below calls
-  // `performUpdate()` first to flush the pending update synchronously so the
-  // api state is ready.
+  // propagate those properties to the api. Calling `performUpdate()` flushes
+  // the pending update synchronously so the api state is ready.
+  _flush() {
+    this.performUpdate();
+  }
+
+  /* CLIENT SIDE RPC METHODS */
   updateBottomRightCellValues(cellData) {
     this._flush();
     this.$connector.updateBottomRightCellValues(cellData);
