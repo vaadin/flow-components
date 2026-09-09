@@ -16,7 +16,6 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -406,32 +405,42 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Fetches the context menu for the spreadsheet. The Lit-based Spreadsheet
-     * renders the menu via the server-side {@code ContextMenu} component, which
-     * is a Vaadin overlay; this method preserves the public contract by looking
-     * for {@code vaadin-context-menu-overlay} in the document.
+     * Fetches the context menu for the spreadsheet. The menu is an internal
+     * element inside the spreadsheet's shadow root, so it is found by
+     * traversing the shadow roots rather than by a document query.
      *
      * @return {@link SpreadsheetElement.ContextMenuElement}
      * @throws java.util.NoSuchElementException
      *             if the menu isn't open
      */
     public ContextMenuElement getContextMenu() {
-        try {
-            WebElement cm = getDriver()
-                    .findElement(By.cssSelector("vaadin-context-menu-overlay"));
-            return wrapElement(cm, getCommandExecutor())
-                    .wrap(ContextMenuElement.class);
-        } catch (WebDriverException e) {
-            throw new NoSuchElementException("Context menu not found", e);
+        WebElement cm = (WebElement) ((JavascriptExecutor) getCommandExecutor()
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const menu = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-context-menu');
+                                return menu && menu.shadowRoot
+                                    ? menu.shadowRoot.querySelector('.menu')
+                                    : null;
+                                """,
+                        this);
+        if (cm == null) {
+            throw new NoSuchElementException("Context menu not found");
         }
+        return wrapElement(cm, getCommandExecutor())
+                .wrap(ContextMenuElement.class);
     }
 
     public static class ContextMenuElement extends TestBenchElement {
 
         public WebElement getItem(String text) {
-            return findElement(
-                    By.xpath(".//vaadin-context-menu-item[contains(text(), \""
-                            + text + "\")]"));
+            for (WebElement item : findElements(By.cssSelector(".item"))) {
+                if (item.getText().trim().equals(text)) {
+                    return item;
+                }
+            }
+            return null;
         }
 
     }
