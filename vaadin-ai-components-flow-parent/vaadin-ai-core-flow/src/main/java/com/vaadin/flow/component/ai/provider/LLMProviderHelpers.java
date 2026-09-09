@@ -64,6 +64,32 @@ final class LLMProviderHelpers {
             }""";
 
     /**
+     * Opening tag of the block that carries the per-turn session context at the
+     * end of the user message text, see
+     * {@link #withSessionContext(String, String)}.
+     */
+    static final String SESSION_CONTEXT_OPEN = "<session_context>";
+
+    /**
+     * Closing tag of the session context block.
+     */
+    static final String SESSION_CONTEXT_CLOSE = "</session_context>";
+
+    /**
+     * Note at the start of the session context block. It tells the model that
+     * the block is application-supplied rather than the user's words and, since
+     * the default context is the current date and time, how to use it: models
+     * otherwise tend to leave relative dates such as "tomorrow" or "next
+     * Friday" unresolved.
+     */
+    static final String SESSION_CONTEXT_NOTE = "Context supplied by the "
+            + "application when this message was sent, not written by the "
+            + "user. If it includes a date or time, resolve relative phrases "
+            + "in the message (\"today\", \"tomorrow\", \"yesterday\", "
+            + "\"next Friday\", \"in two weeks\", \"end of next month\") "
+            + "against it, into ISO date, date-time or time strings.";
+
+    /**
      * Tells whether a tool declares parameters. A tool whose schema is
      * {@code null} or blank takes none: the provider declares
      * {@link #NO_PARAMETERS_SCHEMA} to the LLM in its place and passes an empty
@@ -112,32 +138,6 @@ final class LLMProviderHelpers {
     public static String getBase64Data(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
     }
-
-    /**
-     * Opening tag of the block that carries the per-turn session context at the
-     * end of the user message text, see
-     * {@link #withSessionContext(String, String)}.
-     */
-    static final String SESSION_CONTEXT_OPEN = "<session_context>";
-
-    /**
-     * Closing tag of the session context block.
-     */
-    static final String SESSION_CONTEXT_CLOSE = "</session_context>";
-
-    /**
-     * Note at the start of the session context block. It tells the model that
-     * the block is application-supplied rather than the user's words and, since
-     * the default context is the current date and time, how to use it: models
-     * otherwise tend to leave relative dates such as "tomorrow" or "next
-     * Friday" unresolved.
-     */
-    static final String SESSION_CONTEXT_NOTE = "Context supplied by the "
-            + "application when this message was sent, not written by the "
-            + "user. If it includes a date or time, resolve relative phrases "
-            + "in the message (\"today\", \"tomorrow\", \"yesterday\", "
-            + "\"next Friday\", \"in two weeks\", \"end of next month\") "
-            + "against it, into ISO date, date-time or time strings.";
 
     /**
      * Appends the session context of the turn, if any, to the user message text
