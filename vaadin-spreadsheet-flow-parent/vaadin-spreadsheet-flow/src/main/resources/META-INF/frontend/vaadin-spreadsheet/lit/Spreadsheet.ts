@@ -263,6 +263,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private cellDataByKey: Map<string, CellData> = new Map();
 
+  /**
+   * Handle of the animation frame a coalesced repaint is waiting on, or
+   * {@code null} when no repaint is pending. See {@link scheduleRender}.
+   */
+  private pendingRenderFrame: number | null = null;
+
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
 
@@ -1511,6 +1517,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Lit wrapper's {@code updated} cycle, integration tests) can
    * force a re-render without going through the scroll surface.
    */
+  /**
+   * Request a repaint on the next animation frame, coalescing repeated
+   * calls into a single {@link recomputeViewport}.
+   *
+   * The server pushes cell values, styles and reload signals as several
+   * separate RPC calls within one roundtrip. Painting on each one would
+   * re-render the whole viewport many times over for what the user sees
+   * as a single update, so the calls collapse into one frame.
+   */
+  private scheduleRender(): void {
+    if (this.pendingRenderFrame !== null) {
+      return;
+    }
+    this.pendingRenderFrame = requestAnimationFrame(() => {
+      this.pendingRenderFrame = null;
+      this.recomputeViewport();
+    });
+  }
+
   recomputeViewport(): void {
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
@@ -1527,6 +1552,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * scroll container after teardown.
    */
   dispose(): void {
+    if (this.pendingRenderFrame !== null) {
+      cancelAnimationFrame(this.pendingRenderFrame);
+      this.pendingRenderFrame = null;
+    }
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
     this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);
@@ -1914,6 +1943,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
   }
 
+  /**
+   * Test-only accessor: the cells currently known to the client, keyed by
+   * {@code toKey(col, row)}.
+   */
+  getCellData(): ReadonlyMap<string, CellData> {
+    return this.cellDataByKey;
+  }
+
   /** Test-only accessor: the cell-grid sub-element this connector owns. */
   getCellGrid(): SpreadsheetCellGrid {
     return this.cellGrid;
@@ -2057,15 +2094,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   updateBottomRightCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
+    this.scheduleRender();
   }
   updateTopLeftCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
+    this.scheduleRender();
   }
   updateTopRightCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
+    this.scheduleRender();
   }
   updateBottomLeftCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
+    this.scheduleRender();
   }
 
   /**
@@ -2125,11 +2166,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void {
     // TODO Phase 3.2 — apply the server-supplied selection state.
   }
-  cellsUpdated(_updatedCellData: CellData[]): void {
-    // TODO Phase 3.2 — repaint affected cells.
+  cellsUpdated(updatedCellData: CellData[]): void {
+    this.storeCellData(updatedCellData);
+    this.scheduleRender();
   }
   refreshCellStyles(): void {
-    // TODO Phase 3.2 — flush the cell-style cache + repaint.
+    this.scheduleRender();
   }
   editCellComment(_col: number, _row: number): void {
     // TODO Phase 3.5 — open the comment-edit dialog.
@@ -2227,8 +2269,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setRowGroupingInversed(inversed: boolean): void {
     this.rowGroupingInversed = inversed;
   }
-  setReload(_triggerReload: boolean): void {
-    // TODO Phase 3.2 — trigger full re-render on reload signal.
+  setReload(triggerReload: boolean): void {
+    if (triggerReload) {
+      this.scheduleRender();
+    }
   }
   setSheetProtected(isProtected: boolean): void {
     this.sheetProtected = isProtected;
