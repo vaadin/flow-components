@@ -3606,12 +3606,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return top-level columns and/or column groups of this grid
      */
-    private List<ColumnBase<?>> getTopLevelColumns() {
+    private List<AbstractColumn<?>> getTopLevelColumns() {
         return getElement().getChildren().map(element -> element.getComponent())
                 .filter(component -> component.isPresent()
-                        && component.get() instanceof ColumnBase<?>)
-                .<ColumnBase<?>> map(
-                        component -> (ColumnBase<?>) component.get())
+                        && component.get() instanceof AbstractColumn<?>)
+                .<AbstractColumn<?>> map(
+                        component -> (AbstractColumn<?>) component.get())
                 .toList();
     }
 
@@ -3976,7 +3976,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @SuppressWarnings("unchecked")
     private void appendChildColumns(List<Column<T>> list,
-            ColumnBase<?> column) {
+            AbstractColumn<?> column) {
         if (column instanceof Column) {
             list.add((Column<T>) column);
         } else if (column instanceof ColumnGroup) {

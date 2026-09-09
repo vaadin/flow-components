@@ -244,7 +244,7 @@ class ColumnLayer implements Serializable {
      *            the total column ordering, having parent column groups
      *            preceding children (pre-order).
      */
-    protected void updateColumnOrder(List<ColumnBase<?>> columnsPreOrder) {
+    protected void updateColumnOrder(List<AbstractColumn<?>> columnsPreOrder) {
         columns.sort(Comparator.comparingInt(columnsPreOrder::indexOf));
         setColumns(columns);
     }
