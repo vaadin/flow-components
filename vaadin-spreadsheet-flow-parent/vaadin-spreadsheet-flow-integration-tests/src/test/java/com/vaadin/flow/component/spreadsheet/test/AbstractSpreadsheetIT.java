@@ -123,6 +123,22 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         // Cell editor input.
         selector = selector.replace("input[id='cellinput']",
                 "[part~=\"cell-input\"]");
+        // Selection corner drag handle — GWT called it .s-corner.
+        selector = selector.replace(".s-corner", ".selection-corner");
+        // Popup (filter) button on a table header cell.
+        selector = selector.replace(".popupbutton", ".popup-button");
+        // Cell comment indicator. The Lit element exposes it as a
+        // documented part rather than a class.
+        selector = selector.replace(".cell-comment-triangle",
+                "[part~=\"comment-triangle\"]");
+        // Column grouping outline. GWT rendered .grouping.plus /
+        // .grouping.minus buttons inside a .col-group-pane strip; the
+        // Lit column header renders one toggle per group carrying its
+        // collapsed state as a data attribute.
+        selector = selector.replace(".col-group-pane .grouping.plus",
+                ".col-grouping-toggle[data-collapsed=\"true\"]");
+        selector = selector.replace(".col-group-pane .grouping.minus",
+                ".col-grouping-toggle[data-collapsed=\"false\"]");
         return selector;
     }
 
