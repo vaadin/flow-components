@@ -20,17 +20,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
@@ -45,9 +42,6 @@ import com.vaadin.flow.data.binder.Validator;
 
 /**
  * Switch is an input field representing a binary on/off choice.
- * <p>
- * This component is experimental and needs to be enabled with the
- * {@code com.vaadin.experimental.switchComponent} feature flag.
  * <p>
  * Switch is functionally equivalent to {@link Checkbox}, but it is presented as
  * an on/off toggle and is intended for a single setting that takes effect
@@ -217,21 +211,6 @@ public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
             ValueChangeListener<ComponentValueChangeEvent<Switch, Boolean>> listener) {
         this(labelText, initialValue);
         addValueChangeListener(listener);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag(attachEvent.getUI());
-    }
-
-    private void checkFeatureFlag(UI ui) {
-        FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
-        if (!featureFlags
-                .isEnabled(SwitchFeatureFlagProvider.SWITCH_COMPONENT)) {
-            throw new SwitchExperimentalFeatureException();
-        }
     }
 
     /**
