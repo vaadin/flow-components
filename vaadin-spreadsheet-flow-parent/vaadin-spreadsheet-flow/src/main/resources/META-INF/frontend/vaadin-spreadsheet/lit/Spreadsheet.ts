@@ -831,20 +831,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
       altKey: boolean;
     }>
   ): void => {
-    const { col, row, shiftKey } = e.detail;
+    const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
     this.dragging = true;
+    this.extendCol = col;
+    this.extendRow = row;
+    if (ctrlKey || metaKey) {
+      // Ctrl/Cmd-mousedown must leave the selection untouched. The
+      // click that follows adds this cell as a further range, and it
+      // needs the current active range to push aside — replacing the
+      // selection here would wipe exactly what the Ctrl-click is meant
+      // to keep. mousedown always precedes click for a real pointer.
+      return;
+    }
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
       // drag start). Standard Excel "shift-drag" behavior.
       const anchor = this.selection.activeCell;
       this.selection = selectRange(anchor.col, anchor.row, col, row);
-      this.extendCol = col;
-      this.extendRow = row;
     } else {
       this.selection = selectSingleCell(col, row);
-      this.extendCol = col;
-      this.extendRow = row;
     }
     this.recomputeViewport();
   };
@@ -2225,10 +2231,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // that move the selection server-side (sheet change, row insert,
     // undo). The active cell is (col, row); it need not be a corner of
     // the range, so the range cannot be derived from it.
+    // Keep any aux ranges. The server reports the active cell and the
+    // active range only; it has no opinion about the other ranges of a
+    // non-coherent (Ctrl-clicked) selection. Clearing them here undoes
+    // the Ctrl-click the moment the server echoes the selection back.
+    // A plain click has already cleared them client-side, so preserving
+    // the current list is also correct for the replace case.
     this.selection = {
       activeCell: { col, row },
       activeRange: normalizedRange(c1, r1, c2, r2),
-      auxRanges: []
+      auxRanges: this.selection.auxRanges
     };
     this.formulaBar.renderState = {
       address: name,

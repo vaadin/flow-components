@@ -52,6 +52,25 @@ function clickCell(
   row: number,
   mods: { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean } = {}
 ): void {
+  // A real pointer fires mousedown BEFORE click, and the drag handler
+  // reacts to mousedown. Dispatching only cell-click hides bugs that
+  // live in that ordering — this helper reproduces the real sequence.
+  sheet.getCellGrid().dispatchEvent(
+    new CustomEvent('cell-mousedown', {
+      detail: {
+        col,
+        row,
+        shiftKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        ...mods
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+  document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
   sheet.getCellGrid().dispatchEvent(
     new CustomEvent('cell-click', {
       detail: {
@@ -198,6 +217,20 @@ describe('Spreadsheet non-coherent selection — server events', () => {
     const selection = ctx.sheet.getSelection();
     expect(isCellSelected(selection, 1, 1)).to.be.true;
     expect(isCellSelected(selection, 4, 4)).to.be.true;
+  });
+
+  it('survives the server echoing the selection back', () => {
+    // The server answers cellAddedToSelectionAndSelected with
+    // setSelectedCellAndRange. That must not wipe the ranges the
+    // Ctrl-clicks built up, or the selection collapses to one cell the
+    // moment the roundtrip completes.
+    clickCell(ctx.sheet, 2, 2);
+    clickCell(ctx.sheet, 3, 3, { ctrlKey: true });
+    ctx.sheet.setSelectedCellAndRange('C3', 3, 3, 3, 3, 3, 3, false);
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 2, 2)).to.be.true;
+    expect(isCellSelected(selection, 3, 3)).to.be.true;
   });
 
   it('a plain click still reports a normal cell selection', () => {
