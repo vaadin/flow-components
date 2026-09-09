@@ -1298,7 +1298,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // visual context. Sets scrollLeft/scrollTop directly; the
     // scroll listener triggers an additional recomputeViewport
     // automatically.
-    this.scrollActiveOrExtendIntoView(target);
+    this.scrollCellIntoView(target);
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
@@ -1314,7 +1314,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * hiddenRowIndexes / hiddenColumnIndexes`. Side effect = scroll
    * adjustment.
    */
-  private scrollActiveOrExtendIntoView(target: NavigationTarget): void {
+  private scrollCellIntoView(target: { col: number; row: number }): void {
     if (this.rows <= 0 || this.cols <= 0) {
       return;
     }
@@ -2155,16 +2155,33 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // TODO Phase 3.5 — show context menu / actions popup.
   }
   setSelectedCellAndRange(
-    _name: string,
-    _col: number,
-    _row: number,
-    _c1: number,
-    _c2: number,
-    _r1: number,
-    _r2: number,
-    _scroll: boolean
+    name: string,
+    col: number,
+    row: number,
+    c1: number,
+    c2: number,
+    r1: number,
+    r2: number,
+    scroll: boolean
   ): void {
-    // TODO Phase 3.2 — apply the server-supplied selection state.
+    // The server is authoritative here: this arrives from
+    // Spreadsheet.setSelection / setSelectionRange and after operations
+    // that move the selection server-side (sheet change, row insert,
+    // undo). The active cell is (col, row); it need not be a corner of
+    // the range, so the range cannot be derived from it.
+    this.selection = {
+      activeCell: { col, row },
+      activeRange: normalizedRange(c1, r1, c2, r2),
+      auxRanges: []
+    };
+    this.formulaBar.renderState = {
+      address: name,
+      formula: this.formulaBar.renderState.formula
+    };
+    if (scroll) {
+      this.scrollCellIntoView({ col, row });
+    }
+    this.scheduleRender();
   }
   cellsUpdated(updatedCellData: CellData[]): void {
     this.storeCellData(updatedCellData);
