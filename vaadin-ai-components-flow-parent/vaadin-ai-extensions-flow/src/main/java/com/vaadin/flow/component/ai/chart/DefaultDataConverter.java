@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -860,10 +861,10 @@ public class DefaultDataConverter implements DataConverter {
 
     /**
      * Converts a value to an {@link Instant}. Handles {@link Instant},
-     * {@link Timestamp}, {@link java.sql.Date}, {@link java.sql.Time} (placed
-     * on {@link #TIME_OF_DAY_ANCHOR}), {@link LocalDate},
-     * {@link LocalDateTime}, {@link Date}, and numeric values (interpreted as
-     * milliseconds since epoch).
+     * {@link Timestamp}, {@link java.sql.Date}, {@link LocalDate},
+     * {@link LocalDateTime}, {@link java.sql.Time} and {@link LocalTime} (both
+     * placed on {@link #TIME_OF_DAY_ANCHOR}), {@link Date}, and numeric values
+     * (interpreted as milliseconds since epoch).
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
@@ -877,8 +878,9 @@ public class DefaultDataConverter implements DataConverter {
             localDateTime.toInstant(ZoneOffset.UTC);
         // java.sql.Time extends java.util.Date but carries no date, so
         // toInstant() throws UnsupportedOperationException by contract
-        case Time time -> time.toLocalTime().atDate(TIME_OF_DAY_ANCHOR)
-                .toInstant(ZoneOffset.UTC);
+        case Time time -> toInstant(time.toLocalTime());
+        case LocalTime localTime ->
+            localTime.atDate(TIME_OF_DAY_ANCHOR).toInstant(ZoneOffset.UTC);
         case Date date -> date.toInstant();
         case Number number -> Instant.ofEpochMilli(number.longValue());
         case null, default -> null;
@@ -892,7 +894,7 @@ public class DefaultDataConverter implements DataConverter {
     private static boolean isTemporalOrNumeric(Object value) {
         return value instanceof Number || value instanceof Instant
                 || value instanceof LocalDate || value instanceof LocalDateTime
-                || value instanceof Date;
+                || value instanceof LocalTime || value instanceof Date;
     }
 
     /**
