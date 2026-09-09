@@ -2205,8 +2205,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
   }
 
-  notifyStateChanges(_changedPropertyNames: string[], _firstUpdate: boolean): void {
-    // TODO Phase 3.2 — fold the property batch into a single render pass.
+  notifyStateChanges(changedPropertyNames: string[], _firstUpdate: boolean): void {
+    // The wrapper calls this once per property batch, after forwarding every
+    // changed property. Without a repaint here, server-pushed state that is
+    // not a cell value — overlays, popup buttons, comments, merged regions,
+    // style maps, grouping, hidden rows and columns — reaches the connector
+    // and never reaches the screen.
+    //
+    // The repaint is coalesced, which is what folds the whole batch into a
+    // single render pass.
+    if (changedPropertyNames.length > 0) {
+      this.scheduleRender();
+    }
   }
 
   // ====================================================================

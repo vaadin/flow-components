@@ -206,3 +206,52 @@ describe('Spreadsheet render scheduling — lifecycle', () => {
         expect(ctx.paints()).to.equal(0);
     });
 });
+
+describe('Spreadsheet render scheduling — property batches', () => {
+  let ctx: Awaited<ReturnType<typeof attachSheet>>;
+
+  beforeEach(async () => {
+    ctx = await attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('repaints after the wrapper reports a property batch', async () => {
+    // The wrapper forwards each changed property and then calls this once.
+    // Server-pushed state that is not a cell value has no other repaint
+    // trigger.
+    ctx.sheet.setOverlays({
+      i1: { type: 'IMAGE', col: 2, row: 2, width: 40, height: 30, dx: 0, dy: 0 }
+    });
+    ctx.sheet.notifyStateChanges(['overlays'], false);
+    await afterFrame();
+
+    expect(ctx.paints()).to.equal(1);
+  });
+
+  it('folds a whole batch into one repaint', async () => {
+    ctx.sheet.notifyStateChanges(['overlays', 'mergedRegions', 'cellComments'], false);
+    await afterFrame();
+
+    expect(ctx.paints()).to.equal(1);
+  });
+
+  it('does not repaint when nothing changed', async () => {
+    ctx.sheet.notifyStateChanges([], false);
+    await afterFrame();
+
+    expect(ctx.paints()).to.equal(0);
+  });
+
+  it('the overlay reaches the cell grid once the batch is reported', async () => {
+    ctx.sheet.setOverlays({
+      i1: { type: 'IMAGE', col: 2, row: 2, width: 40, height: 30, dx: 0, dy: 0 }
+    });
+    ctx.sheet.notifyStateChanges(['overlays'], false);
+    await afterFrame();
+
+    expect(ctx.sheet.getCellGrid().renderState.overlays).to.have.length(1);
+  });
+});
