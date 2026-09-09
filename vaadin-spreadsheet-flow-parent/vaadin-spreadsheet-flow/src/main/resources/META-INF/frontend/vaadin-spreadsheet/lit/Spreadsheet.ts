@@ -2277,7 +2277,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       open: true,
       x: this.lastContextMenuPosition.x,
       y: this.lastContextMenuPosition.y,
-      actions: actionDetails ?? []
+      // Arrives JSON-serialized through the Flow lane, like the
+      // collection-shaped property pushes slice 179 handles.
+      actions: coerceArray<SpreadsheetActionDetails>(actionDetails)
     };
   }
 

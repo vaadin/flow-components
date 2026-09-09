@@ -119,6 +119,20 @@ describe('Spreadsheet context menu — opening', () => {
     expect(el.style.top).to.equal('90px');
   });
 
+  it('accepts the JSON-serialized payload the server actually sends', async () => {
+    // Flow serializes the action list, so it arrives as a string rather
+    // than an array — the same lane the collection-shaped property
+    // pushes come through.
+    ctx.sheet.showActions(
+      JSON.stringify([action('Insert row', 'insert-row', 0)]) as any
+    );
+
+    const rendered = await items(ctx.sheet);
+    expect(rendered.map((i) => i.textContent!.trim())).to.deep.equal([
+      'Insert row'
+    ]);
+  });
+
   it('shows nothing when the server offers no actions', async () => {
     ctx.sheet.showActions([]);
 
