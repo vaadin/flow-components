@@ -442,6 +442,7 @@
                         <argLine>-Xmx2048m</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
+                            <serverPort>${jetty.http.port}</serverPort>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
                             <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
                         </systemPropertyVariables>

@@ -83,6 +83,15 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
 
     private static final boolean USE_HUB = Boolean.getBoolean("test.use.hub");
 
+    /**
+     * Port the integration-test server listens on. Defaults to 8080 and is
+     * overridden with {@code -Djetty.http.port=...}, which the failsafe
+     * configuration forwards as the {@code serverPort} system property so the
+     * server and the tests always agree on the port.
+     */
+    private static final String SERVER_PORT = System.getProperty("serverPort",
+            "8080");
+
     private static final String HUB_URL = System.getProperty("test.hub.url",
             "http://" + Parameters.getHubHostname() + ":4444/wd/hub");
 
@@ -153,7 +162,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
         if (USE_HUB) {
             host = findHostAddress();
         }
-        return "http://" + host + ":8080";
+        return "http://" + host + ":" + SERVER_PORT;
     }
 
     private String findHostAddress() {
