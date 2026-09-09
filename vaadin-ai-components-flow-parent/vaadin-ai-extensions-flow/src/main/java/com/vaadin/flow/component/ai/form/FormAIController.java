@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -222,16 +220,6 @@ public class FormAIController implements AIController {
      * shows it, ties its lifecycle to the field rather than to the controller.
      */
     private static final String FIELD_MARK_KEY = "vaadin.ai.form.fieldMark";
-
-    /**
-     * How long {@code fill_form} waits for a fill queued with
-     * {@code ui.access()} to run before giving up and telling the LLM so.
-     * Generous enough that no ordinary UI thread hits it, short enough that a
-     * provider which blocks the lock holder surfaces as an error instead of a
-     * parked thread. Not final so the test for that path does not have to wait
-     * a minute for it.
-     */
-    static int fillAccessTimeoutSeconds = 60; // NOSONAR — see above
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_form_instructions";
 
@@ -1809,26 +1797,10 @@ public class FormAIController implements AIController {
                 }
             });
             try {
-                // Bounded: the lock holder this fill waits for is another
-                // thread, and a provider that blocks it while waiting for
-                // this tool would otherwise park here forever with nothing
-                // in the log to explain it.
-                return future.get(fillAccessTimeoutSeconds, TimeUnit.SECONDS);
+                return future.get();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 return "Error: fill interrupted.";
-            } catch (TimeoutException ex) {
-                LOGGER.warn(
-                        "fill_form waited {} seconds for the session lock and "
-                                + "gave up. The fill was queued with "
-                                + "ui.access() from a thread that does not "
-                                + "hold the lock, and the thread holding it "
-                                + "never released it — check whether the "
-                                + "LLMProvider blocks the thread it was "
-                                + "handed while a background thread calls "
-                                + "the tool.",
-                        fillAccessTimeoutSeconds);
-                return "Error: fill timed out waiting for the UI thread.";
             } catch (ExecutionException ex) {
                 LOGGER.warn("fill_form execution failed", ex.getCause());
                 return "Error: fill failed.";

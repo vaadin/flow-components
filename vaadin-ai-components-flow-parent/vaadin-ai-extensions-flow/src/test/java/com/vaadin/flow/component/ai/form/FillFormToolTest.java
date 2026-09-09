@@ -1888,37 +1888,6 @@ class FillFormToolTest {
     }
 
     @Test
-    @Timeout(30)
-    void fillForm_queuedFillThatNeverRunsTimesOutWithAnExplanation()
-            throws Exception {
-        // A provider that keeps the lock holder blocked while a background
-        // thread calls the tool would park that thread for good. Bounded wait
-        // instead, with a message that names the problem.
-        var field = new TestField();
-        var controller = controllerFor(field);
-        queueAccessCommands(); // queued, and never purged
-
-        var original = FormAIController.fillAccessTimeoutSeconds;
-        FormAIController.fillAccessTimeoutSeconds = 1;
-        String raw;
-        try {
-            raw = CompletableFuture
-                    .supplyAsync(() -> fillFormPayload(controller,
-                            payload(field, "\"Ana Torres\"")))
-                    .get(20, TimeUnit.SECONDS);
-        } finally {
-            FormAIController.fillAccessTimeoutSeconds = original;
-        }
-
-        Assertions.assertEquals(
-                "Error: fill timed out waiting for the UI thread.", raw,
-                "A fill that never gets the lock must report the wait, "
-                        + "got: " + raw);
-        Assertions.assertEquals("", field.getValue(),
-                "A timed-out fill must not have written the field");
-    }
-
-    @Test
     void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
         // FormValueConverter.convert delegates to field.getEmptyValue() for
         // JSON null. A field whose getEmptyValue() throws produces an
