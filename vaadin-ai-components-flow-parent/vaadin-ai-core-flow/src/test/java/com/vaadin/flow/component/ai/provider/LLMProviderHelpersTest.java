@@ -37,6 +37,16 @@ class LLMProviderHelpersTest {
                 result.endsWith("\nTenant: acme\n"
                         + LLMProviderHelpers.SESSION_CONTEXT_CLOSE),
                 "Context must be the last thing in the block; got: " + result);
+        // The note's wording is tuned freely and deliberately not pinned
+        // here; what the block must always do is introduce the context
+        // with one.
+        var block = result.substring(
+                result.indexOf(LLMProviderHelpers.SESSION_CONTEXT_OPEN)
+                        + LLMProviderHelpers.SESSION_CONTEXT_OPEN.length(),
+                result.lastIndexOf(LLMProviderHelpers.SESSION_CONTEXT_CLOSE));
+        Assertions.assertFalse(block.replace("Tenant: acme", "").isBlank(),
+                "The block must introduce the context with a note; got: "
+                        + result);
     }
 
     @Test
