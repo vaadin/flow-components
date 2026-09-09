@@ -17,6 +17,7 @@ import type {
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
+  addAuxRange,
   normalizedRange,
   selectRange,
   selectSingleCell,
@@ -569,18 +570,36 @@ export class Spreadsheet implements SpreadsheetClientApi {
       altKey: boolean;
     }>
   ): void => {
-    const { col, row, shiftKey } = e.detail;
+    const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
+    const ctrlOrMeta = ctrlKey || metaKey;
+    this.extendCol = col;
+    this.extendRow = row;
+    if (ctrlOrMeta && shiftKey) {
+      // Extend the active range, keeping the ranges already picked
+      // out with earlier Ctrl-clicks.
+      const anchor = this.selection.activeCell;
+      const extended = selectRange(anchor.col, anchor.row, col, row);
+      this.selection = { ...extended, auxRanges: this.selection.auxRanges };
+      this.recomputeViewport();
+      this.dispatchCellsAddedToRangeSelection(extended.activeRange);
+      return;
+    }
+    if (ctrlOrMeta) {
+      // Non-coherent selection: the clicked cell joins the selection
+      // as its own range and becomes active; the previous active
+      // range is kept as an aux range.
+      this.selection = addAuxRange(this.selection, col, row, col, row);
+      this.recomputeViewport();
+      this.dispatchCellAddedToSelection(col, row);
+      return;
+    }
     if (shiftKey) {
       // Extend the active range from the existing active cell
       // (= the anchor) to the clicked coordinate.
       const anchor = this.selection.activeCell;
       this.selection = selectRange(anchor.col, anchor.row, col, row);
-      this.extendCol = col;
-      this.extendRow = row;
     } else {
       this.selection = selectSingleCell(col, row);
-      this.extendCol = col;
-      this.extendRow = row;
     }
     this.recomputeViewport();
     this.dispatchSelectionEvent();
@@ -1654,6 +1673,43 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * SpreadsheetHandler dispatch signatures (preserved verbatim
    * from the GWT side as a wire contract).
    */
+  /**
+   * Tell the server a cell joined a non-coherent selection. Distinct
+   * from {@link dispatchSelectionEvent}, which reports a selection that
+   * replaces whatever came before.
+   */
+  private dispatchCellAddedToSelection(col: number, row: number): void {
+    const data: CellSelectedData = {
+      row,
+      column: col,
+      oldSelectionRangeDiscarded: false
+    };
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'cellAddedToSelectionAndSelected', data },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  /** Tell the server a whole range joined a non-coherent selection. */
+  private dispatchCellsAddedToRangeSelection(range: CellRange): void {
+    const data: CellRangeSelectedData = {
+      row1: range.r1,
+      col1: range.c1,
+      row2: range.r2,
+      col2: range.c2
+    };
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'cellsAddedToRangeSelection', data },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
   private dispatchSelectionEvent(): void {
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
