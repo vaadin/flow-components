@@ -808,6 +808,18 @@ class DefaultDataConverterTest {
         }
 
         @Test
+        void sqlTimeXValue_convertedToHighchartsTimestampOnEpochDay() {
+            var time = java.sql.Time.valueOf("12:00:00");
+            var expectedMillis = time.toLocalTime().atDate(LocalDate.EPOCH)
+                    .toInstant(ZoneOffset.UTC).getEpochSecond() * 1000;
+            var data = List
+                    .of(row(X, time, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(expectedMillis,
+                    result.getData().getFirst().getX());
+        }
+
+        @Test
         void ganttWithLocalDateStartEnd() {
             var data = List.of(row(NAME, "Task", START,
                     LocalDate.of(2024, 1, 1), END, LocalDate.of(2024, 2, 1)));

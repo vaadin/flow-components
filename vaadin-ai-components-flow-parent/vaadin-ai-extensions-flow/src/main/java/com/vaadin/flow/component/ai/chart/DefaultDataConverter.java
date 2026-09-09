@@ -11,6 +11,7 @@ package com.vaadin.flow.component.ai.chart;
 import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -848,9 +849,10 @@ public class DefaultDataConverter implements DataConverter {
 
     /**
      * Converts a value to an {@link Instant}. Handles {@link Instant},
-     * {@link Timestamp}, {@link java.sql.Date}, {@link LocalDate},
-     * {@link LocalDateTime}, {@link Date}, and numeric values (interpreted as
-     * milliseconds since epoch).
+     * {@link Timestamp}, {@link java.sql.Date}, {@link java.sql.Time} (mapped
+     * onto the epoch day), {@link LocalDate}, {@link LocalDateTime},
+     * {@link Date}, and numeric values (interpreted as milliseconds since
+     * epoch).
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
@@ -862,6 +864,10 @@ public class DefaultDataConverter implements DataConverter {
             localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         case LocalDateTime localDateTime ->
             localDateTime.toInstant(ZoneOffset.UTC);
+        // java.sql.Time extends java.util.Date but carries no date, so
+        // toInstant() throws UnsupportedOperationException by contract
+        case Time time -> time.toLocalTime().atDate(LocalDate.EPOCH)
+                .toInstant(ZoneOffset.UTC);
         case Date date -> date.toInstant();
         case Number number -> Instant.ofEpochMilli(number.longValue());
         case null, default -> null;
