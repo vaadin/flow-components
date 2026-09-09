@@ -2871,6 +2871,8 @@ export function computePositionedOverlays(
       top += rowHeight(r);
     }
     const positioned: PositionedOverlay = {
+      col: info.col,
+      row: info.row,
       id,
       type: info.type,
       src: info.type === 'IMAGE' ? resources[id] : undefined,

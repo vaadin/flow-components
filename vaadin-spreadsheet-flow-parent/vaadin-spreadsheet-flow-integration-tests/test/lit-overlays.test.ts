@@ -17,6 +17,8 @@ import {
 import type {
     OverlayInfo, PopupButtonState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import { SpreadsheetCellGrid } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
+import { emptyCellGridRenderState } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
 
 /**
  * Slice 160 — sheet overlay rendering.
@@ -341,5 +343,84 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
             '.sheet-overlay'
         )).to.have.length(0);
         cleanup();
+    });
+});
+
+describe('Overlays — addressable by their anchor cell', () => {
+    const uniformWidth = (_c: number) => 50;
+    const uniformHeight = (_r: number) => 20;
+
+    it('carries the anchor cell through positioning', () => {
+        // Pixel geometry alone does not say which cell an overlay belongs
+        // to, so nothing could address an overlay by its anchor.
+        const overlays: Record<string, OverlayInfo> = {
+            img1: { type: 'IMAGE', col: 3, row: 2, width: 100, height: 60, dx: 0, dy: 0 },
+        };
+        const result = computePositionedOverlays(overlays, {}, uniformWidth, uniformHeight);
+
+        expect(result[0].col).to.equal(3);
+        expect(result[0].row).to.equal(2);
+    });
+
+    it('renders the anchor as data attributes on an image overlay', async () => {
+        const el = document.createElement(
+            'vaadin-spreadsheet-internal-cell-grid'
+        ) as SpreadsheetCellGrid;
+        el.renderState = {
+            ...emptyCellGridRenderState(),
+            // render() bails out on an empty viewport, so give it one.
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 6, lastColumnPosition: 300,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 6, lastRowPosition: 120,
+            },
+            colX: [0, 50, 100, 150, 200, 250],
+            rowY: [0, 20, 40, 60, 80, 100],
+            colWidths: [50, 50, 50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20, 20, 20],
+            overlays: [
+                { id: 'i1', type: 'IMAGE', src: '/a.png', col: 3, row: 2,
+                  leftPx: 100, topPx: 20, widthPx: 40, heightPx: 30 },
+            ],
+        };
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        const img = el.shadowRoot!.querySelector('.sheet-overlay-image')!;
+        expect(img.getAttribute('data-col')).to.equal('3');
+        expect(img.getAttribute('data-row')).to.equal('2');
+        el.remove();
+    });
+
+    it('renders the anchor on a component overlay too', async () => {
+        const el = document.createElement(
+            'vaadin-spreadsheet-internal-cell-grid'
+        ) as SpreadsheetCellGrid;
+        el.renderState = {
+            ...emptyCellGridRenderState(),
+            // render() bails out on an empty viewport, so give it one.
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 6, lastColumnPosition: 300,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 6, lastRowPosition: 120,
+            },
+            colX: [0, 50, 100, 150, 200, 250],
+            rowY: [0, 20, 40, 60, 80, 100],
+            colWidths: [50, 50, 50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20, 20, 20],
+            overlays: [
+                { id: 'c1', type: 'COMPONENT', src: undefined, col: 5, row: 4,
+                  leftPx: 200, topPx: 60, widthPx: 40, heightPx: 30 },
+            ],
+        };
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        const placeholder = el.shadowRoot!.querySelector('.sheet-overlay-component')!;
+        expect(placeholder.getAttribute('data-col')).to.equal('5');
+        expect(placeholder.getAttribute('data-row')).to.equal('4');
+        el.remove();
     });
 });

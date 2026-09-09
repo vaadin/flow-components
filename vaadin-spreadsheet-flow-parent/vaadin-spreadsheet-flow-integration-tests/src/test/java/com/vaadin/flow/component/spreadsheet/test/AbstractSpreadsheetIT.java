@@ -138,6 +138,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 ".col-grouping-toggle[data-collapsed=\"true\"]");
         selector = selector.replace(".col-group-pane .grouping.minus",
                 ".col-grouping-toggle[data-collapsed=\"false\"]");
+        // Sheet overlays. GWT rendered a div carrying the anchor cell as
+        // .col<N>.row<N> classes; the Lit grid renders an <img> (or a
+        // placeholder div for component overlays) carrying the anchor as
+        // data attributes, matching the convention cells already use.
+        selector = selector.replaceAll(
+                "(?:div)?\\.sheet-image\\.col(\\d+)\\.row(\\d+)",
+                ".sheet-overlay[data-col=\"$1\"][data-row=\"$2\"]");
+        selector = selector.replaceAll("(?:div)?\\.sheet-image",
+                ".sheet-overlay-image");
         return selector;
     }
 

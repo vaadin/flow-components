@@ -1046,7 +1046,14 @@ function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
     if (overlay.type === 'IMAGE') {
       const src = overlay.src ?? '';
       return html`
-        <img class="sheet-overlay sheet-overlay-image" data-overlay-id=${overlay.id} src=${src} style=${style} />
+        <img
+          class="sheet-overlay sheet-overlay-image"
+          data-overlay-id=${overlay.id}
+          data-col=${overlay.col}
+          data-row=${overlay.row}
+          src=${src}
+          style=${style}
+        />
       `;
     }
     // COMPONENT overlay: render a placeholder that a future
@@ -1054,7 +1061,13 @@ function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
     // (via slot or appended-child injection from the Flow
     // wrapper).
     return html`
-      <div class="sheet-overlay sheet-overlay-component" data-overlay-id=${overlay.id} style=${style}></div>
+      <div
+        class="sheet-overlay sheet-overlay-component"
+        data-overlay-id=${overlay.id}
+        data-col=${overlay.col}
+        data-row=${overlay.row}
+        style=${style}
+      ></div>
     `;
   });
 }

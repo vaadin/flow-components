@@ -240,6 +240,10 @@ export interface CellEditorState {
 export interface PositionedOverlay {
   /** Identifier from the server's `setOverlays` map. */
   id: string;
+  /** 1-based column of the cell the overlay is anchored to. */
+  col: number;
+  /** 1-based row of the cell the overlay is anchored to. */
+  row: number;
   /** Overlay kind — image or embedded component. */
   type: 'IMAGE' | 'COMPONENT';
   /**
