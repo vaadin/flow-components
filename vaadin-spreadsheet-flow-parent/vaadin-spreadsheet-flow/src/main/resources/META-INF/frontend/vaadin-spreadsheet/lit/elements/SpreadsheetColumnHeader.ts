@@ -251,7 +251,8 @@ export class SpreadsheetColumnHeader extends LitElement {
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
   }
 
-  private readonly handleShadowContextMenu = (e: Event): void => {
+  private readonly handleShadowContextMenu = (event: Event): void => {
+    const e = event as MouseEvent;
     const target = e.target;
     if (!(target instanceof Element)) {
       return;
@@ -267,7 +268,7 @@ export class SpreadsheetColumnHeader extends LitElement {
     e.preventDefault();
     this.dispatchEvent(
       new CustomEvent('column-header-contextmenu', {
-        detail: { col },
+        detail: { col, clientX: e.clientX, clientY: e.clientY },
         bubbles: true,
         composed: true
       })

@@ -288,13 +288,17 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         // Slice 154 added the sheet-tabs strip below the scroll
         // container; the host is now a flex column.
         // Slice 175 added the formula bar above the scroll container.
+        // Slice 191 added the context menu, which stays empty until the
+        // server answers a right-click with the actions it offers.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
-        // Host has 3 children: formula bar + scroll container + sheet tabs.
-        expect(host.children).to.have.length(3);
+        // Host has 4 children: formula bar + context menu + scroll
+        // container + sheet tabs.
+        expect(host.children).to.have.length(4);
         const hostKids = Array.from(host.children);
         expect(hostKids.includes(sheet.getFormulaBar())).to.be.true;
+        expect(hostKids.includes(sheet.getContextMenu())).to.be.true;
         expect(hostKids.includes(sheet.getScrollContainer())).to.be.true;
         expect(hostKids.includes(sheet.getSheetTabs())).to.be.true;
 
@@ -2231,9 +2235,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
 
         const sheet = new Spreadsheet(host, shadow);
 
-        // Scroll container + formula bar + sheet tabs go inside the
-        // shadow root, not the light DOM.
-        expect(shadow.children.length).to.equal(3);
+        // Scroll container + formula bar + context menu + sheet tabs go
+        // inside the shadow root, not the light DOM.
+        expect(shadow.children.length).to.equal(4);
         expect(host.children.length).to.equal(0);
         // Host is still the event target / style host.
         expect(host.style.display).to.equal('flex');

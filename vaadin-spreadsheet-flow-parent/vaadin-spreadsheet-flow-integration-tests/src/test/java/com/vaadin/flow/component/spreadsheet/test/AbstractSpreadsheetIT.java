@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
@@ -841,22 +840,46 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     // Context menu helpers
 
+    /**
+     * Find a context-menu item by its caption. The menu lives in the
+     * spreadsheet's nested shadow roots, and there is no TestBench query for
+     * "element whose text is X", so this walks the roots in one script rather
+     * than paying a round-trip per candidate.
+     */
+    private WebElement findMenuItem(String caption) {
+        return (WebElement) ((org.openqa.selenium.JavascriptExecutor) getDriver())
+                .executeScript("""
+                        const host = arguments[0];
+                        const caption = arguments[1];
+                        function search(root) {
+                            if (!root) return null;
+                            for (const item of root.querySelectorAll('.item')) {
+                                if (item.textContent.trim() === caption) {
+                                    return item;
+                                }
+                            }
+                            for (const c of root.querySelectorAll('*')) {
+                                if (c.shadowRoot) {
+                                    const sub = search(c.shadowRoot);
+                                    if (sub) return sub;
+                                }
+                            }
+                            return null;
+                        }
+                        return search(host.shadowRoot);
+                        """, $(SpreadsheetElement.class).first(), caption);
+    }
+
     public void clickItem(String caption) {
-        try {
-            new Actions(getDriver()).click(getDriver().findElement(
-                    By.xpath("//div[@class='popupContent']//*[text()='"
-                            + caption + "']")))
-                    .perform();
-        } catch (NoSuchElementException ex) {
-            throw new RuntimeException("Menu item '" + caption + "' not found",
-                    ex);
+        WebElement item = findMenuItem(caption);
+        if (item == null) {
+            throw new RuntimeException("Menu item '" + caption + "' not found");
         }
+        new Actions(getDriver()).click(item).perform();
     }
 
     public boolean hasOption(String caption) {
-        return getDriver().findElements(By.xpath(
-                "//div[@class='popupContent']//*[text()='" + caption + "']"))
-                .size() != 0;
+        return findMenuItem(caption) != null;
     }
 
     public List<WebElement> getGroupings() {

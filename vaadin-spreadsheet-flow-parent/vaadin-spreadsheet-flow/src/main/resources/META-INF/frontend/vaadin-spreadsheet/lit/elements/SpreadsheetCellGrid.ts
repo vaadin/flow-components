@@ -409,7 +409,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * context menu so the server-side {@code ContextMenu} is the
    * only menu shown. Slice 166.
    */
-  private readonly handleShadowContextMenu = (e: Event): void => {
+  private readonly handleShadowContextMenu = (event: Event): void => {
+    const e = event as MouseEvent;
     const target = e.target;
     if (!(target instanceof Element)) {
       return;
@@ -426,7 +427,7 @@ export class SpreadsheetCellGrid extends LitElement {
     e.preventDefault();
     this.dispatchEvent(
       new CustomEvent('cell-contextmenu', {
-        detail: { col, row },
+        detail: { col, row, clientX: e.clientX, clientY: e.clientY },
         bubbles: true,
         composed: true
       })

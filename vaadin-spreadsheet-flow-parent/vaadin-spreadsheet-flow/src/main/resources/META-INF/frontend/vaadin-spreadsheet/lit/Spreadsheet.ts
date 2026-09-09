@@ -51,6 +51,7 @@ import {
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
+import { emptyContextMenuRenderState, SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -270,6 +271,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private pendingRenderFrame: number | null = null;
 
+  /** The context menu shown on right-click. Empty until the server answers. */
+  private readonly contextMenu: SpreadsheetContextMenu;
+
+  /**
+   * Viewport position of the most recent right-click, so `showActions` can
+   * place the menu where the user clicked. The contextmenu event and the
+   * server's answer arrive in separate turns.
+   */
+  private lastContextMenuPosition: { x: number; y: number } = { x: 0, y: 0 };
+
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
 
@@ -389,6 +400,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.headerCorner = document.createElement('div');
     this.sheetTabs = new SpreadsheetSheetTabs();
     this.formulaBar = new SpreadsheetFormulaBar();
+    this.contextMenu = new SpreadsheetContextMenu();
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
     // intrinsic height. Slice 154. Existing host width/height
@@ -456,6 +468,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // ahead of the scroll container in DOM order.
     this.formulaBar.style.flex = '0 0 auto';
     this.renderTarget.appendChild(this.formulaBar);
+    this.renderTarget.appendChild(this.contextMenu);
     this.formulaBar.addEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
     this.renderTarget.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
@@ -491,6 +504,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // its selection + re-renders. Bubble + composed = true so the
     // event crosses the cell-grid's shadow DOM boundary.
     this.cellGrid.addEventListener('cell-click', this.handleCellClick as EventListener);
+    this.contextMenu.addEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
+    document.addEventListener('pointerdown', this.handleDocumentPointerDown);
+    document.addEventListener('keydown', this.handleContextMenuKeyDown);
     // Cell editor lifecycle events (slice 152). The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
@@ -709,8 +725,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * selection, leave the selection alone and dispatch the event
    * with the clicked cell's coordinates.
    */
-  private readonly handleCellContextMenu = (e: CustomEvent<{ col: number; row: number }>): void => {
+  private readonly handleCellContextMenu = (
+    e: CustomEvent<{ col: number; row: number; clientX?: number; clientY?: number }>
+  ): void => {
     const { col, row } = e.detail;
+    this.rememberContextMenuPosition(e.detail);
     if (!isCellInSelection(col, row, this.selection)) {
       this.selection = selectSingleCell(col, row);
       this.extendCol = col;
@@ -735,8 +754,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * whole column (Excel behavior) then dispatches
    * {@code columnHeaderContextMenuOpen}.
    */
-  private readonly handleColumnHeaderContextMenu = (e: CustomEvent<{ col: number }>): void => {
+  private readonly handleColumnHeaderContextMenu = (
+    e: CustomEvent<{ col: number; clientX?: number; clientY?: number }>
+  ): void => {
     const { col } = e.detail;
+    this.rememberContextMenuPosition(e.detail);
     const rows = this.rows > 0 ? this.rows : 1;
     this.selection = {
       activeCell: { col, row: 1 },
@@ -764,8 +786,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * variant — selects the whole row then dispatches
    * {@code rowHeaderContextMenuOpen}.
    */
-  private readonly handleRowHeaderContextMenu = (e: CustomEvent<{ row: number }>): void => {
+  private readonly handleRowHeaderContextMenu = (
+    e: CustomEvent<{ row: number; clientX?: number; clientY?: number }>
+  ): void => {
     const { row } = e.detail;
+    this.rememberContextMenuPosition(e.detail);
     const cols = this.cols > 0 ? this.cols : 1;
     this.selection = {
       activeCell: { col: 1, row },
@@ -1613,6 +1638,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.removeEventListener('cut', this.handleCut as EventListener);
     this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
     this.cellGrid.removeEventListener('cell-click', this.handleCellClick as EventListener);
+    this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
+    document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
+    document.removeEventListener('keydown', this.handleContextMenuKeyDown);
     this.cellGrid.removeEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
     this.cellGrid.removeEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.removeEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
@@ -2039,6 +2067,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.cellDataByKey;
   }
 
+  /** Test-only accessor: the context menu shown on right-click. */
+  getContextMenu(): SpreadsheetContextMenu {
+    return this.contextMenu;
+  }
+
   /** Test-only accessor: the cell-grid sub-element this connector owns. */
   getCellGrid(): SpreadsheetCellGrid {
     return this.cellGrid;
@@ -2239,9 +2272,75 @@ export class Spreadsheet implements SpreadsheetClientApi {
       formula: cellValue
     };
   }
-  showActions(_actionDetails: SpreadsheetActionDetails[]): void {
-    // TODO Phase 3.5 — show context menu / actions popup.
+  showActions(actionDetails: SpreadsheetActionDetails[]): void {
+    this.contextMenu.renderState = {
+      open: true,
+      x: this.lastContextMenuPosition.x,
+      y: this.lastContextMenuPosition.y,
+      actions: actionDetails ?? []
+    };
   }
+
+  /**
+   * Note where a right-click landed. The menu is placed here once the server
+   * answers with the actions it offers.
+   */
+  private rememberContextMenuPosition(detail: { clientX?: number; clientY?: number }): void {
+    this.lastContextMenuPosition = {
+      x: detail.clientX ?? 0,
+      y: detail.clientY ?? 0
+    };
+  }
+
+  /**
+   * Close the context menu and tell the server, unless it is already closed.
+   */
+  private closeContextMenu(): void {
+    if (!this.contextMenu.renderState.open) {
+      return;
+    }
+    this.contextMenu.renderState = emptyContextMenuRenderState();
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'contextMenuClosed', data: {} },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  /** An item was picked: report it against whatever the menu was opened on. */
+  private readonly handleContextMenuAction = (e: CustomEvent<{ key: string; type: number }>): void => {
+    const { key, type } = e.detail;
+    // 0 = cell, 1 = row, 2 = column, matching SpreadsheetActionDetails.
+    const eventType =
+      type === 1 ? 'actionOnRowHeader' : type === 2 ? 'actionOnColumnHeader' : 'actionOnCurrentSelection';
+    this.contextMenu.renderState = emptyContextMenuRenderState();
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: eventType, data: { actionKey: key } },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  /** Any click outside the menu dismisses it, as a native menu would. */
+  private readonly handleDocumentPointerDown = (e: Event): void => {
+    if (!this.contextMenu.renderState.open) {
+      return;
+    }
+    if (e.composedPath().includes(this.contextMenu)) {
+      return;
+    }
+    this.closeContextMenu();
+  };
+
+  private readonly handleContextMenuKeyDown = (e: Event): void => {
+    if ((e as KeyboardEvent).key === 'Escape') {
+      this.closeContextMenu();
+    }
+  };
   setSelectedCellAndRange(
     name: string,
     col: number,
