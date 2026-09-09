@@ -1474,3 +1474,74 @@ describe('SpreadsheetCellGrid — render state updates', () => {
         cleanup(el);
     });
 });
+
+describe('Cell grid — invalid-formula indicator', () => {
+    function stateWith(invalid: string[]): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 3, lastColumnPosition: 150,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 3, lastRowPosition: 60,
+            },
+            colX: [0, 50, 100],
+            rowY: [0, 20, 40],
+            colWidths: [50, 50, 50],
+            rowHeights: [20, 20, 20],
+            invalidFormulaCells: new Set(invalid),
+        };
+    }
+
+    async function attach(state: CellGridRenderState): Promise<SpreadsheetCellGrid> {
+        const el = document.createElement(
+            'vaadin-spreadsheet-internal-cell-grid'
+        ) as SpreadsheetCellGrid;
+        el.renderState = state;
+        document.body.appendChild(el);
+        await el.updateComplete;
+        return el;
+    }
+
+    it('marks a cell whose formula could not be evaluated', async () => {
+        const el = await attach(stateWith(['col2 row2']));
+
+        const marks = el.shadowRoot!.querySelectorAll('.invalidformula-indicator');
+        expect(marks).to.have.length(1);
+        el.remove();
+    });
+
+    it('carries the documented invalid-triangle part', async () => {
+        const el = await attach(stateWith(['col2 row2']));
+
+        const mark = el.shadowRoot!.querySelector('.invalidformula-indicator')!;
+        expect(mark.getAttribute('part')).to.equal('invalid-triangle');
+        el.remove();
+    });
+
+    it('marks every invalid cell, and only those', async () => {
+        const el = await attach(stateWith(['col1 row1', 'col3 row3']));
+
+        expect(el.shadowRoot!.querySelectorAll('.invalidformula-indicator'))
+            .to.have.length(2);
+        el.remove();
+    });
+
+    it('marks nothing when every formula evaluated', async () => {
+        const el = await attach(stateWith([]));
+
+        expect(el.shadowRoot!.querySelectorAll('.invalidformula-indicator'))
+            .to.have.length(0);
+        el.remove();
+    });
+
+    it('sits in the cell top-left, opposite the comment triangle', async () => {
+        const el = await attach(stateWith(['col2 row2']));
+
+        // col 2 starts at x=50, row 2 at y=20.
+        const mark = el.shadowRoot!.querySelector<HTMLElement>('.invalidformula-indicator')!;
+        expect(mark.style.left).to.equal('50px');
+        expect(mark.style.top).to.equal('20px');
+        el.remove();
+    });
+});

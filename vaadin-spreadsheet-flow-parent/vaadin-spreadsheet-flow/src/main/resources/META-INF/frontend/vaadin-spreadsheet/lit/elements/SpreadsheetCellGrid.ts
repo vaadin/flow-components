@@ -178,6 +178,19 @@ export class SpreadsheetCellGrid extends LitElement {
            drawn via border + clip-path so no extra image asset
            is needed. Excel renders red; gnumeric+LibreOffice
            render yellow. We follow Excel. */
+    /* Invalid-formula indicator — Excel draws a small marker in the
+       cell's top-LEFT corner when a formula cannot be evaluated,
+       mirroring the comment triangle in the top-right. */
+    .invalidformula-indicator {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--vaadin-spreadsheet-invalidformula-bg, #d32f2f);
+      clip-path: polygon(0 0, 0 100%, 100% 0);
+      z-index: 5;
+      pointer-events: none;
+    }
+
     .comment-indicator {
       position: absolute;
       width: 8px;
@@ -658,6 +671,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // introduced them).
       const hyperlinkCells = state.hyperlinkCells ?? new Set();
       const commentCells = state.commentCells ?? new Set();
+      const invalidFormulaCells = state.invalidFormulaCells ?? new Set();
       const linkClass = hyperlinkCells.has(key) ? ' link-cell' : '';
       const classList =
         `cell col${col} row${row} quadrant-${quadrantName}` +
@@ -668,6 +682,13 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // Comment indicator — render an additional triangle
       // anchored at the cell's top-right when the cell has
       // a comment. Slice 165.
+      const invalidIndicator = invalidFormulaCells.has(key)
+        ? html`<div
+            class="invalidformula-indicator"
+            part="invalid-triangle"
+            style="left:${left}px;top:${top}px;"
+          ></div>`
+        : '';
       const commentIndicator = commentCells.has(key)
         ? html`<div
             class="comment-indicator"
@@ -687,7 +708,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // for the cell's coordinate when the event bubbles.
       cells.push(html`
         <div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}> ${text} </div>
-        ${commentIndicator}
+        ${invalidIndicator} ${commentIndicator}
       `);
     }
   }

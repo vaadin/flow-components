@@ -2155,6 +2155,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // are keyed by the cell-key format already, so a Set
       // of their keys is the right shape for the render.
       commentCells: new Set(Object.keys(this.cellComments)),
+      invalidFormulaCells: this.invalidFormulaCells,
       hyperlinkCells: new Set(Object.keys(this.hyperlinksTooltips))
     };
   }

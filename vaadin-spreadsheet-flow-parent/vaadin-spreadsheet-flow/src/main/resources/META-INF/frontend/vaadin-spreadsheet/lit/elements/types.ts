@@ -183,6 +183,12 @@ export interface CellGridRenderState {
    * set when no cell has a comment. Slice 165.
    */
   commentCells: ReadonlySet<string>;
+  /**
+   * Cells whose formula the server could not evaluate, keyed by
+   * {@code toKey(col, row)}. Each gets the documented
+   * {@code invalid-triangle} indicator.
+   */
+  invalidFormulaCells: ReadonlySet<string>;
 
   /**
    * Cell keys whose cell is a clickable hyperlink. Click on
@@ -300,6 +306,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     overlays: [],
     popupButtons: [],
     commentCells: new Set(),
+    invalidFormulaCells: new Set(),
     hyperlinkCells: new Set(),
     selection: {
       activeCell: { col: 1, row: 1 },

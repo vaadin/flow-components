@@ -130,6 +130,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         // documented part rather than a class.
         selector = selector.replace(".cell-comment-triangle",
                 "[part~=\"comment-triangle\"]");
+        selector = selector.replace(".cell-invalidformula-triangle",
+                "[part~=\"invalid-triangle\"]");
         // Column grouping outline. GWT rendered .grouping.plus /
         // .grouping.minus buttons inside a .col-group-pane strip; the
         // Lit column header renders one toggle per group carrying its
