@@ -2143,6 +2143,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       colWidths,
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
+      conditionalFormattingStyles: this.conditionalFormattingStyles,
+      shiftedCellBorderStyles: this.shiftedCellBorderStyles,
       mergedRegions: this.mergedRegions,
       selection: this.selection,
       verticalSplitPosition: this.verticalSplitPosition,

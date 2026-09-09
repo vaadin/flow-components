@@ -8,9 +8,12 @@
  */
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
+import type { DirectiveResult } from 'lit/directive.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
+import type { CellData } from '../types/wire.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
@@ -64,6 +67,14 @@ export class SpreadsheetCellGrid extends LitElement {
       border-bottom: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-cell-font, inherit);
       font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
+    }
+
+    /* The server appends an "r" to a cell's class list when the value is
+       right-aligned — numbers and dates under most formats. It rides on
+       the cell class rather than a cs<N> rule because alignment follows
+       the value, not the style index. */
+    .cell.r {
+      text-align: right;
     }
 
     /* Selection overlay: the wrapper .sheet-selection is
@@ -485,15 +496,8 @@ export class SpreadsheetCellGrid extends LitElement {
   };
 
   render(): TemplateResult {
-    const {
-      viewport,
-      cellStyleToCSSStyle,
-      mergedRegions,
-      verticalSplitPosition,
-      horizontalSplitPosition,
-      scrollLeft,
-      scrollTop
-    } = this.renderState;
+    const { viewport, mergedRegions, verticalSplitPosition, horizontalSplitPosition, scrollLeft, scrollTop } =
+      this.renderState;
 
     if (viewport.lastColumnIndex < viewport.firstColumnIndex || viewport.lastRowIndex < viewport.firstRowIndex) {
       // Empty viewport — render an empty host. (The connector
@@ -593,7 +597,7 @@ export class SpreadsheetCellGrid extends LitElement {
       `;
     }
 
-    const styleBlock = buildCellStyleBlock(cellStyleToCSSStyle);
+    const styleBlock = buildCellStyleBlock(this.renderState);
     const mergedOverlays = buildMergedCellOverlays(this.renderState);
     const selectionOverlay = buildSelectionOverlay(this.renderState);
     const editor = buildCellEditorOverlay(this.renderState);
@@ -680,7 +684,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         (cellStyleClass ? ` ${cellStyleClass}` : '') +
         cellRangeClass +
         linkClass;
-      const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+      const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + textColorDeclaration(data);
       // Comment indicator — render an additional triangle
       // anchored at the cell's top-right when the cell has
       // a comment. Slice 165.
@@ -812,7 +816,7 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
       `cell col${region.col1} row${region.row1} merged-cell` +
       (cellStyleClass ? ` ${cellStyleClass}` : '') +
       cellRangeClass;
-    const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+    const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + textColorDeclaration(data);
 
     overlays.push(html` <div class=${classList} style=${style}> ${text} </div> `);
   }
@@ -898,6 +902,20 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
 }
 
 /**
+ * Inline {@code color:} declaration for a cell whose number format names a
+ * colour — `[Red]#,##0` and friends.
+ *
+ * This cannot ride on a `cs<N>` class: the colour depends on the cell's
+ * *value* (a four-part format paints positive, negative, zero and text
+ * differently) while the style index describes the format itself. So the
+ * server resolves it per cell and sends the hex digits without the `#`.
+ */
+function textColorDeclaration(data: CellData | undefined): string {
+  const color = data?.textColor;
+  return color ? `color:#${color};` : '';
+}
+
+/**
  * Build a {@code <style>} TemplateResult containing one rule per
  * entry in {@code cellStyleToCSSStyle}. Each rule has the form
  * {@code .cell.cs<N> { <body> }}. The body is taken verbatim from
@@ -906,9 +924,27 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
  *
  * Returns an empty fragment when the map is empty.
  */
-function buildCellStyleBlock(cellStyleToCSSStyle: Readonly<Record<number, string>>): TemplateResult | string {
-  const entries = Object.entries(cellStyleToCSSStyle);
-  if (entries.length === 0) {
+function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | string {
+  const rules: string[] = [];
+  for (const [index, body] of Object.entries(state.cellStyleToCSSStyle)) {
+    rules.push(`.cell.cs${index} { ${body} }`);
+  }
+  // Conditional formatting after the per-cell styles, and in ascending
+  // key order: a rule that matches beats the cell's own style, and a
+  // later rule beats an earlier one.
+  const conditional = state.conditionalFormattingStyles ?? {};
+  for (const index of Object.keys(conditional)
+    .map(Number)
+    .sort((a, b) => a - b)) {
+    rules.push(`.cell.cf${index} { ${conditional[index]} }`);
+  }
+  // Shifted borders last. These arrive as complete rules selecting
+  // `.col<N>.row<N>`; scope them to cells the way the GWT client did,
+  // which prefixed them with its sheet id.
+  for (const rule of state.shiftedCellBorderStyles ?? []) {
+    rules.push(rule.replace(/\.col/g, '.cell.col'));
+  }
+  if (rules.length === 0) {
     return '';
   }
   // Compose the rules as plain text + use unsafeHTML — Lit's
@@ -917,9 +953,8 @@ function buildCellStyleBlock(cellStyleToCSSStyle: Readonly<Record<number, string
   // this is the same trust boundary the wrapper already exposes
   // (the GWT path emitted these rules via document.createElement
   // ('style') + appendChild).
-  const rules = entries.map(([index, body]) => `.cell.cs${index} { ${body} }`).join('\n');
   return html`<style>
-    ${unsafeHTML(rules)}
+    ${unsafeHTML(rules.join('\n'))}
   </style>`;
 }
 
@@ -1055,42 +1090,53 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
  * render as a placeholder {@code <div class="sheet-overlay
  * sheet-overlay-component" data-overlay-id="...">} pending
  * Vaadin-component slotting in a later slice. Slice 160.
+ *
+ * Keyed on the overlay id. The list arrives from the server's overlay map,
+ * whose iteration order shifts whenever an entry is removed and re-added —
+ * which is what scrolling one out of view and back does. Rendered
+ * positionally, a reordering makes Lit rewrite each {@code <img>} in place,
+ * so every image re-downloads and flickers even though nothing about it
+ * changed. Keyed, Lit moves the existing elements instead.
  */
-function buildSheetOverlays(state: CellGridRenderState): TemplateResult[] {
+function buildSheetOverlays(state: CellGridRenderState): DirectiveResult {
   // Defensive default — some older test fixtures may not
   // declare the overlays array yet (slice 160 introduced it).
   // Real connector pushes always populate the field.
   const overlays = state.overlays ?? [];
-  return overlays.map((overlay) => {
-    const style =
-      `left:${overlay.leftPx}px;top:${overlay.topPx}px;` + `width:${overlay.widthPx}px;height:${overlay.heightPx}px;`;
-    if (overlay.type === 'IMAGE') {
-      const src = overlay.src ?? '';
+  return repeat(
+    overlays,
+    (overlay) => overlay.id,
+    (overlay) => {
+      const style =
+        `left:${overlay.leftPx}px;top:${overlay.topPx}px;` + `width:${overlay.widthPx}px;height:${overlay.heightPx}px;`;
+      if (overlay.type === 'IMAGE') {
+        const src = overlay.src ?? '';
+        return html`
+          <img
+            class="sheet-overlay sheet-overlay-image"
+            data-overlay-id=${overlay.id}
+            data-col=${overlay.col}
+            data-row=${overlay.row}
+            src=${src}
+            style=${style}
+          />
+        `;
+      }
+      // COMPONENT overlay: render a placeholder that a future
+      // slice will replace with the actual Vaadin component
+      // (via slot or appended-child injection from the Flow
+      // wrapper).
       return html`
-        <img
-          class="sheet-overlay sheet-overlay-image"
+        <div
+          class="sheet-overlay sheet-overlay-component"
           data-overlay-id=${overlay.id}
           data-col=${overlay.col}
           data-row=${overlay.row}
-          src=${src}
           style=${style}
-        />
+        ></div>
       `;
     }
-    // COMPONENT overlay: render a placeholder that a future
-    // slice will replace with the actual Vaadin component
-    // (via slot or appended-child injection from the Flow
-    // wrapper).
-    return html`
-      <div
-        class="sheet-overlay sheet-overlay-component"
-        data-overlay-id=${overlay.id}
-        data-col=${overlay.col}
-        data-row=${overlay.row}
-        style=${style}
-      ></div>
-    `;
-  });
+  );
 }
 
 /**

@@ -337,7 +337,8 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
 describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
     function build1x1State(
         cellData: Map<string, CellData>,
-        cellStyleToCSSStyle: Record<number, string>
+        cellStyleToCSSStyle: Record<number, string>,
+        extra: Partial<CellGridRenderState> = {}
     ): CellGridRenderState {
         return {
             viewport: {
@@ -369,9 +370,119 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
             scrollTop: 0,
             editor: null,
             overlays: [],
+            conditionalFormattingStyles: {},
+            shiftedCellBorderStyles: [],
             selection: emptyCellGridRenderState().selection,
+            ...extra,
         };
     }
+
+    /** The one cell of the 1x1 fixture, as the server would send it. */
+    function a1(over: Partial<CellData> = {}): Map<string, CellData> {
+        return new Map([
+            ['col1 row1', { row: 1, col: 1, value: '42', cellStyle: 'cs0', ...over } as CellData],
+        ]);
+    }
+
+    function cellOf(el: SpreadsheetCellGrid): HTMLElement {
+        return el.shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
+    }
+
+    it('paints the colour the number format names on the cell', async () => {
+        // A four-part format paints positive, negative, zero and text
+        // differently, so the colour follows the value and cannot ride on
+        // the cs<N> class. The server resolves it per cell and sends the
+        // hex digits with no leading '#'.
+        const el = await attachWithState(
+            build1x1State(a1({ textColor: '0000FF' }), {})
+        );
+
+        expect(cellOf(el).style.color).to.equal('rgb(0, 0, 255)');
+        cleanup(el);
+    });
+
+    it('leaves the colour alone when the format names none', async () => {
+        const el = await attachWithState(build1x1State(a1(), {}));
+
+        expect(cellOf(el).style.color).to.equal('');
+        cleanup(el);
+    });
+
+    it('right-aligns a cell the server marked with r', async () => {
+        const el = await attachWithState(
+            build1x1State(a1({ cellStyle: 'cs0 r' }), {})
+        );
+
+        const cell = cellOf(el);
+        expect(cell.classList.contains('r')).to.be.true;
+        expect(getComputedStyle(cell).textAlign).to.equal('right');
+        cleanup(el);
+    });
+
+    it('emits conditional-formatting rules after the cell styles', async () => {
+        // A matching rule has to beat the cell's own style, so it must come
+        // later in the sheet.
+        const el = await attachWithState(
+            build1x1State(a1({ cellStyle: 'cs3 cf1' }), { 3: 'color: red;' }, {
+                conditionalFormattingStyles: { 1: 'color: lime;' },
+            })
+        );
+
+        const cssText = Array.from(el.shadowRoot!.querySelectorAll('style'))
+            .map((n) => n.textContent ?? '')
+            .join('\n');
+        expect(cssText).to.include('.cell.cf1 { color: lime; }');
+        expect(cssText.indexOf('.cell.cf1')).to.be.greaterThan(
+            cssText.indexOf('.cell.cs3')
+        );
+        expect(getComputedStyle(cellOf(el)).color).to.equal('rgb(0, 255, 0)');
+        cleanup(el);
+    });
+
+    it('orders conditional-formatting rules by ascending index', async () => {
+        // Excel resolves later rules over earlier ones; equal-specificity
+        // CSS resolves by source order, so the emission order is the
+        // behaviour.
+        const el = await attachWithState(
+            build1x1State(a1({ cellStyle: 'cs0 cf2 cf10' }), {}, {
+                conditionalFormattingStyles: {
+                    10: 'color: lime;',
+                    2: 'color: red;',
+                },
+            })
+        );
+
+        const cssText = Array.from(el.shadowRoot!.querySelectorAll('style'))
+            .map((n) => n.textContent ?? '')
+            .join('\n');
+        expect(cssText.indexOf('.cell.cf2')).to.be.lessThan(
+            cssText.indexOf('.cell.cf10')
+        );
+        cleanup(el);
+    });
+
+    it('scopes shifted cell-border rules to cells and emits them last', async () => {
+        // These arrive as complete rules selecting .col<N>.row<N>; unscoped
+        // they would also match the column headers.
+        const el = await attachWithState(
+            build1x1State(a1(), { 0: 'border-right: 1px solid black;' }, {
+                shiftedCellBorderStyles: [
+                    '.col1.row1 { border-right: 2px solid blue; }',
+                ],
+            })
+        );
+
+        const cssText = Array.from(el.shadowRoot!.querySelectorAll('style'))
+            .map((n) => n.textContent ?? '')
+            .join('\n');
+        expect(cssText).to.include(
+            '.cell.col1.row1 { border-right: 2px solid blue; }'
+        );
+        expect(cssText.indexOf('.cell.col1.row1')).to.be.greaterThan(
+            cssText.indexOf('.cell.cs0')
+        );
+        cleanup(el);
+    });
 
     it('emits a <style> block with the cellStyleToCSSStyle rules', async () => {
         const el = await attachWithState(

@@ -240,6 +240,49 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
+    it('keeps the same <img> element when the overlay map is reordered', async () => {
+        // The server rebuilds its overlay map as a HashMap, so removing and
+        // re-adding one entry — what scrolling an overlay out of view and
+        // back does — can change the iteration order of all of them. Without
+        // a key, Lit rewrites each img's src in place and every image
+        // re-downloads: a visible flicker on an ordinary scroll.
+        const { host, sheet, cleanup } = attachSheet(400, 300);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+        host.setAttribute('resource-a', '/img/a.png');
+        host.setAttribute('resource-b', '/img/b.png');
+        sheet.setResources(host, ['a', 'b']);
+        sheet.setOverlays({
+            a: { type: 'IMAGE', col: 1, row: 1, width: 40, height: 20, dx: 0, dy: 0 },
+            b: { type: 'IMAGE', col: 3, row: 1, width: 40, height: 20, dx: 0, dy: 0 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const find = (id: string) =>
+            sheet.getCellGrid().shadowRoot!.querySelector(
+                `.sheet-overlay-image[data-overlay-id="${id}"]`
+            );
+        const firstA = find('a');
+        const firstB = find('b');
+        expect(firstA).to.not.be.null;
+        expect(firstB).to.not.be.null;
+
+        // Same overlays, opposite insertion order.
+        sheet.setOverlays({
+            b: { type: 'IMAGE', col: 3, row: 1, width: 40, height: 20, dx: 0, dy: 0 },
+            a: { type: 'IMAGE', col: 1, row: 1, width: 40, height: 20, dx: 0, dy: 0 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        expect(find('a')).to.equal(firstA);
+        expect(find('b')).to.equal(firstB);
+        cleanup();
+    });
+
     it('follows the attribute when the server re-mints a resource', async () => {
         // Scrolling an overlay out of view unregisters its stream resource;
         // scrolling back mints a fresh one under the same id. Only the

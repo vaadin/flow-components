@@ -79,6 +79,23 @@ export interface CellGridRenderState {
   cellStyleToCSSStyle: Readonly<Record<number, string>>;
 
   /**
+   * Conditional-formatting rule bodies, keyed by rule index. A cell that
+   * a rule matches carries {@code "cf<index>"} in its {@code cellStyle}.
+   * Emitted after the {@code cs<N>} rules so a matching rule wins over the
+   * cell's own style, and in ascending key order so a later rule wins over
+   * an earlier one — the order Excel resolves them in.
+   */
+  conditionalFormattingStyles: Readonly<Record<number, string>>;
+
+  /**
+   * Complete CSS rules for cells whose borders come from a neighbour —
+   * Excel draws a border once and both cells show it. Each entry already
+   * carries its own selector, written against {@code .col<N>.row<N>}.
+   * Emitted last: a shifted border overrides the cell's own edge.
+   */
+  shiftedCellBorderStyles: ReadonlyArray<string>;
+
+  /**
    * Merged regions that overlap the visible viewport. Slice 137 will
    * render these as larger cells overlaying the underlying single-
    * cell grid; slice 132's minimal render ignores them.
@@ -291,6 +308,8 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     colWidths: [],
     rowHeights: [],
     cellStyleToCSSStyle: {},
+    conditionalFormattingStyles: {},
+    shiftedCellBorderStyles: [],
     mergedRegions: [],
     verticalSplitPosition: 0,
     horizontalSplitPosition: 0,
