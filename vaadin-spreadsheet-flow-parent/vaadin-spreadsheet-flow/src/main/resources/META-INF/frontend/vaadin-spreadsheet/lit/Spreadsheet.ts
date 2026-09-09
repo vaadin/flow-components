@@ -548,6 +548,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // button in the grouping gutter; the connector forwards
     // it as `groupingCollapsed` to the server.
     this.columnHeader.addEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
+    this.rowHeader.addEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
     this.rowHeader.addEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
     // Header-drag resize (slice 164). The header elements
     // emit `column-resize-start` / `row-resize-start` from
@@ -835,6 +836,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
         detail: {
           type: 'groupingCollapsed',
           data: { cols: true, colIndex: uniqueIndex, collapsed }
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  private readonly handleRowGroupingToggle = (e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>): void => {
+    const { uniqueIndex, collapsed } = e.detail;
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: {
+          type: 'groupingCollapsed',
+          data: { cols: false, colIndex: uniqueIndex, collapsed }
         },
         bubbles: true,
         composed: true
@@ -1700,6 +1715,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.handleColumnHeaderContextMenu as EventListener
     );
     this.columnHeader.removeEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
+    this.rowHeader.removeEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
     this.rowHeader.removeEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
     document.removeEventListener('mouseup', this.handleDocumentMouseUp);
     document.removeEventListener('mousemove', this.handleDocumentMouseMove);
@@ -1926,19 +1942,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Row-header strip (slice 144). Same opt-in gate as column
     // header — headerColumnWidth must be > 0 to render.
     if (this.headerColumnWidth > 0) {
-      this.rowHeader.style.width = `${this.headerColumnWidth}px`;
+      // Row groupings mirror the column ones; heights come from the same
+      // point-to-pixel conversion the grid uses.
+      const ppi = FALLBACK_PPI;
+      const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
+      const rowHeightsPx: number[] = [];
+      for (let r = 0; r < this.rowHeights.length; r++) {
+        rowHeightsPx.push(convertPointsToPixel(this.rowHeights[r], ppi));
+      }
+      const rowGroupings = computePositionedColGroupings(
+        this.rowGroupingData,
+        rowHeightsPx,
+        this.rowGroupingInversed,
+        defaultRowHeightPx
+      );
+      const rowGutterPx = this.rowGroupingMax * 16;
+      this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
       this.rowHeader.renderState = {
         viewport: state.viewport,
         rowY: state.rowY,
         rowHeights: state.rowHeights,
-        headerWidth: this.headerColumnWidth,
+        headerWidth: this.headerColumnWidth + rowGutterPx,
         totalGridHeightPx: state.totalGridHeightPx,
         // Slice 173: feed the selected-rows set so the
         // header can emit `part="row-header
         // header-selected"` on rows inside the active
         // range.
-        selectedRows: selectedRowSet(this.selection)
+        selectedRows: selectedRowSet(this.selection),
+        rowGroupings,
+        rowGroupingMax: this.rowGroupingMax,
+        rowGroupingInversed: this.rowGroupingInversed
       };
     }
     // Header corner (slice 145). Sized only when BOTH header

@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import {
     SpreadsheetRowHeader,
     emptyRowHeaderRenderState,
@@ -353,5 +354,159 @@ describe('SpreadsheetRowHeader — re-renders on renderState reassignment', () =
         expect(cells[1].textContent?.trim()).to.equal('101');
 
         cleanup(el);
+    });
+});
+
+describe('Row header — grouping outline', () => {
+    function stateWithGroupings(opts: {
+        max: number;
+        inversed?: boolean;
+        groupings: { uniqueIndex: number; level: number; startPx: number;
+                     endPx: number; buttonPx: number; collapsed: boolean }[];
+    }): RowHeaderRenderState {
+        return {
+            ...emptyRowHeaderRenderState(),
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 1, lastColumnPosition: 0,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 4, lastRowPosition: 80,
+            },
+            rowY: [0, 20, 40, 60],
+            rowHeights: [20, 20, 20, 20],
+            headerWidth: 40 + opts.max * 16,
+            totalGridHeightPx: 80,
+            rowGroupings: opts.groupings,
+            rowGroupingMax: opts.max,
+            rowGroupingInversed: opts.inversed ?? false,
+        };
+    }
+
+    const oneGroup = [{ uniqueIndex: 3, level: 1, startPx: 20, endPx: 60,
+                        buttonPx: 4, collapsed: false }];
+
+    it('draws a line and a toggle for each grouping', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+
+        expect(el.shadowRoot!.querySelectorAll('.row-grouping-line')).to.have.length(1);
+        expect(el.shadowRoot!.querySelectorAll('.row-grouping-toggle')).to.have.length(1);
+        cleanup(el);
+    });
+
+    it('shows minus when expanded and plus when collapsed', async () => {
+        const expanded = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+        expect(expanded.shadowRoot!.querySelector('.row-grouping-toggle')!.textContent!.trim())
+            .to.equal('−');
+        cleanup(expanded);
+
+        const collapsed = await attachWithState(stateWithGroupings({
+            max: 1,
+            groupings: [{ ...oneGroup[0], collapsed: true }],
+        }));
+        expect(collapsed.shadowRoot!.querySelector('.row-grouping-toggle')!.textContent!.trim())
+            .to.equal('+');
+        cleanup(collapsed);
+    });
+
+    it('carries the collapsed state as a data attribute', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+
+        const toggle = el.shadowRoot!.querySelector('.row-grouping-toggle')!;
+        expect(toggle.getAttribute('data-collapsed')).to.equal('false');
+        expect(toggle.getAttribute('data-unique-index')).to.equal('3');
+        cleanup(el);
+    });
+
+    it('renders no gutter when there are no grouping levels', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 0, groupings: [] }));
+
+        expect(el.shadowRoot!.querySelectorAll('.row-grouping-toggle')).to.have.length(0);
+        cleanup(el);
+    });
+
+    it('offsets the row numbers past the gutter', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 2, groupings: oneGroup }));
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.row-header-cell')!;
+        expect(cell.style.left).to.equal('32px');
+        cleanup(el);
+    });
+
+    it('puts the gutter on the right when inversed', async () => {
+        const el = await attachWithState(stateWithGroupings({
+            max: 1, inversed: true, groupings: oneGroup,
+        }));
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.row-header-cell')!;
+        expect(cell.style.left).to.equal('0px');
+        cleanup(el);
+    });
+
+    it('asks to collapse an expanded group when its toggle is clicked', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+        const received: any[] = [];
+        el.addEventListener('row-grouping-toggle', (e) =>
+            received.push((e as CustomEvent).detail));
+
+        el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!.click();
+
+        expect(received).to.have.length(1);
+        expect(received[0]).to.deep.equal({ uniqueIndex: 3, collapsed: true });
+        cleanup(el);
+    });
+
+    it('asks to expand a collapsed group', async () => {
+        const el = await attachWithState(stateWithGroupings({
+            max: 1, groupings: [{ ...oneGroup[0], collapsed: true }],
+        }));
+        const received: any[] = [];
+        el.addEventListener('row-grouping-toggle', (e) =>
+            received.push((e as CustomEvent).detail));
+
+        el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!.click();
+
+        expect(received[0]).to.deep.equal({ uniqueIndex: 3, collapsed: false });
+        cleanup(el);
+    });
+
+    it('does not also report a row-header click', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+        const headerClicks: any[] = [];
+        el.addEventListener('row-header-click', (e) => headerClicks.push(e));
+
+        el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!.click();
+
+        expect(headerClicks).to.have.length(0);
+        cleanup(el);
+    });
+});
+
+describe('Row header — grouping reaches the server', () => {
+    it('forwards a row toggle as a row grouping, not a column one', () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        const received: any[] = [];
+        host.addEventListener('spreadsheet-event', (e) =>
+            received.push((e as CustomEvent).detail));
+
+        sheet.getRowHeader().dispatchEvent(
+            new CustomEvent('row-grouping-toggle', {
+                detail: { uniqueIndex: 5, collapsed: true },
+                bubbles: true,
+                composed: true,
+            })
+        );
+
+        const grouping = received.filter((e) => e.type === 'groupingCollapsed');
+        expect(grouping).to.have.length(1);
+        // cols:false is what distinguishes a row outline from a column one.
+        expect(grouping[0].data).to.deep.equal({
+            cols: false, colIndex: 5, collapsed: true,
+        });
+
+        sheet.dispose();
+        host.remove();
     });
 });

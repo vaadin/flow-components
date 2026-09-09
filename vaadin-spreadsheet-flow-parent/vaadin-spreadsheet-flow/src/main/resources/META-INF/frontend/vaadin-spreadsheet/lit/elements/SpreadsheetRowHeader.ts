@@ -9,6 +9,7 @@
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
 
+import type { PositionedGrouping } from './SpreadsheetColumnHeader.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
 
 /**
@@ -50,6 +51,20 @@ export interface RowHeaderRenderState {
    * public styling API. Slice 173.
    */
   selectedRows: ReadonlySet<number>;
+  /**
+   * Row groupings (outline) with pre-computed pixel positions. Mirrors the
+   * column header's gutter, rotated: the gutter is a column of levels to the
+   * LEFT of the row numbers (or to the right when inversed).
+   */
+  rowGroupings: ReadonlyArray<PositionedGrouping>;
+  /** Number of grouping levels. {@code 0} renders no gutter. */
+  rowGroupingMax: number;
+  /**
+   * When {@code true} the gutter renders to the RIGHT of the row numbers and
+   * each +/- button sits at the END of its range. Excel's "summary columns to
+   * the right" toggle.
+   */
+  rowGroupingInversed: boolean;
 }
 
 /** Helper: build an empty row-header render state. */
@@ -69,7 +84,10 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
     rowHeights: [],
     headerWidth: 0,
     totalGridHeightPx: 0,
-    selectedRows: new Set()
+    selectedRows: new Set(),
+    rowGroupings: [],
+    rowGroupingMax: 0,
+    rowGroupingInversed: false
   };
 }
 
@@ -87,12 +105,46 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
  * Same render-state-driven contract + same no-decorator pattern as
  * the cell-grid + column-header. Slice 144.
  */
+/** Width of one grouping level in the gutter, in pixels. */
+const GROUPING_LEVEL_WIDTH_PX = 16;
+
 export class SpreadsheetRowHeader extends LitElement {
   static properties = {
     renderState: { attribute: false }
   };
 
   static styles = css`
+    /* Grouping outline gutter, mirroring the column header's but
+       rotated: one COLUMN per level beside the row numbers. Each
+       grouping renders one .row-grouping-line spanning
+       startPx..endPx plus one .row-grouping-toggle button. */
+    .row-grouping-line {
+      position: absolute;
+      width: 1px;
+      background: var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      pointer-events: none;
+    }
+
+    .row-grouping-toggle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      line-height: 1;
+      font: inherit;
+      font-size: 10px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--vaadin-spreadsheet-header-bg, #f5f5f5);
+      border: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+    }
+
+    .row-grouping-toggle:hover {
+      background: #e8e8e8;
+    }
+
     :host {
       display: block;
       position: sticky;
@@ -201,6 +253,25 @@ export class SpreadsheetRowHeader extends LitElement {
     if (!(target instanceof Element)) {
       return;
     }
+    // Grouping toggle click — dispatch `row-grouping-toggle` so the
+    // connector can forward `groupingCollapsed`. Stop here so the click is
+    // not also read as a row-header click.
+    const toggle = target.closest<HTMLElement>('.row-grouping-toggle');
+    if (toggle) {
+      const uniqueIndex = Number(toggle.dataset.uniqueIndex);
+      const collapsed = toggle.dataset.collapsed === 'true';
+      if (Number.isFinite(uniqueIndex)) {
+        this.dispatchEvent(
+          new CustomEvent('row-grouping-toggle', {
+            detail: { uniqueIndex, collapsed: !collapsed },
+            bubbles: true,
+            composed: true
+          })
+        );
+      }
+      ev.stopPropagation();
+      return;
+    }
     const cell = target.closest<HTMLElement>('.row-header-cell');
     if (!cell) {
       return;
@@ -225,11 +296,26 @@ export class SpreadsheetRowHeader extends LitElement {
   };
 
   render(): TemplateResult {
-    const { viewport, rowY, rowHeights, headerWidth, selectedRows = new Set<number>() } = this.renderState;
+    const {
+      viewport,
+      rowY,
+      rowHeights,
+      headerWidth,
+      selectedRows = new Set<number>(),
+      rowGroupings = [],
+      rowGroupingMax = 0,
+      rowGroupingInversed = false
+    } = this.renderState;
 
     if (headerWidth === 0 || viewport.lastRowIndex < viewport.firstRowIndex) {
       return html``;
     }
+
+    // The gutter takes a fixed slice of the header's width; the numbers
+    // occupy the rest, offset when the gutter is on the left.
+    const gutterWidth = rowGroupingMax * GROUPING_LEVEL_WIDTH_PX;
+    const numbersLeft = rowGroupingInversed ? 0 : gutterWidth;
+    const numbersWidth = Math.max(0, headerWidth - gutterWidth);
 
     const cells: TemplateResult[] = [];
     const handles: TemplateResult[] = [];
@@ -239,7 +325,8 @@ export class SpreadsheetRowHeader extends LitElement {
       if (height === 0) {
         continue;
       }
-      const style = `left:0;top:${top}px;width:${headerWidth}px;height:${height}px;` + `line-height:${height}px;`;
+      const style =
+        `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;` + `line-height:${height}px;`;
       // Slice 173: `part="row-header"` (+ `header-selected`
       // when the row intersects the active selection) mirrors
       // the documented public styling API.
@@ -251,10 +338,33 @@ export class SpreadsheetRowHeader extends LitElement {
         <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
       `);
       // Resize handle on the row's bottom edge (slice 164).
-      const handleStyle = `top:${top + height - 3}px;width:${headerWidth}px;`;
+      const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
       handles.push(html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `);
     }
-    return html`${cells}${handles}`;
+    // One vertical line per grouping plus its +/- toggle, laid out by
+    // level across the gutter.
+    const groupingEls: TemplateResult[] = [];
+    for (const g of rowGroupings) {
+      const levelLeft = rowGroupingInversed
+        ? numbersWidth + (g.level - 1) * GROUPING_LEVEL_WIDTH_PX
+        : (g.level - 1) * GROUPING_LEVEL_WIDTH_PX;
+      const lineStyle =
+        `left:${levelLeft + GROUPING_LEVEL_WIDTH_PX / 2}px;` +
+        `top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx)}px;`;
+      groupingEls.push(html` <div class="row-grouping-line" style=${lineStyle}></div> `);
+      const btnStyle = `left:${levelLeft}px;top:${g.buttonPx}px;`;
+      groupingEls.push(html`
+        <button
+          class="row-grouping-toggle"
+          style=${btnStyle}
+          data-unique-index=${g.uniqueIndex}
+          data-collapsed=${g.collapsed ? 'true' : 'false'}
+        >
+          ${g.collapsed ? '+' : '−'}
+        </button>
+      `);
+    }
+    return html`${groupingEls}${cells}${handles}`;
   }
 }
 
