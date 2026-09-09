@@ -219,11 +219,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private invalidFormulaCells: Set<string> = new Set();
   private overlays: Record<string, OverlayInfo> = {};
   /**
-   * Resource map decoded from {@link setResources} — overlay ID
-   * → image URL. Used at render time to resolve IMAGE-type
-   * overlay sources. Slice 160.
+   * Overlay IDs the server has published a resource for, from
+   * {@link setResources}. The URLs themselves are not kept: they live on
+   * the host as `resource-<id>` attributes and are read at render time by
+   * {@link resolveResources}. Slice 160.
    */
-  private resources: Record<string, string> = {};
+  private resourceKeys: string[] = [];
+  /** The element the `resource-<id>` attributes live on. */
+  private resourceHost: HTMLElement | null = null;
   /**
    * Popup-button states from {@link setPopupButtons}. Slice 161.
    */
@@ -273,7 +276,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Whether the server has been told the connector is live and where the
-   * viewport starts. See {@link announceViewportOnce}.
+   * viewport starts. See {@link announceViewport}.
    */
   private viewportAnnounced = false;
 
@@ -1597,8 +1600,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    *
    * `onConnectorInit` first, so the server marks the next scroll as a full
    * reload rather than diffing against viewport bounds it has never seen.
+   *
+   * Runs once per handshake, not once per connector: {@link setReload}
+   * clears the latch whenever the server discards its sheet state, and the
+   * next completed viewport announces itself again.
    */
-  private announceViewportOnce(): void {
+  private announceViewport(): void {
     if (this.viewportAnnounced) {
       return;
     }
@@ -1677,7 +1684,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportWidth: this.scrollContainer.clientWidth,
       viewportHeight: this.scrollContainer.clientHeight
     });
-    this.announceViewportOnce();
+    this.announceViewport();
   }
 
   /**
@@ -2114,9 +2121,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // widths/heights) + the overlay's dx/dy offset.
     const positionedOverlays = computePositionedOverlays(
       this.overlays,
-      this.resources,
+      this.resolveResources(),
       colWidthForIndex,
-      rowHeightForIndex
+      rowHeightForIndex,
+      ppi
     );
 
     // Compute positioned popup buttons (slice 161). Each
@@ -2168,9 +2176,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.cellDataByKey;
   }
 
-  /** Test-only accessor: resource id to resolved URL. */
+  /** Test-only accessor: resource id to currently resolved URL. */
   getResources(): Readonly<Record<string, string>> {
-    return this.resources;
+    return this.resolveResources();
   }
 
   /** Test-only accessor: the context menu shown on right-click. */
@@ -2230,6 +2238,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
     const { index } = e.detail;
+    if (index === this.sheetIndex) {
+      // Clicking the tab that is already active selects nothing — Excel
+      // does nothing here either. Reporting it anyway makes the server run
+      // `setActiveSheetIndex` on the sheet it is already showing, and that
+      // goes through `reloadActiveSheetData`, which throws away every
+      // overlay, comment, hyperlink, table and popup button `loadCells`
+      // had just loaded.
+      return;
+    }
     // Optimistically reflect the click in the tab strip so the
     // active tab visually moves immediately, without waiting
     // for the server's response. The server's setSheetIndex
@@ -2600,8 +2617,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setRowGroupingInversed(inversed: boolean): void {
     this.rowGroupingInversed = inversed;
   }
+  /**
+   * The server signals that it has thrown away its per-sheet state.
+   *
+   * `Spreadsheet.reloadActiveSheetData` clears the overlay, comment,
+   * hyperlink and custom-component maps and resets its viewport bounds to
+   * -1 before raising this flag. Everything `loadCells` provides is gone on
+   * the server side until the client reports its viewport again, and
+   * `loadCells` only runs off `onSheetScroll`. Repainting alone leaves a
+   * sheet that shows its cells and nothing else — no images, no charts, no
+   * comment markers — for as long as the user does not scroll.
+   *
+   * So clear the handshake latch and let the next completed viewport
+   * announce itself.
+   */
   setReload(triggerReload: boolean): void {
     if (triggerReload) {
+      this.viewportAnnounced = false;
       this.scheduleRender();
     }
   }
@@ -2655,15 +2687,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // resources minted per element rather than plain strings
     // (Spreadsheet.setResource). Resolving them means reading the
     // attributes, not parsing a map out of this argument.
+    this.resourceHost = host;
+    this.resourceKeys = coerceArray<string>(keys);
+    this.scheduleRender();
+  }
+
+  /**
+   * Read the current URL for every published resource id.
+   *
+   * Deliberately re-read on every render rather than cached when the key
+   * list arrives. Scrolling an overlay out of view unregisters its stream
+   * resource, and scrolling back mints a fresh one under the same id: the
+   * attribute changes while the key list does not, so there is no property
+   * push to cache on. A cached URL would point at a registration the
+   * server has already dropped, and the image would 404.
+   */
+  private resolveResources(): Record<string, string> {
+    const host = this.resourceHost;
+    if (host === null) {
+      return {};
+    }
     const resolved: Record<string, string> = {};
-    for (const key of coerceArray<string>(keys)) {
+    for (const key of this.resourceKeys) {
       const url = host.getAttribute(`resource-${key}`);
       if (url) {
         resolved[key] = url;
       }
     }
-    this.resources = resolved;
-    this.scheduleRender();
+    return resolved;
   }
   setPopupButtons(popupButtons: PopupButtonState[]): void {
     // Store the raw popup-button list. The connector computes
@@ -2964,6 +3015,12 @@ export function computePositionedPopupButtons(
  * position is `anchor cell's left/top` (cumulative sums of col/
  * row sizes 1..anchor-1) + the overlay's `dx`/`dy` offset.
  *
+ * The two axes do not share a unit. POI measures anything vertical in
+ * points, so `height` and `dy` are points while `width` and `dx` are
+ * already pixels — the same split the row heights come through with.
+ * Treating the vertical pair as pixels makes every overlay 25% too short
+ * and seats it too high.
+ *
  * Pure (no DOM, no instance state) so it's straightforward to
  * unit-test in isolation. Slice 160.
  */
@@ -2971,7 +3028,8 @@ export function computePositionedOverlays(
   overlays: Record<string, OverlayInfo>,
   resources: Record<string, string>,
   colWidth: (col: number) => number,
-  rowHeight: (row: number) => number
+  rowHeight: (row: number) => number,
+  ppi: number = FALLBACK_PPI
 ): PositionedOverlay[] {
   const result: PositionedOverlay[] = [];
   for (const [id, info] of Object.entries(overlays)) {
@@ -2990,9 +3048,9 @@ export function computePositionedOverlays(
       type: info.type,
       src: info.type === 'IMAGE' ? resources[id] : undefined,
       leftPx: left + info.dx,
-      topPx: top + info.dy,
+      topPx: top + convertPointsToPixel(info.dy, ppi),
       widthPx: info.width,
-      heightPx: info.height
+      heightPx: convertPointsToPixel(info.height, ppi)
     };
     result.push(positioned);
   }

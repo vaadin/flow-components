@@ -50,7 +50,8 @@ describe('computePositionedOverlays — anchor positioning', () => {
         expect(result[0].leftPx).to.equal(100);
         expect(result[0].topPx).to.equal(20);
         expect(result[0].widthPx).to.equal(100);
-        expect(result[0].heightPx).to.equal(60);
+        // 60pt at 96 ppi = 80px. Height arrives in points; width does not.
+        expect(result[0].heightPx).to.equal(80);
     });
 
     it('adds dx/dy offset to the anchor position', () => {
@@ -58,8 +59,35 @@ describe('computePositionedOverlays — anchor positioning', () => {
             img1: { type: 'IMAGE', col: 2, row: 2, width: 100, height: 60, dx: 7, dy: 11 },
         };
         const result = computePositionedOverlays(overlays, {}, uniformWidth, uniformHeight);
+        // dx is pixels, dy is points — 11pt at 96 ppi truncates to 14px.
         expect(result[0].leftPx).to.equal(50 + 7);
-        expect(result[0].topPx).to.equal(20 + 11);
+        expect(result[0].topPx).to.equal(20 + 14);
+    });
+
+    it('reads the vertical measurements as points and the horizontal as pixels', () => {
+        // POI hands out anything vertical in points, the way row heights
+        // arrive. Applying `height` as pixels renders every overlay a
+        // quarter too short: a square icon comes out 20x15.
+        const overlays: Record<string, OverlayInfo> = {
+            icon: { type: 'IMAGE', col: 1, row: 1, width: 20, height: 15, dx: 0, dy: 0 },
+        };
+        const result = computePositionedOverlays(overlays, {}, uniformWidth, uniformHeight);
+
+        expect(result[0].widthPx).to.equal(20);
+        expect(result[0].heightPx).to.equal(20);
+    });
+
+    it('honours a measured ppi over the 96 fallback', () => {
+        const overlays: Record<string, OverlayInfo> = {
+            icon: { type: 'IMAGE', col: 1, row: 1, width: 20, height: 15, dx: 0, dy: 30 },
+        };
+        const result = computePositionedOverlays(
+            overlays, {}, uniformWidth, uniformHeight, 144
+        );
+
+        // 15pt at 144 ppi = 30px; 30pt = 60px.
+        expect(result[0].heightPx).to.equal(30);
+        expect(result[0].topPx).to.equal(60);
     });
 
     it('resolves IMAGE src from the resources map', () => {
@@ -212,6 +240,47 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
+    it('follows the attribute when the server re-mints a resource', async () => {
+        // Scrolling an overlay out of view unregisters its stream resource;
+        // scrolling back mints a fresh one under the same id. Only the
+        // attribute changes — the key list is identical, so there is no
+        // property push. A URL cached when the keys arrived would point at a
+        // registration the server has already dropped and the image 404s.
+        const { host, sheet, cleanup } = attachSheet(300, 200);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
+        sheet.setOverlays({
+            img1: { type: 'IMAGE', col: 1, row: 1, width: 80, height: 40, dx: 0, dy: 0 },
+        });
+        host.setAttribute('resource-img1', '/dynamic/resource/0/first/');
+        sheet.setResources(host, ['img1']);
+        sheet.recomputeViewport();
+        expect(sheet.getCellGrid().renderState.overlays[0].src)
+            .to.equal('/dynamic/resource/0/first/');
+
+        host.setAttribute('resource-img1', '/dynamic/resource/0/second/');
+        sheet.recomputeViewport();
+
+        expect(sheet.getResources().img1).to.equal('/dynamic/resource/0/second/');
+        expect(sheet.getCellGrid().renderState.overlays[0].src)
+            .to.equal('/dynamic/resource/0/second/');
+        cleanup();
+    });
+
+    it('drops a resource whose attribute the server removed', () => {
+        const { host, sheet, cleanup } = attachSheet(300, 200);
+        host.setAttribute('resource-img1', '/img/photo.png');
+        sheet.setResources(host, ['img1']);
+        expect(sheet.getResources().img1).to.equal('/img/photo.png');
+
+        host.removeAttribute('resource-img1');
+
+        expect(sheet.getResources()).to.deep.equal({});
+        cleanup();
+    });
+
     it('cell-grid renders <img.sheet-overlay-image> for each IMAGE overlay', async () => {
         const { host, sheet, cleanup } = attachSheet(300, 200);
         sheet.setRows(10);
@@ -278,11 +347,12 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
             '.sheet-overlay-image'
         ) as HTMLElement;
         // col 3 = sum of widths 1..2 = 100. row 2 = height of row 1 = 20.
-        // + dx=5, dy=3 → leftPx=105, topPx=23.
+        // dx=5 is already pixels; dy=3 and height=40 are points, so at 96
+        // ppi they become 4px and 53px.
         expect(overlay.style.left).to.equal('105px');
-        expect(overlay.style.top).to.equal('23px');
+        expect(overlay.style.top).to.equal('24px');
         expect(overlay.style.width).to.equal('80px');
-        expect(overlay.style.height).to.equal('40px');
+        expect(overlay.style.height).to.equal('53px');
         cleanup();
     });
 

@@ -30,6 +30,20 @@ public class ImageIT extends AbstractSpreadsheetIT {
         open();
         loadFile("picture_sheet.xlsx");
         spreadsheet = $(SpreadsheetElement.class).first();
+        waitForImages();
+    }
+
+    /**
+     * Wait for the sheet's images to arrive.
+     *
+     * Loading a file returns once the cells are on screen; overlays are sent on
+     * a later roundtrip, so nothing is there to measure yet.
+     * {@code pictureType2_width} already waits like this after scrolling — the
+     * same wait is needed after the initial load.
+     */
+    private void waitForImages() {
+        waitUntil(d -> !findElementsInShadowRoot(
+                By.cssSelector(".sheet-overlay-image")).isEmpty());
     }
 
     @Test
@@ -90,6 +104,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     @Test
     public void shouldUpdateImageURIOnReattach() {
         loadFile("group_image.xlsx");
+        waitForImages();
         var image = findElementInShadowRoot(
                 By.cssSelector(cellToCSS("D3") + " img"));
         var originalSrc = image.getAttribute("src");
@@ -98,8 +113,18 @@ public class ImageIT extends AbstractSpreadsheetIT {
 
         // Scroll back to top so the image is reattached
         spreadsheet.scroll(0);
-        image = waitUntil(e -> findElementInShadowRoot(
-                By.cssSelector(cellToCSS("D3") + " img")));
+        // The image element comes back as soon as the client repaints, still
+        // carrying the URL of the registration the server dropped on the way
+        // out. Waiting for the element alone samples that stale src; wait for
+        // the re-registered URL to land instead.
+        waitUntil(e -> {
+            var found = findElementsInShadowRoot(
+                    By.cssSelector(cellToCSS("D3") + " img"));
+            return !found.isEmpty()
+                    && !originalSrc.equals(found.get(0).getAttribute("src"));
+        });
+        image = findElementInShadowRoot(
+                By.cssSelector(cellToCSS("D3") + " img"));
 
         var newSrc = image.getAttribute("src");
         Assert.assertNotEquals(

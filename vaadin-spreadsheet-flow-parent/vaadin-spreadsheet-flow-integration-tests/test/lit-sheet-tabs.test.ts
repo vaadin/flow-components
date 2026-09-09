@@ -232,6 +232,58 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)
         cleanup();
     });
 
+    it('clicking the tab that is already active reports nothing', () => {
+        // The server answers sheetSelected with setActiveSheetIndex, which
+        // runs reloadActiveSheetData even when the index has not moved. That
+        // discards the overlays, comments, hyperlinks, tables and popup
+        // buttons loadCells had just delivered, and only a scroll brings
+        // them back. Excel does nothing when you click the active tab.
+        const { host, sheet, cleanup } = attachSheet(200, 100);
+        sheet.setSheetNames(['Alpha', 'Beta']);
+        sheet.setSheetIndex(1);
+
+        const received: string[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            received.push((e as CustomEvent).detail.type);
+        });
+
+        sheet.getSheetTabs().dispatchEvent(new CustomEvent('sheet-tab-click', {
+            detail: { index: 1 },
+            bubbles: true,
+            composed: true,
+        }));
+
+        expect(received).to.not.include('sheetSelected');
+        expect(sheet.getSheetTabs().renderState.activeIndex).to.equal(1);
+        cleanup();
+    });
+
+    it('still reports a move away from the active tab and back to it', () => {
+        const { host, sheet, cleanup } = attachSheet(200, 100);
+        sheet.setSheetNames(['Alpha', 'Beta']);
+        sheet.setSheetIndex(1);
+
+        const names: unknown[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'sheetSelected') {
+                names.push(detail.data.sheetName);
+            }
+        });
+
+        const click = (index: number) =>
+            sheet.getSheetTabs().dispatchEvent(new CustomEvent('sheet-tab-click', {
+                detail: { index },
+                bubbles: true,
+                composed: true,
+            }));
+        click(2);
+        click(1);
+
+        expect(names).to.deep.equal(['Beta', 'Alpha']);
+        cleanup();
+    });
+
     it('sheet-tab click optimistically updates the active index BEFORE the server responds', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setSheetNames(['Alpha', 'Beta', 'Gamma']);

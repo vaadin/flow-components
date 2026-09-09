@@ -420,13 +420,24 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
-        // Slice 178: force sheet initial focus. The legacy
-        // `.sheet-tabsheet` class doesn't exist in the Lit DOM; click
-        // a tab inside the sheet-tabs element instead — clicking any
-        // tab focuses the spreadsheet.
-        WebElement firstTab = findInLitShadowRoots("[part~=\"tab\"]");
-        if (firstTab != null) {
-            firstTab.click();
+        // Slice 178 gave the sheet its initial focus by clicking the first
+        // sheet tab, standing in for the legacy `.sheet-tabsheet` click.
+        // That is not a focus gesture: it selects a sheet. On a workbook
+        // whose active sheet is not the first one it switched sheets behind
+        // the test, and even on the first one the server answered with a
+        // full `reloadActiveSheetData`, discarding the overlays, comments,
+        // hyperlinks and popup buttons the load had just delivered. Focus
+        // the scroll container directly instead — that is the element the
+        // keyboard handlers live on (tabindex=0, slice 147).
+        focusSheet();
+    }
+
+    /** Give the sheet keyboard focus without touching the selection. */
+    protected void focusSheet() {
+        WebElement scrollContainer = findInLitShadowRoots(".sheet-scroll");
+        if (scrollContainer != null) {
+            ((org.openqa.selenium.JavascriptExecutor) getDriver())
+                    .executeScript("arguments[0].focus();", scrollContainer);
         }
     }
 

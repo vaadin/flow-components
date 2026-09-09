@@ -328,6 +328,58 @@ describe('Spreadsheet startup handshake', () => {
     ctx.cleanup();
   });
 
+  it('announces again when the server says it dropped the sheet state', async () => {
+    // reloadActiveSheetData clears the server's overlay/comment/hyperlink
+    // maps and resets its viewport bounds to -1, then raises the reload
+    // flag. Only onSheetScroll makes it call loadCells again, so without a
+    // second announcement the sheet keeps its cells and loses everything
+    // else until the user happens to scroll.
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+    ctx.events.length = 0;
+
+    ctx.sheet.setReload(true);
+    await afterFrame();
+
+    const types = ctx.events.map((e) => e.type);
+    expect(types).to.include('onConnectorInit');
+    expect(types).to.include('onSheetScroll');
+    expect(types.indexOf('onConnectorInit')).to.be.lessThan(
+      types.indexOf('onSheetScroll')
+    );
+    ctx.cleanup();
+  });
+
+  it('says nothing when the reload flag is lowered rather than raised', async () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+    ctx.events.length = 0;
+
+    ctx.sheet.setReload(false);
+    await afterFrame();
+
+    expect(ctx.events).to.have.length(0);
+    ctx.cleanup();
+  });
+
+  it('re-announces once per reload, not once per following repaint', async () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+    ctx.events.length = 0;
+
+    ctx.sheet.setReload(true);
+    await afterFrame();
+    ctx.sheet.recomputeViewport();
+    ctx.sheet.recomputeViewport();
+
+    const inits = ctx.events.filter((e) => e.type === 'onConnectorInit');
+    expect(inits).to.have.length(1);
+    ctx.cleanup();
+  });
+
   it('waits for a measurable viewport before announcing', () => {
     // A zero-size host measures nothing; announcing then would tell the
     // server an empty range and it would load nothing.
