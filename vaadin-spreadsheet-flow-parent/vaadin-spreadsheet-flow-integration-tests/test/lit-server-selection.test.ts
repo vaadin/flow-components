@@ -206,3 +206,70 @@ describe('Spreadsheet selection overlay — reports where the selection is', () 
     expect(el!.getAttribute('data-row')).to.equal('7');
   });
 });
+
+describe('Formula bar — named ranges', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function box(): Promise<HTMLSelectElement | null> {
+    const bar = ctx.sheet.getFormulaBar();
+    await bar.updateComplete;
+    return bar.shadowRoot!.querySelector<HTMLSelectElement>('.namedrangebox');
+  }
+
+  it('offers one option per named range the workbook defines', async () => {
+    ctx.sheet.setNamedRanges(['Sales', 'Costs']);
+
+    const select = await box();
+    expect(select).to.not.be.null;
+    expect([...select!.options].map((o) => o.textContent!.trim())).to.deep.equal([
+      'Sales',
+      'Costs'
+    ]);
+  });
+
+  it('shows no dropdown when the workbook defines none', async () => {
+    ctx.sheet.setNamedRanges([]);
+
+    expect(await box()).to.be.null;
+  });
+
+  it('accepts the JSON-serialized list the server sends', async () => {
+    ctx.sheet.setNamedRanges(JSON.stringify(['Sales']) as any);
+
+    const select = await box();
+    expect([...select!.options].map((o) => o.value)).to.deep.equal(['Sales']);
+  });
+
+  it('navigates to the range that is picked', async () => {
+    ctx.sheet.setNamedRanges(['Sales', 'Costs']);
+    const select = await box();
+    const received: any[] = [];
+    ctx.sheet.getFormulaBar().addEventListener('sheet-address-changed', (e) =>
+      received.push((e as CustomEvent).detail)
+    );
+
+    select!.value = 'Costs';
+    select!.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+
+    expect(received).to.deep.equal([{ value: 'Costs' }]);
+  });
+
+  it('keeps the address and formula fields alongside it', async () => {
+    ctx.sheet.setNamedRanges(['Sales']);
+    ctx.sheet.showSelectedCell('B2', 2, 2, '=1+1', true, false, false);
+
+    const bar = ctx.sheet.getFormulaBar();
+    await bar.updateComplete;
+    expect(bar.shadowRoot!.querySelector('[part~="address-field"]')).to.not.be.null;
+    expect(bar.shadowRoot!.querySelector('[part~="formula-field"]')).to.not.be.null;
+    expect(bar.shadowRoot!.querySelector('.namedrangebox')).to.not.be.null;
+  });
+});

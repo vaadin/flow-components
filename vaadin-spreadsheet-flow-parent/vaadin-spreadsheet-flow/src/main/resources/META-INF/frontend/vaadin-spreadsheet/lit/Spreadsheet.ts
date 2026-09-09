@@ -2360,7 +2360,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // updated separately by {@link showSelectedCell}.
     this.formulaBar.renderState = {
       address: possibleName,
-      formula: this.formulaBar.renderState.formula
+      formula: this.formulaBar.renderState.formula,
+      namedRanges: this.namedRanges
     };
   }
   invalidCellAddress(): void {
@@ -2380,7 +2381,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // arrow keys server-side.
     this.formulaBar.renderState = {
       address: name,
-      formula: cellValue
+      formula: cellValue,
+      namedRanges: this.namedRanges
     };
   }
   showActions(actionDetails: SpreadsheetActionDetails[]): void {
@@ -2482,7 +2484,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
     this.formulaBar.renderState = {
       address: name,
-      formula: this.formulaBar.renderState.formula
+      formula: this.formulaBar.renderState.formula,
+      namedRanges: this.namedRanges
     };
     if (scroll) {
       this.scrollCellIntoView({ col, row });
@@ -2634,6 +2637,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   setNamedRanges(names: string[]): void {
     this.namedRanges = coerceArray(names);
+    // Refresh the bar directly: the named-range list arrives on the property
+    // lane, which repaints the grid but does not rebuild the formula bar.
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      namedRanges: this.namedRanges
+    };
   }
   setResources(_host: HTMLElement, jsonString: string): void {
     // Parse the JSON-serialized resource map (id → URL) so

@@ -30,11 +30,16 @@ export interface FormulaBarRenderState {
   address: string;
   /** Active cell's formula or display value. */
   formula: string;
+  /**
+   * Named ranges defined in the workbook. Rendered as a dropdown beside the
+   * address field; picking one navigates to it. Empty hides the dropdown.
+   */
+  namedRanges: ReadonlyArray<string>;
 }
 
 /** Helper: build an empty formula-bar render state. */
 export function emptyFormulaBarRenderState(): FormulaBarRenderState {
-  return { address: '', formula: '' };
+  return { address: '', formula: '', namedRanges: [] };
 }
 
 /**
@@ -94,6 +99,17 @@ export class SpreadsheetFormulaBar extends LitElement {
       flex: 1 1 auto;
       min-width: 0;
     }
+
+    .namedrangebox {
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      height: 100%;
+      border: 0;
+      border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c0c0c0);
+      background: transparent;
+      font: inherit;
+      color: inherit;
+    }
   `;
 
   declare renderState: FormulaBarRenderState;
@@ -104,6 +120,25 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   firstUpdated(): void {
+    // Picking a named range navigates to it. The server treats it exactly
+    // like typing the name into the address field.
+    this.shadowRoot!.addEventListener('change', (e: Event) => {
+      const target = e.target;
+      if (!(target instanceof HTMLSelectElement)) {
+        return;
+      }
+      if (!target.classList.contains('namedrangebox')) {
+        return;
+      }
+      this.dispatchEvent(
+        new CustomEvent('sheet-address-changed', {
+          detail: { value: target.value },
+          bubbles: true,
+          composed: true
+        })
+      );
+    });
+
     // Slice 175: when the user presses Enter inside the
     // address field, dispatch `sheet-address-changed` with
     // the input's current value. The connector translates
@@ -135,9 +170,18 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   render(): TemplateResult {
-    const { address, formula } = this.renderState;
+    const { address, formula, namedRanges = [] } = this.renderState;
+    // The dropdown only appears once the workbook defines a named range,
+    // matching Excel — an empty picker beside every sheet would be noise.
+    const namedRangeBox =
+      namedRanges.length === 0
+        ? ''
+        : html`<select class="namedrangebox" part="named-range-box">
+            ${namedRanges.map((name) => html`<option value=${name}>${name}</option>`)}
+          </select>`;
     return html`
       <input class="address" part="address-field" .value=${address} />
+      ${namedRangeBox}
       <input class="formula" part="formula-field" .value=${formula} />
     `;
   }
