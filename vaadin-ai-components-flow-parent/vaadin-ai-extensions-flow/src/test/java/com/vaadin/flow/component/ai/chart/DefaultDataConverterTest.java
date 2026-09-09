@@ -808,10 +808,10 @@ class DefaultDataConverterTest {
         }
 
         @Test
-        void sqlTimeXValue_convertedToHighchartsTimestampOnEpochDay() {
+        void sqlTimeXValue_convertedToHighchartsTimestampOnAnchorDay() {
             var time = java.sql.Time.valueOf("12:00:00");
-            var expectedMillis = time.toLocalTime().atDate(LocalDate.EPOCH)
-                    .toInstant(ZoneOffset.UTC).getEpochSecond() * 1000;
+            var expectedMillis = LocalDate.of(2000, 1, 1).atTime(12, 0)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli();
             var data = List
                     .of(row(X, time, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
             var result = (DataSeries) convertSingle(data);

@@ -119,6 +119,17 @@ public class DefaultDataConverter implements DataConverter {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
 
+    /**
+     * Day onto which time-of-day values are placed when converted to a
+     * timestamp. A time of day has no calendar position of its own, so any day
+     * would do for the axis labels. This one is chosen so the values fall
+     * inside the range that {@link ChartRenderer} recognises as timestamps when
+     * it infers a datetime X-axis; values before year 2000 are treated as plain
+     * numbers there.
+     */
+    private static final LocalDate TIME_OF_DAY_ANCHOR = LocalDate.of(2000, 1,
+            1);
+
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
         Objects.requireNonNull(data, "Data must not be null");
@@ -849,10 +860,10 @@ public class DefaultDataConverter implements DataConverter {
 
     /**
      * Converts a value to an {@link Instant}. Handles {@link Instant},
-     * {@link Timestamp}, {@link java.sql.Date}, {@link java.sql.Time} (mapped
-     * onto the epoch day), {@link LocalDate}, {@link LocalDateTime},
-     * {@link Date}, and numeric values (interpreted as milliseconds since
-     * epoch).
+     * {@link Timestamp}, {@link java.sql.Date}, {@link java.sql.Time} (placed
+     * on {@link #TIME_OF_DAY_ANCHOR}), {@link LocalDate},
+     * {@link LocalDateTime}, {@link Date}, and numeric values (interpreted as
+     * milliseconds since epoch).
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
@@ -866,7 +877,7 @@ public class DefaultDataConverter implements DataConverter {
             localDateTime.toInstant(ZoneOffset.UTC);
         // java.sql.Time extends java.util.Date but carries no date, so
         // toInstant() throws UnsupportedOperationException by contract
-        case Time time -> time.toLocalTime().atDate(LocalDate.EPOCH)
+        case Time time -> time.toLocalTime().atDate(TIME_OF_DAY_ANCHOR)
                 .toInstant(ZoneOffset.UTC);
         case Date date -> date.toInstant();
         case Number number -> Instant.ofEpochMilli(number.longValue());
