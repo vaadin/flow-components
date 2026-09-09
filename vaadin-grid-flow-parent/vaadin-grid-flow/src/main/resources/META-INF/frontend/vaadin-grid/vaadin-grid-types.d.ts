@@ -96,7 +96,7 @@ export interface FlowGridInternals {
 }
 
 /** The Flow grid element */
-export type FlowGrid = Grid<Item> & FlowGridInternals;
+export type FlowGrid = FlowGridInternals & Grid<Item>;
 
 /**
  * The private/protected @vaadin/grid API and the Flow-specific API that the
@@ -109,10 +109,11 @@ export interface FlowTreeGridInternals {
   _scrollToFlatIndex(flatIndex: number): void;
   expandItem(item: Item | undefined): void;
   collapseItem(item: Item | undefined): void;
+  scrollToIndex(...indexes: number[]): Promise<number | undefined>;
 }
 
 /** The Flow tree grid element */
-export type FlowTreeGrid = FlowGrid & FlowTreeGridInternals;
+export type FlowTreeGrid = FlowTreeGridInternals & FlowGrid;
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
