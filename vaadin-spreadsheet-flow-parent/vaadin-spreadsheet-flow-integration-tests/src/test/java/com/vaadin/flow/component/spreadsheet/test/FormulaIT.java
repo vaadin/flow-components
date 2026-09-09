@@ -12,7 +12,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -175,8 +174,7 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("A1", "=a");
         selectCell("B1");
 
-        var invalidFormulaIndicator = getCellElement("A1")
-                .findElement(By.className("invalidformula-indicator"));
+        var invalidFormulaIndicator = waitForInvalidFormulaIndicator("A1");
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mousedown', {bubbles:true}))",
                 invalidFormulaIndicator);

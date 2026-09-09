@@ -147,6 +147,9 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         // Set a formula that produces an error
         errorCell.setValue("=XYZ");
 
+        waitUntil(d -> !errorCell
+                .findElements(By.className("invalidformula-indicator"))
+                .isEmpty());
         var errorIndicator = errorCell
                 .findElement(By.className("invalidformula-indicator"));
         assertPartEquals(errorIndicator, "invalid-triangle");

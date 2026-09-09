@@ -438,6 +438,25 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         return getSpreadsheet().getCellAt(row, col);
     }
 
+    /**
+     * Wait for a cell's invalid-formula indicator to appear.
+     *
+     * Committing a cell value returns as soon as the editor closes; whether the
+     * formula was valid is decided on the server and pushed back afterwards, so
+     * the marker cannot be there yet.
+     *
+     * @param cell
+     *            the cell address, e.g. {@code "A1"}
+     * @return the indicator element
+     */
+    public WebElement waitForInvalidFormulaIndicator(String cell) {
+        waitUntil(d -> !getCellElement(cell)
+                .findElements(By.className("invalidformula-indicator"))
+                .isEmpty());
+        return getCellElement(cell)
+                .findElement(By.className("invalidformula-indicator"));
+    }
+
     public WebElement getCellElement(String cell) {
         return findElementInShadowRoot(By.cssSelector(cellToCSS(cell)));
     }
