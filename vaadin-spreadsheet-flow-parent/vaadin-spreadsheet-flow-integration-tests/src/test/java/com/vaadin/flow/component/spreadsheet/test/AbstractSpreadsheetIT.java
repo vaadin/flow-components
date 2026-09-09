@@ -144,6 +144,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 ".row-grouping-toggle[data-collapsed=\"true\"]");
         selector = selector.replace(".row-group-pane .grouping.minus",
                 ".row-grouping-toggle[data-collapsed=\"false\"]");
+        // Frozen-pane quadrants. GWT named them by position; the Lit grid
+        // wraps each frozen quadrant in its own transform container. The
+        // unfrozen quadrant has no wrapper — it is the grid's own cells — so
+        // ".bottom-right-pane" has no equivalent and is left alone.
+        selector = selector.replace(".top-left-pane",
+                ".quadrant-wrapper-corner");
+        selector = selector.replace(".top-right-pane", ".quadrant-wrapper-top");
+        selector = selector.replace(".bottom-left-pane",
+                ".quadrant-wrapper-left");
         // Sheet overlays. GWT rendered a div carrying the anchor cell as
         // .col<N>.row<N> classes; the Lit grid renders an <img> (or a
         // placeholder div for component overlays) carrying the anchor as
