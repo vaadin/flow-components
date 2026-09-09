@@ -147,6 +147,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 ".sheet-overlay[data-col=\"$1\"][data-row=\"$2\"]");
         selector = selector.replaceAll("(?:div)?\\.sheet-image",
                 ".sheet-overlay-image");
+        // GWT nested the image inside its anchor cell, so tests look for
+        // ".col<N>.row<N> img". The Lit grid renders overlays as siblings of
+        // the cells, addressed by the same anchor.
+        selector = selector.replaceAll("\\.col(\\d+)\\.row(\\d+)\\s+img",
+                ".sheet-overlay-image[data-col=\"$1\"][data-row=\"$2\"]");
         return selector;
     }
 
