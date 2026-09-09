@@ -13,7 +13,7 @@ import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js'
  */
 export class ComboBoxConnector {
   readonly #comboBox: FlowComboBox;
-  readonly #placeholder = new window.Vaadin.ComboBoxPlaceholder();
+  readonly #placeholder = new ComboBoxPlaceholder();
 
   #cache: Record<number, Item[]> = {};
 
@@ -48,8 +48,9 @@ export class ComboBoxConnector {
     const filteredItems = comboBox.filteredItems ?? [];
     for (let index = firstPage * pageSize; index < lastPage * pageSize; index++) {
       if (filteredItems[index]) {
-        // The placeholder stands in for an item that is being loaded
-        filteredItems[index] = this.#placeholder as Item;
+        // The placeholder stands in for an item that is being loaded. It is not
+        // an Item, but the combo box expects placeholders in the items array.
+        filteredItems[index] = this.#placeholder as unknown as Item;
       }
     }
   }
