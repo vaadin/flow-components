@@ -40,14 +40,14 @@ final class FormFieldHints {
      * label wins. Populated upfront for fixed-options registrations and as each
      * query-callback batch arrives for query-mode registrations. Iteration
      * order is insertion order. Reset at each
-     * {@link FormAIController#onRequest()} turn boundary; non-{@code null}
+     * {@link FormAIController#onRequest} turn boundary; non-{@code null}
      * whenever {@link #valueOptionsQuery} is set.
      */
     Map<String, Object> valueOptionsItems;
     /**
      * Item-to-label function used to render the field's current value and to
      * compute the keys in {@link #valueOptionsItems}. Captured at each
-     * {@link FormAIController#onRequest()} from the explicit
+     * {@link FormAIController#onRequest} from the explicit
      * {@link ValueOptions#itemLabelGenerator(com.vaadin.flow.component.ItemLabelGenerator)}
      * if set, otherwise from the field's own {@code getItemLabelGenerator()}
      * (read reflectively), otherwise {@link String#valueOf(Object)}. Stable
@@ -66,10 +66,10 @@ final class FormFieldHints {
      * {@link #itemLabelGenerator} from the registration's captured config
      * (fixed list or query callback, explicit labeler or field reference).
      * Invoked once at registration so the schema works before the first turn,
-     * and again at each {@link FormAIController#onRequest()} so a labeler
-     * change on the field between turns is picked up and the query-mode map
-     * starts each turn empty. {@code null} when no value-options registration
-     * exists for this field.
+     * and again at each {@link FormAIController#onRequest} so a labeler change
+     * on the field between turns is picked up and the query-mode map starts
+     * each turn empty. {@code null} when no value-options registration exists
+     * for this field.
      */
     Runnable valueOptionsTurnSetup;
     boolean ignored;

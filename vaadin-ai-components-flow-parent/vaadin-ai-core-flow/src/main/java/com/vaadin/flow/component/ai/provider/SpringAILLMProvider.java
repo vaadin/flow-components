@@ -216,7 +216,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * the assistant placeholder render, and the response is added when it
      * arrives.
      * <p>
-     * This requires three things from the application:
+     * This requires the following from the application:
      * <ul>
      * <li><b>A way to deliver the response.</b> Annotate the application shell
      * or UI class with {@code @Push}, or enable polling with
@@ -228,20 +228,18 @@ public class SpringAILLMProvider implements LLMProvider {
      * Security's {@code SecurityContext} are not bound, and UI components must
      * not be accessed directly. Wrap component access in {@code ui.access()},
      * or capture what you need in
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest},
      * which still runs on the UI thread. This is the same requirement streaming
      * mode already has.</li>
-     *
-     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
-     * time. Without background execution, a message submitted while a turn is
-     * running waits for the session lock and is processed when the turn ends;
-     * with it, the submit is rejected and dropped with a warning — and a
-     * connected input has already cleared its text. Disable the input while a
-     * turn is running, for example from
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
-     * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(ResponseListener.ResponseEvent)}.</li>
      * </ul>
+     *
+     * <p>
+     * The orchestrator processes one prompt at a time. Without background
+     * execution, a message submitted while a turn is running waits for the
+     * session lock and is processed when the turn ends; with it, the submit is
+     * rejected and dropped with a warning — and a connected input has already
+     * cleared its text.
+     * </p>
      *
      * <p>
      * Like the streaming mode, the setting is not preserved when the session is

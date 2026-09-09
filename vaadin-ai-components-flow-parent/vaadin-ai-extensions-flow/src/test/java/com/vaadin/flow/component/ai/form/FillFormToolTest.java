@@ -11,6 +11,7 @@ package com.vaadin.flow.component.ai.form;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.executeQueryFieldOptions;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -1282,7 +1283,7 @@ class FillFormToolTest {
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("Premium", "Basic"))
                 .itemLabelGenerator(s -> s.substring(0, 1)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"P\""));
 
@@ -1302,7 +1303,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1406,7 +1407,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
 
@@ -1431,7 +1432,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo, vega)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller,
                 payload(field, "[\"Apollo\", \"Vega\"]"));
@@ -1530,7 +1531,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(existing)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "[]"));
 
@@ -1551,7 +1552,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1577,7 +1578,7 @@ class FillFormToolTest {
                 ValueOptions.forField(field).options(List.of(first)));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(second)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
 
         var result = fillFormResult(controller, payload(field, "[\"Second\"]"));
@@ -1600,7 +1601,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(first, dup)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1620,14 +1621,14 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         fillFormResult(controller, payload(field, "\"Apollo\""));
         Assertions.assertEquals(apollo, field.getValue(),
                 "Turn 1 must resolve via Project::name");
 
         field.setValue(null);
         field.setItemLabelGenerator(Project::code);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         var result = fillFormResult(controller, payload(field, "\"APL\""));
 
         Assertions.assertEquals(apollo, field.getValue(),
@@ -1646,7 +1647,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1673,7 +1674,7 @@ class FillFormToolTest {
                         .filter(p -> p.name().toLowerCase()
                                 .contains(filter.toLowerCase()))
                         .limit(limit).toList()));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "Apo", 10);
         executeQueryFieldOptions(controller, field, "Veg", 10);
 
@@ -1696,14 +1697,14 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
         fillFormResult(controller, payload(field, "\"Apollo\""));
         Assertions.assertEquals(apollo, field.getValue(),
                 "Turn 1 must fill after the query populates the cache");
 
         field.setValue(null);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
         Assertions.assertNull(field.getValue(),
@@ -1728,7 +1729,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(versions.get())));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
         versions.set(second);
         executeQueryFieldOptions(controller, field, "", 10);
@@ -1753,7 +1754,7 @@ class FillFormToolTest {
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(1, 10))
                         .itemLabelGenerator(v -> v == 1 ? "low" : "high"));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"high\""));
 
@@ -1811,7 +1812,7 @@ class FillFormToolTest {
         var detachedForm = new Div(field);
         // No ui.add(detachedForm) — form is intentionally detached.
         var controller = new FormAIController(detachedForm);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
 
@@ -2006,7 +2007,7 @@ class FillFormToolTest {
         var controller = newController(fields);
         // Drive onRequest() so each discovered field has its UUID id
         // stamped — payload helpers use idOf() to look the id up.
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         return controller;
     }
 
@@ -2028,7 +2029,7 @@ class FillFormToolTest {
         var form = new Div(fields);
         ui.add(form);
         var controller = new FormAIController(form, binder);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         return controller;
     }
 
