@@ -57,7 +57,9 @@ public class DateTimePickerElement extends TestBenchElement
         if (dateTime == null) {
             setValue("");
         } else {
-            setValue(dateTime.toString());
+            // Date time needs to be truncated to millisecond precision,
+            // otherwise the web component will not update the value
+            setValue(dateTime.truncatedTo(ChronoUnit.MILLIS).toString());
         }
     }
 

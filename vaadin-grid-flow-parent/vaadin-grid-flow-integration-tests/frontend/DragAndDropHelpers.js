@@ -25,7 +25,11 @@ window.fireDragStart = (draggable) => {
     setDragImage: () => {},
     setData: (type, data) => (dragData[type] = data)
   };
-  if (draggable.getAttribute('draggable') === 'true') {
+  const isDraggable = draggable.hasAttribute('draggable')
+    ? draggable.draggable
+    : draggable.getAttribute('draggable-source') === 'true';
+
+  if (isDraggable) {
     draggable.dispatchEvent(event);
   }
 };

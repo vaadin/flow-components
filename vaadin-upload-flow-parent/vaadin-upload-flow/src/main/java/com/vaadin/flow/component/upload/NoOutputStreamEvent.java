@@ -17,6 +17,8 @@ package com.vaadin.flow.component.upload;
 
 /**
  * FailedEvent that indicates that an output stream could not be obtained.
+ * 
+ * @since 1.0
  */
 public class NoOutputStreamEvent extends FailedEvent {
 

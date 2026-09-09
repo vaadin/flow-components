@@ -23,6 +23,8 @@ import com.vaadin.flow.component.map.configuration.style.TextStyle;
 /**
  * A geographic feature to be displayed on a map. A feature represents a point
  * of interest, such as an address, a building, a vehicle, or any other entity.
+ * 
+ * @since 23.0
  */
 public abstract class Feature extends AbstractConfigurationObject {
 
@@ -89,6 +91,7 @@ public abstract class Feature extends AbstractConfigurationObject {
      * The text that should be displayed next to the feature.
      *
      * @return the text string
+     * @since 24.1
      */
     public String getText() {
         return text;
@@ -100,6 +103,7 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @param text
      *            the new text string, or {@code null} to remove the text
+     * @since 24.1
      */
     public void setText(String text) {
         this.text = text;
@@ -113,6 +117,7 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @return the custom text style, or {@code null} if no custom text style
      *         has been set
+     * @since 24.1
      */
     public TextStyle getTextStyle() {
         return style != null ? style.getTextStyle() : null;
@@ -131,6 +136,7 @@ public abstract class Feature extends AbstractConfigurationObject {
      * @param textStyle
      *            the new custom text style, or {@code null} to remove the
      *            custom text style
+     * @since 24.1
      */
     public void setTextStyle(TextStyle textStyle) {
         if (style == null && textStyle == null) {
@@ -147,6 +153,8 @@ public abstract class Feature extends AbstractConfigurationObject {
     /**
      * Whether the feature can be dragged on the map using pointing devices or
      * not
+     * 
+     * @since 24.1
      */
     public boolean isDraggable() {
         return draggable;
@@ -162,6 +170,7 @@ public abstract class Feature extends AbstractConfigurationObject {
      *
      * @param draggable
      *            whether the feature can be dragged or not
+     * @since 24.1
      */
     public void setDraggable(boolean draggable) {
         this.draggable = draggable;

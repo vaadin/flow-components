@@ -80,14 +80,13 @@ public class MessageListPage extends Div {
         addButton("setImageAsStreamResource", () -> {
             StreamResource resource = new StreamResource("message-list-img",
                     () -> getClass().getResourceAsStream(
-                            "/META-INF/resources/frontend/images/avatar.png"));
+                            "/META-INF/resources/images/avatar.png"));
             foo.setUserImageResource(resource);
         });
 
         addButton("setImageAsDownloadHandler", () -> {
             DownloadHandler resource = DownloadHandler.forClassResource(
-                    getClass(),
-                    "/META-INF/resources/frontend/images/avatar.png",
+                    getClass(), "/META-INF/resources/images/avatar.png",
                     "message-list-img");
             foo.setUserImageHandler(resource);
         });

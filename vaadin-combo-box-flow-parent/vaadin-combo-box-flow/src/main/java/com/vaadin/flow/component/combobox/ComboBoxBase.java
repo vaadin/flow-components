@@ -37,6 +37,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasTheme;
@@ -88,11 +89,13 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
  *            Type of individual items that are selectable in the combo box
  * @param <TValue>
  *            Type of the selection / value of the extending component
+ * @since 23.2
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue> implements
-        Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel, HasAutoOpen,
-        HasClearButton, HasDataView<TItem, String, ComboBoxDataView<TItem>>,
+        extends AbstractSinglePropertyField<TComponent, TValue>
+        implements Focusable<TComponent>, HasAllowedCharPattern,
+        HasAriaDescription, HasAriaLabel, HasAutoOpen, HasClearButton,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
@@ -331,14 +334,82 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
+     * <p>
+     * Custom values cannot be used together with
+     * {@link #setPartialMatchMode(PartialMatchMode)}. Enabling custom values
+     * while the partial match mode is other than {@link PartialMatchMode#NONE}
+     * throws an exception.
      *
      * @param allowCustomValue
      *            {@code true} to enable custom value set events, {@code false}
      *            to disable them
+     * @throws IllegalStateException
+     *             when enabling custom values while the partial match mode is
+     *             other than {@link PartialMatchMode#NONE}
      * @see #addCustomValueSetListener(ComponentEventListener)
      */
     public void setAllowCustomValue(boolean allowCustomValue) {
+        if (allowCustomValue
+                && getPartialMatchMode() != PartialMatchMode.NONE) {
+            throw new IllegalStateException("""
+                    Custom values cannot be allowed when partial match mode \
+                    is used. Disable it with \
+                    setPartialMatchMode(PartialMatchMode.NONE) first.""");
+        }
         getElement().setProperty("allowCustomValue", allowCustomValue);
+    }
+
+    /**
+     * Gets the mode that controls which item is automatically set to be
+     * selected, for example on Enter, when the typed filter only partially
+     * matches its label. Defaults to {@link PartialMatchMode#NONE}.
+     *
+     * @return the mode, not {@code null}
+     * @see #setPartialMatchMode(PartialMatchMode)
+     * @since 25.3
+     */
+    public PartialMatchMode getPartialMatchMode() {
+        return PartialMatchMode
+                .fromClientName(getElement().getProperty("partialMatchMode"));
+    }
+
+    /**
+     * Sets the mode that controls which item is automatically set to be
+     * selected, for example on Enter, when the typed filter only partially
+     * matches its label. The item that will be selected is highlighted in the
+     * dropdown while typing.
+     * <p>
+     * Defaults to {@link PartialMatchMode#NONE}, which means that an item is
+     * automatically set to be selected only when the filter matches its label
+     * exactly. In general, an exact match is always set to be selected and
+     * takes precedence over partial matches, regardless of the mode.
+     * <p>
+     * A partial match is only applied while the dropdown is open. For example,
+     * when auto-open is disabled with {@link #setAutoOpen(boolean)}, typing
+     * does not highlight a match or set it to be selected until the dropdown is
+     * opened.
+     * <p>
+     * This feature cannot be used together with custom values, because a
+     * partial match is also a valid custom value. Setting a mode other than
+     * {@link PartialMatchMode#NONE} while custom values are allowed with
+     * {@link #setAllowCustomValue(boolean)} throws an exception.
+     *
+     * @param mode
+     *            the mode to set, not {@code null}
+     * @throws IllegalStateException
+     *             when setting a mode other than {@link PartialMatchMode#NONE}
+     *             while custom values are allowed
+     * @since 25.3
+     */
+    public void setPartialMatchMode(PartialMatchMode mode) {
+        Objects.requireNonNull(mode, "The mode cannot be null");
+        if (mode != PartialMatchMode.NONE && isAllowCustomValue()) {
+            throw new IllegalStateException("""
+                    Partial match mode cannot be used when custom values are \
+                    allowed. Disable custom values with \
+                    setAllowCustomValue(false) first.""");
+        }
+        getElement().setProperty("partialMatchMode", mode.getClientName());
     }
 
     /**
@@ -371,6 +442,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param filterTimeout
      *            the time in milliseconds to wait after typing stops before
      *            filtering is triggered
+     * @since 25.1
      */
     public void setFilterTimeout(int filterTimeout) {
         getElement().setProperty("_filterTimeout", filterTimeout);
@@ -381,6 +453,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @return the time in milliseconds to wait after typing stops before
      *         filtering is triggered
+     * @since 25.1
      */
     public int getFilterTimeout() {
         return getElement().getProperty("_filterTimeout",
@@ -398,6 +471,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param required
      *            {@code true} to make the field required, {@code false}
      *            otherwise
+     * @since 24.5
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -409,6 +483,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
@@ -454,6 +529,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The referenced elements are announced in addition to the helper text and
+     * the error message.
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**
@@ -548,6 +640,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param item
      *            the data item
      * @return string class name for the data item
+     * @since 24.5
      */
     protected String generateClassName(TItem item) {
         if (item == null) {
@@ -847,12 +940,12 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param fetchCallback
      *            function that returns a stream of items from the backend based
-     *            on the offset, limit and a object filter
+     *            on the offset, limit and an object filter
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
-     *            the user into a callback's object filter
+     *            the user into the callback's object filter
      * @param <C>
-     *            filter type used by a callback
+     *            filter type used by the callback
      * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
@@ -887,15 +980,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param fetchCallback
      *            function that returns a stream of items from the backend based
-     *            on the offset, limit and a object filter
+     *            on the offset, limit and an object filter
      * @param countCallback
-     *            function that return the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
-     *            the user into a callback's object filter
+     *            the user into the object filter used by the callbacks
      * @param <C>
-     *            filter type used by a callbacks
+     *            filter type used by the callbacks
      * @return ComboBoxLazyDataView instance for further configuration
      */
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
@@ -978,8 +1071,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            function that returns a stream of items from the back end for
      *            a query
      * @param countCallback
-     *            function that return the number of items in the back end for a
-     *            query
+     *            function that returns the number of items in the back end for
+     *            a query
      * @return ComboBoxLazyDataView instance for further configuration
      */
     @Override
@@ -989,6 +1082,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return HasLazyDataView.super.setItems(fetchCallback, countCallback);
     }
 
+    /**
+     * @since 24.7
+     */
     public interface SpringData extends Serializable {
         /**
          * Callback interface for fetching a list of items from a backend based
@@ -1054,6 +1150,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a function that returns a sorted list of items from the
      *            backend based on the given pageable
      * @return a data view for further configuration
+     * @since 24.7
      */
     public ComboBoxLazyDataView<TItem> setItemsPageable(
             SpringData.FetchCallback<Pageable, TItem> fetchCallback) {
@@ -1084,6 +1181,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a function that returns the number of items in the back end
      *            based on the filter string
      * @return LazyDataView instance for further configuration
+     * @since 24.7
      */
     public ComboBoxLazyDataView<TItem> setItemsPageable(
             SpringData.FetchCallback<Pageable, TItem> fetchCallback,
@@ -1235,6 +1333,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Use this method when none of the {@code setItems} methods are applicable,
      * e.g. when having a data provider with filter that cannot be transformed
      * to {@code DataProvider<T, Void>}.
+     *
+     * @since 24.2
      */
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
@@ -1258,6 +1358,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            a callback for getting the count of items, not
      *            <code>null</code>
      * @see CallbackDataProvider
+     * @since 24.2
      */
     public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
@@ -1412,6 +1513,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
+     *
+     * @since 23.2.12
      */
     protected void validate() {
         validationController.validate(getValue());
@@ -1424,6 +1527,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param <TComponent>
      *            The specific combo box component type
+     * @since 23.2.2
      */
     @DomEvent("custom-value-set")
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
@@ -1449,6 +1553,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * {@link #setI18n(ComboBoxBaseI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 24.5
      */
     protected ComboBoxBaseI18n getI18n() {
         return i18n;
@@ -1459,6 +1564,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @param i18n
      *            the i18n object, not {@code null}
+     * @since 24.5
      */
     protected void setI18n(ComboBoxBaseI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,

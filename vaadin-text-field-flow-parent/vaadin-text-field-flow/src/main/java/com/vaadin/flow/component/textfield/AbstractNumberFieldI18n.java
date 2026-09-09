@@ -19,6 +19,8 @@ import java.io.Serializable;
 
 /**
  * The internationalization properties for {@link AbstractNumberField}.
+ * 
+ * @since 24.5
  */
 public interface AbstractNumberFieldI18n extends Serializable {
     /**

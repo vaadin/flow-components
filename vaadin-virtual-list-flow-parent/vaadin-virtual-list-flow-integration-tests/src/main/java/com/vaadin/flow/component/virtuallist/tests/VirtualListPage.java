@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Text;
@@ -269,7 +268,7 @@ public class VirtualListPage extends Div {
         list.setHeight("100px");
 
         List<String> items = IntStream.range(1, 101).mapToObj(i -> "Item " + i)
-                .collect(Collectors.toList());
+                .toList();
 
         list.setRenderer(new ComponentRenderer<>(item -> {
             Div text = new Div(new Text(item));

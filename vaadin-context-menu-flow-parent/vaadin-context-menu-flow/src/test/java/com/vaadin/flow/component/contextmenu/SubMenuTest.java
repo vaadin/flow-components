@@ -17,7 +17,6 @@ package com.vaadin.flow.component.contextmenu;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -219,8 +218,7 @@ class SubMenuTest {
 
     private void verifyChildren(SubMenu subMenu,
             Component... expectedChildren) {
-        List<Component> children = subMenu.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = subMenu.getChildren().toList();
         Assertions.assertArrayEquals(expectedChildren,
                 children.toArray(new Component[children.size()]));
     }

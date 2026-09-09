@@ -36,6 +36,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the item type
+ * @since 18.0
  */
 public class ComboBoxDataView<T> extends AbstractDataView<T> {
 
@@ -49,6 +50,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      *            the data communicator of the component
      * @param comboBox
      *            the ComboBox
+     * @since 23.2
      */
     public ComboBoxDataView(DataCommunicator<T> dataCommunicator,
             ComboBoxBase<?, T, ?> comboBox) {

@@ -19,6 +19,7 @@ package com.vaadin.flow.component.grid.dnd;
  * Defines drop locations within a Grid row.
  *
  * @author Vaadin Ltd.
+ * @since 4.0
  */
 public enum GridDropLocation {
 

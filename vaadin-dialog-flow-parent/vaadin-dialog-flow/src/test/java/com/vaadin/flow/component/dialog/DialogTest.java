@@ -17,7 +17,6 @@ package com.vaadin.flow.component.dialog;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -53,32 +53,31 @@ class DialogTest {
         dialog.setWidth("200px");
         dialog.setHeight("100px");
 
-        List<Component> children = dialog.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = dialog.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
 
         dialog.add(span3);
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(3, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
         Assertions.assertTrue(children.contains(span3));
 
         dialog.remove(span2);
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span3));
 
         span1.getElement().removeFromParent();
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         Assertions.assertTrue(children.contains(span3));
 
         dialog.removeAll();
-        children = dialog.getChildren().collect(Collectors.toList());
+        children = dialog.getChildren().toList();
         Assertions.assertEquals(0, children.size());
 
         Assertions.assertEquals("200px", dialog.getWidth());
@@ -193,6 +192,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void isFocusTrap_trueByDefault() {
         Dialog dialog = new Dialog();
         Assertions.assertTrue(dialog.isFocusTrap(),
@@ -203,6 +203,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeDisabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -214,6 +215,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setFocusTrap_dialogFocusTrapCanBeReEnabled() {
         Dialog dialog = new Dialog();
         dialog.setFocusTrap(false);
@@ -226,16 +228,36 @@ class DialogTest {
     }
 
     @Test
+    void setAutofocus_isAutofocus() {
+        Dialog dialog = new Dialog();
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(false);
+        Assertions.assertFalse(dialog.isAutofocus());
+        Assertions.assertTrue(
+                dialog.getElement().getProperty("noAutofocus", false));
+
+        dialog.setAutofocus(true);
+        Assertions.assertTrue(dialog.isAutofocus());
+        Assertions.assertFalse(
+                dialog.getElement().getProperty("noAutofocus", false));
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
     void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
         Assertions.assertEquals("dialog", dialog.getRole());
         Assertions.assertEquals("dialog", dialog.getOverlayRole());
         Assertions.assertEquals("dialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_getOverlayRole() {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
@@ -243,10 +265,11 @@ class DialogTest {
         Assertions.assertEquals("alertdialog", dialog.getRole());
         Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setOverlayRole_null_throws() {
         Dialog dialog = new Dialog();
         Assertions.assertThrows(NullPointerException.class,
@@ -254,6 +277,7 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_getRole() {
         Dialog dialog = new Dialog();
         dialog.setRole("alertdialog");
@@ -261,14 +285,20 @@ class DialogTest {
         Assertions.assertEquals("alertdialog", dialog.getRole());
         Assertions.assertEquals("alertdialog", dialog.getOverlayRole());
         Assertions.assertEquals("alertdialog",
-                dialog.getElement().getProperty("role"));
+                dialog.getElement().getAttribute("role"));
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void setRole_null_throws() {
         Dialog dialog = new Dialog();
         Assertions.assertThrows(NullPointerException.class,
                 () -> dialog.setRole(null));
+    }
+
+    @Test
+    void implementsHasAriaRole() {
+        Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Dialog.class));
     }
 
     private void addDivAtIndex(int index) {

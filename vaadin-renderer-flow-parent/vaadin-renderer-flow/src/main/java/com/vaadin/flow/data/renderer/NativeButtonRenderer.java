@@ -38,6 +38,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <SOURCE>
  *            the type of the item to be received in the click listeners
+ * @since 22.0
  */
 public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
         implements ClickableRenderer<SOURCE> {

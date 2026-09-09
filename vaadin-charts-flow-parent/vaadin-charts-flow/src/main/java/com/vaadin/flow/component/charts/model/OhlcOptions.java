@@ -12,6 +12,9 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class OhlcOptions extends AbstractPlotOptions {
 
     @Override
@@ -71,16 +74,20 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
     /**
      * @see #setColorByPoint(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getColorByPoint();
 
@@ -94,6 +101,8 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * arrays are not supported, and instead this option gives the points
      * individual color class names on the form
      * <code>highcharts-color-{n}</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setColorByPoint(Boolean colorByPoint);
 
@@ -111,6 +120,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public abstract String getColorKey();
 
@@ -119,17 +129,22 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * <code>colorAxis</code> is used. Requires to set <code>min</code> and
      * <code>max</code> if some custom point property is used or if
      * approximation for data grouping is set to <code>'sum'</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract Color[] getColors();
 
     /**
      * A series specific or series type specific color set to apply instead of
      * the theme colors.
+     * 
+     * @since 18.0
      */
     public abstract void setColors(Color... colors);
 
@@ -139,6 +154,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void addColor(Color color);
 
@@ -148,6 +164,7 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public abstract void removeColor(Color color);
 
@@ -351,11 +368,14 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public abstract Number getLineWidth();
 
     /**
      * The pixel width of the candlestick line/border.
+     * 
+     * @since 18.0
      */
     public abstract void setLineWidth(Number lineWidth);
 
@@ -411,11 +431,14 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 
@@ -684,11 +707,14 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
 
     /**
      * @see #setUpColor(Color)
+     * @since 18.0
      */
     public abstract Color getUpColor();
 
     /**
      * Line color for up points.
+     * 
+     * @since 18.0
      */
     public abstract void setUpColor(Color upColor);
 

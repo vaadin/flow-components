@@ -33,6 +33,7 @@ import com.vaadin.flow.data.provider.SortOrderBuilder;
  *
  * @param <T>
  *            the type of the grid
+ * @since 1.0
  */
 public class GridSortOrderBuilder<T>
         extends SortOrderBuilder<GridSortOrder<T>, Column<T>> {

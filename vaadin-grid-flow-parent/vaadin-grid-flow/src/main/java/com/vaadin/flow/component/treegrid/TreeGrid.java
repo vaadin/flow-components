@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -70,9 +69,10 @@ import tools.jackson.databind.node.ObjectNode;
  * @param <T>
  *            the grid bean type
  * @author Vaadin Ltd
+ * @since 1.1
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
-@JsModule("./treeGridConnector.ts")
+@JsModule("./vaadin-grid/treeGridConnector.ts")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
     /**
@@ -96,7 +96,11 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @since 24.5
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected TreeGrid(int pageSize,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         super(pageSize, dataCommunicatorBuilder);
@@ -169,6 +173,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
+     * @since 24.5
      */
     public TreeGrid(Class<T> beanType, boolean autoCreateColumns) {
         this(beanType, new TreeDataCommunicatorBuilder<>(), autoCreateColumns);
@@ -186,12 +191,17 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @since 24.5
+     * @deprecated Override {@link #createDataCommunicator()} instead. This
+     *             constructor will be removed in Vaadin 26.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     protected TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
     }
 
+    @Deprecated(since = "25.3", forRemoval = true)
     private TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder,
             boolean autoCreateColumns) {
@@ -301,8 +311,10 @@ public class TreeGrid<T> extends Grid<T>
             this.setDataProvider((HierarchicalDataProvider) dataProvider);
         } else {
             throw new IllegalArgumentException(
-                    "TreeGrid only accepts hierarchical data providers. "
-                            + "An example of interface to be used: HierarchicalDataProvider");
+                    """
+                            TreeGrid only accepts hierarchical data providers. \
+                            An example of interface to be used: HierarchicalDataProvider\
+                            """);
         }
     }
 
@@ -327,15 +339,18 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
     public GridLazyDataView<T> setItems(
             BackEndDataProvider<T, Void> dataProvider) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider\
+                        """);
     }
 
     /**
@@ -352,15 +367,18 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
     public GridLazyDataView<T> setItems(
             CallbackDataProvider.FetchCallback<T, Void> fetchCallback) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider\
+                        """);
     }
 
     /**
@@ -378,14 +396,17 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
     public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider\
+                        """);
     }
 
     /**
@@ -402,14 +423,17 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
     public GridListDataView<T> setItems(T... items) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider\
+                        """);
     }
 
     /**
@@ -426,14 +450,17 @@ public class TreeGrid<T> extends Grid<T>
      *             {@link #setItems(Collection, ValueProvider)},
      *             {@link #setItems(Stream, ValueProvider)} or
      *             {@link #setTreeData(TreeData)} instead.
+     * @since 18.0
      */
     @Deprecated
     @Override
     public GridListDataView<T> setItems(Collection<T> items) {
         throw new UnsupportedOperationException(
-                "TreeGrid only accepts hierarchical data providers. "
-                        + "Use another setDataProvider/setItems method instead with hierarchical data."
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                """
+                        TreeGrid only accepts hierarchical data providers. \
+                        Use another setDataProvider/setItems method instead with hierarchical data.\
+                        An example of interface to be used: HierarchicalDataProvider\
+                        """);
     }
 
     /**
@@ -445,6 +472,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -462,6 +490,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -479,6 +508,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @return exception is thrown
      * @deprecated not supported
+     * @since 18.0
      */
     @Deprecated
     @Override
@@ -539,6 +569,7 @@ public class TreeGrid<T> extends Grid<T>
      * @return the new column
      * @see #addColumn(Renderer)
      * @see #removeColumn(Column)
+     * @since 5.1
      */
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
@@ -599,8 +630,7 @@ public class TreeGrid<T> extends Grid<T>
     public Column<T> setHierarchyColumn(String propertyName,
             ValueProvider<T, ?> valueProvider) {
         List<String> currentPropertyList = getColumns().stream()
-                .map(Column::getKey).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .map(Column::getKey).filter(Objects::nonNull).toList();
         resetColumns(propertyName, valueProvider, currentPropertyList);
         return getColumnByKey(propertyName);
     }
@@ -635,9 +665,11 @@ public class TreeGrid<T> extends Grid<T>
             Collection<String> propertyNames) {
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid that isn't constructed from a bean type. "
-                            + "To construct Grid from a bean type, please provide a beanType argument"
-                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                    """
+                            This method can't be used for a TreeGrid that isn't constructed from a bean type. \
+                            To construct TreeGrid from a bean type, please provide a beanType argument \
+                            to the constructor: TreeGrid<Person> treeGrid = new TreeGrid<>(Person.class)\
+                            """);
         }
         resetColumns(hierarchyPropertyName, valueProvider, propertyNames);
         return getColumnByKey(hierarchyPropertyName);
@@ -672,9 +704,11 @@ public class TreeGrid<T> extends Grid<T>
     private Column<T> addHierarchyColumn(String propertyName) {
         if (getPropertySet() == null) {
             throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid that isn't constructed from a bean type. "
-                            + "To construct Grid from a bean type, please provide a beanType argument"
-                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                    """
+                            This method can't be used for a TreeGrid that isn't constructed from a bean type. \
+                            To construct TreeGrid from a bean type, please provide a beanType argument \
+                            to the constructor: TreeGrid<Person> treeGrid = new TreeGrid<>(Person.class)\
+                            """);
         }
         Objects.requireNonNull(propertyName,
                 "Hierarchy Property name can't be null");
@@ -683,11 +717,13 @@ public class TreeGrid<T> extends Grid<T>
         try {
             property = getPropertySet().getProperty(propertyName).get();
         } catch (NoSuchElementException | IllegalArgumentException exception) {
-            throw new IllegalArgumentException(
-                    "There is no such hierarchy property name in the beanType used "
-                            + "for construction of the grid:"
-                            + "Trying to get '" + propertyName + "' from '"
-                            + getPropertySet() + "'");
+            throw new IllegalArgumentException(String.format(
+                    """
+                            There is no such hierarchy property name in the beanType used \
+                            for construction of the TreeGrid: \
+                            Trying to get '%s' from '%s'\
+                            """,
+                    propertyName, getPropertySet()));
         }
         return addHierarchyColumn(property);
     }
@@ -740,8 +776,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the items to expand
      */
-    public void expand(Collection<T> items) {
-        expand(items, false);
+    public void expand(Collection<? extends T> items) {
+        expand(new ArrayList<>(items), false);
     }
 
     /**
@@ -771,9 +807,8 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to expand recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
-    public void expandRecursively(Stream<T> items, int depth) {
+    public void expandRecursively(Stream<? extends T> items, int depth) {
         expandRecursively(items.toList(), depth);
     }
 
@@ -790,9 +825,8 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to expand recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
-    public void expandRecursively(Collection<T> items, int depth) {
+    public void expandRecursively(Collection<? extends T> items, int depth) {
         var expandedItems = getDataCommunicator()
                 .expand(getItemsWithChildrenRecursively(items, depth));
         fireEvent(new ExpandEvent<>(this, false, expandedItems));
@@ -819,8 +853,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the collection of items to collapse
      */
-    public void collapse(Collection<T> items) {
-        collapse(items, false);
+    public void collapse(Collection<? extends T> items) {
+        collapse(new ArrayList<>(items), false);
     }
 
     /**
@@ -850,9 +884,8 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to collapse recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
-    public void collapseRecursively(Stream<T> items, int depth) {
+    public void collapseRecursively(Stream<? extends T> items, int depth) {
         collapseRecursively(items.toList(), depth);
     }
 
@@ -869,9 +902,8 @@ public class TreeGrid<T> extends Grid<T>
      *            the items to collapse recursively
      * @param depth
      *            the maximum depth of recursion
-     * @since 8.4
      */
-    public void collapseRecursively(Collection<T> items, int depth) {
+    public void collapseRecursively(Collection<? extends T> items, int depth) {
         var collapsedItems = getDataCommunicator()
                 .collapse(getItemsWithChildrenRecursively(items, depth));
         fireEvent(new CollapseEvent<>(this, false, collapsedItems));
@@ -894,8 +926,8 @@ public class TreeGrid<T> extends Grid<T>
      * @return collection of given items and their children recursively until
      *         the given depth
      */
-    protected Collection<T> getItemsWithChildrenRecursively(Collection<T> items,
-            int depth) {
+    protected Collection<T> getItemsWithChildrenRecursively(
+            Collection<? extends T> items, int depth) {
         List<T> itemsWithChildren = new ArrayList<>();
         if (depth < 0) {
             return itemsWithChildren;
@@ -907,7 +939,7 @@ public class TreeGrid<T> extends Grid<T>
                             getItemsWithChildrenRecursively(getDataProvider()
                                     .fetchChildren(
                                             new HierarchicalQuery<>(null, item))
-                                    .collect(Collectors.toList()), depth - 1));
+                                    .toList(), depth - 1));
                 });
         return itemsWithChildren;
     }
@@ -957,6 +989,7 @@ public class TreeGrid<T> extends Grid<T>
      *
      * @param index
      *            zero based index of the item to scroll to
+     * @since 20.0.5
      */
     @Override
     public void scrollToIndex(int index) {
@@ -988,6 +1021,7 @@ public class TreeGrid<T> extends Grid<T>
      * @throws UnsupportedOperationException
      *             if the data provider uses a hierarchy format other than
      *             {@link HierarchyFormat#NESTED}
+     * @since 24.1
      */
     public void scrollToIndex(int... path) {
         if (!getDataProvider().getHierarchyFormat()
@@ -995,7 +1029,7 @@ public class TreeGrid<T> extends Grid<T>
             throw new UnsupportedOperationException(
                     """
                             scrollToIndex(int...) is supported only for data providers that use HierarchyFormat.NESTED. \
-                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.
+                            For HierarchyFormat.FLATTENED, use scrollToIndex(int) with a flat index instead.\
                             """);
         }
 
@@ -1035,10 +1069,10 @@ public class TreeGrid<T> extends Grid<T>
         var maxAllowedItems = 10 * Math.max(50, pageSize);
         if (maxAllowedItems < padding) {
             throw new IllegalArgumentException(String.format(
-                    "Requested viewport size (%d items) "
-                            + "exceeds security limit (%d items max). "
-                            + "Consider reducing the grid height or increasing "
-                            + "the page size to at least %d if it's a valid request.",
+                    """
+                            Requested viewport size (%d items) exceeds security limit (%d items max). \
+                            Consider reducing the grid height or increasing the page size to at least %d if it's a valid request.\
+                            """,
                     padding, maxAllowedItems, (int) Math.ceil(padding / 10.0)));
         }
 
@@ -1126,6 +1160,7 @@ public class TreeGrid<T> extends Grid<T>
      *            the item to scroll to
      * @throws NoSuchElementException
      *             if the item does not belong to the tree
+     * @since 24.4
      */
     @Override
     public void scrollToItem(T item) {

@@ -20,6 +20,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
+/**
+ * @since 23.1
+ */
 public abstract class SheetOverlayWrapper implements Serializable {
 
     public interface OverlayChangeListener extends Serializable {
@@ -44,6 +47,7 @@ public abstract class SheetOverlayWrapper implements Serializable {
      * this method can inform the spreadsheet.
      *
      * @param listener
+     *            the listener
      */
     public void setOverlayChangeListener(OverlayChangeListener listener) {
         // NOP
@@ -280,6 +284,7 @@ public abstract class SheetOverlayWrapper implements Serializable {
      * Gets the handler serving this image
      *
      * @return Image resource
+     * @since 24.8
      */
     public DownloadHandler getResourceHandler() {
         return null;

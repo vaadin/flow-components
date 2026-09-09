@@ -18,6 +18,7 @@ import tools.jackson.databind.SerializationContext;
  * Custom bean serializer for {@link AbstractSeries} that adds the type field.
  * We need to use a bean serializer so that annotations work.
  *
+ * @since 6.0.1
  */
 public class AbstractSeriesBeanSerializer
         extends BeanSerializationDelegate<AbstractSeries> {

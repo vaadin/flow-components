@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointSelectEvent class stores data for select events on the points of the
  * chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-select")
 public class PointSelectEvent extends ComponentEvent<Chart> implements HasItem {

@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Under which conditions the rule applies.
+ * 
+ * @since 6.0.1
  */
 public class Condition extends AbstractConfigurationObject {
 

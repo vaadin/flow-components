@@ -18,7 +18,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
  * Command for changing the height of row(s) or the width of column(s).
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class SizeChangeCommand extends SpreadsheetCommand {
 

@@ -102,6 +102,7 @@ import tools.jackson.databind.JsonNode;
  * web browsers.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
@@ -1154,6 +1155,8 @@ public class Spreadsheet extends Component
      * the default / previously set spreadsheet handler.
      *
      * @param spreadsheetHandler
+     *            the spreadsheet handler
+     * @since 24.9.2
      */
     public void setSpreadsheetHandler(
             SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1168,6 +1171,7 @@ public class Spreadsheet extends Component
      * Create the default Spreadsheet handler.
      *
      * @return SpreadsheetHandlerImpl
+     * @since 24.9.2
      */
     protected SpreadsheetHandlerImpl createDefaultHandler() {
         return new SpreadsheetHandlerImpl(this);
@@ -1434,7 +1438,8 @@ public class Spreadsheet extends Component
      * Returns true if embedded charts are displayed
      *
      * @see #setChartsEnabled(boolean)
-     * @return
+     * @return {@code true} if charts are enabled, {@code false} otherwise
+     * @since 24.0
      */
     public boolean isChartsEnabled() {
         return chartsEnabled;
@@ -1445,6 +1450,8 @@ public class Spreadsheet extends Component
      * the spreadsheet or not.
      *
      * @param chartsEnabled
+     *            whether charts are enabled
+     * @since 24.0
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
@@ -1471,6 +1478,7 @@ public class Spreadsheet extends Component
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
+     * @since 24.8
      */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
         this.showCustomEditorOnFocus.set(showCustomEditorOnFocus);
@@ -1481,6 +1489,7 @@ public class Spreadsheet extends Component
      *
      * @return a boolean indicating whether the custom editor is visible on
      *         focus (true) or not (false)
+     * @since 24.8
      */
     public boolean isShowCustomEditorOnFocus() {
         return showCustomEditorOnFocus.get();
@@ -2758,7 +2767,7 @@ public class Spreadsheet extends Component
      *
      * @param fileName
      *            The full name of the file. If the name doesn't end with '.xls'
-     *            or '.xlsx', the approriate one will be appended.
+     *            or '.xlsx', the appropriate one will be appended.
      * @return A File with the content of the current {@link Workbook}, In the
      *         file format of the original {@link Workbook}.
      * @throws FileNotFoundException
@@ -2884,6 +2893,9 @@ public class Spreadsheet extends Component
      * contents. This forces reload of all: custom components (always visible
      * and editors) from {@link SpreadsheetComponentFactory}, hyperlinks, cells'
      * comments and cells' contents. Also updates styles for the visible area.
+     * <p>
+     * Any state entered into a custom editor is lost, as the editors are
+     * replaced with new instances from the factory.
      */
     public void reloadVisibleCellContents() {
         loadCustomComponents();
@@ -3164,6 +3176,7 @@ public class Spreadsheet extends Component
      * @param cellAddress
      *            The address of the cell to check
      * @return true if the cell is locked, false otherwise
+     * @since 24.8.8
      */
     public boolean isCellLocked(CellAddress cellAddress) {
         // Locking cells only works if the sheet is protected
@@ -3372,6 +3385,14 @@ public class Spreadsheet extends Component
     /**
      * Loads the custom components for the currently viewed cells and clears
      * previous components that are not currently visible.
+     *
+     * @param recreateEditors
+     *            {@code true} to recreate custom editors from the factory, used
+     *            when the application forces a refresh, changes the factory, or
+     *            the sheet changes; {@code false} to reuse the editor already
+     *            shown for a cell so its state survives the re-render, used
+     *            when the same cells stay visible (scrolling, selection,
+     *            resize).
      */
     void loadCustomComponents() {
         customComponentLoader.load();
@@ -3429,6 +3450,7 @@ public class Spreadsheet extends Component
      *
      * @param customComponentFactory
      *            The new component factory to use.
+     * @since 24.0
      */
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
@@ -4587,17 +4609,17 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Get the minimum row heigth in points for the rows that contain custom
+     * Get the minimum row height in points for the rows that contain custom
      * components
      *
-     * @return the minimum row heigths in points
+     * @return the minimum row heights in points
      */
     public int getMinimumRowHeightForComponents() {
         return minimumRowHeightForComponents;
     }
 
     /***
-     * Set the minimum row heigth in points for the rows that contain custom
+     * Set the minimum row height in points for the rows that contain custom
      * components. If set to a small value, it might cause some components like
      * checkboxes to be cut off
      *
@@ -4677,6 +4699,7 @@ public class Spreadsheet extends Component
      *
      * @param theme
      *            SpreadsheetTheme
+     * @since 24.5
      */
     public void setTheme(SpreadsheetTheme theme) {
         getElement().setAttribute("theme", theme.getThemeName());
@@ -4684,6 +4707,8 @@ public class Spreadsheet extends Component
 
     /**
      * Themes for the Spreadsheet.
+     * 
+     * @since 24.5
      */
     public enum SpreadsheetTheme {
         LUMO("lumo"), VALO("");

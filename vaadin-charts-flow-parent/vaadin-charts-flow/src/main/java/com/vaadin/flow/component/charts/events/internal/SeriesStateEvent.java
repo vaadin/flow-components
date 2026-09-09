@@ -13,7 +13,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Listener class for Series enabling and disabling events.
  *
- * @since 2.0
+ * @since 6.0.1
  */
 public class SeriesStateEvent extends AbstractSeriesEvent {
 

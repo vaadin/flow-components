@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -31,7 +30,7 @@ public class MultiSelectComboBoxClientSideFilteringPage extends Div {
         // By generating less items than the default page size of 50 we
         // automatically enable client-side filtering
         List<String> items = IntStream.range(0, 10)
-                .mapToObj(i -> "Item " + (i + 1)).collect(Collectors.toList());
+                .mapToObj(i -> "Item " + (i + 1)).toList();
         comboBox.setItems(items);
 
         add(comboBox);

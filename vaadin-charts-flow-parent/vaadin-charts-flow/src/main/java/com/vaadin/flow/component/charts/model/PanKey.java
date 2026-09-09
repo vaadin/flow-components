@@ -14,6 +14,8 @@ package com.vaadin.flow.component.charts.model;
  * (event.altKey, event.ctrlKey, event.metaKey and event.shiftKey).
  *
  * Defaults to undefined.
+ * 
+ * @since 6.0.1
  */
 public enum PanKey implements ChartEnum {
 

@@ -18,6 +18,9 @@ import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.shared.Registration;
 
+/**
+ * @since 24.6
+ */
 public abstract class DashboardChildDetachHandler
         implements ElementDetachListener {
 

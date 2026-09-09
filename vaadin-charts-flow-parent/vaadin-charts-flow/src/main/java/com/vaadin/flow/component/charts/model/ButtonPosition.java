@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Positioning options for buttons
+ * 
+ * @since 6.0.1
  */
 public class ButtonPosition extends AbstractConfigurationObject {
     private VerticalAlign verticalAlign;

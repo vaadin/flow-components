@@ -15,6 +15,9 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.STRadarStyle;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.RadarSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class RadarSeriesReader
         extends AbstractSeriesReader<CTRadarSer, RadarSeriesData> {
 

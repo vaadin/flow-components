@@ -383,7 +383,7 @@ public abstract class AbstractComponentIT extends TestBenchTestCase {
                         .intValue())
                 .filter(logEntry -> !logEntry.getMessage()
                         .contains("favicon.ico"))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static final String WEB_SOCKET_CONNECTION_ERROR_PREFIX = "WebSocket connection to ";

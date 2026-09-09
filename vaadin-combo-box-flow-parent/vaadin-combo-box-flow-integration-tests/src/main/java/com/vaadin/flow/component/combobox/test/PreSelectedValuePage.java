@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -30,8 +29,8 @@ public class PreSelectedValuePage extends Div {
 
     public PreSelectedValuePage() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setItems(IntStream.range(0, 20).mapToObj(i -> "Item " + i)
-                .collect(Collectors.toList()));
+        comboBox.setItems(
+                IntStream.range(0, 20).mapToObj(i -> "Item " + i).toList());
         comboBox.setValue(PRE_SELECTED_VALUE);
         comboBox.setId("combo");
 

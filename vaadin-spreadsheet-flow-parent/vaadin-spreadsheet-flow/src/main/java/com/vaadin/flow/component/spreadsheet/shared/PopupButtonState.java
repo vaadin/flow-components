@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.shared;
 
+/**
+ * @since 23.1
+ */
 public class PopupButtonState {
 
     /** 1-based */

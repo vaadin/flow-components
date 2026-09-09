@@ -15,6 +15,8 @@ import java.util.Arrays;
  * Applies only to polar charts and angular gauges. This configuration object
  * holds general options for the combined X and Y axes set. Each xAxis or yAxis
  * can reference the pane by index.
+ * 
+ * @since 6.0.1
  */
 public class Pane extends AbstractConfigurationObject {
 

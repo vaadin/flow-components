@@ -164,15 +164,16 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         }
 
         void noItemSelected() {
-            try {
-                SelectElement.ItemElement selectedItem = selectElement
-                        .getSelectedItem();
-                Assert.fail(
-                        "Expected nothing to be selected, but selection was: "
-                                + selectedItem.getText());
-            } catch (NoSuchElementException nsee) {
-                // expected
-            }
+            SelectElement.ItemElement selectedItem = selectElement
+                    .getSelectedItem();
+            Assert.assertNull(
+                    "Expected nothing to be selected, but selection was: "
+                            + (selectedItem == null ? null
+                                    : selectedItem.getText()),
+                    selectedItem);
+            Assert.assertEquals(
+                    "Expected empty selected text when nothing is selected", "",
+                    selectElement.getSelectedText());
         }
 
         void emptySelectionItemSelected() {
@@ -301,6 +302,15 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
     @Before
     public void init() {
         open(getDefaultParameter());
+    }
+
+    /*
+     * Reads the item's text content instead of using getText(), which only
+     * returns text of rendered elements. Items are projected into the select's
+     * overlay, which is not rendered while the dropdown is closed.
+     */
+    protected static String getItemText(TestBenchElement item) {
+        return item.getPropertyString("textContent").trim();
     }
 
     protected abstract int getInitialNumberOfItems();

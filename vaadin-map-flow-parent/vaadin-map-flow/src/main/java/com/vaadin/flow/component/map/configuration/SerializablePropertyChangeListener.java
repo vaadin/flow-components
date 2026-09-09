@@ -13,6 +13,8 @@ import java.io.Serializable;
 
 /**
  * A {@link PropertyChangeListener} that is also {@link Serializable}.
+ * 
+ * @since 24.9.5
  */
 public interface SerializablePropertyChangeListener
         extends PropertyChangeListener, Serializable {

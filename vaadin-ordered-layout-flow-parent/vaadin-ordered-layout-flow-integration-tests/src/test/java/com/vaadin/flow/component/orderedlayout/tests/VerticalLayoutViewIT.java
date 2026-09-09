@@ -29,7 +29,7 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * Tests for the VerticalLayout.
  */
-@TestPath("vaadin-ordered-layout")
+@TestPath("vaadin-ordered-layout/vertical-layout")
 public class VerticalLayoutViewIT extends AbstractComponentIT {
 
     @Before

@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.util.Util;
 
 /**
  * An array of objects defining plot bands on the Y axis.
+ * 
+ * @since 6.0.1
  */
 public class PlotBand extends AbstractConfigurationObject {
 
@@ -36,6 +38,7 @@ public class PlotBand extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -46,6 +49,8 @@ public class PlotBand extends AbstractConfigurationObject {
      * be set.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -53,6 +58,7 @@ public class PlotBand extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -63,6 +69,8 @@ public class PlotBand extends AbstractConfigurationObject {
      * be set.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -85,6 +93,7 @@ public class PlotBand extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -92,6 +101,8 @@ public class PlotBand extends AbstractConfigurationObject {
 
     /**
      * The color of the plot band.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;

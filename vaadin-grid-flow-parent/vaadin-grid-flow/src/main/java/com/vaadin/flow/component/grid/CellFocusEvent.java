@@ -30,6 +30,7 @@ import com.vaadin.flow.component.EventData;
  * @author Vaadin Ltd
  *         <p>
  * @see Grid#addCellFocusListener(com.vaadin.flow.component.ComponentEventListener)
+ * @since 21.0
  */
 @DomEvent("grid-cell-focus")
 public class CellFocusEvent<T> extends ComponentEvent<Grid<T>> {

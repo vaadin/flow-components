@@ -17,7 +17,6 @@ package com.vaadin.flow.component.notification;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -177,14 +176,14 @@ class NotificationChildrenTest {
         // Get a List of the node ids
         var childIds = Arrays.stream(components)
                 .map(component -> component.getElement().getNode().getId())
-                .collect(Collectors.toList());
+                .toList();
 
         // Get the virtualChildNodeIds property from the dialog as a JsonArray
         var jsonArrayOfIds = (ArrayNode) JacksonUtils.getMapper().readTree(
                 notification.getElement().getProperty("virtualChildNodeIds"));
 
         var virtualChildNodeIds = JacksonUtils.stream(jsonArrayOfIds)
-                .mapToInt(JsonNode::asInt).boxed().collect(Collectors.toList());
+                .mapToInt(JsonNode::asInt).boxed().toList();
 
         Assertions.assertEquals(childIds, virtualChildNodeIds);
     }

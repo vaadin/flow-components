@@ -20,6 +20,8 @@ import java.util.Objects;
  * Configuration specific to each ChartType can be set using
  * {@link Configuration#setPlotOptions(AbstractPlotOptions...)} or for a single
  * series using {@link AbstractSeries#setPlotOptions(AbstractPlotOptions)}
+ * 
+ * @since 6.0.1
  */
 public class ChartType implements ChartEnum {
 
@@ -41,6 +43,7 @@ public class ChartType implements ChartEnum {
     public static final ChartType AREASPLINE = new ChartType("areaspline");
     /**
      * @see PlotOptionsBullet
+     * @since 18.0
      */
     public static final ChartType BULLET = new ChartType("bullet");
     /**
@@ -129,6 +132,7 @@ public class ChartType implements ChartEnum {
 
     /**
      * @see PlotOptionsTimeline
+     * @since 18.0
      */
     public static final ChartType TIMELINE = new ChartType("timeline");
 
@@ -139,16 +143,19 @@ public class ChartType implements ChartEnum {
 
     /**
      * @see PlotOptionsOrganization
+     * @since 18.0
      */
     public static final ChartType ORGANIZATION = new ChartType("organization");
 
     /**
      * @see PlotOptionsSankey
+     * @since 24.3
      */
     public static final ChartType SANKEY = new ChartType("sankey");
 
     /**
      * @see PlotOptionsXrange
+     * @since 18.0
      */
     public static final ChartType XRANGE = new ChartType("xrange");
 

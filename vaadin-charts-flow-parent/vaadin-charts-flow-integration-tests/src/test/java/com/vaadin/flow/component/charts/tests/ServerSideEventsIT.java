@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.tests;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -299,7 +298,7 @@ public class ServerSideEventsIT extends AbstractChartIT {
             String eventDetailsJson = eventDetailsSpan.getText();
 
             return new HistoryEvent(eventType, eventDetailsJson);
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private static class HistoryEvent {

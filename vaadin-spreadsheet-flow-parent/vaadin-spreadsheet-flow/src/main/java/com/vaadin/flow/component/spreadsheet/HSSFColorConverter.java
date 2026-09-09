@@ -23,7 +23,7 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * POI terms).
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class HSSFColorConverter implements ColorConverter {
     private final HSSFWorkbook wb;

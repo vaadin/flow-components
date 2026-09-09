@@ -13,6 +13,8 @@ import java.util.List;
 
 /**
  * Container for labels on the chart
+ * 
+ * @since 24.0
  */
 public class AnnotationItem extends AbstractConfigurationObject {
 

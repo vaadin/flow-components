@@ -17,7 +17,7 @@ import {
     parseHeaderIndex,
     toCssKey,
     toKey,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/CellKeys.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/CellKeys.js';
 
 describe('CellKeys — toKey', () => {
     it('formats (1, 1) as "col1 row1"', () => {

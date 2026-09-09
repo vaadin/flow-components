@@ -46,4 +46,16 @@ public class DialogContentIT extends AbstractComponentIT {
         // Expect the content to be present inside the dialog overlay
         waitForElementPresent(By.cssSelector("vaadin-dialog #close-button"));
     }
+
+    @Test
+    public void addContentReattachDialogAndOpen_contentPresent() {
+        // Add dialog content, then detach and re-attach the dialog before
+        // opening it. Slotted content must survive the reattach.
+        clickElementWithJs("add-content-button");
+        clickElementWithJs("reattach-button");
+        clickElementWithJs("open-button");
+
+        // Expect the content to be present inside the dialog overlay
+        waitForElementPresent(By.cssSelector("vaadin-dialog #close-button"));
+    }
 }

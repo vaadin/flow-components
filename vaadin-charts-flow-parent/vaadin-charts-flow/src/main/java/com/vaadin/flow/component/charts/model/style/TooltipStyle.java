@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Style options for tooltips
+ * 
+ * @since 18.0
  */
 public class TooltipStyle extends AbstractConfigurationObject {
 

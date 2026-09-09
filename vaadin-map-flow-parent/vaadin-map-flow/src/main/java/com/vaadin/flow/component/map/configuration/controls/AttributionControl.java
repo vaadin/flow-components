@@ -12,6 +12,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * A control that displays attribution information on the map.
+ * 
+ * @since 25.1
  */
 public class AttributionControl extends Control {
     @Override

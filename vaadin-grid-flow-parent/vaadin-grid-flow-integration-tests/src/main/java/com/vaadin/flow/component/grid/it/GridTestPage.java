@@ -133,8 +133,8 @@ public class GridTestPage extends Div {
                 "Set reorder listener", evt -> {
                     grid.addColumnReorderListener(e -> {
                         if (e.isFromClient()) {
-                            List<Column<Item>> columnList = e.getColumns()
-                                    .stream().collect(Collectors.toList());
+                            List<Column<Item>> columnList = new ArrayList<>(
+                                    e.getColumns());
                             // Reorder columns in the list
                             Collections.swap(columnList, 1, 2);
                             grid.setColumnOrder(columnList);

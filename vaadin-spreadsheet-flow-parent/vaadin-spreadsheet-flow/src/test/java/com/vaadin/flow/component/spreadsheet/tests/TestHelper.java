@@ -44,7 +44,7 @@ public class TestHelper {
     }
 
     /**
-     * Ceates a Spreadsheet component with the given Excel file as the data
+     * Creates a Spreadsheet component with the given Excel file as the data
      * source.
      *
      * @param fileName

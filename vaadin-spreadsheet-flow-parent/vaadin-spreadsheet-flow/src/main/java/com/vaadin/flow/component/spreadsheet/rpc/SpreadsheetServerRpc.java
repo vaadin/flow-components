@@ -29,6 +29,8 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetHandler;
  * Subclass {@code SpreadsheetHandlerImpl} (not this interface directly) to
  * customize client-event handling on a per-instance basis via
  * {@code Spreadsheet.setSpreadsheetHandler(...)}.
+ *
+ * @since 23.1
  */
 public interface SpreadsheetServerRpc extends SpreadsheetHandler {
 
@@ -59,6 +61,7 @@ public interface SpreadsheetServerRpc extends SpreadsheetHandler {
      * The action was selected from context menu for the current selection.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnCurrentSelection(String actionKey);
 
@@ -74,6 +77,7 @@ public interface SpreadsheetServerRpc extends SpreadsheetHandler {
      * The action was selected from context menu for the row header.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnRowHeader(String actionKey);
 
@@ -89,11 +93,14 @@ public interface SpreadsheetServerRpc extends SpreadsheetHandler {
      * The action was selected from context menu for the column header.
      *
      * @param actionKey
+     *            the action key
      */
     void actionOnColumnHeader(String actionKey);
 
     /**
      * Context menu was closed.
+     * 
+     * @since 24.9.7
      */
     void contextMenuClosed();
 }

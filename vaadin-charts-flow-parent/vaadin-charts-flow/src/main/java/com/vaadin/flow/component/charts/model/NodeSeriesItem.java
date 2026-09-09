@@ -14,6 +14,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * Data for the {@link NodeSeries}. Represents a link between the from and to
  * nodes.
+ * 
+ * @since 18.0
  */
 public class NodeSeriesItem extends AbstractConfigurationObject {
 

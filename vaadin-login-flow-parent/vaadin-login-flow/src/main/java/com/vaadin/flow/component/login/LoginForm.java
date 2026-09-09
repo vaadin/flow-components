@@ -39,9 +39,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * automatically enabled for the next login attempt.
  *
  * @author Vaadin Ltd
+ * @since 1.0
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value = "@vaadin/login", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/login", version = "25.3.0-beta2")
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin implements HasStyle {
 

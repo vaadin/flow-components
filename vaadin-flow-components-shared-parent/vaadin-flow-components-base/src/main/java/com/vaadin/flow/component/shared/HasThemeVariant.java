@@ -29,6 +29,7 @@ import com.vaadin.flow.signals.Signal;
  *
  * @param <TVariantEnum>
  *            The specific theme variant enum type
+ * @since 23.2
  */
 public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
         extends HasTheme {
@@ -64,6 +65,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      * @param set
      *            <code>true</code> to add the theme variant, <code>false</code>
      *            to remove it
+     * @since 25.0
      */
     @SuppressWarnings("unchecked")
     default void setThemeVariant(TVariantEnum variant, boolean set) {
@@ -80,6 +82,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *
      * @param variants
      *            the theme variants to set
+     * @since 25.0
      */
     @SuppressWarnings("unchecked")
     default void setThemeVariants(TVariantEnum... variants) {
@@ -95,6 +98,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *            <code>false</code> to remove them
      * @param variants
      *            the theme variants to add or remove
+     * @since 25.0
      */
     @SuppressWarnings("unchecked")
     default void setThemeVariants(boolean set, TVariantEnum... variants) {
@@ -118,6 +122,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
      * @see HasTheme#bindThemeName(String, Signal)
+     * @since 25.1
      */
     default SignalBinding<Boolean> bindThemeVariant(TVariantEnum variant,
             Signal<Boolean> signal) {
@@ -139,6 +144,7 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
      * @see HasTheme#bindThemeNames(Signal)
+     * @since 25.2
      */
     default SignalBinding<List<TVariantEnum>> bindThemeVariants(
             Signal<List<TVariantEnum>> variants) {

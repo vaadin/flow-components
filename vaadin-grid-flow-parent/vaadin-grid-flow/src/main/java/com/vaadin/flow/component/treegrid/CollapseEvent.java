@@ -22,6 +22,9 @@ import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 
+/**
+ * @since 1.1
+ */
 public class CollapseEvent<T, C extends Component> extends ComponentEvent<C> {
 
     private final Collection<T> items;

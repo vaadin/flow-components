@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.Legend;
 
 /**
  * Style options for Legend
+ * 
+ * @since 18.0
  */
 public class LegendStyle extends Legend {
 

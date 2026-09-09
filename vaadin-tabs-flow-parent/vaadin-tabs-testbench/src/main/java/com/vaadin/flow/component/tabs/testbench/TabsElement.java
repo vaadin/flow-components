@@ -41,7 +41,7 @@ public class TabsElement extends TestBenchElement {
     /**
      * Gets the index of the currently selected tab.
      *
-     * @return the index of the currenly selected tab
+     * @return the index of the currently selected tab
      */
     public int getSelectedTabIndex() {
         return getPropertyInteger("selected");

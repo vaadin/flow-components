@@ -22,7 +22,7 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
  * Spreadsheet action for deleting a SpreadsheetTable.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class DeleteTableAction extends SpreadsheetAction {
 

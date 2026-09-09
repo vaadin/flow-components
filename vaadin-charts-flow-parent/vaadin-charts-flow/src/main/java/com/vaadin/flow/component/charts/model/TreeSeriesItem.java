@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * This class represents one node in a {@link TreeSeries}.
+ * 
+ * @since 6.0.1
  */
 public class TreeSeriesItem extends AbstractSeriesItem {
 

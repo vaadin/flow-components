@@ -303,4 +303,33 @@ class TabsTest {
         Assertions
                 .assertTrue(HasThemeVariant.class.isAssignableFrom(Tabs.class));
     }
+
+    @Test
+    void getIndexOf_returnsIndex() {
+        Tab tab1 = new Tab("Tab one");
+        Tab tab2 = new Tab("Tab two");
+        Tab tab3 = new Tab("Tab three");
+        Tabs tabs = new Tabs(tab1, tab2, tab3);
+
+        Assertions.assertEquals(0, tabs.getIndexOf(tab1));
+        Assertions.assertEquals(1, tabs.getIndexOf(tab2));
+        Assertions.assertEquals(2, tabs.getIndexOf(tab3));
+    }
+
+    @Test
+    void getIndexOf_tabNotChild_returnsMinusOne() {
+        Tab tab1 = new Tab("Tab one");
+        Tab orphan = new Tab("orphan");
+        Tabs tabs = new Tabs(tab1);
+
+        Assertions.assertEquals(-1, tabs.getIndexOf(orphan));
+    }
+
+    @Test
+    void getIndexOf_null_throws() {
+        Tabs tabs = new Tabs();
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tabs.getIndexOf(null));
+    }
 }

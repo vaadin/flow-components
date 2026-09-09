@@ -30,6 +30,7 @@ import com.vaadin.flow.data.provider.DataProvider;
  *
  * @see SelectionPreservationMode
  * @author Vaadin Ltd.
+ * @since 24.4
  */
 public abstract class SelectionPreservationHandler<T> implements Serializable {
 

@@ -6,13 +6,22 @@
 const fs = require('fs');
 const xml2js = require('xml2js');
 const { execSync } = require('child_process');
+const { parseArgs } = require('util');
+
+const { values: options, positionals } = parseArgs({
+  options: {
+    watch: { type: 'boolean', default: false },
+    files: { type: 'string' }
+  },
+  allowPositionals: true
+});
 
 let modules = [];
 async function computeModules() {
-  if (process.argv.length > 2) {
+  if (positionals.length > 0) {
     // Modules are passed as arguments
-    for (let i = 2; i < process.argv.length; i++) {
-      modules.push(`vaadin-${process.argv[i]}-flow-parent`);
+    for (const positional of positionals) {
+      modules.push(`vaadin-${positional}-flow-parent`);
     }
   } else {
     // Read modules from the parent pom.xml
@@ -55,8 +64,11 @@ async function runTests() {
     const id = module.replace('-parent', '');
     const itFolder = `${module}/${id}-integration-tests`;
 
-    // Check if the IT module has wtr tests
-    if (fs.existsSync(`${itFolder}/${wtrTestsFolderName}`)) {
+    const hasTests = fs.existsSync(`${itFolder}/${wtrTestsFolderName}`);
+    const hasTsConfig = fs.existsSync(`${module}/${id}/tsconfig.json`);
+
+    // Check if the IT module has wtr tests or frontend files to type-check
+    if (hasTests || hasTsConfig) {
       console.log(`Installing dependencies in ${itFolder}`);
 
       // Set up an empty node_modules and package.json before running Flow build
@@ -72,10 +84,25 @@ async function runTests() {
       }
 
       // Install the IT module dependencies
-      execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
+      execSync(`mvn flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
+
+      // Type-check the component module's frontend files if it has a tsconfig.
+      // Run after the Flow build so the IT module's node_modules, which the
+      // tsconfig resolves the @vaadin package types from, is populated.
+      if (hasTsConfig) {
+        console.log(`Type-checking frontend files in ${module}/${id}`);
+        execSync(`npx tsc -p ../${id}/tsconfig.json`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      }
+
+      if (!hasTests) {
+        continue;
+      }
 
       // Install Playwright Chromium
       execSync(`npx playwright install chromium`, {
@@ -86,7 +113,11 @@ async function runTests() {
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
       try {
-        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
+        const glob = options.files
+          ? `${wtrTestsFolderName}/${options.files}`
+          : `${wtrTestsFolderName}/**/*.test.ts`;
+        const watchFlag = options.watch ? ' --watch' : '';
+        execSync(`npx web-test-runner --playwright ${glob}${watchFlag}`, {
           cwd: itFolder,
           stdio: 'inherit'
         });
@@ -103,6 +134,14 @@ async function runTests() {
 
 async function main() {
   await computeModules();
+
+  if (options.files && modules.length !== 1) {
+    console.error(
+      '--files requires exactly one component module, e.g. `node scripts/wtr.js grid --files grid-connector-sorting.test.ts`'
+    );
+    process.exit(1);
+  }
+
   await runTests();
 }
 

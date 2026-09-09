@@ -19,6 +19,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializer for {@link AxisList}
  *
+ * @since 6.0.1
  */
 public class AxisListSerializer extends ValueSerializer<AxisList> {
 

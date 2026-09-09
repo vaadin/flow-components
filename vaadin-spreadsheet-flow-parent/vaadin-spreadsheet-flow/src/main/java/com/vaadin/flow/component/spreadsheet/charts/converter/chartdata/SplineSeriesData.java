@@ -10,6 +10,9 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.confwriter.SplineSeriesDataWriter;
 
+/**
+ * @since 24.0
+ */
 public class SplineSeriesData extends LineSeriesData {
 
     @Override

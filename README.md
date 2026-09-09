@@ -51,6 +51,10 @@ NOTE: By default it merges all modules, but it's also possible to merge certain 
 
 - `./scripts/mergeITs.js button text-field crud`
 
+To also include components that depend on the given ones, expand the list first with `./scripts/computeModules.js`:
+
+- `./scripts/mergeITs.js $(./scripts/computeModules.js button)`
+
 ## Running ITs of all components in the merged module
 
 It should take around 15-20 minutes depending on the computer capabilities.
@@ -82,25 +86,15 @@ For running all merged components execute:
 
 ## Debugging web-test-runner tests of a component
 
-Make sure the root level dependencies are installed
+Install the shared dev dependencies at the repo root:
 
 - `npm install`
 
-Serve the IT pages of the component whose tests you want to debug
+Run the tests for the component:
 
-- See "Serving the IT pages of a component" above
+- `node ./scripts/wtr.js grid --watch`
 
-Run the tests for the component once to have the necessary dependencies installed
-
-- `node ./scripts/wtr.js grid`
-
-Move to the integration tests module of the component
-
-- `cd vaadin-grid-flow-parent/vaadin-grid-flow-integration-tests`
-
-Start the test runner in watch mode
-
-- `npx web-test-runner --playwright test/**/*.test.ts --node-resolve --watch`
+This will build the frontend for the integration tests and start the Web Test Runner in watch mode.
 
 NOTE: The tests actually import the client module under test from `..integration-tests/frontend/generated/jar-resources`.
 For faster feedback loop you can work on the generated file directly. Just be careful not to lose your changes to it since it's not under version control.

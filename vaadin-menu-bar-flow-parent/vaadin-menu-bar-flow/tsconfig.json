@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "useDefineForClassFields": false,
+    // The connector imports the context menu module's connector, which Flow
+    // resolves from the folder all jar frontend resources are merged into.
+    // Treating both modules' frontend folders as one virtual root lets the
+    // compiler resolve the import, and the item types, the same way.
+    "rootDirs": [
+      "src/main/resources/META-INF/frontend",
+      "../../vaadin-context-menu-flow-parent/vaadin-context-menu-flow/src/main/resources/META-INF/frontend"
+    ],
+    // Resolve @vaadin package types from the integration tests module, whose
+    // node_modules is populated by the Maven frontend build
+    "paths": {
+      "@vaadin/*": ["../vaadin-menu-bar-flow-integration-tests/node_modules/@vaadin/*"]
+    }
+  },
+  "include": ["src/main/resources/META-INF/frontend/**/*"]
+}

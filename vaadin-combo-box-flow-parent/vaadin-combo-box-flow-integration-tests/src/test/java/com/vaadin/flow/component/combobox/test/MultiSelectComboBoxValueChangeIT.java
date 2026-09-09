@@ -102,6 +102,16 @@ public class MultiSelectComboBoxValueChangeIT extends AbstractComponentIT {
         assertValueChange(Collections.emptySet(), "server");
     }
 
+    @Test
+    public void selectItems_deselectAll_valueCleared() {
+        comboBox.selectByText("Item 1");
+        comboBox.selectByText("Item 10");
+        comboBox.deselectAll();
+
+        assertSelectedItems(Collections.emptySet());
+        assertValueChange(Collections.emptySet(), "client");
+    }
+
     private void assertSelectedItems(Set<String> items) {
         List<String> selectedTexts = comboBox.getSelectedTexts();
         Assert.assertEquals("Number of selected items does not match",

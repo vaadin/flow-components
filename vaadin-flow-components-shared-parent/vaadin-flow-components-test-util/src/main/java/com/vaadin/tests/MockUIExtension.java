@@ -32,8 +32,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 /**
  * JUnit extension to set up a UI and VaadinSession for testing.
@@ -52,16 +54,52 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     private UI ui;
     private VaadinSession session;
     private VaadinService service;
+    private VaadinContext vaadinContext;
 
     @Override
-    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
     public void beforeEach(ExtensionContext context) {
+        setUp();
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) {
+        tearDown();
+    }
+
+    /**
+     * Sets up a UI for testing. Only use this method directly in contexts where
+     * registering the extension is not possible, for example when using
+     * {@link org.junit.jupiter.api.DynamicTest}.
+     */
+    @SuppressWarnings("checkstyle:UiSetCurrentCheck")
+    public void setUp() {
         service = Mockito.mock(VaadinService.class);
         DeploymentConfiguration deploymentConfig = Mockito
                 .mock(DeploymentConfiguration.class);
         Mockito.when(deploymentConfig.isProductionMode()).thenReturn(false);
         Mockito.when(service.getDeploymentConfiguration())
                 .thenReturn(deploymentConfig);
+        vaadinContext = Mockito.mock(VaadinContext.class);
+        var applicationConfiguration = Mockito
+                .mock(ApplicationConfiguration.class);
+        // Derive from the deployment configuration so a test that re-stubs
+        // production mode there gets a consistent answer on both lookup
+        // paths.
+        Mockito.when(applicationConfiguration.isProductionMode())
+                .thenAnswer(query -> deploymentConfig.isProductionMode());
+        // Mockito does not run real default methods on mocks, so the
+        // delegating one-arg getAttribute(Class) overload must be stubbed
+        // separately from the two-arg one that
+        // ApplicationConfiguration.get(context) calls. An unstubbed overload
+        // returns null and every caller resolving the configuration (Binder
+        // validation, session serialization) fails with a
+        // NullPointerException.
+        Mockito.when(vaadinContext.getAttribute(
+                Mockito.eq(ApplicationConfiguration.class), Mockito.any()))
+                .thenReturn(applicationConfiguration);
+        Mockito.when(vaadinContext.getAttribute(ApplicationConfiguration.class))
+                .thenReturn(applicationConfiguration);
+        Mockito.when(service.getContext()).thenReturn(vaadinContext);
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 
@@ -72,13 +110,13 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         VaadinSession.setCurrent(session);
     }
 
-    @Override
-    public void afterEach(ExtensionContext context) {
-        cleanup();
-    }
-
+    /**
+     * Tears down a UI that was previously set up. Only use this method directly
+     * in contexts where registering the extension is not possible, for example
+     * when using {@link org.junit.jupiter.api.DynamicTest}.
+     */
     @SuppressWarnings("checkstyle:UiSetCurrentCheck")
-    private void cleanup() {
+    public void tearDown() {
         removeAll();
         UI.setCurrent(null);
         VaadinSession.setCurrent(null);
@@ -97,14 +135,14 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      * Clears the current the UI.
      */
     public void clearUI() {
-        cleanup();
+        tearDown();
     }
 
     /**
      * Replaces the current UI with a new instance.
      */
     public void replaceUI() {
-        cleanup();
+        tearDown();
         beforeEach(null);
     }
 
@@ -130,6 +168,20 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      */
     public VaadinService getService() {
         return service;
+    }
+
+    /**
+     * Get the VaadinContext instance that the mocked {@link VaadinService}
+     * returns.
+     * <p>
+     * Note that this returns a Mockito mock, so it supports stubbing and
+     * verification. An {@link ApplicationConfiguration} attribute is stubbed on
+     * it already.
+     *
+     * @return the VaadinContext instance
+     */
+    public VaadinContext getContext() {
+        return vaadinContext;
     }
 
     /**

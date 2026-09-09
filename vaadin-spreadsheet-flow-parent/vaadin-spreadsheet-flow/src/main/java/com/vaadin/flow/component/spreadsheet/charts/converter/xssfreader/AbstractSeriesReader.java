@@ -33,6 +33,9 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Abstract
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataSelectListener;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 
+/**
+ * @since 24.0
+ */
 public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES_DATA_TYPE extends AbstractSeriesData> {
 
     private final XmlObject ctChart;

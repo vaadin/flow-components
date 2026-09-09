@@ -12,6 +12,9 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.charts.util.Util;
 
+/**
+ * @since 6.0.1
+ */
 public interface ClickEvent extends Serializable {
 
     /**

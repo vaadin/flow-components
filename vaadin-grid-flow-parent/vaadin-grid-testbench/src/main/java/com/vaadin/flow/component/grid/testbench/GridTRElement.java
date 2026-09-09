@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -47,20 +45,15 @@ public class GridTRElement extends TestBenchElement {
      *         columns
      */
     public List<GridTHTDElement> getCells(GridColumnElement... columns) {
-        Object cells = executeScript("const row = arguments[0];" //
-                + "const columnIds = arguments[1];"
-                + "return Array.from(row.children)."
-                + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
-                this, Arrays.stream(columns)
-                        .map(GridColumnElement::get__generatedId).toArray());
-        if (cells != null) {
-            return ((ArrayList<?>) cells).stream()
-                    .map(elem -> ((TestBenchElement) elem)
-                            .wrap(GridTHTDElement.class))
-                    .toList();
-        } else {
-            return new ArrayList<>();
-        }
+        @SuppressWarnings("unchecked")
+        List<TestBenchElement> cells = (List<TestBenchElement>) executeScript(
+                """
+                        const [row, columns] = arguments;
+                        return Array.from(row.children)
+                            .filter((cell) => columns.includes(cell._column));
+                        """, this, columns);
+        return cells.stream().map(cell -> cell.wrap(GridTHTDElement.class))
+                .toList();
     }
 
     /**

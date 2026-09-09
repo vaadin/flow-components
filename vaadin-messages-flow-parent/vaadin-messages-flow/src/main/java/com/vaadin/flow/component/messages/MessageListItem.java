@@ -52,6 +52,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer;
  *
  * @author Vaadin Ltd.
  * @see MessageList#setItems(Collection)
+ * @since 14.7
  */
 public class MessageListItem implements Serializable {
 
@@ -108,6 +109,7 @@ public class MessageListItem implements Serializable {
      *            the user name of the message sender
      * @see #setText(String)
      * @see #setUserName(String)
+     * @since 24.8
      */
     public MessageListItem(String text, String userName) {
         this(text);
@@ -193,6 +195,7 @@ public class MessageListItem implements Serializable {
      *
      * @param text
      *            the text to append to the message's text content
+     * @since 24.8
      */
     public void appendText(String text) {
         if (text == null) {
@@ -334,9 +337,9 @@ public class MessageListItem implements Serializable {
     }
 
     /*
-     * The following theme-related methods are copied from the HasTheme
-     * interface, because the interface is compatible only with components. For
-     * more detailed reasoning, see the discussion in:
+     * The following theme-related methods are copied from the HasTheme and
+     * HasThemeVariant interfaces, because those interfaces are compatible only
+     * with components. For more detailed reasoning, see the discussion in:
      * https://github.com/vaadin/flow-components/pull/979#discussion_r634097080
      */
 
@@ -346,6 +349,7 @@ public class MessageListItem implements Serializable {
      *
      * @param themeNames
      *            the theme name or theme names to be added to the message
+     * @since 21.0
      */
     public void addThemeNames(String... themeNames) {
         this.themeNames.addAll(Arrays.asList(themeNames));
@@ -358,6 +362,7 @@ public class MessageListItem implements Serializable {
      *
      * @param themeNames
      *            the theme name or theme names to be removed from the message
+     * @since 21.0
      */
     public void removeThemeNames(String... themeNames) {
         this.themeNames.removeAll(Arrays.asList(themeNames));
@@ -371,9 +376,84 @@ public class MessageListItem implements Serializable {
      *            the theme name to check for
      * @return <code>true</code> if the message has the given theme name,
      *         <code>false</code> otherwise
+     * @since 21.0
      */
     public boolean hasThemeName(String themeName) {
         return themeNames.contains(themeName);
+    }
+
+    /**
+     * Adds theme variants to this message.
+     *
+     * @param variants
+     *            the theme variants to add
+     * @since 25.3
+     */
+    public void addThemeVariants(MessageListItemVariant... variants) {
+        addThemeNames(getVariantNames(variants));
+    }
+
+    /**
+     * Removes theme variants from this message.
+     *
+     * @param variants
+     *            the theme variants to remove
+     * @since 25.3
+     */
+    public void removeThemeVariants(MessageListItemVariant... variants) {
+        removeThemeNames(getVariantNames(variants));
+    }
+
+    /**
+     * Sets the theme variants of this message. This method overwrites any
+     * previously set theme variants, as well as any theme names added with
+     * {@link #addThemeNames(String...)}.
+     *
+     * @param variants
+     *            the theme variants to set
+     * @since 25.3
+     */
+    public void setThemeVariants(MessageListItemVariant... variants) {
+        themeNames.clear();
+        addThemeVariants(variants);
+    }
+
+    /**
+     * Adds or removes the given theme variant for this message.
+     *
+     * @param variant
+     *            the theme variant to add or remove, not <code>null</code>
+     * @param set
+     *            <code>true</code> to add the theme variant, <code>false</code>
+     *            to remove it
+     * @since 25.3
+     */
+    public void setThemeVariant(MessageListItemVariant variant, boolean set) {
+        if (set) {
+            addThemeVariants(variant);
+        } else {
+            removeThemeVariants(variant);
+        }
+    }
+
+    /**
+     * Checks if the message has the given theme variant.
+     *
+     * @param variant
+     *            the theme variant to check for
+     * @return <code>true</code> if the message has the given theme variant,
+     *         <code>false</code> otherwise
+     * @since 25.3
+     */
+    public boolean hasThemeVariant(MessageListItemVariant variant) {
+        return hasThemeName(variant.getVariantName());
+    }
+
+    private static String[] getVariantNames(
+            MessageListItemVariant... variants) {
+        return Arrays.stream(variants)
+                .map(MessageListItemVariant::getVariantName)
+                .toArray(String[]::new);
     }
 
     // Used only for Jackson serialization
@@ -392,6 +472,7 @@ public class MessageListItem implements Serializable {
      *
      * @param classNames
      *            the class name or class names to be added to the item
+     * @since 24.3
      */
     public void addClassNames(String... classNames) {
         this.classNames.addAll(Arrays.asList(classNames));
@@ -404,6 +485,7 @@ public class MessageListItem implements Serializable {
      *
      * @param classNames
      *            the class name or class names to be removed from the item
+     * @since 24.3
      */
     public void removeClassNames(String... classNames) {
         this.classNames.removeAll(Arrays.asList(classNames));
@@ -417,6 +499,7 @@ public class MessageListItem implements Serializable {
      *            the class name to check for
      * @return <code>true</code> if the message has the given class name,
      *         <code>false</code> otherwise
+     * @since 24.3
      */
     public boolean hasClassName(String className) {
         return classNames.contains(className);
@@ -459,6 +542,7 @@ public class MessageListItem implements Serializable {
      *            download handler for the image resource, or {@code null} to
      *            remove the resource
      * @see MessageListItem#setUserImage(String)
+     * @since 24.8
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
         if (downloadHandler == null) {
@@ -619,6 +703,7 @@ public class MessageListItem implements Serializable {
      * Gets the attachments of this message.
      *
      * @return an unmodifiable list of attachments, never {@code null}
+     * @since 25.1
      */
     public List<Attachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
@@ -630,6 +715,7 @@ public class MessageListItem implements Serializable {
      *
      * @param attachments
      *            the attachments to set, or an empty list to clear attachments
+     * @since 25.1
      */
     public void setAttachments(List<Attachment> attachments) {
         Objects.requireNonNull(attachments,
@@ -643,6 +729,7 @@ public class MessageListItem implements Serializable {
      *
      * @param attachment
      *            the attachment to add, not {@code null}
+     * @since 25.1
      */
     public void addAttachment(Attachment attachment) {
         Objects.requireNonNull(attachment, "Attachment cannot be null");
@@ -665,6 +752,7 @@ public class MessageListItem implements Serializable {
      * @param mimeType
      *            the MIME type of the attachment (e.g., "application/pdf",
      *            "image/png"). Serialized as "type" in JSON.
+     * @since 25.1
      */
     public record Attachment(String name, String url,
             @JsonProperty("type") String mimeType) implements Serializable {

@@ -96,7 +96,7 @@ public class ClusterPage extends Div {
         FeatureLayer layer = map.getFeatureLayer();
 
         DownloadHandler downloadHandler = DownloadHandler.forClassResource(
-                getClass(), "/META-INF/resources/frontend/custom-cluster.png",
+                getClass(), "/META-INF/resources/custom-cluster.png",
                 "custom-cluster.png").inline();
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setImg(downloadHandler);

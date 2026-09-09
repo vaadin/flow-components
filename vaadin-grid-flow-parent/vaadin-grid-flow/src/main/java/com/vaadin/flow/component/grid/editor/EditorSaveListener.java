@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.Grid;
  *
  * @see EditorSaveEvent
  * @see Editor#addSaveListener(EditorSaveListener)
+ * @since 2.1
  */
 @FunctionalInterface
 public interface EditorSaveListener<T> extends Serializable {

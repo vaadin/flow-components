@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-tabsheet} component.
+ * 
+ * @since 23.3
  */
 public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_CENTERED("centered"),
@@ -32,17 +34,20 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     /**
      * @deprecated Use {@link #TABS_HIDE_SCROLL_BUTTONS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     /**
      * @deprecated Use {@link #TABS_SHOW_SCROLL_BUTTONS} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_TABS_SHOW_SCROLL_BUTTONS("show-scroll-buttons"),
     /**
      * @deprecated Use {@link #NO_PADDING} instead.
+     * @since 25.0
      */
     @Deprecated
     AURA_NO_PADDING("no-padding"),

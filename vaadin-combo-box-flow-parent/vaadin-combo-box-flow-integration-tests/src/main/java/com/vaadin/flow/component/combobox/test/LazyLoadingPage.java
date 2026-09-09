@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -134,7 +135,7 @@ public class LazyLoadingPage extends Div {
 
         List<Person> people = IntStream.range(0, 987)
                 .mapToObj(i -> new Person("Person " + i, i))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
                 people);
 
@@ -156,8 +157,7 @@ public class LazyLoadingPage extends Div {
         itemLabelGeneratorButton.setId("item-label-generator");
 
         List<Person> altPeople = IntStream.range(0, 220)
-                .mapToObj(i -> new Person("Changed " + i, 2000 + i))
-                .collect(Collectors.toList());
+                .mapToObj(i -> new Person("Changed " + i, 2000 + i)).toList();
         ListDataProvider<Person> altPersonDataProvider = new ListDataProvider<>(
                 altPeople);
         NativeButton dataProviderButton = new NativeButton(
@@ -188,8 +188,7 @@ public class LazyLoadingPage extends Div {
         comboBox.setId("custom-filter");
 
         List<Person> people = IntStream.range(0, 500)
-                .mapToObj(i -> new Person("Person", i))
-                .collect(Collectors.toList());
+                .mapToObj(i -> new Person("Person", i)).toList();
         ListDataProvider<Person> personDataProvider = new ListDataProvider<>(
                 people);
 
@@ -279,8 +278,7 @@ public class LazyLoadingPage extends Div {
         comboBox.setId("disabled-lazy-loading");
         // Having a number of items less than or equal than the page size will
         // disable lazy-loading
-        List<Integer> items = IntStream.range(0, 100).boxed()
-                .collect(Collectors.toList());
+        List<Integer> items = IntStream.range(0, 100).boxed().toList();
         comboBox.setItems(items);
 
         NativeButton enableLazyLoading = new NativeButton("Enable lazy loading",
@@ -305,7 +303,8 @@ public class LazyLoadingPage extends Div {
 
     public static List<String> generateStrings(int count) {
         List<String> items = IntStream.range(0, count)
-                .mapToObj(i -> "Item " + i).collect(Collectors.toList());
+                .mapToObj(i -> "Item " + i)
+                .collect(Collectors.toCollection(ArrayList::new));
         return items;
     }
 

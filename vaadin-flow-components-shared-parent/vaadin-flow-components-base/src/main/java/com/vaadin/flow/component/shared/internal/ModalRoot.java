@@ -38,6 +38,8 @@ import java.lang.annotation.Target;
  * <p>
  * <strong> Internal use only. May be renamed or removed in a future release.
  * </strong>
+ * 
+ * @since 24.9.3
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

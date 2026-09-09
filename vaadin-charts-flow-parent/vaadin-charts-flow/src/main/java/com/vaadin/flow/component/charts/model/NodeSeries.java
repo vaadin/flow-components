@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * A series containing nodes and links to nodes.
+ * 
+ * @since 18.0
  */
 @JsonPropertyOrder({ "nodes", "values" })
 public class NodeSeries extends AbstractSeries {

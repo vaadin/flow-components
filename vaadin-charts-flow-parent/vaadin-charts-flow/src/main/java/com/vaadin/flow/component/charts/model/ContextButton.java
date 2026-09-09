@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the export button.
+ * 
+ * @since 6.0.1
  */
 public class ContextButton extends AbstractConfigurationObject {
 
@@ -62,6 +64,7 @@ public class ContextButton extends AbstractConfigurationObject {
      * Gets the spacing between the context button and other exporting buttons.
      *
      * @return the button spacing
+     * @since 25.0
      */
     public Number getButtonSpacing() {
         return buttonSpacing;
@@ -72,6 +75,7 @@ public class ContextButton extends AbstractConfigurationObject {
      *
      * @param buttonSpacing
      *            the spacing value
+     * @since 25.0
      */
     public void setButtonSpacing(Number buttonSpacing) {
         this.buttonSpacing = buttonSpacing;
@@ -154,6 +158,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolFill(Color)
+     * @since 18.0
      */
     public Color getSymbolFill() {
         return symbolFill;
@@ -165,6 +170,8 @@ public class ContextButton extends AbstractConfigurationObject {
      * symbolFill.
      * <p>
      * Defaults to: #666666
+     * 
+     * @since 18.0
      */
     public void setSymbolFill(Color symbolFill) {
         this.symbolFill = symbolFill;
@@ -172,6 +179,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolSize(Number)
+     * @since 18.0
      */
     public Number getSymbolSize() {
         return symbolSize;
@@ -181,6 +189,8 @@ public class ContextButton extends AbstractConfigurationObject {
      * The pixel size of the symbol on the button.
      * <p>
      * Defaults to: 14
+     * 
+     * @since 18.0
      */
     public void setSymbolSize(Number symbolSize) {
         this.symbolSize = symbolSize;
@@ -188,6 +198,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolStroke(Color)
+     * @since 18.0
      */
     public Color getSymbolStroke() {
         return symbolStroke;
@@ -197,6 +208,8 @@ public class ContextButton extends AbstractConfigurationObject {
      * The color of the symbol's stroke or line.
      * <p>
      * Defaults to: #666666
+     * 
+     * @since 18.0
      */
     public void setSymbolStroke(Color symbolStroke) {
         this.symbolStroke = symbolStroke;
@@ -204,6 +217,7 @@ public class ContextButton extends AbstractConfigurationObject {
 
     /**
      * @see #setSymbolStrokeWidth(Number)
+     * @since 18.0
      */
     public Number getSymbolStrokeWidth() {
         return symbolStrokeWidth;
@@ -213,6 +227,8 @@ public class ContextButton extends AbstractConfigurationObject {
      * The pixel stroke width of the symbol on the button.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setSymbolStrokeWidth(Number symbolStrokeWidth) {
         this.symbolStrokeWidth = symbolStrokeWidth;

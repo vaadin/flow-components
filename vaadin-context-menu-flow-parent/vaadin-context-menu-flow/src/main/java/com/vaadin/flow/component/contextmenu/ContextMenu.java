@@ -47,6 +47,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * as an overflow menu, use Menu Bar.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
@@ -87,6 +88,7 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
      * Gets position of the context menu with respect to its {@code target}.
      *
      * @return the position
+     * @since 25.0
      */
     public ContextMenuPosition getPosition() {
         String positionString = getElement().getProperty("position");
@@ -106,6 +108,7 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
      * @param position
      *            the position to set
      * @see #setTarget(Component)
+     * @since 25.0
      */
     public void setPosition(ContextMenuPosition position) {
         getElement().setProperty("position", position.getPosition());

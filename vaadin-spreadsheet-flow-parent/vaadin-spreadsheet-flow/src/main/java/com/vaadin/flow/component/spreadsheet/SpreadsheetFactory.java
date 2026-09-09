@@ -908,9 +908,9 @@ public class SpreadsheetFactory implements Serializable {
                         LOGGER.debug("IMAGE WITHOUT ANCHOR: " + overlayWrapper);
 
                         // FIXME seems like there is a POI bug, images that have
-                        // in Excel (XLSX) been se as a certain type (type==3)
+                        // in Excel (XLSX) been set as a certain type (type==3)
                         // will get a null anchor.
-                        // Achor types:
+                        // Anchor types:
                         // 0 = Move and size with Cells,
                         // 2 = Move but don't size with cells,
                         // 3 = Don't move or size with cells.

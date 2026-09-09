@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public class ExportingMenuItemDefinition extends AbstractConfigurationObject {
 
     private String _fn_onclick;

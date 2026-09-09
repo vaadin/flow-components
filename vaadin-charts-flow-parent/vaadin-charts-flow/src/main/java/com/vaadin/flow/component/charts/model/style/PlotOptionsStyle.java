@@ -44,6 +44,8 @@ import com.vaadin.flow.component.charts.model.PlotOptionsXrange;
 
 /**
  * Styles for PlotOptions of different plot types
+ * 
+ * @since 18.0
  */
 @SuppressWarnings("serial")
 public class PlotOptionsStyle extends AbstractConfigurationObject {
@@ -547,6 +549,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
 
     /**
      * @see #setGantt(PlotOptionsGantt)
+     * @since 24.7
      */
     public PlotOptionsGantt getGantt() {
         return gantt;
@@ -556,6 +559,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      * Sets the style options for {@link ChartType#GANTT} charts
      *
      * @param gantt
+     * @since 24.7
      */
     public void setGantt(PlotOptionsGantt gantt) {
         this.gantt = gantt;

@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * Possible timespan values for range selector buttons
+ * 
+ * @since 6.0.1
  */
 public enum RangeSelectorTimespan implements ChartEnum {
     MILLISECOND("millisecond"),

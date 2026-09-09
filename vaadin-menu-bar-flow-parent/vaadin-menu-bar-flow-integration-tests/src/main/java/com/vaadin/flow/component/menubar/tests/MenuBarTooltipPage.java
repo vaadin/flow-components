@@ -54,6 +54,15 @@ public class MenuBarTooltipPage extends Div {
                 "Item 0-2 / Tooltip");
         item0_2.setTooltipPosition(TooltipPosition.TOP);
 
+        // Hidden before the first render, so the generated items array is
+        // created without its tooltip
+        var item3 = menuBar.addItem("Item 3", "Item 3 / Tooltip");
+        item3.setVisible(false);
+
+        var showItem3 = new NativeButton("Show Item 3",
+                event -> item3.setVisible(true));
+        showItem3.setId("show-item-3");
+
         var attach = new NativeButton("Attach", event -> add(menuBar));
         attach.setId("attach");
         var detach = new NativeButton("Detach", event -> remove(menuBar));
@@ -65,6 +74,6 @@ public class MenuBarTooltipPage extends Div {
         });
         updateTooltips.setId("update-tooltips");
 
-        add(attach, detach, updateTooltips, menuBar);
+        add(attach, detach, updateTooltips, showItem3, menuBar);
     }
 }

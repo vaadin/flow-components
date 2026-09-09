@@ -13,7 +13,7 @@ import {
     SpreadsheetRowHeader,
     emptyRowHeaderRenderState,
     type RowHeaderRenderState,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetRowHeader.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetRowHeader.js';
 
 /**
  * Slice 144 — row header strip.

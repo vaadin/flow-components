@@ -19,6 +19,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
  * @param <V>
  *            the value type
  *
+ * @since 1.0
  */
 public interface ItemUpdater<T, V> extends SerializableBiConsumer<T, V> {
 

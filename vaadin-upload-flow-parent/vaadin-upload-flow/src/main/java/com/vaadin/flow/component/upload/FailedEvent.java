@@ -20,6 +20,7 @@ package com.vaadin.flow.component.upload;
  * interrupted for some reason.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class FailedEvent extends FinishedEvent {
 

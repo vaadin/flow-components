@@ -15,6 +15,8 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
  * Abstract base class for all map sources
+ * 
+ * @since 23.0
  */
 public abstract class Source extends AbstractConfigurationObject {
 
@@ -92,6 +94,9 @@ public abstract class Source extends AbstractConfigurationObject {
         return projection;
     }
 
+    /**
+     * @since 23.1
+     */
     protected static abstract class Options {
         private List<String> attributions;
         private boolean attributionsCollapsible = true;

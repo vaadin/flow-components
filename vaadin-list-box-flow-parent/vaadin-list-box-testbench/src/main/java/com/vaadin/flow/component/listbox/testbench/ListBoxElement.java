@@ -18,7 +18,6 @@ package com.vaadin.flow.component.listbox.testbench;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
@@ -49,7 +48,7 @@ public class ListBoxElement extends TestBenchElement
     }
 
     public List<String> getOptions() {
-        return getItems().map(WebElement::getText).collect(Collectors.toList());
+        return getItems().map(WebElement::getText).toList();
     }
 
     private Stream<WebElement> getItems() {

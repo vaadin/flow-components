@@ -18,7 +18,6 @@ package com.vaadin.flow.component.radiobutton.testbench;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasSelectByText;
@@ -41,7 +40,7 @@ public class RadioButtonGroupElement extends TestBenchElement
      */
     public List<String> getOptions() {
         return getRadioButtons().stream().map(RadioButtonElement::getItem)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

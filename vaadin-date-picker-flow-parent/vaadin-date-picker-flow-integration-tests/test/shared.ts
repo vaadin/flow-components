@@ -1,33 +1,19 @@
 import './env-setup.js';
 import '@vaadin/date-picker/src/vaadin-date-picker.js';
-import '../frontend/generated/jar-resources/datepickerConnector.js';
-import type { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
+import '../frontend/generated/jar-resources/vaadin-date-picker/datepickerConnector.ts';
 export { extractDateParts } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 import type {} from '@web/test-runner-mocha';
+import type { FlowDatePicker } from '../frontend/generated/jar-resources/vaadin-date-picker/vaadin-date-picker-types.js';
 
-export type FlowDatePickerI18n = {
-  dateFormats: string[];
-  referenceDate?: string;
-};
+export type {
+  DatePickerConnector,
+  DatePickerServer,
+  DateMetadataConfig as FlowDatePickerDateMetadataConfig,
+  FlowDatePicker,
+  FlowDatePickerI18n
+} from '../frontend/generated/jar-resources/vaadin-date-picker/vaadin-date-picker-types.js';
 
-export type DatePickerConnector = {
-  initLazy: (datePicker: DatePicker) => void;
-  updateI18n: (locale: string, i18n: FlowDatePickerI18n) => void;
-};
-
-export type FlowDatePicker = DatePicker & {
-  $connector: DatePickerConnector;
-};
-
-type Vaadin = {
-  Flow: {
-    datepickerConnector: DatePickerConnector;
-  };
-};
-
-const Vaadin = window.Vaadin as Vaadin;
-
-export const datepickerConnector = Vaadin.Flow.datepickerConnector;
+export const datepickerConnector = window.Vaadin.Flow.datepickerConnector;
 
 export function init(datePicker: FlowDatePicker): void {
   datepickerConnector.initLazy(datePicker);

@@ -15,6 +15,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * The DataSeriesItem class represents a single entry in a {@link DataSeries}.
+ * 
+ * @since 6.0.1
  */
 @SuppressWarnings("serial")
 public class DataSeriesItem extends AbstractSeriesItem {
@@ -65,6 +67,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      *            Y-value of the item.
      * @param color
      *            Color of the item.
+     * @since 18.0
      */
     public DataSeriesItem(String name, Number y, Color color) {
         setName(name);
@@ -96,6 +99,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      *            Y-value of the item.
      * @param color
      *            Color of the item.
+     * @since 18.0
      */
     public DataSeriesItem(Number x, Number y, Color color) {
         setX(x);
@@ -220,6 +224,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 18.0
      */
     @Override
     public void setColor(Color color) {
@@ -376,6 +382,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
 
     /**
      * @see #setDescription(String)
+     * @since 18.0
      */
     public String getDescription() {
         return description;
@@ -391,6 +398,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * </p>
      * <p>
      * Defaults to: undefined
+     * 
+     * @since 18.0
      */
     public void setDescription(String description) {
         this.description = description;

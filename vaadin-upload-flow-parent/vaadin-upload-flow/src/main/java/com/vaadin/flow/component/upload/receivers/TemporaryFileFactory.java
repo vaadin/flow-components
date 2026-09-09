@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * @since 21.0.4
+ */
 @Deprecated(since = "24.8", forRemoval = true)
 public class TemporaryFileFactory implements FileFactory {
 

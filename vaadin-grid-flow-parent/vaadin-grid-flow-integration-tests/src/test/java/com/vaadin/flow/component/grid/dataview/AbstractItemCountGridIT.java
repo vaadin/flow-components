@@ -56,10 +56,8 @@ public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
     protected void doScroll(int rowToScroll, int expectedRows, int fetchIndex,
             int start, int end) {
         grid.scrollToRow(rowToScroll);
-        // FIXME when grid reduces size, it does currently some extra fetches
-        // -> not checking the requested items until this is fixed
-        // verifyFetchForUndefinedSizeCallback(fetchIndex,
-        // Range.between(start, end));
+        // A single scroll may fetch several pages, so only the resulting row
+        // count is asserted here. fetchIndex/start/end document the range.
         verifyRows(expectedRows);
     }
 
@@ -98,6 +96,20 @@ public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
     protected void verifyRows(int size) {
         Assert.assertEquals("Item count doesn't match", size,
                 grid.getRowCount());
+    }
+
+    protected int getFetchQueryCount() {
+        return findElements(By.cssSelector("[id^='log-']")).size();
+    }
+
+    /**
+     * Returns the start offset of the fetch query logged at the given index.
+     * Log entries are formatted as {@code "<index>:Range [<start>..<end>]"}.
+     */
+    protected int getFetchedOffset(int index) {
+        String text = findElement(By.id("log-" + index)).getText();
+        return Integer.parseInt(
+                text.substring(text.indexOf('[') + 1, text.indexOf("..")));
     }
 
     protected void verifyFetchForUndefinedSizeCallback(int index, Range range) {

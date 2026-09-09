@@ -9,7 +9,7 @@
 
 import { expect } from 'chai';
 
-import { computeNavigationTarget } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { computeNavigationTarget } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
  * Slice 149 — extended keyboard navigation.

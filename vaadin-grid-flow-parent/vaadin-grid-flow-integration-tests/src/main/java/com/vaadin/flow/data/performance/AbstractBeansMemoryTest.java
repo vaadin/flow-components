@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -90,8 +89,7 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
     protected abstract T createComponent();
 
     protected List<Person> createBeans(int size) {
-        return IntStream.range(0, size).mapToObj(this::createPerson)
-                .collect(Collectors.toList());
+        return IntStream.range(0, size).mapToObj(this::createPerson).toList();
     }
 
     protected Person createPerson(int index) {

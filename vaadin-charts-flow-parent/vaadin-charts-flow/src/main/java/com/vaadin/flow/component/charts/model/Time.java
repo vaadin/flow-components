@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * These settings affect how datetime axes are laid out, how tooltips are
  * formatted, how series pointIntervalUnit works and how the Highstock range
  * selector handles time.
+ * 
+ * @since 18.0
  */
 public class Time extends AbstractConfigurationObject {
 
@@ -24,6 +26,7 @@ public class Time extends AbstractConfigurationObject {
 
     /**
      * @see #setTimezone(String)
+     * @since 25.0
      */
     public String getTimezone() {
         return timezone;
@@ -45,6 +48,7 @@ public class Time extends AbstractConfigurationObject {
      * {@link #setUseUTC(Boolean) useUTC} to true.
      *
      * @param timezone
+     * @since 25.0
      */
     public void setTimezone(String timezone) {
         this.timezone = timezone;

@@ -18,6 +18,8 @@ import tools.jackson.databind.node.ArrayNode;
 /**
  * The ChartAddSeriesEvent class stores data about new series added to an
  * existing chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("chart-add-series")
 public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
@@ -32,6 +34,7 @@ public class ChartAddSeriesEvent extends ComponentEvent<Chart> {
      * @param fromClient
      * @param name
      * @param data
+     * @since 25.0
      */
     public ChartAddSeriesEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.options.name") String name,

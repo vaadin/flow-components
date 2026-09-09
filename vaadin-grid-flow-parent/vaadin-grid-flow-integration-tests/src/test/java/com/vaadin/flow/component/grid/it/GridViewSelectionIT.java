@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -152,11 +151,9 @@ public class GridViewSelectionIT extends AbstractComponentIT {
     private static String getSelectionMessage(List<Person> previousSelection,
             List<Person> newSelection, boolean isFromClient) {
         List<Person> previousSelectionSorted = previousSelection.stream()
-                .sorted(Comparator.comparingLong(Person::getId))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparingLong(Person::getId)).toList();
         List<Person> newSelectionSorted = newSelection.stream()
-                .sorted(Comparator.comparingLong(Person::getId))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparingLong(Person::getId)).toList();
 
         return String.format(
                 "Selection changed from %s to %s, selection is from client: %s",

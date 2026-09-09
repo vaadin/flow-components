@@ -37,6 +37,17 @@ public class MarkdownPage extends Div {
                 event -> markdown.setContent("**Updated** _Markdown_"));
         setButton.setId("set-button");
         add(setButton);
+
+        var setLineBreaksContentButton = new NativeButton(
+                "Set line breaks content",
+                event -> markdown.setContent("lorem\nipsum"));
+        setLineBreaksContentButton.setId("set-line-breaks-content-button");
+        add(setLineBreaksContentButton);
+
+        var toggleLineBreaksButton = new NativeButton("Toggle line breaks",
+                event -> markdown.setLineBreaks(!markdown.isLineBreaks()));
+        toggleLineBreaksButton.setId("toggle-line-breaks-button");
+        add(toggleLineBreaksButton);
     }
 
 }

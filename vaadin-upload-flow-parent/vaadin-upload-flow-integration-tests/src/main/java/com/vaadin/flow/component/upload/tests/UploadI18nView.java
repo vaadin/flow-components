@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.html.Div;
@@ -57,10 +56,8 @@ public class UploadI18nView extends Div {
                                     .setUnexpectedServerError(
                                             "Неожиданная ошибка сервера")
                                     .setForbidden("Загрузка запрещена")))
-            .setUnits(Stream
-                    .of("Б", "Кбайт", "Мбайт", "Гбайт", "Тбайт", "Пбайт",
-                            "Эбайт", "Збайт", "Ибайт")
-                    .collect(Collectors.toList()), 1024);
+            .setUnits(Stream.of("Б", "Кбайт", "Мбайт", "Гбайт", "Тбайт",
+                    "Пбайт", "Эбайт", "Збайт", "Ибайт").toList(), 1024);
 
     public UploadI18nView() {
         MemoryBuffer buffer = new MemoryBuffer();

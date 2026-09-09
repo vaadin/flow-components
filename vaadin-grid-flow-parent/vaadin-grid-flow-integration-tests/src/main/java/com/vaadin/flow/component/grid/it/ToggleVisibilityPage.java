@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -36,12 +35,12 @@ public class ToggleVisibilityPage extends Div {
     public ToggleVisibilityPage() {
         Grid<String> grid1 = new Grid<>();
         grid1.setItems(IntStream.range(0, 100).mapToObj(i -> "Grid1 Item " + i)
-                .collect(Collectors.toList()));
+                .toList());
         grid1.addColumn(ValueProvider.identity());
 
         Grid<String> grid2 = new Grid<>();
         grid2.setItems(IntStream.range(0, 100).mapToObj(i -> "Grid2 Item " + i)
-                .collect(Collectors.toList()));
+                .toList());
         grid2.addColumn(ValueProvider.identity());
 
         Div parent1 = new Div(grid1);

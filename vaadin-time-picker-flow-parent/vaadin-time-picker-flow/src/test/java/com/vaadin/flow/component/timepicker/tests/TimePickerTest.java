@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
@@ -325,6 +326,29 @@ class TimePickerTest {
 
         timePicker.setAriaLabelledBy((String) null);
         Assertions.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(TimePicker.class),
+                "Time picker should support aria-describedby");
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        TimePicker timePicker = new TimePicker();
+
+        timePicker.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id", timePicker.getElement()
+                .getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                timePicker.getAriaDescribedBy().get());
+
+        timePicker.setAriaDescribedBy((String) null);
+        Assertions.assertNull(timePicker.getElement()
+                .getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(timePicker.getAriaDescribedBy().isEmpty());
     }
 
     @Test

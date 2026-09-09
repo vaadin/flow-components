@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * The direction where the layout algorithm will start drawing. Applies to
  * {@link ChartType#TREEMAP} charts.
+ * 
+ * @since 6.0.1
  */
 public enum TreeMapLayoutStartingDirection implements ChartEnum {
     VERTICAL("vertical"), HORIZONTAL("horizontal");

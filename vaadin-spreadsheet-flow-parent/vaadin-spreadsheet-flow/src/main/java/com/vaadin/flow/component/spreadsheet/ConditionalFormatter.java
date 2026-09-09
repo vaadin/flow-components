@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * For now, only XSSF formatting rules are supported because of bugs in POI.
  *
  * @author Thomas Mattsson / Vaadin Ltd.
+ * @since 23.1
  */
 public class ConditionalFormatter implements Serializable {
 

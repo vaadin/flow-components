@@ -12,6 +12,8 @@ package com.vaadin.flow.component.map.configuration;
  * Defines constants for OpenLayers types, which are uses by the client-side
  * synchronization mechanism to identify which OL class to construct and
  * synchronize into.
+ * 
+ * @since 23.0
  */
 public class Constants {
     // Layers

@@ -18,7 +18,6 @@ package com.vaadin.flow.component.combobox.test;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -285,6 +284,6 @@ public class ComboBoxIT extends AbstractComboBoxIT {
     private List<String> getRenderedItems(ComboBoxElement comboBox) {
         return getItemElements(comboBox).stream()
                 .map(element -> element.getPropertyString("innerHTML"))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

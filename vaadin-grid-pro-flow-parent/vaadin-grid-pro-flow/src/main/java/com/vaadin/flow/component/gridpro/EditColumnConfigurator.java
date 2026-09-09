@@ -32,6 +32,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  * @param <T>
  *            the grid bean type
+ * @since 1.0
  */
 public class EditColumnConfigurator<T> implements Serializable {
 
@@ -118,6 +119,7 @@ public class EditColumnConfigurator<T> implements Serializable {
      *            changed. It receives the edited item, and the new value from
      *            the editor.
      * @return the configured column
+     * @since 23.1.1
      */
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ItemUpdater<T, V> itemUpdater) {
@@ -145,6 +147,7 @@ public class EditColumnConfigurator<T> implements Serializable {
      *            changed. It receives the edited item, and the new value from
      *            the editor.
      * @return the configured column
+     * @since 24.0
      */
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ValueProvider<T, V> valueProvider, ItemUpdater<T, V> itemUpdater) {
@@ -312,6 +315,7 @@ public class EditColumnConfigurator<T> implements Serializable {
      * performed in the provided item updater manually.
      *
      * @return the configurator
+     * @since 24.3
      */
     public EditColumnConfigurator<T> withManualRefresh() {
         column.setManualRefresh(true);
@@ -327,6 +331,7 @@ public class EditColumnConfigurator<T> implements Serializable {
      *
      * @param cellEditableProvider
      *            the cell editable provider
+     * @since 24.4
      */
     public EditColumnConfigurator<T> withCellEditableProvider(
             SerializablePredicate<T> cellEditableProvider) {

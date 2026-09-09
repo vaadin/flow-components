@@ -18,7 +18,7 @@ import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
  * Spreadsheet action for deleting a single row.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class DeleteRowAction extends SpreadsheetAction {
 

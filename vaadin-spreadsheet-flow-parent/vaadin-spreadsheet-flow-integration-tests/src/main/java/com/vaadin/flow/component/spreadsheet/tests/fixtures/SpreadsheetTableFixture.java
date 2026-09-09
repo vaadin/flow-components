@@ -18,20 +18,23 @@ public class SpreadsheetTableFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-        int maxColumns = 5;
-        int maxRows = 5;
+        int rows = 5; // 1 header row + 4 data rows
+        int columns = 5;
+        int firstRow = 1;
+        int firstColumn = 1;
 
-        for (int column = 1; column < maxColumns + 1; column++) {
-            spreadsheet.createCell(1, column, "Column " + column);
-        }
-
-        for (int row = 2; row < maxRows + 2; row++) {
-            for (int col = 1; col < maxColumns + 1; col++) {
-                spreadsheet.createCell(row, col, row + col);
+        // Label every cell with its position within the table, e.g. "Cell 0:0".
+        // This keeps each value distinct and makes it obvious which row and
+        // column a filter value belongs to.
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                spreadsheet.createCell(firstRow + row, firstColumn + col,
+                        "Cell " + row + ":" + col);
             }
         }
-        CellRangeAddress range = new CellRangeAddress(1, maxRows, 1,
-                maxColumns);
+
+        CellRangeAddress range = new CellRangeAddress(firstRow,
+                firstRow + rows - 1, firstColumn, firstColumn + columns - 1);
         SpreadsheetTable table = new SpreadsheetFilterTable(spreadsheet, range);
         spreadsheet.registerTable(table);
         spreadsheet.refreshAllCellValues();

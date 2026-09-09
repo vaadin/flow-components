@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * General plotting options for the gauge series type. Requires
  * <code>highcharts-more.js</code>
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsGauge extends GaugeOptions {
 
@@ -110,6 +112,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -120,6 +123,8 @@ public class PlotOptionsGauge extends GaugeOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -127,6 +132,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -151,6 +157,8 @@ public class PlotOptionsGauge extends GaugeOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -176,6 +184,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -190,6 +199,8 @@ public class PlotOptionsGauge extends GaugeOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -410,6 +421,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -419,6 +431,8 @@ public class PlotOptionsGauge extends GaugeOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -443,6 +457,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -453,6 +468,8 @@ public class PlotOptionsGauge extends GaugeOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;

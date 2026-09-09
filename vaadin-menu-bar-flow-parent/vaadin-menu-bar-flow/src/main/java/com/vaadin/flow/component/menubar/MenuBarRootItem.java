@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.menubar;
 
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.function.SerializableRunnable;
 
 class MenuBarRootItem extends MenuBarItem {
@@ -66,7 +67,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void addClassName(String className) {
         super.addClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -75,7 +76,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void addClassNames(String... classNames) {
         super.addClassNames(classNames);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -84,7 +85,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void setClassName(String className) {
         super.setClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -93,7 +94,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void setClassName(String className, boolean set) {
         super.setClassName(className, set);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
     /**
@@ -102,7 +103,7 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public boolean removeClassName(String className) {
         var result = super.removeClassName(className);
-        updateClassName();
+        menuBar.updateButtons();
         return result;
     }
 
@@ -112,12 +113,24 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void removeClassNames(String... classNames) {
         super.removeClassNames(classNames);
-        updateClassName();
+        menuBar.updateButtons();
     }
 
-    private void updateClassName() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.setClassName(this)");
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setTooltipText(String tooltipText) {
+        super.setTooltipText(tooltipText);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setTooltipPosition(TooltipPosition position) {
+        super.setTooltipPosition(position);
         menuBar.updateButtons();
     }
 }

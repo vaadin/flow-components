@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public enum TimeUnit implements ChartEnum {
     MILLISECOND("millisecond"),
     SECOND("second"),

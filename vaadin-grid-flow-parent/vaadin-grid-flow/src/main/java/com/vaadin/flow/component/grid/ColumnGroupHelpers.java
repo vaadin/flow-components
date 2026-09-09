@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ class ColumnGroupHelpers {
     public static List<AbstractColumn<?>> wrapInSeparateColumnGroups(
             Collection<AbstractColumn<?>> cols, Grid<?> grid) {
         return cols.stream().map(col -> wrapSingleColumn(col, grid))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**

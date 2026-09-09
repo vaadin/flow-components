@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,8 @@ public class LegacyTestView extends Div {
     }
 
     protected List<Person> getItems() {
-        return items.stream().map(Person::clone).collect(Collectors.toList());
+        return items.stream().map(Person::clone)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     protected List<PersonWithLevel> getRootItems() {

@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * What frame the button should be placed related to. Can be either "plot" or
  * "chart". Defaults to plot.
+ * 
+ * @since 6.0.1
  */
 public enum ResetZoomButtonRelativeTo implements ChartEnum {
 

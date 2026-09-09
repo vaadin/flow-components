@@ -25,7 +25,9 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.InputMode;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -115,6 +117,26 @@ class TextFieldTest {
     }
 
     @Test
+    void inputMode_defaultsToNull() {
+        TextField textField = new TextField();
+        Assertions.assertNull(textField.getInputMode());
+    }
+
+    @Test
+    void setInputMode_getInputMode() {
+        TextField textField = new TextField();
+
+        textField.setInputMode(InputMode.NUMERIC);
+        Assertions.assertEquals(InputMode.NUMERIC, textField.getInputMode());
+        Assertions.assertEquals("numeric",
+                textField.getElement().getProperty("inputMode"));
+
+        textField.setInputMode(null);
+        Assertions.assertNull(textField.getInputMode());
+        Assertions.assertNull(textField.getElement().getProperty("inputMode"));
+    }
+
+    @Test
     void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
@@ -193,6 +215,28 @@ class TextFieldTest {
 
         field.setAriaLabelledBy((String) null);
         Assertions.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementHasAriaDescription() {
+        TextField field = new TextField();
+        Assertions.assertTrue(field instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        TextField field = new TextField();
+
+        field.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                field.getAriaDescribedBy().get());
+
+        field.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                field.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(field.getAriaDescribedBy().isEmpty());
     }
 
     @Test

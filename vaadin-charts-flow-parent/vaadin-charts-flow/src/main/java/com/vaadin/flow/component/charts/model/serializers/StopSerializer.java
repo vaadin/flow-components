@@ -19,6 +19,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  * Serializer for {@link com.vaadin.flow.component.charts.model.Stop}.
  *
+ * @since 6.0.1
  */
 public class StopSerializer extends ValueSerializer<Stop> {
 

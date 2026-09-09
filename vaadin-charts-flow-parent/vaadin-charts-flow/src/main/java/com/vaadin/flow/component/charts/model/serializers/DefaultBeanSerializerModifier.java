@@ -24,6 +24,8 @@ import tools.jackson.databind.ser.bean.BeanSerializerBase;
 /**
  * Logic for altering the bean serialization process. Mainly used when
  * serialization needs to be customized with a bean serializer.
+ * 
+ * @since 6.0.1
  */
 public class DefaultBeanSerializerModifier extends ValueSerializerModifier {
 

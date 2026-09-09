@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.gridpro.testbench;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -167,20 +166,6 @@ public class GridProElement extends TestBenchElement {
                 .wrap(GridTRElement.class);
     }
 
-    protected void generatedColumnIdsIfNeeded() {
-        String generateIds = "const grid = arguments[0];"
-                + "if (!grid.__generatedTbId) {"//
-                + "  grid.__generatedTbId = 1;"//
-                + "}" //
-                + "grid._getColumns().forEach(function(column) {"
-                + "  if (!column.__generatedTbId) {"
-                + "    column.__generatedTbId = grid.__generatedTbId++;" //
-                + "  }" //
-                + "});";
-
-        executeScript(generateIds, this);
-    }
-
     /**
      * Gets the currently visible columns in the grid, including any selection
      * checkbox column.
@@ -189,12 +174,16 @@ public class GridProElement extends TestBenchElement {
      *         given column
      */
     public List<GridProColumnElement> getVisibleColumns() {
-        generatedColumnIdsIfNeeded();
-        String getVisibleColumnsJS = "return arguments[0]._getColumns().filter(function(column) {return !column.hidden;}).sort(function(a,b) { return a._order - b._order;}).map(function(column) { return column.__generatedTbId;});";
-        List<Long> elements = (List<Long>) executeScript(getVisibleColumnsJS,
-                this);
-        return elements.stream().map(id -> new GridProColumnElement(id, this))
-                .collect(Collectors.toList());
-
+        @SuppressWarnings("unchecked")
+        List<TestBenchElement> columns = (List<TestBenchElement>) executeScript(
+                """
+                        const [grid] = arguments;
+                        return grid._getColumns()
+                            .filter((column) => !column.hidden)
+                            .sort((a, b) => a._order - b._order);
+                        """, this);
+        return columns.stream()
+                .map(element -> element.wrap(GridProColumnElement.class))
+                .toList();
     }
 }

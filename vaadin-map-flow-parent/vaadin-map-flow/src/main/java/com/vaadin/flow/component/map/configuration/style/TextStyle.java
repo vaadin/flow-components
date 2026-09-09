@@ -18,6 +18,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * Text style that defines how to render texts on the map.
+ * 
+ * @since 24.1
  */
 public class TextStyle extends AbstractConfigurationObject {
     private String font;

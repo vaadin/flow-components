@@ -53,6 +53,8 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetServerRpc;
  * {@code Spreadsheet.setSpreadsheetHandler(...)} to replace the default. The
  * "RPC" in the parent interface name is a historical naming convention — there
  * is no legacy Vaadin 8 RPC machinery in the runtime path.
+ *
+ * @since 23.1
  */
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
@@ -480,6 +482,10 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void updateCellComment(String text, int col, int row) {
+        if (spreadsheet.isCellLocked(new CellAddress(row - 1, col - 1))) {
+            protectedCellWriteAttempted();
+            return;
+        }
         CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
         RichTextString str = factory.createRichTextString(text);
         Cell cell = getOrCreateCell(spreadsheet.getActiveSheet(), row - 1,

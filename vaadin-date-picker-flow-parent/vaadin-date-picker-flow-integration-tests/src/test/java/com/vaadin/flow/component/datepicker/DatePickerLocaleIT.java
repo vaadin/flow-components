@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -150,8 +149,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
         applyLocale(new Locale("i", "i", "i"));
 
-        waitUntil(driver -> getWarningEntries().toString().contains(
-                "The locale is not supported, using default format setting (ISO 8601)."));
+        waitForUnsupportedLocaleWarning();
     }
 
     @Test
@@ -162,6 +160,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "Should display the value using the default (ISO 8601) date format",
                 "2018-05-03", picker.getInputValue());
+
+        waitForUnsupportedLocaleWarning();
     }
 
     @Test
@@ -170,8 +170,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
         applyLocale(new Locale("th", "TH"));
 
-        waitUntil(driver -> getWarningEntries().toString().contains(
-                "The locale is not supported, using default format setting (ISO 8601)."));
+        waitForUnsupportedLocaleWarning();
     }
 
     @Test
@@ -188,7 +187,21 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                     "Should display the value using the default ISO date format for locale "
                             + unsupportedLocale,
                     "2018-05-03", picker.getInputValue());
+
+            waitForUnsupportedLocaleWarning();
         });
+    }
+
+    /**
+     * Waits for the connector's unsupported locale warning to appear in the
+     * browser log. Reading the log also removes the warning from the buffer, so
+     * tests that expect the warning must consume it this way to keep it from
+     * leaking into the log assertions of tests that share the browser session
+     * (the CI runs with {@code -Dtest.reuseDriver=true}).
+     */
+    private void waitForUnsupportedLocaleWarning() {
+        waitUntil(driver -> getWarningEntries().toString().contains(
+                "The locale is not supported, using default format setting (ISO 8601)."));
     }
 
     @Test
@@ -326,7 +339,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 .filter(log -> !log.getMessage().contains("Lit is in dev mode"))
                 .filter(log -> !log.getMessage()
                         .contains("React Router Future Flag Warning"))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void assertNoWarnings() {

@@ -19,6 +19,15 @@ describe('combo-box connector', () => {
     expect(comboBox.$connector).to.equal(connector);
   });
 
+  it('should not throw when initialized while opened', () => {
+    // When a combo box is made visible and opened in the same round-trip,
+    // initLazy runs while it is already opened. Assigning the data provider
+    // then triggers a first-page load that calls back into the connector,
+    // before `$connector` has even been assigned on the combo box.
+    comboBox = fixtureSync('<vaadin-combo-box opened></vaadin-combo-box>');
+    expect(() => init(comboBox)).to.not.throw();
+  });
+
   describe('pending requests', () => {
     let dataProviderController: FlowComboBox['__dataProviderController'];
 

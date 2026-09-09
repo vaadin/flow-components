@@ -17,6 +17,7 @@ package com.vaadin.flow.data.bean;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,7 +34,7 @@ public class ItemGenerator extends BeanGenerator {
         LocalDate baseDate = LocalDate.of(2018, 1, 10);
         return IntStream.range(0, amount)
                 .mapToObj(index -> createItem(index + 1, baseDate))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Item createItem(int index, LocalDate baseDate) {

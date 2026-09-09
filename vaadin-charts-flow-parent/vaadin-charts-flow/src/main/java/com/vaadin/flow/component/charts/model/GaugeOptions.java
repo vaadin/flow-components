@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**
@@ -29,17 +32,21 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
      * Note that clipping should be always enabled when chart.zoomType is set
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getCrisp();
 
@@ -50,6 +57,8 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
      * or distance between columns. In these cases, setting <code>crisp</code>
      * to <code>false</code> may look better, even though each column is
      * rendered blurry.
+     * 
+     * @since 18.0
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -132,11 +141,14 @@ public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 

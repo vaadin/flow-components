@@ -83,6 +83,19 @@ public class DateTimePickerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setDefaultTime_selectDate_defaultTimeFilledIn() {
+        DateTimePickerElement picker = $(DateTimePickerElement.class)
+                .id("date-time-picker-default-time");
+        TestBenchElement message = $("div").id("message-default-time");
+
+        picker.setDate(LocalDate.of(1985, 1, 11));
+
+        Assert.assertEquals(LocalTime.of(9, 0), picker.getTime());
+        Assert.assertTrue("Message should contain the completed date-time",
+                message.getText().contains("1985-01-11 09:00:00"));
+    }
+
+    @Test
     public void focus() {
         TestBenchElement focusButton = $("button").id("button-focus");
         TestBenchCommandExecutor cmd = focusButton.getCommandExecutor();

@@ -13,6 +13,8 @@ import java.io.Serializable;
 /**
  * Abstract base class for model classes to be serialized to JSON. Mainly
  * com.vaadin.flow.component.charts.model.Configuration and the stuff it uses.
+ * 
+ * @since 6.0.1
  */
 public abstract class AbstractConfigurationObject implements Serializable {
 

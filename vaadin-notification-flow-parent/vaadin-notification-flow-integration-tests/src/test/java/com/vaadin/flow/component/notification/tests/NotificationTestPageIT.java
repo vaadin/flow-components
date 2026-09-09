@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.notification.tests;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,7 +55,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         checkNotificationIsOpen();
 
         List<String> notifications = getNotifications().stream()
-                .map(WebElement::getText).collect(Collectors.toList());
+                .map(WebElement::getText).toList();
         Assert.assertEquals(
                 "Expect to have two notification pop-ups for two notification buttons clicked",
                 2, notifications.size());

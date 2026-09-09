@@ -17,7 +17,6 @@ package com.vaadin.flow.component.notification.tests;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -101,7 +100,7 @@ public class NotificationIT extends AbstractComponentIT {
 
     private void assertNotificationContent(String expected) {
         List<String> notifications = getNotifications().stream()
-                .map(WebElement::getText).collect(Collectors.toList());
+                .map(WebElement::getText).toList();
         Assert.assertTrue(String.format(
                 "Expected any of the notifications to contain the string '%s' but neither of them did. Notifications: '%s'",
                 expected, notifications),

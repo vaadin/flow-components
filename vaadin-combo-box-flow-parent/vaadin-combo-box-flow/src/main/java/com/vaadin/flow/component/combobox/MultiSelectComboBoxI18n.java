@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Class for localization of the {@link MultiSelectComboBox}
+ * 
+ * @since 23.2
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
@@ -36,6 +38,7 @@ public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
      * @return the error message or {@code null} if not set
      * @see MultiSelectComboBox#isRequiredIndicatorVisible()
      * @see MultiSelectComboBox#setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     @JsonIgnore // Not used in client side
     public String getRequiredErrorMessage() {
@@ -54,6 +57,7 @@ public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
      * @return this instance for method chaining
      * @see MultiSelectComboBox#isRequiredIndicatorVisible()
      * @see MultiSelectComboBox#setRequiredIndicatorVisible(boolean)
+     * @since 24.5
      */
     public MultiSelectComboBoxI18n setRequiredErrorMessage(
             String errorMessage) {

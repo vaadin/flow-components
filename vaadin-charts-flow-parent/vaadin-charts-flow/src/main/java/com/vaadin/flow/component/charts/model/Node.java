@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * A collection of options for the individual nodes. The nodes in an org chart
  * are auto-generated instances of Highcharts.Point, but options can be applied
  * here and linked by the id.
+ * 
+ * @since 18.0
  */
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Node extends AbstractConfigurationObject {

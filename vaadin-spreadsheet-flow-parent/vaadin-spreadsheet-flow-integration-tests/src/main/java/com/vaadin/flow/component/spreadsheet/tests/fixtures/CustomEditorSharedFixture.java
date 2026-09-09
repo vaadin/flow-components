@@ -26,7 +26,6 @@ public class CustomEditorSharedFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(final Spreadsheet spreadsheet) {
-        System.out.println("Loading CustomEditorRowFixture");
         spreadsheet.setSpreadsheetComponentFactory(new CustomEditorFactory());
         spreadsheet.setColumnWidth(0, 200);
         spreadsheet.setShowCustomEditorOnFocus(true);

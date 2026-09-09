@@ -35,6 +35,8 @@ import tools.jackson.databind.ser.ValueSerializerModifier;
 /**
  * Util class that handles the configuration needed for the model classes to be
  * serialized to JSON.
+ * 
+ * @since 6.0.1
  */
 public class ChartSerialization implements Serializable {
 

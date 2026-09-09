@@ -18,7 +18,6 @@ package com.vaadin.flow.component.combobox.dataview;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -241,7 +240,7 @@ class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
         List<String> filteredItems = genericDataProvider
                 .fetch(new Query<>(0, Integer.MAX_VALUE, null, null, "ba"))
-                .collect(Collectors.toList());
+                .toList();
 
         // The result should contain an intersection of two filters (text and
         // predicate), so the result should start with 'ba' and contain 6 chars.

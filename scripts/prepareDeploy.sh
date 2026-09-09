@@ -111,7 +111,13 @@ for i in $modules
 do
   if [ -d "$i" -o -d "$i-flow-parent" ]
   then
-    build="$build,$i-flow-parent,$i-flow-parent/$i-flow"
+    build="$build,$i-flow-parent"
+    ## include every published component module, e.g. vaadin-ai-core-flow
+    ## and vaadin-ai-extensions-flow in vaadin-ai-components-flow-parent
+    for m in "$i-flow-parent"/*-flow
+    do
+      [ -d "$m" ] && build="$build,$m"
+    done
     [ -d "$i-flow-parent/$i-testbench" ] && build="$build,$i-flow-parent/$i-testbench"
     [ -d "$i-flow-parent/$i-flow-demo" ] && build="$build,$i-flow-parent/$i-flow-demo"
     [ -d "$i-flow-parent/$i-flow-svg-generator" ] && build="$build,$i-flow-parent/$i-flow-svg-generator"

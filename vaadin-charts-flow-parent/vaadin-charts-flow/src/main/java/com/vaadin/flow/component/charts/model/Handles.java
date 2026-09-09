@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>.highcharts-navigator-handle-left</code> and
  * <code>.highcharts-navigator-handle-right</code> classes.
  * </p>
+ * 
+ * @since 18.0
  */
 public class Handles extends AbstractConfigurationObject {
 

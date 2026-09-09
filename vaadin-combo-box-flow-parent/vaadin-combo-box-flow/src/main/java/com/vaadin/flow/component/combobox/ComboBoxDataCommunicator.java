@@ -33,6 +33,7 @@ import tools.jackson.databind.node.ArrayNode;
  *
  * @param <TItem>
  *            The type of the item selectable in the combo box
+ * @since 23.2
  */
 public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
 

@@ -16,6 +16,9 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTPieSer;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.PieSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class PieSeriesReader
         extends AbstractSeriesReader<CTPieSer, PieSeriesData> {
 

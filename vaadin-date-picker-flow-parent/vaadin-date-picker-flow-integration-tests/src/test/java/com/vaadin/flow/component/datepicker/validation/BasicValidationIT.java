@@ -17,8 +17,11 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.DISABLED_DATES_INPUT;
+import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.DISABLED_DATE_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.METADATA_PROVIDER_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.MIN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
@@ -112,6 +115,41 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertErrorMessage("");
 
         testField.setInputValue("");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void disabledDates_changeValue_assertValidity() {
+        $("input").id(DISABLED_DATES_INPUT).sendKeys("2022-03-01", Keys.ENTER);
+
+        testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(DISABLED_DATE_ERROR_MESSAGE);
+
+        testField.setInputValue("3/2/2022");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void dateMetadataProvider_changeValue_assertValidity() {
+        $("input").id(METADATA_PROVIDER_INPUT).sendKeys("2022-03-01",
+                Keys.ENTER);
+
+        testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(DISABLED_DATE_ERROR_MESSAGE);
+
+        testField.setInputValue("3/2/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();

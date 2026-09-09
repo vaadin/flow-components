@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -31,7 +32,8 @@ public class GridScrollToPage extends Div {
         grid.setId("data-grid");
 
         List<String> items = IntStream.rangeClosed(0, 1000)
-                .mapToObj(String::valueOf).collect(Collectors.toList());
+                .mapToObj(String::valueOf)
+                .collect(Collectors.toCollection(ArrayList::new));
         grid.setItems(items);
 
         grid.addColumn(item -> item).setHeader("Data");

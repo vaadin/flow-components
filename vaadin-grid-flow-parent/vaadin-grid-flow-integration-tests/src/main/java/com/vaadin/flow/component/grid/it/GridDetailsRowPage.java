@@ -23,27 +23,32 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.bean.PeopleGenerator;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-details-row")
 public class GridDetailsRowPage extends Div {
 
-    private List<Person> items = new ArrayList<>();
-    private Grid<Person> grid = new Grid<>();
+    private List<DetailItem> items = new ArrayList<>();
+    private Grid<DetailItem> grid = new Grid<>();
 
-    private static record Person(int id, String name) {
+    private static record DetailItem(int id, String name) {
     }
 
     public GridDetailsRowPage() {
-        items.add(new Person(0, "Person 0"));
-        items.add(new Person(1, "Person 1"));
-        items.add(new Person(2, "Person 2"));
+        items.add(new DetailItem(0, "Person 0"));
+        items.add(new DetailItem(1, "Person 1"));
+        items.add(new DetailItem(2, "Person 2"));
 
-        ListDataProvider<Person> dataProvider = new ListDataProvider<>(items) {
+        ListDataProvider<DetailItem> dataProvider = new ListDataProvider<>(
+                items) {
             @Override
-            public Object getId(Person person) {
+            public Object getId(DetailItem person) {
                 return person.id();
             };
         };
@@ -54,7 +59,7 @@ public class GridDetailsRowPage extends Div {
                 new ComponentRenderer<>(person -> new Button(person.name())));
 
         NativeButton updatePerson2 = new NativeButton("Update person 2", e -> {
-            Person updatedPerson = new Person(2, "Updated Person 2");
+            DetailItem updatedPerson = new DetailItem(2, "Updated Person 2");
             items.set(2, updatedPerson);
             grid.getDataProvider().refreshItem(updatedPerson);
         });
@@ -73,10 +78,55 @@ public class GridDetailsRowPage extends Div {
         });
 
         add(grid, openDetails, updatePerson2, removePerson2);
+
+        createItemDetails();
+        createItemDetailsOpenedProgrammatically();
     }
 
     public void setFirstAndSecondItemsVisible() {
         grid.setDetailsVisible(items.get(0), true);
         grid.setDetailsVisible(items.get(1), true);
+    }
+
+    private Grid<Person> createGridWithDetails() {
+        Grid<Person> detailsGrid = new Grid<>();
+        detailsGrid.setItems(new PeopleGenerator().generatePeople(500));
+
+        detailsGrid.addColumn(Person::getFirstName).setHeader("Name");
+        detailsGrid.addColumn(Person::getAge).setHeader("Age");
+
+        // Any renderer can be used for the item details. By default, the
+        // details are opened and closed by clicking the rows.
+        detailsGrid.setItemDetailsRenderer(LitRenderer.<Person> of(
+                "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
+                        + "<div>Hi! My name is <b>${item.firstName}!</b></div>"
+                        + "<div><button @click=${handleClick}>Update Person</button></div>"
+                        + "</div>")
+                .withProperty("firstName", Person::getFirstName)
+                .withFunction("handleClick", person -> {
+                    person.setFirstName(person.getFirstName() + " Updated");
+                    detailsGrid.getDataProvider().refreshItem(person);
+                }));
+        return detailsGrid;
+    }
+
+    private void createItemDetails() {
+        Grid<Person> detailsGrid = createGridWithDetails();
+        detailsGrid.setId("grid-with-details-row");
+        add(detailsGrid);
+    }
+
+    private void createItemDetailsOpenedProgrammatically() {
+        Grid<Person> detailsGrid = createGridWithDetails();
+
+        // Disable the default way of opening item details:
+        detailsGrid.setDetailsVisibleOnClick(false);
+
+        detailsGrid.addColumn(new NativeButtonRenderer<>("Toggle details open",
+                item -> detailsGrid.setDetailsVisible(item,
+                        !detailsGrid.isDetailsVisible(item))));
+
+        detailsGrid.setId("grid-with-details-row-2");
+        add(detailsGrid);
     }
 }

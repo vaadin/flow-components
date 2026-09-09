@@ -13,7 +13,7 @@ import {
     columnIndexToLetters,
     parseCellRefRange,
     parseSingleCell,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/CellRef.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/CellRef.js';
 
 describe('CellRef — parseSingleCell', () => {
     it('parses simple single-letter columns', () => {

@@ -23,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * The I18N helper file for the upload component.
+ * 
+ * @since 1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UploadI18N implements Serializable {
@@ -381,7 +383,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param serverUnavailable
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setServerUnavailable(String serverUnavailable) {
                 this.serverUnavailable = serverUnavailable;
@@ -398,7 +400,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param unexpectedServerError
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setUnexpectedServerError(
                     String unexpectedServerError) {
@@ -416,7 +418,7 @@ public class UploadI18N implements Serializable {
             /**
              * @param forbidden
              *            translation string
-             * @return
+             * @return this instance
              */
             public Error setForbidden(String forbidden) {
                 this.forbidden = forbidden;
@@ -428,6 +430,7 @@ public class UploadI18N implements Serializable {
              * returns HTTP 413 (Payload Too Large).
              *
              * @return translation string
+             * @since 25.1
              */
             public String getFileTooLarge() {
                 return fileTooLarge;
@@ -440,6 +443,7 @@ public class UploadI18N implements Serializable {
              * @param fileTooLarge
              *            translation string
              * @return this instance for chaining
+             * @since 25.1
              */
             public Error setFileTooLarge(String fileTooLarge) {
                 this.fileTooLarge = fileTooLarge;
@@ -450,6 +454,8 @@ public class UploadI18N implements Serializable {
 
     /**
      * unit translations.
+     * 
+     * @since 1.2
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Units implements Serializable {
@@ -482,6 +488,7 @@ public class UploadI18N implements Serializable {
          *            list of unit translations
          * @param sizeBase
          *            units size base
+         * @since 24.5
          */
         public Units(List<String> size, Integer sizeBase) {
             this.size = size;
@@ -491,7 +498,7 @@ public class UploadI18N implements Serializable {
         /**
          * get units size list
          *
-         * @return
+         * @return the list of size unit labels
          */
         public List<String> getSize() {
             return size;
@@ -502,7 +509,8 @@ public class UploadI18N implements Serializable {
          * "YB"]
          *
          * @param size
-         * @return
+         *            the list of size unit labels
+         * @return this instance
          */
         public Units setSize(List<String> size) {
             this.size = size;
@@ -513,6 +521,7 @@ public class UploadI18N implements Serializable {
          * Gets the units size base.
          *
          * @return the units size base
+         * @since 24.5
          */
         public Integer getSizeBase() {
             return sizeBase;
@@ -524,6 +533,7 @@ public class UploadI18N implements Serializable {
          * @param sizeBase
          *            units size base
          * @return units
+         * @since 24.5
          */
         public Units setSizeBase(Integer sizeBase) {
             this.sizeBase = sizeBase;
@@ -533,6 +543,8 @@ public class UploadI18N implements Serializable {
 
     /**
      * file translations.
+     * 
+     * @since 23.3
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class File implements Serializable {
@@ -696,6 +708,7 @@ public class UploadI18N implements Serializable {
      * Get file translations.
      *
      * @return file translations
+     * @since 23.3
      */
     public File getFile() {
         return file;
@@ -707,6 +720,7 @@ public class UploadI18N implements Serializable {
      * @param file
      *            file translations
      * @return i18n translations
+     * @since 23.3
      */
     public UploadI18N setFile(File file) {
         this.file = file;
@@ -772,6 +786,7 @@ public class UploadI18N implements Serializable {
      * @param sizeBase
      *            units size base
      * @return i18n translations
+     * @since 24.5
      */
     public UploadI18N setUnits(List<String> units, int sizeBase) {
         this.units = new Units(units, sizeBase);
@@ -803,6 +818,7 @@ public class UploadI18N implements Serializable {
      * @param units
      *            unit translations object.
      * @return unit translations.
+     * @since 1.2
      */
     public UploadI18N setUnits(Units units) {
         this.units = units;

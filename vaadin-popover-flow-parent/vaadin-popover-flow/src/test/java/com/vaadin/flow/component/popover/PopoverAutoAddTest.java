@@ -156,6 +156,43 @@ class PopoverAutoAddTest {
     }
 
     @Test
+    void setTarget_setAnotherTargetDuringAutoAdd_autoAdded() {
+        Div target = new Div();
+        Div other = new Div();
+        ui.add(target);
+        ui.add(other);
+
+        Popover popover = new Popover();
+        popover.addAttachListener(event -> popover.setTarget(other));
+
+        popover.setTarget(target);
+
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(other, popover.getTarget());
+        Assertions.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
+    }
+
+    @Test
+    void setTarget_setAnotherTargetDuringAutoAdd_detachFirstTarget_notAutoRemoved() {
+        Div target = new Div();
+        Div other = new Div();
+        ui.add(target);
+        ui.add(other);
+
+        Popover popover = new Popover();
+        popover.addAttachListener(event -> popover.setTarget(other));
+
+        popover.setTarget(target);
+        ui.fakeClientCommunication();
+
+        ui.remove(target);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(ui.getUI().getElement(),
+                popover.getElement().getParent());
+    }
+
+    @Test
     void setTarget_openModal_popoverIsAttachedToUi() {
         Div target = new Div();
         Popover popover = new Popover();

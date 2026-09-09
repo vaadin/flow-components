@@ -31,6 +31,7 @@ import com.vaadin.flow.function.SerializableSupplier;
  *
  * @param <T>
  *            item type
+ * @since 18.0
  */
 public class SelectListDataView<T> extends AbstractListDataView<T> {
 

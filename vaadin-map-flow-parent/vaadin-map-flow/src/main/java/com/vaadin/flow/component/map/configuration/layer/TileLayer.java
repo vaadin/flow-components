@@ -19,6 +19,8 @@ import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
 
 /**
  * Layer for displaying tiled map data
+ * 
+ * @since 23.0
  */
 public class TileLayer extends Layer {
     private TileSource source;

@@ -3,7 +3,7 @@ import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
 import { sendKeys } from '@web/test-runner-commands';
 import { init, setRootItems, getBodyCell } from './shared.js';
 import type { FlowGrid } from './shared.js';
-import { GridColumn } from '@vaadin/grid';
+import type { GridColumn } from '@vaadin/grid/vaadin-grid-column.js';
 import sinon from 'sinon';
 
 describe('grid connector - cell focus', () => {

@@ -18,6 +18,8 @@ import com.vaadin.flow.component.map.Map;
  * {@code EPSG:4326}, also referred to as GPS coordinates. If the user
  * projection has been changed using {@link Map#setUserProjection(String)}, then
  * coordinates must be specified in that projection instead.
+ * 
+ * @since 23.0
  */
 public class Coordinate implements Serializable {
     private final double x;
@@ -36,7 +38,9 @@ public class Coordinate implements Serializable {
      * in that projection instead.
      *
      * @param x
+     *            the x coordinate
      * @param y
+     *            the y coordinate
      */
     public Coordinate(double x, double y) {
         this.x = x;

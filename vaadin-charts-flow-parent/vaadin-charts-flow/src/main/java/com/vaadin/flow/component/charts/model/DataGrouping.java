@@ -24,6 +24,8 @@ import java.util.Arrays;
  * If data grouping is applied, the grouping information of grouped points can
  * be read from the <a href="#Point.dataGroup">Point.dataGroup</a>.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class DataGrouping extends AbstractConfigurationObject {
 

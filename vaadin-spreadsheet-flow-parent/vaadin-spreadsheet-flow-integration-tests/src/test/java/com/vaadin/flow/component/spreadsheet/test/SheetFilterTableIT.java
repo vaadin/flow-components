@@ -10,10 +10,14 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import static org.junit.Assert.assertFalse;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -61,8 +65,68 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
         assertSelectAll(cell);
     }
 
+    @Test
+    public void filterColumn_otherColumnOmitsValuesOfHiddenRows() {
+        loadTestFixture(TestFixtures.SpreadsheetTable);
+        final SpreadsheetElement spreadsheet = getSpreadsheet();
+
+        // Before filtering, the first column offers all of its values
+        spreadsheet.getCellAt("B2").popupButtonClick();
+        Assert.assertEquals(
+                List.of("Cell 1:0", "Cell 2:0", "Cell 3:0", "Cell 4:0"),
+                getFilterPopup().getOptions());
+        closeFilterPopup();
+
+        // Filter the second column so that row 1 gets hidden
+        spreadsheet.getCellAt("C2").popupButtonClick();
+        getFilterPopup().deselectByText("Cell 1:1");
+        closeFilterPopup();
+
+        // The first column no longer offers "Cell 1:0", as its row is hidden
+        // by the second column
+        spreadsheet.getCellAt("B2").popupButtonClick();
+        Assert.assertEquals(List.of("Cell 2:0", "Cell 3:0", "Cell 4:0"),
+                getFilterPopup().getOptions());
+    }
+
+    @Test
+    public void filterTwoColumns_eachColumnRetainsOwnFilteredValues() {
+        loadTestFixture(TestFixtures.SpreadsheetTable);
+        final SpreadsheetElement spreadsheet = getSpreadsheet();
+
+        // Filter the first column so that row 1 gets hidden
+        spreadsheet.getCellAt("B2").popupButtonClick();
+        getFilterPopup().deselectByText("Cell 1:0");
+        closeFilterPopup();
+
+        // Filter the second column so that row 2 gets hidden
+        spreadsheet.getCellAt("C2").popupButtonClick();
+        getFilterPopup().deselectByText("Cell 2:1");
+        closeFilterPopup();
+
+        // The first column still offers "Cell 1:0" as an unchecked option, so
+        // its hidden row can be brought back independently of the second
+        // column's filter. Row 2, hidden by the second column, is excluded.
+        spreadsheet.getCellAt("B2").popupButtonClick();
+        Assert.assertEquals(List.of("Cell 1:0", "Cell 3:0", "Cell 4:0"),
+                getFilterPopup().getOptions());
+        Assert.assertEquals(List.of("Cell 3:0", "Cell 4:0"),
+                getFilterPopup().getSelectedTexts());
+    }
+
     private void assertSelectAll(SheetCellElement cell) {
         cell.popupButtonClick();
         Assert.assertTrue(hasOption("(Select All)"));
+    }
+
+    private CheckboxGroupElement getFilterPopup() {
+        return $(CheckboxGroupElement.class).single();
+    }
+
+    private void closeFilterPopup() {
+        findElement(By.className("v-window-closebox")).click();
+        // The overlay fades out, so wait until it is actually gone before
+        // opening the next one, otherwise single() would match two overlays.
+        waitUntil(driver -> $(CheckboxGroupElement.class).all().isEmpty());
     }
 }

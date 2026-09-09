@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The chart's subtitle
+ * 
+ * @since 6.0.1
  */
 public class Subtitle extends AbstractConfigurationObject {
 
@@ -64,6 +66,7 @@ public class Subtitle extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -85,6 +88,8 @@ public class Subtitle extends AbstractConfigurationObject {
      * </p>
      * <p>
      * Defaults to: { "color": "#666666" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

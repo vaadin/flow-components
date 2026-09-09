@@ -11,7 +11,7 @@ import { expect } from 'chai';
 import {
     parseTsv,
     serializeToTsv,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/Tsv.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Tsv.js';
 
 describe('Tsv — serializeToTsv', () => {
     it('serializes a 1x1 grid', () => {

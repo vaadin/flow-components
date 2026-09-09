@@ -18,6 +18,7 @@ import tools.jackson.databind.ser.bean.BeanSerializerBase;
  * implementing {@link BeanSerializerBase}.
  *
  * @param <T>
+ * @since 6.0.1
  */
 public abstract class BeanSerializationDelegate<T> {
     public abstract Class<T> getBeanClass();

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * The chart's main title.
+ * 
+ * @since 6.0.1
  */
 public class Title extends AbstractConfigurationObject {
 
@@ -81,6 +83,7 @@ public class Title extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -103,6 +106,8 @@ public class Title extends AbstractConfigurationObject {
      * </p>
      * <p>
      * Defaults to: { "color": "#333333", "fontSize": "18px" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

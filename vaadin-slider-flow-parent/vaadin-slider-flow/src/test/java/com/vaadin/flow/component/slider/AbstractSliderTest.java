@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -60,6 +61,26 @@ abstract class AbstractSliderTest<TComponent extends NumberSlider<TComponent, TV
 
         slider.setAriaLabelledBy((String) null);
         Assertions.assertTrue(slider.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(slider instanceof HasAriaDescription);
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        slider.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                slider.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                slider.getAriaDescribedBy().get());
+
+        slider.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                slider.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(slider.getAriaDescribedBy().isEmpty());
     }
 
     @Test

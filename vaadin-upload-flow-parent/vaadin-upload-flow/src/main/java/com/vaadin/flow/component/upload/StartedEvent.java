@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * StartedEvent event is sent when the upload is started to received.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class StartedEvent extends ComponentEvent<Upload> {
 

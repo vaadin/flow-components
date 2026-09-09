@@ -14,6 +14,9 @@ import org.apache.poi.xssf.usermodel.XSSFChart;
 
 import com.vaadin.flow.component.Component;
 
+/**
+ * @since 23.1
+ */
 public interface ChartCreator extends Serializable {
 
     /**
@@ -23,7 +26,7 @@ public interface ChartCreator extends Serializable {
      *            metadata with the chart configuration
      * @param spreadsheet
      *            spreadsheet that chart uses as data source
-     * @return
+     * @return the created chart component
      */
     public Component createChart(XSSFChart chartXml, Spreadsheet spreadsheet);
 }

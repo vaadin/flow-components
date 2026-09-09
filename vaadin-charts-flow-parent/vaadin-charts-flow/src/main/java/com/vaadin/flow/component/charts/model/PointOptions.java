@@ -12,6 +12,9 @@ import java.time.Instant;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
+/**
+ * @since 6.0.1
+ */
 public abstract class PointOptions extends AbstractPlotOptions {
 
     @Override
@@ -47,6 +50,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public abstract Color getColor();
 
@@ -55,6 +59,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * and the point markers unless otherwise specified. In bar type series it
      * applies to the bars unless a color is specified per point. The default
      * value is pulled from the <code>options.colors</code> array.
+     * 
+     * @since 18.0
      */
     public abstract void setColor(Color color);
 
@@ -84,12 +90,15 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getClip();
 
     /**
      * Disable this option to allow series rendering in the whole plotting area.
      * Note that clipping should be always enabled when chart.zoomType is set
+     * 
+     * @since 18.0
      */
     public abstract void setClip(Boolean clip);
 
@@ -112,11 +121,14 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * <code>colorAxis</code> is used. Requires to set <code>min</code> and
      * <code>max</code> if some custom point property is used or if
      * approximation for data grouping is set to <code>'sum'</code>.
+     * 
+     * @since 18.0
      */
     public abstract void setColorKey(String colorKey);
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public abstract Boolean getCrisp();
 
@@ -127,6 +139,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * or distance between columns. In these cases, setting <code>crisp</code>
      * to <code>false</code> may look better, even though each column is
      * rendered blurry.
+     * 
+     * @since 18.0
      */
     public abstract void setCrisp(Boolean crisp);
 
@@ -172,6 +186,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public abstract DashStyle getDashStyle();
 
@@ -193,6 +208,8 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * <li>LongDashDot</li>
      * <li>LongDashDotDot</li>
      * </ul>
+     * 
+     * @since 18.0
      */
     public abstract void setDashStyle(DashStyle dashStyle);
 
@@ -298,11 +315,14 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public abstract Number getLineWidth();
 
     /**
      * The width of the line connecting the data points.
+     * 
+     * @since 18.0
      */
     public abstract void setLineWidth(Number lineWidth);
 
@@ -331,22 +351,28 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public abstract Color getNegativeColor();
 
     /**
      * The color for the parts of the graph or points that are below the
      * threshold.
+     * 
+     * @since 18.0
      */
     public abstract void setNegativeColor(Color negativeColor);
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public abstract Number getOpacity();
 
     /**
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
+     * 
+     * @since 18.0
      */
     public abstract void setOpacity(Number opacity);
 

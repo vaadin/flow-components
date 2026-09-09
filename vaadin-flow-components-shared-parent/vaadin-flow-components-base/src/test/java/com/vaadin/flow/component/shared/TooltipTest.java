@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIExtension;
@@ -191,9 +193,47 @@ class TooltipTest {
     }
 
     @Test
+    void createTooltip_setAriaLinkMode() {
+        var tooltip = Tooltip.forComponent(component);
+        tooltip.setAriaLinkMode(AriaLinkMode.ARIA_LABELLED_BY);
+        ui.add(component);
+        Assertions.assertEquals("aria-labelledby",
+                getTooltipElement().get().getProperty("ariaLinkMode"));
+        Assertions.assertEquals(AriaLinkMode.ARIA_LABELLED_BY,
+                tooltip.getAriaLinkMode());
+    }
+
+    @Test
+    void createTooltip_defaultAriaLinkMode() {
+        var tooltip = Tooltip.forComponent(component);
+        Assertions.assertEquals(AriaLinkMode.ARIA_DESCRIBED_BY,
+                tooltip.getAriaLinkMode());
+    }
+
+    @Test
+    void createTooltip_setAriaLinkModeNull_resetsToDefault() {
+        var tooltip = Tooltip.forComponent(component);
+        tooltip.setAriaLinkMode(AriaLinkMode.ARIA_LABELLED_BY);
+        tooltip.setAriaLinkMode(null);
+        ui.add(component);
+        Assertions.assertEquals("aria-describedby",
+                getTooltipElement().get().getProperty("ariaLinkMode"));
+        Assertions.assertEquals(AriaLinkMode.ARIA_DESCRIBED_BY,
+                tooltip.getAriaLinkMode());
+    }
+
+    @Test
     void tooltipForCompopnentTwice_sameReference() {
         var tooltip = Tooltip.forComponent(component);
         var tooltip2 = Tooltip.forComponent(component);
+        Assertions.assertSame(tooltip, tooltip2);
+    }
+
+    @Test
+    void tooltipForCompositeTwice_sameReference() {
+        var composite = new CompositeComponent();
+        var tooltip = Tooltip.forComponent(composite);
+        var tooltip2 = Tooltip.forComponent(composite);
         Assertions.assertSame(tooltip, tooltip2);
     }
 
@@ -203,7 +243,8 @@ class TooltipTest {
 
         var tooltip = Tooltip.forComponent(component).withText("foo")
                 .withFocusDelay(200).withHideDelay(1000).withHoverDelay(500)
-                .withPosition(TooltipPosition.BOTTOM_END).withManual(true);
+                .withPosition(TooltipPosition.BOTTOM_END).withManual(true)
+                .withAriaLinkMode(AriaLinkMode.ARIA_LABELLED_BY);
 
         tooltip.setOpened(true);
 
@@ -221,6 +262,8 @@ class TooltipTest {
                 getTooltipElement().get().getProperty("position"));
         Assertions.assertEquals(true,
                 getTooltipElement().get().getProperty("manual", false));
+        Assertions.assertEquals("aria-labelledby",
+                getTooltipElement().get().getProperty("ariaLinkMode"));
     }
 
     @Test
@@ -246,5 +289,12 @@ class TooltipTest {
 
     @Tag("test")
     private static class TestComponent extends Component {
+    }
+
+    private static class CompositeComponent extends Composite<TestComponent> {
+        @Override
+        protected TestComponent initContent() {
+            return new TestComponent();
+        }
     }
 }

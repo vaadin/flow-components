@@ -8,13 +8,13 @@
  */
 
 import { expect } from 'chai';
-import type { MergedRegion } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import type { MergedRegion } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 import {
     createMergedRegion,
     createMergedRegionFromCorners,
     type MergedRegionContainer,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegion.js';
-import { findIncreasingSelection } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegionUtil.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegion.js';
+import { findIncreasingSelection } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/MergedRegionUtil.js';
 
 /**
  * Test helper: an in-memory {@link MergedRegionContainer} that holds a

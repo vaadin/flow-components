@@ -30,6 +30,8 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
  * is no legacy Vaadin 8 RPC machinery in the runtime path — that migration was
  * completed before the modernization plan started. See
  * {@code MODERNIZATION_PLAN.md} Tier 2 Step 10.
+ *
+ * @since 23.1
  */
 public interface SpreadsheetClientRpc {
 
@@ -58,6 +60,7 @@ public interface SpreadsheetClientRpc {
      * The String arrays contain the caption and the icon resource key.
      *
      * @param actionDetails
+     *            the action details
      */
     void showActions(ArrayList<SpreadsheetActionDetails> actionDetails);
 

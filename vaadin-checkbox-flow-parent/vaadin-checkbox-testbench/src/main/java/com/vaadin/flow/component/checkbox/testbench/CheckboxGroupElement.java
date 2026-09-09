@@ -18,7 +18,6 @@ package com.vaadin.flow.component.checkbox.testbench;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.testbench.HasHelper;
@@ -36,8 +35,7 @@ public class CheckboxGroupElement extends TestBenchElement
      * @return a list of the labels
      */
     public List<String> getOptions() {
-        return getCheckboxes().stream().map(CheckboxElement::getLabel)
-                .collect(Collectors.toList());
+        return getCheckboxes().stream().map(CheckboxElement::getLabel).toList();
     }
 
     /**
@@ -94,8 +92,7 @@ public class CheckboxGroupElement extends TestBenchElement
      */
     public List<String> getSelectedTexts() {
         Stream<CheckboxElement> button = getSelectedCheckboxes();
-        return button.map(CheckboxElement::getLabel)
-                .collect(Collectors.toList());
+        return button.map(CheckboxElement::getLabel).toList();
     }
 
     /**

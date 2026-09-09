@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class DetachReattachIT extends AbstractComponentIT {
     private List<Boolean> getCheckboxesCheckedState() {
         TestBenchElement group = $("vaadin-checkbox-group").first();
         return group.$(CheckboxElement.class).all().stream()
-                .map(CheckboxElement::isChecked).collect(Collectors.toList());
+                .map(CheckboxElement::isChecked).toList();
     }
 
     private void clickButton(String id) {

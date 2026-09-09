@@ -59,7 +59,7 @@ public class AccordionElement extends TestBenchElement {
     }
 
     /**
-     * Gets the the opened panel or null if the accordion is closed.
+     * Gets the opened panel or null if the accordion is closed.
      *
      * @return the opened panel or null if closed.
      */

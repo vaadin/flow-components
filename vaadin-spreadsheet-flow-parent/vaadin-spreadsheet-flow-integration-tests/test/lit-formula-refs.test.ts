@@ -11,7 +11,7 @@ import { expect } from 'chai';
 import {
     isCellRef,
     parseCellReferences,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/FormulaRefs.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/FormulaRefs.js';
 
 const SHEET_NAMES = ['Sheet1', 'Sheet2', 'Sheet3'];
 

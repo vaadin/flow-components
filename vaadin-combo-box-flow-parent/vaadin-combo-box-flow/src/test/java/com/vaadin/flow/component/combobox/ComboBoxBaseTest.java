@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasPlaceholder;
@@ -78,6 +79,14 @@ abstract class ComboBoxBaseTest {
     }
 
     @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()),
+                "ComboBox should support setting aria-describedby");
+    }
+
+    @Test
     void implementsHasAllowedCharPattern() {
         Assertions.assertTrue(
                 HasAllowedCharPattern.class.isAssignableFrom(
@@ -109,6 +118,46 @@ abstract class ComboBoxBaseTest {
         Assertions.assertTrue(
                 comboBox.getElement().getProperty("autoOpenDisabled", false));
         Assertions.assertFalse(comboBox.isAutoOpen());
+    }
+
+    @Test
+    void setPartialMatchMode_getPartialMatchMode() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        Assertions.assertEquals(PartialMatchMode.NONE,
+                comboBox.getPartialMatchMode());
+
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
+        Assertions.assertEquals("first-match",
+                comboBox.getElement().getProperty("partialMatchMode"));
+        Assertions.assertEquals(PartialMatchMode.FIRST_MATCH,
+                comboBox.getPartialMatchMode());
+    }
+
+    @Test
+    void setPartialMatchModeNull_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> comboBox.setPartialMatchMode(null));
+    }
+
+    @Test
+    void allowCustomValue_setPartialMatchMode_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setAllowCustomValue(true);
+        Assertions.assertThrows(IllegalStateException.class, () -> comboBox
+                .setPartialMatchMode(PartialMatchMode.FIRST_MATCH));
+        Assertions.assertDoesNotThrow(
+                () -> comboBox.setPartialMatchMode(PartialMatchMode.NONE));
+    }
+
+    @Test
+    void partialMatchMode_setAllowCustomValue_throws() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.setPartialMatchMode(PartialMatchMode.FIRST_MATCH);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> comboBox.setAllowCustomValue(true));
+        Assertions
+                .assertDoesNotThrow(() -> comboBox.setAllowCustomValue(false));
     }
 
     @Test
@@ -374,5 +423,21 @@ abstract class ComboBoxBaseTest {
 
         comboBox.setAriaLabelledBy((String) null);
         Assertions.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+
+        comboBox.setAriaDescribedBy("description-id");
+        Assertions.assertEquals("description-id",
+                comboBox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertEquals("description-id",
+                comboBox.getAriaDescribedBy().get());
+
+        comboBox.setAriaDescribedBy((String) null);
+        Assertions.assertNull(
+                comboBox.getElement().getProperty("accessibleDescriptionRef"));
+        Assertions.assertTrue(comboBox.getAriaDescribedBy().isEmpty());
     }
 }

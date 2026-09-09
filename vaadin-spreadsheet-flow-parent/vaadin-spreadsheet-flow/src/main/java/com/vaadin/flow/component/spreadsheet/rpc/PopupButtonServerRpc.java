@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.rpc;
 
+/**
+ * @since 23.1
+ */
 public interface PopupButtonServerRpc {
 
     /**

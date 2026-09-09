@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.model.Series;
  * Base class for series item events. Contains the information about series and
  * exactly one of item or value.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public abstract class AbstractSeriesItemEvent extends AbstractSeriesEvent {

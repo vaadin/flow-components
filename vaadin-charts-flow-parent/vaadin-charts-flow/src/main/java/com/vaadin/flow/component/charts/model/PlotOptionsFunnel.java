@@ -17,6 +17,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * Funnel charts are a type of chart often used to visualize stages in a sales
  * project, where the top are the initial stages with the most clients. It
  * requires that the <code>modules/funnel.js</code> file is loaded.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsFunnel extends PyramidOptions {
 
@@ -107,6 +109,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -128,6 +131,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * </p>
      * <p>
      * Defaults to: #ffffff
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -135,6 +140,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -160,6 +166,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -191,6 +199,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -201,6 +210,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * Note that clipping should be always enabled when chart.zoomType is set.
      * <p>
      * Defaults to <code>false</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -226,6 +237,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -238,6 +250,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -290,6 +304,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -304,6 +319,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -480,6 +497,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setIgnoreHiddenPoint(Boolean)
+     * @since 18.0
      */
     public Boolean getIgnoreHiddenPoint() {
         return ignoreHiddenPoint;
@@ -490,6 +508,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * point were null.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setIgnoreHiddenPoint(Boolean ignoreHiddenPoint) {
         this.ignoreHiddenPoint = ignoreHiddenPoint;
@@ -578,6 +598,7 @@ public class PlotOptionsFunnel extends PyramidOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -587,6 +608,8 @@ public class PlotOptionsFunnel extends PyramidOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.sidenav.testbench;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
@@ -60,7 +59,7 @@ public class SideNavElement extends TestBenchElement {
     }
 
     public List<SideNavItemElement> getItems(boolean includeNestedItems) {
-        return getItemsStream(includeNestedItems).collect(Collectors.toList());
+        return getItemsStream(includeNestedItems).toList();
     }
 
     public SideNavItemElement getSelectedItem() {

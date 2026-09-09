@@ -17,7 +17,6 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -115,7 +114,7 @@ public class ComponentRendererPage extends Div {
         List<ComboBoxDemoPage.Song> longListOfSongs = IntStream.range(0, 1000)
                 .mapToObj(i -> new ComboBoxDemoPage.Song("Song " + i,
                         "Artist " + i, "Album " + i))
-                .collect(Collectors.toList());
+                .toList();
         comboBox.setItems(longListOfSongs);
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");

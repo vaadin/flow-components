@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
@@ -55,14 +54,13 @@ public class TreeGridStringDataBuilder {
         }
         return parentItems.stream()
                 .map(parent -> addItemsToParent(name, numberOfItems, parent))
-                .flatMap(List::stream).collect(Collectors.toList());
+                .flatMap(List::stream).toList();
     }
 
     private List<String> addItemsToParent(String name, int numberOfItems,
             String parent) {
         return IntStream.range(0, numberOfItems)
-                .mapToObj(index -> createItem(name, parent, index))
-                .collect(Collectors.toList());
+                .mapToObj(index -> createItem(name, parent, index)).toList();
     }
 
     private String createItem(String name, String parent, int index) {

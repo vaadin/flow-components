@@ -29,6 +29,7 @@ import com.vaadin.flow.component.grid.Grid;
  *
  * @param <T>
  *            the bean type
+ * @since 2.1
  */
 @FunctionalInterface
 public interface EditorCancelListener<T> extends Serializable {

@@ -35,6 +35,7 @@ public class DatePickerI18nPage extends Div {
             DatePickerI18n i18n = new DatePickerI18n();
             i18n.setToday("Custom today");
             i18n.setCancel("Custom cancel");
+            i18n.setDialogAccessibleName("Custom calendar");
             i18n.setMonthNames(List.of("Custom January", "Custom February",
                     "Custom March", "Custom April", "Custom May", "Custom June",
                     "Custom July", "Custom August", "Custom September",

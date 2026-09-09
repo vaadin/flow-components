@@ -13,7 +13,7 @@ import {
     type PopupButtonEventData,
     type SpreadsheetEvent,
     type SpreadsheetEventType,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/types/rpc-client-to-server.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/rpc-client-to-server.js';
 
 /**
  * Slice 128 added `popupButtonClick` + `popupClose` to the

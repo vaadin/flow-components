@@ -17,6 +17,8 @@ import java.util.Arrays;
  * extended with some color options, <a href="#yAxis.minColor">minColor</a>,
  * <a href="#yAxis.maxColor">maxColor</a> and <a href="#yAxis.stops">stops</a>,
  * to control the color of the gauge itself.
+ * 
+ * @since 6.0.1
  */
 public class PlotOptionsSolidgauge extends GaugeOptions {
 
@@ -40,6 +42,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
     private Number overshoot;
     private Number opacity;
     private String _fn_pointDescriptionFormatter;
+    private String radius;
+    private String innerRadius;
     private Boolean rounded;
     private Boolean selected;
     private Boolean showCheckbox;
@@ -96,6 +100,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     /**
      * @see #setBorderRadius(String)
+     * @since 25.0
      */
     public String getBorderRadius() {
         return borderRadius;
@@ -107,9 +112,54 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * relative size.
      *
      * @param borderRadius
+     * @since 25.0
      */
     public void setBorderRadius(String borderRadius) {
         this.borderRadius = borderRadius;
+    }
+
+    /**
+     * @see #setRadius(String)
+     * @since 25.3
+     */
+    public String getRadius() {
+        return radius;
+    }
+
+    /**
+     * The outer radius for points in the solid gauge. Can be given as a number
+     * (pixels) or a percentage string, like for example 100%, relative to the
+     * pane size.
+     * <p>
+     * Defaults to: 100%
+     *
+     * @param radius
+     * @since 25.3
+     */
+    public void setRadius(String radius) {
+        this.radius = radius;
+    }
+
+    /**
+     * @see #setInnerRadius(String)
+     * @since 25.3
+     */
+    public String getInnerRadius() {
+        return innerRadius;
+    }
+
+    /**
+     * The inner radius for points in the solid gauge. Can be given as a number
+     * (pixels) or a percentage string, like for example 60%, relative to the
+     * pane size.
+     * <p>
+     * Defaults to: 60%
+     *
+     * @param innerRadius
+     * @since 25.3
+     */
+    public void setInnerRadius(String innerRadius) {
+        this.innerRadius = innerRadius;
     }
 
     /**
@@ -128,6 +178,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -138,6 +189,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -145,6 +198,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     /**
      * @see #setColorByPoint(Boolean)
+     * @since 18.0
      */
     public Boolean getColorByPoint() {
         return colorByPoint;
@@ -154,6 +208,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * Whether to give each point an individual color.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setColorByPoint(Boolean colorByPoint) {
         this.colorByPoint = colorByPoint;
@@ -179,6 +235,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -193,6 +250,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -387,6 +446,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -396,6 +456,8 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -453,7 +515,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
     }
 
     /**
-     * Wether to draw rounded edges on the gauge.
+     * Whether to draw rounded edges on the gauge.
      * <p>
      * Defaults to: false
      */

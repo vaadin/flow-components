@@ -9,10 +9,14 @@
 package com.vaadin.flow.component.charts.model;
 
 import com.vaadin.flow.component.charts.model.style.Style;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.server.InitParameters;
 
 /**
  * Highchart by default puts a credits label in the lower right corner of the
  * chart. This can be changed using these options.
+ * 
+ * @since 6.0.1
  */
 public class Credits extends AbstractConfigurationObject {
 
@@ -56,8 +60,38 @@ public class Credits extends AbstractConfigurationObject {
      * The URL for the credits label.
      * <p>
      * Defaults to: http://www.highcharts.com
+     *
+     * @throws IllegalArgumentException
+     *             if {@code href} uses a scheme that is not considered safe;
+     *             see {@link #setUnsafeHref(String)} and the
+     *             {@value InitParameters#URL_SAFE_SCHEMES} configuration
+     *             property
+     * @see #setUnsafeHref(String)
      */
     public void setHref(String href) {
+        if (href != null && !UrlUtil.isSafeUrl(href)) {
+            throw new IllegalArgumentException(UrlUtil.getUnsafeUrlMessage(
+                    "href", href, "setUnsafeHref(String)"));
+        }
+        this.href = href;
+    }
+
+    /**
+     * Sets the URL for the credits label without validating its scheme.
+     * <p>
+     * Unlike {@link #setHref(String)}, this method does not reject URLs based
+     * on the {@value InitParameters#URL_SAFE_SCHEMES} configuration. Use it
+     * only for URLs that are fully under your control and known to be safe.
+     * Passing untrusted input here can expose the application to cross-site
+     * scripting (XSS) attacks.
+     *
+     * @see #setHref(String)
+     *
+     * @param href
+     *            the URL for the credits label
+     * @since 25.2
+     */
+    public void setUnsafeHref(String href) {
         this.href = href;
     }
 
@@ -80,6 +114,7 @@ public class Credits extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -93,6 +128,8 @@ public class Credits extends AbstractConfigurationObject {
      * <p>
      * Defaults to: { "cursor": "pointer", "color": "#999999", "fontSize":
      * "10px" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

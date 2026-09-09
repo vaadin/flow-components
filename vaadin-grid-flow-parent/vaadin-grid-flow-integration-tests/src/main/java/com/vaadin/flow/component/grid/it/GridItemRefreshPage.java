@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -173,7 +172,7 @@ public class GridItemRefreshPage extends Div {
     private List<Bean> createItems(int numberOfItems) {
         return IntStream.range(0, numberOfItems).mapToObj(
                 intValue -> new Bean(String.valueOf(intValue), intValue))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void updateBean(Bean bean) {

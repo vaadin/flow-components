@@ -17,7 +17,6 @@ package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -44,18 +43,17 @@ public class DatePickerElement extends TestBenchElement
          * Gets all visible month calendars that are currently rendered by the
          * infinite scroller in the overlay.
          *
-         * @return
+         * @return the visible month calendars
          */
         public List<MonthCalendarElement> getVisibleMonthCalendars() {
             return this.$("vaadin-month-calendar").all().stream()
-                    .map(el -> el.wrap(MonthCalendarElement.class))
-                    .collect(Collectors.toList());
+                    .map(el -> el.wrap(MonthCalendarElement.class)).toList();
         }
 
         /**
          * Gets the today button from the overlays toolbar
          *
-         * @return
+         * @return the today button
          */
         public ButtonElement getTodayButton() {
             return this.$(ButtonElement.class)
@@ -65,7 +63,7 @@ public class DatePickerElement extends TestBenchElement
         /**
          * Gets the cancel button from the overlays toolbar
          *
-         * @return
+         * @return the cancel button
          */
         public ButtonElement getCancelButton() {
             return this.$(ButtonElement.class)
@@ -77,7 +75,7 @@ public class DatePickerElement extends TestBenchElement
         /**
          * Gets the header text of the month calendar, e.g. `January 1999`
          *
-         * @return
+         * @return the header text
          */
         public String getHeaderText() {
             return this.$(TestBenchElement.class)
@@ -87,15 +85,48 @@ public class DatePickerElement extends TestBenchElement
         /**
          * Gets the weekday headers that are rendered by the month calendar
          *
-         * @return
+         * @return the weekdays
          */
         public List<WeekdayElement> getWeekdays() {
             return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
         }
+
+        /**
+         * Gets the day cells that show a day of the month rendered by the month
+         * calendar.
+         *
+         * @return the day cells
+         */
+        public List<DayElement> getDays() {
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withCondition(day -> !day.getText().isEmpty()).all();
+        }
+
+        /**
+         * Gets the day cell for the given day of the month. The cell renders
+         * the state of the day: for example, a day that cannot be selected has
+         * a {@code disabled} attribute, and custom part names from the date
+         * metadata show up in its {@code part} attribute.
+         *
+         * @param day
+         *            the day of the month
+         * @return the day cell, or {@code null} if the month calendar does not
+         *         show the given day
+         */
+        public DayElement getDay(int day) {
+            return this.$(DayElement.class)
+                    .withAttributeContainingWord("part", "date")
+                    .withText(String.valueOf(day)).all().stream().findFirst()
+                    .orElse(null);
+        }
     }
 
     public static class WeekdayElement extends TestBenchElement {
+    }
+
+    public static class DayElement extends TestBenchElement {
     }
 
     /**
@@ -175,7 +206,7 @@ public class DatePickerElement extends TestBenchElement
      * Gets the visible presentation value from the inner input element as a
      * string. This value depends on the used Locale.
      *
-     * @return
+     * @return the input value
      */
     public String getInputValue() {
         TestBenchElement input = $("input").first();

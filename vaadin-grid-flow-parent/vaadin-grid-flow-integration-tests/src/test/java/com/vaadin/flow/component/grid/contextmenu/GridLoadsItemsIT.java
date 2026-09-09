@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -92,7 +91,7 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
 
     private List<String> getMessages() {
         return findElements(By.cssSelector("#messages > span")).stream()
-                .map(WebElement::getText).collect(Collectors.toList());
+                .map(WebElement::getText).toList();
     }
 
 }

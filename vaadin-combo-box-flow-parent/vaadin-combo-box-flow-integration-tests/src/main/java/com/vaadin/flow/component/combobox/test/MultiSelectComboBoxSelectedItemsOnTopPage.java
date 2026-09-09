@@ -17,7 +17,6 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -33,7 +32,7 @@ public class MultiSelectComboBoxSelectedItemsOnTopPage extends Div {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Items");
         List<String> items = IntStream.range(0, 100)
-                .mapToObj(i -> "Item " + (i + 1)).collect(Collectors.toList());
+                .mapToObj(i -> "Item " + (i + 1)).toList();
         comboBox.setItems(items);
 
         NativeButton setSelectedOnTop = new NativeButton("Set selected on top",

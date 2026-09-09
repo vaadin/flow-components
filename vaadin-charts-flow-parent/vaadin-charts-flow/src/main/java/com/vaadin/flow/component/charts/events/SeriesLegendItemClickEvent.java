@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The SeriesLegendItemClickEvent class stores information on click events on
  * the charts's legend items that correspond to a chart series.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("series-legend-item-click")
 public class SeriesLegendItemClickEvent extends ComponentEvent<Chart>
@@ -29,6 +31,7 @@ public class SeriesLegendItemClickEvent extends ComponentEvent<Chart>
      *
      * @param source
      * @param fromClient
+     * @since 22.0
      */
     public SeriesLegendItemClickEvent(Chart source, boolean fromClient,
             @EventData("event.detail.originalEvent.browserEvent.pageX") int pageX,

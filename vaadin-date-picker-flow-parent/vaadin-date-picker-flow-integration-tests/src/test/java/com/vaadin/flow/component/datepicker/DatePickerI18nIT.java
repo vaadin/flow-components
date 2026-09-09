@@ -51,6 +51,8 @@ public class DatePickerI18nIT extends AbstractComponentIT {
                 overlayContent.getTodayButton().getText());
         Assert.assertEquals("Custom cancel",
                 overlayContent.getCancelButton().getText());
+        Assert.assertEquals("Custom calendar",
+                overlayContent.getDomAttribute("aria-label"));
         Assert.assertTrue(overlayContent.getVisibleMonthCalendars().stream()
                 .anyMatch(month -> month.getHeaderText()
                         .contains("Custom January")));
@@ -68,6 +70,8 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         Assert.assertEquals("Today", overlayContent.getTodayButton().getText());
         Assert.assertEquals("Cancel",
                 overlayContent.getCancelButton().getText());
+        Assert.assertEquals("Calendar",
+                overlayContent.getDomAttribute("aria-label"));
         Assert.assertTrue(overlayContent.getVisibleMonthCalendars().stream()
                 .anyMatch(month -> month.getHeaderText().contains("January")));
     }

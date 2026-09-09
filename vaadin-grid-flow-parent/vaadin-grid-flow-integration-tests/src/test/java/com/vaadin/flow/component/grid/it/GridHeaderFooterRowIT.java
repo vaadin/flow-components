@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -114,6 +113,42 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         assertFooterOrder(0, 1);
         clickButton("prepend-footer");
         assertFooterOrder(2, 0, 1);
+    }
+
+    @Test
+    public void setHeaderComponent_appendHeader_componentIsPreserved() {
+        clickButton("append-header");
+        clickButton("set-components-for-headers");
+        clickButton("append-header");
+
+        List<WebElement> headerCells = getHeaderCells();
+        Assert.assertEquals("Unexpected amount of header cells", 2,
+                headerCells.size());
+        Assert.assertEquals(
+                "The first header row should contain the moved component",
+                "<span>foo</span>",
+                headerCells.get(0).getDomProperty("innerHTML"));
+        Assert.assertEquals(
+                "The appended header row should contain only its own text", "1",
+                headerCells.get(1).getDomProperty("innerHTML"));
+    }
+
+    @Test
+    public void setFooterComponent_prependFooter_componentIsPreserved() {
+        clickButton("append-footer");
+        clickButton("set-components-for-footers");
+        clickButton("prepend-footer");
+
+        List<WebElement> footerCells = getFooterCells();
+        Assert.assertEquals("Unexpected amount of footer cells", 2,
+                footerCells.size());
+        Assert.assertEquals(
+                "The prepended footer row should contain only its own text",
+                "1", footerCells.get(0).getDomProperty("innerHTML"));
+        Assert.assertEquals(
+                "The last footer row should contain the moved component",
+                "<span>foo</span>",
+                footerCells.get(1).getDomProperty("innerHTML"));
     }
 
     @Test
@@ -393,24 +428,23 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         List<WebElement> headers = thead.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("th")).stream())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> cellNames = headers.stream().map(header -> header
                 .findElement(By.tagName("slot")).getDomAttribute("name"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<WebElement> headerCells = cellNames.stream()
-                .map(name -> grid.findElement(By.cssSelector(
+                .<WebElement> map(name -> grid.findElement(By.cssSelector(
                         "vaadin-grid-cell-content[slot='" + name + "']")))
-                .collect(Collectors.toList());
+                .toList();
 
         return headerCells;
     }
 
     private List<String> getHeaderContents() {
         return getHeaderCells().stream()
-                .map(cell -> cell.getDomProperty("innerHTML"))
-                .collect(Collectors.toList());
+                .map(cell -> cell.getDomProperty("innerHTML")).toList();
     }
 
     private void assertFooterOrder(int... numbers) {
@@ -430,18 +464,85 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         List<WebElement> footers = tfoot.findElements(By.tagName("tr")).stream()
                 .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("td")).stream())
-                .collect(Collectors.toList());
+                .toList();
 
         List<String> cellNames = footers.stream().map(footer -> footer
                 .findElement(By.tagName("slot")).getDomAttribute("name"))
-                .collect(Collectors.toList());
+                .toList();
 
         List<WebElement> footerCells = cellNames.stream()
-                .map(name -> grid.findElement(By.cssSelector(
+                .<WebElement> map(name -> grid.findElement(By.cssSelector(
                         "vaadin-grid-cell-content[slot='" + name + "']")))
-                .collect(Collectors.toList());
+                .toList();
 
         return footerCells;
+    }
+
+    @Test
+    public void gridWithHeaderAndFooterRows_headerAndFooterAreRenderered() {
+        grid = $(GridElement.class).id("grid-with-header-and-footer-rows");
+        scrollToElement(grid);
+
+        // Joined columns are at prepended row, i.e. index 0
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 0), "Name", true);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 1), "Age", true);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 2), "Street", false);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 3), "Postal Code",
+                false);
+
+        Assert.assertTrue(
+                "The first column group should have 'Basic Information' header text",
+                grid.getHeaderCellContent(0, 0).getText()
+                        .contains("Basic Information"));
+
+        Assert.assertTrue(
+                "The second column group should have 'Address Information' header text",
+                grid.getHeaderCellContent(0, 1).getText()
+                        .contains("Address Information"));
+
+        Assert.assertTrue("There should be a cell with the renderered footer",
+                grid.getFooterCell(0, 0).getText()
+                        .contains("Total: 500 people"));
+    }
+
+    @Test
+    public void gridWithHeaderWithComponentRenderer_headerAndFooterAreRenderered() {
+        grid = $(GridElement.class).id("grid-header-with-components");
+        scrollToElement(grid);
+
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 0), "<span>Name</span>",
+                true);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 1), "<span>Age</span>",
+                true);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 2),
+                "<span>Street</span>", false);
+        assertRenderedHeaderCell(grid.getHeaderCell(1, 3),
+                "<span>Postal Code</span>", false);
+
+        Assert.assertTrue(
+                "The first column group should have a 'Basic Information' component header",
+                grid.getHeaderCellContent(0, 0).getDomProperty("innerHTML")
+                        .contains("<span>Basic Information</span>"));
+
+        Assert.assertTrue(
+                "The second column group should have an 'Address Information' component header",
+                grid.getHeaderCellContent(0, 1).getDomProperty("innerHTML")
+                        .contains("<span>Address Information</span>"));
+
+        Assert.assertTrue("The footer should contain the renderered component",
+                grid.getFooterCellContent(0, 0).getDomProperty("innerHTML")
+                        .contains("<span>Total: 500 people</span>"));
+    }
+
+    private void assertRenderedHeaderCell(GridTHTDElement headerCell,
+            String text, boolean withSorter) {
+        String html = headerCell.getInnerHTML();
+        if (withSorter) {
+            Assert.assertTrue(html.contains("<vaadin-grid-sorter"));
+        } else {
+            Assert.assertFalse(html.contains("<vaadin-grid-sorter"));
+        }
+        Assert.assertTrue(html.contains(text));
     }
 
     private void clickButton(String id) {

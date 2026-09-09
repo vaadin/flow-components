@@ -31,6 +31,7 @@ import com.vaadin.flow.data.binder.Validator;
  *            Type of the component that uses this controller.
  * @param <V>
  *            Type of the value of the extending component.
+ * @since 24.5
  */
 public class ValidationController<C extends Component & HasValidator<V> & HasValidation, V>
         implements Serializable {

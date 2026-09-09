@@ -126,7 +126,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         this.layer = layer;
         this.cellCtor = cellCtor;
         cells = layer.getColumns().stream().map(cellCtor)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -161,10 +161,11 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     protected void removeCell(AbstractColumn<?> columnComponent) {
         CELL cellToRemove = cells.stream()
                 .filter(cell -> cell.getColumn().equals(columnComponent))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "removeCell() should never be called for a column component "
-                                + "that doesn't have a corresponding cell in this row."));
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        """
+                                removeCell() should never be called for a column component \
+                                that doesn't have a corresponding cell in this row.\
+                                """));
         cells.remove(cellToRemove);
     }
 
@@ -198,9 +199,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                             && parent.get() instanceof AbstractColumn) {
                         return getCellFor((AbstractColumn<?>) parent.get());
                     } else {
-                        throw new IllegalArgumentException(
-                                "Cannot find a cell from this row that would "
-                                        + "correspond to the given column");
+                        throw new IllegalArgumentException("""
+                                Cannot find a cell from this row that would \
+                                correspond to the given column\
+                                """);
                     }
                 });
     }
@@ -227,8 +229,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      *             if it's not possible to join the given cells
      */
     public CELL join(Column<?>... columns) {
-        return join(Arrays.stream(columns).map(this::getCell)
-                .collect(Collectors.toList()));
+        return join(Arrays.stream(columns).map(this::getCell).toList());
     }
 
     /**
@@ -283,9 +284,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     public CELL join(Collection<CELL> cells) {
         Grid<?> grid = layer.getGrid();
         if (!isOutmostRow()) {
-            throw new IllegalArgumentException(
-                    "Cells can be joined only on the top-most HeaderRow "
-                            + "or the bottom-most FooterRow.");
+            throw new IllegalArgumentException("""
+                    Cells can be joined only on the top-most HeaderRow \
+                    or the bottom-most FooterRow.\
+                    """);
         }
         if (cells.size() < 2) {
             throw new IllegalArgumentException("Cannot join less than 2 cells");
@@ -297,7 +299,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
         List<CELL> sortedCells = cells.stream().sorted((c1, c2) -> Integer
                 .compare(this.cells.indexOf(c1), this.cells.indexOf(c2)))
-                .collect(Collectors.toList());
+                .toList();
 
         int cellInsertIndex = this.cells.indexOf(sortedCells.get(0));
         IntStream.range(0, sortedCells.size()).forEach(i -> {
@@ -308,11 +310,10 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         });
 
         List<AbstractColumn<?>> columnsToJoin = sortedCells.stream()
-                .map(CELL::getColumn).collect(Collectors.toList());
+                .<AbstractColumn<?>> map(CELL::getColumn).toList();
 
         List<Column<?>> bottomColumnsToJoin = columnsToJoin.stream()
-                .flatMap(col -> col.getBottomChildColumns().stream())
-                .collect(Collectors.toList());
+                .flatMap(col -> col.getBottomChildColumns().stream()).toList();
 
         List<ColumnLayer> layers = grid.getColumnLayers();
 
@@ -354,14 +355,16 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
             List<AbstractColumn<?>> joinedColumns = possibleParentLayer
                     .getColumns().stream().filter(col -> ((ColumnGroup) col)
                             .getChildColumns().size() > 1)
-                    .collect(Collectors.toList());
+                    .toList();
             boolean otherColumnsJoined = joinedColumns.stream()
                     .flatMap(col -> col.getBottomChildColumns().stream())
                     .anyMatch(col -> !bottomColumnsToJoin.contains(col));
             if (otherColumnsJoined) {
                 throw new IllegalArgumentException(
-                        "This set of cells can not be joined because of the hierarchical "
-                                + "column group structure of the client-side web component.");
+                        """
+                                This set of cells can not be joined because of the hierarchical \
+                                column group structure of the client-side web component.\
+                                """);
             }
         }
         return layers.size();
@@ -386,8 +389,8 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
         layer.getColumns().removeAll(columnsToJoin);
         CELL keeper = this.cells.get(elementInsertIndex);
-        this.cells.removeAll(cellsToJoin.stream().filter(cell -> cell != keeper)
-                .collect(Collectors.toList()));
+        this.cells.removeAll(
+                cellsToJoin.stream().filter(cell -> cell != keeper).toList());
 
         return this.cells.get(cellInsertIndex);
     }
@@ -403,7 +406,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         List<AbstractColumn<?>> childColumns = lowerLayer.getColumns().stream()
                 .filter(col -> bottomColumnsToJoin
                         .containsAll(col.getBottomChildColumns()))
-                .collect(Collectors.toList());
+                .toList();
 
         List<AbstractColumn<?>> newColumns = new ArrayList<AbstractColumn<?>>();
         Iterator<AbstractColumn<?>> leftColumns = layer.getColumns().stream()

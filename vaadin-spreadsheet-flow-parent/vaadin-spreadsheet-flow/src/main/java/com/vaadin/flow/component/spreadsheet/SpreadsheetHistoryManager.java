@@ -26,6 +26,7 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  * the public/protected API that callers and subclasses depend on.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 public class SpreadsheetHistoryManager implements Serializable {
 

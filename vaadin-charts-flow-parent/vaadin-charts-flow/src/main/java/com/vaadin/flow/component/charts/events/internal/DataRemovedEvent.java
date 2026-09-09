@@ -13,7 +13,7 @@ import com.vaadin.flow.component.charts.model.Series;
 /**
  * Event when the data was removed.
  *
- * @since 2.0
+ * @since 6.0.1
  *
  */
 public class DataRemovedEvent extends AbstractSeriesEvent {

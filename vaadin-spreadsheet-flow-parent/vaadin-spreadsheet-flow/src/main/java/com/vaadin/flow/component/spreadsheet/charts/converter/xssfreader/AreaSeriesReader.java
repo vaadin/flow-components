@@ -16,6 +16,9 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AreaSeriesData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Stacking;
 
+/**
+ * @since 24.0
+ */
 public class AreaSeriesReader
         extends AbstractSeriesReader<CTAreaSer, AreaSeriesData> {
 

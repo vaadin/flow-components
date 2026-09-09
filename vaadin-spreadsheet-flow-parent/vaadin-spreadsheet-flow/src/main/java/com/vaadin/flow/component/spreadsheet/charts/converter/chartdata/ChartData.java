@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * @since 24.0
+ */
 public class ChartData {
     public String title;
 

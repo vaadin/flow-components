@@ -29,6 +29,7 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
  * Basic multi file in memory file receiver implementation.
  *
  * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
+ * @since 1.0
  */
 @Deprecated(since = "24.8", forRemoval = true)
 public class MultiFileMemoryBuffer implements MultiFileReceiver {

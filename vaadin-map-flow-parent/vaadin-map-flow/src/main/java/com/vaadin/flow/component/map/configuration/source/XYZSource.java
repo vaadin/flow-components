@@ -17,6 +17,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
  * <p>
  * This is commonly used by OpenStreetMap, as well as other services who have
  * adopted the OSM tile numbering scheme.
+ * 
+ * @since 23.0
  */
 public class XYZSource extends TileImageSource {
 
@@ -64,6 +66,7 @@ public class XYZSource extends TileImageSource {
     public static class Options extends TileImageSource.Options {
         /**
          * @see XYZSource#getUrl()
+         * @since 23.1
          */
         @Override
         public void setUrl(String url) {

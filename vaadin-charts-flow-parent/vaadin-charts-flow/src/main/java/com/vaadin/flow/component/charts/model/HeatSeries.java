@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * A specialized series for use with HeatMaps
+ * 
+ * @since 6.0.1
  */
 public class HeatSeries extends AbstractSeries {
 

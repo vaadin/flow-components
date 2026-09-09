@@ -16,6 +16,7 @@ import com.vaadin.flow.component.charts.model.style.ButtonTheme;
  *
  * @apiNote This button is only shown after a selection zoom, not after a mouse
  *          wheel zoom.
+ * @since 25.0
  */
 public class ZoomingResetButton extends AbstractConfigurationObject {
 

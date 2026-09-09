@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -51,21 +50,20 @@ class NotificationTest {
 
         Notification notification = new Notification(span1, span2);
 
-        List<Component> children = notification.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = notification.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
 
         notification.add(span3);
-        children = notification.getChildren().collect(Collectors.toList());
+        children = notification.getChildren().toList();
         Assertions.assertEquals(3, children.size());
         Assertions.assertTrue(children.contains(span1));
         Assertions.assertTrue(children.contains(span2));
         Assertions.assertTrue(children.contains(span3));
 
         notification.remove(span2);
-        children = notification.getChildren().collect(Collectors.toList());
+        children = notification.getChildren().toList();
         Assertions.assertEquals(2, children.size());
         Assertions.assertTrue(children.contains(span1),
                 "Children should contain span1");
@@ -73,13 +71,13 @@ class NotificationTest {
                 "Children should contain span3");
 
         span1.getElement().removeFromParent();
-        children = notification.getChildren().collect(Collectors.toList());
+        children = notification.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         Assertions.assertTrue(children.contains(span3),
                 "Children should contain span3");
 
         notification.removeAll();
-        children = notification.getChildren().collect(Collectors.toList());
+        children = notification.getChildren().toList();
         Assertions.assertEquals(0, children.size());
     }
 
@@ -89,8 +87,7 @@ class NotificationTest {
         Div container2 = new Div(container1);
 
         Notification notification = new Notification(container2);
-        List<Component> children = notification.getChildren()
-                .collect(Collectors.toList());
+        List<Component> children = notification.getChildren().toList();
         Assertions.assertEquals(1, children.size());
         Assertions.assertTrue(children.contains(container2),
                 "Children should contain container2");
@@ -261,8 +258,8 @@ class NotificationTest {
         // Check that the notification is opened and attached to the parent
         // container
         Assertions.assertTrue(notification.isOpened());
-        Assertions.assertTrue(parent.getChildren().collect(Collectors.toList())
-                .contains(notification));
+        Assertions.assertTrue(
+                parent.getChildren().toList().contains(notification));
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
@@ -274,8 +271,8 @@ class NotificationTest {
         Assertions.assertFalse(notification.isOpened());
         // The notification should have been automatically removed from the
         // parent container
-        Assertions.assertFalse(parent.getChildren().collect(Collectors.toList())
-                .contains(notification));
+        Assertions.assertFalse(
+                parent.getChildren().toList().contains(notification));
     }
 
     @Test

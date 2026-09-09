@@ -18,6 +18,7 @@ import java.time.Instant;
  * @see PlotOptionsOhlc
  * @see PlotOptionsCandlestick
  *
+ * @since 6.0.1
  */
 public class OhlcItem extends DataSeriesItem {
     // high/low already defined in DataSeriesItem

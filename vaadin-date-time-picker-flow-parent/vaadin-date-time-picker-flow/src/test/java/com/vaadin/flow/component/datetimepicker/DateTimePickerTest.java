@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
@@ -133,6 +134,36 @@ class DateTimePickerTest {
         picker.setMax(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
                 picker.getMax());
+    }
+
+    @Test
+    void setDefaultTime() {
+        DateTimePicker picker = new DateTimePicker();
+        Assertions.assertNull(picker.getDefaultTime());
+        assertFalse(picker.getElement().hasProperty("defaultTime"));
+
+        picker.setDefaultTime(LocalTime.of(9, 0));
+        assertEquals("09:00", picker.getElement().getProperty("defaultTime"));
+        assertEquals(LocalTime.of(9, 0), picker.getDefaultTime());
+
+        picker.setDefaultTime(LocalTime.of(9, 30, 15));
+        assertEquals("09:30:15",
+                picker.getElement().getProperty("defaultTime"));
+        assertEquals(LocalTime.of(9, 30, 15), picker.getDefaultTime());
+
+        picker.setDefaultTime(null);
+        Assertions.assertNull(picker.getDefaultTime());
+        assertFalse(picker.getElement().hasProperty("defaultTime"));
+    }
+
+    @Test
+    void setDefaultTime_truncatesToMilliseconds() {
+        DateTimePicker picker = new DateTimePicker();
+        picker.setDefaultTime(LocalTime.of(9, 30, 15, 123_456_789));
+        assertEquals("09:30:15.123",
+                picker.getElement().getProperty("defaultTime"));
+        assertEquals(LocalTime.of(9, 30, 15, 123_000_000),
+                picker.getDefaultTime());
     }
 
     @Test

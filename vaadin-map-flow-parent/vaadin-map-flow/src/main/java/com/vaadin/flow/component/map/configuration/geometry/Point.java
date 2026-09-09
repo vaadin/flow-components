@@ -16,6 +16,8 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 
 /**
  * Geometry that is represented by a single point and coordinate.
+ * 
+ * @since 23.0
  */
 public class Point extends SimpleGeometry {
 

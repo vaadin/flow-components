@@ -26,6 +26,7 @@ import com.vaadin.flow.component.grid.FooterRow.FooterCell;
  * One row of {@link FooterCell}s in a Grid.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class FooterRow extends AbstractRow<FooterCell> {
 
@@ -80,6 +81,7 @@ public class FooterRow extends AbstractRow<FooterCell> {
      * Creates a new footer row from the layer of column elements.
      *
      * @param layer
+     *            the column layer
      */
     FooterRow(ColumnLayer layer) {
         super(layer, FooterCell::new);
@@ -88,11 +90,12 @@ public class FooterRow extends AbstractRow<FooterCell> {
     @Override
     public FooterCell join(Collection<FooterCell> cells) {
         if (layer.getGrid().getColumnLayers().indexOf(layer) == 0) {
-            throw new UnsupportedOperationException(
-                    "Cells cannot be joined on the top-most footer row. "
-                            + "This row is used as the default row for setting column "
-                            + "footers, so each cell in it should have maximum one "
-                            + "related column.");
+            throw new UnsupportedOperationException("""
+                    Cells cannot be joined on the top-most footer row. \
+                    This row is used as the default row for setting column \
+                    footers, so each cell in it should have maximum one \
+                    related column.\
+                    """);
         }
         return super.join(cells);
     }

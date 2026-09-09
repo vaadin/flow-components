@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
@@ -58,7 +59,8 @@ public class ImageIT extends AbstractSpreadsheetIT {
         // Get all type3 pictures (absolute position)
         var type3 = findElementsInShadowRoot(
                 By.cssSelector(cellToCSS("A1") + " img")).stream()
-                .map(image -> image.getRect()).collect(Collectors.toList());
+                .map(image -> image.getRect())
+                .collect(Collectors.toCollection(ArrayList::new));
         Assert.assertEquals(3, type3.size());
 
         // Sort the pictures by their position starting from the left

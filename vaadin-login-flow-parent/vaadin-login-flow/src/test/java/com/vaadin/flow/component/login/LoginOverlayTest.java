@@ -75,7 +75,7 @@ class LoginOverlayTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginOverlay.class))
                     .thenReturn(mockedLogger);
 
@@ -104,7 +104,7 @@ class LoginOverlayTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         try (MockedStatic<LoggerFactory> context = Mockito
-                .mockStatic(LoggerFactory.class)) {
+                .mockStatic(LoggerFactory.class, Mockito.CALLS_REAL_METHODS)) {
             context.when(() -> LoggerFactory.getLogger(LoginOverlay.class))
                     .thenReturn(mockedLogger);
 
@@ -142,5 +142,18 @@ class LoginOverlayTest {
                 "Expected form being disabled by default listener");
         Assertions.assertFalse(overlay.isError(),
                 "Expected error status being reset by default listener");
+    }
+
+    @Test
+    void headingLevel() {
+        final LoginOverlay overlay = new LoginOverlay();
+
+        Assertions.assertEquals(1, overlay.getHeadingLevel());
+
+        overlay.setHeadingLevel(3);
+
+        Assertions.assertEquals(3, overlay.getHeadingLevel());
+        Assertions.assertEquals(3.0,
+                overlay.getElement().getProperty("headingLevel", 0.0));
     }
 }

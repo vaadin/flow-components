@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +48,7 @@ class AppLayoutTest {
         systemUnderTest.setContent(content);
 
         List<Element> children = systemUnderTest.getElement().getChildren()
-                .collect(Collectors.toList());
+                .toList();
         assertTrue(children.contains(content.getElement()));
     }
 
@@ -63,7 +62,7 @@ class AppLayoutTest {
         systemUnderTest.setContent(null);
 
         List<Element> children = systemUnderTest.getElement().getChildren()
-                .collect(Collectors.toList());
+                .toList();
         assertFalse(children.contains(content.getElement()));
         assertNull(systemUnderTest.getContent());
     }

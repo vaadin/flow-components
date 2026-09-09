@@ -16,6 +16,8 @@ import com.vaadin.flow.component.charts.Chart;
 /**
  * The PointUnselectEvent class stores data for unselect events on the points of
  * the chart.
+ * 
+ * @since 6.0.1
  */
 @DomEvent("point-unselect")
 public class PointUnselectEvent extends ComponentEvent<Chart>

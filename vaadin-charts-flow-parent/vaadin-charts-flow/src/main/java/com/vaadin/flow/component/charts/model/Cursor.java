@@ -12,6 +12,8 @@ package com.vaadin.flow.component.charts.model;
  * You can set the cursor to POINTER("pointer") if you have click events
  * attached to the series, to signal to the user that the points and lines can
  * be clicked. Defaults to NONE.
+ * 
+ * @since 6.0.1
  */
 public enum Cursor implements ChartEnum {
     POINTER("pointer"), NONE("");

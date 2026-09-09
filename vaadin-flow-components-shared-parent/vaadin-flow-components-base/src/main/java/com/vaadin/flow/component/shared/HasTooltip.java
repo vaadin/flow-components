@@ -33,6 +33,7 @@ import com.vaadin.flow.component.HasElement;
  *
  *
  * @author Vaadin Ltd
+ * @since 23.3
  */
 public interface HasTooltip extends HasElement {
 
@@ -60,6 +61,7 @@ public interface HasTooltip extends HasElement {
      *            The tooltip text in Markdown format
      *
      * @return the tooltip handle
+     * @since 25.0
      */
     default Tooltip setTooltipMarkdown(String markdown) {
         var tooltip = Tooltip.getForElement(getElement());

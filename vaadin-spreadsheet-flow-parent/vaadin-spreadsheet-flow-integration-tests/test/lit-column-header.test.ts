@@ -13,7 +13,7 @@ import {
     SpreadsheetColumnHeader,
     emptyColumnHeaderRenderState,
     type ColumnHeaderRenderState,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetColumnHeader.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetColumnHeader.js';
 
 /**
  * Slice 143 — column header strip.

@@ -1,0 +1,59 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.checkbox.testbench;
+
+import java.util.Collections;
+
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
+
+/**
+ * A TestBench element representing a <code>&lt;vaadin-switch&gt;</code>
+ * element.
+ */
+@Element("vaadin-switch")
+public class SwitchElement extends TestBenchElement
+        implements HasLabel, HasHelper, HasValidation {
+    /**
+     * Checks whether the switch is checked (on).
+     *
+     * @return <code>true</code> if the switch is on, <code>false</code> if it
+     *         is off
+     */
+    public boolean isChecked() {
+        return getPropertyBoolean("checked");
+    }
+
+    /**
+     * Sets whether the switch is checked (on).
+     *
+     * @param checked
+     *            <code>true</code> to turn the switch on, <code>false</code> to
+     *            turn it off
+     */
+    public void setChecked(boolean checked) {
+        setProperty("checked", checked);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
+    }
+
+    @Override
+    public String getLabel() {
+        return $("label").first().getPropertyString("textContent");
+    }
+}

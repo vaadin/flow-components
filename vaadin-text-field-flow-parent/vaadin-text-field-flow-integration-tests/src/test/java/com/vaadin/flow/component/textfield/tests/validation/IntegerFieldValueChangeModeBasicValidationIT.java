@@ -194,6 +194,8 @@ public class IntegerFieldValueChangeModeBasicValidationIT
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("valid");
 
+        Thread.sleep(VALUE_CHANGE_TIMEOUT);
+
         // Entered:
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE);
@@ -202,6 +204,8 @@ public class IntegerFieldValueChangeModeBasicValidationIT
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("valid");
 
+        Thread.sleep(VALUE_CHANGE_TIMEOUT);
+
         // Entered: --
         startValidationTimeout();
         testField.sendKeys("-");
@@ -209,6 +213,8 @@ public class IntegerFieldValueChangeModeBasicValidationIT
         testField.sendKeys("-");
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("invalid");
+
+        Thread.sleep(VALUE_CHANGE_TIMEOUT);
 
         // Entered: -2
         startValidationTimeout();
@@ -218,6 +224,8 @@ public class IntegerFieldValueChangeModeBasicValidationIT
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("valid");
 
+        Thread.sleep(VALUE_CHANGE_TIMEOUT);
+
         // Entered: --
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE);
@@ -225,6 +233,8 @@ public class IntegerFieldValueChangeModeBasicValidationIT
         testField.sendKeys("-");
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("invalid");
+
+        Thread.sleep(VALUE_CHANGE_TIMEOUT);
 
         // Entered:
         startValidationTimeout();

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * A control that provides zooming functionality on the map.
+ * 
+ * @since 25.1
  */
 public class ZoomControl extends Control {
     @Override

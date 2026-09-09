@@ -10,6 +10,8 @@ package com.vaadin.flow.component.charts.model;
 
 /**
  * The name of a symbol to use for the border in {@link ChartType#FLAGS} series.
+ * 
+ * @since 6.0.1
  */
 public enum FlagShape implements ChartEnum {
 

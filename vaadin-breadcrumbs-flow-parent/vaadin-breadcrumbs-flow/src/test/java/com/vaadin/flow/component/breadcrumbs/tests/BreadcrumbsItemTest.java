@@ -94,6 +94,35 @@ class BreadcrumbsItemTest {
     }
 
     @Test
+    void setPathWithUnsafeScheme_throws() {
+        var item = new BreadcrumbsItem("Docs");
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> item.setPath("javascript:alert(1)"));
+    }
+
+    @Test
+    void setUnsafePathWithUnsafeScheme_pathSet() {
+        var item = new BreadcrumbsItem("Docs");
+        item.setUnsafePath("javascript:alert(1)");
+
+        Assertions.assertEquals("javascript:alert(1)", item.getPath());
+    }
+
+    @Test
+    void constructor_textPath_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)"));
+    }
+
+    @Test
+    void constructor_textPathPrefixComponent_unsafeScheme_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new BreadcrumbsItem("Docs", "javascript:alert(1)",
+                        new Div()));
+    }
+
+    @Test
     void setNullStringPath_pathAttributeRemoved() {
         var item = new BreadcrumbsItem("Docs", "/docs");
         item.setPath((String) null);
@@ -140,6 +169,30 @@ class BreadcrumbsItemTest {
         var prefix = new Div();
         item.setPrefixComponent(prefix);
 
+        Assertions.assertEquals(prefix, item.getPrefixComponent());
+    }
+
+    @Test
+    void setTextAfterPrefix_prefixPreserved() {
+        var item = new BreadcrumbsItem("Inbox (2 items)");
+        var prefix = new Div();
+        item.setPrefixComponent(prefix);
+
+        item.setText("Inbox (3 items)");
+
+        Assertions.assertEquals("Inbox (3 items)", item.getText());
+        Assertions.assertEquals(prefix, item.getPrefixComponent());
+    }
+
+    @Test
+    void setEmptyTextAfterPrefix_prefixPreserved() {
+        var item = new BreadcrumbsItem("Home");
+        var prefix = new Div();
+        item.setPrefixComponent(prefix);
+
+        item.setText("");
+
+        Assertions.assertEquals("", item.getText());
         Assertions.assertEquals(prefix, item.getPrefixComponent());
     }
 

@@ -25,6 +25,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/css/color-zones/"
  * >view live demo</a>).
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class Zones extends AbstractConfigurationObject {
 
@@ -55,6 +57,7 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -62,6 +65,8 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * Defines the color of the series.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -69,6 +74,7 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * @see #setDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getDashStyle() {
         return dashStyle;
@@ -76,6 +82,8 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * A name for the dash style to use for the graph.
+     * 
+     * @since 18.0
      */
     public void setDashStyle(DashStyle dashStyle) {
         this.dashStyle = dashStyle;
@@ -83,6 +91,7 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * @see #setFillColor(Color)
+     * @since 18.0
      */
     public Color getFillColor() {
         return fillColor;
@@ -90,6 +99,8 @@ public class Zones extends AbstractConfigurationObject {
 
     /**
      * Defines the fill color for the series (in area type series)
+     * 
+     * @since 18.0
      */
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;

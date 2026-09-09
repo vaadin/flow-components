@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Allows setting a set of rules to apply for different screen or chart sizes.
  * Each rule specifies additional chart options.
+ * 
+ * @since 6.0.1
  */
 public class Responsive extends AbstractConfigurationObject {
 

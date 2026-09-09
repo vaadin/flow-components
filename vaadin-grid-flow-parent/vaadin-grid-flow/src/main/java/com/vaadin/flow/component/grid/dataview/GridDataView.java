@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.IdentifierProvider;
  *
  * @param <T>
  *            the item type
- * @since
+ * @since 18.0
  */
 public class GridDataView<T> extends AbstractDataView<T> {
 

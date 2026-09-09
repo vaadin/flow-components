@@ -20,6 +20,8 @@ package com.vaadin.flow.component.charts.model;
  * 	}
  * });
  * </pre>
+ * 
+ * @since 6.0.1
  */
 public class Global extends AbstractConfigurationObject {
 

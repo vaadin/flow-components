@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * The layout of the legend items. Can be one of HORIZONTAL("horizontal") or
  * VERTICAL("vertical"). Defaults to HORIZONTAL.
+ * 
+ * @since 6.0.1
  */
 public enum LayoutDirection implements ChartEnum {
 

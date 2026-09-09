@@ -20,7 +20,7 @@ import {
     selectRange,
     selectSingleCell,
     type SelectionState,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 describe('SelectionState — selectSingleCell', () => {
     it('builds a single-cell selection with matching active range', () => {

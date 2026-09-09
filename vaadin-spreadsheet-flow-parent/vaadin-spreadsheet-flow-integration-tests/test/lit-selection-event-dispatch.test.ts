@@ -9,7 +9,7 @@
 
 import { expect } from 'chai';
 
-import { buildSelectionEvent } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { buildSelectionEvent } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
  * Slice 150 — pure helper that classifies a selection shape and

@@ -19,6 +19,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * <p>
  * To change partial fill amount or color use {@link #getPartialFill()} to get
  * the configuration object.
+ * 
+ * @since 18.0
  */
 public class DataSeriesItemXrange extends DataSeriesItem {
 

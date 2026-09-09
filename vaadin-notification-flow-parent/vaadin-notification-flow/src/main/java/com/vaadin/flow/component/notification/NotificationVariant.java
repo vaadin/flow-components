@@ -19,6 +19,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for {@code vaadin-notification} component.
+ * 
+ * @since 2.0
  */
 public enum NotificationVariant implements ThemeVariant {
     LUMO_PRIMARY("primary"),

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -169,7 +168,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
                 .findElements(By.cssSelector("vaadin-vertical-layout")).stream()
                 .filter(element -> !element.getDomProperty("innerHTML")
                         .contains("-----")) // placeholders
-                .collect(Collectors.toList());
+                .toList();
 
         waitUntil(driver -> content.get(0).getDomAttribute("disabled") != null);
         Optional<WebElement> notDisabled = content.stream()

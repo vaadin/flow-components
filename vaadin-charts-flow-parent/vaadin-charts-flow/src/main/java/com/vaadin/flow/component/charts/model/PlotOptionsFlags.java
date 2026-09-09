@@ -16,6 +16,7 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  *
+ * @since 6.0.1
  */
 public class PlotOptionsFlags extends AbstractPlotOptions {
 
@@ -130,6 +131,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setClip(Boolean)
+     * @since 18.0
      */
     public Boolean getClip() {
         return clip;
@@ -140,6 +142,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setClip(Boolean clip) {
         this.clip = clip;
@@ -147,6 +151,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -171,6 +176,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * <code>.highcharts-series-{n}</code> class, or individual classes given by
      * the <code>className</code> option.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;
@@ -196,6 +203,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setColorKey(String)
+     * @since 18.0
      */
     public String getColorKey() {
         return colorKey;
@@ -208,6 +216,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * approximation for data grouping is set to <code>'sum'</code>.
      * <p>
      * Defaults to <code>y</code>.
+     * 
+     * @since 18.0
      */
     public void setColorKey(String colorKey) {
         this.colorKey = colorKey;
@@ -215,6 +225,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public Color[] getColors() {
         if (colors == null) {
@@ -229,6 +240,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * A series specific or series type specific color set to apply instead of
      * the global <a href="#colors">colors</a> when
      * <a href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
+     * 
+     * @since 18.0
      */
     public void setColors(Color... colors) {
         this.colors = new ArrayList<Color>(Arrays.asList(colors));
@@ -240,6 +253,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * @param color
      *            to add
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void addColor(Color color) {
         if (this.colors == null) {
@@ -254,6 +268,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * @param color
      *            to remove
      * @see #setColors(Color...)
+     * @since 18.0
      */
     public void removeColor(Color color) {
         this.colors.remove(color);
@@ -279,6 +294,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setCrisp(Boolean)
+     * @since 18.0
      */
     public Boolean getCrisp() {
         return crisp;
@@ -293,6 +309,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * rendered blurry.
      * <p>
      * Defaults to <code>true</code>.
+     * 
+     * @since 18.0
      */
     public void setCrisp(Boolean crisp) {
         this.crisp = crisp;
@@ -526,6 +544,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -544,6 +563,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * </p>
      * <p>
      * Defaults to: #000000
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -551,6 +572,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -561,6 +583,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * <code>1</code>.
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -631,6 +655,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setNegativeColor(Color)
+     * @since 18.0
      */
     public Color getNegativeColor() {
         return negativeColor;
@@ -641,6 +666,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * <a href="#plotOptions.series.threshold">threshold</a>.
      * <p>
      * Defaults to: null
+     * 
+     * @since 18.0
      */
     public void setNegativeColor(Color negativeColor) {
         this.negativeColor = negativeColor;
@@ -685,6 +712,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setOpacity(Number)
+     * @since 18.0
      */
     public Number getOpacity() {
         return opacity;
@@ -694,6 +722,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * Opacity of a series parts: line, fill (e.g. area) and dataLabels.
      * <p>
      * Defaults to <code>1</code>.
+     * 
+     * @since 18.0
      */
     public void setOpacity(Number opacity) {
         this.opacity = opacity;
@@ -938,6 +968,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -959,6 +990,8 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * </p>
      * <p>
      * Defaults to: { "fontSize": "11px", "fontWeight": "bold" }
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

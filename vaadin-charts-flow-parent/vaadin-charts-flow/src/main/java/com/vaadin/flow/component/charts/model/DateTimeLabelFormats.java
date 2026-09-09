@@ -25,6 +25,8 @@ package com.vaadin.flow.component.charts.model;
  *   year: '%Y'
  * }
  * </code>
+ * 
+ * @since 6.0.1
  */
 @SuppressWarnings("serial")
 public class DateTimeLabelFormats extends AbstractConfigurationObject {

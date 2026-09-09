@@ -12,6 +12,8 @@ import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  * Text labels for the plot bands
+ * 
+ * @since 6.0.1
  */
 public class Label extends AbstractConfigurationObject {
 
@@ -62,6 +64,7 @@ public class Label extends AbstractConfigurationObject {
 
     /**
      * @see #setStyle(Style)
+     * @since 18.0
      */
     public Style getStyle() {
         if (style == null) {
@@ -81,6 +84,8 @@ public class Label extends AbstractConfigurationObject {
      * >styled mode</a>, the labels are styled by the
      * <code>.highcharts-plot-band-label</code> class.
      * </p>
+     * 
+     * @since 18.0
      */
     public void setStyle(Style style) {
         this.style = style;

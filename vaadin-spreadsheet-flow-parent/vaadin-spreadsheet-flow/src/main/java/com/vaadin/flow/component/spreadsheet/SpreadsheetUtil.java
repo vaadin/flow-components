@@ -41,7 +41,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
  * Utility class for miscellaneous Spreadsheet operations.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public class SpreadsheetUtil implements Serializable {
 
@@ -149,8 +149,8 @@ public class SpreadsheetUtil implements Serializable {
 
     /**
      * Returns the POI index of the first visible sheet (not hidden or very
-     * hidden). If no sheets are visible, returns 0. This is not be possible at
-     * least in Excel, but unfortunately POI allows it.
+     * hidden). If no sheets are visible, returns 0. This should not be possible
+     * at least in Excel, but unfortunately POI allows it.
      *
      * @param workbook
      *            Workbook to get the sheets from
@@ -446,8 +446,11 @@ public class SpreadsheetUtil implements Serializable {
      * and find the bounding rectangle for the referenced cells.
      *
      * @param formula
+     *            the formula
      * @param spreadsheet
+     *            the spreadsheet
      * @param includeHiddenCells
+     *            whether hidden cells are included
      * @return CellRangeAddress bounding the evaluated result
      */
     public static CellRangeAddress getRangeForReference(String formula,

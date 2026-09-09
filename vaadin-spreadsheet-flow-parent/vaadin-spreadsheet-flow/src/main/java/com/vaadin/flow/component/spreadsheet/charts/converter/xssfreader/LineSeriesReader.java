@@ -15,6 +15,9 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.LineSeriesData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.SplineSeriesData;
 
+/**
+ * @since 24.0
+ */
 public class LineSeriesReader
         extends AbstractSeriesReader<CTLineSer, LineSeriesData> {
 

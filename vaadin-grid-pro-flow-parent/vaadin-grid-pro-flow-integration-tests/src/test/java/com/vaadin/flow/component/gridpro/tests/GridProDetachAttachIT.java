@@ -65,9 +65,7 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
         Assert.assertFalse(cell.innerHTMLContains(editorTag));
 
         // Entering edit mode with double click
-        executeScript(
-                "arguments[0].dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));",
-                cell);
+        cell.doubleClick();
         Assert.assertTrue(cell.innerHTMLContains(editorTag));
         // Assert there are no null reference errors
         checkLogsForErrors();

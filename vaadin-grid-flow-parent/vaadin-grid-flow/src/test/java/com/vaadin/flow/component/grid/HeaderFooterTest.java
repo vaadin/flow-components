@@ -1388,8 +1388,7 @@ class HeaderFooterTest {
 
     private void assertRowWrapsLayer(AbstractRow<?> row, List<Element> layer) {
         List<Element> cellWrappedElements = row.getCells().stream()
-                .map(cell -> cell.getColumn().getElement())
-                .collect(Collectors.toList());
+                .map(cell -> cell.getColumn().getElement()).toList();
 
         Assertions.assertEquals(layer.size(), cellWrappedElements.size(),
                 "The row contains unexpected amount of column elements");
@@ -1423,8 +1422,7 @@ class HeaderFooterTest {
      */
     private List<List<Element>> getColumnLayers() {
         List<List<Element>> layers = new ArrayList<List<Element>>();
-        List<Element> children = grid.getElement().getChildren()
-                .collect(Collectors.toList());
+        List<Element> children = grid.getElement().getChildren().toList();
         while (children.stream().anyMatch(isColumnGroup)) {
             if (!children.stream().allMatch(isColumnGroup)) {
                 throw new IllegalStateException(
@@ -1437,8 +1435,7 @@ class HeaderFooterTest {
             }
             layers.add(children);
             children = children.stream()
-                    .flatMap(element -> element.getChildren())
-                    .collect(Collectors.toList());
+                    .flatMap(element -> element.getChildren()).toList();
         }
         if (children.stream().anyMatch(isColumn)) {
             if (!children.stream().allMatch(isColumn)) {

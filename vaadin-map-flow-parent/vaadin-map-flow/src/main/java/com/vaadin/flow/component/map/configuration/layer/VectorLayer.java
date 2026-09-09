@@ -19,6 +19,8 @@ import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
 /**
  * Layer for rendering vector data client-side
+ * 
+ * @since 23.0
  */
 public class VectorLayer extends Layer {
     // Store source as the more general Source instead of VectorSource

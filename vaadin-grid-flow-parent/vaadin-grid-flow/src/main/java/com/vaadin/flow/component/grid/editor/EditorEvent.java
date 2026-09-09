@@ -31,6 +31,7 @@ import com.vaadin.flow.component.grid.Grid;
  *
  * @param <T>
  *            the item type
+ * @since 2.1
  */
 public abstract class EditorEvent<T> extends EventObject {
 

@@ -21,6 +21,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * See <a class="internal" href="#Axis">the Axis object</a> for programmatic
  * access to the axis.
  * </p>
+ * 
+ * @since 6.0.1
  */
 public class ZAxis extends Axis {
 
@@ -113,6 +115,8 @@ public class ZAxis extends Axis {
     /**
      * When using an alternate grid color, a band is painted across the plot
      * area between every other grid line.
+     * 
+     * @since 18.0
      */
     public void setAlternateGridColor(Color alternateGridColor) {
         this.alternateGridColor = alternateGridColor;
@@ -338,6 +342,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setGridLineColor(Color)
+     * @since 18.0
      */
     public Color getGridLineColor() {
         return gridLineColor;
@@ -356,6 +361,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #e6e6e6
+     * 
+     * @since 18.0
      */
     public void setGridLineColor(Color gridLineColor) {
         this.gridLineColor = gridLineColor;
@@ -363,6 +370,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setGridLineDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getGridLineDashStyle() {
         return gridLineDashStyle;
@@ -375,6 +383,8 @@ public class ZAxis extends Axis {
      * >this demonstration</a>.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setGridLineDashStyle(DashStyle gridLineDashStyle) {
         this.gridLineDashStyle = gridLineDashStyle;
@@ -382,6 +392,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setGridLineWidth(Number)
+     * @since 18.0
      */
     public Number getGridLineWidth() {
         return gridLineWidth;
@@ -400,6 +411,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setGridLineWidth(Number gridLineWidth) {
         this.gridLineWidth = gridLineWidth;
@@ -455,6 +468,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setLineColor(Color)
+     * @since 18.0
      */
     public Color getLineColor() {
         return lineColor;
@@ -474,6 +488,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #ccd6eb
+     * 
+     * @since 18.0
      */
     public void setLineColor(Color lineColor) {
         this.lineColor = lineColor;
@@ -481,6 +497,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setLineWidth(Number)
+     * @since 18.0
      */
     public Number getLineWidth() {
         return lineWidth;
@@ -500,6 +517,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setLineWidth(Number lineWidth) {
         this.lineWidth = lineWidth;
@@ -617,6 +636,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setMinorGridLineColor(Color)
+     * @since 18.0
      */
     public Color getMinorGridLineColor() {
         return minorGridLineColor;
@@ -636,6 +656,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #f2f2f2
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineColor(Color minorGridLineColor) {
         this.minorGridLineColor = minorGridLineColor;
@@ -643,6 +665,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setMinorGridLineDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getMinorGridLineDashStyle() {
         return minorGridLineDashStyle;
@@ -655,6 +678,8 @@ public class ZAxis extends Axis {
      * >this demonstration</a>.
      * <p>
      * Defaults to: Solid
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle) {
         this.minorGridLineDashStyle = minorGridLineDashStyle;
@@ -662,6 +687,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setMinorGridLineWidth(Number)
+     * @since 18.0
      */
     public Number getMinorGridLineWidth() {
         return minorGridLineWidth;
@@ -680,6 +706,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setMinorGridLineWidth(Number minorGridLineWidth) {
         this.minorGridLineWidth = minorGridLineWidth;
@@ -687,6 +715,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setMinorTickColor(Color)
+     * @since 18.0
      */
     public Color getMinorTickColor() {
         return minorTickColor;
@@ -696,6 +725,8 @@ public class ZAxis extends Axis {
      * Color for the minor tick marks.
      * <p>
      * Defaults to: #999999
+     * 
+     * @since 18.0
      */
     public void setMinorTickColor(Color minorTickColor) {
         this.minorTickColor = minorTickColor;
@@ -771,6 +802,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setMinorTickWidth(Number)
+     * @since 18.0
      */
     public Number getMinorTickWidth() {
         return minorTickWidth;
@@ -780,6 +812,8 @@ public class ZAxis extends Axis {
      * The pixel width of the minor tick mark.
      * <p>
      * Defaults to: 0
+     * 
+     * @since 18.0
      */
     public void setMinorTickWidth(Number minorTickWidth) {
         this.minorTickWidth = minorTickWidth;
@@ -1095,6 +1129,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setTickColor(Color)
+     * @since 18.0
      */
     public Color getTickColor() {
         return tickColor;
@@ -1113,6 +1148,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: #ccd6eb
+     * 
+     * @since 18.0
      */
     public void setTickColor(Color tickColor) {
         this.tickColor = tickColor;
@@ -1238,6 +1275,7 @@ public class ZAxis extends Axis {
 
     /**
      * @see #setTickWidth(Number)
+     * @since 18.0
      */
     public Number getTickWidth() {
         return tickWidth;
@@ -1256,6 +1294,8 @@ public class ZAxis extends Axis {
      * </p>
      * <p>
      * Defaults to: 1
+     * 
+     * @since 18.0
      */
     public void setTickWidth(Number tickWidth) {
         this.tickWidth = tickWidth;

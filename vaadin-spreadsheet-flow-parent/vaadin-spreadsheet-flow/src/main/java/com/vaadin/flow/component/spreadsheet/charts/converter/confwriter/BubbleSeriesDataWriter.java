@@ -15,6 +15,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsBubble;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 
+/**
+ * @since 24.0
+ */
 public class BubbleSeriesDataWriter extends AbstractSeriesDataWriter {
 
     public BubbleSeriesDataWriter(AbstractSeriesData series) {

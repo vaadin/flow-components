@@ -10,6 +10,8 @@ package com.vaadin.flow.component.map.configuration.source;
 
 /**
  * Abstract base class for map sources providing tiled images from a URL
+ * 
+ * @since 23.0
  */
 public abstract class TileImageSource extends UrlTileSource {
 
@@ -32,6 +34,9 @@ public abstract class TileImageSource extends UrlTileSource {
         return crossOrigin;
     }
 
+    /**
+     * @since 23.1
+     */
     protected static abstract class Options extends UrlTileSource.Options {
         private String crossOrigin;
 

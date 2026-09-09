@@ -32,6 +32,7 @@ import com.vaadin.flow.dom.Element;
  * @see SideNavItem
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 public interface HasSideNavItems extends HasElement {
 

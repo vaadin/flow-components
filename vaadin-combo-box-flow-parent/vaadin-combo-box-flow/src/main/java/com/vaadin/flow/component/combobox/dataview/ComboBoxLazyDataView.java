@@ -36,6 +36,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of the items in ComboBox
+ * @since 18.0
  */
 public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
 

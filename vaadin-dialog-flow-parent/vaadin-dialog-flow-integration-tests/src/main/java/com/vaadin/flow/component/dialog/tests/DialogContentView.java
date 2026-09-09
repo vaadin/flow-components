@@ -46,7 +46,15 @@ public class DialogContentView extends HorizontalLayout {
         });
         openButton.setId("open-button");
 
+        // Detaches and re-attaches the dialog, mimicking a UI transfer. Slotted
+        // content must survive this without any renderer re-initialization.
+        var reattachButton = new Button("Reattach dialog", e -> {
+            remove(dialog);
+            add(dialog);
+        });
+        reattachButton.setId("reattach-button");
+
         // It's crucial that the dialog itself is added to the UI for this test
-        add(dialog, addContentButton, openButton);
+        add(dialog, addContentButton, openButton, reattachButton);
     }
 }

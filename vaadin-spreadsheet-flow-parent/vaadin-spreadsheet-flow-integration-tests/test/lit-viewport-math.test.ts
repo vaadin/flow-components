@@ -19,7 +19,7 @@ import {
     getDefaultRowHeightPx,
     getRowHeightPx,
     type ViewportInput,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
 describe('ViewportMath — unit conversion', () => {
     it('converts points to pixels at 96 ppi (Excel default)', () => {

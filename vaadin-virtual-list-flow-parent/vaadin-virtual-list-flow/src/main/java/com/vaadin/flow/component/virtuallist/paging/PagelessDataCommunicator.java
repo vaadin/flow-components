@@ -29,6 +29,7 @@ import tools.jackson.databind.node.ArrayNode;
  *
  * @param <T>
  *            item type
+ * @since 21.0
  */
 public class PagelessDataCommunicator<T> extends DataCommunicator<T> {
 

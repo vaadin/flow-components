@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 /**
  * A configuration object to express dependencies between tasks in a Gantt
  * chart.
+ * 
+ * @since 24.7
  */
 @SuppressWarnings("unused")
 public class GanttSeriesItemDependency extends ConnectorStyle {

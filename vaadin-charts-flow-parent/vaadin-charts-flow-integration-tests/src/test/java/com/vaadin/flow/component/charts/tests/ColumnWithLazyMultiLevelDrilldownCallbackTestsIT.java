@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.tests;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -106,6 +105,6 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
 
     private List<String> getLogMessages() {
         return findElements(By.tagName("li")).stream().map(e -> e.getText())
-                .collect(Collectors.toList());
+                .toList();
     }
 }

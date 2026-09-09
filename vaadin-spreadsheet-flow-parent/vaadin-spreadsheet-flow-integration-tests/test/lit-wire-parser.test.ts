@@ -25,7 +25,7 @@ import {
     parsePopupButtonState,
     parseSetNumber,
     parseSetString,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/lit/wire/parser.js';
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/wire/parser.js';
 
 /**
  * Wire-format parser tests. The expected JSON inputs match the snapshots

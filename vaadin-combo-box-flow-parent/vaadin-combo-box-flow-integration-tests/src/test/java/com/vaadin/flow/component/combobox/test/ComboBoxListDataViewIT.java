@@ -117,7 +117,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
                 "Expected size = 2 after applying programmatic filter", 2);
 
         firstComboBox.openPopup();
-        assertLoadedItemsCount("Should be 2 persons after filtering", 2,
+        waitForLoadedItemsCount("Should be 2 persons after filtering", 2,
                 firstComboBox);
 
         // Verify that the second combo box has not been impacted by filtering

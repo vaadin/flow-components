@@ -40,6 +40,7 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @param <T>
  *            the grid bean type
+ * @since 2.1
  */
 public class EditorImpl<T> extends AbstractGridExtension<T>
         implements Editor<T> {
@@ -207,9 +208,11 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     private void validate(T item) {
         if (getBinder() == null) {
             throw new IllegalStateException(
-                    "Editor doesn't have a binder. It's needed to be set explicitly. "
-                            + "An example of setting the Binder: "
-                            + "Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)");
+                    """
+                            Editor doesn't have a binder. It's needed to be set explicitly. \
+                            An example of setting the Binder: \
+                            Binder<Person> binder = new Binder<>(Person.class); grid.setBinder(binder)\
+                            """);
         }
 
         if (isBuffered() && edited != null) {

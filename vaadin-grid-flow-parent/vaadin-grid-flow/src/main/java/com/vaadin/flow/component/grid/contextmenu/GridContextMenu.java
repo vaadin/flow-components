@@ -35,6 +35,7 @@ import tools.jackson.databind.node.ObjectNode;
  * {@link Grid}.
  *
  * @author Vaadin Ltd.
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public class GridContextMenu<T> extends
@@ -86,6 +87,9 @@ public class GridContextMenu<T> extends
         }
     }
 
+    /**
+     * @since 4.0
+     */
     public static class GridContextMenuOpenedEvent<T>
             extends OpenedChangeEvent<GridContextMenu<T>> {
 
@@ -159,8 +163,10 @@ public class GridContextMenu<T> extends
     public void setTarget(Component target) {
         if (target != null && !(target instanceof Grid<?>)) {
             throw new IllegalArgumentException(
-                    "Only an instance of Grid can be used as the target for GridContextMenu. "
-                            + "Use ContextMenu for any other component.");
+                    """
+                            Only an instance of Grid can be used as the target for GridContextMenu. \
+                            Use ContextMenu for any other component.\
+                            """);
         }
         super.setTarget(target);
     }
@@ -203,6 +209,7 @@ public class GridContextMenu<T> extends
      * @param listener
      *            the listener to add
      * @return a Registration for removing the event listener
+     * @since 4.0
      */
     public Registration addGridContextMenuOpenedListener(
             ComponentEventListener<GridContextMenuOpenedEvent<T>> listener) {
@@ -222,6 +229,7 @@ public class GridContextMenu<T> extends
      *
      * @return the callback function that is executed before opening the context
      *         menu, or {@code null} if not specified.
+     * @since 4.1
      */
     public SerializablePredicate<T> getDynamicContentHandler() {
         return dynamicContentHandler;
@@ -244,6 +252,7 @@ public class GridContextMenu<T> extends
      * @param dynamicContentHandler
      *            the callback function that will be executed before opening the
      *            context menu.
+     * @since 4.1
      */
     public void setDynamicContentHandler(
             SerializablePredicate<T> dynamicContentHandler) {
@@ -252,6 +261,8 @@ public class GridContextMenu<T> extends
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 25.0
      */
     @Override
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {

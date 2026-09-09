@@ -20,22 +20,28 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Markdown is a component for rendering Markdown content. It takes Markdown
  * source as input and renders the corresponding HTML.
  *
  * @author Vaadin Ltd
+ * @since 24.8
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.2.0-beta1")
+@NpmPackage(value = "@vaadin/markdown", version = "25.3.0-beta2")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
-    private String serverContent;
+    private final SignalPropertySupport<String> contentSupport = SignalPropertySupport
+            .create(this, this::handleContentChange);
+
     private String clientContent;
 
     /**
@@ -56,14 +62,25 @@ public class Markdown extends Component implements HasSize {
     }
 
     /**
+     * Creates a Markdown with content bound to a signal.
+     *
+     * @param contentSignal
+     *            the signal providing the markdown content
+     * @see #bindContent(Signal)
+     * @since 25.3
+     */
+    public Markdown(Signal<String> contentSignal) {
+        bindContent(contentSignal);
+    }
+
+    /**
      * Sets the markdown content.
      *
      * @param content
      *            the markdown content
      */
     public void setContent(String content) {
-        serverContent = content;
-        scheduleContentUpdate();
+        contentSupport.set(content);
     }
 
     /**
@@ -73,10 +90,8 @@ public class Markdown extends Component implements HasSize {
      *            the markdown content to append
      */
     public void appendContent(String content) {
-        if (serverContent == null) {
-            serverContent = "";
-        }
-        setContent(serverContent + content);
+        var current = contentSupport.get();
+        setContent((current == null ? "" : current) + content);
     }
 
     /**
@@ -85,21 +100,93 @@ public class Markdown extends Component implements HasSize {
      * @return the markdown content
      */
     public String getContent() {
-        return serverContent;
+        return contentSupport.get();
+    }
+
+    /**
+     * Binds the markdown content to the given signal. While the binding is
+     * active, calling {@link #setContent(String)} or
+     * {@link #appendContent(String)} will throw a
+     * {@code BindingActiveException}.
+     *
+     * @param contentSignal
+     *            the signal providing the markdown content
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.3
+     */
+    public SignalBinding<String> bindContent(Signal<String> contentSignal) {
+        return contentSupport.bind(contentSignal);
+    }
+
+    /**
+     * Sets whether single line breaks ("soft breaks") within a paragraph are
+     * rendered as line breaks, the same way chat and message-style Markdown
+     * behaves.
+     * <p>
+     * By default, this is {@code false}, following the original Markdown
+     * specification where single line breaks are ignored and a blank line is
+     * required to start a new paragraph.
+     *
+     * @param lineBreaks
+     *            {@code true} to render single line breaks as line breaks,
+     *            {@code false} otherwise
+     * @since 25.3
+     */
+    public void setLineBreaks(boolean lineBreaks) {
+        getElement().setProperty("lineBreaks", lineBreaks);
+    }
+
+    /**
+     * Gets whether single line breaks ("soft breaks") within a paragraph are
+     * rendered as line breaks.
+     *
+     * @return {@code true} if single line breaks are rendered as line breaks,
+     *         {@code false} otherwise
+     * @since 25.3
+     */
+    public boolean isLineBreaks() {
+        return getElement().getProperty("lineBreaks", false);
+    }
+
+    /**
+     * Binds the line breaks state to the given signal. While the binding is
+     * active, calling {@link #setLineBreaks(boolean)} will throw a
+     * {@code BindingActiveException}. A {@code null} signal value is treated as
+     * {@code false}.
+     *
+     * @param lineBreaksSignal
+     *            the signal providing the line breaks state, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.3
+     */
+    public SignalBinding<Boolean> bindLineBreaks(
+            Signal<Boolean> lineBreaksSignal) {
+        Objects.requireNonNull(lineBreaksSignal, "Signal cannot be null");
+        return getElement().bindProperty("lineBreaks", lineBreaksSignal
+                .map(value -> value == null ? Boolean.FALSE : value), null);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (serverContent != null) {
+        if (contentSupport.get() != null) {
             clientContent = null;
             scheduleContentUpdate();
         }
     }
 
+    private void handleContentChange(String content) {
+        scheduleContentUpdate();
+    }
+
     private void scheduleContentUpdate() {
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    var serverContent = contentSupport.get();
                     if (Objects.equals(clientContent, serverContent)) {
                         return;
                     }

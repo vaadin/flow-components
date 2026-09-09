@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializablePredicate;
  *
  * @param <T>
  *            data type
- * @since
+ * @since 18.0
  */
 public class GridListDataView<T> extends AbstractListDataView<T> {
     private DataCommunicator<T> dataCommunicator;

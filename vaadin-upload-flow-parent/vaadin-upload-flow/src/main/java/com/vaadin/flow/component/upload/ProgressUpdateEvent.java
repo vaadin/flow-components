@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
  * ProgressUpdateEvent is sent to track progress of upload.
  *
  * @author Vaadin Ltd.
+ * @since 1.0
  */
 public class ProgressUpdateEvent extends ComponentEvent<Upload> {
 
@@ -69,6 +70,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      *            total size of file currently being uploaded, -1 if unknown
      * @param fileName
      *            name of file currently being uploaded
+     * @since 24.4
      */
     public ProgressUpdateEvent(Upload source, long readBytes,
             long contentLength, String fileName) {
@@ -109,6 +111,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      * Get the file name.
      *
      * @return file name
+     * @since 24.4
      */
     public String getFileName() {
         return fileName;

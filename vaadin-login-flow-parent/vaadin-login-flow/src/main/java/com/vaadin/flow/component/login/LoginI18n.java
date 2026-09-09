@@ -25,11 +25,12 @@ import com.vaadin.flow.internal.StringUtil;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Internationalization object for customizing the component UI texts. An
- * instance with the default messages can be obtained using
- * {@link LoginI18n#createDefault()}
+ * Internationalization object for customizing the component UI texts. Set only
+ * the properties to customize; unset properties fall back to the component's
+ * default texts.
  *
  * @see LoginForm#setI18n(LoginI18n)
+ * @since 1.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginI18n implements Serializable {
@@ -54,8 +55,14 @@ public class LoginI18n implements Serializable {
     private String additionalInformation;
 
     /**
+     * Creates a new instance with the default messages.
+     *
      * @return a new instance with the default messages
+     * @deprecated Create a new instance and set only the properties to
+     *             customize. Unset properties fall back to the component's
+     *             default texts.
      */
+    @Deprecated(since = "25.3", forRemoval = true)
     public static LoginI18n createDefault() {
         return JacksonUtils.readToObject(DEFAULT_I18N, LoginI18n.class);
     }
@@ -289,6 +296,7 @@ public class LoginI18n implements Serializable {
 
         /**
          * @return current value for the username property
+         * @since 24.1
          */
         public String getUsername() {
             return username;
@@ -299,6 +307,7 @@ public class LoginI18n implements Serializable {
          *
          * @param username
          *            new value for the username property
+         * @since 24.1
          */
         public void setUsername(String username) {
             this.username = username;
@@ -306,6 +315,7 @@ public class LoginI18n implements Serializable {
 
         /**
          * @return current value for the password property
+         * @since 24.1
          */
         public String getPassword() {
             return password;
@@ -316,6 +326,7 @@ public class LoginI18n implements Serializable {
          *
          * @param password
          *            new value for the password property
+         * @since 24.1
          */
         public void setPassword(String password) {
             this.password = password;

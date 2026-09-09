@@ -20,7 +20,7 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
  * Abstract base class for Spreadsheet actions.
  *
  * @author Vaadin Ltd.
- * @since 1.0
+ * @since 23.1
  */
 public abstract class SpreadsheetAction extends Action {
 

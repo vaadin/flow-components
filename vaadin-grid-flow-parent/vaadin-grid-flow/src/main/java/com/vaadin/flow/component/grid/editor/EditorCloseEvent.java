@@ -24,6 +24,7 @@ package com.vaadin.flow.component.grid.editor;
  *
  * @param <T>
  *            the item type
+ * @since 2.1
  */
 public class EditorCloseEvent<T> extends EditorEvent<T> {
 

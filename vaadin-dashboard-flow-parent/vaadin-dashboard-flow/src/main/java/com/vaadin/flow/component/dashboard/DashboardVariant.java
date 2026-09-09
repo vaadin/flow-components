@@ -13,6 +13,8 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 /**
  * The set of theme variants applicable to the {@code vaadin-dashboard} and
  * {@code vaadin-dashboard-layout} components.
+ * 
+ * @since 24.8
  */
 public enum DashboardVariant implements ThemeVariant {
 

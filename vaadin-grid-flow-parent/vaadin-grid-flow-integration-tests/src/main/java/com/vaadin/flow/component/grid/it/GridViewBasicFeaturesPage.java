@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -66,14 +65,14 @@ public class GridViewBasicFeaturesPage extends LegacyTestView {
         HeaderRow topHeader = grid.prependHeaderRow();
 
         IntStream.range(baseYear, baseYear + numberOfYears).forEach(year -> {
-            BigDecimal firstHalfSum = list.fetch(new Query<>())
-                    .collect(Collectors.toList()).stream()
+            BigDecimal firstHalfSum = list.fetch(new Query<>()).toList()
+                    .stream()
                     .map(budgetHistory -> budgetHistory
                             .getFirstHalfOfYear(year))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            BigDecimal secondHalfSum = list.fetch(new Query<>())
-                    .collect(Collectors.toList()).stream()
+            BigDecimal secondHalfSum = list.fetch(new Query<>()).toList()
+                    .stream()
                     .map(budgetHistory -> budgetHistory
                             .getSecondHalfOfYear(year))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);

@@ -10,7 +10,6 @@ package com.vaadin.flow.component.crud.testbench;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 
@@ -87,7 +86,7 @@ public class CrudElement extends TestBenchElement {
                     .map(column -> editedRow.getCell(column))
                     .filter(cell -> cell.getInnerHTML()
                             .contains("vaadin-crud-edit"))
-                    .collect(Collectors.toList()).get(0);
+                    .toList().get(0);
             editCell.$("vaadin-crud-edit").get(0).click();
         }
     }

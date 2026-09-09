@@ -10,6 +10,9 @@ package com.vaadin.flow.component.charts.model;
 
 import java.io.Serializable;
 
+/**
+ * @since 6.0.1
+ */
 public interface ChartConfiguration extends Serializable {
 
     void fireAxesRescaled(Axis axis, Number minimum, Number maximum,

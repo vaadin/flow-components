@@ -20,7 +20,6 @@ import com.vaadin.flow.component.DebounceSettings;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -62,9 +61,6 @@ public class CustomSearchView extends VerticalLayout {
                 e -> filterableDataProvider.setFilter(searchBar.getValue()));
 
         crud.setToolbar(searchBar);
-
-        Anchor newItemLink = new Anchor("javascript:", "New person");
-        crud.setNewButton(newItemLink);
 
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
 

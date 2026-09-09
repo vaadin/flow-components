@@ -17,6 +17,7 @@ package com.vaadin.flow.component.slider;
 
 import java.util.Optional;
 
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.function.SerializableFunction;
 
@@ -32,7 +33,7 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>, TValue extends Number>
         extends SliderBase<TComponent, TValue, TValue, Double>
-        implements HasAriaLabel {
+        implements HasAriaDescription, HasAriaLabel {
 
     /**
      * Constructs a NumberSlider with the given min and max values, and
@@ -104,6 +105,35 @@ abstract class NumberSlider<TComponent extends NumberSlider<TComponent, TValue>,
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * Sets the id of an element to be used as the accessible description for
+     * the range input element of the slider.
+     * <p>
+     * The referenced element is announced in addition to the helper text and
+     * the error message.
+     *
+     * @param ariaDescribedBy
+     *            the id of the element to be used as the description, or
+     *            {@code null} to remove it
+     */
+    @Override
+    public void setAriaDescribedBy(String ariaDescribedBy) {
+        getElement().setProperty("accessibleDescriptionRef", ariaDescribedBy);
+    }
+
+    /**
+     * Gets the id of the element used as the accessible description for the
+     * range input element of the slider.
+     *
+     * @return an optional id of the element used as the description, or an
+     *         empty optional if none has been set
+     */
+    @Override
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     /**

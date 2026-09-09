@@ -13,6 +13,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * Set options on specific levels. Takes precedence over series options, but not
  * point options.
+ * 
+ * @since 6.0.1
  */
 public class Level extends AbstractConfigurationObject {
 
@@ -30,6 +32,7 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderColor(Color)
+     * @since 18.0
      */
     public Color getBorderColor() {
         return borderColor;
@@ -38,6 +41,8 @@ public class Level extends AbstractConfigurationObject {
     /**
      * Can set a <code>borderColor</code> on all points which lies on the same
      * level.
+     * 
+     * @since 18.0
      */
     public void setBorderColor(Color borderColor) {
         this.borderColor = borderColor;
@@ -45,6 +50,7 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderDashStyle(DashStyle)
+     * @since 18.0
      */
     public DashStyle getBorderDashStyle() {
         return borderDashStyle;
@@ -55,6 +61,8 @@ public class Level extends AbstractConfigurationObject {
      * level. See <a
      * href"#plotOptions.scatter.dashStyle">plotOptions.scatter.dashStyle</a>
      * for possible options.
+     * 
+     * @since 18.0
      */
     public void setBorderDashStyle(DashStyle borderDashStyle) {
         this.borderDashStyle = borderDashStyle;
@@ -62,6 +70,7 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderWidth(Number)
+     * @since 18.0
      */
     public Number getBorderWidth() {
         return borderWidth;
@@ -69,6 +78,8 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * Can set the borderWidth on all points which lies on the same level.
+     * 
+     * @since 18.0
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
@@ -76,6 +87,7 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * @see #setColor(Color)
+     * @since 18.0
      */
     public Color getColor() {
         return color;
@@ -83,6 +95,8 @@ public class Level extends AbstractConfigurationObject {
 
     /**
      * Can set a color on all points which lies on the same level.
+     * 
+     * @since 18.0
      */
     public void setColor(Color color) {
         this.color = color;

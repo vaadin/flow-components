@@ -39,6 +39,7 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
  * should be used.
  *
  * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
+ * @since 1.0
  */
 @Deprecated(since = "24.8", forRemoval = true)
 public class MultiFileBuffer extends AbstractFileBuffer
@@ -62,6 +63,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
      *
      * @param factory
      *            file factory for file buffer
+     * @since 22.0
      */
     public MultiFileBuffer(FileFactory factory) {
         super(factory);
