@@ -8,12 +8,12 @@
  */
 
 import type {
-    CellData,
-    GroupingData,
-    MergedRegion,
-    OverlayInfo,
-    PopupButtonState,
-    SpreadsheetActionDetails,
+  CellData,
+  GroupingData,
+  MergedRegion,
+  OverlayInfo,
+  PopupButtonState,
+  SpreadsheetActionDetails
 } from '../types/wire.js';
 
 /**
@@ -38,97 +38,79 @@ import type {
  * the Java Parser's early-return condition.
  */
 function isEmpty(raw: string | null | undefined): boolean {
-    return raw === null || raw === undefined || raw === '' || raw === 'null';
+  return raw === null || raw === undefined || raw === '' || raw === 'null';
 }
 
 /** Parse an array of `CellData`. */
-export function parseArrayOfCellData(
-    raw: string | null | undefined
-): CellData[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as CellData[];
+export function parseArrayOfCellData(raw: string | null | undefined): CellData[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as CellData[];
 }
 
 /** Parse an array of `MergedRegion`. */
-export function parseArrayOfMergedRegion(
-    raw: string | null | undefined
-): MergedRegion[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as MergedRegion[];
+export function parseArrayOfMergedRegion(raw: string | null | undefined): MergedRegion[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as MergedRegion[];
 }
 
 /** Parse an array of `SpreadsheetActionDetails`. */
-export function parseArrayOfSpreadsheetActionDetails(
-    raw: string | null | undefined
-): SpreadsheetActionDetails[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as SpreadsheetActionDetails[];
+export function parseArrayOfSpreadsheetActionDetails(raw: string | null | undefined): SpreadsheetActionDetails[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as SpreadsheetActionDetails[];
 }
 
 /** Parse an array of `PopupButtonState`. */
-export function parseArrayOfPopupButtonState(
-    raw: string | null | undefined
-): PopupButtonState[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as PopupButtonState[];
+export function parseArrayOfPopupButtonState(raw: string | null | undefined): PopupButtonState[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as PopupButtonState[];
 }
 
 /** Parse a single `PopupButtonState`. */
-export function parsePopupButtonState(
-    raw: string | null | undefined
-): PopupButtonState | null {
-    if (isEmpty(raw)) {
-        return null;
-    }
-    return JSON.parse(raw as string) as PopupButtonState;
+export function parsePopupButtonState(raw: string | null | undefined): PopupButtonState | null {
+  if (isEmpty(raw)) {
+    return null;
+  }
+  return JSON.parse(raw as string) as PopupButtonState;
 }
 
 /** Parse an array of `GroupingData`. */
-export function parseArrayOfGroupingData(
-    raw: string | null | undefined
-): GroupingData[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as GroupingData[];
+export function parseArrayOfGroupingData(raw: string | null | undefined): GroupingData[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as GroupingData[];
 }
 
 /** Parse a `Record<string, OverlayInfo>`. */
-export function parseMapStringOverlayInfo(
-    raw: string | null | undefined
-): Record<string, OverlayInfo> | null {
-    if (isEmpty(raw)) {
-        return null;
-    }
-    return JSON.parse(raw as string) as Record<string, OverlayInfo>;
+export function parseMapStringOverlayInfo(raw: string | null | undefined): Record<string, OverlayInfo> | null {
+  if (isEmpty(raw)) {
+    return null;
+  }
+  return JSON.parse(raw as string) as Record<string, OverlayInfo>;
 }
 
 /** Parse an array of strings. */
-export function parseArrayOfStrings(
-    raw: string | null | undefined
-): string[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as string[];
+export function parseArrayOfStrings(raw: string | null | undefined): string[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as string[];
 }
 
 /** Parse an array of integers. */
-export function parseArrayOfIntegers(
-    raw: string | null | undefined
-): number[] {
-    if (isEmpty(raw)) {
-        return [];
-    }
-    return JSON.parse(raw as string) as number[];
+export function parseArrayOfIntegers(raw: string | null | undefined): number[] {
+  if (isEmpty(raw)) {
+    return [];
+  }
+  return JSON.parse(raw as string) as number[];
 }
 
 /**
@@ -136,26 +118,22 @@ export function parseArrayOfIntegers(
  * `Parser.parseArrayInt` shape — the consumers wanted a primitive int
  * array, not a boxed Integer list.
  */
-export function parseInt32Array(
-    raw: string | null | undefined
-): Int32Array {
-    if (isEmpty(raw)) {
-        return new Int32Array(0);
-    }
-    return Int32Array.from(JSON.parse(raw as string) as number[]);
+export function parseInt32Array(raw: string | null | undefined): Int32Array {
+  if (isEmpty(raw)) {
+    return new Int32Array(0);
+  }
+  return Int32Array.from(JSON.parse(raw as string) as number[]);
 }
 
 /**
  * Parse a JSON array of numbers as a typed `Float32Array`. Matches
  * Java's `Parser.parseArrayFloat`.
  */
-export function parseFloat32Array(
-    raw: string | null | undefined
-): Float32Array {
-    if (isEmpty(raw)) {
-        return new Float32Array(0);
-    }
-    return Float32Array.from(JSON.parse(raw as string) as number[]);
+export function parseFloat32Array(raw: string | null | undefined): Float32Array {
+  if (isEmpty(raw)) {
+    return new Float32Array(0);
+  }
+  return Float32Array.from(JSON.parse(raw as string) as number[]);
 }
 
 /**
@@ -163,62 +141,52 @@ export function parseFloat32Array(
  * `parseMapIntegerString`. Map keys are JSON strings (JSON spec); we
  * coerce to numbers on read.
  */
-export function parseMapNumberString(
-    raw: string | null | undefined
-): Map<number, string> | null {
-    if (isEmpty(raw)) {
-        return null;
-    }
-    const obj = JSON.parse(raw as string) as Record<string, string>;
-    const map = new Map<number, string>();
-    for (const key of Object.keys(obj)) {
-        map.set(Number(key), obj[key]);
-    }
-    return map;
+export function parseMapNumberString(raw: string | null | undefined): Map<number, string> | null {
+  if (isEmpty(raw)) {
+    return null;
+  }
+  const obj = JSON.parse(raw as string) as Record<string, string>;
+  const map = new Map<number, string>();
+  for (const key of Object.keys(obj)) {
+    map.set(Number(key), obj[key]);
+  }
+  return map;
 }
 
 /** Parse a `Record<number, number>`. Mirrors Java's `parseMapIntegerInteger`. */
-export function parseMapNumberNumber(
-    raw: string | null | undefined
-): Map<number, number> | null {
-    if (isEmpty(raw)) {
-        return null;
-    }
-    const obj = JSON.parse(raw as string) as Record<string, number>;
-    const map = new Map<number, number>();
-    for (const key of Object.keys(obj)) {
-        map.set(Number(key), obj[key]);
-    }
-    return map;
+export function parseMapNumberNumber(raw: string | null | undefined): Map<number, number> | null {
+  if (isEmpty(raw)) {
+    return null;
+  }
+  const obj = JSON.parse(raw as string) as Record<string, number>;
+  const map = new Map<number, number>();
+  for (const key of Object.keys(obj)) {
+    map.set(Number(key), obj[key]);
+  }
+  return map;
 }
 
 /** Parse a `Record<string, string>`. */
-export function parseMapStringString(
-    raw: string | null | undefined
-): Map<string, string> | null {
-    if (isEmpty(raw)) {
-        return null;
-    }
-    const obj = JSON.parse(raw as string) as Record<string, string>;
-    return new Map(Object.entries(obj));
+export function parseMapStringString(raw: string | null | undefined): Map<string, string> | null {
+  if (isEmpty(raw)) {
+    return null;
+  }
+  const obj = JSON.parse(raw as string) as Record<string, string>;
+  return new Map(Object.entries(obj));
 }
 
 /** Parse a `Set<number>`. */
-export function parseSetNumber(
-    raw: string | null | undefined
-): Set<number> {
-    if (isEmpty(raw)) {
-        return new Set();
-    }
-    return new Set(JSON.parse(raw as string) as number[]);
+export function parseSetNumber(raw: string | null | undefined): Set<number> {
+  if (isEmpty(raw)) {
+    return new Set();
+  }
+  return new Set(JSON.parse(raw as string) as number[]);
 }
 
 /** Parse a `Set<string>`. */
-export function parseSetString(
-    raw: string | null | undefined
-): Set<string> {
-    if (isEmpty(raw)) {
-        return new Set();
-    }
-    return new Set(JSON.parse(raw as string) as string[]);
+export function parseSetString(raw: string | null | undefined): Set<string> {
+  if (isEmpty(raw)) {
+    return new Set();
+  }
+  return new Set(JSON.parse(raw as string) as string[]);
 }

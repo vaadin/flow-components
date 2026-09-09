@@ -8,10 +8,7 @@
  */
 
 import type { MergedRegion } from '../types/wire.js';
-import {
-    createMergedRegion,
-    type MergedRegionContainer,
-} from './MergedRegion.js';
+import { createMergedRegion, type MergedRegionContainer } from './MergedRegion.js';
 
 /**
  * Expand a rectangular selection so its edges don't cut through any
@@ -59,198 +56,178 @@ import {
  *          input selection and respects all overlapping merged regions.
  */
 export function findIncreasingSelection(
-    container: MergedRegionContainer,
-    topRow: number,
-    bottomRow: number,
-    leftColumn: number,
-    rightColumn: number
+  container: MergedRegionContainer,
+  topRow: number,
+  bottomRow: number,
+  leftColumn: number,
+  rightColumn: number
 ): MergedRegion {
-    // Single-cell shortcut: collapsed selection.
-    if (topRow === bottomRow && leftColumn === rightColumn) {
-        const mergedRegion = container.getMergedRegion(leftColumn, topRow);
-        if (mergedRegion === null) {
-            // Synthesize a transient region for the single cell.
-            const synth = createMergedRegion();
-            synth.col1 = leftColumn;
-            synth.col2 = rightColumn;
-            synth.row1 = topRow;
-            synth.row2 = bottomRow;
-            return synth;
-        }
-        return mergedRegion;
+  // Single-cell shortcut: collapsed selection.
+  if (topRow === bottomRow && leftColumn === rightColumn) {
+    const mergedRegion = container.getMergedRegion(leftColumn, topRow);
+    if (mergedRegion === null) {
+      // Synthesize a transient region for the single cell.
+      const synth = createMergedRegion();
+      synth.col1 = leftColumn;
+      synth.col2 = rightColumn;
+      synth.row1 = topRow;
+      synth.row2 = bottomRow;
+      return synth;
+    }
+    return mergedRegion;
+  } else {
+    // Multi-cell selection: check if a single merged region already
+    // covers the selection exactly (anchored at top-left).
+    const merged = container.getMergedRegionStartingFrom(leftColumn, topRow);
+    if (merged !== null && merged.col2 >= rightColumn && merged.row2 >= bottomRow) {
+      return merged;
+    }
+  }
+
+  let trouble = false;
+  let i: number;
+
+  // Edge 1: top — walk left-to-right.
+  i = leftColumn;
+  while (i <= rightColumn) {
+    const region = container.getMergedRegion(i, topRow);
+    if (region !== null) {
+      i = region.col2 + 1;
+      if (leftColumn > region.col1) {
+        leftColumn = region.col1;
+        trouble = true;
+      }
+      if (rightColumn < region.col2) {
+        rightColumn = region.col2;
+        trouble = true;
+      }
+      if (topRow > region.row1) {
+        topRow = region.row1;
+        trouble = true;
+      }
     } else {
-        // Multi-cell selection: check if a single merged region already
-        // covers the selection exactly (anchored at top-left).
-        const merged = container.getMergedRegionStartingFrom(
-            leftColumn,
-            topRow
-        );
-        if (
-            merged !== null &&
-            merged.col2 >= rightColumn &&
-            merged.row2 >= bottomRow
-        ) {
-            return merged;
-        }
+      i++;
     }
+  }
+  // Clamp after top edge.
+  if (topRow > bottomRow) {
+    topRow = bottomRow;
+  }
 
-    let trouble = false;
-    let i: number;
-
-    // Edge 1: top — walk left-to-right.
-    i = leftColumn;
-    while (i <= rightColumn) {
-        const region = container.getMergedRegion(i, topRow);
-        if (region !== null) {
-            i = region.col2 + 1;
-            if (leftColumn > region.col1) {
-                leftColumn = region.col1;
-                trouble = true;
-            }
-            if (rightColumn < region.col2) {
-                rightColumn = region.col2;
-                trouble = true;
-            }
-            if (topRow > region.row1) {
-                topRow = region.row1;
-                trouble = true;
-            }
-        } else {
-            i++;
-        }
-    }
-    // Clamp after top edge.
-    if (topRow > bottomRow) {
-        topRow = bottomRow;
-    }
-
-    // Edge 2: right — walk top-to-bottom.
-    i = topRow;
-    while (i <= bottomRow) {
-        const region = container.getMergedRegion(rightColumn, i);
-        if (region !== null) {
-            i = region.row2 + 1;
-            if (rightColumn < region.col2) {
-                rightColumn = region.col2;
-                trouble = true;
-            }
-            if (topRow > region.row1) {
-                topRow = region.row1;
-                trouble = true;
-            }
-            if (bottomRow < region.row2) {
-                bottomRow = region.row2;
-                trouble = true;
-            }
-        } else {
-            i++;
-        }
-    }
-    // Clamp after right edge.
-    if (rightColumn < leftColumn) {
-        rightColumn = leftColumn;
-    }
-
-    // Edge 3: bottom — walk left-to-right.
-    i = leftColumn;
-    while (i <= rightColumn) {
-        const region = container.getMergedRegion(i, bottomRow);
-        if (region !== null) {
-            i = region.col2 + 1;
-            if (leftColumn > region.col1) {
-                leftColumn = region.col1;
-                trouble = true;
-            }
-            if (rightColumn < region.col2) {
-                rightColumn = region.col2;
-                trouble = true;
-            }
-            if (bottomRow < region.row2) {
-                bottomRow = region.row2;
-                trouble = true;
-            }
-        } else {
-            i++;
-        }
-    }
-    // Clamp after bottom edge.
-    if (bottomRow < topRow) {
-        bottomRow = topRow;
-    }
-
-    // Edge 4: left — walk top-to-bottom.
-    i = topRow;
-    while (i <= bottomRow) {
-        const region = container.getMergedRegion(leftColumn, i);
-        if (region !== null) {
-            i = region.row2 + 1;
-            if (leftColumn > region.col1) {
-                leftColumn = region.col1;
-                trouble = true;
-            }
-            if (topRow > region.row1) {
-                topRow = region.row1;
-                trouble = true;
-            }
-            if (bottomRow < region.row2) {
-                bottomRow = region.row2;
-                trouble = true;
-            }
-        } else {
-            i++;
-        }
-    }
-    // Clamp after left edge.
-    if (leftColumn > rightColumn) {
-        leftColumn = rightColumn;
-    }
-
-    if (trouble) {
-        // Selection grew; re-walk with the new corners. Recursion
-        // terminates because either an edge stops expanding (no merged
-        // region on the perimeter) or the selection grows monotonically
-        // to the whole sheet.
-        return findIncreasingSelection(
-            container,
-            topRow,
-            bottomRow,
-            leftColumn,
-            rightColumn
-        );
-    } else if (topRow === bottomRow && leftColumn === rightColumn) {
-        // Collapsed after the walk — same single-cell shortcut as
-        // entry.
-        const mergedRegion = container.getMergedRegion(leftColumn, topRow);
-        if (mergedRegion === null) {
-            const synth = createMergedRegion();
-            synth.col1 = leftColumn;
-            synth.col2 = rightColumn;
-            synth.row1 = topRow;
-            synth.row2 = bottomRow;
-            return synth;
-        }
-        return mergedRegion;
+  // Edge 2: right — walk top-to-bottom.
+  i = topRow;
+  while (i <= bottomRow) {
+    const region = container.getMergedRegion(rightColumn, i);
+    if (region !== null) {
+      i = region.row2 + 1;
+      if (rightColumn < region.col2) {
+        rightColumn = region.col2;
+        trouble = true;
+      }
+      if (topRow > region.row1) {
+        topRow = region.row1;
+        trouble = true;
+      }
+      if (bottomRow < region.row2) {
+        bottomRow = region.row2;
+        trouble = true;
+      }
     } else {
-        // Same start-coord-exact-match check as entry.
-        const merged = container.getMergedRegionStartingFrom(
-            leftColumn,
-            topRow
-        );
-        if (
-            merged !== null &&
-            merged.col2 >= rightColumn &&
-            merged.row2 >= bottomRow
-        ) {
-            return merged;
-        }
+      i++;
     }
+  }
+  // Clamp after right edge.
+  if (rightColumn < leftColumn) {
+    rightColumn = leftColumn;
+  }
 
-    // Fallthrough: no exact-match region; emit a transient region for
-    // the expanded corners.
-    const result = createMergedRegion();
-    result.col1 = leftColumn;
-    result.col2 = rightColumn;
-    result.row1 = topRow;
-    result.row2 = bottomRow;
-    return result;
+  // Edge 3: bottom — walk left-to-right.
+  i = leftColumn;
+  while (i <= rightColumn) {
+    const region = container.getMergedRegion(i, bottomRow);
+    if (region !== null) {
+      i = region.col2 + 1;
+      if (leftColumn > region.col1) {
+        leftColumn = region.col1;
+        trouble = true;
+      }
+      if (rightColumn < region.col2) {
+        rightColumn = region.col2;
+        trouble = true;
+      }
+      if (bottomRow < region.row2) {
+        bottomRow = region.row2;
+        trouble = true;
+      }
+    } else {
+      i++;
+    }
+  }
+  // Clamp after bottom edge.
+  if (bottomRow < topRow) {
+    bottomRow = topRow;
+  }
+
+  // Edge 4: left — walk top-to-bottom.
+  i = topRow;
+  while (i <= bottomRow) {
+    const region = container.getMergedRegion(leftColumn, i);
+    if (region !== null) {
+      i = region.row2 + 1;
+      if (leftColumn > region.col1) {
+        leftColumn = region.col1;
+        trouble = true;
+      }
+      if (topRow > region.row1) {
+        topRow = region.row1;
+        trouble = true;
+      }
+      if (bottomRow < region.row2) {
+        bottomRow = region.row2;
+        trouble = true;
+      }
+    } else {
+      i++;
+    }
+  }
+  // Clamp after left edge.
+  if (leftColumn > rightColumn) {
+    leftColumn = rightColumn;
+  }
+
+  if (trouble) {
+    // Selection grew; re-walk with the new corners. Recursion
+    // terminates because either an edge stops expanding (no merged
+    // region on the perimeter) or the selection grows monotonically
+    // to the whole sheet.
+    return findIncreasingSelection(container, topRow, bottomRow, leftColumn, rightColumn);
+  } else if (topRow === bottomRow && leftColumn === rightColumn) {
+    // Collapsed after the walk — same single-cell shortcut as
+    // entry.
+    const mergedRegion = container.getMergedRegion(leftColumn, topRow);
+    if (mergedRegion === null) {
+      const synth = createMergedRegion();
+      synth.col1 = leftColumn;
+      synth.col2 = rightColumn;
+      synth.row1 = topRow;
+      synth.row2 = bottomRow;
+      return synth;
+    }
+    return mergedRegion;
+  } else {
+    // Same start-coord-exact-match check as entry.
+    const merged = container.getMergedRegionStartingFrom(leftColumn, topRow);
+    if (merged !== null && merged.col2 >= rightColumn && merged.row2 >= bottomRow) {
+      return merged;
+    }
+  }
+
+  // Fallthrough: no exact-match region; emit a transient region for
+  // the expanded corners.
+  const result = createMergedRegion();
+  result.col1 = leftColumn;
+  result.col2 = rightColumn;
+  result.row1 = topRow;
+  result.row2 = bottomRow;
+  return result;
 }

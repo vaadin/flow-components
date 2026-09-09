@@ -25,15 +25,15 @@ import com.vaadin.testbench.elementsbase.Element;
 /**
  * Base TestBench element for the Vaadin Spreadsheet component.
  *
- * <p>Slice 177 (Tier 3 Phase 3.7): re-targeted from the GWT-era DOM to
- * the Lit-element DOM. The component now consists of nested shadow
- * roots: the {@code <vaadin-spreadsheet>} wrapper owns one, and each
- * internal Lit sub-element ({@code internal-formula-bar},
- * {@code internal-column-header}, {@code internal-row-header},
- * {@code internal-cell-grid}, {@code internal-sheet-tabs}) owns its
- * own. This class traverses them via JavaScript executor calls — the
- * public Java method signatures here are unchanged, so existing IT
- * tests don't need updates.
+ * <p>
+ * Slice 177 (Tier 3 Phase 3.7): re-targeted from the GWT-era DOM to the
+ * Lit-element DOM. The component now consists of nested shadow roots: the
+ * {@code <vaadin-spreadsheet>} wrapper owns one, and each internal Lit
+ * sub-element ({@code internal-formula-bar}, {@code internal-column-header},
+ * {@code internal-row-header}, {@code internal-cell-grid},
+ * {@code internal-sheet-tabs}) owns its own. This class traverses them via
+ * JavaScript executor calls — the public Java method signatures here are
+ * unchanged, so existing IT tests don't need updates.
  *
  * @author Vaadin Ltd.
  */
@@ -41,20 +41,22 @@ import com.vaadin.testbench.elementsbase.Element;
 public class SpreadsheetElement extends TestBenchElement {
 
     /**
-     * Find a single element in the cell-grid's shadow root via a
-     * CSS selector. Returns {@code null} when not found (matches
-     * the legacy {@code findElementInShadowRoot} return semantics).
+     * Find a single element in the cell-grid's shadow root via a CSS selector.
+     * Returns {@code null} when not found (matches the legacy
+     * {@code findElementInShadowRoot} return semantics).
      */
     private WebElement findInCellGrid(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const grid = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-cell-grid');
-                        return grid && grid.shadowRoot
-                            ? grid.shadowRoot.querySelector(arguments[1])
-                            : null;
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const grid = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-cell-grid');
+                                return grid && grid.shadowRoot
+                                    ? grid.shadowRoot.querySelector(arguments[1])
+                                    : null;
+                                """,
+                        this, selector);
     }
 
     /**
@@ -62,14 +64,16 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     private WebElement findInColumnHeader(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const ch = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-column-header');
-                        return ch && ch.shadowRoot
-                            ? ch.shadowRoot.querySelector(arguments[1])
-                            : null;
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const ch = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-column-header');
+                                return ch && ch.shadowRoot
+                                    ? ch.shadowRoot.querySelector(arguments[1])
+                                    : null;
+                                """,
+                        this, selector);
     }
 
     /**
@@ -77,14 +81,16 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     private WebElement findInRowHeader(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const rh = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-row-header');
-                        return rh && rh.shadowRoot
-                            ? rh.shadowRoot.querySelector(arguments[1])
-                            : null;
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const rh = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-row-header');
+                                return rh && rh.shadowRoot
+                                    ? rh.shadowRoot.querySelector(arguments[1])
+                                    : null;
+                                """,
+                        this, selector);
     }
 
     /**
@@ -92,14 +98,16 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     private WebElement findInFormulaBar(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const fb = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-formula-bar');
-                        return fb && fb.shadowRoot
-                            ? fb.shadowRoot.querySelector(arguments[1])
-                            : null;
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const fb = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-formula-bar');
+                                return fb && fb.shadowRoot
+                                    ? fb.shadowRoot.querySelector(arguments[1])
+                                    : null;
+                                """,
+                        this, selector);
     }
 
     /**
@@ -107,31 +115,35 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     private WebElement findInSheetTabs(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const st = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
-                        return st && st.shadowRoot
-                            ? st.shadowRoot.querySelector(arguments[1])
-                            : null;
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const st = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
+                                return st && st.shadowRoot
+                                    ? st.shadowRoot.querySelector(arguments[1])
+                                    : null;
+                                """,
+                        this, selector);
     }
 
     /**
-     * Find all elements in the sheet-tabs' shadow root matching a
-     * selector. Returns an empty list when the element isn't there.
+     * Find all elements in the sheet-tabs' shadow root matching a selector.
+     * Returns an empty list when the element isn't there.
      */
     @SuppressWarnings("unchecked")
     private List<WebElement> findAllInSheetTabs(String selector) {
         return (List<WebElement>) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const st = host.shadowRoot
-                            .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
-                        return st && st.shadowRoot
-                            ? Array.from(st.shadowRoot.querySelectorAll(arguments[1]))
-                            : [];
-                        """, this, selector);
+                .getDriver()).executeScript(
+                        """
+                                const host = arguments[0];
+                                const st = host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
+                                return st && st.shadowRoot
+                                    ? Array.from(st.shadowRoot.querySelectorAll(arguments[1]))
+                                    : [];
+                                """,
+                        this, selector);
     }
 
     /**
@@ -154,34 +166,36 @@ public class SpreadsheetElement extends TestBenchElement {
         // cell case can be reintroduced if needed; for now there's a
         // single cell per (col,row).
         WebElement cell = (WebElement) getCommandExecutor().getDriver()
-                .executeAsyncScript("""
-                        const host = arguments[0];
-                        const selector = arguments[1];
-                        const callback = arguments[arguments.length - 1];
-                        const MAX_ATTEMPTS = 50;
-                        const delay = () => new Promise(r => setTimeout(r, 100));
-                        async function locateGrid() {
-                            for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                const grid = host.shadowRoot
-                                    && host.shadowRoot.querySelector(
-                                        'vaadin-spreadsheet-internal-cell-grid');
-                                if (grid && grid.shadowRoot) return grid;
-                                await delay();
-                            }
-                            return null;
-                        }
-                        async function findCell() {
-                            const grid = await locateGrid();
-                            if (!grid) return null;
-                            for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                const cell = grid.shadowRoot.querySelector(selector);
-                                if (cell) return cell;
-                                await delay();
-                            }
-                            return null;
-                        }
-                        findCell().then(callback);
-                        """, this, selector);
+                .executeAsyncScript(
+                        """
+                                const host = arguments[0];
+                                const selector = arguments[1];
+                                const callback = arguments[arguments.length - 1];
+                                const MAX_ATTEMPTS = 50;
+                                const delay = () => new Promise(r => setTimeout(r, 100));
+                                async function locateGrid() {
+                                    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                        const grid = host.shadowRoot
+                                            && host.shadowRoot.querySelector(
+                                                'vaadin-spreadsheet-internal-cell-grid');
+                                        if (grid && grid.shadowRoot) return grid;
+                                        await delay();
+                                    }
+                                    return null;
+                                }
+                                async function findCell() {
+                                    const grid = await locateGrid();
+                                    if (!grid) return null;
+                                    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                                        const cell = grid.shadowRoot.querySelector(selector);
+                                        if (cell) return cell;
+                                        await delay();
+                                    }
+                                    return null;
+                                }
+                                findCell().then(callback);
+                                """,
+                        this, selector);
         if (cell == null) {
             throw new NoSuchElementException(
                     "Cell not found: row=" + row + ", column=" + column);
@@ -252,8 +266,8 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     public TestBenchElement getAddressField() {
         WebElement el = findInFormulaBar("[part~=\"address-field\"]");
-        return el == null ? null : (TestBenchElement) wrapElement(el,
-                getCommandExecutor());
+        return el == null ? null
+                : (TestBenchElement) wrapElement(el, getCommandExecutor());
     }
 
     /**
@@ -264,17 +278,16 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     public TestBenchElement getFormulaField() {
         WebElement el = findInFormulaBar("[part~=\"formula-field\"]");
-        return el == null ? null : (TestBenchElement) wrapElement(el,
-                getCommandExecutor());
+        return el == null ? null
+                : (TestBenchElement) wrapElement(el, getCommandExecutor());
     }
 
     /**
-     * Gets the info label. Currently no equivalent in the Lit-based
-     * Spreadsheet — preserved as a public API stub returning
-     * {@code null}. Existing TestBench callers that null-check
-     * the result continue to work; tests that asserted on the
-     * label text should be deferred until the info-label feature
-     * is reintroduced.
+     * Gets the info label. Currently no equivalent in the Lit-based Spreadsheet
+     * — preserved as a public API stub returning {@code null}. Existing
+     * TestBench callers that null-check the result continue to work; tests that
+     * asserted on the label text should be deferred until the info-label
+     * feature is reintroduced.
      */
     public TestBenchElement getInfoLabel() {
         return null;
@@ -301,10 +314,9 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The Lit Spreadsheet's scroll container — a {@code <div>} inside
-     * the host's shadow root that wraps the cell grid and its
-     * sticky-positioned header strips. Lit equivalent of the legacy
-     * {@code .bottom-right-pane}.
+     * The Lit Spreadsheet's scroll container — a {@code <div>} inside the
+     * host's shadow root that wraps the cell grid and its sticky-positioned
+     * header strips. Lit equivalent of the legacy {@code .bottom-right-pane}.
      */
     private TestBenchElement scrollContainer() {
         WebElement el = (WebElement) ((JavascriptExecutor) getCommandExecutor()
@@ -322,8 +334,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs
-     * element yet. This is a no-op until they're added.
+     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs element yet.
+     * This is a no-op until they're added.
      */
     public void scrollSheetsToStart() {
         // No-op (deferred): Lit sheet-tabs doesn't render scroll
@@ -331,8 +343,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs
-     * element yet. This is a no-op until they're added.
+     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs element yet.
+     * This is a no-op until they're added.
      */
     public void scrollSheetsToEnd() {
         // No-op (deferred): Lit sheet-tabs doesn't render scroll
@@ -340,8 +352,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Tab-scroll isn't implemented in the Lit sheet-tabs element yet.
-     * Preserved as a public method that's effectively a no-op.
+     * Tab-scroll isn't implemented in the Lit sheet-tabs element yet. Preserved
+     * as a public method that's effectively a no-op.
      *
      * @param amount
      *            Amount to scroll (ignored).
@@ -385,8 +397,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The "add new sheet" button isn't implemented in the Lit
-     * sheet-tabs element yet — this is a no-op until it is.
+     * The "add new sheet" button isn't implemented in the Lit sheet-tabs
+     * element yet — this is a no-op until it is.
      */
     public void addSheet() {
         // No-op (deferred): Lit sheet-tabs doesn't render an add
@@ -394,11 +406,10 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Fetches the context menu for the spreadsheet. The Lit-based
-     * Spreadsheet renders the menu via the server-side
-     * {@code ContextMenu} component, which is a Vaadin overlay; this
-     * method preserves the public contract by looking for
-     * {@code vaadin-context-menu-overlay} in the document.
+     * Fetches the context menu for the spreadsheet. The Lit-based Spreadsheet
+     * renders the menu via the server-side {@code ContextMenu} component, which
+     * is a Vaadin overlay; this method preserves the public contract by looking
+     * for {@code vaadin-context-menu-overlay} in the document.
      *
      * @return {@link SpreadsheetElement.ContextMenuElement}
      * @throws java.util.NoSuchElementException
@@ -418,9 +429,9 @@ public class SpreadsheetElement extends TestBenchElement {
     public static class ContextMenuElement extends TestBenchElement {
 
         public WebElement getItem(String text) {
-            return findElement(By.xpath(
-                    ".//vaadin-context-menu-item[contains(text(), \"" + text
-                            + "\")]"));
+            return findElement(
+                    By.xpath(".//vaadin-context-menu-item[contains(text(), \""
+                            + text + "\")]"));
         }
 
     }
@@ -491,21 +502,21 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The cell value input — Lit equivalent is the {@code <input>}
-     * inside the cell-grid carrying {@code part="cell-input"}.
+     * The cell value input — Lit equivalent is the {@code <input>} inside the
+     * cell-grid carrying {@code part="cell-input"}.
      */
     public WebElement getCellValueInput() {
         return findInCellGrid("[part~=\"cell-input\"]");
     }
 
     /**
-     * Determine if the pop-up of PopupButton is currently visible. The
-     * Lit path uses Vaadin's standard Dialog overlay rather than the
-     * GWT-era {@code .v-spreadsheet-popupbutton-overlay} class.
+     * Determine if the pop-up of PopupButton is currently visible. The Lit path
+     * uses Vaadin's standard Dialog overlay rather than the GWT-era
+     * {@code .v-spreadsheet-popupbutton-overlay} class.
      */
     public boolean isPopupButtonPopupVisible() {
-        List<WebElement> elements = getDriver().findElements(
-                By.cssSelector("vaadin-dialog-overlay"));
+        List<WebElement> elements = getDriver()
+                .findElements(By.cssSelector("vaadin-dialog-overlay"));
         return !elements.isEmpty();
     }
 }

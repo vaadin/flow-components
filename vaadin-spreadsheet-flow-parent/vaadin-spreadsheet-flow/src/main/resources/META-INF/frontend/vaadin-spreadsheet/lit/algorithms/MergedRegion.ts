@@ -19,7 +19,7 @@ import type { MergedRegion } from '../types/wire.js';
  * synthesized client-side rather than read from the workbook.
  */
 export function createMergedRegion(): MergedRegion {
-    return { id: 0, col1: 0, col2: 0, row1: 0, row2: 0 };
+  return { id: 0, col1: 0, col2: 0, row1: 0, row2: 0 };
 }
 
 /**
@@ -30,13 +30,8 @@ export function createMergedRegion(): MergedRegion {
  * same convention the rest of the codebase uses (col first, row
  * second), distinct from the (row, col) order POI uses internally.
  */
-export function createMergedRegionFromCorners(
-    c1: number,
-    r1: number,
-    c2: number,
-    r2: number
-): MergedRegion {
-    return { id: 0, col1: c1, col2: c2, row1: r1, row2: r2 };
+export function createMergedRegionFromCorners(c1: number, r1: number, c2: number, r2: number): MergedRegion {
+  return { id: 0, col1: c1, col2: c2, row1: r1, row2: r2 };
 }
 
 /**
@@ -50,22 +45,22 @@ export function createMergedRegionFromCorners(
  * selection's perimeter, and the algorithm can recurse.
  */
 export interface MergedRegionContainer {
-    /**
-     * Returns the merged region whose top-left cell is at the given
-     * coordinates, or `null` if none.
-     *
-     * @param column Column index, 1-based.
-     * @param row    Row index, 1-based.
-     */
-    getMergedRegionStartingFrom(column: number, row: number): MergedRegion | null;
+  /**
+   * Returns the merged region whose top-left cell is at the given
+   * coordinates, or `null` if none.
+   *
+   * @param column Column index, 1-based.
+   * @param row    Row index, 1-based.
+   */
+  getMergedRegionStartingFrom(column: number, row: number): MergedRegion | null;
 
-    /**
-     * Returns the merged region that overlaps the given coordinates
-     * (containing them, possibly not anchored there), or `null` if no
-     * region overlaps.
-     *
-     * @param column Column index, 1-based.
-     * @param row    Row index, 1-based.
-     */
-    getMergedRegion(column: number, row: number): MergedRegion | null;
+  /**
+   * Returns the merged region that overlaps the given coordinates
+   * (containing them, possibly not anchored there), or `null` if no
+   * region overlaps.
+   *
+   * @param column Column index, 1-based.
+   * @param row    Row index, 1-based.
+   */
+  getMergedRegion(column: number, row: number): MergedRegion | null;
 }

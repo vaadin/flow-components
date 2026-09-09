@@ -43,7 +43,7 @@ window.Vaadin.Flow.spreadsheetConnector = window.Vaadin.Flow.spreadsheetConnecto
     element.$connector.setHeight('100%');
     element.$connector.setWidth('100%');
     element.createCallbacks();
-  },
+  }
 };
 
 const overlayStyles = (() => {

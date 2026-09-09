@@ -43,72 +43,72 @@
  * forgotten here, the dispatch switch in the new client won't compile.
  */
 export type SpreadsheetEventType =
-    // Grouping (outline) interactions
-    | 'groupingCollapsed'
-    | 'levelHeaderClicked'
-    // Context menu
-    | 'contextMenuOpenOnSelection'
-    | 'rowHeaderContextMenuOpen'
-    | 'columnHeaderContextMenuOpen'
-    | 'actionOnCurrentSelection'
-    | 'actionOnRowHeader'
-    | 'actionOnColumnHeader'
-    | 'contextMenuClosed'
-    // Sheet lifecycle
-    | 'sheetSelected'
-    | 'sheetRenamed'
-    | 'sheetCreated'
-    | 'sheetAddressChanged'
-    // Selection
-    | 'cellSelected'
-    | 'cellRangeSelected'
-    | 'cellAddedToSelectionAndSelected'
-    | 'cellsAddedToRangeSelection'
-    | 'rowSelected'
-    | 'rowAddedToRangeSelection'
-    | 'columnSelected'
-    | 'columnAddedToSelection'
-    | 'cellRangePainted'
-    | 'selectionIncreasePainted'
-    | 'selectionDecreasePainted'
-    // Cell content
-    | 'cellValueEdited'
-    | 'deleteSelectedCells'
-    | 'linkCellClicked'
-    | 'updateCellComment'
-    // Resize + autofit
-    | 'rowsResized'
-    | 'columnResized'
-    | 'onRowAutofit'
-    | 'onColumnAutofit'
-    | 'setCellStyleWidthRatios'
-    // Scroll
-    | 'onSheetScroll'
-    // History
-    | 'onUndo'
-    | 'onRedo'
-    // Copy / paste
-    | 'onPaste'
-    | 'clearSelectedCellsOnCut'
-    // Init + protection
-    | 'onConnectorInit'
-    | 'protectedCellWriteAttempted'
-    // Popup buttons (slice 128 — added after audit; the original
-    // slice 120 survey scanned the wrapper's GENERAL event-dispatch
-    // section + missed these two in the popup-button section)
-    | 'popupButtonClick'
-    | 'popupClose';
+  // Grouping (outline) interactions
+  | 'groupingCollapsed'
+  | 'levelHeaderClicked'
+  // Context menu
+  | 'contextMenuOpenOnSelection'
+  | 'rowHeaderContextMenuOpen'
+  | 'columnHeaderContextMenuOpen'
+  | 'actionOnCurrentSelection'
+  | 'actionOnRowHeader'
+  | 'actionOnColumnHeader'
+  | 'contextMenuClosed'
+  // Sheet lifecycle
+  | 'sheetSelected'
+  | 'sheetRenamed'
+  | 'sheetCreated'
+  | 'sheetAddressChanged'
+  // Selection
+  | 'cellSelected'
+  | 'cellRangeSelected'
+  | 'cellAddedToSelectionAndSelected'
+  | 'cellsAddedToRangeSelection'
+  | 'rowSelected'
+  | 'rowAddedToRangeSelection'
+  | 'columnSelected'
+  | 'columnAddedToSelection'
+  | 'cellRangePainted'
+  | 'selectionIncreasePainted'
+  | 'selectionDecreasePainted'
+  // Cell content
+  | 'cellValueEdited'
+  | 'deleteSelectedCells'
+  | 'linkCellClicked'
+  | 'updateCellComment'
+  // Resize + autofit
+  | 'rowsResized'
+  | 'columnResized'
+  | 'onRowAutofit'
+  | 'onColumnAutofit'
+  | 'setCellStyleWidthRatios'
+  // Scroll
+  | 'onSheetScroll'
+  // History
+  | 'onUndo'
+  | 'onRedo'
+  // Copy / paste
+  | 'onPaste'
+  | 'clearSelectedCellsOnCut'
+  // Init + protection
+  | 'onConnectorInit'
+  | 'protectedCellWriteAttempted'
+  // Popup buttons (slice 128 — added after audit; the original
+  // slice 120 survey scanned the wrapper's GENERAL event-dispatch
+  // section + missed these two in the popup-button section)
+  | 'popupButtonClick'
+  | 'popupClose';
 
 /**
  * Generic envelope for every event the wrapper dispatches. The data
  * shape varies per event; specific event interfaces below narrow it.
  */
 export interface SpreadsheetEventDetail<
-    T extends SpreadsheetEventType = SpreadsheetEventType,
-    D = Record<string, unknown>,
+  T extends SpreadsheetEventType = SpreadsheetEventType,
+  D = Record<string, unknown>
 > {
-    type: T;
-    data: D;
+  type: T;
+  data: D;
 }
 
 // ====================================================================
@@ -118,129 +118,129 @@ export interface SpreadsheetEventDetail<
 // ====================================================================
 
 export interface OnSheetScrollData {
-    firstRow: number;
-    firstColumn: number;
-    lastRow: number;
-    lastColumn: number;
+  firstRow: number;
+  firstColumn: number;
+  lastRow: number;
+  lastColumn: number;
 }
 
 export interface CellSelectedData {
-    row: number;
-    column: number;
-    /** When true, the previous selection range is replaced (not extended). */
-    oldSelectionRangeDiscarded: boolean;
+  row: number;
+  column: number;
+  /** When true, the previous selection range is replaced (not extended). */
+  oldSelectionRangeDiscarded: boolean;
 }
 
 export interface CellRangeSelectedData {
-    row1: number;
-    col1: number;
-    row2: number;
-    col2: number;
+  row1: number;
+  col1: number;
+  row2: number;
+  col2: number;
 }
 
 export interface RowSelectedData {
-    row: number;
-    firstColumnIndex: number;
+  row: number;
+  firstColumnIndex: number;
 }
 
 export interface ColumnSelectedData {
-    column: number;
-    firstRowIndex: number;
+  column: number;
+  firstRowIndex: number;
 }
 
 export interface CellRangePaintedData {
-    selectedCellRow: number;
-    selectedCellColumn: number;
-    row1: number;
-    col1: number;
-    row2: number;
-    col2: number;
+  selectedCellRow: number;
+  selectedCellColumn: number;
+  row1: number;
+  col1: number;
+  row2: number;
+  col2: number;
 }
 
 export interface SelectionIncreasePaintedData {
-    r1: number;
-    c1: number;
-    r2: number;
-    c2: number;
+  r1: number;
+  c1: number;
+  r2: number;
+  c2: number;
 }
 
 export interface SelectionDecreasePaintedData {
-    row: number;
-    col: number;
+  row: number;
+  col: number;
 }
 
 export interface CellValueEditedData {
-    row: number;
-    col: number;
-    value: string;
+  row: number;
+  col: number;
+  value: string;
 }
 
 export interface SheetSelectedData {
-    /** 0-based POI sheet index. */
-    sheetIndex: number;
-    scrollLeft: number;
-    scrollTop: number;
+  /** 0-based POI sheet index. */
+  sheetIndex: number;
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 export interface SheetRenamedData {
-    /** 0-based POI sheet index. */
-    sheetIndex: number;
-    newName: string;
+  /** 0-based POI sheet index. */
+  sheetIndex: number;
+  newName: string;
 }
 
 export interface SheetCreatedData {
-    scrollLeft: number;
-    scrollTop: number;
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 export interface LinkCellClickedData {
-    /** 1-based row index. */
-    row: number;
-    /** 1-based column index. */
-    column: number;
+  /** 1-based row index. */
+  row: number;
+  /** 1-based column index. */
+  column: number;
 }
 
 export interface RowsResizedData {
-    /** Row index (1-based) → new height in points. */
-    newRowSizes: Record<number, number>;
-    row1: number;
-    col1: number;
-    row2: number;
-    col2: number;
+  /** Row index (1-based) → new height in points. */
+  newRowSizes: Record<number, number>;
+  row1: number;
+  col1: number;
+  row2: number;
+  col2: number;
 }
 
 export interface ColumnResizedData {
-    /** Column index (1-based) → new width in pixels. */
-    newColumnSizes: Record<number, number>;
-    row1: number;
-    col1: number;
-    row2: number;
-    col2: number;
+  /** Column index (1-based) → new width in pixels. */
+  newColumnSizes: Record<number, number>;
+  row1: number;
+  col1: number;
+  row2: number;
+  col2: number;
 }
 
 export interface OnPasteData {
-    /** Pasted text — typically TSV from the clipboard. */
-    text: string;
+  /** Pasted text — typically TSV from the clipboard. */
+  text: string;
 }
 
 export interface GroupingCollapsedData {
-    cols: boolean;
-    colIndex: number;
-    collapsed: boolean;
+  cols: boolean;
+  colIndex: number;
+  collapsed: boolean;
 }
 
 export interface LevelHeaderClickedData {
-    cols: boolean;
-    level: number;
+  cols: boolean;
+  level: number;
 }
 
 export interface ActionData {
-    actionKey: string;
+  actionKey: string;
 }
 
 export interface ContextMenuOpenData {
-    row: number;
-    column: number;
+  row: number;
+  column: number;
 }
 
 /**
@@ -255,48 +255,48 @@ export interface ContextMenuOpenData {
  * incrementally narrow those.
  */
 export type SpreadsheetEvent =
-    | { type: 'onSheetScroll'; data: OnSheetScrollData }
-    | { type: 'cellSelected'; data: CellSelectedData }
-    | { type: 'cellRangeSelected'; data: CellRangeSelectedData }
-    | { type: 'cellAddedToSelectionAndSelected'; data: CellSelectedData }
-    | { type: 'cellsAddedToRangeSelection'; data: CellRangeSelectedData }
-    | { type: 'rowSelected'; data: RowSelectedData }
-    | { type: 'rowAddedToRangeSelection'; data: RowSelectedData }
-    | { type: 'columnSelected'; data: ColumnSelectedData }
-    | { type: 'columnAddedToSelection'; data: ColumnSelectedData }
-    | { type: 'cellRangePainted'; data: CellRangePaintedData }
-    | { type: 'selectionIncreasePainted'; data: SelectionIncreasePaintedData }
-    | { type: 'selectionDecreasePainted'; data: SelectionDecreasePaintedData }
-    | { type: 'cellValueEdited'; data: CellValueEditedData }
-    | { type: 'sheetSelected'; data: SheetSelectedData }
-    | { type: 'sheetRenamed'; data: SheetRenamedData }
-    | { type: 'sheetCreated'; data: SheetCreatedData }
-    | { type: 'sheetAddressChanged'; data: { value: string } }
-    | { type: 'linkCellClicked'; data: LinkCellClickedData }
-    | { type: 'rowsResized'; data: RowsResizedData }
-    | { type: 'columnResized'; data: ColumnResizedData }
-    | { type: 'onRowAutofit'; data: { rowIndex: number } }
-    | { type: 'onColumnAutofit'; data: { columnIndex: number } }
-    | { type: 'setCellStyleWidthRatios'; data: { ratios: Record<number, number> } }
-    | { type: 'onPaste'; data: OnPasteData }
-    | { type: 'clearSelectedCellsOnCut'; data: Record<string, never> }
-    | { type: 'onUndo'; data: Record<string, never> }
-    | { type: 'onRedo'; data: Record<string, never> }
-    | { type: 'onConnectorInit'; data: Record<string, never> }
-    | { type: 'protectedCellWriteAttempted'; data: Record<string, never> }
-    | { type: 'updateCellComment'; data: { row: number; col: number; text: string } }
-    | { type: 'deleteSelectedCells'; data: Record<string, never> }
-    | { type: 'groupingCollapsed'; data: GroupingCollapsedData }
-    | { type: 'levelHeaderClicked'; data: LevelHeaderClickedData }
-    | { type: 'contextMenuOpenOnSelection'; data: ContextMenuOpenData }
-    | { type: 'rowHeaderContextMenuOpen'; data: { rowIndex: number } }
-    | { type: 'columnHeaderContextMenuOpen'; data: { columnIndex: number } }
-    | { type: 'actionOnCurrentSelection'; data: ActionData }
-    | { type: 'actionOnRowHeader'; data: ActionData }
-    | { type: 'actionOnColumnHeader'; data: ActionData }
-    | { type: 'contextMenuClosed'; data: Record<string, never> }
-    | { type: 'popupButtonClick'; data: PopupButtonEventData }
-    | { type: 'popupClose'; data: PopupButtonEventData };
+  | { type: 'onSheetScroll'; data: OnSheetScrollData }
+  | { type: 'cellSelected'; data: CellSelectedData }
+  | { type: 'cellRangeSelected'; data: CellRangeSelectedData }
+  | { type: 'cellAddedToSelectionAndSelected'; data: CellSelectedData }
+  | { type: 'cellsAddedToRangeSelection'; data: CellRangeSelectedData }
+  | { type: 'rowSelected'; data: RowSelectedData }
+  | { type: 'rowAddedToRangeSelection'; data: RowSelectedData }
+  | { type: 'columnSelected'; data: ColumnSelectedData }
+  | { type: 'columnAddedToSelection'; data: ColumnSelectedData }
+  | { type: 'cellRangePainted'; data: CellRangePaintedData }
+  | { type: 'selectionIncreasePainted'; data: SelectionIncreasePaintedData }
+  | { type: 'selectionDecreasePainted'; data: SelectionDecreasePaintedData }
+  | { type: 'cellValueEdited'; data: CellValueEditedData }
+  | { type: 'sheetSelected'; data: SheetSelectedData }
+  | { type: 'sheetRenamed'; data: SheetRenamedData }
+  | { type: 'sheetCreated'; data: SheetCreatedData }
+  | { type: 'sheetAddressChanged'; data: { value: string } }
+  | { type: 'linkCellClicked'; data: LinkCellClickedData }
+  | { type: 'rowsResized'; data: RowsResizedData }
+  | { type: 'columnResized'; data: ColumnResizedData }
+  | { type: 'onRowAutofit'; data: { rowIndex: number } }
+  | { type: 'onColumnAutofit'; data: { columnIndex: number } }
+  | { type: 'setCellStyleWidthRatios'; data: { ratios: Record<number, number> } }
+  | { type: 'onPaste'; data: OnPasteData }
+  | { type: 'clearSelectedCellsOnCut'; data: Record<string, never> }
+  | { type: 'onUndo'; data: Record<string, never> }
+  | { type: 'onRedo'; data: Record<string, never> }
+  | { type: 'onConnectorInit'; data: Record<string, never> }
+  | { type: 'protectedCellWriteAttempted'; data: Record<string, never> }
+  | { type: 'updateCellComment'; data: { row: number; col: number; text: string } }
+  | { type: 'deleteSelectedCells'; data: Record<string, never> }
+  | { type: 'groupingCollapsed'; data: GroupingCollapsedData }
+  | { type: 'levelHeaderClicked'; data: LevelHeaderClickedData }
+  | { type: 'contextMenuOpenOnSelection'; data: ContextMenuOpenData }
+  | { type: 'rowHeaderContextMenuOpen'; data: { rowIndex: number } }
+  | { type: 'columnHeaderContextMenuOpen'; data: { columnIndex: number } }
+  | { type: 'actionOnCurrentSelection'; data: ActionData }
+  | { type: 'actionOnRowHeader'; data: ActionData }
+  | { type: 'actionOnColumnHeader'; data: ActionData }
+  | { type: 'contextMenuClosed'; data: Record<string, never> }
+  | { type: 'popupButtonClick'; data: PopupButtonEventData }
+  | { type: 'popupClose'; data: PopupButtonEventData };
 
 /**
  * Payload for {@code popupButtonClick} and {@code popupClose}.
@@ -307,8 +307,8 @@ export type SpreadsheetEvent =
  * 1-based, matching the rest of the API.
  */
 export interface PopupButtonEventData {
-    row: number;
-    column: number;
+  row: number;
+  column: number;
 }
 
 /**
@@ -327,15 +327,13 @@ export interface PopupButtonEventData {
  *     });
  * </pre>
  */
-export function asSpreadsheetEvent(
-    event: Event
-): SpreadsheetEvent | null {
-    if (!(event instanceof CustomEvent)) {
-        return null;
-    }
-    const detail = event.detail as SpreadsheetEvent | null;
-    if (!detail || typeof detail !== 'object' || typeof detail.type !== 'string') {
-        return null;
-    }
-    return detail;
+export function asSpreadsheetEvent(event: Event): SpreadsheetEvent | null {
+  if (!(event instanceof CustomEvent)) {
+    return null;
+  }
+  const detail = event.detail as SpreadsheetEvent | null;
+  if (!detail || typeof detail !== 'object' || typeof detail.type !== 'string') {
+    return null;
+  }
+  return detail;
 }

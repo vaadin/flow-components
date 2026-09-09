@@ -61,11 +61,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     /**
-     * Slice 178: deep-search through the spreadsheet's nested shadow
-     * roots (the Lit cell-grid, column-header, row-header, formula-bar,
-     * and sheet-tabs each own their own shadow root). Maps the legacy
-     * GWT selectors to their Lit-DOM equivalents on the fly so the
-     * existing IT call sites don't need bulk rewriting.
+     * Slice 178: deep-search through the spreadsheet's nested shadow roots (the
+     * Lit cell-grid, column-header, row-header, formula-bar, and sheet-tabs
+     * each own their own shadow root). Maps the legacy GWT selectors to their
+     * Lit-DOM equivalents on the fly so the existing IT call sites don't need
+     * bulk rewriting.
      */
     protected WebElement findElementInShadowRoot(By by) {
         WebElement el = findInLitShadowRoots(toCssSelector(by));
@@ -81,8 +81,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     /**
-     * Convert a Selenium {@link By} locator to its equivalent CSS
-     * selector string. Selenium's {@code By.toString()} returns
+     * Convert a Selenium {@link By} locator to its equivalent CSS selector
+     * string. Selenium's {@code By.toString()} returns
      * {@code "By.cssSelector: <sel>"} or {@code "By.className: <name>"};
      * normalize both shapes to a plain CSS selector. Slice 178.
      */
@@ -101,9 +101,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     /**
-     * Translate a legacy GWT-era CSS selector to its Lit-DOM
-     * equivalent. Returns the input unchanged when no translation
-     * applies. Slice 178.
+     * Translate a legacy GWT-era CSS selector to its Lit-DOM equivalent.
+     * Returns the input unchanged when no translation applies. Slice 178.
      */
     private String translateSelector(String selector) {
         // Headers — GWT used .ch / .rh class on header cells; Lit
@@ -129,8 +128,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private WebElement findInLitShadowRoots(String cssSelector) {
         String translated = translateSelector(cssSelector);
-        return (WebElement) ((org.openqa.selenium.JavascriptExecutor)
-                getDriver()).executeScript("""
+        return (WebElement) ((org.openqa.selenium.JavascriptExecutor) getDriver())
+                .executeScript("""
                         const host = arguments[0];
                         const selector = arguments[1];
                         function searchShadow(root) {
@@ -149,15 +148,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                             return null;
                         }
                         return searchShadow(host.shadowRoot);
-                        """,
-                $(SpreadsheetElement.class).first(), translated);
+                        """, $(SpreadsheetElement.class).first(), translated);
     }
 
     @SuppressWarnings("unchecked")
     private List<WebElement> findAllInLitShadowRoots(String cssSelector) {
         String translated = translateSelector(cssSelector);
-        return (List<WebElement>) ((org.openqa.selenium.JavascriptExecutor)
-                getDriver()).executeScript("""
+        return (List<WebElement>) ((org.openqa.selenium.JavascriptExecutor) getDriver())
+                .executeScript("""
                         const host = arguments[0];
                         const selector = arguments[1];
                         const out = [];
@@ -171,8 +169,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                         }
                         searchShadow(host.shadowRoot);
                         return out;
-                        """,
-                $(SpreadsheetElement.class).first(), translated);
+                        """, $(SpreadsheetElement.class).first(), translated);
     }
 
     public void selectCell(String address) {

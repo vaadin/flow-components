@@ -34,26 +34,26 @@
  * values are omitted from the wire.
  */
 export interface CellData {
-    /** 1-based row index. */
-    row: number;
-    /** 1-based column index. */
-    col: number;
-    /** Display value. ALWAYS present in the wire format (even null). */
-    value: string | null;
-    /** Formula source text, when the cell holds a formula. */
-    formulaValue?: string;
-    /** Raw underlying value (locale-independent). */
-    originalValue?: string;
-    /** CSS class index for this cell's style. Default `"cs0"`. */
-    cellStyle: string;
-    /** Override text color (hex RGB, no leading `#`). */
-    textColor?: string;
-    /** When true, the cell can't be edited regardless of selection. */
-    locked: boolean;
-    /** Hint to the renderer that this cell needs a width measurement. */
-    needsMeasure: boolean;
-    /** True if the cell's number format includes `%`. */
-    isPercentage: boolean;
+  /** 1-based row index. */
+  row: number;
+  /** 1-based column index. */
+  col: number;
+  /** Display value. ALWAYS present in the wire format (even null). */
+  value: string | null;
+  /** Formula source text, when the cell holds a formula. */
+  formulaValue?: string;
+  /** Raw underlying value (locale-independent). */
+  originalValue?: string;
+  /** CSS class index for this cell's style. Default `"cs0"`. */
+  cellStyle: string;
+  /** Override text color (hex RGB, no leading `#`). */
+  textColor?: string;
+  /** When true, the cell can't be edited regardless of selection. */
+  locked: boolean;
+  /** Hint to the renderer that this cell needs a width measurement. */
+  needsMeasure: boolean;
+  /** True if the cell's number format includes `%`. */
+  isPercentage: boolean;
 }
 
 /**
@@ -65,15 +65,15 @@ export interface CellData {
  * regions with id 0.
  */
 export interface MergedRegion {
-    id: number;
-    /** Left column, 1-based, inclusive. */
-    col1: number;
-    /** Right column, 1-based, inclusive. */
-    col2: number;
-    /** Top row, 1-based, inclusive. */
-    row1: number;
-    /** Bottom row, 1-based, inclusive. */
-    row2: number;
+  id: number;
+  /** Left column, 1-based, inclusive. */
+  col1: number;
+  /** Right column, 1-based, inclusive. */
+  col2: number;
+  /** Top row, 1-based, inclusive. */
+  row1: number;
+  /** Bottom row, 1-based, inclusive. */
+  row2: number;
 }
 
 /**
@@ -84,13 +84,13 @@ export interface MergedRegion {
  * their constant name. The TS-side compares against the literal strings.
  */
 export interface OverlayInfo {
-    type: 'IMAGE' | 'COMPONENT';
-    col: number;
-    row: number;
-    width: number;
-    height: number;
-    dx: number;
-    dy: number;
+  type: 'IMAGE' | 'COMPONENT';
+  col: number;
+  row: number;
+  width: number;
+  height: number;
+  dx: number;
+  dy: number;
 }
 
 /**
@@ -102,12 +102,12 @@ export interface OverlayInfo {
  * TS client reads it as `number` (preserving the server's typing).
  */
 export interface SpreadsheetActionDetails {
-    caption: string;
-    /** 0 = cell, 1 = row, 2 = column. */
-    type: number;
-    key: string;
-    /** Vaadin Flow node ID of the icon child, 0 if no icon. */
-    iconNodeId: number;
+  caption: string;
+  /** 0 = cell, 1 = row, 2 = column. */
+  type: number;
+  key: string;
+  /** Vaadin Flow node ID of the icon child, 0 if no icon. */
+  iconNodeId: number;
 }
 
 /**
@@ -121,15 +121,15 @@ export interface SpreadsheetActionDetails {
  * shape.
  */
 export interface PopupButtonState {
-    /** 1-based column index of the anchored cell. */
-    col: number;
-    /** 1-based row index. */
-    row: number;
-    active: boolean;
-    headerHidden: boolean;
-    popupHeight: string | null;
-    popupWidth: string | null;
-    sheet: string;
+  /** 1-based column index of the anchored cell. */
+  col: number;
+  /** 1-based row index. */
+  row: number;
+  active: boolean;
+  headerHidden: boolean;
+  popupHeight: string | null;
+  popupWidth: string | null;
+  sheet: string;
 }
 
 /**
@@ -140,10 +140,10 @@ export interface PopupButtonState {
  * GroupingData`.
  */
 export interface GroupingData {
-    startIndex: number;
-    endIndex: number;
-    level: number;
-    /** Unique within the grouping list for collapse/expand identity. */
-    uniqueIndex: number;
-    collapsed: boolean;
+  startIndex: number;
+  endIndex: number;
+  level: number;
+  /** Unique within the grouping list for collapse/expand identity. */
+  uniqueIndex: number;
+  collapsed: boolean;
 }

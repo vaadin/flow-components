@@ -24,10 +24,10 @@ import type { MergedRegion } from '../types/wire.js';
  * column-letter notation are below.
  */
 export interface CellCoord {
-    /** 1-based column index. */
-    col: number;
-    /** 1-based row index. */
-    row: number;
+  /** 1-based column index. */
+  col: number;
+  /** 1-based row index. */
+  row: number;
 }
 
 /**
@@ -52,41 +52,38 @@ export interface CellCoord {
  *          unparseable input.
  */
 export function parseSingleCell(cellRef: string | null): CellCoord {
-    if (cellRef === null) {
-        return { col: 0, row: 0 };
+  if (cellRef === null) {
+    return { col: 0, row: 0 };
+  }
+
+  // Java splits twice: once by digits (to extract the letter prefix)
+  // and once by letters (to extract the number suffix). We do the
+  // same to preserve the exact behavior on edge cases like "A1B2"
+  // (which the original parser maps to col=A, row=2).
+  const upperRef = cellRef.toUpperCase();
+  const splitByDigits = upperRef.split(/[0-9]/);
+  const splitByLetters = cellRef.split(/[A-Za-z]/);
+
+  const letterPart = splitByDigits.length > 0 ? splitByDigits[0] : '';
+  const digitPart = splitByLetters.length > 0 ? splitByLetters[splitByLetters.length - 1] : '';
+
+  const row = digitPart.length > 0 ? Number.parseInt(digitPart, 10) : 0;
+
+  let col = 0;
+  for (let i = 0; i < letterPart.length; i++) {
+    const code = letterPart.charCodeAt(i);
+    let charNum = 0;
+    if (code >= 65 && code <= 90) {
+      // 'A'..'Z'
+      charNum = code - 64;
     }
+    // The Java version also matches 'a'..'z' here, but at this
+    // point we've already uppercased — keep the structure so the
+    // intent is documented.
+    col = col * 26 + charNum;
+  }
 
-    // Java splits twice: once by digits (to extract the letter prefix)
-    // and once by letters (to extract the number suffix). We do the
-    // same to preserve the exact behavior on edge cases like "A1B2"
-    // (which the original parser maps to col=A, row=2).
-    const upperRef = cellRef.toUpperCase();
-    const splitByDigits = upperRef.split(/[0-9]/);
-    const splitByLetters = cellRef.split(/[A-Za-z]/);
-
-    const letterPart = splitByDigits.length > 0 ? splitByDigits[0] : '';
-    const digitPart =
-        splitByLetters.length > 0
-            ? splitByLetters[splitByLetters.length - 1]
-            : '';
-
-    const row = digitPart.length > 0 ? Number.parseInt(digitPart, 10) : 0;
-
-    let col = 0;
-    for (let i = 0; i < letterPart.length; i++) {
-        const code = letterPart.charCodeAt(i);
-        let charNum = 0;
-        if (code >= 65 && code <= 90) {
-            // 'A'..'Z'
-            charNum = code - 64;
-        }
-        // The Java version also matches 'a'..'z' here, but at this
-        // point we've already uppercased — keep the structure so the
-        // intent is documented.
-        col = col * 26 + charNum;
-    }
-
-    return { col, row };
+  return { col, row };
 }
 
 /**
@@ -101,19 +98,19 @@ export function parseSingleCell(cellRef: string | null): CellCoord {
  * @param col 1-based column index. Values ≤ 0 return `""`.
  */
 export function columnIndexToLetters(col: number): string {
-    if (col <= 0) {
-        return '';
-    }
-    let letters = '';
-    let n = col;
-    while (n > 0) {
-        // Map 1..26 to A..Z; subtract 1 because the base-26 system is
-        // "bijective" (no zero digit).
-        const remainder = (n - 1) % 26;
-        letters = String.fromCharCode(65 + remainder) + letters;
-        n = Math.trunc((n - 1) / 26);
-    }
-    return letters;
+  if (col <= 0) {
+    return '';
+  }
+  let letters = '';
+  let n = col;
+  while (n > 0) {
+    // Map 1..26 to A..Z; subtract 1 because the base-26 system is
+    // "bijective" (no zero digit).
+    const remainder = (n - 1) % 26;
+    letters = String.fromCharCode(65 + remainder) + letters;
+    n = Math.trunc((n - 1) / 26);
+  }
+  return letters;
 }
 
 /**
@@ -124,7 +121,7 @@ export function columnIndexToLetters(col: number): string {
  *          `col <= 0` AND `row <= 0`.
  */
 export function cellCoordToAddress(coord: CellCoord): string {
-    return columnIndexToLetters(coord.col) + (coord.row > 0 ? coord.row : '');
+  return columnIndexToLetters(coord.col) + (coord.row > 0 ? coord.row : '');
 }
 
 /**
@@ -151,39 +148,36 @@ export function cellCoordToAddress(coord: CellCoord): string {
  * @returns A `MergedRegion` with `id=0` describing the addressed range,
  *          or `null` when the ref is on another sheet.
  */
-export function parseCellRefRange(
-    ref: string,
-    activeSheetName: string
-): MergedRegion | null {
-    if (ref.includes('!')) {
-        // Sheet-qualified ref.
-        const parts = ref.split('!');
-        const sheetname = parts[0];
-        if (activeSheetName !== sheetname) {
-            return null;
-        }
-        return parseCellRefRange(parts[1], activeSheetName);
-    } else if (ref.includes(':')) {
-        // Range ref.
-        const refs = ref.split(':');
-        const c1 = parseSingleCell(refs[0]);
-        const c2 = parseSingleCell(refs[1]);
-        return {
-            id: 0,
-            col1: c1.col,
-            col2: c2.col,
-            row1: c1.row,
-            row2: c2.row,
-        };
-    } else {
-        // Single-cell ref.
-        const cc = parseSingleCell(ref);
-        return {
-            id: 0,
-            col1: cc.col,
-            col2: cc.col,
-            row1: cc.row,
-            row2: cc.row,
-        };
+export function parseCellRefRange(ref: string, activeSheetName: string): MergedRegion | null {
+  if (ref.includes('!')) {
+    // Sheet-qualified ref.
+    const parts = ref.split('!');
+    const sheetname = parts[0];
+    if (activeSheetName !== sheetname) {
+      return null;
     }
+    return parseCellRefRange(parts[1], activeSheetName);
+  } else if (ref.includes(':')) {
+    // Range ref.
+    const refs = ref.split(':');
+    const c1 = parseSingleCell(refs[0]);
+    const c2 = parseSingleCell(refs[1]);
+    return {
+      id: 0,
+      col1: c1.col,
+      col2: c2.col,
+      row1: c1.row,
+      row2: c2.row
+    };
+  } else {
+    // Single-cell ref.
+    const cc = parseSingleCell(ref);
+    return {
+      id: 0,
+      col1: cc.col,
+      col2: cc.col,
+      row1: cc.row,
+      row2: cc.row
+    };
+  }
 }

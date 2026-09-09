@@ -45,18 +45,18 @@
  * @returns The TSV-formatted text.
  */
 export function serializeToTsv(values: readonly (string | null)[][]): string {
-    if (values.length === 0) {
-        return '';
-    }
-    const rows: string[] = [];
-    for (const row of values) {
-        // Each cell's value or '' for null. The join handles the
-        // column separators correctly (n-1 tabs for n cells, no
-        // trailing tab — matching the Java version's
-        // `if (col != xMax) sb.append("\t")` behavior).
-        rows.push(row.map((cell) => (cell ?? '')).join('\t'));
-    }
-    return rows.join('\n');
+  if (values.length === 0) {
+    return '';
+  }
+  const rows: string[] = [];
+  for (const row of values) {
+    // Each cell's value or '' for null. The join handles the
+    // column separators correctly (n-1 tabs for n cells, no
+    // trailing tab — matching the Java version's
+    // `if (col != xMax) sb.append("\t")` behavior).
+    rows.push(row.map((cell) => cell ?? '').join('\t'));
+  }
+  return rows.join('\n');
 }
 
 /**
@@ -77,17 +77,15 @@ export function serializeToTsv(values: readonly (string | null)[][]): string {
  *          (not `[[]]`).
  */
 export function parseTsv(text: string): string[][] {
-    if (text.length === 0) {
-        return [];
-    }
-    // Normalize CRLF and CR to LF for cross-platform clipboard
-    // tolerance (Windows / classic-Mac).
-    const normalized = text.replace(/\r\n?/g, '\n');
-    // Strip a single trailing newline if present, so a TSV ending in
-    // `\n` doesn't produce an empty trailing row.
-    const trimmed = normalized.endsWith('\n')
-        ? normalized.slice(0, -1)
-        : normalized;
-    const rows = trimmed.split('\n');
-    return rows.map((row) => row.split('\t'));
+  if (text.length === 0) {
+    return [];
+  }
+  // Normalize CRLF and CR to LF for cross-platform clipboard
+  // tolerance (Windows / classic-Mac).
+  const normalized = text.replace(/\r\n?/g, '\n');
+  // Strip a single trailing newline if present, so a TSV ending in
+  // `\n` doesn't produce an empty trailing row.
+  const trimmed = normalized.endsWith('\n') ? normalized.slice(0, -1) : normalized;
+  const rows = trimmed.split('\n');
+  return rows.map((row) => row.split('\t'));
 }

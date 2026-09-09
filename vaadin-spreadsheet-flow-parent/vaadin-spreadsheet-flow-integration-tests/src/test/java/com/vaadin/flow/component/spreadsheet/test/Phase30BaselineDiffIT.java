@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.imageio.ImageIO;
 
 import org.junit.Assert;
@@ -26,29 +25,26 @@ import com.vaadin.flow.testutil.TestPath;
 /**
  * Tier 3 / Phase 3.0 visual-regression check.
  *
- * <p>Loads each top-priority fixture, waits for the GWT client to
- * render, then calls {@link #compareScreen(File, String)} against
- * the baseline written by {@link Phase30BaselineCaptureIT}. Fails
- * with a fixture-by-fixture report when any baseline differs beyond
- * the configured per-pixel tolerance (0.01, set in pom.xml).
+ * <p>
+ * Loads each top-priority fixture, waits for the GWT client to render, then
+ * calls {@link #compareScreen(File, String)} against the baseline written by
+ * {@link Phase30BaselineCaptureIT}. Fails with a fixture-by-fixture report when
+ * any baseline differs beyond the configured per-pixel tolerance (0.01, set in
+ * pom.xml).
  *
- * <p>This IT runs on every CI build. The baselines it diffs against
- * are committed under {@code src/reference-screenshots/<slug>/}.
+ * <p>
+ * This IT runs on every CI build. The baselines it diffs against are committed
+ * under {@code src/reference-screenshots/<slug>/}.
  */
 @TestPath("vaadin-spreadsheet")
 public class Phase30BaselineDiffIT extends AbstractSpreadsheetIT {
 
     private static final Dimension CAPTURE_VIEWPORT = new Dimension(1280, 720);
 
-    private static final List<String> FIXTURES = List.of(
-            "Tagetik 5.xlsx",
-            "Groupingtest.xlsx",
-            "100_000_rows.xlsx",
-            "merged_cells.xlsx",
-            "scrolled_frozen.xlsx",
-            "ConditionalFormatterSamples.xlsx",
-            "spreadsheet_styles.xlsx",
-            "FormulaValues.xlsx",
+    private static final List<String> FIXTURES = List.of("Tagetik 5.xlsx",
+            "Groupingtest.xlsx", "100_000_rows.xlsx", "merged_cells.xlsx",
+            "scrolled_frozen.xlsx", "ConditionalFormatterSamples.xlsx",
+            "spreadsheet_styles.xlsx", "FormulaValues.xlsx",
             "data_filters.xlsx");
 
     @Before
@@ -87,10 +83,8 @@ public class Phase30BaselineDiffIT extends AbstractSpreadsheetIT {
                     + ". Run Phase30BaselineCaptureIT with "
                     + "-Dphase3.baseline.capture=true to bootstrap them.");
         }
-        Assert.assertTrue(
-                "Visual regression detected on: " + mismatches
-                        + ". Check target/screenshot-diffs/ for the actual "
-                        + "vs reference comparison.",
-                mismatches.isEmpty());
+        Assert.assertTrue("Visual regression detected on: " + mismatches
+                + ". Check target/screenshot-diffs/ for the actual "
+                + "vs reference comparison.", mismatches.isEmpty());
     }
 }

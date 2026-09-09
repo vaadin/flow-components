@@ -45,20 +45,13 @@
  *                   always provides at least one (the active sheet).
  */
 function buildCellRefRegex(sheetNames: readonly string[]): RegExp {
-    const escapedNames = sheetNames.map(escapeRegex).join('|');
-    const singleCellRef = '([A-Za-z]{1,3}[0-9]{1,7})';
-    // Build:    ^((sheet1|sheet2)!)?singleCellRef(:singleCellRef)?
-    // The `{0,1}` in the Java original is `?` in JS regex — semantically
-    // identical, more compact.
-    const pattern =
-        '^((' +
-        escapedNames +
-        ')!)?' +
-        singleCellRef +
-        '(:' +
-        singleCellRef +
-        ')?$';
-    return new RegExp(pattern);
+  const escapedNames = sheetNames.map(escapeRegex).join('|');
+  const singleCellRef = '([A-Za-z]{1,3}[0-9]{1,7})';
+  // Build:    ^((sheet1|sheet2)!)?singleCellRef(:singleCellRef)?
+  // The `{0,1}` in the Java original is `?` in JS regex — semantically
+  // identical, more compact.
+  const pattern = '^((' + escapedNames + ')!)?' + singleCellRef + '(:' + singleCellRef + ')?$';
+  return new RegExp(pattern);
 }
 
 /**
@@ -74,7 +67,7 @@ function buildCellRefRegex(sheetNames: readonly string[]): RegExp {
  * references — but flagging here for review.
  */
 function escapeRegex(name: string): string {
-    return name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -85,14 +78,11 @@ function escapeRegex(name: string): string {
  *                    formula text — see `parseCellReferences`).
  * @param sheetNames  The active workbook's sheet names.
  */
-export function isCellRef(
-    token: string,
-    sheetNames: readonly string[]
-): boolean {
-    if (sheetNames.length === 0) {
-        return false;
-    }
-    return buildCellRefRegex(sheetNames).test(token);
+export function isCellRef(token: string, sheetNames: readonly string[]): boolean {
+  if (sheetNames.length === 0) {
+    return false;
+  }
+  return buildCellRefRegex(sheetNames).test(token);
 }
 
 /**
@@ -119,20 +109,17 @@ export function isCellRef(
  * @returns The list of cell references found in document order.
  *          Ranges remain as a single token (`"A1:B3"`).
  */
-export function parseCellReferences(
-    formula: string,
-    sheetNames: readonly string[]
-): string[] {
-    if (sheetNames.length === 0) {
-        return [];
+export function parseCellReferences(formula: string, sheetNames: readonly string[]): string[] {
+  if (sheetNames.length === 0) {
+    return [];
+  }
+  const regex = buildCellRefRegex(sheetNames);
+  const tokens = formula.split(/[^A-Za-z0-9:!]+/);
+  const refs: string[] = [];
+  for (const token of tokens) {
+    if (regex.test(token)) {
+      refs.push(token);
     }
-    const regex = buildCellRefRegex(sheetNames);
-    const tokens = formula.split(/[^A-Za-z0-9:!]+/);
-    const refs: string[] = [];
-    for (const token of tokens) {
-        if (regex.test(token)) {
-            refs.push(token);
-        }
-    }
-    return refs;
+  }
+  return refs;
 }

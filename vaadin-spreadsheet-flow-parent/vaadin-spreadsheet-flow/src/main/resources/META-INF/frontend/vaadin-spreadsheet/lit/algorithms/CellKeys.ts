@@ -34,7 +34,7 @@
  * {@code "col1 row1"}. Used as a cache key + CSS class prefix.
  */
 export function toKey(col: number, row: number): string {
-    return 'col' + col + ' row' + row;
+  return 'col' + col + ' row' + row;
 }
 
 /**
@@ -42,13 +42,13 @@ export function toKey(col: number, row: number): string {
  * select a cell's rendered element by coordinate.
  */
 export function toCssKey(col: number, row: number): string {
-    return '.col' + col + '.row' + row;
+  return '.col' + col + '.row' + row;
 }
 
 /** Parsed cell-key pair returned by {@link parseColRow}. */
 export interface ParsedCellKey {
-    col: number;
-    row: number;
+  col: number;
+  row: number;
 }
 
 /**
@@ -69,27 +69,27 @@ export interface ParsedCellKey {
  * "not a cell key".
  */
 export function parseColRow(str: string): ParsedCellKey {
-    let i = 0;
-    let flags = 0;
-    let c = 0;
-    let r = 0;
-    while (i < str.length) {
-        const code = str.charCodeAt(i);
-        if (code === 32) {
-            flags++;
-        } else if (code > 47 && code < 58) {
-            if (flags === 0) {
-                c = c * 10 + code - 48;
-            } else {
-                r = r * 10 + code - 48;
-            }
-        }
-        if (flags === 2) {
-            break;
-        }
-        i++;
+  let i = 0;
+  let flags = 0;
+  let c = 0;
+  let r = 0;
+  while (i < str.length) {
+    const code = str.charCodeAt(i);
+    if (code === 32) {
+      flags++;
+    } else if (code > 47 && code < 58) {
+      if (flags === 0) {
+        c = c * 10 + code - 48;
+      } else {
+        r = r * 10 + code - 48;
+      }
     }
-    return { col: c, row: r };
+    if (flags === 2) {
+      break;
+    }
+    i++;
+  }
+  return { col: c, row: r };
 }
 
 /**
@@ -117,17 +117,17 @@ export const HEADER_COL = 2;
  * are always written "rh<N>") from "rh5".
  */
 export function headerType(str: string): number {
-    if (!str || str.length < 2) {
-        return HEADER_NONE;
-    }
-    const first = str.charAt(0);
-    if (first === 'r' && str.charAt(1) === 'h') {
-        return HEADER_ROW;
-    }
-    if (first === 'c' && str.charAt(1) === 'h') {
-        return HEADER_COL;
-    }
+  if (!str || str.length < 2) {
     return HEADER_NONE;
+  }
+  const first = str.charAt(0);
+  if (first === 'r' && str.charAt(1) === 'h') {
+    return HEADER_ROW;
+  }
+  if (first === 'c' && str.charAt(1) === 'h') {
+    return HEADER_COL;
+  }
+  return HEADER_NONE;
 }
 
 /**
@@ -143,19 +143,19 @@ export function headerType(str: string): number {
  * handle the 0 return as "not a valid index".
  */
 export function parseHeaderIndex(str: string): number {
-    if (!str || str.length < 3) {
-        return 0;
+  if (!str || str.length < 3) {
+    return 0;
+  }
+  let index = 0;
+  let i = 2; // skip the two-char prefix
+  while (i < str.length) {
+    const code = str.charCodeAt(i);
+    if (code > 47 && code < 58) {
+      index = index * 10 + code - 48;
+    } else {
+      break;
     }
-    let index = 0;
-    let i = 2; // skip the two-char prefix
-    while (i < str.length) {
-        const code = str.charCodeAt(i);
-        if (code > 47 && code < 58) {
-            index = index * 10 + code - 48;
-        } else {
-            break;
-        }
-        i++;
-    }
-    return index;
+    i++;
+  }
+  return index;
 }
