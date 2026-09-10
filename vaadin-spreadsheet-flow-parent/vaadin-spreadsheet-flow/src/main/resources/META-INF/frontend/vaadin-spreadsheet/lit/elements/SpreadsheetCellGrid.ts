@@ -844,8 +844,24 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
       (cellStyleClass ? ` ${cellStyleClass}` : '') +
       cellRangeClass;
     const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + textColorDeclaration(data);
+    // data-col / data-row are what the click delegation reads. Without
+    // them a merged region matched `.cell` and then parsed NaN, so
+    // every click on one was dropped — a merged cell could not be
+    // selected at all. `part` for the same reason a plain cell has it:
+    // a merged cell is still a cell to a stylesheet.
+    const cellPart = inSelection && !isActive ? 'cell cell-range' : 'cell';
 
-    overlays.push(html` <div class=${classList} style=${style}> ${text} </div> `);
+    overlays.push(html`
+      <div
+        class=${classList}
+        part=${cellPart}
+        style=${style}
+        data-col=${region.col1}
+        data-row=${region.row1}
+      >
+        ${text}
+      </div>
+    `);
   }
   return overlays;
 }

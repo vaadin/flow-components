@@ -893,6 +893,99 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
     });
 });
 
+describe('SpreadsheetCellGrid — clicking a merged cell', () => {
+    /**
+     * A merged region is drawn as one element carrying the `cell` class,
+     * so the grid's click delegation finds it — but it read the
+     * coordinates from data attributes the merged element did not have,
+     * parsed NaN and gave up. A merged cell could not be selected at
+     * all.
+     */
+    async function attachMerged(): Promise<{
+        sheet: Spreadsheet;
+        merged: HTMLElement;
+        cleanup: () => void;
+    }> {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(10);
+        sheet.setCols(6);
+        sheet.setColW(new Array(6).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+        sheet.setMergedRegions([{ id: 1, col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+        const merged = sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector<HTMLElement>('.merged-cell')!;
+        return {
+            sheet,
+            merged,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    it('carries the coordinates the click delegation reads', async () => {
+        const { merged, cleanup } = await attachMerged();
+        expect(merged.dataset.col).to.equal('2');
+        expect(merged.dataset.row).to.equal('3');
+        cleanup();
+    });
+
+    it('selects the region when it is clicked', async () => {
+        const { sheet, merged, cleanup } = await attachMerged();
+
+        merged.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+        merged.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 3 });
+        cleanup();
+    });
+
+    it('reports the click to the server', async () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(10);
+        sheet.setCols(6);
+        sheet.setColW(new Array(6).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+        sheet.setMergedRegions([{ id: 1, col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+        const events: any[] = [];
+        host.addEventListener('spreadsheet-event', (e) =>
+            events.push((e as CustomEvent).detail)
+        );
+
+        const merged = sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector<HTMLElement>('.merged-cell')!;
+        merged.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+        merged.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+        const selected = events.find((e) => e.type === 'cellSelected');
+        expect(selected).to.not.be.undefined;
+        expect(selected.data).to.include({ row: 3, column: 2 });
+
+        sheet.dispose();
+        host.remove();
+    });
+
+    it('is a cell to a stylesheet', async () => {
+        // `::part(cell)` should reach a merged region like any other.
+        const { merged, cleanup } = await attachMerged();
+        expect(merged.getAttribute('part')).to.contain('cell');
+        cleanup();
+    });
+});
+
 describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
     function buildMergedState(
         mergedRegions: CellGridRenderState['mergedRegions'],
