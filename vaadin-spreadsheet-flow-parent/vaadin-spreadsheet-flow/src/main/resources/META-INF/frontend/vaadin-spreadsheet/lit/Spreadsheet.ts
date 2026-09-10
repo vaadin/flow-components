@@ -2511,13 +2511,36 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // range, or a sheet-qualified reference. For an ordinary cell it
     // sends null and leaves the address to the client, which is the
     // common case: without this the address field sits empty for every
-    // selection the user makes. The formula field is updated separately
-    // by {@link showSelectedCell}. Slice 175.
+    // selection the user makes. Slice 175.
     this.formulaBar.renderState = {
       address: possibleName ?? cellCoordToAddress({ col, row }),
-      formula: this.formulaBar.renderState.formula,
+      formula: this.formulaFieldValueFor(col, row),
       namedRanges: this.namedRanges
     };
+  }
+
+  /**
+   * What the formula field shows for a cell.
+   *
+   * The bar shows what the cell *is*, not what it displays: the formula
+   * behind a computed cell, and otherwise the value before formatting.
+   * The unformatted value is what carries a text cell's leading
+   * apostrophe and a number's full precision, both of which the
+   * displayed value has already dropped.
+   *
+   * The server sends a formula without its leading `=`, the way POI
+   * stores it.
+   */
+  private formulaFieldValueFor(col: number, row: number): string {
+    const data = this.cellDataByKey.get(toKey(col, row));
+    if (data === undefined) {
+      return '';
+    }
+    const formula = data.formulaValue;
+    if (formula !== undefined && formula !== null && formula !== '') {
+      return `=${formula}`;
+    }
+    return data.originalValue ?? data.value ?? '';
   }
   invalidCellAddress(): void {
     // TODO Phase 3.3 — flash the address bar to indicate invalid input.

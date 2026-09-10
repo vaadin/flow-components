@@ -240,11 +240,56 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('AB5');
   });
 
-  it('leaves the formula field alone', () => {
-    // Only showSelectedCell knows the formula; the address arriving must
-    // not blank it.
-    ctx.sheet.showSelectedCell('A1', 1, 1, '=SUM(B1:B9)', true, false, false);
-    ctx.sheet.updateFormulaBar(null as any, 1, 1);
+  it('shows the formula behind a computed cell', () => {
+    // The bar shows what the cell is, not what it displays. The server
+    // sends the formula without its leading =, the way POI stores it.
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
+  });
+
+  it('shows the unformatted value of a plain cell', () => {
+    // originalValue keeps a text cell's leading apostrophe and a
+    // number's full precision, both of which the displayed value has
+    // already dropped.
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 4, col: 2, value: 'abc', originalValue: "'abc", cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 4);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal("'abc");
+  });
+
+  it('falls back to the displayed value when there is nothing else', () => {
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 5, col: 2, value: 'plain', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 5);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('plain');
+  });
+
+  it('empties the field for a cell the server has sent nothing for', () => {
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null as any, 9, 9);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
+  });
+
+  it('prefers the formula over the unformatted value', () => {
+    ctx.sheet.updateBottomRightCellValues([
+      {
+        row: 2, col: 2, value: '42',
+        formulaValue: 'SUM(B1:B9)', originalValue: '42', cellStyle: 'cs0'
+      } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
   });
