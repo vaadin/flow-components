@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -1762,12 +1763,9 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            // The fill always hops through ui.access so writes land on the
-            // UI thread with CurrentInstance bound, regardless of whether
-            // the LLM provider invoked the tool from a reactor scheduler
-            // thread (the production path) or directly from the UI thread
-            // itself (in which case ui.access runs the lambda synchronously
-            // and future.get() returns immediately, so the hop is a no-op).
+            // The fill has to land on a thread that holds the session lock,
+            // with CurrentInstance bound. Which hop gets it there depends on
+            // where the LLM provider called the tool from.
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
@@ -1775,6 +1773,21 @@ public class FormAIController implements AIController {
                     .orElseThrow(() -> new IllegalStateException(
                             "fill_form invoked on a controller whose form is not "
                                     + "attached to a UI"));
+            var session = ui.getSession();
+            if (session != null && session.hasLock()) {
+                // The provider called the tool on the very thread it was
+                // handed, which is still inside the prompt call and holds the
+                // session lock. ui.access() would only queue the fill until
+                // that lock is ultimately released, which cannot happen before
+                // this call returns — the wait below would be waiting for
+                // itself. accessSynchronously re-enters the lock and binds
+                // CurrentInstance the same way the queued command would. A
+                // failure propagates out of the tool call, where fill_form's
+                // own catch logs it and reports the fill failure to the LLM.
+                var result = new AtomicReference<String>();
+                ui.accessSynchronously(() -> result.set(doFill(arguments)));
+                return result.get();
+            }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
