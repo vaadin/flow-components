@@ -40,7 +40,7 @@ import {
   getDefaultRowHeightPx,
   convertPointsToPixel
 } from './algorithms/ViewportMath.js';
-import { toKey } from './algorithms/CellKeys.js';
+import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import {
   SlottedVirtualChildren,
   cellComponentSlotName,
@@ -623,6 +623,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // stops the browser from scrolling the viewport via the
     // arrow keys.
     this.scrollContainer.addEventListener('keydown', this.handleKeyDown as EventListener);
+    this.scrollContainer.addEventListener('pointerdown', this.handleHostedEditorPointerDown);
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
     this.resizeObserver.observe(this.scrollContainer);
   }
@@ -1798,6 +1799,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.renderQueued = false;
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
     this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
+    this.scrollContainer.removeEventListener('pointerdown', this.handleHostedEditorPointerDown);
     this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);
     this.scrollContainer.removeEventListener('cut', this.handleCut as EventListener);
     this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
@@ -2777,6 +2779,58 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
     }
     return false;
+  }
+
+  /**
+   * Clicking a custom editor selects the cell it belongs to.
+   *
+   * An editor is usually wider than its cell, so a click aimed at the cell
+   * often lands on the editor instead — and the cell-grid's own click
+   * delegation cannot see it, because the editor is projected in rather
+   * than a descendant of the cell. Without this, selecting such a cell by
+   * mouse is impossible, and the server never learns the editor is showing.
+   *
+   * Bound to pointerdown rather than focus on purpose: the server focuses
+   * an editor itself when it displays one, and reporting that back as a
+   * selection would move the selection to whatever the server was last
+   * talking about — the feedback loop the GWT client guarded against with
+   * its `userInitiatedFocus` flag.
+   */
+  private readonly handleHostedEditorPointerDown = (e: Event): void => {
+    const cell = this.cellShowingEditorFor(e);
+    if (cell === null) {
+      return;
+    }
+    if (
+      this.selection.activeCell.col === cell.col &&
+      this.selection.activeCell.row === cell.row
+    ) {
+      return;
+    }
+    this.selection = selectSingleCell(cell.col, cell.row);
+    this.extendCol = cell.col;
+    this.extendRow = cell.row;
+    this.recomputeViewport();
+    this.dispatchSelectionEvent();
+  };
+
+  /** The cell whose custom editor an event came out of, if any. */
+  private cellShowingEditorFor(e: Event): { col: number; row: number } | null {
+    if (!this.eventCameFromCellEditor(e)) {
+      return null;
+    }
+    for (const [cellKey, assignment] of Object.entries(this.cellSlotAssignments())) {
+      if (assignment.kind !== 'editor') {
+        continue;
+      }
+      const element = this.cellEditors.get(assignment.nodeId);
+      if (element === null || !e.composedPath().includes(element)) {
+        continue;
+      }
+      const parsed = parseColRow(cellKey);
+      return { col: parsed.col, row: parsed.row };
+    }
+    return null;
   }
 
   /** Whether an event came out of a custom cell editor specifically. */

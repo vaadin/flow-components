@@ -707,6 +707,106 @@ describe('Spreadsheet — custom cell editors', () => {
     expect(editor.isConnected).to.be.true;
   });
 
+  it('selects the cell when its editor is clicked', async () => {
+    // An editor is usually wider than its cell, so a click aimed at the
+    // cell often lands on the editor. The cell-grid's click delegation
+    // cannot see it — the editor is projected in, not a descendant — so
+    // without this the cell can never be selected with the mouse.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col3 row4': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    editor.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 4 });
+    cleanup();
+  });
+
+  it('tells the server about a selection made through an editor', async () => {
+    const editor = field();
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col3 row4': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    const events: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) =>
+      events.push((e as CustomEvent).detail)
+    );
+
+    editor.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+
+    const selected = events.find((e) => e.type === 'cellSelected');
+    expect(selected).to.not.be.undefined;
+    expect(selected.data).to.include({ row: 4, column: 3 });
+    cleanup();
+  });
+
+  it('says nothing when the editor of the selected cell is clicked', async () => {
+    // Re-reporting the selection the server already knows about would
+    // bounce a needless round trip on every click into the editor.
+    const editor = field();
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col3 row4': '77' });
+    sheet.setSelectedCellAndRange('C4', 3, 4, 3, 3, 4, 4, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    const events: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) =>
+      events.push((e as CustomEvent).detail)
+    );
+
+    editor.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+
+    expect(events.map((e) => e.type)).to.not.include('cellSelected');
+    cleanup();
+  });
+
+  it('does not report a selection when the server focuses an editor', async () => {
+    // The server focuses an editor when it displays one. Reporting that
+    // back would move the selection to whatever the server was last
+    // talking about, and the two would chase each other.
+    const editor = field();
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col3 row4': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    const events: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) =>
+      events.push((e as CustomEvent).detail)
+    );
+
+    editor.focus();
+
+    expect(events.map((e) => e.type)).to.not.include('cellSelected');
+    cleanup();
+  });
+
+  it('leaves the selection alone when an in-cell component is clicked', async () => {
+    // Only editors stand in for their cell; a component in a cell is its
+    // own thing.
+    const widget = document.createElement('input');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col3 row4' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    widget.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
+    cleanup();
+  });
+
   it('gives focus back to the sheet on Escape', async () => {
     // Escape is the way out of a custom editor. Without it the editor
     // keeps the keyboard and the sheet can never be driven again.
