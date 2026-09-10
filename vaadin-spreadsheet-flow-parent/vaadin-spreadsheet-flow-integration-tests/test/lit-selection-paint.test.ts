@@ -229,4 +229,23 @@ describe('Spreadsheet — dragging the fill handle', () => {
   it('keeps the outline element in the tree when nothing is painted', () => {
     expect(ctx.sheet.getCellGrid().shadowRoot!.querySelector('.paintmode')).to.not.be.null;
   });
+
+  it('puts the handle where a pointer actually lands on it', () => {
+    // A hit test, not a DOM query. The handle rendered and could be found
+    // by a selector while the cell beneath it won every real click: cells
+    // carry z-index 1 and the handle had none, so a drag selected cells
+    // instead of filling them. Dispatching on the element directly — which
+    // the tests above do — cannot see that.
+    const corner = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLElement>('.selection-corner')!;
+    const box = corner.getBoundingClientRect();
+    const topmost = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+
+    expect(topmost, 'nothing under the handle at all').to.not.be.null;
+    expect(topmost!.classList.contains('selection-corner'), `hit ${topmost!.className} instead`)
+      .to.be.true;
+  });
 });

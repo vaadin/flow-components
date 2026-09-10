@@ -1195,16 +1195,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * loaded workbook with sheet protection enabled blocks all
    * cells; unlocking a region in POI flips the per-cell flag.
    * When the sheet is unprotected, the flag is meaningless.
-   * Cells without CellData entries default to locked because
-   * that matches POI's behavior for empty cells in a protected
-   * sheet.
+   *
+   * A cell the server has sent no data for — an empty cell — has no flag of
+   * its own, so its row and column styles decide, and it is locked only
+   * when **both** are. Defaulting such a cell to locked instead makes every
+   * empty cell uneditable on a sheet that protects only some rows or
+   * columns, which is most protected sheets.
    */
   private isCellLockedForEdit(col: number, row: number): boolean {
     if (!this.sheetProtected) {
       return false;
     }
     const cellData = this.cellDataByKey.get(toKey(col, row));
-    return cellData?.locked ?? true;
+    if (cellData !== undefined) {
+      return cellData.locked;
+    }
+    return this.lockedColumnIndexes.includes(col) && this.lockedRowIndexes.includes(row);
   }
 
   /**

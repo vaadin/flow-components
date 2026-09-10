@@ -153,6 +153,12 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-selection-color, #1976d2);
       cursor: crosshair;
       pointer-events: auto;
+      /* Above the cells, which carry z-index 1. Without this the handle
+         paints and can be found in the DOM but the cell under it wins
+         every hit test, so a real drag selects cells instead of filling
+         them. The border divs above have explicit z-indexes for the same
+         reason. */
+      z-index: 3;
     }
     /* Cells inside the active range get a subtle background
            highlight by default; matches the previous selected-cell-

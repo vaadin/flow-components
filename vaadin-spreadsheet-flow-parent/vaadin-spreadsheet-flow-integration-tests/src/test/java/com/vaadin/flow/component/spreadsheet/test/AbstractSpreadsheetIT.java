@@ -118,6 +118,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 "[part~=\"address-field\"]");
         selector = selector.replace(".functionfield",
                 "[part~=\"formula-field\"]");
+        // GWT sized the scroll area with a tall empty ".floater" div. The
+        // Lit grid is its own scroll extent, so the cell-grid element is
+        // what has the full sheet height.
+        selector = selector.replace(".floater",
+                "vaadin-spreadsheet-internal-cell-grid");
         // Cell editor input.
         selector = selector.replace("input[id='cellinput']",
                 "[part~=\"cell-input\"]");

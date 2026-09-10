@@ -39,9 +39,11 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
         selectCell("A1");
 
+        // The fill handle. GWT called it .s-corner; the scoped lookup below
+        // is a plain Selenium search, so it needs the Lit class name.
         WebElement selectionCorner = findElementInShadowRoot(
                 By.className("sheet-selection"))
-                .findElement(By.className("s-corner"));
+                .findElement(By.className("selection-corner"));
         // drag corner element of the selected cell to the target cell
         new Actions(driver).dragAndDrop(selectionCorner, target).perform();
 

@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -38,7 +39,11 @@ public class LockIT extends AbstractSpreadsheetIT {
         // work around Selenium issue with double-click targeting wrong cell
         selectCell("B2");
         lockedCell.doubleClick();
-        Assert.assertFalse(spreadsheet.getCellValueInput().isDisplayed());
+        // No editor at all is the locked case: getCellValueInput returns
+        // null when the cell-grid is not showing one.
+        WebElement input = spreadsheet.getCellValueInput();
+        Assert.assertFalse("Locked cell opened an editor",
+                input != null && input.isDisplayed());
 
         // Toggle locked state of the region (should unlock the cells)
         selectRegion("B2", "D4");
