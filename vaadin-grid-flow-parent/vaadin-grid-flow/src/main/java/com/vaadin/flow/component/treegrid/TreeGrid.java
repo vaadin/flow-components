@@ -960,6 +960,17 @@ public class TreeGrid<T> extends Grid<T>
         return (HierarchicalDataCommunicator<T>) super.getDataCommunicator();
     }
 
+    /**
+     * Returns the hierarchical data provider of this tree grid.
+     * <p>
+     * Use the returned provider to inspect items and to refresh them after
+     * changes. {@link #getListDataView()} and {@link #getLazyDataView()} are
+     * not supported on TreeGrid and throw
+     * {@link UnsupportedOperationException}.
+     *
+     * @return the hierarchical data provider of this tree grid, or {@code null}
+     *         if the current provider is not hierarchical
+     */
     @SuppressWarnings("unchecked")
     @Override
     public HierarchicalDataProvider<T, SerializablePredicate<T>> getDataProvider() {
