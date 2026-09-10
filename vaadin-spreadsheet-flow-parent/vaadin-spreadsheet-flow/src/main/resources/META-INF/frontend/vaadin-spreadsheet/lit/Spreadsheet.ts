@@ -1309,6 +1309,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
 
+    // A cell showing a custom editor is edited through that editor, so
+    // every key that would otherwise start editing hands it the focus
+    // instead: F2, Enter, and any printable character.
+    //
+    // Deliberately without preventDefault. The character that opened the
+    // editor should land in it, and the browser delivers a keypress to
+    // whatever holds the focus once the handlers have run — which by then
+    // is the editor.
+    const startsEditing =
+      !this.editor &&
+      !ctrlOrMeta &&
+      !e.altKey &&
+      (key === 'F2' || key === 'Enter' || key.length === 1);
+    if (startsEditing && this.focusCustomEditor()) {
+      return;
+    }
+
     // Ctrl+A / Cmd+A — select the entire sheet (slice 159).
     if (ctrlOrMeta && (key === 'a' || key === 'A')) {
       if (this.rows <= 0 || this.cols <= 0) {
@@ -1368,10 +1385,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       if (this.isCellLockedForEdit(col, row)) {
         return;
       }
-      if (this.focusCustomEditor()) {
-        e.preventDefault();
-        return;
-      }
       e.preventDefault();
       const cellData = this.cellDataByKey.get(toKey(col, row));
       this.editor = {
@@ -1394,10 +1407,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       const { col, row } = this.selection.activeCell;
       if (this.isCellLockedForEdit(col, row)) {
-        return;
-      }
-      if (this.focusCustomEditor()) {
-        e.preventDefault();
         return;
       }
       e.preventDefault();

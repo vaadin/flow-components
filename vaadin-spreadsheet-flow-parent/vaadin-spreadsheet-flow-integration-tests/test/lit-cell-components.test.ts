@@ -565,6 +565,69 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('gives Enter to the custom editor instead of moving down', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(document.activeElement).to.equal(editor);
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    cleanup();
+  });
+
+  it('lets the character that opened the editor reach it', async () => {
+    // The browser delivers the keypress to whatever holds the focus once
+    // the handlers have run, so the editor must be focused without the
+    // key being cancelled — otherwise the first character is swallowed.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'a',
+      bubbles: true,
+      composed: true,
+      cancelable: true
+    });
+    sheet.getScrollContainer().dispatchEvent(event);
+
+    expect(event.defaultPrevented).to.be.false;
+    cleanup();
+  });
+
+  it('still cancels the key when the cell has no custom editor', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'a',
+      bubbles: true,
+      composed: true,
+      cancelable: true
+    });
+    sheet.getScrollContainer().dispatchEvent(event);
+
+    // The inline editor takes the character, so the browser must not also
+    // type it somewhere.
+    expect(event.defaultPrevented).to.be.true;
+    cleanup();
+  });
+
   it('gives a typed character to the custom editor too', async () => {
     const editor = field();
     const { sheet, cleanup } = attachSheet({ '77': editor });
