@@ -77,6 +77,12 @@ export class SpreadsheetCellGrid extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       white-space: nowrap;
+      /* A cell is a surface, not a window: it has a ground of its own,
+         so a conditional format that stops matching leaves the cell
+         white rather than transparent, and a cell under a merge or an
+         overlay does not show what is behind the sheet. A cs<N> or
+         cf<N> rule wins over this, being the more specific selector. */
+      background: var(--vaadin-spreadsheet-cell-background, #fff);
       border-right: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       border-bottom: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-cell-font, inherit);

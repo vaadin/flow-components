@@ -58,6 +58,18 @@ export const spreadsheetStyles = css`
     flex: 1 1 auto;
     isolation: isolate;
     background-color: #fff;
+    /* The server writes these into the per-cell style rules it generates
+       (background-color: var(--default-background-color) and the like),
+       so they have to resolve to something: an undefined var() is
+       invalid at computed-value time, which turns every unformatted
+       cell's background transparent. Defined here rather than in the
+       grid because custom properties inherit through the shadow
+       boundary. No backticks in this comment — the whole stylesheet is
+       a template literal and one would end it. */
+    --default-background-color: #fff;
+    --default-color: #000;
+    --default-font-family: Helvetica;
+    --default-font-size: 11pt;
     color: var(--vaadin-spreadsheet-text-color);
     font-family: Helvetica;
     font-size: 14px;

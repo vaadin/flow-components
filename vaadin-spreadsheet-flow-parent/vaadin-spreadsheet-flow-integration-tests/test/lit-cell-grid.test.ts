@@ -1877,6 +1877,33 @@ describe('SpreadsheetCellGrid — hidden rows and columns', () => {
         return cell!.style.display;
     }
 
+    it('gives every cell a ground of its own', async () => {
+        // Not a window onto whatever is behind the sheet: a conditional
+        // format that stops matching must leave the cell white, and a
+        // cell under a merge must not show through it. Five conditional-
+        // formatting suites read this as rgba(255,255,255,1).
+        const el = await attachWithState(stateWithSizes([50, 50], [20, 20]));
+
+        const cell = el.shadowRoot!.querySelector('.cell')!;
+        expect(getComputedStyle(cell).backgroundColor).to.equal('rgb(255, 255, 255)');
+        cleanup(el);
+    });
+
+    it('lets a cell style override the default ground', async () => {
+        const el = await attachWithState({
+            ...stateWithSizes([50, 50], [20, 20]),
+            cellData: new Map([
+                ['col1 row1', makeCellData(1, 1, 'x')],
+            ]),
+            cellStyleToCSSStyle: { 0: 'background: rgb(1, 2, 3);' },
+        });
+
+        const cell = el.shadowRoot!.querySelector('.cell.cs0')!;
+        expect(cell, 'no styled cell').to.not.be.null;
+        expect(getComputedStyle(cell).backgroundColor).to.equal('rgb(1, 2, 3)');
+        cleanup(el);
+    });
+
     it('hides a cell in a zero-width column', async () => {
         const el = await attachWithState(stateWithSizes([50, 0, 50], [20, 20]));
 
