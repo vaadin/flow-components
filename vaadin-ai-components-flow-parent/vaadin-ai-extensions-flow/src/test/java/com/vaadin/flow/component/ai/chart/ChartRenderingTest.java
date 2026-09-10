@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.chart;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -516,6 +517,25 @@ class ChartRenderingTest {
             controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNotEquals(AxisType.DATETIME,
+                    chart.getConfiguration().getxAxis().getType());
+        }
+
+        @Test
+        void sqlTimeXValuesSetsDatetimeAxisType() {
+            // A TIME column has no date part. The converter must still place
+            // the values where the datetime detection recognises them, or the
+            // axis would stay linear and label 12:00 as raw milliseconds.
+            databaseProvider.results = List.of(
+                    row(ColumnNames.X, Time.valueOf("00:00:00"), ColumnNames.Y,
+                            10),
+                    row(ColumnNames.X, Time.valueOf("12:00:00"), ColumnNames.Y,
+                            20));
+
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT x, y FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertEquals(AxisType.DATETIME,
                     chart.getConfiguration().getxAxis().getType());
         }
 

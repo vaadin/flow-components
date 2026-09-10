@@ -13,6 +13,7 @@ import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -805,6 +806,38 @@ class DefaultDataConverterTest {
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(expectedMillis,
                     result.getData().getFirst().getX());
+        }
+
+        @Test
+        void sqlTimeXValue_convertedToHighchartsTimestampOnAnchorDay() {
+            var time = java.sql.Time.valueOf("12:00:00");
+            var expectedMillis = LocalDate.of(2000, 1, 1).atTime(12, 0)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli();
+            var data = List
+                    .of(row(X, time, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(expectedMillis,
+                    result.getData().getFirst().getX());
+        }
+
+        @Test
+        void localTimeXValue_convertedToHighchartsTimestampOnAnchorDay() {
+            // JDBC drivers may return TIME columns as LocalTime
+            var time = LocalTime.of(12, 0);
+            var expectedMillis = LocalDate.of(2000, 1, 1).atTime(12, 0)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli();
+            var data = List.of(row(X, time, Y, 10));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(expectedMillis,
+                    result.getData().getFirst().getX());
+        }
+
+        @Test
+        void ganttWithLocalTimeStartEnd() {
+            var data = List.of(row(NAME, "Task", START, LocalTime.of(9, 0), END,
+                    LocalTime.of(17, 0)));
+            var gs = (GanttSeries) convertSingle(data);
+            Assertions.assertEquals(1, gs.size());
         }
 
         @Test
