@@ -207,6 +207,49 @@ describe('Spreadsheet selection overlay — reports where the selection is', () 
   });
 });
 
+describe('Formula bar — the address field', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('shows the address the client works out when the server sends none', () => {
+    // The server only names a selection that has a name — a named range,
+    // or a sheet-qualified reference. For an ordinary cell it sends null
+    // and leaves the address to the client, which is every selection a
+    // user makes by clicking.
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
+  });
+
+  it('prefers the name the server sent', () => {
+    ctx.sheet.updateFormulaBar('Sales', 2, 2);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('Sales');
+  });
+
+  it('works out a two-letter column', () => {
+    ctx.sheet.updateFormulaBar(null as any, 28, 5);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('AB5');
+  });
+
+  it('leaves the formula field alone', () => {
+    // Only showSelectedCell knows the formula; the address arriving must
+    // not blank it.
+    ctx.sheet.showSelectedCell('A1', 1, 1, '=SUM(B1:B9)', true, false, false);
+    ctx.sheet.updateFormulaBar(null as any, 1, 1);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
+  });
+});
+
 describe('Formula bar — named ranges', () => {
   let ctx: ReturnType<typeof attachSheet>;
 

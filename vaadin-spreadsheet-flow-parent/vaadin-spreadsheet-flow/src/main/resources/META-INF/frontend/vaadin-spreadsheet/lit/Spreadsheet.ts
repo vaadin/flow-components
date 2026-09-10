@@ -40,6 +40,7 @@ import {
   getDefaultRowHeightPx,
   convertPointsToPixel
 } from './algorithms/ViewportMath.js';
+import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import {
   SlottedVirtualChildren,
@@ -2505,12 +2506,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
     }
   }
-  updateFormulaBar(possibleName: string, _col: number, _row: number): void {
-    // Slice 175: update the address field with the server-supplied
-    // name (cell address or named range). The formula field is
-    // updated separately by {@link showSelectedCell}.
+  updateFormulaBar(possibleName: string | null, col: number, row: number): void {
+    // The server only sends a name when the selection has one — a named
+    // range, or a sheet-qualified reference. For an ordinary cell it
+    // sends null and leaves the address to the client, which is the
+    // common case: without this the address field sits empty for every
+    // selection the user makes. The formula field is updated separately
+    // by {@link showSelectedCell}. Slice 175.
     this.formulaBar.renderState = {
-      address: possibleName,
+      address: possibleName ?? cellCoordToAddress({ col, row }),
       formula: this.formulaBar.renderState.formula,
       namedRanges: this.namedRanges
     };
