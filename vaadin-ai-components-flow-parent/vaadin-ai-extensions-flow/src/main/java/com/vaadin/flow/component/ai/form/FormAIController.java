@@ -248,8 +248,8 @@ public class FormAIController implements AIController {
             Form-fill workflow. Follow this for every turn:
 
             1. Call get_form_state() to see the form. Each field carries an \
-            opaque id, a description, a JSON-Schema-like type block (type, \
-            plus format / pattern / enum / queryable / array / items as \
+            id, a description, a JSON-Schema-like type block (type, plus \
+            format / pattern / enum / queryable / array / items as \
             applicable), and its current value.
             2. For each field you intend to write that declares "queryable": \
             true (single-select) or "items": {"queryable": true} \
