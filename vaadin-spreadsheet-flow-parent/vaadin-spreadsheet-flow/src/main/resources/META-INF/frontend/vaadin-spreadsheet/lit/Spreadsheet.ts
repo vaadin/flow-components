@@ -279,7 +279,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Handle of the animation frame a coalesced repaint is waiting on, or
    * {@code null} when no repaint is pending. See {@link scheduleRender}.
    */
-  private pendingRenderFrame: number | null = null;
+  /**
+   * Whether a coalesced repaint is already queued.
+   *
+   * The repaint runs on a microtask, not an animation frame. Everything
+   * that queues one is server-driven — a property push or one of the
+   * cell-value RPCs — and those arrive several to a response. A microtask
+   * still folds the whole response into one render, but runs before the
+   * browser leaves the turn that processed it, so the sheet is never a
+   * frame behind the answer a caller has already been given. Scrolling
+   * does not come through here: the scroll handler repaints directly.
+   */
+  private renderQueued = false;
 
   /**
    * Whether the server has been told the connector is live and where the
@@ -1702,11 +1713,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * as a single update, so the calls collapse into one frame.
    */
   private scheduleRender(): void {
-    if (this.pendingRenderFrame !== null) {
+    if (this.renderQueued) {
       return;
     }
-    this.pendingRenderFrame = requestAnimationFrame(() => {
-      this.pendingRenderFrame = null;
+    this.renderQueued = true;
+    queueMicrotask(() => {
+      if (!this.renderQueued) {
+        return;
+      }
+      this.renderQueued = false;
       this.recomputeViewport();
     });
   }
@@ -1720,10 +1735,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * has been told the work is done.
    */
   private flushRender(): void {
-    if (this.pendingRenderFrame !== null) {
-      cancelAnimationFrame(this.pendingRenderFrame);
-      this.pendingRenderFrame = null;
-    }
+    this.renderQueued = false;
     this.recomputeViewport();
   }
 
@@ -1744,10 +1756,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * scroll container after teardown.
    */
   dispose(): void {
-    if (this.pendingRenderFrame !== null) {
-      cancelAnimationFrame(this.pendingRenderFrame);
-      this.pendingRenderFrame = null;
-    }
+    this.renderQueued = false;
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
     this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);

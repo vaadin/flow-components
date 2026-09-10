@@ -151,6 +151,56 @@ describe('Spreadsheet render scheduling — server pushes repaint', () => {
     });
 });
 
+describe('Spreadsheet render scheduling — when the repaint lands', () => {
+    let ctx: Awaited<ReturnType<typeof attachSheet>>;
+
+    beforeEach(async () => {
+        ctx = await attachSheet();
+    });
+
+    afterEach(() => {
+        ctx.cleanup();
+    });
+
+    it('repaints within the same turn, not on the next frame', async () => {
+        // Everything that queues a repaint is server-driven, and the
+        // caller has already been told the round trip finished. Waiting
+        // for a frame leaves the DOM behind the answer; a microtask still
+        // folds a whole response into one render.
+        ctx.sheet.updateBottomRightCellValues([cell(1, 1, 'fresh')]);
+
+        await Promise.resolve();
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(
+            ctx.sheet.getCellGrid().shadowRoot!.querySelector('.cell.col1.row1')!
+                .textContent!.trim()
+        ).to.equal('fresh');
+    });
+
+    it('folds every push in one response into a single repaint', async () => {
+        const grid = ctx.sheet.getCellGrid();
+        let renders = 0;
+        const originalUpdate = grid.updated.bind(grid);
+        (grid as any).updated = (changed: any) => {
+            renders += 1;
+            return originalUpdate(changed);
+        };
+
+        // Four quadrant pushes, as one response delivers them.
+        ctx.sheet.updateTopLeftCellValues([cell(1, 1, 'a')]);
+        ctx.sheet.updateTopRightCellValues([cell(2, 1, 'b')]);
+        ctx.sheet.updateBottomLeftCellValues([cell(1, 2, 'c')]);
+        ctx.sheet.updateBottomRightCellValues([cell(2, 2, 'd')]);
+
+        await Promise.resolve();
+        await grid.updateComplete;
+        await afterFrame();
+
+        expect(renders).to.equal(1);
+    });
+});
+
 describe('Spreadsheet render scheduling — end of a server batch', () => {
     let ctx: Awaited<ReturnType<typeof attachSheet>>;
 
