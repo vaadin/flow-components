@@ -23,11 +23,16 @@ import {
  * places it. The cell shows it instead of its own text.
  */
 
+/** A 3x3 sheet in view with no frozen panes. */
 const VIEWPORT_3x3 = {
-  firstColumnIndex: 1,
-  lastColumnIndex: 3,
-  firstRowIndex: 1,
-  lastRowIndex: 3
+  viewport: {
+    firstColumnIndex: 1,
+    lastColumnIndex: 3,
+    firstRowIndex: 1,
+    lastRowIndex: 3
+  },
+  verticalSplitPosition: 0,
+  horizontalSplitPosition: 0
 };
 
 function slotsFor(input: Partial<Parameters<typeof computeCellSlots>[0]>) {
@@ -156,6 +161,81 @@ describe('visibleCellSlots — only what the viewport renders', () => {
     expect(visibleCellSlots(slots, VIEWPORT_3x3).map((a) => a.nodeId)).to.deep.equal([
       '31'
     ]);
+  });
+
+  it('includes a cell pinned in a frozen row', () => {
+    // A frozen row stays rendered whatever the scroll position, in its
+    // own quadrant. Counting only the scrolling viewport left an editor
+    // pinned there with no element.
+    const slots = slotsFor({ cellKeyToEditorId: { 'col2 row1': '77' } });
+    const scrolledPast = {
+      viewport: {
+        firstColumnIndex: 1,
+        lastColumnIndex: 3,
+        firstRowIndex: 40,
+        lastRowIndex: 60
+      },
+      verticalSplitPosition: 2,
+      horizontalSplitPosition: 0
+    };
+
+    expect(visibleCellSlots(slots, scrolledPast).map((a) => a.nodeId)).to.deep.equal([
+      '77'
+    ]);
+  });
+
+  it('includes a cell pinned in a frozen column', () => {
+    const slots = slotsFor({ cellKeyToEditorId: { 'col1 row45': '77' } });
+    const scrolledRight = {
+      viewport: {
+        firstColumnIndex: 20,
+        lastColumnIndex: 30,
+        firstRowIndex: 40,
+        lastRowIndex: 60
+      },
+      verticalSplitPosition: 0,
+      horizontalSplitPosition: 2
+    };
+
+    expect(visibleCellSlots(slots, scrolledRight).map((a) => a.nodeId)).to.deep.equal([
+      '77'
+    ]);
+  });
+
+  it('includes the frozen corner', () => {
+    const slots = slotsFor({ cellKeyToEditorId: { 'col1 row1': '77' } });
+    const scrolledAway = {
+      viewport: {
+        firstColumnIndex: 20,
+        lastColumnIndex: 30,
+        firstRowIndex: 40,
+        lastRowIndex: 60
+      },
+      verticalSplitPosition: 2,
+      horizontalSplitPosition: 2
+    };
+
+    expect(visibleCellSlots(slots, scrolledAway).map((a) => a.nodeId)).to.deep.equal([
+      '77'
+    ]);
+  });
+
+  it('reports each assignment once when the quadrants overlap', () => {
+    // With the sheet scrolled to the top, the frozen rows and the
+    // viewport rows are the same rows.
+    const slots = slotsFor({ cellKeyToEditorId: { 'col1 row1': '77' } });
+    const atTop = {
+      viewport: {
+        firstColumnIndex: 1,
+        lastColumnIndex: 3,
+        firstRowIndex: 1,
+        lastRowIndex: 3
+      },
+      verticalSplitPosition: 2,
+      horizontalSplitPosition: 2
+    };
+
+    expect(visibleCellSlots(slots, atTop)).to.have.length(1);
   });
 
   it('skips one scrolled out of view', () => {

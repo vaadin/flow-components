@@ -2021,7 +2021,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.sync(state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id));
     // Only the cells on screen render a slot, so only those elements are
     // placed — one off-screen would be parented with nowhere to project.
-    const visible = visibleCellSlots(this.cellSlotAssignments(), state.viewport);
+    const visible = visibleCellSlots(this.cellSlotAssignments(), state);
     this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
     this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
     // Column-header strip (slice 143). Sized + state-pushed only
@@ -3326,24 +3326,49 @@ export function computeCellSlots(input: {
 }
 
 /**
- * The subset of {@link computeCellSlots} whose cells the viewport renders.
+ * The subset of {@link computeCellSlots} whose cells the sheet renders.
  *
- * A cell off screen renders no slot, so parenting its element would take it
- * out of the document for nothing. Scrolling back renders the slot again
- * and the next repaint places it.
+ * A cell off screen renders no slot, so parenting its element would take
+ * it out of the document for nothing. Scrolling back renders the slot
+ * again and the next repaint places it.
+ *
+ * "On screen" is not just the scrolling viewport: a frozen row or column
+ * stays rendered whatever the scroll position, in its own quadrant. An
+ * editor pinned in a frozen row was never placed while only the viewport
+ * counted.
  */
 export function visibleCellSlots(
   assignments: Readonly<Record<string, CellSlotAssignment>>,
-  viewport: {
-    firstRowIndex: number;
-    lastRowIndex: number;
-    firstColumnIndex: number;
-    lastColumnIndex: number;
+  state: {
+    viewport: {
+      firstRowIndex: number;
+      lastRowIndex: number;
+      firstColumnIndex: number;
+      lastColumnIndex: number;
+    };
+    verticalSplitPosition: number;
+    horizontalSplitPosition: number;
   }
 ): CellSlotAssignment[] {
-  const visible: CellSlotAssignment[] = [];
+  const { viewport } = state;
+  const rows = new Set<number>();
+  for (let row = 1; row <= state.verticalSplitPosition; row++) {
+    rows.add(row);
+  }
   for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+    rows.add(row);
+  }
+  const cols = new Set<number>();
+  for (let col = 1; col <= state.horizontalSplitPosition; col++) {
+    cols.add(col);
+  }
+  for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+    cols.add(col);
+  }
+
+  const visible: CellSlotAssignment[] = [];
+  for (const row of rows) {
+    for (const col of cols) {
       const assignment = assignments[toKey(col, row)];
       if (assignment !== undefined) {
         visible.push(assignment);
