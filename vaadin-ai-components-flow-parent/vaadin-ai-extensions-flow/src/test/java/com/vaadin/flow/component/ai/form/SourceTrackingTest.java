@@ -97,6 +97,106 @@ class SourceTrackingTest {
     }
 
     @Nested
+    class ToolSchema {
+
+        @Test
+        void schemaDeclaresSourcesOnlyWhileTrackingIsOn() {
+            var controller = controllerFor(new TestField());
+            var untracked = fillFormSchema(controller);
+            Assertions.assertTrue(
+                    parameters(untracked).path("sources").isMissingNode(),
+                    "Untracked schema must not ask for sources, got: "
+                            + untracked);
+
+            controller.setSourceTrackingEnabled(true);
+            var tracked = fillFormSchema(controller);
+            Assertions.assertTrue(
+                    parameters(tracked).path("sources").isObject(),
+                    "Tracking must ask for sources next to values, got: "
+                            + tracked);
+            Assertions.assertTrue(
+                    parameters(tracked).path("values")
+                            .path("additionalProperties").isBoolean(),
+                    "Values must stay plain, the source lives in its own "
+                            + "map, got: " + tracked);
+            Assertions.assertEquals(tracked, fillFormSchema(controller),
+                    "Tracked schema must be byte-identical across calls so "
+                            + "providers can cache the tool definition");
+
+            controller.setSourceTrackingEnabled(false);
+            Assertions.assertEquals(untracked, fillFormSchema(controller),
+                    "Toggling tracking off must restore the untracked "
+                            + "schema");
+        }
+
+        @Test
+        void sourcesAreOptionalAndKeyedLikeValues() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var schema = JacksonUtils.readTree(fillFormSchema(controller));
+            Assertions.assertEquals(List.of("values"),
+                    stringsOf(schema.path("required")),
+                    "A fill without sources must stay valid");
+            var sources = schema.path("properties").path("sources");
+            Assertions.assertEquals("object", sources.path("type").asString());
+            Assertions.assertTrue(
+                    sources.path("additionalProperties").isObject(),
+                    "Sources must be an open map keyed by field id");
+        }
+
+        @Test
+        void sourceEntryListsEveryConfidenceLevel() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var levels = stringsOf(sourceEntry(controller).path("properties")
+                    .path("confidence").path("enum"));
+
+            var expected = new ArrayList<String>();
+            for (var level : ConfidenceLevel.values()) {
+                expected.add(level.name().toLowerCase());
+            }
+            Assertions.assertEquals(expected, levels,
+                    "The schema must offer exactly the levels the parser "
+                            + "accepts, in lower case");
+        }
+
+        @Test
+        void sourceEntryDescribesExtractsAsParserReadsThem() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var extract = sourceEntry(controller).path("properties")
+                    .path("extracts").path("items");
+            Assertions.assertEquals(List.of("text"),
+                    stringsOf(extract.path("required")),
+                    "An extract needs its text, the location is optional");
+            var location = extract.path("properties").path("location")
+                    .path("properties");
+            Assertions.assertTrue(location.has("type"));
+            Assertions.assertTrue(location.has("page"));
+            Assertions.assertTrue(location.has("rect"));
+        }
+
+        private JsonNode parameters(String schema) {
+            return JacksonUtils.readTree(schema).path("properties");
+        }
+
+        /** The schema of one entry of the {@code sources} map. */
+        private JsonNode sourceEntry(FormAIController controller) {
+            return parameters(fillFormSchema(controller)).path("sources")
+                    .path("additionalProperties");
+        }
+
+        private List<String> stringsOf(JsonNode array) {
+            var strings = new ArrayList<String>();
+            array.forEach(node -> strings.add(node.asString()));
+            return strings;
+        }
+    }
+
+    @Nested
     class ToolDescription {
 
         @Test
@@ -148,15 +248,15 @@ class SourceTrackingTest {
     }
 
     @Nested
-    class EnvelopeParsing {
+    class SourceParsing {
 
         @Test
-        void envelopeValueIsUnwrappedWrittenAndSourceStored() {
+        void reportedSourceIsStoredWithTheWrittenValue() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "Acme Ltd", "confidence": "high", "extracts": [
+            fill(controller, field, "\"Acme Ltd\"", """
+                    {"confidence": "high", "extracts": [
                       {"text": "Invoiced to Acme Ltd.",
                        "location": {"type": "page-region", "page": 2,
                         "rect": [0.12, 0.34, 0.25, 0.04]}}]}""");
@@ -181,8 +281,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "total", "extracts": [
+            fill(controller, field, "\"total\"", """
+                    {"extracts": [
                       {"text": "first"}, {"text": "second"}]}""");
 
             var texts = controller.getFieldSource(field).orElseThrow()
@@ -205,60 +305,95 @@ class SourceTrackingTest {
         }
 
         @Test
-        void envelopeIsNotUnwrappedWhenTrackingOff() {
-            // With tracking off the behavior is exactly today's: an object
-            // is not a valid string-field value and is rejected like any
-            // other bad value.
+        void sourcesAreIgnoredWhileTrackingIsOff() {
+            // With tracking off the value is written as always and whatever
+            // the model put under "sources" is not stored.
+            var field = new TestField();
+            var controller = controllerFor(field);
+
+            var result = fill(controller, field, "\"Acme Ltd\"", """
+                    {"confidence": "high", "extracts": [{"text": "x"}]}""");
+
+            Assertions.assertEquals("Acme Ltd", field.getValue());
+            Assertions.assertTrue(rejectedIsEmpty(result),
+                    "A source must not affect the write, got: " + result);
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "No source must be stored while tracking is off");
+        }
+
+        @Test
+        void objectValueIsRejectedLikeAnyBadValueWhileTrackingIsOn() {
+            // Sources live in their own map; an object where a plain value
+            // belongs is not unwrapped but rejected like any bad value.
             var field = new TestField();
             field.setValue("before");
-            var controller = controllerFor(field);
+            var controller = trackingControllerFor(field);
 
             var result = fill(controller, field, """
                     {"value": "Acme Ltd", "confidence": "high"}""");
 
-            Assertions.assertEquals("before", field.getValue(),
-                    "Envelope must not be unwrapped while tracking is off");
+            Assertions.assertEquals("before", field.getValue());
             Assertions.assertFalse(rejectedIsEmpty(result),
-                    "Envelope object must be rejected like any bad value, "
-                            + "got: " + result);
+                    "An object value must be rejected, got: " + result);
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
         }
 
         @Test
-        void objectWithoutValueKeyIsRejectedWithTrackingOn() {
+        void sourceForAFieldThatWasNotWrittenIsIgnored() {
             var field = new TestField();
             field.setValue("before");
             var controller = trackingControllerFor(field);
 
-            var result = fill(controller, field, """
-                    {"confidence": "high", "extracts": [{"text": "x"}]}""");
+            var result = JacksonUtils.readTree(findTool(controller.getTools(),
+                    "fill_form")
+                    .execute(JacksonUtils.readTree(
+                            "{\"values\": {}, \"sources\": {\"" + idOf(field)
+                                    + "\": " + TRACKED_SOURCE + "}}")));
 
             Assertions.assertEquals("before", field.getValue());
-            Assertions.assertFalse(rejectedIsEmpty(result),
-                    "Object without the required value key must be rejected, "
+            Assertions.assertTrue(rejectedIsEmpty(result),
+                    "A stray source must not be reported as a rejection, "
                             + "got: " + result);
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
+                    "A source for an unwritten field must not be stored");
         }
 
         @Test
-        void envelopeWithoutSourceDataYieldsNoSource() {
+        void nonObjectSourceIsDroppedWhileValueIsWritten() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, "{\"value\": \"bare\"}");
+            var result = fill(controller, field, "\"Acme\"", "\"page two\"");
+
+            Assertions.assertEquals("Acme", field.getValue());
+            Assertions.assertTrue(rejectedIsEmpty(result),
+                    "A malformed source must not block the value, got: "
+                            + result);
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
+            Assertions.assertEquals(1, parserDebugMessages().size(),
+                    "The malformed source must be logged exactly once, got: "
+                            + parserDebugMessages());
+        }
+
+        @Test
+        void sourceWithoutDataYieldsNoSource() {
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, "\"bare\"", "{}");
 
             Assertions.assertEquals("bare", field.getValue());
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
-                    "An envelope with no confidence and no extracts must not "
-                            + "produce a source");
+                    "A source with no confidence and no extracts must not "
+                            + "be stored");
         }
 
         @Test
-        void confidenceOnlyEnvelopeYieldsSourceWithEmptyExtracts() {
+        void confidenceOnlySourceYieldsSourceWithEmptyExtracts() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field,
-                    "{\"value\": \"guess\", \"confidence\": \"low\"}");
+            fill(controller, field, "\"guess\"", "{\"confidence\": \"low\"}");
 
             var source = controller.getFieldSource(field).orElseThrow();
             Assertions.assertEquals(ConfidenceLevel.LOW, source.confidence());
@@ -270,8 +405,7 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field,
-                    "{\"value\": \"x\", \"confidence\": \"Medium\"}");
+            fill(controller, field, "\"x\"", "{\"confidence\": \"Medium\"}");
 
             Assertions.assertEquals(ConfidenceLevel.MEDIUM, controller
                     .getFieldSource(field).orElseThrow().confidence());
@@ -282,8 +416,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [{"text": "snippet"}]}""");
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [{"text": "snippet"}]}""");
 
             Assertions.assertNull(controller.getFieldSource(field).orElseThrow()
                     .confidence());
@@ -294,8 +428,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location": {"type": "page-region",
                        "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
 
@@ -310,8 +444,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location": {"type": "page-region",
                        "page": 1, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
 
@@ -330,8 +464,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "whole page", "location":
                        {"type": "page-region", "rect": [0, 0, 1, 1]}},
                       {"text": "far corner", "location":
@@ -358,8 +492,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            var result = fill(controller, field, """
-                    {"value": "x", "confidence": "banana",
+            var result = fill(controller, field, "\"x\"", """
+                    {"confidence": "banana",
                      "extracts": [{"text": "snippet"}]}""");
 
             Assertions.assertEquals("x", field.getValue());
@@ -380,8 +514,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location":
                        {"type": "time-range", "start": 3, "end": 8,
                         "page": 2, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
@@ -398,8 +532,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location": "on page three"}]}""");
 
             var extract = controller.getFieldSource(field).orElseThrow()
@@ -417,8 +551,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            var result = fill(controller, field, """
-                    {"value": "x", "extracts": [
+            var result = fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location":
                        {"type": "page-region", "page": 2}}]}""");
 
@@ -438,19 +572,19 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field,
+            fill(controller, field, "\"x\"",
                     """
-                            {"value": "x", "extracts": [
-                              {"text": "three numbers", "location":
-                               {"type": "page-region", "rect": [0.1, 0.2, 0.3]}},
-                              {"text": "no width", "location":
-                               {"type": "page-region", "rect": [0.1, 0.2, 0, 0.1]}},
-                              {"text": "no height", "location":
-                               {"type": "page-region", "rect": [0.1, 0.2, 0.3, 0]}},
-                              {"text": "out of range", "location":
-                               {"type": "page-region", "rect": [1.5, 0.2, 0.3, 0.1]}},
-                              {"text": "not numbers", "location":
-                               {"type": "page-region", "rect": [0.1, "oops", 0.3, 0.1]}}]}""");
+                            {"extracts": [
+                                      {"text": "three numbers", "location":
+                                       {"type": "page-region", "rect": [0.1, 0.2, 0.3]}},
+                                      {"text": "no width", "location":
+                                       {"type": "page-region", "rect": [0.1, 0.2, 0, 0.1]}},
+                                      {"text": "no height", "location":
+                                       {"type": "page-region", "rect": [0.1, 0.2, 0.3, 0]}},
+                                      {"text": "out of range", "location":
+                                       {"type": "page-region", "rect": [1.5, 0.2, 0.3, 0.1]}},
+                                      {"text": "not numbers", "location":
+                                       {"type": "page-region", "rect": [0.1, "oops", 0.3, 0.1]}}]}""");
 
             var extracts = controller.getFieldSource(field).orElseThrow()
                     .extracts();
@@ -469,8 +603,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location":
                        {"type": "page-region", "page": 2.0,
                         "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
@@ -487,8 +621,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location":
                        {"type": "page-region", "page": 4294967297,
                         "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
@@ -505,8 +639,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"text": "snippet", "location":
                        {"type": "page-region", "page": 0,
                         "rect": [0.1, 0.2, 0.3, 0.04]}}]}""");
@@ -522,8 +656,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts": [
+            fill(controller, field, "\"x\"", """
+                    {"extracts": [
                       {"location": {"type": "page-region",
                        "rect": [0.1, 0.2, 0.3, 0.04]}},
                       {"text": "kept"}]}""");
@@ -541,8 +675,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "x", "extracts":
+            fill(controller, field, "\"x\"", """
+                    {"extracts":
                      {"first": {"text": "snippet"}}}""");
 
             Assertions.assertEquals("x", field.getValue());
@@ -555,13 +689,13 @@ class SourceTrackingTest {
             var field = new DoubleField();
             var controller = trackingControllerFor(field);
 
-            var result = fill(controller, field, """
-                    {"value": "not a number", "confidence": "high",
+            var result = fill(controller, field, "\"not a number\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
 
             Assertions.assertFalse(rejectedIsEmpty(result),
-                    "The unwrapped value must still go through conversion, "
-                            + "got: " + result);
+                    "The value must still go through conversion, got: "
+                            + result);
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
                     "A rejected write must not leave a source behind");
         }
@@ -574,7 +708,7 @@ class SourceTrackingTest {
         void sourceIsReturnedWhileFieldHoldsTheReportedValue() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
 
             Assertions.assertTrue(controller.getFieldSource(field).isPresent());
             Assertions.assertTrue(controller.getFieldSource(field).isPresent(),
@@ -585,7 +719,7 @@ class SourceTrackingTest {
         void sourceGoesStaleWhenUserEditsTheField() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
@@ -601,7 +735,7 @@ class SourceTrackingTest {
             // field regaining the AI-written value.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
@@ -620,7 +754,7 @@ class SourceTrackingTest {
             // must not hand back the old citation for the retyped value.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             controller.onResponse(AITurnEvents.success());
 
             field.setValue("edited by hand");
@@ -640,7 +774,7 @@ class SourceTrackingTest {
             // a citation that was never reported for its write.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             controller.onResponse(AITurnEvents.success());
 
             controller.onRequest(requestEvent());
@@ -664,7 +798,7 @@ class SourceTrackingTest {
             // fabricated for it.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             field.setValue("edited by hand");
 
             controller.onRequest(requestEvent());
@@ -680,13 +814,11 @@ class SourceTrackingTest {
         void refillingAFieldReplacesItsSource() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field,
-                    """
-                            {"value": "first", "extracts": [{"text": "old snippet"}]}""");
+            fill(controller, field, "\"first\"", """
+                    {"extracts": [{"text": "old snippet"}]}""");
 
-            fill(controller, field,
-                    """
-                            {"value": "second", "extracts": [{"text": "new snippet"}]}""");
+            fill(controller, field, "\"second\"", """
+                    {"extracts": [{"text": "new snippet"}]}""");
 
             Assertions.assertEquals("new snippet",
                     controller.getFieldSource(field).orElseThrow().extracts()
@@ -704,7 +836,7 @@ class SourceTrackingTest {
             var events = new ArrayList<FieldValueChangeEvent>();
             controller.addFieldValueChangeListener(events::add);
 
-            fill(controller, field, trackedValue("Acme"));
+            fill(controller, field, "\"Acme\"", TRACKED_SOURCE);
             controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(events.isEmpty(),
@@ -781,8 +913,8 @@ class SourceTrackingTest {
             var events = new ArrayList<FieldValueChangeEvent>();
             controller.addFieldValueChangeListener(events::add);
 
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
@@ -815,8 +947,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
@@ -844,8 +976,8 @@ class SourceTrackingTest {
             var field = new TestField();
             var controller = trackingControllerFor(field);
 
-            fill(controller, field, """
-                    {"value": "Acme", "extracts": [{"text": "snippet"}]}""");
+            fill(controller, field, "\"Acme\"", """
+                    {"extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
@@ -860,16 +992,16 @@ class SourceTrackingTest {
             // replace the one shown.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
             controller.onRequest(requestEvent());
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "low",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "low",
                      "extracts": [{"text": "re-read"}]}""");
             controller.onResponse(AITurnEvents.success());
 
@@ -885,16 +1017,16 @@ class SourceTrackingTest {
             // marker must not show a level the new source does not include.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
                     markerOn(field).getProperty("confidence"));
 
             controller.onRequest(requestEvent());
-            fill(controller, field, """
-                    {"value": "Acme", "extracts": [{"text": "re-read"}]}""");
+            fill(controller, field, "\"Acme\"", """
+                    {"extracts": [{"text": "re-read"}]}""");
             controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(markerOn(field).getProperty("confidence"),
@@ -909,8 +1041,8 @@ class SourceTrackingTest {
             // — an indicator with no source behind it would be fabricated.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
@@ -927,8 +1059,8 @@ class SourceTrackingTest {
         void refillWithoutSourceClearsMarkerConfidence() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, """
-                    {"value": "first", "confidence": "medium",
+            fill(controller, field, "\"first\"", """
+                    {"confidence": "medium",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
 
@@ -950,8 +1082,8 @@ class SourceTrackingTest {
             // the value the field no longer holds.
             var field = new TestField();
             var controller = trackingControllerFor(field);
-            fill(controller, field, """
-                    {"value": "Acme", "confidence": "high",
+            fill(controller, field, "\"Acme\"", """
+                    {"confidence": "high",
                      "extracts": [{"text": "snippet"}]}""");
             controller.onResponse(AITurnEvents.success());
             Assertions.assertEquals("high",
@@ -993,10 +1125,15 @@ class SourceTrackingTest {
         return controllerFor(fields).setSourceTrackingEnabled(true);
     }
 
+    /** A minimal source: high confidence with one located extract. */
+    private static final String TRACKED_SOURCE = """
+            {"confidence": "high", "extracts": [
+              {"text": "snippet", "location": {"type": "page-region",
+               "page": 1, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""";
+
     /**
      * Executes {@code fill_form} with a single-field payload whose value is the
-     * given JSON text — a plain value or a source envelope — and returns the
-     * parsed response.
+     * given JSON text and no source, and returns the parsed response.
      */
     private static JsonNode fill(FormAIController controller,
             HasValue<?, ?> field, String jsonValue) {
@@ -1007,13 +1144,19 @@ class SourceTrackingTest {
         return JacksonUtils.readTree(response);
     }
 
-    /** A minimal envelope: the given value with one located extract. */
-    private static String trackedValue(String value) {
-        return """
-                {"value": "%s", "confidence": "high", "extracts": [
-                  {"text": "snippet", "location": {"type": "page-region",
-                   "page": 1, "rect": [0.1, 0.2, 0.3, 0.04]}}]}"""
-                .formatted(value);
+    /**
+     * Executes {@code fill_form} with a single-field payload whose value is the
+     * given JSON text and whose source, under the same field id, is the given
+     * JSON text, and returns the parsed response.
+     */
+    private static JsonNode fill(FormAIController controller,
+            HasValue<?, ?> field, String jsonValue, String jsonSource) {
+        var arguments = JacksonUtils.readTree("{\"values\": {\"" + idOf(field)
+                + "\": " + jsonValue + "}, \"sources\": {\"" + idOf(field)
+                + "\": " + jsonSource + "}}");
+        var response = findTool(controller.getTools(), "fill_form")
+                .execute(arguments);
+        return JacksonUtils.readTree(response);
     }
 
     private static boolean rejectedIsEmpty(JsonNode result) {
@@ -1022,5 +1165,10 @@ class SourceTrackingTest {
 
     private static String fillFormDescription(FormAIController controller) {
         return findTool(controller.getTools(), "fill_form").getDescription();
+    }
+
+    private static String fillFormSchema(FormAIController controller) {
+        return findTool(controller.getTools(), "fill_form")
+                .getParametersSchema();
     }
 }
