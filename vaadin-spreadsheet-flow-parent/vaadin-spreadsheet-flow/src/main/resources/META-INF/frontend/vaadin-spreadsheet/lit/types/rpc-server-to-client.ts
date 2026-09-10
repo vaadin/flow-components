@@ -245,7 +245,13 @@ export interface SpreadsheetClientApi {
   // Popup-button lifecycle
   // ====================================================================
 
-  onPopupButtonOpened(row: number, column: number, contentId: string, appId: string): void;
+  /**
+   * Named for the server's call, not the past tense the earlier draft used:
+   * {@code PopupButton.openPopup()} runs
+   * {@code callJsFunction("onPopupButtonOpen", ...)}, and a client method
+   * under any other name is simply never called.
+   */
+  onPopupButtonOpen(row: number, column: number, contentId: string, appId: string): void;
   closePopup(row: number, column: number): void;
   addPopupButton(rawState: string): void;
   removePopupButton(rawState: string): void;

@@ -432,7 +432,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   onPopupButtonOpen(row, column, contentId, appId) {
     this._flush();
-    this.$connector.onPopupButtonOpened(row, column, contentId, appId);
+    this.$connector.onPopupButtonOpen(row, column, contentId, appId);
   }
 
   closePopup(row, column) {

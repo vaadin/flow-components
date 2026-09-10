@@ -61,6 +61,17 @@ export function cellEditorSlotName(nodeId: string): string {
   return `custom-editor-${nodeId}`;
 }
 
+/**
+ * Name of the slot a popup button's content is projected through.
+ *
+ * The content of an open popup is a server-side component like any other,
+ * and only one popup is open at a time — but the slot is still keyed by node
+ * id so reopening a different button never projects the previous content.
+ */
+export function popupContentSlotName(nodeId: string): string {
+  return `popup-content-${nodeId}`;
+}
+
 /** Resolves a Flow node id to the element Flow created for it. */
 export type VirtualChildResolver = (nodeId: string) => HTMLElement | null;
 
@@ -119,9 +130,21 @@ export class SlottedVirtualChildren {
   constructor(
     private readonly lightHost: HTMLElement,
     private readonly slotHost: HTMLElement,
-    private readonly resolve: VirtualChildResolver,
+    private resolve: VirtualChildResolver,
     private readonly slotName: (nodeId: string) => string
   ) {}
+
+  /**
+   * Point the holder at a different Flow application.
+   *
+   * A popup button reports the application its own element belongs to,
+   * which need not be the sheet's when a page runs more than one. Changing
+   * the resolver does not disturb what is already placed — those elements
+   * were resolved when they were placed and are held by reference.
+   */
+  setResolver(resolve: VirtualChildResolver): void {
+    this.resolve = resolve;
+  }
 
   /**
    * Place every id in {@code nodeIds} and remove anything placed earlier
@@ -227,6 +250,16 @@ interface PlacedChild {
  * component up by name, and is itself assigned — under the same name — to
  * the slot the cell renders.
  */
+/**
+ * A plain named slot. Use when the slot sits in the same shadow root as the
+ * component's light host, so one boundary is all it has to cross.
+ */
+export function namedSlot(name: string): HTMLSlotElement {
+  const slot = document.createElement('slot');
+  slot.setAttribute('name', name);
+  return slot;
+}
+
 function forwarderFor(name: string): HTMLSlotElement {
   const forwarder = document.createElement('slot');
   forwarder.setAttribute('name', name);

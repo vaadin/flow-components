@@ -15,7 +15,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
@@ -124,7 +123,12 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
     }
 
     private void closeFilterPopup() {
-        findElement(By.className("v-window-closebox")).click();
+        // The Lit popup renders its close box as a documented part inside
+        // the spreadsheet's shadow root; GWT used a Vaadin 8 window header.
+        ((org.openqa.selenium.JavascriptExecutor) getDriver()).executeScript("""
+                arguments[0].shadowRoot
+                    .querySelector('[part~="popup-close"]').click();
+                """, getSpreadsheet());
         // The overlay fades out, so wait until it is actually gone before
         // opening the next one, otherwise single() would match two overlays.
         waitUntil(driver -> $(CheckboxGroupElement.class).all().isEmpty());

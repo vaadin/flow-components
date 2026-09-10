@@ -524,13 +524,20 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Determine if the pop-up of PopupButton is currently visible. The Lit path
-     * uses Vaadin's standard Dialog overlay rather than the GWT-era
-     * {@code .v-spreadsheet-popupbutton-overlay} class.
+     * Determine if the pop-up of PopupButton is currently visible.
+     * <p>
+     * The Lit client shows it in its own overlay inside the spreadsheet's
+     * shadow root, positioned in the scroll container so it tracks the sheet,
+     * rather than in the GWT-era {@code .v-spreadsheet-popupbutton-overlay}
+     * floating div.
      */
     public boolean isPopupButtonPopupVisible() {
-        List<WebElement> elements = getDriver()
-                .findElements(By.cssSelector("vaadin-dialog-overlay"));
-        return !elements.isEmpty();
+        Object visible = ((JavascriptExecutor) getCommandExecutor().getDriver())
+                .executeScript("""
+                        const overlay = arguments[0].shadowRoot
+                            .querySelector('.popup-overlay');
+                        return !!overlay && !overlay.hidden;
+                        """, this);
+        return Boolean.TRUE.equals(visible);
     }
 }
