@@ -243,9 +243,10 @@ public class SheetCellElement extends TestBenchElement {
      * @return true if this cell has a invalid formula indicator
      */
     public boolean hasInvalidFormulaIndicator() {
-        // Deferred: the invalid-triangle part is documented but not
-        // yet rendered by the Lit cell-grid.
-        return false;
+        // The marker is a child of the cell element, so a scoped find
+        // answers for this cell and no other.
+        return !findElements(By.cssSelector("[part~=\"invalid-triangle\"]"))
+                .isEmpty();
     }
 
     /**
@@ -263,24 +264,22 @@ public class SheetCellElement extends TestBenchElement {
         if (col.isEmpty() || row.isEmpty()) {
             return false;
         }
-        WebElement indicator = (WebElement) ((org.openqa.selenium.JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript("""
-                        const host = arguments[0];
-                        const grid = host.shadowRoot
-                            && host.shadowRoot.querySelector(
-                                'vaadin-spreadsheet-internal-cell-grid');
-                        if (!grid || !grid.shadowRoot) return null;
-                        // The comment-indicator is a sibling of the
-                        // cell, anchored at the cell's top-right
-                        // corner. With one indicator per commented
-                        // cell, return any visible one. Tests asking
-                        // "does THIS specific cell have one" rely on
-                        // the cell having a non-empty value (the
-                        // server tags it).
-                        return grid.shadowRoot.querySelector(
-                            '[part~="comment-triangle"]');
-                        """, parent);
-        return indicator != null;
+        // The comment triangle is a sibling of the cell, positioned in
+        // grid coordinates, and carries the same anchor attributes — so
+        // this answers for this cell rather than for any commented cell.
+        Object present = ((org.openqa.selenium.JavascriptExecutor) getCommandExecutor()
+                .getDriver()).executeScript(
+                        """
+                                const grid = arguments[0].shadowRoot
+                                    && arguments[0].shadowRoot.querySelector(
+                                        'vaadin-spreadsheet-internal-cell-grid');
+                                if (!grid || !grid.shadowRoot) return false;
+                                return !!grid.shadowRoot.querySelector(
+                                    `[part~="comment-triangle"][data-col="${arguments[1]}"]`
+                                    + `[data-row="${arguments[2]}"]`);
+                                """,
+                        parent, col, row);
+        return Boolean.TRUE.equals(present);
     }
 
 }

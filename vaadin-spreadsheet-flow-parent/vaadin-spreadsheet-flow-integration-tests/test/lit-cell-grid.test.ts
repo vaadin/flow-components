@@ -247,7 +247,7 @@ describe('SpreadsheetCellGrid — non-empty render', () => {
 });
 
 describe('SpreadsheetCellGrid — hidden rows + columns', () => {
-    it('skips rendering rows whose height is 0 (hidden)', async () => {
+    it('renders a hidden row collapsed rather than leaving it out', async () => {
         const state: CellGridRenderState = {
             viewport: {
                 firstColumnIndex: 1,
@@ -282,17 +282,26 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
         };
         const el = await attachWithState(state);
 
-        // 2 cols × 2 visible rows (row 2 is hidden) = 4 cells.
+        // Every cell in the viewport is rendered; the hidden row's are
+        // collapsed with display:none. Leaving them out makes them
+        // unfindable, and "is this cell hidden?" is a question both the
+        // tests and an application's own scripting ask.
         const cells = el.shadowRoot!.querySelectorAll('.cell');
-        expect(cells).to.have.length(4);
-        expect(el.shadowRoot!.querySelector('.row2')).to.be.null;
-        expect(el.shadowRoot!.querySelector('.row1')).to.not.be.null;
-        expect(el.shadowRoot!.querySelector('.row3')).to.not.be.null;
+        expect(cells).to.have.length(6);
+        const hidden = el.shadowRoot!.querySelector<HTMLElement>('.row2');
+        expect(hidden, 'the hidden row was left out').to.not.be.null;
+        expect(hidden!.style.display).to.equal('none');
+        expect(
+            el.shadowRoot!.querySelector<HTMLElement>('.row1')!.style.display
+        ).to.not.equal('none');
+        expect(
+            el.shadowRoot!.querySelector<HTMLElement>('.row3')!.style.display
+        ).to.not.equal('none');
 
         cleanup(el);
     });
 
-    it('skips rendering columns whose width is 0 (hidden)', async () => {
+    it('renders a hidden column collapsed rather than leaving it out', async () => {
         const state: CellGridRenderState = {
             viewport: {
                 firstColumnIndex: 1,
@@ -328,8 +337,10 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
         const el = await attachWithState(state);
 
         const cells = el.shadowRoot!.querySelectorAll('.cell');
-        expect(cells).to.have.length(2); // col 1 + col 3
-        expect(el.shadowRoot!.querySelector('.col2')).to.be.null;
+        expect(cells).to.have.length(3);
+        const hidden = el.shadowRoot!.querySelector<HTMLElement>('.col2');
+        expect(hidden, 'the hidden column was left out').to.not.be.null;
+        expect(hidden!.style.display).to.equal('none');
 
         cleanup(el);
     });
@@ -1805,5 +1816,80 @@ describe('Cell grid — invalid-formula indicator', () => {
         expect(cell.dataset.col).to.equal('2');
         expect(cell.dataset.row).to.equal('2');
         el.remove();
+    });
+});
+
+/**
+ * A hidden row or column collapses its cells to nothing.
+ *
+ * Sizing them to zero is not enough: a zero-width box still paints its
+ * borders, still answers a hit test on its edge, and still reports itself
+ * as laid out, so a hidden column showed as a hairline and could be
+ * clicked.
+ */
+describe('SpreadsheetCellGrid — hidden rows and columns', () => {
+    function stateWithSizes(
+        colWidths: number[],
+        rowHeights: number[]
+    ): CellGridRenderState {
+        let x = 0;
+        const colX = colWidths.map((w) => {
+            const at = x;
+            x += w;
+            return at;
+        });
+        let y = 0;
+        const rowY = rowHeights.map((h) => {
+            const at = y;
+            y += h;
+            return at;
+        });
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: colWidths.length,
+                lastColumnPosition: x,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: rowHeights.length,
+                lastRowPosition: y,
+            },
+            colX,
+            rowY,
+            colWidths,
+            rowHeights,
+        };
+    }
+
+    function cellStyle(el: SpreadsheetCellGrid, col: number, row: number): string {
+        const cell = el.shadowRoot!.querySelector<HTMLElement>(
+            `.cell[data-col="${col}"][data-row="${row}"]`
+        );
+        expect(cell, `no cell ${col},${row}`).to.not.be.null;
+        return cell!.style.display;
+    }
+
+    it('hides a cell in a zero-width column', async () => {
+        const el = await attachWithState(stateWithSizes([50, 0, 50], [20, 20]));
+
+        expect(cellStyle(el, 2, 1)).to.equal('none');
+        cleanup(el);
+    });
+
+    it('hides a cell in a zero-height row', async () => {
+        const el = await attachWithState(stateWithSizes([50, 50], [20, 0]));
+
+        expect(cellStyle(el, 1, 2)).to.equal('none');
+        cleanup(el);
+    });
+
+    it('leaves the cells around a hidden one visible', async () => {
+        const el = await attachWithState(stateWithSizes([50, 0, 50], [20, 20]));
+
+        expect(cellStyle(el, 1, 1)).to.not.equal('none');
+        expect(cellStyle(el, 3, 1)).to.not.equal('none');
+        cleanup(el);
     });
 });

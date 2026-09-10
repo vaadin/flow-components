@@ -738,15 +738,13 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
   for (let row = rowStart; row <= rowEnd; row++) {
     const top = getRowTop(row);
     const height = getRowHeight(row);
-    if (height === 0) {
-      continue;
-    }
     for (let col = colStart; col <= colEnd; col++) {
       const left = getColLeft(col);
       const width = getColWidth(col);
-      if (width === 0) {
-        continue;
-      }
+      // A cell in a hidden row or column is still rendered, collapsed by
+      // `display:none` — see collapsedDeclaration. Leaving it out instead
+      // makes it unfindable, and "is this cell hidden?" is a question
+      // both the tests and an application's own scripting ask.
       const key = toKey(col, row);
       if (coveredByMerge.has(key)) {
         continue;
@@ -776,7 +774,10 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         (cellStyleClass ? ` ${cellStyleClass}` : '') +
         cellRangeClass +
         linkClass;
-      const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + textColorDeclaration(data);
+      const style =
+        `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
+        collapsedDeclaration(width, height) +
+        textColorDeclaration(data);
       // Comment indicator — render an additional triangle
       // anchored at the cell's top-right when the cell has
       // a comment. Slice 165.
@@ -1143,6 +1144,17 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
  * differently) while the style index describes the format itself. So the
  * server resolves it per cell and sends the hex digits without the `#`.
  */
+/**
+ * A hidden row or column collapses its cells to nothing.
+ *
+ * `display:none` rather than a zero-sized box: a box with no width still
+ * paints its borders, still answers a hit test on its edge, and still
+ * reports itself as laid out. Hidden means gone.
+ */
+function collapsedDeclaration(width: number, height: number): string {
+  return width === 0 || height === 0 ? 'display:none;' : '';
+}
+
 function textColorDeclaration(data: CellData | undefined): string {
   const color = data?.textColor;
   return color ? `color:#${color};` : '';
