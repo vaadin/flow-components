@@ -88,6 +88,12 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
             <version>${reactor-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jspecify</groupId>
+                    <artifactId>jspecify</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jspecify</groupId>
