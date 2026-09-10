@@ -51,6 +51,16 @@ export function cellComponentSlotName(nodeId: string): string {
   return `custom-component-${nodeId}`;
 }
 
+/**
+ * Name of the slot a custom cell editor is projected through.
+ *
+ * Distinct from {@link cellComponentSlotName} because a cell can have both
+ * a component and an editor, and they must not share a slot.
+ */
+export function cellEditorSlotName(nodeId: string): string {
+  return `custom-editor-${nodeId}`;
+}
+
 /** Resolves a Flow node id to the element Flow created for it. */
 export type VirtualChildResolver = (nodeId: string) => HTMLElement | null;
 

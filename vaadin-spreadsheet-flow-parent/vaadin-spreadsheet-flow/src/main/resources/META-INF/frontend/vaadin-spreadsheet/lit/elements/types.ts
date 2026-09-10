@@ -86,14 +86,14 @@ export interface CellGridRenderState {
    * an earlier one — the order Excel resolves them in.
    */
   /**
-   * Server-side components rendered inside a cell, as cell key → Flow node
-   * id. The cell shows the component instead of its own text.
+   * Cells that show a server-side component instead of their own text, as
+   * cell key → the name of the slot that projects it.
    *
-   * Inverted from the server's node-id-keyed map by the connector, because
-   * rendering asks the question the other way round: given this cell, is
-   * there a component in it?
+   * Covers both components placed with {@code Spreadsheet.setComponent} and
+   * custom cell editors; the cell only needs to know which slot to render,
+   * and the connector decides which of the two wins a cell that has both.
    */
-  cellComponents: Readonly<Record<string, string>>;
+  cellSlots: Readonly<Record<string, string>>;
 
   conditionalFormattingStyles: Readonly<Record<number, string>>;
 
@@ -318,7 +318,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     colWidths: [],
     rowHeights: [],
     cellStyleToCSSStyle: {},
-    cellComponents: {},
+    cellSlots: {},
     conditionalFormattingStyles: {},
     shiftedCellBorderStyles: [],
     mergedRegions: [],

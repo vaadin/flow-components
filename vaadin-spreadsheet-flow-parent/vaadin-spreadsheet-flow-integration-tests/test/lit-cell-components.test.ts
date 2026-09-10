@@ -10,93 +10,177 @@
 import { expect } from 'chai';
 import {
   Spreadsheet,
-  invertCellComponentMap,
-  visibleCellComponentIds
+  computeCellSlots,
+  visibleCellSlots
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import { emptyCellGridRenderState } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
 
 /**
- * Components the server renders inside a cell.
+ * Server-side elements rendered inside a cell.
  *
- * `Spreadsheet.setComponent` attaches the component as a Flow virtual child
- * and tells the client which cell it belongs to. The cell shows the
- * component instead of its own text.
+ * `Spreadsheet.setComponent` puts a component in a cell, and a custom cell
+ * editor attaches one too. Both arrive as Flow virtual children — the
+ * element exists on the client but is not in the document until the client
+ * places it. The cell shows it instead of its own text.
  */
 
-describe('invertCellComponentMap — node id keys to cell keys', () => {
-  it('turns the server map round', () => {
-    // The server keeps it as node id → cell key; rendering asks the
+const VIEWPORT_3x3 = {
+  firstColumnIndex: 1,
+  lastColumnIndex: 3,
+  firstRowIndex: 1,
+  lastRowIndex: 3
+};
+
+function slotsFor(input: Partial<Parameters<typeof computeCellSlots>[0]>) {
+  return computeCellSlots({
+    componentIdToCellKey: {},
+    cellKeyToEditorId: {},
+    showCustomEditorOnFocus: false,
+    activeCellKey: null,
+    ...input
+  });
+}
+
+describe('computeCellSlots — components', () => {
+  it('gives a cell with a component its component slot', () => {
+    // The server keeps the map as node id → cell key; rendering asks the
     // opposite question, once per visible cell.
-    expect(invertCellComponentMap({ '31': 'col2 row3' })).to.deep.equal({
-      'col2 row3': '31'
+    expect(slotsFor({ componentIdToCellKey: { '31': 'col2 row3' } })).to.deep.equal({
+      'col2 row3': { nodeId: '31', slot: 'custom-component-31', kind: 'component' }
     });
   });
 
-  it('handles an empty map', () => {
-    expect(invertCellComponentMap({})).to.deep.equal({});
+  it('assigns nothing when there is nothing to assign', () => {
+    expect(slotsFor({})).to.deep.equal({});
   });
 
   it('keeps every distinct cell', () => {
-    expect(
-      invertCellComponentMap({ '1': 'col1 row1', '2': 'col2 row2' })
-    ).to.deep.equal({ 'col1 row1': '1', 'col2 row2': '2' });
+    const slots = slotsFor({
+      componentIdToCellKey: { '1': 'col1 row1', '2': 'col2 row2' }
+    });
+    expect(Object.keys(slots).sort()).to.deep.equal(['col1 row1', 'col2 row2']);
   });
 
   it('lets the later component win a contested cell', () => {
     // One slot per cell, so only one can be shown either way.
-    expect(
-      invertCellComponentMap({ '1': 'col1 row1', '2': 'col1 row1' })
-    ).to.deep.equal({ 'col1 row1': '2' });
+    const slots = slotsFor({
+      componentIdToCellKey: { '1': 'col1 row1', '2': 'col1 row1' }
+    });
+    expect(slots['col1 row1'].nodeId).to.equal('2');
   });
 
-  it('drops an entry with no cell', () => {
-    expect(invertCellComponentMap({ '1': '' })).to.deep.equal({});
+  it('drops a component with no cell', () => {
+    expect(slotsFor({ componentIdToCellKey: { '1': '' } })).to.deep.equal({});
   });
 });
 
-describe('visibleCellComponentIds — only what the viewport renders', () => {
-  function stateWith(
-    cellComponents: Record<string, string>,
-    viewport: Partial<ReturnType<typeof emptyCellGridRenderState>['viewport']> = {}
-  ) {
-    const base = emptyCellGridRenderState();
-    return {
-      ...base,
-      cellComponents,
-      viewport: {
-        ...base.viewport,
-        firstColumnIndex: 1,
-        lastColumnIndex: 3,
-        firstRowIndex: 1,
-        lastRowIndex: 3,
-        ...viewport
-      }
-    };
-  }
-
-  it('returns the component in a visible cell', () => {
-    expect(
-      visibleCellComponentIds(stateWith({ 'col2 row2': '31' }))
-    ).to.deep.equal(['31']);
+describe('computeCellSlots — custom editors', () => {
+  it('shows every editor in its cell by default', () => {
+    // setShowCustomEditorOnFocus(false) is the default: a cell with a
+    // custom editor displays it, focused or not.
+    const slots = slotsFor({ cellKeyToEditorId: { 'col2 row2': '77' } });
+    expect(slots['col2 row2']).to.deep.equal({
+      nodeId: '77',
+      slot: 'custom-editor-77',
+      kind: 'editor'
+    });
   });
 
-  it('skips a component scrolled out of view', () => {
+  it('shows only the selected cell\'s editor when asked to', () => {
+    const slots = slotsFor({
+      cellKeyToEditorId: { 'col1 row1': 'a', 'col2 row2': 'b' },
+      showCustomEditorOnFocus: true,
+      activeCellKey: 'col2 row2'
+    });
+
+    expect(Object.keys(slots)).to.deep.equal(['col2 row2']);
+    expect(slots['col2 row2'].nodeId).to.equal('b');
+  });
+
+  it('shows no editor on focus when nothing is selected', () => {
+    expect(
+      slotsFor({
+        cellKeyToEditorId: { 'col1 row1': 'a' },
+        showCustomEditorOnFocus: true,
+        activeCellKey: null
+      })
+    ).to.deep.equal({});
+  });
+
+  it('drops an editor entry with no node id', () => {
+    expect(slotsFor({ cellKeyToEditorId: { 'col1 row1': '' } })).to.deep.equal({});
+  });
+
+  it('gives the editor the cell when it also holds a component', () => {
+    // The editor is the interactive one, and it is applied last — the same
+    // order the GWT client mounted them in.
+    const slots = slotsFor({
+      componentIdToCellKey: { '31': 'col1 row1' },
+      cellKeyToEditorId: { 'col1 row1': '77' }
+    });
+
+    expect(slots['col1 row1'].kind).to.equal('editor');
+    expect(slots['col1 row1'].nodeId).to.equal('77');
+  });
+
+  it('leaves a component alone in a cell with no editor', () => {
+    const slots = slotsFor({
+      componentIdToCellKey: { '31': 'col1 row1' },
+      cellKeyToEditorId: { 'col2 row2': '77' }
+    });
+
+    expect(slots['col1 row1'].kind).to.equal('component');
+    expect(slots['col2 row2'].kind).to.equal('editor');
+  });
+
+  it('hides a component-free editor cell again when focus moves away', () => {
+    const withFocus = slotsFor({
+      cellKeyToEditorId: { 'col1 row1': 'a' },
+      showCustomEditorOnFocus: true,
+      activeCellKey: 'col1 row1'
+    });
+    const withoutFocus = slotsFor({
+      cellKeyToEditorId: { 'col1 row1': 'a' },
+      showCustomEditorOnFocus: true,
+      activeCellKey: 'col2 row2'
+    });
+
+    expect(Object.keys(withFocus)).to.deep.equal(['col1 row1']);
+    expect(withoutFocus).to.deep.equal({});
+  });
+});
+
+describe('visibleCellSlots — only what the viewport renders', () => {
+  it('returns the assignment for a visible cell', () => {
+    const slots = slotsFor({ componentIdToCellKey: { '31': 'col2 row2' } });
+
+    expect(visibleCellSlots(slots, VIEWPORT_3x3).map((a) => a.nodeId)).to.deep.equal([
+      '31'
+    ]);
+  });
+
+  it('skips one scrolled out of view', () => {
     // No slot is rendered for it, so parenting it would take it out of the
     // document for nothing.
+    const slots = slotsFor({ componentIdToCellKey: { '31': 'col9 row9' } });
+
+    expect(visibleCellSlots(slots, VIEWPORT_3x3)).to.deep.equal([]);
+  });
+
+  it('returns nothing when no cell has an assignment', () => {
+    expect(visibleCellSlots({}, VIEWPORT_3x3)).to.deep.equal([]);
+  });
+
+  it('returns every visible assignment, of either kind', () => {
+    const slots = slotsFor({
+      componentIdToCellKey: { a: 'col1 row1', c: 'col9 row1' },
+      cellKeyToEditorId: { 'col3 row3': 'b' }
+    });
+
     expect(
-      visibleCellComponentIds(stateWith({ 'col9 row9': '31' }))
-    ).to.deep.equal([]);
-  });
-
-  it('returns nothing when no cell has a component', () => {
-    expect(visibleCellComponentIds(stateWith({}))).to.deep.equal([]);
-  });
-
-  it('returns every visible component', () => {
-    const ids = visibleCellComponentIds(
-      stateWith({ 'col1 row1': 'a', 'col3 row3': 'b', 'col9 row1': 'c' })
-    );
-    expect(ids.sort()).to.deep.equal(['a', 'b']);
+      visibleCellSlots(slots, VIEWPORT_3x3)
+        .map((s) => s.nodeId)
+        .sort()
+    ).to.deep.equal(['a', 'b']);
   });
 });
 
@@ -251,5 +335,171 @@ describe('Spreadsheet — components inside cells', () => {
     cleanup();
 
     expect(widget.parentElement).to.be.null;
+  });
+});
+
+describe('Spreadsheet — custom cell editors', () => {
+  const originalVaadin = (window as any).Vaadin;
+
+  function attachSheet(editors: Record<string, HTMLElement>): {
+    sheet: Spreadsheet;
+    cleanup: () => void;
+  } {
+    const host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:300px;';
+    (host as any).appId = 'ROOT';
+    document.body.appendChild(host);
+    (window as any).Vaadin = {
+      Flow: {
+        clients: { ROOT: { getByNodeId: (n: number) => editors[String(n)] ?? null } }
+      }
+    };
+    const sheet = new Spreadsheet(host);
+    sheet.setRows(50);
+    sheet.setCols(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(50).fill(15));
+    return {
+      sheet,
+      cleanup: () => {
+        sheet.dispose();
+        host.remove();
+        (window as any).Vaadin = originalVaadin;
+      }
+    };
+  }
+
+  function field(): HTMLElement {
+    return document.createElement('input');
+  }
+
+  function cell(sheet: Spreadsheet, selector: string): HTMLElement | null {
+    return sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>(selector);
+  }
+
+  it('shows the editor in its cell by default', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
+    expect(slot.getAttribute('name')).to.equal('custom-editor-77');
+    const assigned = slot.assignedElements();
+    expect(assigned).to.have.length(1);
+    expect(assigned[0]).to.equal(editor);
+    cleanup();
+  });
+
+  it('holds the editor back until the cell is selected on focus mode', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setShowCustomEditorOnFocus(true);
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    // Selection starts at A1.
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    expect(cell(sheet, '.cell.col2.row2')!.querySelector('slot')).to.be.null;
+    expect(editor.parentElement).to.be.null;
+    cleanup();
+  });
+
+  it('brings the editor in when its cell is selected', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setShowCustomEditorOnFocus(true);
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
+    expect(slot.getAttribute('name')).to.equal('custom-editor-77');
+    expect(editor.parentElement).to.equal(sheet.getCellGrid());
+    cleanup();
+  });
+
+  it('takes the editor back out when the selection moves away', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setShowCustomEditorOnFocus(true);
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    expect(editor.parentElement).to.be.null;
+    expect(editor.hasAttribute('slot')).to.be.false;
+    cleanup();
+  });
+
+  it('gives the editor the cell when a component is there too', async () => {
+    const editor = field();
+    const widget = document.createElement('span');
+    const { sheet, cleanup } = attachSheet({ '77': editor, '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
+    expect(slot.getAttribute('name')).to.equal('custom-editor-77');
+    expect(editor.parentElement).to.equal(sheet.getCellGrid());
+    // The component keeps no slot it cannot project through.
+    expect(widget.parentElement).to.be.null;
+    cleanup();
+  });
+
+  it('accepts the JSON-serialized map the server sends', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap(JSON.stringify({ 'col2 row2': '77' }) as any);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    expect(editor.getAttribute('slot')).to.equal('custom-editor-77');
+    cleanup();
+  });
+
+  it('does not re-parent the editor when the sheet repaints', async () => {
+    // Re-parenting rebuilds the component and loses half-typed input.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    let moved = false;
+    new MutationObserver(() => {
+      moved = true;
+    }).observe(sheet.getCellGrid(), { childList: true });
+
+    sheet.recomputeViewport();
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    expect(moved).to.be.false;
+    cleanup();
+  });
+
+  it('releases the editor when the sheet is disposed', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    cleanup();
+
+    expect(editor.parentElement).to.be.null;
   });
 });

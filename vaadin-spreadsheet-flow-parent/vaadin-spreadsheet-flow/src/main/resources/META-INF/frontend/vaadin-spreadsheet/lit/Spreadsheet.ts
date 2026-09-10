@@ -44,6 +44,7 @@ import { toKey } from './algorithms/CellKeys.js';
 import {
   SlottedVirtualChildren,
   cellComponentSlotName,
+  cellEditorSlotName,
   flowVirtualChildResolver,
   overlayComponentSlotName
 } from './dom/VirtualChildren.js';
@@ -313,6 +314,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * overlay or in a cell, never both, so the two id sets never overlap.
    */
   private readonly cellComponents: SlottedVirtualChildren;
+  /**
+   * Custom cell editors. A third holder rather than a flag on
+   * {@link cellComponents}, because a cell can carry both and each needs
+   * its own slot: swapping one for the other must not disturb the other's
+   * element.
+   */
+  private readonly cellEditors: SlottedVirtualChildren;
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -442,6 +450,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.cellGrid,
       resolveVirtualChild,
       cellComponentSlotName
+    );
+    this.cellEditors = new SlottedVirtualChildren(
+      this.cellGrid,
+      resolveVirtualChild,
+      cellEditorSlotName
     );
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
@@ -1739,6 +1752,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.removeEventListener('cell-click', this.handleCellClick as EventListener);
     this.overlayComponents.clear();
     this.cellComponents.clear();
+    this.cellEditors.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     document.removeEventListener('keydown', this.handleContextMenuKeyDown);
@@ -1953,9 +1967,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.sync(
       state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id)
     );
-    // Only the cells on screen render a slot, so only those components are
+    // Only the cells on screen render a slot, so only those elements are
     // placed — one off-screen would be parented with nowhere to project.
-    this.cellComponents.sync(visibleCellComponentIds(state));
+    const visible = visibleCellSlots(this.cellSlotAssignments(), state.viewport);
+    this.cellComponents.sync(
+      visible.filter((a) => a.kind === 'component').map((a) => a.nodeId)
+    );
+    this.cellEditors.sync(
+      visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId)
+    );
     // Column-header strip (slice 143). Sized + state-pushed only
     // when headerRowHeight > 0 so the default opt-out path stays
     // a no-op — important to avoid feedback loops with the
@@ -2188,7 +2208,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       colWidths,
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
-      cellComponents: invertCellComponentMap(this.componentIDtoCellKeysMap),
+      cellSlots: Object.fromEntries(
+        Object.entries(this.cellSlotAssignments()).map(([cellKey, a]) => [cellKey, a.slot])
+      ),
       conditionalFormattingStyles: this.conditionalFormattingStyles,
       shiftedCellBorderStyles: this.shiftedCellBorderStyles,
       mergedRegions: this.mergedRegions,
@@ -2679,6 +2701,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * So clear the handshake latch and let the next completed viewport
    * announce itself.
    */
+  /**
+   * Which server-side element each cell shows, from the three inputs the
+   * server pushes separately.
+   *
+   * Recomputed rather than cached: it depends on the selection, which
+   * changes on every click, and the maps it reads are small.
+   */
+  private cellSlotAssignments(): Record<string, CellSlotAssignment> {
+    const active = this.selection.activeCell;
+    return computeCellSlots({
+      componentIdToCellKey: this.componentIDtoCellKeysMap,
+      cellKeyToEditorId: this.cellKeysToEditorIdMap,
+      showCustomEditorOnFocus: this.showCustomEditorOnFocus,
+      activeCellKey: active === null ? null : toKey(active.col, active.row)
+    });
+  }
+
   setReload(triggerReload: boolean): void {
     if (triggerReload) {
       this.viewportAnnounced = false;
@@ -3058,49 +3097,94 @@ export function computePositionedPopupButtons(
 }
 
 /**
- * Node ids of the in-cell components whose cell is inside the rendered
- * viewport.
- *
- * A component outside it has no slot to project through, so parenting it
- * would take it out of the document for no gain. Scrolling the cell back
- * into view renders the slot again and the next sync places it.
+ * What a cell shows in place of its own text: a server-side component, or
+ * the custom editor for that cell.
  */
-export function visibleCellComponentIds(state: CellGridRenderState): string[] {
-  const { viewport, cellComponents } = state;
-  const ids: string[] = [];
-  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-      const nodeId = cellComponents[toKey(col, row)];
-      if (nodeId !== undefined) {
-        ids.push(nodeId);
-      }
-    }
-  }
-  return ids;
+export interface CellSlotAssignment {
+  /** Flow node id of the element to project. */
+  nodeId: string;
+  /** Slot name the cell renders and the element is assigned to. */
+  slot: string;
+  /** Which holder owns the element. */
+  kind: 'component' | 'editor';
 }
 
 /**
- * Turn the server's node-id-keyed component map into the cell-keyed one the
- * renderer needs.
+ * Decide, per cell, which server-side element the sheet should show.
  *
- * The server sends {@code componentIDtoCellKeysMap} as node id → cell key,
- * because that is the direction it maintains it in. Rendering asks the
- * opposite question — given this cell, is there a component in it — and a
- * lookup per visible cell against the inverted map beats a scan.
+ * Two sources feed this. `setComponent` puts a component in a cell
+ * outright. A custom editor is attached to a cell too, but
+ * `showCustomEditorOnFocus` decides when it appears: by default every
+ * editor is shown in its cell, and when the flag is set only the selected
+ * cell's editor is.
  *
- * Two components claiming one cell cannot both be shown; the later entry
- * wins, matching what a single slot per cell can actually render.
+ * Editors are applied after components, so an editor wins a cell that has
+ * both — the same order the GWT client mounted them in, and the one that
+ * makes sense: the editor is the interactive thing.
  */
-export function invertCellComponentMap(
-  componentIdToCellKey: Readonly<Record<string, string>>
-): Record<string, string> {
-  const byCell: Record<string, string> = {};
-  for (const [nodeId, cellKey] of Object.entries(componentIdToCellKey)) {
+export function computeCellSlots(input: {
+  componentIdToCellKey: Readonly<Record<string, string>>;
+  cellKeyToEditorId: Readonly<Record<string, string>>;
+  showCustomEditorOnFocus: boolean;
+  activeCellKey: string | null;
+}): Record<string, CellSlotAssignment> {
+  const assignments: Record<string, CellSlotAssignment> = {};
+
+  for (const [nodeId, cellKey] of Object.entries(input.componentIdToCellKey)) {
     if (cellKey) {
-      byCell[cellKey] = nodeId;
+      // Two components claiming one cell cannot both be shown; the later
+      // entry wins, matching what a single slot per cell can render.
+      assignments[cellKey] = {
+        nodeId,
+        slot: cellComponentSlotName(nodeId),
+        kind: 'component'
+      };
     }
   }
-  return byCell;
+
+  for (const [cellKey, nodeId] of Object.entries(input.cellKeyToEditorId)) {
+    if (!nodeId) {
+      continue;
+    }
+    if (input.showCustomEditorOnFocus && cellKey !== input.activeCellKey) {
+      continue;
+    }
+    assignments[cellKey] = {
+      nodeId,
+      slot: cellEditorSlotName(nodeId),
+      kind: 'editor'
+    };
+  }
+
+  return assignments;
+}
+
+/**
+ * The subset of {@link computeCellSlots} whose cells the viewport renders.
+ *
+ * A cell off screen renders no slot, so parenting its element would take it
+ * out of the document for nothing. Scrolling back renders the slot again
+ * and the next repaint places it.
+ */
+export function visibleCellSlots(
+  assignments: Readonly<Record<string, CellSlotAssignment>>,
+  viewport: {
+    firstRowIndex: number;
+    lastRowIndex: number;
+    firstColumnIndex: number;
+    lastColumnIndex: number;
+  }
+): CellSlotAssignment[] {
+  const visible: CellSlotAssignment[] = [];
+  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+      const assignment = assignments[toKey(col, row)];
+      if (assignment !== undefined) {
+        visible.push(assignment);
+      }
+    }
+  }
+  return visible;
 }
 
 /**
