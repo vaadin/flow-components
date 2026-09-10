@@ -36,12 +36,12 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 class CustomEditorCallbackTest {
 
     private Spreadsheet spreadsheet;
-    private Component editor;
+    private List<Component> handedOut;
     private List<String> displayed;
 
     @BeforeEach
     void init() {
-        editor = new Span("editor");
+        handedOut = new ArrayList<>();
         displayed = new ArrayList<>();
 
         spreadsheet = new Spreadsheet();
@@ -60,8 +60,14 @@ class CustomEditorCallbackTest {
                             int rowIndex, int columnIndex,
                             Spreadsheet spreadsheet, Sheet sheet) {
                         // B2 only, in 0-based POI coordinates.
-                        return rowIndex == 1 && columnIndex == 1 ? editor
-                                : null;
+                        if (rowIndex != 1 || columnIndex != 1) {
+                            return null;
+                        }
+                        // A fresh instance per call, which a factory is
+                        // free to do and several real ones do. The
+                        // spreadsheet is expected to keep the one it has.
+                        handedOut.add(new Span("editor"));
+                        return handedOut.get(handedOut.size() - 1);
                     }
 
                     @Override
@@ -157,6 +163,31 @@ class CustomEditorCallbackTest {
         repaint();
 
         assertEquals(List.of(), displayed);
+    }
+
+    @Test
+    void repaint_theEditorIsNotReplaced() {
+        // The editor holds what the user has typed into it. Asking the
+        // factory again on every repaint throws that away and hands back
+        // an empty one.
+        selectAndReload("B2");
+        int afterFirst = handedOut.size();
+
+        repaint();
+        repaint();
+
+        assertEquals(afterFirst, handedOut.size());
+    }
+
+    @Test
+    void scrollAwayAndBack_theEditorIsNotReplaced() {
+        selectAndReload("B2");
+        int afterFirst = handedOut.size();
+
+        scrollTo(200, 210);
+        scrollTo(1, 10);
+
+        assertEquals(afterFirst, handedOut.size());
     }
 
     @Test

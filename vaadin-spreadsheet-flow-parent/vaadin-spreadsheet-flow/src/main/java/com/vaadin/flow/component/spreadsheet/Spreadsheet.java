@@ -1682,7 +1682,7 @@ public class Spreadsheet extends Component
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
             // updated node id's).
-            loadCustomComponents();
+            loadCustomComponentsRecreatingEditors();
         }
     }
 
@@ -2193,7 +2193,19 @@ public class Spreadsheet extends Component
      * cells. For that, use {@link #reloadVisibleCellContents()}
      */
     void updateMarkedCells() {
-        cellMarkUpdater.updateMarkedCells();
+        cellMarkUpdater.updateMarkedCells(false);
+    }
+
+    /**
+     * As {@link #updateMarkedCells()}, but asking the factory for fresh
+     * editors.
+     * <p>
+     * Only for updates that move cells, such as inserting or deleting rows: an
+     * editor is cached against a cell key, so one left in place would end up on
+     * the wrong cell.
+     */
+    void updateMarkedCellsRecreatingEditors() {
+        cellMarkUpdater.updateMarkedCells(true);
     }
 
     /**
@@ -2559,7 +2571,9 @@ public class Spreadsheet extends Component
         if (sheetOverlayManager.hasOverlays()) {
             sheetOverlayManager.markReloadFromPoi();
         }
-        updateMarkedCells();
+        // Deleting rows moves cells, and an editor is cached against a cell
+        // key — one left in place would end up on the wrong cell.
+        updateMarkedCellsRecreatingEditors();
         CellReference selectedCellReference = getSelectedCellReference();
         if (selectedCellReference.getRow() >= startRow
                 && selectedCellReference.getRow() <= endRow) {
@@ -2920,7 +2934,21 @@ public class Spreadsheet extends Component
      * replaced with new instances from the factory.
      */
     public void reloadVisibleCellContents() {
-        loadCustomComponents();
+        // The documented contract of this method: state entered into a custom
+        // editor is lost, because the editors are replaced with new instances
+        // from the factory.
+        reloadVisibleCellContents(true);
+    }
+
+    /**
+     * Reload the currently viewed cell contents.
+     *
+     * @param recreateEditors
+     *            {@code true} to ask the factory for new editors, {@code false}
+     *            to keep the existing ones so their state survives
+     */
+    void reloadVisibleCellContents(boolean recreateEditors) {
+        customComponentLoader.load(recreateEditors);
         updateRowAndColumnRangeCellData(viewportBounds.getFirstRow(),
                 viewportBounds.getFirstColumn(), viewportBounds.getLastRow(),
                 viewportBounds.getLastColumn());
@@ -3429,7 +3457,16 @@ public class Spreadsheet extends Component
      *            resize).
      */
     void loadCustomComponents() {
-        customComponentLoader.load();
+        customComponentLoader.load(false);
+    }
+
+    /**
+     * Reload the custom components, asking the factory for fresh editors rather
+     * than reusing the ones already shown. See
+     * {@link CustomComponentLoader#load(boolean)}.
+     */
+    void loadCustomComponentsRecreatingEditors() {
+        customComponentLoader.load(true);
     }
 
     static String getComponentNodeId(Component component) {
@@ -3490,7 +3527,9 @@ public class Spreadsheet extends Component
             SpreadsheetComponentFactory customComponentFactory) {
         customComponentLoader.setFactory(customComponentFactory);
         if (viewportBounds.getFirstRow() != -1) {
-            loadCustomComponents();
+            // A new factory produces its own editors, so recreate them rather
+            // than reuse the previous factory's by cell key.
+            loadCustomComponentsRecreatingEditors();
             loadCustomEditorOnSelectedCell();
         } else {
             customComponentLoader.unloadAll();

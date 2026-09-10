@@ -255,10 +255,14 @@ class RowShiftOrchestratorTest {
         // gets reloaded (uses the current viewport bounds, not the
         // shifted range), then merged regions update. All three fire in
         // order.
+        //
+        // The editors are recreated rather than reused: a shift moves
+        // cells, and an editor is cached against a cell key, so one left
+        // in place would end up on the wrong cell.
         orchestrator.shift(0, 2, 1, false, false);
 
         org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(spreadsheet);
-        inOrder.verify(spreadsheet).updateMarkedCells();
+        inOrder.verify(spreadsheet).updateMarkedCellsRecreatingEditors();
         inOrder.verify(spreadsheet).updateRowAndColumnRangeCellData(1, 1, 10,
                 3);
         inOrder.verify(spreadsheet).updateMergedRegions();

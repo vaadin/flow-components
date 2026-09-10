@@ -223,12 +223,12 @@ class CellMarkUpdaterTest {
         // 2. valueManager.updateMarkedCellValues()
         // 3. selectionManager.reSelectSelectedCell()
         // 4. cellCommentLoader.load()
-        // 5. spreadsheet.reloadVisibleCellContents()
+        // 5. spreadsheet.reloadVisibleCellContents(recreateEditors)
         // The order is load-bearing: conditional-formatting rules MUST
         // be rebuilt BEFORE valueManager pushes the values (which would
         // otherwise miss the updated styles), and reloadVisibleCellContents
         // MUST be last (it depends on the freshly-loaded value cache).
-        updater.updateMarkedCells();
+        updater.updateMarkedCells(false);
 
         org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(
                 conditionalFormatter, valueManager, selectionManager,
@@ -237,7 +237,16 @@ class CellMarkUpdaterTest {
         inOrder.verify(valueManager).updateMarkedCellValues();
         inOrder.verify(selectionManager).reSelectSelectedCell();
         inOrder.verify(cellCommentLoader).load();
-        inOrder.verify(spreadsheet).reloadVisibleCellContents();
+        inOrder.verify(spreadsheet).reloadVisibleCellContents(false);
+    }
+
+    @Test
+    void updateMarkedCells_recreatingEditors_passesTheFlagOn() {
+        // Row insert and delete move cells, and an editor is cached against
+        // a cell key — one left in place would end up on the wrong cell.
+        updater.updateMarkedCells(true);
+
+        org.mockito.Mockito.verify(spreadsheet).reloadVisibleCellContents(true);
     }
 
     // ----- refreshAllCellValues --------------------------------------------

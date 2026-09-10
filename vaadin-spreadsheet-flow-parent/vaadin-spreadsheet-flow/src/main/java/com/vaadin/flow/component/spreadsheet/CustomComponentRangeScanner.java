@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -52,6 +53,12 @@ final class CustomComponentRangeScanner implements Serializable {
             HashMap<String, String> cellKeysToEditorIdMap,
             HashMap<String, String> componentIDtoCellKeysMap, int row1,
             int col1, int row2, int col2) {
+        // Node id to the component it belongs to, so a cell that already
+        // has an editor can be handed the one it has.
+        Map<String, Component> byNodeId = new HashMap<>();
+        for (Component existing : existingComponents) {
+            byNodeId.put(Spreadsheet.getComponentNodeId(existing), existing);
+        }
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -78,13 +85,21 @@ final class CustomComponentRangeScanner implements Serializable {
                             rowsWithComponents.add(r);
                         } else if (!spreadsheet
                                 .isCellLocked(new CellAddress(r, c))) {
-                            Component customEditor = factory
-                                    .getCustomEditorForCell(cell, r, c,
-                                            spreadsheet,
-                                            spreadsheet.getActiveSheet());
+                            final String key = SpreadsheetUtil.toKey(c + 1,
+                                    r + 1);
+                            // A cell that already has an editor keeps it, so
+                            // whatever the user has typed into it survives the
+                            // re-render. Only ask the factory for a cell that
+                            // has none — a factory is free to hand back a new
+                            // instance every call, and several do.
+                            Component customEditor = byNodeId
+                                    .get(cellKeysToEditorIdMap.get(key));
+                            if (customEditor == null) {
+                                customEditor = factory.getCustomEditorForCell(
+                                        cell, r, c, spreadsheet,
+                                        spreadsheet.getActiveSheet());
+                            }
                             if (customEditor != null) {
-                                final String key = SpreadsheetUtil.toKey(c + 1,
-                                        r + 1);
                                 if (!newCustomComponents.contains(customEditor)
                                         && !existingComponents
                                                 .contains(customEditor)) {

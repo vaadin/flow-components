@@ -57,6 +57,24 @@ final class CustomComponentLoader implements Serializable {
     }
 
     void load() {
+        load(false);
+    }
+
+    /**
+     * @param recreateEditors
+     *            {@code true} to ask the factory for fresh editors — the
+     *            application forced a refresh, swapped the factory, or moved
+     *            the cells an editor is cached against; {@code false} to hand
+     *            each cell the editor it already has, so what the user typed
+     *            into it survives the re-render.
+     */
+    void load(boolean recreateEditors) {
+        if (recreateEditors) {
+            // Drop the cached editors (and the callback tracker) so the scan
+            // below asks the factory for new ones and the callback fires again
+            // for the selected cell.
+            spreadsheet.setCellKeysToEditorIdMap(null);
+        }
         if (factory == null) {
             // No factory -> clear all
             spreadsheet.setCellKeysToEditorIdMap(null);

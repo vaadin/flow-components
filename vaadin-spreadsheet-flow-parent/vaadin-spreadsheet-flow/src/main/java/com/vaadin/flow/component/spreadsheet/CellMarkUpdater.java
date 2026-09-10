@@ -78,7 +78,7 @@ final class CellMarkUpdater implements Serializable {
         }
     }
 
-    void updateMarkedCells() {
+    void updateMarkedCells(boolean recreateEditors) {
         // update conditional formatting in case styling has changed. New
         // values are fetched in ValueManager (below).
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
@@ -93,7 +93,7 @@ final class CellMarkUpdater implements Serializable {
         spreadsheet.cellCommentLoader.load();
 
         // update custom components, editors
-        spreadsheet.reloadVisibleCellContents();
+        spreadsheet.reloadVisibleCellContents(recreateEditors);
     }
 
     void refreshAllCellValues() {
