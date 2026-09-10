@@ -633,10 +633,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * instead of shrinking the columns. When flex grow is {@code 0}, the
          * column keeps exactly this width.
          * <p>
-         * When {@link #setAutoWidth(boolean) auto width} is enabled, the width
-         * set with this method is replaced on the client by the width
-         * calculated from the column contents. In that case {@link #getWidth()}
-         * does not reflect the calculated width.
+         * When {@link #setAutoWidth(boolean) auto width} is enabled, the client
+         * replaces this width with the width calculated from the column
+         * contents. {@link #getWidth()} reflects the calculated width only
+         * after the user resizes a column.
          * <p>
          * Please note that using the {@code em} length unit is discouraged as
          * it might lead to misalignment issues if the header, body, and footer
@@ -659,10 +659,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Gets the width of this column as a CSS-string.
          * <p>
-         * Returns the width set with {@link #setWidth(String)}, or the width
-         * applied when the user resizes a column. Returns {@code null} if
-         * neither has happened yet. Widths calculated by
-         * {@link #setAutoWidth(boolean) auto width} are not reflected.
+         * Returns the width set with {@link #setWidth(String)}, or {@code null}
+         * if none was set. After the user resizes any column, returns the
+         * current client-side width of this column, including widths calculated
+         * by {@link #setAutoWidth(boolean) auto width}.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
@@ -701,8 +701,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Gets the flex grow value, by default {@code 1}.
          * <p>
-         * Returns the value set with {@link #setFlexGrow(int)}, or the value
-         * applied when the user resizes a column.
+         * After the user resizes any column, returns the current client-side
+         * flex grow of this column.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
@@ -719,8 +719,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * <p>
          * Automatically sets the width of the column based on the column
          * contents when this is set to {@code true}. The calculated width
-         * replaces the width set with {@link #setWidth(String)} on the client,
-         * but {@link #getWidth()} keeps returning the width set on the server.
+         * replaces the width set with {@link #setWidth(String)} on the client.
+         * {@link #getWidth()} reflects it only after the user resizes a column.
          * <p>
          * For performance reasons the column width is calculated automatically
          * only once when the grid items are rendered for the first time and the
