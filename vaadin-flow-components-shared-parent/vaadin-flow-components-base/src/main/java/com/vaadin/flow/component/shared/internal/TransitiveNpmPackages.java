@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
@@ -41,6 +43,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * {@code @vaadin/router} or {@code @vaadin/vaadin-usage-statistics}, have
  * versions of their own and are left to the platform to pin.
  * <p>
+ * The class carries no state and is never instantiated. It is still
+ * {@link Serializable}, as every class the components ship is expected to be.
+ * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
 @NpmPackage(value = "@vaadin/a11y-base", version = "25.3.0-beta2")
@@ -49,7 +54,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/input-container", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/lit-renderer", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/overlay", version = "25.3.0-beta2")
-final class TransitiveNpmPackages {
+final class TransitiveNpmPackages implements Serializable {
 
     private TransitiveNpmPackages() {
     }
