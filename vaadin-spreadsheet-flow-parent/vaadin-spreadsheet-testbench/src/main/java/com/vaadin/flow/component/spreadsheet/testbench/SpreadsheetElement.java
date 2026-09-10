@@ -439,7 +439,11 @@ public class SpreadsheetElement extends TestBenchElement {
     public static class ContextMenuElement extends TestBenchElement {
 
         /**
-         * The menu item with the given caption, or {@code null}.
+         * The menu item whose caption contains the given text, or {@code null}.
+         * <p>
+         * A substring match, because several captions name what they act on —
+         * "Delete row 1", not "Delete row" — and callers ask for the stable
+         * part. The xpath {@code contains()} lookup this replaces did the same.
          * <p>
          * Matched on {@code textContent} rather than
          * {@link WebElement#getText()}: the items live in the context menu's
@@ -451,7 +455,7 @@ public class SpreadsheetElement extends TestBenchElement {
                     .getDriver()).executeScript("""
                             const menu = arguments[0];
                             for (const item of menu.querySelectorAll('.item')) {
-                                if (item.textContent.trim() === arguments[1]) {
+                                if (item.textContent.includes(arguments[1])) {
                                     return item;
                                 }
                             }

@@ -521,7 +521,29 @@ public class Spreadsheet extends Component
 
     void setCellKeysToEditorIdMap(
             HashMap<String, String> cellKeysToEditorIdMap) {
+        if (cellKeysToEditorIdMap == null) {
+            // Every editor is gone — a sheet switch, the factory being
+            // removed, a forced refresh. The next one to be selected is
+            // newly displayed however it compares to the last.
+            resetEditorCallbackTracker();
+        }
         this.cellKeysToEditorIdMap.set(cellKeysToEditorIdMap);
+    }
+
+    /**
+     * Cell key and editor that {@code onCustomEditorDisplayed} was last invoked
+     * for, so the callback fires on a real selection change and not on the
+     * re-renders that keep the same selection — scrolling, resizing, extending
+     * a range. Re-firing would re-run the application's setValue and wipe
+     * whatever the user had typed into the editor.
+     */
+    private String lastEditorCallbackKey;
+
+    private Component lastEditorCallbackComponent;
+
+    private void resetEditorCallbackTracker() {
+        lastEditorCallbackKey = null;
+        lastEditorCallbackComponent = null;
     }
 
     void setComponentIDtoCellKeysMap(
@@ -3066,6 +3088,15 @@ public class Spreadsheet extends Component
                 for (Component c : customComponentLoader
                         .getCustomComponents()) {
                     if (getComponentNodeId(c).equals(componentId)) {
+                        if (key.equals(lastEditorCallbackKey)
+                                && c == lastEditorCallbackComponent) {
+                            // Same cell, same editor: nothing was newly
+                            // displayed, so the callback has already run for
+                            // it.
+                            return;
+                        }
+                        lastEditorCallbackKey = key;
+                        lastEditorCallbackComponent = c;
                         insideCustomEditorCallback = true;
                         try {
                             factory.onCustomEditorDisplayed(getCell(row, col),
@@ -3081,6 +3112,9 @@ public class Spreadsheet extends Component
                     }
                 }
             }
+            // Selected cell has no custom editor: forget the last-fired
+            // editor so returning to an editor cell fires the callback again.
+            resetEditorCallbackTracker();
             setCellKeysToEditorIdMap(
                     new HashMap<>(currentCellKeysToEditorIdMap));
         }

@@ -1322,6 +1322,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // event so the editor doesn't briefly flash on top of the
     // server's response.
     this.editor = null;
+    this.returnFocusToSheet();
     // Move the active cell to the next slot per Excel
     // convention (slice 158). For 'Enter' / 'Tab' the move
     // direction is fixed; blur leaves the selection at the
@@ -1360,8 +1361,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleCellEditorCancel = (): void => {
     this.editor = null;
+    this.returnFocusToSheet();
     this.recomputeViewport();
   };
+
+  /**
+   * Put the keyboard back on the sheet.
+   *
+   * Closing the editor takes its input out of the document and the focus
+   * lands on the body, where the sheet's own key handling — arrows,
+   * Ctrl+Z, Ctrl+C — cannot see it. Excel leaves the keyboard on the grid
+   * after every edit, and so must we, or the next shortcut goes nowhere.
+   *
+   * Not done while a hosted component holds the focus: a custom editor is
+   * a component the application owns and taking its focus away mid-edit
+   * would be wrong.
+   */
+  private returnFocusToSheet(): void {
+    const active = this.host.shadowRoot?.activeElement ?? document.activeElement;
+    if (active !== null && this.cellEditors.owns(active)) {
+      return;
+    }
+    this.scrollContainer.focus();
+  }
 
   /**
    * Column-header click handler (slice 148). Selects the entire
@@ -3091,6 +3113,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const eventType =
       type === 1 ? 'actionOnRowHeader' : type === 2 ? 'actionOnColumnHeader' : 'actionOnCurrentSelection';
     this.contextMenu.renderState = emptyContextMenuRenderState();
+    this.actionIcons.clear();
+    // The menu item had the focus; picking it is done, so the keyboard
+    // goes back to the sheet.
+    this.returnFocusToSheet();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: eventType, data: { actionKey: key } },

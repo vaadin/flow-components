@@ -1119,6 +1119,26 @@ describe('Spreadsheet — committing an edit with a key', () => {
         expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
     });
 
+    it('puts the keyboard back on the sheet after a commit', async () => {
+        // Closing the editor drops the focus on the body, where the
+        // sheet's own shortcuts — arrows, Ctrl+Z, Ctrl+C — never arrive.
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'Enter');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getScrollContainer().matches(':focus')).to.be.true;
+    });
+
+    it('puts the keyboard back on the sheet after Escape', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'Escape');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getScrollContainer().matches(':focus')).to.be.true;
+    });
+
     it('stops at the edge of the sheet', async () => {
         const input = await typeOver(ctx.sheet, 1, 1, 'x');
 
