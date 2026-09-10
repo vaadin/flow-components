@@ -11,10 +11,12 @@ package com.vaadin.flow.component.ai.chart;
 import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,6 +119,17 @@ public class DefaultDataConverter implements DataConverter {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
+
+    /**
+     * Day onto which time-of-day values are placed when converted to a
+     * timestamp. A time of day has no calendar position of its own, so any day
+     * would do for the axis labels. This one is chosen so the values fall
+     * inside the range that {@link ChartRenderer} recognises as timestamps when
+     * it infers a datetime X-axis; values before year 2000 are treated as plain
+     * numbers there.
+     */
+    private static final LocalDate TIME_OF_DAY_ANCHOR = LocalDate.of(2000, 1,
+            1);
 
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
@@ -849,8 +862,9 @@ public class DefaultDataConverter implements DataConverter {
     /**
      * Converts a value to an {@link Instant}. Handles {@link Instant},
      * {@link Timestamp}, {@link java.sql.Date}, {@link LocalDate},
-     * {@link LocalDateTime}, {@link Date}, and numeric values (interpreted as
-     * milliseconds since epoch).
+     * {@link LocalDateTime}, {@link java.sql.Time} and {@link LocalTime} (both
+     * placed on {@link #TIME_OF_DAY_ANCHOR}), {@link Date}, and numeric values
+     * (interpreted as milliseconds since epoch).
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
@@ -862,6 +876,11 @@ public class DefaultDataConverter implements DataConverter {
             localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         case LocalDateTime localDateTime ->
             localDateTime.toInstant(ZoneOffset.UTC);
+        // java.sql.Time extends java.util.Date but carries no date, so
+        // toInstant() throws UnsupportedOperationException by contract
+        case Time time -> toInstant(time.toLocalTime());
+        case LocalTime localTime ->
+            localTime.atDate(TIME_OF_DAY_ANCHOR).toInstant(ZoneOffset.UTC);
         case Date date -> date.toInstant();
         case Number number -> Instant.ofEpochMilli(number.longValue());
         case null, default -> null;
@@ -875,7 +894,7 @@ public class DefaultDataConverter implements DataConverter {
     private static boolean isTemporalOrNumeric(Object value) {
         return value instanceof Number || value instanceof Instant
                 || value instanceof LocalDate || value instanceof LocalDateTime
-                || value instanceof Date;
+                || value instanceof LocalTime || value instanceof Date;
     }
 
     /**
