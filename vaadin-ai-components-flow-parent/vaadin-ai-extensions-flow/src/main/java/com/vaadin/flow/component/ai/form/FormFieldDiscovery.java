@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 
@@ -29,8 +30,9 @@ final class FormFieldDiscovery {
 
     /**
      * Collects every {@link HasValue} component reachable from the given root,
-     * recursing through any {@link HasComponents} children so layouts
-     * containing layouts are handled.
+     * recursing through any {@link HasComponents} and {@link Composite}
+     * children so layouts containing layouts, and fields wrapped in reusable
+     * composites, are handled.
      *
      * @param root
      *            the component to walk, not {@code null}
@@ -46,12 +48,16 @@ final class FormFieldDiscovery {
     private static void collect(Component component,
             List<HasValue<?, ?>> sink) {
         component.getChildren().forEach(child -> {
-            // A component that is both HasValue and HasComponents is treated
-            // as a leaf field — its children are considered part of the
-            // field's internal composition, not separate form fields.
+            // A component that is both HasValue and HasComponents (or a
+            // Composite) is treated as a leaf field — its children are
+            // considered part of the field's internal composition, not
+            // separate form fields.
             if (child instanceof HasValue<?, ?> hv) {
                 sink.add(hv);
-            } else if (child instanceof HasComponents) {
+            } else if (child instanceof HasComponents
+                    || child instanceof Composite) {
+                // Composite exposes its content as its only child, so the
+                // walk reaches the fields inside a reusable composite.
                 collect(child, sink);
             }
         });
