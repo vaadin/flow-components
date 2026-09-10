@@ -1072,27 +1072,33 @@ describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
         cleanup(el);
     });
 
-    it('skips rendering the underlying single-cell divs covered by the merge', async () => {
+    it('keeps the cells a merge covers, drawing the merge over them', async () => {
         const el = await attachWithState(buildMergedState([
             { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
         ]));
 
-        // (2,2) is the top-left — replaced by the merged-cell overlay,
-        // no plain single-cell at that coord.
+        // Two elements answer to the anchor coordinate: the cell itself
+        // and the merge drawn over it. An application, and the tests, ask
+        // about a cell by its coordinates whether or not a merge happens
+        // to sit there, so the cell stays.
         const cellsAt22 = el.shadowRoot!.querySelectorAll('.col2.row2');
-        // Exactly one element with both classes: the merged-cell.
-        expect(cellsAt22).to.have.length(1);
-        expect(cellsAt22[0].classList.contains('merged-cell')).to.be.true;
+        expect(cellsAt22).to.have.length(2);
+        expect(
+            [...cellsAt22].filter((c) => c.classList.contains('merged-cell'))
+        ).to.have.length(1);
 
-        // Underlying single cells (2,3), (3,2), (3,3) should NOT be
-        // rendered — they're covered by the merge.
-        expect(el.shadowRoot!.querySelector('.col2.row3')).to.be.null;
-        expect(el.shadowRoot!.querySelector('.col3.row2')).to.be.null;
-        expect(el.shadowRoot!.querySelector('.col3.row3')).to.be.null;
+        // The rest of the covered region is there too.
+        expect(el.shadowRoot!.querySelector('.col2.row3')).to.not.be.null;
+        expect(el.shadowRoot!.querySelector('.col3.row2')).to.not.be.null;
+        expect(el.shadowRoot!.querySelector('.col3.row3')).to.not.be.null;
 
-        // Cells OUTSIDE the merge still render normally.
+        // Cells OUTSIDE the merge render as they always did.
         expect(el.shadowRoot!.querySelector('.col1.row1')).to.not.be.null;
         expect(el.shadowRoot!.querySelector('.col4.row4')).to.not.be.null;
+
+        // The merge sits above them, so its content is what shows.
+        const merged = el.shadowRoot!.querySelector<HTMLElement>('.merged-cell')!;
+        expect(merged.style.zIndex).to.equal('2');
 
         cleanup(el);
     });

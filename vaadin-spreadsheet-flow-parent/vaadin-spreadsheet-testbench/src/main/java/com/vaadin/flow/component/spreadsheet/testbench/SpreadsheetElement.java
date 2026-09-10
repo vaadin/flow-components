@@ -160,9 +160,10 @@ public class SpreadsheetElement extends TestBenchElement {
     public SheetCellElement getCellAt(int row, int column) {
         String selector = String.format(".col%d.row%d.cell", column, row);
         // Polls the cell-grid's shadow root for the cell — the grid may
-        // not have rendered yet (e.g. just after a scroll). The merged-
-        // cell case can be reintroduced if needed; for now there's a
-        // single cell per (col,row).
+        // not have rendered yet (e.g. just after a scroll). Where a merge
+        // covers the coordinate two elements answer to it: the cell and
+        // the merge drawn over it. The merge is what the user sees, so it
+        // wins.
         WebElement cell = (WebElement) getCommandExecutor().getDriver()
                 .executeAsyncScript(
                         """
@@ -185,8 +186,17 @@ public class SpreadsheetElement extends TestBenchElement {
                                     const grid = await locateGrid();
                                     if (!grid) return null;
                                     for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                        const cell = grid.shadowRoot.querySelector(selector);
-                                        if (cell) return cell;
+                                        const matches = grid.shadowRoot
+                                            .querySelectorAll(selector);
+                                        if (matches.length) {
+                                            for (const match of matches) {
+                                                if (match.classList
+                                                        .contains('merged-cell')) {
+                                                    return match;
+                                                }
+                                            }
+                                            return matches[0];
+                                        }
                                         await delay();
                                     }
                                     return null;

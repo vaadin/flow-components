@@ -103,6 +103,15 @@ export class SpreadsheetCellGrid extends LitElement {
       box-sizing: border-box;
     }
 
+    /* A merged cell covers the cells it spans, which stay in the DOM
+       underneath so they can still be found by their coordinates. It
+       needs a ground of its own or their content shows through. A cs<N>
+       rule wins over this, being the more specific selector, so a styled
+       merge keeps its own background. */
+    .merged-cell {
+      background: var(--vaadin-spreadsheet-cell-background, #fff);
+    }
+
     /* Comment notes. Anchored at the cell's top-right and above every
        cell, since the point is to be readable over the sheet. */
     .v-spreadsheet-comment-overlay {
@@ -592,18 +601,12 @@ export class SpreadsheetCellGrid extends LitElement {
       return html``;
     }
 
-    // Coordinates covered by a merged region. The render loop
-    // skips ALL of them — the merged-cell overlay div is the
-    // sole rendering at the top-left.
-    const coveredByMerge = computeCoveredCoords(mergedRegions);
-
     // Main (bottom-right) quadrant: scrolling rows + cols.
     // Emitted as direct children of the cell-grid so cells sit at
     // their virtual coordinates and scroll naturally with the
     // scroll container.
     const mainCells = renderQuadrant({
       state: this.renderState,
-      coveredByMerge,
       quadrantName: 'main',
       colStart: viewport.firstColumnIndex,
       colEnd: viewport.lastColumnIndex,
@@ -627,7 +630,6 @@ export class SpreadsheetCellGrid extends LitElement {
     if (verticalSplitPosition > 0) {
       const topCells = renderQuadrant({
         state: this.renderState,
-        coveredByMerge,
         quadrantName: 'top',
         colStart: viewport.firstColumnIndex,
         colEnd: viewport.lastColumnIndex,
@@ -646,7 +648,6 @@ export class SpreadsheetCellGrid extends LitElement {
     if (horizontalSplitPosition > 0) {
       const leftCells = renderQuadrant({
         state: this.renderState,
-        coveredByMerge,
         quadrantName: 'left',
         colStart: 1,
         colEnd: horizontalSplitPosition,
@@ -667,7 +668,6 @@ export class SpreadsheetCellGrid extends LitElement {
     if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
       const cornerCells = renderQuadrant({
         state: this.renderState,
-        coveredByMerge,
         quadrantName: 'corner',
         colStart: 1,
         colEnd: horizontalSplitPosition,
@@ -698,7 +698,6 @@ export class SpreadsheetCellGrid extends LitElement {
 
 interface QuadrantRenderOpts {
   state: CellGridRenderState;
-  coveredByMerge: ReadonlySet<string>;
   quadrantName: 'main' | 'top' | 'left' | 'corner';
   colStart: number;
   colEnd: number;
@@ -718,22 +717,35 @@ interface QuadrantRenderOpts {
  * closures — different quadrants use different position arrays
  * (frozen arrays vs main arrays).
  */
+/**
+ * Every coordinate a merged region covers, its anchor included.
+ *
+ * These cells are still rendered — an application, and the tests, ask
+ * about a cell by its coordinates whether or not a merge sits over it —
+ * but the merge owns the region's content, so they render their text and
+ * nothing else. A second slot of the same name underneath would capture
+ * the component and hide it below the merge.
+ */
+function coveredByMergeCoords(
+  mergedRegions: ReadonlyArray<{ col1: number; col2: number; row1: number; row2: number }>
+): Set<string> {
+  const covered = new Set<string>();
+  for (const region of mergedRegions) {
+    for (let row = region.row1; row <= region.row2; row++) {
+      for (let col = region.col1; col <= region.col2; col++) {
+        covered.add(toKey(col, row));
+      }
+    }
+  }
+  return covered;
+}
+
 function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
-  const {
-    state,
-    coveredByMerge,
-    quadrantName,
-    colStart,
-    colEnd,
-    rowStart,
-    rowEnd,
-    getColLeft,
-    getColWidth,
-    getRowTop,
-    getRowHeight
-  } = opts;
+  const { state, quadrantName, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } =
+    opts;
   const { cellData, selection } = state;
 
+  const covered = coveredByMergeCoords(state.mergedRegions);
   const cells: TemplateResult[] = [];
   for (let row = rowStart; row <= rowEnd; row++) {
     const top = getRowTop(row);
@@ -746,13 +758,11 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // makes it unfindable, and "is this cell hidden?" is a question
       // both the tests and an application's own scripting ask.
       const key = toKey(col, row);
-      if (coveredByMerge.has(key)) {
-        continue;
-      }
       const data = cellData.get(key);
       // A cell holding a server-side component or a custom editor shows
       // that instead of its own text — it is what the cell is for.
-      const slotName = (state.cellSlots ?? {})[key];
+      const underMerge = covered.has(key);
+      const slotName = underMerge ? undefined : (state.cellSlots ?? {})[key];
       const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
       const cellStyleClass = data?.cellStyle ?? '';
       const inSelection = isCellSelected(selection, col, row);
@@ -781,22 +791,24 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // Comment indicator — render an additional triangle
       // anchored at the cell's top-right when the cell has
       // a comment. Slice 165.
-      const invalidIndicator = invalidFormulaCells.has(key)
-        ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
-        : '';
+      const invalidIndicator =
+        invalidFormulaCells.has(key) && !underMerge
+          ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
+          : '';
       // The triangle is a sibling of its cell, not a child — it is
       // positioned in grid coordinates like every other overlay — so it
       // carries the anchor as data attributes, the way the popup buttons
       // and sheet overlays do. Nothing else ties it to its cell.
-      const commentIndicator = commentCells.has(key)
-        ? html`<div
-            class="comment-indicator"
-            part="comment-triangle"
-            data-col=${col}
-            data-row=${row}
-            style="left:${left + width}px;top:${top}px;"
-          ></div>`
-        : '';
+      const commentIndicator =
+        commentCells.has(key) && !underMerge
+          ? html`<div
+              class="comment-indicator"
+              part="comment-triangle"
+              data-col=${col}
+              data-row=${row}
+              style="left:${left + width}px;top:${top}px;"
+            ></div>`
+          : '';
       // Slice 173: `part` attribute mirrors the documented
       // public styling API at
       // ../docs/articles/components/spreadsheet/styling.adoc.
@@ -816,35 +828,6 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
     }
   }
   return cells;
-}
-
-/**
- * Build the set of cell-keys that are INSIDE a merged region. The
- * per-cell render loop skips ALL of them — the merged-cell overlay
- * div is the sole rendering at the top-left, and the other
- * positions are covered (not rendered separately).
- *
- * Returned set holds keys in the {@link toKey} format
- * ({@code "col<C> row<R>"}) for O(1) lookup during the per-cell
- * render loop.
- */
-function computeCoveredCoords(
-  mergedRegions: ReadonlyArray<{
-    col1: number;
-    col2: number;
-    row1: number;
-    row2: number;
-  }>
-): Set<string> {
-  const covered = new Set<string>();
-  for (const region of mergedRegions) {
-    for (let row = region.row1; row <= region.row2; row++) {
-      for (let col = region.col1; col <= region.col2; col++) {
-        covered.add(toKey(col, row));
-      }
-    }
-  }
-  return covered;
 }
 
 /**
@@ -902,8 +885,8 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
     const key = toKey(region.col1, region.row1);
     const data = cellData.get(key);
     // A merged cell can hold a component or a custom editor just like a
-    // plain one, and it is the only element rendered for the region — the
-    // per-cell loop skips everything a merge covers, its anchor included.
+    // plain one, and it is the only element in the region that renders the
+    // slot — the cells underneath deliberately leave it out.
     const slotName = (state.cellSlots ?? {})[key];
     const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
     const cellStyleClass = data?.cellStyle ?? '';
@@ -919,7 +902,11 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
       `cell col${region.col1} row${region.row1} merged-cell` +
       (cellStyleClass ? ` ${cellStyleClass}` : '') +
       cellRangeClass;
-    const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + textColorDeclaration(data);
+    // The merged cell is drawn over the cells it spans, which are still
+    // in the DOM underneath — so it needs a z-index above them, and a
+    // ground of its own or their text shows through.
+    const style =
+      `left:${left}px;top:${top}px;width:${width}px;height:${height}px;z-index:2;` + textColorDeclaration(data);
     // data-col / data-row are what the click delegation reads. Without
     // them a merged region matched `.cell` and then parsed NaN, so
     // every click on one was dropped — a merged cell could not be

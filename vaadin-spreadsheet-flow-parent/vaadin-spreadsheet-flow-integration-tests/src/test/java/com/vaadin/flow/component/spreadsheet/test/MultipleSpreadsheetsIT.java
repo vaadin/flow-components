@@ -42,10 +42,14 @@ public class MultipleSpreadsheetsIT extends AbstractComponentIT {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).id(id);
         new Actions(getDriver()).contextClick(spreadsheet.getCellAt(2, 2))
                 .perform();
-        getDriver().findElement(By.xpath(
-                "//div[@class='popupContent']//*[normalize-space(text())='"
-                        + actionLabel + "']"))
-                .click();
+        // Each spreadsheet draws its own context menu inside its own
+        // shadow root — which is the point of the test, so the item is
+        // looked up through that instance and not at document level.
+        WebElement item = spreadsheet.getContextMenu().getItem(actionLabel);
+        Assert.assertNotNull(
+                "No '" + actionLabel + "' item in the menu of '" + id + "'",
+                item);
+        item.click();
     }
 
     private void assertLastAction(String id, String expected) {

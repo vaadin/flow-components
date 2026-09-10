@@ -32,23 +32,31 @@ public class SpreadsheetInShadowRootIT extends AbstractComponentIT {
         // Selecting a cell opens a popup-button overlay (see the page).
         spreadsheet.getCellAt(2, 2).click();
 
-        // The overlay lives inside the host's shadow root, so it can't be
-        // located at document level; drill through the shadow root instead.
-        waitUntil(driver -> (Boolean) executeScript(
-                "return !!document.getElementById('shadow-host').shadowRoot"
-                        + ".querySelector('.v-spreadsheet-popupbutton-overlay');"));
+        // The overlay is drawn inside the spreadsheet's own shadow root,
+        // itself inside the host's — two boundaries down from the
+        // document, so no document query reaches it.
+        waitUntil(driver -> Boolean.TRUE.equals(executeScript("""
+                const sheet = document.getElementById('shadow-host')
+                    .shadowRoot.querySelector('vaadin-spreadsheet');
+                const overlay = sheet && sheet.shadowRoot
+                    && sheet.shadowRoot.querySelector('.popup-overlay');
+                return !!overlay && !overlay.hidden;
+                """)));
 
-        String borderRadius = (String) executeScript(
-                "return getComputedStyle(document.getElementById('shadow-host')"
-                        + ".shadowRoot.querySelector('.v-spreadsheet-popupbutton-overlay'))"
-                        + ".borderRadius;");
+        String border = (String) executeScript(
+                """
+                        const sheet = document.getElementById('shadow-host')
+                            .shadowRoot.querySelector('vaadin-spreadsheet');
+                        const overlay = sheet.shadowRoot.querySelector('.popup-overlay');
+                        return getComputedStyle(overlay).borderTopStyle;
+                        """);
 
-        // Unstyled (bug): the UA popover default border-radius is 0px. Styled
-        // (fixed): the overlay stylesheet, adopted onto the shadow root, sets a
-        // non-zero border-radius.
-        Assert.assertNotEquals(
+        // The component styles its own overlay from inside its shadow
+        // root, so nesting cannot cut them off. An unstyled div reports
+        // "none" here.
+        Assert.assertEquals(
                 "Overlay styles should reach the overlay even when the "
                         + "spreadsheet is nested in a shadow root",
-                "0px", borderRadius);
+                "solid", border);
     }
 }
