@@ -41,6 +41,16 @@ export function overlayComponentSlotName(nodeId: string): string {
   return `overlay-component-${nodeId}`;
 }
 
+/**
+ * Name of the slot a component rendered inside a cell is projected through.
+ *
+ * Separate from {@link overlayComponentSlotName} so the two placements never
+ * compete for the same slot even though both are keyed by node id.
+ */
+export function cellComponentSlotName(nodeId: string): string {
+  return `custom-component-${nodeId}`;
+}
+
 /** Resolves a Flow node id to the element Flow created for it. */
 export type VirtualChildResolver = (nodeId: string) => HTMLElement | null;
 

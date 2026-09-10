@@ -14,7 +14,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
 import type { CellData } from '../types/wire.js';
-import { overlayComponentSlotName } from '../dom/VirtualChildren.js';
+import { cellComponentSlotName, overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
@@ -664,7 +664,13 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         continue;
       }
       const data = cellData.get(key);
-      const text = data?.value ?? '';
+      // A cell holding a server-side component shows the component instead
+      // of its own text — the component is what the cell is for.
+      const componentNodeId = (state.cellComponents ?? {})[key];
+      const text =
+        componentNodeId === undefined
+          ? (data?.value ?? '')
+          : html`<slot name=${cellComponentSlotName(componentNodeId)}></slot>`;
       const cellStyleClass = data?.cellStyle ?? '';
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);

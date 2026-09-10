@@ -85,6 +85,16 @@ export interface CellGridRenderState {
    * cell's own style, and in ascending key order so a later rule wins over
    * an earlier one — the order Excel resolves them in.
    */
+  /**
+   * Server-side components rendered inside a cell, as cell key → Flow node
+   * id. The cell shows the component instead of its own text.
+   *
+   * Inverted from the server's node-id-keyed map by the connector, because
+   * rendering asks the question the other way round: given this cell, is
+   * there a component in it?
+   */
+  cellComponents: Readonly<Record<string, string>>;
+
   conditionalFormattingStyles: Readonly<Record<number, string>>;
 
   /**
@@ -308,6 +318,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     colWidths: [],
     rowHeights: [],
     cellStyleToCSSStyle: {},
+    cellComponents: {},
     conditionalFormattingStyles: {},
     shiftedCellBorderStyles: [],
     mergedRegions: [],

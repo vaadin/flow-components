@@ -43,6 +43,7 @@ import {
 import { toKey } from './algorithms/CellKeys.js';
 import {
   SlottedVirtualChildren,
+  cellComponentSlotName,
   flowVirtualChildResolver,
   overlayComponentSlotName
 } from './dom/VirtualChildren.js';
@@ -305,6 +306,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * them over the sheet.
    */
   private readonly overlayComponents: SlottedVirtualChildren;
+  /**
+   * Server-side components rendered inside a cell. Same mechanism as
+   * {@link overlayComponents} and the same host, kept apart because the two
+   * project through differently named slots. A component is either an
+   * overlay or in a cell, never both, so the two id sets never overlap.
+   */
+  private readonly cellComponents: SlottedVirtualChildren;
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -423,10 +431,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs = new SpreadsheetSheetTabs();
     this.formulaBar = new SpreadsheetFormulaBar();
     this.contextMenu = new SpreadsheetContextMenu();
+    const resolveVirtualChild = (nodeId: string): HTMLElement | null =>
+      flowVirtualChildResolver(overlayComponentAppId(host))(nodeId);
     this.overlayComponents = new SlottedVirtualChildren(
       this.cellGrid,
-      (nodeId) => flowVirtualChildResolver(overlayComponentAppId(host))(nodeId),
+      resolveVirtualChild,
       overlayComponentSlotName
+    );
+    this.cellComponents = new SlottedVirtualChildren(
+      this.cellGrid,
+      resolveVirtualChild,
+      cellComponentSlotName
     );
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
@@ -1723,6 +1738,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
     this.cellGrid.removeEventListener('cell-click', this.handleCellClick as EventListener);
     this.overlayComponents.clear();
+    this.cellComponents.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     document.removeEventListener('keydown', this.handleContextMenuKeyDown);
@@ -1937,6 +1953,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.sync(
       state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id)
     );
+    // Only the cells on screen render a slot, so only those components are
+    // placed — one off-screen would be parented with nowhere to project.
+    this.cellComponents.sync(visibleCellComponentIds(state));
     // Column-header strip (slice 143). Sized + state-pushed only
     // when headerRowHeight > 0 so the default opt-out path stays
     // a no-op — important to avoid feedback loops with the
@@ -2169,6 +2188,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       colWidths,
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
+      cellComponents: invertCellComponentMap(this.componentIDtoCellKeysMap),
       conditionalFormattingStyles: this.conditionalFormattingStyles,
       shiftedCellBorderStyles: this.shiftedCellBorderStyles,
       mergedRegions: this.mergedRegions,
@@ -3035,6 +3055,52 @@ export function computePositionedPopupButtons(
       active: state.active
     };
   });
+}
+
+/**
+ * Node ids of the in-cell components whose cell is inside the rendered
+ * viewport.
+ *
+ * A component outside it has no slot to project through, so parenting it
+ * would take it out of the document for no gain. Scrolling the cell back
+ * into view renders the slot again and the next sync places it.
+ */
+export function visibleCellComponentIds(state: CellGridRenderState): string[] {
+  const { viewport, cellComponents } = state;
+  const ids: string[] = [];
+  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+      const nodeId = cellComponents[toKey(col, row)];
+      if (nodeId !== undefined) {
+        ids.push(nodeId);
+      }
+    }
+  }
+  return ids;
+}
+
+/**
+ * Turn the server's node-id-keyed component map into the cell-keyed one the
+ * renderer needs.
+ *
+ * The server sends {@code componentIDtoCellKeysMap} as node id → cell key,
+ * because that is the direction it maintains it in. Rendering asks the
+ * opposite question — given this cell, is there a component in it — and a
+ * lookup per visible cell against the inverted map beats a scan.
+ *
+ * Two components claiming one cell cannot both be shown; the later entry
+ * wins, matching what a single slot per cell can actually render.
+ */
+export function invertCellComponentMap(
+  componentIdToCellKey: Readonly<Record<string, string>>
+): Record<string, string> {
+  const byCell: Record<string, string> = {};
+  for (const [nodeId, cellKey] of Object.entries(componentIdToCellKey)) {
+    if (cellKey) {
+      byCell[cellKey] = nodeId;
+    }
+  }
+  return byCell;
 }
 
 /**
