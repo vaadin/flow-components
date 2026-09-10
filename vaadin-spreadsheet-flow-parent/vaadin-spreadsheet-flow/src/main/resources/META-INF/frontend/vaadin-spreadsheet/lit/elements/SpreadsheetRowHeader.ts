@@ -249,7 +249,33 @@ export class SpreadsheetRowHeader extends LitElement {
     // browser's native menu so only the server-supplied
     // ContextMenu is shown.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
+    // Double-clicking a resize handle autofits the row to its content, the
+    // way Excel does; the drag on the same handle resizes it by hand.
+    this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick as EventListener);
   }
+
+  private readonly handleShadowDoubleClick = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    const handle = target.closest<HTMLElement>('.row-resize-handle');
+    if (!handle) {
+      return;
+    }
+    const row = Number(handle.dataset.row);
+    if (!Number.isFinite(row) || row < 1) {
+      return;
+    }
+    e.preventDefault();
+    this.dispatchEvent(
+      new CustomEvent('row-autofit', {
+        detail: { row },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
 
   private readonly handleShadowContextMenu = (event: Event): void => {
     const e = event as MouseEvent;

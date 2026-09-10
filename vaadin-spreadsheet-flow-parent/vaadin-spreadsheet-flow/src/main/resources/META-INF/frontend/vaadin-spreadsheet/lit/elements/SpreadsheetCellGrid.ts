@@ -102,6 +102,16 @@ export class SpreadsheetCellGrid extends LitElement {
       pointer-events: none;
       box-sizing: border-box;
     }
+
+    /* The fill handle's drag outline. Dashed, so it reads as a preview
+       rather than a second selection. */
+    .paintmode {
+      position: absolute;
+      pointer-events: none;
+      box-sizing: border-box;
+      border: 1px dashed var(--vaadin-spreadsheet-selection-border-color, #217346);
+      z-index: 3;
+    }
     .sheet-selection .s-top {
       position: absolute;
       top: 0;
@@ -365,6 +375,14 @@ export class SpreadsheetCellGrid extends LitElement {
     if (!(target instanceof Element)) {
       return;
     }
+    // The fill handle sits on top of the cell under it, and a drag from it
+    // paints rather than selects — so it is checked first and the event
+    // goes no further.
+    if (target.closest('.selection-corner')) {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('selection-paint-start', { bubbles: true, composed: true }));
+      return;
+    }
     const cell = target.closest<HTMLElement>('.cell');
     if (!cell) {
       return;
@@ -624,7 +642,8 @@ export class SpreadsheetCellGrid extends LitElement {
     const editor = buildCellEditorOverlay(this.renderState);
     const sheetOverlays = buildSheetOverlays(this.renderState);
     const popupButtons = buildPopupButtons(this.renderState);
-    return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${sheetOverlays}${popupButtons}${editor}`;
+    const paintOutline = buildPaintOutline(this.renderState);
+    return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${editor}`;
   }
 }
 
@@ -879,6 +898,67 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
  * slice) — slice 137's scope is the structural DOM that TestBench
  * locates.
  */
+/**
+ * The dashed outline the fill handle drags out.
+ *
+ * Always rendered, hidden when nothing is being painted: it is the only
+ * feedback the user has for where a fill drag will land, and keeping the
+ * element in the tree means an observer can ask whether it is showing
+ * rather than whether it exists.
+ */
+function buildPaintOutline(state: CellGridRenderState): TemplateResult {
+  // `?? null` rather than `=== null`: a hand-built render state may leave
+  // the field off entirely, and a missing outline is not a crash.
+  const rect = state.paintRect ?? null;
+  const geometry = rect === null ? null : rectGeometry(state, rect);
+  const style =
+    geometry === null
+      ? 'display:none;'
+      : `left:${geometry.left}px;top:${geometry.top}px;` +
+        `width:${geometry.width}px;height:${geometry.height}px;` +
+        'position:absolute;pointer-events:none;';
+  // Deliberately not also `.sheet-selection`, which GWT put on it: that
+  // class is how the selection overlay is found, and two elements
+  // answering to it makes every such lookup order-dependent.
+  //
+  // No `part` either. GWT exposed the outline as a class and nothing more,
+  // and naming a part here would add to the documented styling API, which
+  // is a product decision rather than part of this rewrite.
+  return html`<div class="paintmode" style=${style}></div>`;
+}
+
+/**
+ * Pixel box of a cell rectangle inside the visible viewport, or null when
+ * it falls entirely outside it.
+ */
+function rectGeometry(
+  state: CellGridRenderState,
+  rect: { c1: number; c2: number; r1: number; r2: number }
+): { left: number; top: number; width: number; height: number } | null {
+  const { viewport, colX, rowY, colWidths, rowHeights } = state;
+  const leftCol = Math.max(rect.c1, viewport.firstColumnIndex);
+  const rightCol = Math.min(rect.c2, viewport.lastColumnIndex);
+  const topRow = Math.max(rect.r1, viewport.firstRowIndex);
+  const bottomRow = Math.min(rect.r2, viewport.lastRowIndex);
+  if (leftCol > rightCol || topRow > bottomRow) {
+    return null;
+  }
+  const leftIndex = leftCol - viewport.firstColumnIndex;
+  const rightIndex = rightCol - viewport.firstColumnIndex;
+  const topIndex = topRow - viewport.firstRowIndex;
+  const bottomIndex = bottomRow - viewport.firstRowIndex;
+  const left = colX[leftIndex] ?? 0;
+  const top = rowY[topIndex] ?? 0;
+  const right = (colX[rightIndex] ?? 0) + (colWidths[rightIndex] ?? 0);
+  const bottom = (rowY[bottomIndex] ?? 0) + (rowHeights[bottomIndex] ?? 0);
+  return {
+    left,
+    top,
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top)
+  };
+}
+
 function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | string {
   const { viewport, selection, colX, rowY, colWidths, rowHeights } = state;
   const range = selection.activeRange;

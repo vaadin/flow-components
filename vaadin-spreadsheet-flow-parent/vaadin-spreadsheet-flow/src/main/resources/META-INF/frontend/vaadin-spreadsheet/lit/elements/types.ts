@@ -10,6 +10,7 @@
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
 import type { SelectionState } from '../state/SelectionState.js';
 import type { CellData, MergedRegion } from '../types/wire.js';
+import type { CellRect } from '../algorithms/SelectionPaint.js';
 
 /**
  * Input state for the {@link SpreadsheetCellGrid} element. The
@@ -204,6 +205,12 @@ export interface CellGridRenderState {
   popupButtons: ReadonlyArray<PositionedPopupButton>;
 
   /**
+   * The strip the fill handle is painting over, or null when no paint drag
+   * is in progress. Rendered as a second, dashed selection outline.
+   */
+  paintRect?: CellRect | null;
+
+  /**
    * Cell keys (in {@link toKey} format — `"col<C> row<R>"`)
    * whose cell carries a comment. The cell-grid renders a
    * small yellow corner-triangle indicator on each. Empty
@@ -335,6 +342,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     editor: null,
     overlays: [],
     popupButtons: [],
+    paintRect: null,
     commentCells: new Set(),
     invalidFormulaCells: new Set(),
     hyperlinkCells: new Set(),

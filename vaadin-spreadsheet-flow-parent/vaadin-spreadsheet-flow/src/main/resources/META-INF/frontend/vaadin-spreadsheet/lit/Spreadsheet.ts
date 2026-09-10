@@ -53,6 +53,13 @@ import {
   overlayComponentSlotName,
   popupContentSlotName
 } from './dom/VirtualChildren.js';
+import {
+  computePaintRectangle,
+  grownSelection,
+  isNonEmpty,
+  type CellRect,
+  type PaintOutcome
+} from './algorithms/SelectionPaint.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
@@ -375,6 +382,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private styleWidthRatiosStale = false;
 
   /**
+   * The fill-handle drag in progress: the selection it started from and the
+   * strip it is currently painting. Null when no drag is running.
+   */
+  private painting: { from: CellRect; outcome: PaintOutcome } | null = null;
+
+  /**
    * The column-header sub-element. Sibling of the cell-grid
    * inside the scroll container; renders the column letters
    * (A, B, ..., AA) above the cells. Hidden when
@@ -653,6 +666,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // outside the spreadsheet still terminates cleanly.
     this.cellGrid.addEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
+    this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
     document.addEventListener('mouseup', this.handleDocumentMouseUp);
     // Popup-button click → dispatch popupButtonClick (slice
     // 161). The server's `onPopupButtonClick` opens the
@@ -686,6 +700,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // current drag column/row.
     this.columnHeader.addEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
     this.rowHeader.addEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
+    this.columnHeader.addEventListener('column-autofit', this.handleColumnAutofit as EventListener);
+    this.rowHeader.addEventListener('row-autofit', this.handleRowAutofit as EventListener);
     document.addEventListener('mousemove', this.handleDocumentMouseMove);
     // Header click delegation (slice 148). Each header element
     // emits its own custom event with the col / row coordinate;
@@ -1037,6 +1053,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * silently ignored — the cell-grid emits on every hover.
    */
   private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number }>): void => {
+    if (this.painting !== null) {
+      const { col, row } = e.detail;
+      this.painting = {
+        from: this.painting.from,
+        outcome: computePaintRectangle(this.painting.from, col, row)
+      };
+      this.recomputeViewport();
+      return;
+    }
     if (!this.dragging) {
       return;
     }
@@ -1079,6 +1104,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * dispatched `cellSelected`).
    */
   private readonly handleDocumentMouseUp = (): void => {
+    if (this.painting !== null) {
+      this.finishPainting();
+      return;
+    }
     if (this.columnResize !== null) {
       // End of column-resize drag (slice 164). Dispatch
       // the columnResized event with the new pixel width
@@ -1146,6 +1175,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly handleCellDoubleClick = (e: CustomEvent<{ col: number; row: number }>): void => {
     const { col, row } = e.detail;
     if (this.isCellLockedForEdit(col, row)) {
+      this.reportProtectedCellWriteAttempt();
       return;
     }
     // Seeded with what the cell IS, not what it shows — the formula
@@ -1477,6 +1507,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       const { col, row } = this.selection.activeCell;
       if (this.isCellLockedForEdit(col, row)) {
+        this.reportProtectedCellWriteAttempt();
         return;
       }
       e.preventDefault();
@@ -1501,6 +1532,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       const { col, row } = this.selection.activeCell;
       if (this.isCellLockedForEdit(col, row)) {
+        this.reportProtectedCellWriteAttempt();
         return;
       }
       e.preventDefault();
@@ -1979,6 +2011,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.removeEventListener('sheet-tab-add', this.handleSheetTabAdd);
     this.cellGrid.removeEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.removeEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
+    this.cellGrid.removeEventListener('selection-paint-start', this.handleSelectionPaintStart);
     this.cellGrid.removeEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
     this.cellGrid.removeEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
     this.columnHeader.removeEventListener(
@@ -1992,6 +2025,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     document.removeEventListener('mousemove', this.handleDocumentMouseMove);
     this.columnHeader.removeEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
     this.rowHeader.removeEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
+    this.columnHeader.removeEventListener('column-autofit', this.handleColumnAutofit as EventListener);
+    this.rowHeader.removeEventListener('row-autofit', this.handleRowAutofit as EventListener);
     this.resizeObserver.disconnect();
     if (this.hostClassObserver) {
       this.hostClassObserver.disconnect();
@@ -2109,6 +2144,103 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'cellsAddedToRangeSelection', data },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  /**
+   * Double-click on a column's resize handle — size it to its widest
+   * value. Only the server can measure that: it holds every value in the
+   * column, including the ones outside the viewport.
+   */
+  private readonly handleColumnAutofit = (e: CustomEvent<{ col: number }>): void => {
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'onColumnAutofit', data: { columnIndex: e.detail.col } },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  /** Double-click on a row's resize handle — size it to its tallest value. */
+  private readonly handleRowAutofit = (e: CustomEvent<{ row: number }>): void => {
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'onRowAutofit', data: { rowIndex: e.detail.row } },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  /**
+   * Tell the server the user tried to change a cell they may not change.
+   *
+   * The client refuses the edit on its own; the server is told so it can
+   * say why — the default handler shows the workbook's "this cell is
+   * protected" notification. Silently swallowing the keystroke leaves the
+   * user with no idea why nothing happened.
+   */
+  private reportProtectedCellWriteAttempt(): void {
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'protectedCellWriteAttempted', data: {} },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  /**
+   * Mousedown on the fill handle. The drag that follows paints rather than
+   * selects, so the current range is remembered as the one being grown or
+   * shrunk.
+   */
+  private readonly handleSelectionPaintStart = (): void => {
+    const { c1, c2, r1, r2 } = this.selection.activeRange;
+    this.painting = { from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } };
+  };
+
+  /**
+   * Release of a fill-handle drag: tell the server what to copy or clear.
+   *
+   * The two directions are different operations, and the server takes them
+   * through different events — growing reports the whole new rectangle,
+   * shrinking reports only the corner the selection retreats to.
+   */
+  private finishPainting(): void {
+    const painting = this.painting;
+    this.painting = null;
+    this.recomputeViewport();
+    if (painting === null || painting.outcome.kind === 'none') {
+      return;
+    }
+
+    if (painting.outcome.kind === 'decrease') {
+      const { r1, c1 } = painting.outcome.painted;
+      this.host.dispatchEvent(
+        new CustomEvent('spreadsheet-event', {
+          detail: { type: 'selectionDecreasePainted', data: { row: r1, col: c1 } },
+          bubbles: true,
+          composed: true
+        })
+      );
+      return;
+    }
+
+    const grown = grownSelection(painting.from, painting.outcome.painted);
+    if (!isNonEmpty(grown)) {
+      return;
+    }
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: {
+          type: 'selectionIncreasePainted',
+          data: { r1: grown.r1, c1: grown.c1, r2: grown.r2, c2: grown.c2 }
+        },
         bubbles: true,
         composed: true
       })
@@ -2463,6 +2595,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       editor: this.editor,
       overlays: positionedOverlays,
       popupButtons: positionedPopupButtons,
+      paintRect: this.painting?.outcome.kind === 'none' ? null : this.painting?.outcome.painted ?? null,
       // Comment-bearing + hyperlink cell keys (slice 165).
       // The maps from setCellComments / setHyperlinksTooltips
       // are keyed by the cell-key format already, so a Set

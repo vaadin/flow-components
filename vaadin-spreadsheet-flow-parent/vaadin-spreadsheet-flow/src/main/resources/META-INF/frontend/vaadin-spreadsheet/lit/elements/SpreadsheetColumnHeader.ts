@@ -304,6 +304,9 @@ export class SpreadsheetColumnHeader extends LitElement {
     // server. preventDefault suppresses the browser's native
     // menu.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
+    // Double-clicking a resize handle autofits the column to its content,
+    // the way Excel does; the drag on the same handle resizes it by hand.
+    this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick as EventListener);
   }
 
   private readonly handleShadowContextMenu = (event: Event): void => {
@@ -324,6 +327,29 @@ export class SpreadsheetColumnHeader extends LitElement {
     this.dispatchEvent(
       new CustomEvent('column-header-contextmenu', {
         detail: { col, clientX: e.clientX, clientY: e.clientY },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  private readonly handleShadowDoubleClick = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    const handle = target.closest<HTMLElement>('.col-resize-handle');
+    if (!handle) {
+      return;
+    }
+    const col = Number(handle.dataset.col);
+    if (!Number.isFinite(col) || col < 1) {
+      return;
+    }
+    e.preventDefault();
+    this.dispatchEvent(
+      new CustomEvent('column-autofit', {
+        detail: { col },
         bubbles: true,
         composed: true
       })
