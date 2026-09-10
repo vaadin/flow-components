@@ -1904,7 +1904,6 @@ class FillFormToolTest {
         var field = new CurrentInstanceCapturingField();
         var controller = controllerFor(field);
         var session = ui.getSession();
-        queueAccessCommands();
 
         // Hand the lock over the way a request that has finished would, so
         // the provider's thread can take it.
