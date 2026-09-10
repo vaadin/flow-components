@@ -48,6 +48,18 @@ import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
  * the equivalent + portable.
  */
 export class SpreadsheetCellGrid extends LitElement {
+  /**
+   * Parts this element re-exports to the tree above it.
+   *
+   * `::part()` crosses exactly one shadow boundary. Every part the
+   * spreadsheet documents is emitted inside one of these sub-elements,
+   * which sit inside the component's own shadow root — two boundaries
+   * away from an application's stylesheet. Without re-exporting them,
+   * `vaadin-spreadsheet::part(cell)` matches nothing, and the whole
+   * documented styling API silently does nothing.
+   */
+  static readonly EXPORTED_PARTS = 'cell,cell-range,cell-input,comment-triangle,invalid-triangle,popup-button,selection-corner';
+
   static properties = {
     renderState: { attribute: false }
   };
@@ -278,6 +290,13 @@ export class SpreadsheetCellGrid extends LitElement {
   constructor() {
     super();
     this.renderState = emptyCellGridRenderState();
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    // Set on attach rather than in the constructor: a custom element
+    // may not have attributes when it is created.
+    this.setAttribute('exportparts', SpreadsheetCellGrid.EXPORTED_PARTS);
   }
 
   /**
