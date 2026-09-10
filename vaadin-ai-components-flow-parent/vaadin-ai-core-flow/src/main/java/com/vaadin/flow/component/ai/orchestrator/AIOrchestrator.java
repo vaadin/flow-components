@@ -927,9 +927,13 @@ public class AIOrchestrator implements Serializable {
 
     /**
      * Validates the tools a controller exposes at registration time, so a
-     * malformed definition fails fast and names the tool. The alternative is
-     * the vendor framework rejecting the schema on every request with a JSON
-     * parse error that says nothing about which tool it came from.
+     * malformed definition fails fast and names the tool. Left to the
+     * providers, a broken schema is handled inconsistently: Spring AI rejects
+     * it on every request with a parse error that does not say which tool it
+     * came from, while LangChain4j logs a warning and declares the tool without
+     * parameters, so it stays callable but receives empty arguments. Failing
+     * here replaces both with one error at the point where the tool is
+     * registered.
      */
     private static void validateTools(List<LLMProvider.ToolSpec> tools) {
         var seen = new HashSet<String>();
