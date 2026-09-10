@@ -63,10 +63,12 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.scheduler.Schedulers;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -923,7 +925,13 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    private static void validateToolNames(List<LLMProvider.ToolSpec> tools) {
+    /**
+     * Validates the tools a controller exposes at registration time, so a
+     * malformed definition fails fast and names the tool. The alternative is
+     * the vendor framework rejecting the schema on every request with a JSON
+     * parse error that says nothing about which tool it came from.
+     */
+    private static void validateTools(List<LLMProvider.ToolSpec> tools) {
         var seen = new HashSet<String>();
         for (var tool : tools) {
             var name = tool.getName();
@@ -940,6 +948,7 @@ public class AIOrchestrator implements Serializable {
                                 + "(pattern: "
                                 + VALID_TOOL_NAME_PATTERN.pattern() + ").");
             }
+            validateParametersSchema(tool);
             if (SESSION_CONTEXT_TOOL_NAME.equals(name)) {
                 LOGGER.warn(
                         "Tool name '{}' is reserved for the built-in session context tool",
@@ -950,6 +959,30 @@ public class AIOrchestrator implements Serializable {
                         "Duplicate tool name '{}': previous tool will be replaced",
                         name);
             }
+        }
+    }
+
+    /**
+     * Checks that the tool's parameters schema, when it declares one, is a JSON
+     * object. A {@code null} or blank schema means the tool takes no parameters
+     * and is valid.
+     */
+    private static void validateParametersSchema(LLMProvider.ToolSpec tool) {
+        var schema = tool.getParametersSchema();
+        if (schema == null || schema.isBlank()) {
+            return;
+        }
+        JsonNode parsed;
+        try {
+            parsed = JacksonUtils.getMapper().readTree(schema);
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException("Tool '" + tool.getName()
+                    + "' has a parameters schema that is not valid JSON: "
+                    + e.getOriginalMessage(), e);
+        }
+        if (parsed == null || !parsed.isObject()) {
+            throw new IllegalArgumentException("Tool '" + tool.getName()
+                    + "' has a parameters schema that is not a JSON object.");
         }
     }
 
@@ -1017,13 +1050,13 @@ public class AIOrchestrator implements Serializable {
          *            the controller to use, not {@code null}
          * @return this reconnector
          * @throws IllegalArgumentException
-         *             if any tool name is invalid
+         *             if any tool name or parameters schema is invalid
          * @since 25.2
          */
         public Reconnector withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
             if (controller.getTools() != null) {
-                validateToolNames(controller.getTools());
+                validateTools(controller.getTools());
             }
             this.controller = controller;
             return this;
@@ -1322,13 +1355,13 @@ public class AIOrchestrator implements Serializable {
          * @throws NullPointerException
          *             if controller is {@code null}
          * @throws IllegalArgumentException
-         *             if any tool name is invalid
+         *             if any tool name or parameters schema is invalid
          * @since 25.2
          */
         public Builder withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
             if (controller.getTools() != null) {
-                validateToolNames(controller.getTools());
+                validateTools(controller.getTools());
             }
             warnIfAlreadySet(this.controller, "Controller");
             this.controller = controller;

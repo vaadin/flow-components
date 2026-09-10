@@ -109,8 +109,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 
 ## LLM tools
 
-- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`
-  (validated on registration).
+- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`, and a
+  declared parameters schema must be a JSON object (both validated on
+  registration, so a broken definition fails fast and names the tool).
 - Each controller keeps its tool definitions in a sibling `XxxAITools`
   factory class with a nested `Callbacks` interface implemented by the
   controller, keeping tool JSON and descriptions decoupled from the

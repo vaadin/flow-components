@@ -3107,6 +3107,73 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withMalformedToolSchema_throwsNamingTool() {
+        // An unescaped quote inside a description: the kind of typo that
+        // otherwise surfaces as an anonymous Jackson error on every request.
+        var broken = """
+                {"type": "object", "properties": {
+                  "q": {"type": "string", "description": "the "user"s query"}
+                }}""";
+        var controller = createController(createToolSpec("good_tool", "Fine"),
+                createToolSpec("broken_tool", "Broken", broken));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'broken_tool'"),
+                "Exception should name the tool with the broken schema; got: "
+                        + exception.getMessage());
+        Assertions.assertNotNull(exception.getCause(),
+                "The parse error should be kept as the cause");
+    }
+
+    @Test
+    void builder_withNonObjectToolSchema_throwsNamingTool() {
+        var controller = createController(
+                createToolSpec("array_tool", "Array", "[1, 2]"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'array_tool'"),
+                "Exception should name the tool; got: "
+                        + exception.getMessage());
+    }
+
+    @Test
+    void builder_withValidOrAbsentToolSchema_doesNotThrow() {
+        var controller = createController(
+                createToolSpec("no_schema", "None", null),
+                createToolSpec("blank_schema", "Blank", "  "),
+                createToolSpec("object_schema", "Object", """
+                        {"type": "object", "properties": {
+                          "q": {"type": "string"}}, "required": ["q"]}"""));
+
+        Assertions.assertDoesNotThrow(() -> AIOrchestrator
+                .builder(mockProvider, null).withController(controller));
+    }
+
+    @Test
+    void reconnect_withMalformedToolSchema_throwsNamingTool() throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).build();
+
+        var providerField = AIOrchestrator.class.getDeclaredField("provider");
+        providerField.setAccessible(true);
+        providerField.set(orchestrator, null);
+
+        var controller = createController(
+                createToolSpec("broken_tool", "Broken", "{not json"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> orchestrator.reconnect(mockProvider)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'broken_tool'"),
+                "Exception should name the tool; got: "
+                        + exception.getMessage());
+    }
+
+    @Test
     void builder_withControllerCalledTwice_logsWarning() {
         var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
                 .withController(createController());
@@ -3336,6 +3403,11 @@ class AIOrchestratorTest {
 
     private static LLMProvider.ToolSpec createToolSpec(String name,
             String description) {
+        return createToolSpec(name, description, null);
+    }
+
+    private static LLMProvider.ToolSpec createToolSpec(String name,
+            String description, String parametersSchema) {
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -3349,7 +3421,7 @@ class AIOrchestratorTest {
 
             @Override
             public String getParametersSchema() {
-                return null;
+                return parametersSchema;
             }
 
             @Override
