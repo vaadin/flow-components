@@ -962,11 +962,6 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    /**
-     * Parser for tool schemas. Flow's shared mapper accepts non-standard JSON
-     * such as single-quoted strings, which the providers would pass on as-is
-     * and then fail with on every request.
-     */
     private static final ObjectMapper STRICT_JSON = JsonMapper.builder()
             .build();
 
