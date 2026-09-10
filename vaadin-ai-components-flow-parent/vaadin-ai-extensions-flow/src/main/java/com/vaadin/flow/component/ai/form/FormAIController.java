@@ -185,8 +185,7 @@ import tools.jackson.databind.JsonNode;
  * the LLM also reports, per filled value, the snippets it read, where each one
  * sits in the document, and a confidence level. The data is available from
  * {@link FieldValueChangeEvent#getFieldSource()} and
- * {@link #getFieldSource(HasValue)}, and can be stored and put back later with
- * {@link #restoreFieldSource(HasValue, ValueSource)}. Off by default.
+ * {@link #getFieldSource(HasValue)}. Off by default.
  * </p>
  *
  * <p>
@@ -363,17 +362,16 @@ public class FormAIController implements AIController {
      * {@link ComponentUtil#setData(Component, Class, Object)} — tying its
      * lifecycle to the field rather than to the controller — and tied to the
      * field value the source was reported with. The value is captured from the
-     * field right after the write (or at {@link #restoreFieldSource} time) so
-     * any normalisation the field applied is reflected; {@link #getFieldSource}
-     * compares it against the field's current value to detect a source a turn
-     * left stale. A source lasts as long as the value it describes: the
-     * registration belongs to a value-change listener that drops the source the
-     * moment the value changes outside a fill turn, so a stale source can never
-     * come back by the field regaining the value. The listener stands down
-     * during a turn — the AI's own write sequence must not drop the source it
-     * just stored — so sources a turn leaves stale (a value-change cascade
-     * overwriting a sourced field) are swept at turn end instead by
-     * {@link #purgeStaleFieldSources}.
+     * field right after the write so any normalisation the field applied is
+     * reflected; {@link #getFieldSource} compares it against the field's
+     * current value to detect a source a turn left stale. A source lasts as
+     * long as the value it describes: the registration belongs to a
+     * value-change listener that drops the source the moment the value changes
+     * outside a fill turn, so a stale source can never come back by the field
+     * regaining the value. The listener stands down during a turn — the AI's
+     * own write sequence must not drop the source it just stored — so sources a
+     * turn leaves stale (a value-change cascade overwriting a sourced field)
+     * are swept at turn end instead by {@link #purgeStaleFieldSources}.
      */
     private record StoredFieldSource(Object value, ValueSource source,
             Registration registration) implements Serializable {
@@ -829,30 +827,6 @@ public class FormAIController implements AIController {
             return Optional.empty();
         }
         return Optional.of(stored.source());
-    }
-
-    /**
-     * Attaches a previously stored source to the field, so an application that
-     * persisted the data (see {@link FieldValueChangeEvent#getFieldSource()})
-     * can show it again after a reload without the original chat session.
-     * Restore the field's value first and the source after: the source is tied
-     * to the field's value at the moment of this call, so it is dropped on the
-     * next edit just like a fresh one.
-     *
-     * @param field
-     *            the field the source describes, not {@code null}
-     * @param source
-     *            the source to restore, not {@code null}
-     * @throws NullPointerException
-     *             if {@code field} or {@code source} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
-     * @since 25.3
-     */
-    public void restoreFieldSource(HasValue<?, ?> field, ValueSource source) {
-        Objects.requireNonNull(field, "Field must not be null");
-        Objects.requireNonNull(source, "Source must not be null");
-        putFieldSource(field, source);
     }
 
     /**

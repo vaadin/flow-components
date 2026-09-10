@@ -19,17 +19,19 @@ import java.util.List;
 import java.util.UUID;
 
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.ai.common.ConfidenceLevel;
-import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FieldMarkerI18n;
 import com.vaadin.flow.component.ai.form.FormAIController;
 import com.vaadin.flow.component.ai.orchestrator.RequestListener;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
+import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test page for the AI field marker that {@link FormAIController} applies to
@@ -42,6 +44,9 @@ import com.vaadin.flow.router.Route;
  * from the web component's defaults, so a test can tell the texts sent by the
  * server apart from the built-in ones, and with a field-marker popover content
  * provider that adds a recognizable node to the name field's popover only.
+ * Source tracking is on, so the quantity field is written through the
+ * controller's {@code fill_form} tool with a source reporting a confidence
+ * level, the way a real fill reports one.
  *
  * @author Vaadin Ltd
  */
@@ -63,6 +68,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
     static final String UNCHANGED_VALUE = "Unchanged";
     static final String LOCKED_VALUE = "CC-1024";
     static final String CONFIDENT_VALUE = "42";
+    static final String CONFIDENT_LABEL = "Quantity";
 
     public AIFieldMarkerPage() {
         var name = new TextField("Name");
@@ -87,9 +93,10 @@ public class AIFieldMarkerPage extends VerticalLayout {
         locked.setId("locked");
         name.addValueChangeListener(event -> locked.setReadOnly(true));
 
-        // Filled together with a source reporting a confidence level, so its
-        // marker must show the confidence indicator.
-        var confident = new TextField("Quantity");
+        // Filled through the fill_form tool together with a source reporting
+        // a confidence level, so its marker must show the confidence
+        // indicator.
+        var confident = new TextField(CONFIDENT_LABEL);
         confident.setId("confident");
 
         var form = new VerticalLayout(name, company, unchanged, locked,
@@ -97,6 +104,7 @@ public class AIFieldMarkerPage extends VerticalLayout {
         form.setId("form");
 
         var controller = new FormAIController(form);
+        controller.setSourceTrackingEnabled(true);
         controller.setFieldMarkerI18n(new FieldMarkerI18n().setMessage(MESSAGE)
                 .setRevert(REVERT).setBadgeLabel(BADGE_LABEL)
                 .setBadgeTooltip(BADGE_TOOLTIP)
@@ -129,17 +137,51 @@ public class AIFieldMarkerPage extends VerticalLayout {
             name.setValue(NAME_VALUE);
             company.setValue(COMPANY_VALUE);
             unchanged.setValue(UNCHANGED_VALUE);
-            confident.setValue(CONFIDENT_VALUE);
-            // Attach a source to the value just written, standing in for the
-            // one a real fill would report, so the marker applied at turn end
-            // shows its confidence level.
-            controller.restoreFieldSource(confident,
-                    new ValueSource(ConfidenceLevel.HIGH, null));
+            // A source only reaches a field through a fill, so this value is
+            // written the way the LLM writes one: through the fill_form tool,
+            // wrapped in a source envelope reporting a confidence level. The
+            // marker applied at turn end then shows the level.
+            fillWithSource(controller, CONFIDENT_LABEL, CONFIDENT_VALUE,
+                    "high");
             controller.onResponse(
                     new ResponseListener.ResponseEvent("", null, null));
         });
         finishTurn.setId("finish-turn");
 
         add(form, startTurn, finishTurn);
+    }
+
+    /**
+     * Writes a value to a field through the controller's {@code fill_form}
+     * tool, wrapped in the envelope the LLM uses to report a source with a
+     * confidence level. The field is addressed by its description in the
+     * {@code get_form_state} output, which for a plain labeled field is its
+     * label.
+     */
+    private static void fillWithSource(FormAIController controller,
+            String label, String value, String confidence) {
+        var tools = controller.getTools();
+        var formState = JacksonUtils
+                .readTree(executeTool(tools, "get_form_state", "{}"));
+        executeTool(tools, "fill_form", """
+                {"values": {"%s": {"value": "%s", "confidence": "%s"}}}"""
+                .formatted(fieldIdOf(formState, label), value, confidence));
+    }
+
+    private static String fieldIdOf(JsonNode formState, String description) {
+        for (var field : formState.path("fields")) {
+            if (description.equals(field.path("description").asString())) {
+                return field.path("id").asString();
+            }
+        }
+        throw new IllegalStateException(
+                "get_form_state lists no field described as " + description);
+    }
+
+    private static String executeTool(List<LLMProvider.ToolSpec> tools,
+            String name, String arguments) {
+        return tools.stream().filter(tool -> tool.getName().equals(name))
+                .findFirst().orElseThrow()
+                .execute(JacksonUtils.readTree(arguments));
     }
 }
