@@ -129,7 +129,9 @@ fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
 const pinnedForMode = npmNames.filter((npmName) => !allModes.includes(npmName));
-console.log(
-  `Wrote ${outputFile} pinning ${pinnedForMode.join(', ')} for mode ${mode}` +
-    (allModes.length > 0 ? ` and ${allModes.join(', ')} for every mode` : '')
-);
+const pinned = [
+  pinnedForMode.length > 0 && `${pinnedForMode.join(', ')} for mode ${mode}`,
+  allModes.length > 0 && `${allModes.join(', ')} for every mode`
+].filter(Boolean);
+
+console.log(`Wrote ${outputFile} pinning ${pinned.join(' and ')}`);
