@@ -622,6 +622,80 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('leaves the selection alone when Enter is pressed in the editor', async () => {
+    // The editor is a light child of the host and reaches the screen
+    // through slots, so its keydown travels the flattened tree and lands
+    // on the sheet's own listener. Treating it as a sheet shortcut moves
+    // the selection down, which takes the editor off the sheet in the
+    // middle of typing into it.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    editor.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    expect(editor.isConnected).to.be.true;
+  });
+
+  it('leaves the selection alone for arrow keys in the editor', async () => {
+    // Arrow keys move the caret inside a text field.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    editor.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    cleanup();
+  });
+
+  it('still moves the selection for a key pressed on the sheet', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 2 });
+    cleanup();
+  });
+
+  it('leaves the sheet alone for a key inside an in-cell component', async () => {
+    const widget = document.createElement('input');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    widget.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    cleanup();
+  });
+
   it('releases the editor when the sheet is disposed', async () => {
     const editor = field();
     const { host, sheet, cleanup } = attachSheet({ '77': editor });

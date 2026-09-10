@@ -1288,6 +1288,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * future slices.
    */
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
+    if (this.eventCameFromHostedComponent(e)) {
+      // The key belongs to the component the user is typing into. Acting
+      // on it as a sheet shortcut moves the selection out from under a
+      // custom editor mid-edit, which takes the editor off the sheet.
+      return;
+    }
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
 
@@ -2731,6 +2737,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * So clear the handshake latch and let the next completed viewport
    * announce itself.
    */
+  /**
+   * Whether an event was raised inside a server-side component the sheet
+   * is hosting — a custom editor, an in-cell component, a chart overlay.
+   *
+   * Those components are light children of the host and reach the screen
+   * through slots, so their events travel the flattened tree and arrive at
+   * the sheet's own listeners. They are not the sheet's to act on.
+   */
+  private eventCameFromHostedComponent(e: Event): boolean {
+    for (const target of e.composedPath()) {
+      if (
+        this.cellEditors.owns(target) ||
+        this.cellComponents.owns(target) ||
+        this.overlayComponents.owns(target)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Hand the keyboard to the active cell's custom editor, if it has one.
    *

@@ -167,6 +167,27 @@ export class SlottedVirtualChildren {
     return this.placed.get(nodeId)?.element ?? null;
   }
 
+  /**
+   * Whether this holder placed the given node.
+   *
+   * Used to tell an event that came out of a hosted component from one the
+   * sheet itself raised. The sheet must not act on the first kind: a key
+   * pressed inside a custom editor belongs to the editor, and treating it
+   * as a sheet shortcut moves the selection out from under the component
+   * the user is typing into.
+   */
+  owns(node: EventTarget | null): boolean {
+    if (node === null) {
+      return false;
+    }
+    for (const placed of this.placed.values()) {
+      if (placed.element === node) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** Remove every placed component. Call this when tearing the sheet down. */
   clear(): void {
     for (const placed of this.placed.values()) {
