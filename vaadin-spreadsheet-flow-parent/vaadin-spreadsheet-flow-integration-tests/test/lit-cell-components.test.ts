@@ -491,6 +491,46 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('shows the editor of a merged cell', async () => {
+    // The per-cell loop skips everything a merge covers, its anchor
+    // included, so the merged overlay is the only element rendered for the
+    // region — the slot has to be there or the editor has nowhere to go.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const merged = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLElement>('.merged-cell')!;
+    expect(merged).to.not.be.null;
+    const slot = merged.querySelector('slot')!;
+    expect(slot.getAttribute('name')).to.equal('custom-editor-77');
+    const assigned = slot.assignedElements();
+    expect(assigned).to.have.length(1);
+    expect(assigned[0]).to.equal(editor);
+    cleanup();
+  });
+
+  it('shows a component in a merged cell', async () => {
+    const widget = document.createElement('span');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const merged = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLElement>('.merged-cell')!;
+    expect(merged.querySelector('slot')!.getAttribute('name')).to.equal(
+      'custom-component-31'
+    );
+    cleanup();
+  });
+
   it('releases the editor when the sheet is disposed', async () => {
     const editor = field();
     const { sheet, cleanup } = attachSheet({ '77': editor });

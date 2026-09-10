@@ -667,10 +667,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // A cell holding a server-side component or a custom editor shows
       // that instead of its own text — it is what the cell is for.
       const slotName = (state.cellSlots ?? {})[key];
-      const text =
-        slotName === undefined
-          ? (data?.value ?? '')
-          : html`<slot name=${slotName}></slot>`;
+      const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
       const cellStyleClass = data?.cellStyle ?? '';
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
@@ -809,7 +806,11 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
 
     const key = toKey(region.col1, region.row1);
     const data = cellData.get(key);
-    const text = data?.value ?? '';
+    // A merged cell can hold a component or a custom editor just like a
+    // plain one, and it is the only element rendered for the region — the
+    // per-cell loop skips everything a merge covers, its anchor included.
+    const slotName = (state.cellSlots ?? {})[key];
+    const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
     const cellStyleClass = data?.cellStyle ?? '';
 
     // Selection: a merged cell carries cell-range if its top-left

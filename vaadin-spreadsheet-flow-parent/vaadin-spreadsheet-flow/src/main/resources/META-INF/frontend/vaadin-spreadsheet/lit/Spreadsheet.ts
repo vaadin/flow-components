@@ -441,21 +441,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.contextMenu = new SpreadsheetContextMenu();
     const resolveVirtualChild = (nodeId: string): HTMLElement | null =>
       flowVirtualChildResolver(overlayComponentAppId(host))(nodeId);
-    this.overlayComponents = new SlottedVirtualChildren(
-      this.cellGrid,
-      resolveVirtualChild,
-      overlayComponentSlotName
-    );
-    this.cellComponents = new SlottedVirtualChildren(
-      this.cellGrid,
-      resolveVirtualChild,
-      cellComponentSlotName
-    );
-    this.cellEditors = new SlottedVirtualChildren(
-      this.cellGrid,
-      resolveVirtualChild,
-      cellEditorSlotName
-    );
+    this.overlayComponents = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, overlayComponentSlotName);
+    this.cellComponents = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, cellComponentSlotName);
+    this.cellEditors = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, cellEditorSlotName);
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
     // intrinsic height. Slice 154. Existing host width/height
@@ -1964,18 +1952,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // cell-grid, so the components have to be parented before the browser
     // resolves them. sync() is idempotent, so the repaint on every scroll
     // tick costs a set comparison and nothing else.
-    this.overlayComponents.sync(
-      state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id)
-    );
+    this.overlayComponents.sync(state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id));
     // Only the cells on screen render a slot, so only those elements are
     // placed — one off-screen would be parented with nowhere to project.
     const visible = visibleCellSlots(this.cellSlotAssignments(), state.viewport);
-    this.cellComponents.sync(
-      visible.filter((a) => a.kind === 'component').map((a) => a.nodeId)
-    );
-    this.cellEditors.sync(
-      visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId)
-    );
+    this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
+    this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
     // Column-header strip (slice 143). Sized + state-pushed only
     // when headerRowHeight > 0 so the default opt-out path stays
     // a no-op — important to avoid feedback loops with the
