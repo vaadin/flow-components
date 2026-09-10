@@ -1350,6 +1350,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       if (this.isCellLockedForEdit(col, row)) {
         return;
       }
+      if (this.focusCustomEditor()) {
+        e.preventDefault();
+        return;
+      }
       e.preventDefault();
       const cellData = this.cellDataByKey.get(toKey(col, row));
       this.editor = {
@@ -1372,6 +1376,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       const { col, row } = this.selection.activeCell;
       if (this.isCellLockedForEdit(col, row)) {
+        return;
+      }
+      if (this.focusCustomEditor()) {
+        e.preventDefault();
         return;
       }
       e.preventDefault();
@@ -2723,6 +2731,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * So clear the handshake latch and let the next completed viewport
    * announce itself.
    */
+  /**
+   * Hand the keyboard to the active cell's custom editor, if it has one.
+   *
+   * A cell showing a custom editor has no use for the inline editor: the
+   * editor IS the way to change the value, so a key that would normally
+   * start editing focuses it instead. Excel's F2 on such a cell does the
+   * same thing.
+   *
+   * @returns true when a custom editor took the focus.
+   */
+  private focusCustomEditor(): boolean {
+    const active = this.selection.activeCell;
+    const assignment = this.cellSlotAssignments()[toKey(active.col, active.row)];
+    if (assignment === undefined || assignment.kind !== 'editor') {
+      return false;
+    }
+    const element = this.cellEditors.get(assignment.nodeId);
+    if (element === null) {
+      return false;
+    }
+    element.focus();
+    return true;
+  }
+
   /**
    * Which server-side element each cell shows, from the three inputs the
    * server pushes separately.

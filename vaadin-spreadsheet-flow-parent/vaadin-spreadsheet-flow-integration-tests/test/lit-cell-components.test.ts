@@ -543,6 +543,85 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('gives F2 to the custom editor instead of the inline one', async () => {
+    // The editor IS the way to change such a cell, so the inline editor
+    // has no business opening over it. Excel's F2 does the same.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(document.activeElement).to.equal(editor);
+    expect(
+      sheet.getCellGrid().shadowRoot!.querySelector('[part~="cell-input"]')
+    ).to.be.null;
+    cleanup();
+  });
+
+  it('gives a typed character to the custom editor too', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'x', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(document.activeElement).to.equal(editor);
+    cleanup();
+  });
+
+  it('still opens the inline editor on a cell with no custom editor', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(
+      sheet.getCellGrid().shadowRoot!.querySelector('[part~="cell-input"]')
+    ).to.not.be.null;
+    cleanup();
+  });
+
+  it('opens the inline editor when the cell holds a component, not an editor', async () => {
+    // A component in a cell is not an editor — the cell's value is still
+    // edited the ordinary way.
+    const widget = document.createElement('span');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(
+      sheet.getCellGrid().shadowRoot!.querySelector('[part~="cell-input"]')
+    ).to.not.be.null;
+    cleanup();
+  });
+
   it('releases the editor when the sheet is disposed', async () => {
     const editor = field();
     const { host, sheet, cleanup } = attachSheet({ '77': editor });
