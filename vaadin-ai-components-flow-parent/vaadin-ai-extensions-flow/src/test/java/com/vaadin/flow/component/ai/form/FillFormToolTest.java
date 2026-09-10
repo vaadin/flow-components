@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
@@ -73,6 +74,18 @@ class FillFormToolTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @Test
+    void fillWritesIntoFieldInsideComposite() {
+        var inner = new TestField();
+        var controller = newController(new FieldGroup(inner));
+        controller.onRequest(requestEvent());
+
+        var result = fillFormResult(controller, payload(inner, "\"filled\""));
+
+        Assertions.assertTrue(success(result), "Result: " + result);
+        Assertions.assertEquals("filled", inner.getValue());
+    }
 
     @Test
     void fillForm_responseFieldsBlockMirrorsGetFormStateForAllVisibleFields() {
@@ -2154,6 +2167,13 @@ class FillFormToolTest {
      * required: {@code executeFill} throws {@link IllegalStateException} on a
      * detached form, matching the production contract.
      */
+    /** Reusable group of fields built the recommended way. */
+    private static class FieldGroup extends Composite<Div> {
+        FieldGroup(Component... children) {
+            getContent().add(children);
+        }
+    }
+
     private FormAIController newController(Component... fields) {
         var form = new Div(fields);
         ui.add(form);

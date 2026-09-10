@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
@@ -83,7 +84,8 @@ import tools.jackson.databind.JsonNode;
  * The controller accepts any {@link HasComponents} container. It discovers
  * fields by walking the container's component tree and collecting every
  * component that implements {@link HasValue}. The walk recurses into nested
- * {@link HasComponents} children so layouts containing layouts are handled.
+ * {@link HasComponents} and {@link Composite} children so layouts containing
+ * layouts, and fields wrapped in reusable composites, are handled.
  * </p>
  *
  * <p>
