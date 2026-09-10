@@ -23,24 +23,36 @@
  * component are what a Lit application installs; a React application gets them
  * from `@vaadin/react-components` instead.
  *
+ * A package the React components do not bring has to be installed in either
+ * mode, so it is written without a mode. Whether they bring it is decided by
+ * their npm dependencies: everything the components declare is a dependency of
+ * `@vaadin/react-components` or `@vaadin/react-components-pro`, except the
+ * packages the modules name in the `all-modes` argument. Those are the
+ * packages a Flow connector or theme depends on for itself rather than the web
+ * component depending on them.
+ *
  * Usage:
- *   node generatePinnedNpmVersions.js <source-dir> <output-file>
+ *   node generatePinnedNpmVersions.js <source-dir> <output-file> [all-modes]
  *
  * Example
  *   node ../../scripts/generatePinnedNpmVersions.js src/main/java \
- *     target/classes/META-INF/VAADIN/versions/vaadin-text-field-flow-versions.json
+ *     target/classes/META-INF/VAADIN/versions/vaadin-map-flow-versions.json proj4
  */
 
 const fs = require('fs');
 const path = require('path');
 
-if (process.argv.length !== 4) {
-  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file>');
+if (process.argv.length < 4 || process.argv.length > 5) {
+  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file> [all-modes]');
   process.exit(1);
 }
 
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
+// The packages of the module that no React wrapper brings, so that they are
+// installed whichever mode an application uses. Empty for most modules, as the
+// argument is unset unless the module declares such a package.
+const allModes = (process.argv[4] || '').split(',').map((name) => name.trim()).filter(Boolean);
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
@@ -96,11 +108,17 @@ function entryName(npmName) {
   return npmName.replace(/^@[^/]+\//, '');
 }
 
+const unknownAllModes = allModes.filter((npmName) => !npmNames.includes(npmName));
+if (unknownAllModes.length > 0) {
+  console.error(`No @NpmPackage annotation for ${unknownAllModes.join(', ')} in ${sourceDir}, so there is no entry to leave the mode out of`);
+  process.exit(1);
+}
+
 const versions = {};
 npmNames.forEach((npmName) => {
   versions[entryName(npmName)] = {
     jsVersion: npmPackages[npmName].version,
-    mode,
+    ...(allModes.includes(npmName) ? {} : { mode }),
     npmName
   };
 });
@@ -110,4 +128,8 @@ const content = `${JSON.stringify(versions, null, 4)}\n`;
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
-console.log(`Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}`);
+const pinnedForMode = npmNames.filter((npmName) => !allModes.includes(npmName));
+console.log(
+  `Wrote ${outputFile} pinning ${pinnedForMode.join(', ')} for mode ${mode}` +
+    (allModes.length > 0 ? ` and ${allModes.join(', ')} for every mode` : '')
+);

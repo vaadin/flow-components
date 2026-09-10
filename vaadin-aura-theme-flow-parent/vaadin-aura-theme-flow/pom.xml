@@ -10,6 +10,10 @@
     <packaging>jar</packaging>
     <name>Vaadin Aura Theme</name>
     <description>Vaadin Aura Theme</description>
+    <properties>
+        <!-- The Aura theme is not part of the React components. -->
+        <pinned.npm.versions.allModes>@vaadin/aura</pinned.npm.versions.allModes>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
