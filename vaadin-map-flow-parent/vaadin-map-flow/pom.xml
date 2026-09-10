@@ -11,8 +11,6 @@
     <name>Vaadin Map</name>
     <description>Vaadin Map</description>
     <properties>
-        <!-- proj4 is used by the connector, not by @vaadin/map. -->
-        <pinned.npm.versions.allModes>proj4</pinned.npm.versions.allModes>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>

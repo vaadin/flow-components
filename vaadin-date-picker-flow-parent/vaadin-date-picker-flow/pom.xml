@@ -11,8 +11,6 @@
     <name>Vaadin Date Picker</name>
     <description>Vaadin Date Picker</description>
     <properties>
-        <!-- date-fns is used by the connector, not by @vaadin/date-picker. -->
-        <pinned.npm.versions.allModes>date-fns</pinned.npm.versions.allModes>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>
