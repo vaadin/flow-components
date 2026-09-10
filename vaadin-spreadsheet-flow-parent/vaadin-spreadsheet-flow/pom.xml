@@ -121,9 +121,23 @@
     </dependencies>
     <build>
         <resources>
+            <!-- Only spreadsheet.properties needs Maven property expansion.
+                 Filtering the whole tree would also rewrite ${...} inside the
+                 connector's TypeScript template literals, silently replacing
+                 bindings such as ${name} with the POM's <name>. -->
             <resource>
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
+                <includes>
+                    <include>com/vaadin/flow/component/spreadsheet/spreadsheet.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <filtering>false</filtering>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>com/vaadin/flow/component/spreadsheet/spreadsheet.properties</exclude>
+                </excludes>
             </resource>
         </resources>
         <plugins>
