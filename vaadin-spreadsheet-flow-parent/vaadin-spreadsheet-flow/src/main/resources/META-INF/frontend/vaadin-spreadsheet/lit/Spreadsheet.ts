@@ -1056,9 +1056,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.isCellLockedForEdit(col, row)) {
       return;
     }
-    const key = toKey(col, row);
-    const cellData = this.cellDataByKey.get(key);
-    const initialValue = cellData?.value ?? '';
+    // Seeded with what the cell IS, not what it shows — the formula
+    // behind a computed cell, and the unformatted value otherwise, which
+    // is what carries a text cell's leading apostrophe. The GWT client
+    // seeded the inline editor from the formula field for the same
+    // reason.
+    const initialValue = this.formulaFieldValueFor(col, row);
     this.editor = { col, row, initialValue };
     this.recomputeViewport();
   };
@@ -1392,7 +1395,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.editor = {
         col,
         row,
-        initialValue: cellData?.value ?? ''
+        initialValue: this.formulaFieldValueFor(col, row)
       };
       this.recomputeViewport();
       return;

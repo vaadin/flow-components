@@ -493,7 +493,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public WebElement getInlineEditor(String cell) {
         openInlineEditor(cell);
-        return findElementInShadowRoot(By.cssSelector("input"));
+        // The cell editor, not merely the first input in the sheet — the
+        // formula bar's address and formula fields come before it in the
+        // shadow tree, so a bare "input" returns the address field.
+        return findElementInShadowRoot(
+                By.cssSelector("[part~=\"cell-input\"]"));
     }
 
     public SpreadsheetElement getSpreadsheet() {

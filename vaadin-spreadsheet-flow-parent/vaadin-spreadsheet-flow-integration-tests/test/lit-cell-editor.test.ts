@@ -98,6 +98,113 @@ function attachSheet(width: number, height: number): {
     };
 }
 
+/**
+ * What the editor opens with.
+ *
+ * The editor shows what the cell IS, not what it displays: the formula
+ * behind a computed cell, and the unformatted value otherwise. The
+ * displayed value has already dropped a text cell's leading apostrophe
+ * and a number's full precision, and editing from it would silently
+ * rewrite the cell.
+ */
+describe('Spreadsheet cell editor — the value it opens with', () => {
+  function attach(): { sheet: Spreadsheet; cleanup: () => void } {
+    const host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:300px;';
+    document.body.appendChild(host);
+    const sheet = new Spreadsheet(host);
+    sheet.setRows(20);
+    sheet.setCols(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(20).fill(15));
+    return {
+      sheet,
+      cleanup: () => {
+        sheet.dispose();
+        host.remove();
+      }
+    };
+  }
+
+  function openWithF2(sheet: Spreadsheet, col: number, row: number): void {
+    sheet.setSelectedCellAndRange('X', col, row, col, col, row, row, false);
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true })
+    );
+  }
+
+  it('opens a text cell with its leading apostrophe', async () => {
+    const { sheet, cleanup } = attach();
+    sheet.updateBottomRightCellValues([
+      { row: 4, col: 2, value: 'abc', originalValue: "'abc", cellStyle: 'cs0' } as any
+    ]);
+    sheet.recomputeViewport();
+
+    openWithF2(sheet, 2, 4);
+    await sheet.getCellGrid().updateComplete;
+
+    const input = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLInputElement>('[part~="cell-input"]')!;
+    expect(input.value).to.equal("'abc");
+    cleanup();
+  });
+
+  it('opens a computed cell with its formula', async () => {
+    const { sheet, cleanup } = attach();
+    sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
+    ]);
+    sheet.recomputeViewport();
+
+    openWithF2(sheet, 2, 2);
+    await sheet.getCellGrid().updateComplete;
+
+    const input = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLInputElement>('[part~="cell-input"]')!;
+    expect(input.value).to.equal('=SUM(B1:B9)');
+    cleanup();
+  });
+
+  it('opens a double-clicked cell the same way', async () => {
+    const { sheet, cleanup } = attach();
+    sheet.updateBottomRightCellValues([
+      { row: 4, col: 2, value: 'abc', originalValue: "'abc", cellStyle: 'cs0' } as any
+    ]);
+    sheet.recomputeViewport();
+
+    sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-doubleclick', {
+        detail: { col: 2, row: 4 },
+        bubbles: true,
+        composed: true
+      })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    const input = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLInputElement>('[part~="cell-input"]')!;
+    expect(input.value).to.equal("'abc");
+    cleanup();
+  });
+
+  it('opens an empty cell empty', async () => {
+    const { sheet, cleanup } = attach();
+    sheet.recomputeViewport();
+
+    openWithF2(sheet, 3, 3);
+    await sheet.getCellGrid().updateComplete;
+
+    const input = sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLInputElement>('[part~="cell-input"]')!;
+    expect(input.value).to.equal('');
+    cleanup();
+  });
+});
+
 describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
     it('renders nothing when editor state is null', async () => {
         const empty = emptyCellGridRenderState();
