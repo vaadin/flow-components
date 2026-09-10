@@ -85,7 +85,7 @@ function attachSheet(width: number, height: number): {
     cleanup: () => void;
 } {
     const host = document.createElement('div');
-    host.style.cssText = `width:${width}px;height:${height}px;`;
+    host.style.cssText = `width:${width}px;height:${height}px;display:flex;flex-direction:column;`;
     document.body.appendChild(host);
     const sheet = new Spreadsheet(host);
     return {
@@ -110,7 +110,7 @@ function attachSheet(width: number, height: number): {
 describe('Spreadsheet cell editor — the value it opens with', () => {
   function attach(): { sheet: Spreadsheet; cleanup: () => void } {
     const host = document.createElement('div');
-    host.style.cssText = 'width:400px;height:300px;';
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     document.body.appendChild(host);
     const sheet = new Spreadsheet(host);
     sheet.setRows(20);

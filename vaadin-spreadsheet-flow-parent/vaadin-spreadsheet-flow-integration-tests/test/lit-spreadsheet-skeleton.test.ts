@@ -286,21 +286,26 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         // row-header + restructured the scroll container as a CSS
         // grid. Slice 145 added the corner box at (col 1, row 1).
         // Slice 154 added the sheet-tabs strip below the scroll
-        // container; the host is now a flex column.
-        // Slice 175 added the formula bar above the scroll container.
+        // container. Slice 175 added the formula bar above it.
         // Slice 191 added the context menu, which stays empty until the
         // server answers a right-click with the actions it offers.
+        // They all hang off the component's own root element, which owns
+        // the vertical layout — the host belongs to the application.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
-        // Host has 4 children: formula bar + context menu + scroll
+        expect(host.children).to.have.length(1);
+        const root = sheet.getRoot();
+        expect(host.firstElementChild).to.equal(root);
+
+        // Root has 4 children: formula bar + context menu + scroll
         // container + sheet tabs.
-        expect(host.children).to.have.length(4);
-        const hostKids = Array.from(host.children);
-        expect(hostKids.includes(sheet.getFormulaBar())).to.be.true;
-        expect(hostKids.includes(sheet.getContextMenu())).to.be.true;
-        expect(hostKids.includes(sheet.getScrollContainer())).to.be.true;
-        expect(hostKids.includes(sheet.getSheetTabs())).to.be.true;
+        expect(root.children).to.have.length(4);
+        const rootKids = Array.from(root.children);
+        expect(rootKids.includes(sheet.getFormulaBar())).to.be.true;
+        expect(rootKids.includes(sheet.getContextMenu())).to.be.true;
+        expect(rootKids.includes(sheet.getScrollContainer())).to.be.true;
+        expect(rootKids.includes(sheet.getSheetTabs())).to.be.true;
 
         const scroller = sheet.getScrollContainer();
         // Four scroll-container children: header-corner, column-header,
@@ -534,7 +539,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         cleanup: () => void;
     } {
         const host = document.createElement('div');
-        host.style.cssText = `width:${width}px;height:${height}px;`;
+        host.style.cssText = `width:${width}px;height:${height}px;display:flex;flex-direction:column;`;
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         return {
@@ -758,7 +763,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup: () => void;
     } {
         const host = document.createElement('div');
-        host.style.cssText = `width:${width}px;height:${height}px;`;
+        host.style.cssText = `width:${width}px;height:${height}px;display:flex;flex-direction:column;`;
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         return {
@@ -823,7 +828,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(typeof ResizeObserver).to.equal('function');
 
         const host = document.createElement('div');
-        host.style.cssText = 'width:200px;height:100px;';
+        host.style.cssText = 'width:200px;height:100px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         // Construction completes without throwing — the
         // ResizeObserver was created + observe() succeeded.
@@ -2242,12 +2247,18 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
 
         const sheet = new Spreadsheet(host, shadow);
 
-        // Scroll container + formula bar + context menu + sheet tabs go
-        // inside the shadow root, not the light DOM.
-        expect(shadow.children.length).to.equal(4);
+        // Everything the component draws goes inside the shadow root,
+        // under its own root element, not into the light DOM.
+        expect(shadow.children.length).to.equal(1);
+        expect(shadow.firstElementChild).to.equal(sheet.getRoot());
+        expect(sheet.getRoot().children.length).to.equal(4);
         expect(host.children.length).to.equal(0);
-        // Host is still the event target / style host.
-        expect(host.style.display).to.equal('flex');
+        // The host belongs to the application: the component must not
+        // write a layout onto it. An inline style would beat any
+        // stylesheet the application writes, leaving it no way to
+        // position the component but `!important`.
+        expect(host.style.display).to.equal('');
+        expect(host.style.flexDirection).to.equal('');
 
         sheet.dispose();
         host.remove();

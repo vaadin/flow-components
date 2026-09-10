@@ -43,7 +43,7 @@ async function attachSheet(): Promise<{
     cleanup: () => void;
 }> {
     const host = document.createElement('div');
-    host.style.cssText = 'width:400px;height:300px;';
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     document.body.appendChild(host);
     const sheet = new Spreadsheet(host);
 
@@ -370,7 +370,7 @@ describe('Spreadsheet render scheduling — property batches', () => {
 describe('Spreadsheet startup handshake', () => {
   function attachRaw(): { sheet: Spreadsheet; events: any[]; cleanup: () => void } {
     const host = document.createElement('div');
-    host.style.cssText = 'width:400px;height:300px;';
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     document.body.appendChild(host);
     const events: any[] = [];
     host.addEventListener('spreadsheet-event', (e) =>
@@ -495,7 +495,7 @@ describe('Spreadsheet startup handshake', () => {
     // A zero-size host measures nothing; announcing then would tell the
     // server an empty range and it would load nothing.
     const host = document.createElement('div');
-    host.style.cssText = 'width:0px;height:0px;';
+    host.style.cssText = 'width:0px;height:0px;display:flex;flex-direction:column;';
     document.body.appendChild(host);
     const events: any[] = [];
     host.addEventListener('spreadsheet-event', (e) =>

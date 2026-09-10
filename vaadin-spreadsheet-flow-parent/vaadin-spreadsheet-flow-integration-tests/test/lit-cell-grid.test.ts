@@ -395,7 +395,7 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
         // character: one entry lands under "colundefined rowundefined" and
         // every value on the sheet disappears.
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         sheet.setRows(10);
@@ -425,7 +425,7 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
 
     it('still takes the cell values as a plain array', async () => {
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         sheet.setRows(10);

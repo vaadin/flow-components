@@ -273,7 +273,7 @@ describe('Spreadsheet — components inside cells', () => {
     cleanup: () => void;
   } {
     const host = document.createElement('div');
-    host.style.cssText = 'width:400px;height:300px;';
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     (host as any).appId = 'ROOT';
     document.body.appendChild(host);
     // The wrapper renders into its own shadow root, and that boundary is
@@ -433,7 +433,7 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup: () => void;
   } {
     const host = document.createElement('div');
-    host.style.cssText = 'width:400px;height:300px;';
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     (host as any).appId = 'ROOT';
     document.body.appendChild(host);
     // The wrapper renders into its own shadow root, and that boundary is

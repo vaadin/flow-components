@@ -35,7 +35,7 @@ function attachSheet(): {
 } {
   const host = document.createElement('div');
   host.id = `part-export-host-${hostSeq++}`;
-  host.style.cssText = 'width:400px;height:300px;';
+  host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
   document.body.appendChild(host);
   // The wrapper element renders into its own shadow root, which is the
   // boundary the parts have to cross.

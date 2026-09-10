@@ -484,7 +484,7 @@ describe('Row header — grouping outline', () => {
 describe('Row header — grouping reaches the server', () => {
     it('forwards a row toggle as a row grouping, not a column one', () => {
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         const received: any[] = [];

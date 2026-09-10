@@ -47,7 +47,7 @@ function attachSheet(width: number, height: number): {
     cleanup: () => void;
 } {
     const host = document.createElement('div');
-    host.style.cssText = `width:${width}px;height:${height}px;`;
+    host.style.cssText = `width:${width}px;height:${height}px;display:flex;flex-direction:column;`;
     document.body.appendChild(host);
     const sheet = new Spreadsheet(host);
     return {
@@ -309,8 +309,8 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
 
 describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)', () => {
     it('connector creates a SpreadsheetSheetTabs element below the scroll container', () => {
-        const { host, sheet, cleanup } = attachSheet(200, 100);
-        expect(host.lastElementChild === sheet.getSheetTabs()).to.be.true;
+        const { sheet, cleanup } = attachSheet(200, 100);
+        expect(sheet.getRoot().lastElementChild === sheet.getSheetTabs()).to.be.true;
         expect(sheet.getSheetTabs()).to.be.instanceOf(SpreadsheetSheetTabs);
         cleanup();
     });
@@ -436,7 +436,7 @@ describe('Spreadsheet — scrolling the tab strip', () => {
         cleanup: () => void;
     } {
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         sheet.setSheetNames(names);

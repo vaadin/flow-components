@@ -195,7 +195,7 @@ describe('Spreadsheet — component overlays', () => {
         cleanup: () => void;
     } {
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         (host as any).appId = 'ROOT';
         document.body.appendChild(host);
         // The wrapper renders into its own shadow root, and that boundary
@@ -378,7 +378,7 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup: () => void;
     } {
         const host = document.createElement('div');
-        host.style.cssText = `width:${width}px;height:${height}px;`;
+        host.style.cssText = `width:${width}px;height:${height}px;display:flex;flex-direction:column;`;
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         return {
@@ -749,7 +749,7 @@ describe('Spreadsheet — popup (filter) buttons', () => {
      */
     function attachSheet(): { sheet: Spreadsheet; cleanup: () => void } {
         const host = document.createElement('div');
-        host.style.cssText = 'width:400px;height:300px;';
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
         const sheet = new Spreadsheet(host);
         sheet.setRows(20);

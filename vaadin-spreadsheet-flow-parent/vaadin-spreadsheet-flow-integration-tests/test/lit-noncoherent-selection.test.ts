@@ -25,7 +25,7 @@ import { isCellSelected } from '../../vaadin-spreadsheet-flow/src/main/resources
 
 function attachSheet(): { sheet: Spreadsheet; events: any[]; cleanup: () => void } {
   const host = document.createElement('div');
-  host.style.cssText = 'width:400px;height:300px;';
+  host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
   document.body.appendChild(host);
   const sheet = new Spreadsheet(host);
   sheet.setCols(10);

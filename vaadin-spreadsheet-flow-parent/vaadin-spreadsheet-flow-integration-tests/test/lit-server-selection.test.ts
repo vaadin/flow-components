@@ -27,7 +27,7 @@ function attachSheet(): {
   cleanup: () => void;
 } {
   const host = document.createElement('div');
-  host.style.cssText = 'width:400px;height:300px;';
+  host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
   document.body.appendChild(host);
   const sheet = new Spreadsheet(host);
   // Real geometry, so the scroll container actually overflows and a

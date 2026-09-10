@@ -428,6 +428,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * the total grid dimensions so the scrollbar track reflects the
    * full scroll extent (slice 140).
    */
+  /**
+   * The component's own root inside {@link renderTarget}.
+   *
+   * Everything the spreadsheet draws lives in here, and this element —
+   * not the host — owns the vertical layout. The host belongs to the
+   * application: writing a layout onto it means an application that
+   * positions the component its own way is silently overridden.
+   */
+  private readonly root: HTMLElement;
   private readonly scrollContainer: HTMLElement;
 
   /**
@@ -471,17 +480,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
     );
     this.cellComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellComponentSlotName);
     this.cellEditors = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellEditorSlotName);
-    // Host becomes a flex column so the scroll container takes
-    // the available space + the sheet tabs sit below at their
-    // intrinsic height. Slice 154. Existing host width/height
-    // (set via setWidth/setHeight) are honored by flex.
-    // When renderTarget is a ShadowRoot, flex still applies
-    // on the HOST element (CSS reaches it via the host
-    // selector); skip the style writes when host is a
-    // ShadowRoot itself (e.g. test setups that pass a
-    // ShadowRoot as the first arg — uncommon).
-    this.host.style.display = 'flex';
-    this.host.style.flexDirection = 'column';
+    // A flex column holding the formula bar, the sheet, and the tabs.
+    // `flex:1 1 auto` fills a host that has a definite height and
+    // content-sizes against one that does not; a percentage height
+    // would resolve to `auto` against a host whose own height is a
+    // percentage, and the sheet would grow to the height of the whole
+    // grid. Set on the element rather than in the stylesheet because
+    // this is the component's own element and its sizing has to hold
+    // wherever the connector is used, stylesheet or not.
+    this.root = document.createElement('div');
+    this.root.className = 'spreadsheet-root';
+    this.root.style.cssText =
+      'display:flex;flex-direction:column;width:100%;flex:1 1 auto;min-height:0;box-sizing:border-box;';
     this.scrollContainer = document.createElement('div');
     this.scrollContainer.className = 'sheet-scroll';
     // CSS Grid layout inside the scroll container: 2 columns ×
@@ -537,15 +547,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // height. Appended to renderTarget first so it ends up
     // ahead of the scroll container in DOM order.
     this.formulaBar.style.flex = '0 0 auto';
-    this.renderTarget.appendChild(this.formulaBar);
-    this.renderTarget.appendChild(this.contextMenu);
+    this.root.appendChild(this.formulaBar);
+    this.root.appendChild(this.contextMenu);
     this.formulaBar.addEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
-    this.renderTarget.appendChild(this.scrollContainer);
+    this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
     // column. flex:0 so they take their intrinsic height,
     // never grow / shrink based on content.
     this.sheetTabs.style.flex = '0 0 auto';
-    this.renderTarget.appendChild(this.sheetTabs);
+    this.root.appendChild(this.sheetTabs);
+    this.renderTarget.appendChild(this.root);
     // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
     // tabs strip hides. Observe the host's class attribute via
@@ -1917,6 +1928,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       })
     );
   };
+
+  /** Test-only accessor: the component's own root inside the host. */
+  getRoot(): HTMLElement {
+    return this.root;
+  }
 
   /** Test-only accessor: the scroll container element. */
   getScrollContainer(): HTMLElement {
