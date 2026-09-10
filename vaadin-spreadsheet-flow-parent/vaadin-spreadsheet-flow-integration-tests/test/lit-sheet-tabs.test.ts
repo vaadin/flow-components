@@ -352,8 +352,8 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)
 
         expect(received).to.exist;
         expect(received!.type).to.equal('sheetSelected');
-        // sheetName = sheetNames[index - 1] = 'Beta'.
-        expect(received!.data.sheetName).to.equal('Beta');
+        // The server reads a 0-based tab index; the strip renders 1-based.
+        expect(received!.data.sheetIndex).to.equal(1);
 
         cleanup();
     });
@@ -389,11 +389,11 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)
         sheet.setSheetNames(['Alpha', 'Beta']);
         sheet.setSheetIndex(1);
 
-        const names: unknown[] = [];
+        const indexes: unknown[] = [];
         host.addEventListener('spreadsheet-event', (e: Event) => {
             const detail = (e as CustomEvent).detail;
             if (detail.type === 'sheetSelected') {
-                names.push(detail.data.sheetName);
+                indexes.push(detail.data.sheetIndex);
             }
         });
 
@@ -406,7 +406,7 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)
         click(2);
         click(1);
 
-        expect(names).to.deep.equal(['Beta', 'Alpha']);
+        expect(indexes).to.deep.equal([1, 0]);
         cleanup();
     });
 

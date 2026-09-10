@@ -131,6 +131,16 @@ export interface CellSelectedData {
   oldSelectionRangeDiscarded: boolean;
 }
 
+/**
+ * A cell joining a non-coherent (Ctrl-clicked) selection. Deliberately not
+ * {@link CellSelectedData}: the server reads only the coordinates here, and
+ * sending it a flag it never looks at is how a real key mismatch hides.
+ */
+export interface CellAddedToSelectionData {
+  row: number;
+  column: number;
+}
+
 export interface CellRangeSelectedData {
   row1: number;
   col1: number;
@@ -201,21 +211,17 @@ export interface LinkCellClickedData {
 }
 
 export interface RowsResizedData {
-  /** Row index (1-based) → new height in points. */
-  newRowSizes: Record<number, number>;
-  row1: number;
-  col1: number;
-  row2: number;
-  col2: number;
+  /** Resized rows, 1-based. */
+  rowIndexes: number[];
+  /** New height in points, positionally paired with `rowIndexes`. */
+  newHeights: number[];
 }
 
 export interface ColumnResizedData {
-  /** Column index (1-based) → new width in pixels. */
-  newColumnSizes: Record<number, number>;
-  row1: number;
-  col1: number;
-  row2: number;
-  col2: number;
+  /** Resized columns, 1-based. */
+  colIndexes: number[];
+  /** New width in pixels, positionally paired with `colIndexes`. */
+  newWidths: number[];
 }
 
 export interface OnPasteData {
@@ -337,3 +343,65 @@ export function asSpreadsheetEvent(event: Event): SpreadsheetEvent | null {
   }
   return detail;
 }
+
+/**
+ * The payload key names the server reads for each event type — the single
+ * source of truth for the client-to-server wire.
+ *
+ * Two guards check the two halves against this map, because nothing else
+ * does: the connector can dispatch a key the server never reads and the
+ * event silently does nothing. `sheetSelected` shipped for a while sending
+ * `sheetName` while the server read `sheetIndex`, so every sheet-tab click
+ * activated sheet 0.
+ *
+ * - `ServerEventPayloadContractTest` (Java) checks that
+ *   `SpreadsheetEventListener` reads exactly these keys.
+ * - `lit-server-event-contract.test.ts` (wtr) checks that every payload the
+ *   connector dispatches carries exactly these keys.
+ *
+ * An empty list means the event carries no payload.
+ */
+export const SERVER_EVENT_PAYLOAD_KEYS: Record<SpreadsheetEventType, readonly string[]> = {
+  onConnectorInit: [],
+  onSheetScroll: ['firstRow', 'firstColumn', 'lastRow', 'lastColumn'],
+  sheetAddressChanged: ['value'],
+  cellSelected: ['row', 'column', 'oldSelectionRangeDiscarded'],
+  cellRangeSelected: ['row1', 'col1', 'row2', 'col2'],
+  cellAddedToSelectionAndSelected: ['row', 'column'],
+  cellsAddedToRangeSelection: ['row1', 'col1', 'row2', 'col2'],
+  rowSelected: ['row', 'firstColumnIndex'],
+  rowAddedToRangeSelection: ['row', 'firstColumnIndex'],
+  columnSelected: ['column', 'firstRowIndex'],
+  columnAddedToSelection: ['column', 'firstRowIndex'],
+  selectionIncreasePainted: ['r1', 'c1', 'r2', 'c2'],
+  selectionDecreasePainted: ['row', 'col'],
+  cellValueEdited: ['row', 'col', 'value'],
+  sheetSelected: ['sheetIndex', 'scrollLeft', 'scrollTop'],
+  sheetRenamed: ['sheetIndex', 'newName'],
+  sheetCreated: ['scrollLeft', 'scrollTop'],
+  cellRangePainted: ['selectedCellRow', 'selectedCellColumn', 'row1', 'col1', 'row2', 'col2'],
+  deleteSelectedCells: [],
+  linkCellClicked: ['row', 'column'],
+  rowsResized: ['rowIndexes', 'newHeights'],
+  columnResized: ['colIndexes', 'newWidths'],
+  onRowAutofit: ['rowIndex'],
+  onColumnAutofit: ['columnIndex'],
+  onUndo: [],
+  onRedo: [],
+  setCellStyleWidthRatios: ['styleIndexes', 'ratios'],
+  protectedCellWriteAttempted: [],
+  onPaste: ['text'],
+  clearSelectedCellsOnCut: [],
+  updateCellComment: ['text', 'col', 'row'],
+  groupingCollapsed: ['cols', 'colIndex', 'collapsed'],
+  levelHeaderClicked: ['cols', 'level'],
+  popupButtonClick: ['row', 'column'],
+  popupClose: ['row', 'column'],
+  contextMenuOpenOnSelection: ['row', 'column'],
+  actionOnCurrentSelection: ['actionKey'],
+  rowHeaderContextMenuOpen: ['rowIndex'],
+  actionOnRowHeader: ['actionKey'],
+  columnHeaderContextMenuOpen: ['columnIndex'],
+  actionOnColumnHeader: ['actionKey'],
+  contextMenuClosed: []
+};

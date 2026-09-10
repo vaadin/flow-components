@@ -26,6 +26,7 @@ import {
 } from './state/SelectionState.js';
 import type {
   CellRangeSelectedData,
+  CellAddedToSelectionData,
   CellSelectedData,
   CellValueEditedData,
   ColumnSelectedData,
@@ -1963,10 +1964,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * replaces whatever came before.
    */
   private dispatchCellAddedToSelection(col: number, row: number): void {
-    const data: CellSelectedData = {
+    const data: CellAddedToSelectionData = {
       row,
-      column: col,
-      oldSelectionRangeDiscarded: false
+      column: col
     };
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
@@ -2498,7 +2498,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         detail: {
           type: 'sheetSelected',
           data: {
-            sheetName: this.sheetNames[index - 1] ?? '',
+            // The server reads a 0-based tab index here; `index` is the
+            // 1-based position the strip renders.
+            sheetIndex: index - 1,
             scrollLeft: this.scrollContainer.scrollLeft,
             scrollTop: this.scrollContainer.scrollTop
           }

@@ -190,11 +190,9 @@ describe('Spreadsheet non-coherent selection — server events', () => {
 
     expect(ctx.events).to.have.length(1);
     expect(ctx.events[0].type).to.equal('cellAddedToSelectionAndSelected');
-    expect(ctx.events[0].data).to.deep.equal({
-      row: 3,
-      column: 3,
-      oldSelectionRangeDiscarded: false
-    });
+    // Coordinates only: the server reads no discard flag for this event,
+    // so sending one would violate the payload contract.
+    expect(ctx.events[0].data).to.deep.equal({ row: 3, column: 3 });
   });
 
   it('Ctrl-shift-click reports the added range', () => {

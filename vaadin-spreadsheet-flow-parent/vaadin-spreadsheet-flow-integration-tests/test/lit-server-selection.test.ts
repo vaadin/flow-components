@@ -533,7 +533,9 @@ describe('Formula bar — named ranges', () => {
 
     const select = await box();
     expect(select).to.not.be.null;
+    // The blank first entry is the picker's "nothing picked" state.
     expect([...select!.options].map((o) => o.textContent!.trim())).to.deep.equal([
+      '',
       'Sales',
       'Costs'
     ]);
@@ -549,7 +551,7 @@ describe('Formula bar — named ranges', () => {
     ctx.sheet.setNamedRanges(JSON.stringify(['Sales']) as any);
 
     const select = await box();
-    expect([...select!.options].map((o) => o.value)).to.deep.equal(['Sales']);
+    expect([...select!.options].map((o) => o.value)).to.deep.equal(['', 'Sales']);
   });
 
   it('navigates to the range that is picked', async () => {
