@@ -58,7 +58,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * `vaadin-spreadsheet::part(cell)` matches nothing, and the whole
    * documented styling API silently does nothing.
    */
-  static readonly EXPORTED_PARTS = 'cell,cell-range,cell-input,comment-triangle,invalid-triangle,popup-button,selection-corner';
+  static readonly EXPORTED_PARTS =
+    'cell,cell-range,cell-input,comment-triangle,invalid-triangle,popup-button,selection-corner';
 
   static properties = {
     renderState: { attribute: false }
@@ -852,13 +853,7 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
     const cellPart = inSelection && !isActive ? 'cell cell-range' : 'cell';
 
     overlays.push(html`
-      <div
-        class=${classList}
-        part=${cellPart}
-        style=${style}
-        data-col=${region.col1}
-        data-row=${region.row1}
-      >
+      <div class=${classList} part=${cellPart} style=${style} data-col=${region.col1} data-row=${region.row1}>
         ${text}
       </div>
     `);

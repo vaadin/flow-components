@@ -540,3 +540,79 @@ describe('Spreadsheet — scrolling the tab strip', () => {
         cleanup();
     });
 });
+
+/**
+ * Moving between sheets is navigation, so the keyboard has to end up on the
+ * grid — not on the tab or the strip button that was just clicked. Without
+ * this the arrow keys that naturally follow a sheet switch scroll the tab
+ * strip instead of moving the selection.
+ */
+describe('Spreadsheet — focus after a sheet switch', () => {
+    function attach(names: string[]): {
+        host: HTMLElement;
+        sheet: Spreadsheet;
+        cleanup: () => void;
+    } {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setSheetNames(names);
+        sheet.setSheetIndex(1);
+        return {
+            host,
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    function clickTab(sheet: Spreadsheet, index: number): void {
+        sheet.getSheetTabs().dispatchEvent(
+            new CustomEvent('sheet-tab-click', {
+                detail: { index },
+                bubbles: true,
+                composed: true,
+            })
+        );
+    }
+
+    it('focuses the sheet after switching to another tab', () => {
+        const { sheet, cleanup } = attach(['One', 'Two']);
+        document.body.focus();
+        clickTab(sheet, 2);
+        expect(sheet.getScrollContainer().matches(':focus')).to.be.true;
+        cleanup();
+    });
+
+    it('focuses the sheet after clicking the tab already active', () => {
+        const { sheet, cleanup } = attach(['One', 'Two']);
+        document.body.focus();
+        clickTab(sheet, 1);
+        expect(sheet.getScrollContainer().matches(':focus')).to.be.true;
+        cleanup();
+    });
+
+    it('focuses the sheet after adding one', () => {
+        const { sheet, cleanup } = attach(['One']);
+        document.body.focus();
+        sheet.getSheetTabs().dispatchEvent(
+            new CustomEvent('sheet-tab-add', { bubbles: true, composed: true })
+        );
+        expect(sheet.getScrollContainer().matches(':focus')).to.be.true;
+        cleanup();
+    });
+
+    it('leaves the focus alone when a protected workbook refuses the add', () => {
+        const { sheet, cleanup } = attach(['One']);
+        sheet.setWorkbookProtected(true);
+        document.body.focus();
+        sheet.getSheetTabs().dispatchEvent(
+            new CustomEvent('sheet-tab-add', { bubbles: true, composed: true })
+        );
+        expect(sheet.getScrollContainer().matches(':focus')).to.be.false;
+        cleanup();
+    });
+});

@@ -828,6 +828,40 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('reports the selection once, not once per path', async () => {
+    // The editor is projected into its cell, so a pointer event on it
+    // also travels through the cell in the flattened tree. If the
+    // grid's own click delegation reports the cell as well, the server
+    // sees the selection twice and re-runs onCustomEditorDisplayed for
+    // every click.
+    const editor = field();
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col3 row4': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    const selections: any[] = [];
+    host.addEventListener('spreadsheet-event', (e) => {
+      const d = (e as CustomEvent).detail;
+      if (d.type === 'cellSelected') {
+        selections.push(d.data);
+      }
+    });
+
+    editor.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+    editor.dispatchEvent(
+      new MouseEvent('mousedown', { bubbles: true, composed: true })
+    );
+    editor.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(selections).to.have.length(1);
+    cleanup();
+  });
+
   it('says nothing when the editor of the selected cell is clicked', async () => {
     // Re-reporting the selection the server already knows about would
     // bounce a needless round trip on every click into the editor.

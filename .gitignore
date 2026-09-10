@@ -53,3 +53,4 @@ dev-bundle
 .claude/*.local.*
 CLAUDE.local.md
 .playwright-cli/
+jetty.log

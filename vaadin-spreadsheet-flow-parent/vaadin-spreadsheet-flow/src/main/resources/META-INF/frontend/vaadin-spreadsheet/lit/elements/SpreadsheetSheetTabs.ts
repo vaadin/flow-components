@@ -193,9 +193,7 @@ export class SpreadsheetSheetTabs extends LitElement {
     }
 
     if (target.closest('[data-new-tab]')) {
-      this.dispatchEvent(
-        new CustomEvent('sheet-tab-add', { bubbles: true, composed: true })
-      );
+      this.dispatchEvent(new CustomEvent('sheet-tab-add', { bubbles: true, composed: true }));
       return;
     }
 
@@ -232,8 +230,7 @@ export class SpreadsheetSheetTabs extends LitElement {
   private renderStripButtons(canScrollBack: boolean, canScrollForward: boolean): TemplateResult {
     const scrollPart = (enabled: boolean, specific: string): string =>
       `${enabled ? 'scroll-tabs-button' : 'scroll-tabs-button-disabled'} ${specific}`;
-    const scrollClass = (cls: string, enabled: boolean): string =>
-      enabled ? cls : `${cls} hidden`;
+    const scrollClass = (cls: string, enabled: boolean): string => (enabled ? cls : `${cls} hidden`);
     return html`
       <div class="sheet-tabsheet-options">
         <div

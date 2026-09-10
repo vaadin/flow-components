@@ -2453,6 +2453,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.workbookProtected) {
       return;
     }
+    // The strip button took the focus on the way in. Adding a sheet is a
+    // way of moving to it, so the keyboard belongs to the new sheet.
+    this.scrollContainer.focus();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -2470,6 +2473,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
     const { index } = e.detail;
+    // Clicking a tab focused it. Switching sheets is navigation, so the
+    // keyboard goes back to the grid — the arrow keys that naturally follow
+    // must move the selection, not the tab strip. This holds for a click on
+    // the already-active tab too, which is otherwise a no-op.
+    this.scrollContainer.focus();
     if (index === this.sheetIndex) {
       // Clicking the tab that is already active selects nothing — Excel
       // does nothing here either. Reporting it anyway makes the server run
@@ -3361,10 +3369,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (state === null || typeof state.col !== 'number') {
       return;
     }
-    this.popupButtonStates = [
-      ...this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state)),
-      state
-    ];
+    this.popupButtonStates = [...this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state)), state];
     this.scheduleRender();
   }
 
@@ -3374,9 +3379,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (state === null || typeof state.col !== 'number') {
       return;
     }
-    this.popupButtonStates = this.popupButtonStates.filter(
-      (b) => !samePopupButtonCell(b, state)
-    );
+    this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
     this.scheduleRender();
   }
 

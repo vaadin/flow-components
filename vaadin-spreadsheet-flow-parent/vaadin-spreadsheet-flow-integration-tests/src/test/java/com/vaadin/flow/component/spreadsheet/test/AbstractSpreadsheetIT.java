@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Level;
 
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -752,21 +751,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        TestBenchElement selection = sprElement.$("*")
-                .withClassName("sheet-selection").first();
-        final Set<String> classes = selection.getClassNames();
-
-        int startRow = -1;
-        int startColumn = -1;
-
-        for (String c : classes) {
-            if (c.startsWith("row")) {
-                startRow = Integer.parseInt(c.substring(3));
-            }
-            if (c.startsWith("col")) {
-                startColumn = Integer.parseInt(c.substring(3));
-            }
-        }
+        // The selection overlay lives in the cell-grid's shadow root, which
+        // `sprElement.$(...)` does not reach, and it carries its anchor as
+        // data attributes rather than col<N>/row<N> classes.
+        WebElement selection = findElementInShadowRoot(
+                By.className("sheet-selection"));
+        int startRow = Integer.parseInt(selection.getDomAttribute("data-row"));
+        int startColumn = Integer
+                .parseInt(selection.getDomAttribute("data-col"));
 
         int endRow = startRow + 1;
         while (sprElement.getCellAt(endRow, startColumn).isCellSelected()) {

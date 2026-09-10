@@ -139,25 +139,6 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   firstUpdated(): void {
-    // Picking a named range navigates to it. The server treats it exactly
-    // like typing the name into the address field.
-    this.shadowRoot!.addEventListener('change', (e: Event) => {
-      const target = e.target;
-      if (!(target instanceof HTMLSelectElement)) {
-        return;
-      }
-      if (!target.classList.contains('namedrangebox')) {
-        return;
-      }
-      this.dispatchEvent(
-        new CustomEvent('sheet-address-changed', {
-          detail: { value: target.value },
-          bubbles: true,
-          composed: true
-        })
-      );
-    });
-
     // Slice 175: when the user presses Enter inside the
     // address field, dispatch `sheet-address-changed` with
     // the input's current value. The connector translates
@@ -188,6 +169,34 @@ export class SpreadsheetFormulaBar extends LitElement {
     });
   }
 
+  /**
+   * Picking a named range navigates to it. The server treats it exactly like
+   * typing the name into the address field.
+   *
+   * Bound on the `<select>` itself rather than delegated from the shadow
+   * root: a native `change` bubbles, but a synthetic one dispatched straight
+   * at the element (which is how TestBench drives the picker) does not, and
+   * a delegated listener would never see it.
+   */
+  private handleNamedRangeChange = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof HTMLSelectElement)) {
+      return;
+    }
+    // The blank first entry is the "nothing picked" state, not an address
+    // the server can navigate to.
+    if (target.value === '') {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('sheet-address-changed', {
+        detail: { value: target.value },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
   render(): TemplateResult {
     const { address, formula, namedRanges = [] } = this.renderState;
     // The dropdown only appears once the workbook defines a named range,
@@ -195,7 +204,8 @@ export class SpreadsheetFormulaBar extends LitElement {
     const namedRangeBox =
       namedRanges.length === 0
         ? ''
-        : html`<select class="namedrangebox" part="named-range-box">
+        : html`<select class="namedrangebox" part="named-range-box" @change=${this.handleNamedRangeChange}>
+            <option value=""></option>
             ${namedRanges.map((name) => html`<option value=${name}>${name}</option>`)}
           </select>`;
     return html`
