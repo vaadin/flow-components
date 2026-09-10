@@ -2398,19 +2398,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // 12 explicit RPC methods (server→client action messages)
   // ====================================================================
 
-  updateBottomRightCellValues(cellData: CellData[]): void {
+  updateBottomRightCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
     this.scheduleRender();
   }
-  updateTopLeftCellValues(cellData: CellData[]): void {
+  updateTopLeftCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
     this.scheduleRender();
   }
-  updateTopRightCellValues(cellData: CellData[]): void {
+  updateTopRightCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
     this.scheduleRender();
   }
-  updateBottomLeftCellValues(cellData: CellData[]): void {
+  updateBottomLeftCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
     this.scheduleRender();
   }
@@ -2423,8 +2423,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * four quadrants share one map (the cell-grid's renderState picks
    * out the visible subset).
    */
-  private storeCellData(cellData: CellData[]): void {
-    for (const cell of cellData) {
+  private storeCellData(cellData: CellData[] | string): void {
+    // Flow hands collections over as a JSON string on some lanes and as an
+    // array on others. Iterating the string walks it character by
+    // character, which quietly files one entry under
+    // "colundefined rowundefined" and drops every value on the sheet.
+    for (const cell of coerceArray<CellData>(cellData)) {
       this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
     }
   }

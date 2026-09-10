@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import { SpreadsheetCellGrid } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
 import {
     type CellGridRenderState,
@@ -387,6 +388,61 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
     function cellOf(el: SpreadsheetCellGrid): HTMLElement {
         return el.shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
     }
+
+    it('takes the cell values as the JSON string the server can send', async () => {
+        // Flow hands collections over as a JSON string on some lanes and as
+        // an array on others. Iterating the string walks it character by
+        // character: one entry lands under "colundefined rowundefined" and
+        // every value on the sheet disappears.
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        sheet.updateBottomRightCellValues(
+            JSON.stringify([
+                { row: 1, col: 1, value: 'A1', cellStyle: 'cs0' },
+                { row: 2, col: 1, value: 'A2', cellStyle: 'cs0' },
+            ]) as any
+        );
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        expect(sheet.getCellData().size).to.equal(2);
+        expect(sheet.getCellData().get('col1 row1')!.value).to.equal('A1');
+        const cell = sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
+        expect(cell.textContent!.trim()).to.equal('A1');
+
+        sheet.dispose();
+        host.remove();
+    });
+
+    it('still takes the cell values as a plain array', async () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH(new Array(10).fill(15));
+
+        sheet.updateBottomRightCellValues([
+            { row: 1, col: 1, value: 'A1', cellStyle: 'cs0' },
+        ] as any);
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        expect(sheet.getCellData().get('col1 row1')!.value).to.equal('A1');
+        sheet.dispose();
+        host.remove();
+    });
 
     it('paints the colour the number format names on the cell', async () => {
         // A four-part format paints positive, negative, zero and text
