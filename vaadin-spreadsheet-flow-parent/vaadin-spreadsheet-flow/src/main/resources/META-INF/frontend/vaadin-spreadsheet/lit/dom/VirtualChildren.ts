@@ -100,17 +100,25 @@ export function flowVirtualChildResolver(appId: string): VirtualChildResolver {
  * Vaadin component tears down and rebuilds it.
  */
 export class SlottedVirtualChildren {
-  private readonly placed = new Map<string, HTMLElement>();
+  private readonly placed = new Map<string, PlacedChild>();
 
   /**
-   * @param host the element the components become light-DOM children of.
-   *   Slots that project them must live in this element's shadow root.
+   * @param lightHost the element the components become light-DOM children
+   *   of. This is the {@code <vaadin-spreadsheet>} element itself, so an
+   *   application's own components stay where every other Vaadin component
+   *   is — in the document, findable by an ordinary query or a TestBench
+   *   `$(...)`. Putting them inside a shadow root would hide them.
+   * @param slotHost the element whose shadow root renders the slots. When
+   *   it is not the light host, each component gets a forwarding
+   *   {@code <slot>} placed here, so the projection can cross both shadow
+   *   boundaries; see {@link forwarderFor}.
    * @param resolve turns a node id into the element Flow created.
    * @param slotName names the slot for a given node id. The same function
    *   must be used to name the slots in the template.
    */
   constructor(
-    private readonly host: HTMLElement,
+    private readonly lightHost: HTMLElement,
+    private readonly slotHost: HTMLElement,
     private readonly resolve: VirtualChildResolver,
     private readonly slotName: (nodeId: string) => string
   ) {}
@@ -125,9 +133,9 @@ export class SlottedVirtualChildren {
   sync(nodeIds: Iterable<string>): string[] {
     const wanted = new Set(nodeIds);
 
-    for (const [nodeId, element] of this.placed) {
+    for (const [nodeId, placed] of this.placed) {
       if (!wanted.has(nodeId)) {
-        this.detach(element);
+        this.detach(placed);
         this.placed.delete(nodeId);
       }
     }
@@ -140,9 +148,15 @@ export class SlottedVirtualChildren {
       if (element === null) {
         continue;
       }
-      element.setAttribute('slot', this.slotName(nodeId));
-      this.host.appendChild(element);
-      this.placed.set(nodeId, element);
+      const name = this.slotName(nodeId);
+      element.setAttribute('slot', name);
+      this.lightHost.appendChild(element);
+      let forwarder: HTMLSlotElement | null = null;
+      if (this.slotHost !== this.lightHost) {
+        forwarder = forwarderFor(name);
+        this.slotHost.appendChild(forwarder);
+      }
+      this.placed.set(nodeId, { element, forwarder });
     }
 
     return [...this.placed.keys()];
@@ -150,13 +164,13 @@ export class SlottedVirtualChildren {
 
   /** The element currently placed for an id, if any. */
   get(nodeId: string): HTMLElement | null {
-    return this.placed.get(nodeId) ?? null;
+    return this.placed.get(nodeId)?.element ?? null;
   }
 
   /** Remove every placed component. Call this when tearing the sheet down. */
   clear(): void {
-    for (const element of this.placed.values()) {
-      this.detach(element);
+    for (const placed of this.placed.values()) {
+      this.detach(placed);
     }
     this.placed.clear();
   }
@@ -168,8 +182,33 @@ export class SlottedVirtualChildren {
    * somewhere else later — a chart that scrolls out of view and returns — and
    * a stale slot name would leave it projected nowhere.
    */
-  private detach(element: HTMLElement): void {
-    element.removeAttribute('slot');
-    element.remove();
+  private detach(placed: PlacedChild): void {
+    placed.element.removeAttribute('slot');
+    placed.element.remove();
+    placed.forwarder?.remove();
   }
+}
+
+/** A component the sheet is showing, and the slot that carries it there. */
+interface PlacedChild {
+  element: HTMLElement;
+  forwarder: HTMLSlotElement | null;
+}
+
+/**
+ * A {@code <slot>} that passes a component through a second shadow
+ * boundary.
+ *
+ * The component is a light child of {@code <vaadin-spreadsheet>}, but the
+ * cell that shows it is rendered inside the cell-grid's own shadow root,
+ * and a slot only ever projects its own host's light children. So two are
+ * chained: this one lives in the host's shadow root and picks the
+ * component up by name, and is itself assigned — under the same name — to
+ * the slot the cell renders.
+ */
+function forwarderFor(name: string): HTMLSlotElement {
+  const forwarder = document.createElement('slot');
+  forwarder.setAttribute('name', name);
+  forwarder.setAttribute('slot', name);
+  return forwarder;
 }

@@ -452,9 +452,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.contextMenu = new SpreadsheetContextMenu();
     const resolveVirtualChild = (nodeId: string): HTMLElement | null =>
       flowVirtualChildResolver(overlayComponentAppId(host))(nodeId);
-    this.overlayComponents = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, overlayComponentSlotName);
-    this.cellComponents = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, cellComponentSlotName);
-    this.cellEditors = new SlottedVirtualChildren(this.cellGrid, resolveVirtualChild, cellEditorSlotName);
+    // The components live in the host's light DOM, where an application's
+    // own components belong — findable by an ordinary document query, the
+    // way every other Vaadin component is. The slots that show them are in
+    // the cell-grid's shadow root, so each gets a forwarding slot.
+    this.overlayComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, overlayComponentSlotName);
+    this.cellComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellComponentSlotName);
+    this.cellEditors = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellEditorSlotName);
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
     // intrinsic height. Slice 154. Existing host width/height

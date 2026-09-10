@@ -198,6 +198,10 @@ describe('Spreadsheet — component overlays', () => {
         host.style.cssText = 'width:400px;height:300px;';
         (host as any).appId = 'ROOT';
         document.body.appendChild(host);
+        // The wrapper renders into its own shadow root, and that boundary
+        // is exactly what the forwarding slots exist to cross. A plain div
+        // host would let a broken chain pass.
+        const renderTarget = host.attachShadow({ mode: 'open' });
         (window as any).Vaadin = {
             Flow: {
                 clients: {
@@ -205,7 +209,7 @@ describe('Spreadsheet — component overlays', () => {
                 },
             },
         };
-        const sheet = new Spreadsheet(host);
+        const sheet = new Spreadsheet(host, renderTarget);
         sheet.setRows(10);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
@@ -225,22 +229,22 @@ describe('Spreadsheet — component overlays', () => {
         return { type: 'COMPONENT', col, row, width: 120, height: 60, dx: 0, dy: 0 };
     }
 
-    it('parents the component to the cell grid and slots it', async () => {
+    it('parents the component to the host and slots it', async () => {
         const chart = document.createElement('div');
         chart.id = 'the-chart';
-        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
-        expect(chart.parentElement).to.equal(sheet.getCellGrid());
+        expect(chart.parentElement).to.equal(host);
         expect(chart.getAttribute('slot')).to.equal('overlay-component-31');
         cleanup();
     });
 
     it('renders a matching slot inside the positioned wrapper', async () => {
         const chart = document.createElement('div');
-        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -251,10 +255,11 @@ describe('Spreadsheet — component overlays', () => {
         expect(wrapper).to.not.be.null;
         const slot = wrapper.querySelector('slot')!;
         expect(slot.getAttribute('name')).to.equal('overlay-component-31');
-        // The projection is what puts the component on the sheet.
-        // Compare identity, never deep-equality: chai walks a DOM node's
-        // cyclic parent/child references and never returns.
-        const assigned = slot.assignedElements();
+        // The projection is what puts the component on the sheet. flatten
+        // follows the forwarding slot that carries it across the second
+        // shadow boundary. Compare identity, never deep-equality: chai
+        // walks a DOM node's cyclic references and never returns.
+        const assigned = slot.assignedElements({ flatten: true });
         expect(assigned).to.have.length(1);
         expect(assigned[0]).to.equal(chart);
         cleanup();
@@ -262,7 +267,7 @@ describe('Spreadsheet — component overlays', () => {
 
     it('positions the wrapper at the anchor cell', async () => {
         const chart = document.createElement('div');
-        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({ '31': componentOverlay(3, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -278,7 +283,7 @@ describe('Spreadsheet — component overlays', () => {
 
     it('takes the component back out when the overlay goes away', async () => {
         const chart = document.createElement('div');
-        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -296,7 +301,7 @@ describe('Spreadsheet — component overlays', () => {
         // Re-parenting a live Vaadin component destroys and rebuilds it, and
         // the sheet repaints on every scroll tick.
         const chart = document.createElement('div');
-        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -311,14 +316,14 @@ describe('Spreadsheet — component overlays', () => {
         await sheet.getCellGrid().updateComplete;
 
         expect(moved).to.be.false;
-        expect(chart.parentElement).to.equal(sheet.getCellGrid());
+        expect(chart.parentElement).to.equal(host);
         cleanup();
     });
 
     it('still renders the wrapper when Flow has no element yet', async () => {
         // The geometry and the component arrive in separate server
         // responses, so the first paint can legitimately find nothing.
-        const { sheet, cleanup } = attachSheetWithFlow({});
+        const { host, sheet, cleanup } = attachSheetWithFlow({});
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -327,13 +332,15 @@ describe('Spreadsheet — component overlays', () => {
             '.sheet-overlay-component'
         );
         expect(wrapper).to.not.be.null;
-        expect(wrapper!.querySelector('slot')!.assignedElements()).to.have.length(0);
+        expect(
+          wrapper!.querySelector('slot')!.assignedElements({ flatten: true })
+        ).to.have.length(0);
         cleanup();
     });
 
     it('picks the component up on a later repaint', async () => {
         const components: Record<string, HTMLElement> = {};
-        const { sheet, cleanup } = attachSheetWithFlow(components);
+        const { host, sheet, cleanup } = attachSheetWithFlow(components);
         sheet.setOverlays({ '31': componentOverlay(2, 2) });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
@@ -343,7 +350,7 @@ describe('Spreadsheet — component overlays', () => {
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
-        expect(chart.parentElement).to.equal(sheet.getCellGrid());
+        expect(chart.parentElement).to.equal(host);
         cleanup();
     });
 

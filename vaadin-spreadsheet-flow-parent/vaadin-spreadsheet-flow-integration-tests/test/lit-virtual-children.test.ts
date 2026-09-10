@@ -61,6 +61,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     const chart = component('chart');
     const children = new SlottedVirtualChildren(
       host,
+      host,
       tableResolver({ '7': chart }),
       (id) => `overlay-component-${id}`
     );
@@ -75,6 +76,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     host = makeHost();
     const children = new SlottedVirtualChildren(
       host,
+      host,
       tableResolver({ '1': component('a') }),
       (id) => `s-${id}`
     );
@@ -88,7 +90,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     host = makeHost();
     const table: Record<string, HTMLElement> = {};
     const resolve = tableResolver(table);
-    const children = new SlottedVirtualChildren(host, resolve, (id) => `s-${id}`);
+    const children = new SlottedVirtualChildren(host, host, resolve, (id) => `s-${id}`);
 
     expect(children.sync(['4'])).to.deep.equal([]);
     table['4'] = component('late');
@@ -103,7 +105,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     host = makeHost();
     const chart = component('chart');
     const resolve = tableResolver({ '7': chart });
-    const children = new SlottedVirtualChildren(host, resolve, (id) => `s-${id}`);
+    const children = new SlottedVirtualChildren(host, host, resolve, (id) => `s-${id}`);
     children.sync(['7']);
 
     let moved = false;
@@ -122,6 +124,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     host = makeHost();
     const chart = component('chart');
     const children = new SlottedVirtualChildren(
+      host,
       host,
       tableResolver({ '7': chart }),
       (id) => `s-${id}`
@@ -142,6 +145,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     const chart = component('chart');
     const children = new SlottedVirtualChildren(
       host,
+      host,
       tableResolver({ '7': chart }),
       (id) => `s-${id}`
     );
@@ -156,6 +160,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     const a = component('a');
     const b = component('b');
     const children = new SlottedVirtualChildren(
+      host,
       host,
       tableResolver({ '1': a, '2': b }),
       (id) => `s-${id}`
@@ -172,6 +177,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     const chart = component('chart');
     const children = new SlottedVirtualChildren(
       host,
+      host,
       tableResolver({ '7': chart }),
       (id) => `s-${id}`
     );
@@ -187,6 +193,7 @@ describe('SlottedVirtualChildren — placing components', () => {
     const b = component('b');
     const children = new SlottedVirtualChildren(
       host,
+      host,
       tableResolver({ '1': a, '2': b }),
       (id) => `s-${id}`
     );
@@ -196,6 +203,113 @@ describe('SlottedVirtualChildren — placing components', () => {
 
     expect(host.children).to.have.length(0);
     expect(children.get('1')).to.be.null;
+  });
+});
+
+describe('SlottedVirtualChildren — crossing a second shadow boundary', () => {
+  let host: HTMLElement;
+
+  afterEach(() => {
+    host.remove();
+  });
+
+  /**
+   * The production shape: the component belongs in the host's light DOM,
+   * where an application can still find it, but the element that shows it
+   * lives inside a nested shadow root. A slot only projects its own host's
+   * light children, so two are chained.
+   */
+  function nestedFixture(): { inner: HTMLElement; chart: HTMLElement } {
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    const shadow = host.attachShadow({ mode: 'open' });
+    const inner = document.createElement('div');
+    // A second shadow root, standing in for the cell-grid element.
+    inner.attachShadow({ mode: 'open' }).innerHTML = '<slot name="s-7"></slot>';
+    shadow.appendChild(inner);
+    return { inner, chart: component('chart') };
+  }
+
+  it('leaves the component in the host light DOM', () => {
+    const { inner, chart } = nestedFixture();
+    const children = new SlottedVirtualChildren(
+      host,
+      inner,
+      tableResolver({ '7': chart }),
+      (id) => `s-${id}`
+    );
+
+    children.sync(['7']);
+
+    expect(chart.parentElement).to.equal(host);
+    expect(host.contains(chart)).to.be.true;
+  });
+
+  it('projects it all the way into the inner shadow root', () => {
+    const { inner, chart } = nestedFixture();
+    const children = new SlottedVirtualChildren(
+      host,
+      inner,
+      tableResolver({ '7': chart }),
+      (id) => `s-${id}`
+    );
+
+    children.sync(['7']);
+
+    const innerSlot = inner.shadowRoot!.querySelector('slot')!;
+    const assigned = innerSlot.assignedElements({ flatten: true });
+    expect(assigned).to.have.length(1);
+    expect(assigned[0]).to.equal(chart);
+  });
+
+  it('puts a forwarding slot in the slot host', () => {
+    const { inner, chart } = nestedFixture();
+    const children = new SlottedVirtualChildren(
+      host,
+      inner,
+      tableResolver({ '7': chart }),
+      (id) => `s-${id}`
+    );
+
+    children.sync(['7']);
+
+    const forwarder = inner.querySelector('slot')!;
+    expect(forwarder.getAttribute('name')).to.equal('s-7');
+    expect(forwarder.getAttribute('slot')).to.equal('s-7');
+  });
+
+  it('takes the forwarding slot away with the component', () => {
+    const { inner, chart } = nestedFixture();
+    const children = new SlottedVirtualChildren(
+      host,
+      inner,
+      tableResolver({ '7': chart }),
+      (id) => `s-${id}`
+    );
+    children.sync(['7']);
+
+    children.sync([]);
+
+    expect(inner.querySelector('slot')).to.be.null;
+    expect(chart.parentElement).to.be.null;
+  });
+
+  it('adds no forwarder when both hosts are the same element', () => {
+    // One shadow boundary needs no chain.
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    const chart = component('chart');
+    const children = new SlottedVirtualChildren(
+      host,
+      host,
+      tableResolver({ '7': chart }),
+      (id) => `s-${id}`
+    );
+
+    children.sync(['7']);
+
+    expect(host.querySelector('slot')).to.be.null;
+    expect(chart.parentElement).to.equal(host);
   });
 });
 

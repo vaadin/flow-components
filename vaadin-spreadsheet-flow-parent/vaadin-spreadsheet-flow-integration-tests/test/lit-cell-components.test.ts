@@ -188,6 +188,7 @@ describe('Spreadsheet — components inside cells', () => {
   const originalVaadin = (window as any).Vaadin;
 
   function attachSheet(components: Record<string, HTMLElement>): {
+    host: HTMLElement;
     sheet: Spreadsheet;
     cleanup: () => void;
   } {
@@ -195,17 +196,22 @@ describe('Spreadsheet — components inside cells', () => {
     host.style.cssText = 'width:400px;height:300px;';
     (host as any).appId = 'ROOT';
     document.body.appendChild(host);
+    // The wrapper renders into its own shadow root, and that boundary is
+    // exactly what the forwarding slots exist to cross. A plain div host
+    // would let a broken chain pass.
+    const renderTarget = host.attachShadow({ mode: 'open' });
     (window as any).Vaadin = {
       Flow: {
         clients: { ROOT: { getByNodeId: (n: number) => components[String(n)] ?? null } }
       }
     };
-    const sheet = new Spreadsheet(host);
+    const sheet = new Spreadsheet(host, renderTarget);
     sheet.setRows(50);
     sheet.setCols(10);
     sheet.setColW(new Array(10).fill(50));
     sheet.setRowH(new Array(50).fill(15));
     return {
+      host,
       sheet,
       cleanup: () => {
         sheet.dispose();
@@ -223,7 +229,7 @@ describe('Spreadsheet — components inside cells', () => {
 
   it('projects the component into its cell', async () => {
     const widget = button('Click me');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -233,7 +239,7 @@ describe('Spreadsheet — components inside cells', () => {
       .shadowRoot!.querySelector<HTMLElement>('.cell.col2.row2')!;
     const slot = cell.querySelector('slot')!;
     expect(slot.getAttribute('name')).to.equal('custom-component-31');
-    const assigned = slot.assignedElements();
+    const assigned = slot.assignedElements({ flatten: true });
     expect(assigned).to.have.length(1);
     expect(assigned[0]).to.equal(widget);
     cleanup();
@@ -242,7 +248,7 @@ describe('Spreadsheet — components inside cells', () => {
   it('shows the component instead of the cell value', async () => {
     // The component is what the cell is for; rendering both would stack
     // them on top of each other.
-    const { sheet, cleanup } = attachSheet({ '31': button('Click me') });
+    const { host, sheet, cleanup } = attachSheet({ '31': button('Click me') });
     sheet.updateBottomRightCellValues([
       { row: 2, col: 2, value: 'ignored', cellStyle: 'cs0' } as any
     ]);
@@ -258,7 +264,7 @@ describe('Spreadsheet — components inside cells', () => {
   });
 
   it('leaves cells without a component showing their value', async () => {
-    const { sheet, cleanup } = attachSheet({ '31': button('Click me') });
+    const { host, sheet, cleanup } = attachSheet({ '31': button('Click me') });
     sheet.updateBottomRightCellValues([
       { row: 1, col: 1, value: 'plain', cellStyle: 'cs0' } as any
     ]);
@@ -276,7 +282,7 @@ describe('Spreadsheet — components inside cells', () => {
 
   it('accepts the JSON-serialized map the server sends', async () => {
     const widget = button('Click me');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setComponentIDtoCellKeysMap(
       JSON.stringify({ '31': 'col2 row2' }) as any
     );
@@ -289,7 +295,7 @@ describe('Spreadsheet — components inside cells', () => {
 
   it('takes the component back when the server removes it', async () => {
     const widget = button('Click me');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -307,7 +313,7 @@ describe('Spreadsheet — components inside cells', () => {
     // Re-parenting rebuilds a live Vaadin component, losing its state —
     // half-typed text in a field, an open dropdown.
     const widget = button('Click me');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -315,7 +321,7 @@ describe('Spreadsheet — components inside cells', () => {
     let moved = false;
     new MutationObserver(() => {
       moved = true;
-    }).observe(sheet.getCellGrid(), { childList: true });
+    }).observe(host, { childList: true });
 
     sheet.recomputeViewport();
     sheet.recomputeViewport();
@@ -327,7 +333,7 @@ describe('Spreadsheet — components inside cells', () => {
 
   it('releases the component when the sheet is disposed', async () => {
     const widget = button('Click me');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -342,6 +348,7 @@ describe('Spreadsheet — custom cell editors', () => {
   const originalVaadin = (window as any).Vaadin;
 
   function attachSheet(editors: Record<string, HTMLElement>): {
+    host: HTMLElement;
     sheet: Spreadsheet;
     cleanup: () => void;
   } {
@@ -349,17 +356,22 @@ describe('Spreadsheet — custom cell editors', () => {
     host.style.cssText = 'width:400px;height:300px;';
     (host as any).appId = 'ROOT';
     document.body.appendChild(host);
+    // The wrapper renders into its own shadow root, and that boundary is
+    // exactly what the forwarding slots exist to cross. A plain div host
+    // would let a broken chain pass.
+    const renderTarget = host.attachShadow({ mode: 'open' });
     (window as any).Vaadin = {
       Flow: {
         clients: { ROOT: { getByNodeId: (n: number) => editors[String(n)] ?? null } }
       }
     };
-    const sheet = new Spreadsheet(host);
+    const sheet = new Spreadsheet(host, renderTarget);
     sheet.setRows(50);
     sheet.setCols(10);
     sheet.setColW(new Array(10).fill(50));
     sheet.setRowH(new Array(50).fill(15));
     return {
+      host,
       sheet,
       cleanup: () => {
         sheet.dispose();
@@ -379,14 +391,14 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('shows the editor in its cell by default', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
 
     const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
     expect(slot.getAttribute('name')).to.equal('custom-editor-77');
-    const assigned = slot.assignedElements();
+    const assigned = slot.assignedElements({ flatten: true });
     expect(assigned).to.have.length(1);
     expect(assigned[0]).to.equal(editor);
     cleanup();
@@ -394,7 +406,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('holds the editor back until the cell is selected on focus mode', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setShowCustomEditorOnFocus(true);
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     // Selection starts at A1.
@@ -408,7 +420,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('brings the editor in when its cell is selected', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setShowCustomEditorOnFocus(true);
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
@@ -420,13 +432,13 @@ describe('Spreadsheet — custom cell editors', () => {
 
     const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
     expect(slot.getAttribute('name')).to.equal('custom-editor-77');
-    expect(editor.parentElement).to.equal(sheet.getCellGrid());
+    expect(editor.parentElement).to.equal(host);
     cleanup();
   });
 
   it('takes the editor back out when the selection moves away', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setShowCustomEditorOnFocus(true);
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
@@ -445,7 +457,7 @@ describe('Spreadsheet — custom cell editors', () => {
   it('gives the editor the cell when a component is there too', async () => {
     const editor = field();
     const widget = document.createElement('span');
-    const { sheet, cleanup } = attachSheet({ '77': editor, '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor, '31': widget });
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
@@ -453,7 +465,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
     const slot = cell(sheet, '.cell.col2.row2')!.querySelector('slot')!;
     expect(slot.getAttribute('name')).to.equal('custom-editor-77');
-    expect(editor.parentElement).to.equal(sheet.getCellGrid());
+    expect(editor.parentElement).to.equal(host);
     // The component keeps no slot it cannot project through.
     expect(widget.parentElement).to.be.null;
     cleanup();
@@ -461,7 +473,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('accepts the JSON-serialized map the server sends', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setCellKeysToEditorIdMap(JSON.stringify({ 'col2 row2': '77' }) as any);
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -473,7 +485,7 @@ describe('Spreadsheet — custom cell editors', () => {
   it('does not re-parent the editor when the sheet repaints', async () => {
     // Re-parenting rebuilds the component and loses half-typed input.
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -481,7 +493,7 @@ describe('Spreadsheet — custom cell editors', () => {
     let moved = false;
     new MutationObserver(() => {
       moved = true;
-    }).observe(sheet.getCellGrid(), { childList: true });
+    }).observe(host, { childList: true });
 
     sheet.recomputeViewport();
     sheet.recomputeViewport();
@@ -496,7 +508,7 @@ describe('Spreadsheet — custom cell editors', () => {
     // included, so the merged overlay is the only element rendered for the
     // region — the slot has to be there or the editor has nowhere to go.
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
@@ -508,7 +520,7 @@ describe('Spreadsheet — custom cell editors', () => {
     expect(merged).to.not.be.null;
     const slot = merged.querySelector('slot')!;
     expect(slot.getAttribute('name')).to.equal('custom-editor-77');
-    const assigned = slot.assignedElements();
+    const assigned = slot.assignedElements({ flatten: true });
     expect(assigned).to.have.length(1);
     expect(assigned[0]).to.equal(editor);
     cleanup();
@@ -516,7 +528,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('shows a component in a merged cell', async () => {
     const widget = document.createElement('span');
-    const { sheet, cleanup } = attachSheet({ '31': widget });
+    const { host, sheet, cleanup } = attachSheet({ '31': widget });
     sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
@@ -533,7 +545,7 @@ describe('Spreadsheet — custom cell editors', () => {
 
   it('releases the editor when the sheet is disposed', async () => {
     const editor = field();
-    const { sheet, cleanup } = attachSheet({ '77': editor });
+    const { host, sheet, cleanup } = attachSheet({ '77': editor });
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
