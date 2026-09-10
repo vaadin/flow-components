@@ -457,7 +457,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // own components belong — findable by an ordinary document query, the
     // way every other Vaadin component is. The slots that show them are in
     // the cell-grid's shadow root, so each gets a forwarding slot.
-    this.overlayComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, overlayComponentSlotName);
+    this.overlayComponents = new SlottedVirtualChildren(
+      host,
+      this.cellGrid,
+      resolveVirtualChild,
+      overlayComponentSlotName
+    );
     this.cellComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellComponentSlotName);
     this.cellEditors = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellEditorSlotName);
     // Host becomes a flex column so the scroll container takes
@@ -976,8 +981,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
     this.extendCol = col;
     this.extendRow = row;
+    this.showRangeSizeInAddressField();
     this.recomputeViewport();
   };
+
+  /**
+   * While a range is being dragged out, the address field counts it
+   * rather than naming a cell — Excel's "3R x 2C". The count is what
+   * the user needs mid-drag; the address comes back when the server
+   * answers the finished selection.
+   */
+  private showRangeSizeInAddressField(): void {
+    const { activeRange } = this.selection;
+    const rows = Math.abs(activeRange.r2 - activeRange.r1) + 1;
+    const cols = Math.abs(activeRange.c2 - activeRange.c1) + 1;
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      address: `${rows}R x ${cols}C`
+    };
+  }
 
   /**
    * Mouse drag — mouseup end (slice 155). Closes the drag.
@@ -1323,10 +1345,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // whatever holds the focus once the handlers have run — which by then
     // is the editor.
     const startsEditing =
-      !this.editor &&
-      !ctrlOrMeta &&
-      !e.altKey &&
-      (key === 'F2' || key === 'Enter' || key.length === 1);
+      !this.editor && !ctrlOrMeta && !e.altKey && (key === 'F2' || key === 'Enter' || key.length === 1);
     if (startsEditing && this.focusCustomEditor()) {
       return;
     }
@@ -1872,6 +1891,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleSheetAddressChanged = (e: CustomEvent<{ value: string }>): void => {
     const { value } = e.detail;
+    // Typing an address is a way of moving around the sheet, so the
+    // keyboard goes back to the sheet once it has moved. Leaving the
+    // focus in the address field means the arrow keys that naturally
+    // follow move the caret through the text just typed.
+    this.scrollContainer.focus();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -2664,7 +2688,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       auxRanges: this.selection.auxRanges
     };
     this.formulaBar.renderState = {
-      address: name,
+      // As in updateFormulaBar: the server names a selection only when
+      // it has a name, and leaves an ordinary one to the client.
+      address: name ?? cellCoordToAddress({ col, row }),
       formula: this.formulaBar.renderState.formula,
       namedRanges: this.namedRanges
     };
@@ -2800,11 +2826,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private eventCameFromHostedComponent(e: Event): boolean {
     for (const target of e.composedPath()) {
-      if (
-        this.cellEditors.owns(target) ||
-        this.cellComponents.owns(target) ||
-        this.overlayComponents.owns(target)
-      ) {
+      if (this.cellEditors.owns(target) || this.cellComponents.owns(target) || this.overlayComponents.owns(target)) {
         return true;
       }
     }
@@ -2831,10 +2853,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (cell === null) {
       return;
     }
-    if (
-      this.selection.activeCell.col === cell.col &&
-      this.selection.activeCell.row === cell.row
-    ) {
+    if (this.selection.activeCell.col === cell.col && this.selection.activeCell.row === cell.row) {
       return;
     }
     this.selection = selectSingleCell(cell.col, cell.row);

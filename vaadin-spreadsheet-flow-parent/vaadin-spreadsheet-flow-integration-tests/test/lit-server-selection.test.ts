@@ -295,6 +295,153 @@ describe('Formula bar — the address field', () => {
   });
 });
 
+describe('Formula bar — jumping by address', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('gives the keyboard back to the sheet', () => {
+    // Typing an address is a way of moving around the sheet. Leaving
+    // the focus in the address field means the arrow keys that
+    // naturally follow move the caret through the text just typed.
+    ctx.sheet.getFormulaBar().dispatchEvent(
+      new CustomEvent('sheet-address-changed', {
+        detail: { value: 'B1:C2' },
+        bubbles: true,
+        composed: true
+      })
+    );
+
+    expect(ctx.sheet.getScrollContainer().contains(document.activeElement)).to.be
+      .true;
+  });
+
+  it('still tells the server where to go', () => {
+    const events: any[] = [];
+    const listener = (e: Event) => events.push((e as CustomEvent).detail);
+    document.addEventListener('spreadsheet-event', listener, true);
+    try {
+      ctx.sheet.getFormulaBar().dispatchEvent(
+        new CustomEvent('sheet-address-changed', {
+          detail: { value: 'B1:C2' },
+          bubbles: true,
+          composed: true
+        })
+      );
+    } finally {
+      document.removeEventListener('spreadsheet-event', listener, true);
+    }
+
+    const jump = events.find((e) => e.type === 'sheetAddressChanged');
+    expect(jump).to.not.be.undefined;
+    expect(jump.data).to.deep.equal({ value: 'B1:C2' });
+  });
+
+  it('names an unnamed server selection by its active cell', () => {
+    // Same as updateFormulaBar: the server names a selection only when
+    // it has one, and leaves an ordinary one to the client.
+    ctx.sheet.setSelectedCellAndRange(null as any, 2, 1, 2, 3, 1, 2, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B1');
+  });
+});
+
+describe('Formula bar — dragging out a range', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function drag(from: [number, number], to: [number, number]): void {
+    const grid = ctx.sheet.getCellGrid();
+    grid.dispatchEvent(
+      new CustomEvent('cell-mousedown', {
+        detail: {
+          col: from[0], row: from[1],
+          shiftKey: false, ctrlKey: false, metaKey: false, altKey: false
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+    grid.dispatchEvent(
+      new CustomEvent('cell-mouseover', {
+        detail: { col: to[0], row: to[1] },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  it('counts the range instead of naming a cell', () => {
+    // Excel shows the size while the range is being dragged out; the
+    // address comes back when the selection is finished.
+    drag([8, 10], [9, 10]);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('1R x 2C');
+  });
+
+  it('keeps counting as the drag grows', () => {
+    drag([8, 10], [10, 12]);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('3R x 3C');
+  });
+
+  it('counts a drag that runs backwards', () => {
+    drag([10, 12], [8, 10]);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('3R x 3C');
+  });
+
+  it('shows 1R x 1C while the drag is still on one cell', () => {
+    drag([8, 10], [8, 10]);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('1R x 1C');
+  });
+
+  it('says nothing on a hover with no button down', () => {
+    // The grid emits cell-mouseover on every hover.
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-mouseover', {
+        detail: { col: 9, row: 9 },
+        bubbles: true,
+        composed: true
+      })
+    );
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
+  });
+
+  it('gives the address back when the server answers the selection', () => {
+    drag([8, 10], [9, 10]);
+    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('H10');
+  });
+
+  it('leaves the formula field alone while dragging', () => {
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 10, col: 8, value: 'x', originalValue: 'x', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    drag([8, 10], [9, 10]);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('x');
+  });
+});
+
 describe('Formula bar — named ranges', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
