@@ -3128,6 +3128,22 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withSingleQuotedToolSchema_throwsNamingTool() {
+        // Single quotes are not JSON. Flow's own mapper accepts them, but the
+        // providers hand the schema on as text, so a lenient check here would
+        // let the schema through only to fail on every request.
+        var controller = createController(createToolSpec("quoted_tool",
+                "Quoted", "{'type': 'object', 'properties': {}}"));
+
+        var exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> AIOrchestrator.builder(mockProvider, null)
+                        .withController(controller));
+        Assertions.assertTrue(exception.getMessage().contains("'quoted_tool'"),
+                "Exception should name the tool; got: "
+                        + exception.getMessage());
+    }
+
+    @Test
     void builder_withNonObjectToolSchema_throwsNamingTool() {
         var controller = createController(
                 createToolSpec("array_tool", "Array", "[1, 2]"));

@@ -63,13 +63,14 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.scheduler.Schedulers;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Orchestrator for AI-powered chat interfaces.
@@ -967,6 +968,14 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
+     * Parser for tool schemas. Flow's shared mapper accepts non-standard JSON
+     * such as single-quoted strings, which the providers would pass on as-is
+     * and then fail with on every request.
+     */
+    private static final ObjectMapper STRICT_JSON = JsonMapper.builder()
+            .build();
+
+    /**
      * Checks that the tool's parameters schema, when it declares one, is a JSON
      * object. A {@code null} or blank schema means the tool takes no parameters
      * and is valid.
@@ -978,7 +987,7 @@ public class AIOrchestrator implements Serializable {
         }
         JsonNode parsed;
         try {
-            parsed = JacksonUtils.getMapper().readTree(schema);
+            parsed = STRICT_JSON.readTree(schema);
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Tool '" + tool.getName()
                     + "' has a parameters schema that is not valid JSON: "
