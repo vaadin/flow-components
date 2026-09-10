@@ -116,7 +116,9 @@ describe('Spreadsheet server-driven selection', () => {
   });
 
   it('leaves the formula field alone when only the address changes', () => {
-    ctx.sheet.showSelectedCell('A1', 1, 1, '=SUM(B1:B9)', true, false, false);
+    // The server sends a formula the way POI stores it, without the
+    // leading '='; the client is what puts it back.
+    ctx.sheet.showSelectedCell('A1', 1, 1, 'SUM(B1:B9)', true, false, false);
     ctx.sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal(
@@ -204,6 +206,73 @@ describe('Spreadsheet selection overlay — reports where the selection is', () 
     const el = await overlay();
     expect(el!.getAttribute('data-col')).to.equal('3');
     expect(el!.getAttribute('data-row')).to.equal('7');
+  });
+});
+
+describe('showSelectedCell — the server moving the selection', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('moves the selection to the cell the server names', () => {
+    // Sent from the server's address-change path — jumping by address
+    // and following an internal hyperlink. Updating only the formula
+    // bar left the highlight on the cell the user clicked while the
+    // address field named the one the server had moved to.
+    ctx.sheet.showSelectedCell('B6', 2, 6, '', false, false, false);
+
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 6 });
+  });
+
+  it('collapses a range to that one cell', () => {
+    ctx.sheet.setSelectedCellAndRange('A1', 1, 1, 1, 4, 1, 4, false);
+    ctx.sheet.showSelectedCell('B6', 2, 6, '', false, false, false);
+
+    expect(ctx.sheet.getSelection().activeRange).to.deep.equal({
+      c1: 2, r1: 6, c2: 2, r2: 6
+    });
+  });
+
+  it('puts the leading = back on a formula', () => {
+    ctx.sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=A1+B2');
+  });
+
+  it('leaves a plain value alone', () => {
+    ctx.sheet.showSelectedCell('C3', 3, 3, "'text", false, false, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal("'text");
+  });
+
+  it('shows an empty formula cell as empty, not as a bare =', () => {
+    ctx.sheet.showSelectedCell('C3', 3, 3, '', true, false, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
+  });
+
+  it('works out the address when the server sends no name', () => {
+    ctx.sheet.showSelectedCell(null as any, 2, 6, '', false, false, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B6');
+  });
+
+  it('repaints so the highlight follows', async () => {
+    ctx.sheet.showSelectedCell('B6', 2, 6, '', false, false, false);
+    await Promise.resolve();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    const overlay = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector('.sheet-selection')!;
+    expect(overlay.getAttribute('data-col')).to.equal('2');
+    expect(overlay.getAttribute('data-row')).to.equal('6');
   });
 });
 
@@ -499,7 +568,7 @@ describe('Formula bar — named ranges', () => {
 
   it('keeps the address and formula fields alongside it', async () => {
     ctx.sheet.setNamedRanges(['Sales']);
-    ctx.sheet.showSelectedCell('B2', 2, 2, '=1+1', true, false, false);
+    ctx.sheet.showSelectedCell('B2', 2, 2, '1+1', true, false, false);
 
     const bar = ctx.sheet.getFormulaBar();
     await bar.updateComplete;

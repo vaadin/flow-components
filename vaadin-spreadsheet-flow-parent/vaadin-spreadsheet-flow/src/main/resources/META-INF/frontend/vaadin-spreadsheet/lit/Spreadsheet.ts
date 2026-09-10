@@ -2658,23 +2658,40 @@ export class Spreadsheet implements SpreadsheetClientApi {
   invalidCellAddress(): void {
     // TODO Phase 3.3 — flash the address bar to indicate invalid input.
   }
+  /**
+   * The server moved the selection to a single cell.
+   *
+   * Sent from the server's address-change path — jumping by address,
+   * and following an internal hyperlink — so the selection collapses
+   * to that one cell, as the GWT client did. Range selections never
+   * come through here, so nothing a drag produced is disturbed.
+   *
+   * Updating only the formula bar, as this did before, left the
+   * highlight behind on the cell the user had clicked while the
+   * address field named the one the server had moved to.
+   *
+   * `cellValue` is the formula without its leading `=` when
+   * `formula` is set — that is how POI stores it and how the server
+   * sends it.
+   */
   showSelectedCell(
-    name: string,
-    _col: number,
-    _row: number,
+    name: string | null,
+    col: number,
+    row: number,
     cellValue: string,
-    _formula: boolean,
+    formula: boolean,
     _locked: boolean,
     _initialSelection: boolean
   ): void {
-    // Slice 175: server-pushed update of both formula-bar fields
-    // — happens after the user clicks a cell or navigates with
-    // arrow keys server-side.
+    this.selection = selectSingleCell(col, row);
+    this.extendCol = col;
+    this.extendRow = row;
     this.formulaBar.renderState = {
-      address: name,
-      formula: cellValue,
+      address: name ?? cellCoordToAddress({ col, row }),
+      formula: formula && cellValue !== '' ? `=${cellValue}` : cellValue,
       namedRanges: this.namedRanges
     };
+    this.scheduleRender();
   }
   showActions(actionDetails: SpreadsheetActionDetails[]): void {
     this.contextMenu.renderState = {

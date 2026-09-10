@@ -3264,7 +3264,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
 
     it('showSelectedCell sets both address + formula fields (slice 175)', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
-        sheet.showSelectedCell('C3', 3, 3, '=A1+B2', true, false, false);
+        // Formula without its leading '=', as the server sends it.
+        sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
         await sheet.getFormulaBar().updateComplete;
         const fb = sheet.getFormulaBar().shadowRoot!;
         const addr = fb.querySelector('input.address') as HTMLInputElement;
