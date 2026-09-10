@@ -111,9 +111,11 @@ class IdStorageTest {
     }
 
     @Test
-    void blankComponentIdFallsBackToGeneratedId() {
+    void whitespaceComponentIdFallsBackToGeneratedId() {
+        // setId("") removes the attribute, so getId() is already empty for
+        // it; a whitespace-only id is what actually reaches the blank check.
         var field = new TestField();
-        field.setId("");
+        field.setId("  ");
         var controller = new FormAIController(new Div(field));
         controller.describeField(field, "X");
 
