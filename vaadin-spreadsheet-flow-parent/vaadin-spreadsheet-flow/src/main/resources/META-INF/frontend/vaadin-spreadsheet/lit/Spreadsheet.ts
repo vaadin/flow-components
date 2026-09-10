@@ -2076,6 +2076,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
         colWidths: state.colWidths,
         headerHeight: this.headerRowHeight,
         totalGridWidthPx: state.totalGridWidthPx,
+        // Frozen columns stay on screen whatever the scroll position,
+        // so their headers travel with them.
+        horizontalSplitPosition: state.horizontalSplitPosition,
+        frozenColX: state.frozenColX,
+        frozenColWidths: state.frozenColWidths,
+        scrollLeft: state.scrollLeft,
         colGroupings,
         colGroupingMax: this.colGroupingMax,
         colGroupingInversed: this.colGroupingInversed,
@@ -2120,7 +2126,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
         selectedRows: selectedRowSet(this.selection),
         rowGroupings,
         rowGroupingMax: this.rowGroupingMax,
-        rowGroupingInversed: this.rowGroupingInversed
+        rowGroupingInversed: this.rowGroupingInversed,
+        // Frozen rows stay on screen whatever the scroll position, so
+        // their headers travel with them.
+        verticalSplitPosition: state.verticalSplitPosition,
+        frozenRowY: state.frozenRowY,
+        frozenRowHeights: state.frozenRowHeights,
+        scrollTop: state.scrollTop
       };
     }
     // Header corner (slice 145). Sized only when BOTH header

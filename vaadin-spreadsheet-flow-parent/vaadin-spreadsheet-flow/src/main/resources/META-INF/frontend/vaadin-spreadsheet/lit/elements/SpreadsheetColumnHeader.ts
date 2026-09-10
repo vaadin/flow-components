@@ -53,6 +53,24 @@ export interface ColumnHeaderRenderState {
    * letter cells; each grouping shows a clickable +/- button at
    * one end of its range.
    */
+  /**
+   * Number of frozen columns at the left of the sheet. Those columns
+   * stay on screen whatever the scroll position, so their headers have
+   * to stay with them — a header that scrolls away from the cells it
+   * names is worse than none.
+   */
+  horizontalSplitPosition?: number;
+  /** Pixel x-offsets of the frozen columns, indexed by {@code col - 1}. */
+  frozenColX?: ReadonlyArray<number>;
+  /** Pixel widths of the frozen columns, same indexing as frozenColX. */
+  frozenColWidths?: ReadonlyArray<number>;
+  /**
+   * Current horizontal scroll offset. The frozen strip is translated by
+   * it to cancel the scroll out, the way the cell-grid pins its own
+   * frozen quadrants.
+   */
+  scrollLeft?: number;
+
   colGroupings: ReadonlyArray<PositionedGrouping>;
   /**
    * Number of grouping levels (rows in the gutter). {@code 0}
@@ -121,6 +139,10 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
     colWidths: [],
     headerHeight: 0,
     totalGridWidthPx: 0,
+    horizontalSplitPosition: 0,
+    frozenColX: [],
+    frozenColWidths: [],
+    scrollLeft: 0,
     colGroupings: [],
     colGroupingMax: 0,
     colGroupingInversed: false,
@@ -167,6 +189,20 @@ export class SpreadsheetColumnHeader extends LitElement {
       border-bottom: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
       font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
+    }
+
+    /* Frozen columns are drawn in their own strip, translated to
+       cancel the scroll out. It sits above the scrolling headers so a
+       column sliding underneath does not show through. */
+    .frozen-header-strip {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .frozen-header-strip > * {
+      pointer-events: auto;
     }
 
     .col-header-cell {
@@ -357,7 +393,11 @@ export class SpreadsheetColumnHeader extends LitElement {
       colGroupings = [],
       colGroupingMax = 0,
       colGroupingInversed = false,
-      selectedColumns = new Set<number>()
+      selectedColumns = new Set<number>(),
+      horizontalSplitPosition = 0,
+      frozenColX = [],
+      frozenColWidths = [],
+      scrollLeft = 0
     } = this.renderState;
 
     if (headerHeight === 0 || viewport.lastColumnIndex < viewport.firstColumnIndex) {
@@ -373,12 +413,7 @@ export class SpreadsheetColumnHeader extends LitElement {
 
     const cells: TemplateResult[] = [];
     const handles: TemplateResult[] = [];
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-      const left = colX[col - viewport.firstColumnIndex] ?? 0;
-      const width = colWidths[col - viewport.firstColumnIndex] ?? 0;
-      if (width === 0) {
-        continue;
-      }
+    const buildColumn = (col: number, left: number, width: number): void => {
       const letter = columnIndexToLetters(col);
       const style =
         `left:${left}px;top:${letterTop}px;width:${width}px;` +
@@ -399,7 +434,42 @@ export class SpreadsheetColumnHeader extends LitElement {
       // mousedown begins a resize-drag for THIS column.
       const handleStyle = `left:${left + width - 3}px;top:${letterTop}px;` + `height:${headerHeight}px;`;
       handles.push(html` <div class="col-resize-handle" style=${handleStyle} data-col=${col}></div> `);
+    };
+
+    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+      const width = colWidths[col - viewport.firstColumnIndex] ?? 0;
+      if (width === 0) {
+        continue;
+      }
+      buildColumn(col, colX[col - viewport.firstColumnIndex] ?? 0, width);
     }
+
+    // Frozen columns get their own strip, translated by the scroll
+    // offset so it stays put while the rest slides underneath — the
+    // same trick the cell-grid uses for its frozen quadrants. Built
+    // after the scrolling columns so it draws over them.
+    const frozenCells: TemplateResult[] = [];
+    const frozenHandles: TemplateResult[] = [];
+    let frozenStrip: TemplateResult | string = '';
+    if (horizontalSplitPosition > 0) {
+      const scrolling = cells.length;
+      const scrollingHandles = handles.length;
+      for (let col = 1; col <= horizontalSplitPosition; col++) {
+        const width = frozenColWidths[col - 1] ?? 0;
+        if (width === 0) {
+          continue;
+        }
+        buildColumn(col, frozenColX[col - 1] ?? 0, width);
+      }
+      frozenCells.push(...cells.splice(scrolling));
+      frozenHandles.push(...handles.splice(scrollingHandles));
+      frozenStrip = html`
+        <div class="frozen-header-strip" style="transform:translateX(${scrollLeft}px);">
+          ${frozenCells}${frozenHandles}
+        </div>
+      `;
+    }
+
     const groupingEls: TemplateResult[] = [];
     for (const g of colGroupings) {
       const levelRow = (g.level - 1) * GROUPING_LEVEL_HEIGHT_PX;
@@ -422,7 +492,7 @@ export class SpreadsheetColumnHeader extends LitElement {
         </button>
       `);
     }
-    return html`${groupingEls}${cells}${handles}`;
+    return html`${groupingEls}${cells}${handles}${frozenStrip}`;
   }
 }
 

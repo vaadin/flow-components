@@ -52,6 +52,22 @@ export interface RowHeaderRenderState {
    */
   selectedRows: ReadonlySet<number>;
   /**
+   * Number of frozen rows at the top of the sheet. Those rows stay on
+   * screen whatever the scroll position, so their headers have to stay
+   * with them — a header that scrolls away from the rows it numbers is
+   * worse than none.
+   */
+  verticalSplitPosition?: number;
+  /** Pixel y-offsets of the frozen rows, indexed by {@code row - 1}. */
+  frozenRowY?: ReadonlyArray<number>;
+  /** Pixel heights of the frozen rows, same indexing as frozenRowY. */
+  frozenRowHeights?: ReadonlyArray<number>;
+  /**
+   * Current vertical scroll offset, used to translate the frozen strip
+   * so it cancels the scroll out.
+   */
+  scrollTop?: number;
+  /**
    * Row groupings (outline) with pre-computed pixel positions. Mirrors the
    * column header's gutter, rotated: the gutter is a column of levels to the
    * LEFT of the row numbers (or to the right when inversed).
@@ -85,6 +101,10 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
     headerWidth: 0,
     totalGridHeightPx: 0,
     selectedRows: new Set(),
+    verticalSplitPosition: 0,
+    frozenRowY: [],
+    frozenRowHeights: [],
+    scrollTop: 0,
     rowGroupings: [],
     rowGroupingMax: 0,
     rowGroupingInversed: false
@@ -155,6 +175,19 @@ export class SpreadsheetRowHeader extends LitElement {
       border-right: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
       font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
+    }
+
+    /* Frozen rows are drawn in their own strip, translated to cancel
+       the scroll out, above the scrolling headers. */
+    .frozen-header-strip {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .frozen-header-strip > * {
+      pointer-events: auto;
     }
 
     .row-header-cell {
@@ -304,7 +337,11 @@ export class SpreadsheetRowHeader extends LitElement {
       selectedRows = new Set<number>(),
       rowGroupings = [],
       rowGroupingMax = 0,
-      rowGroupingInversed = false
+      rowGroupingInversed = false,
+      verticalSplitPosition = 0,
+      frozenRowY = [],
+      frozenRowHeights = [],
+      scrollTop = 0
     } = this.renderState;
 
     if (headerWidth === 0 || viewport.lastRowIndex < viewport.firstRowIndex) {
@@ -319,12 +356,7 @@ export class SpreadsheetRowHeader extends LitElement {
 
     const cells: TemplateResult[] = [];
     const handles: TemplateResult[] = [];
-    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-      const top = rowY[row - viewport.firstRowIndex] ?? 0;
-      const height = rowHeights[row - viewport.firstRowIndex] ?? 0;
-      if (height === 0) {
-        continue;
-      }
+    const buildRow = (row: number, top: number, height: number): void => {
       const style =
         `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;` + `line-height:${height}px;`;
       // Slice 173: `part="row-header"` (+ `header-selected`
@@ -340,7 +372,39 @@ export class SpreadsheetRowHeader extends LitElement {
       // Resize handle on the row's bottom edge (slice 164).
       const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
       handles.push(html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `);
+    };
+
+    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+      const height = rowHeights[row - viewport.firstRowIndex] ?? 0;
+      if (height === 0) {
+        continue;
+      }
+      buildRow(row, rowY[row - viewport.firstRowIndex] ?? 0, height);
     }
+
+    // Frozen rows get their own strip, translated by the scroll offset
+    // so it stays put while the rest slides underneath — the same trick
+    // the cell-grid uses for its frozen quadrants.
+    let frozenStrip: TemplateResult | string = '';
+    if (verticalSplitPosition > 0) {
+      const scrolling = cells.length;
+      const scrollingHandles = handles.length;
+      for (let row = 1; row <= verticalSplitPosition; row++) {
+        const height = frozenRowHeights[row - 1] ?? 0;
+        if (height === 0) {
+          continue;
+        }
+        buildRow(row, frozenRowY[row - 1] ?? 0, height);
+      }
+      const frozenCells = cells.splice(scrolling);
+      const frozenHandles = handles.splice(scrollingHandles);
+      frozenStrip = html`
+        <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
+          ${frozenCells}${frozenHandles}
+        </div>
+      `;
+    }
+
     // One vertical line per grouping plus its +/- toggle, laid out by
     // level across the gutter.
     const groupingEls: TemplateResult[] = [];
@@ -364,7 +428,7 @@ export class SpreadsheetRowHeader extends LitElement {
         </button>
       `);
     }
-    return html`${groupingEls}${cells}${handles}`;
+    return html`${groupingEls}${cells}${handles}${frozenStrip}`;
   }
 }
 
