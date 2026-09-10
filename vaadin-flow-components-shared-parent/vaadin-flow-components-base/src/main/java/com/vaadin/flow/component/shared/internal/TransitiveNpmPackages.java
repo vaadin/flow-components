@@ -29,10 +29,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * free to resolve a base package to a version the components were not built
  * against.
  * <p>
- * The annotations are only read to generate the versions file this module
- * ships, which is what pins the packages. The class is not a component and is
- * not scanned for frontend dependencies, so it does not add any of them to the
- * {@code package.json} of an application.
+ * The annotations are read to generate the versions file this module ships,
+ * which is what pins the packages. They are also picked up wherever Flow scans
+ * the whole classpath for {@code @NpmPackage} instead of only the classes an
+ * application reaches, as the development bundle build does, which adds the
+ * packages to the {@code package.json} of the application. That is harmless:
+ * the version is the one the web components depend on anyway, so it only writes
+ * down what npm would install transitively.
  * <p>
  * Packages that are not released with the components, such as
  * {@code @vaadin/router} or {@code @vaadin/vaadin-usage-statistics}, have
