@@ -108,8 +108,9 @@ import tools.jackson.databind.JsonNode;
  * {@link Component#setId(String) component id} when the controller first
  * discovers it (at the latest on the first prompt) is addressed by that id, so
  * conversation logs and tool calls stay readable and reproducible across runs.
- * Component ids must be unique within the form. A field without one gets a
- * random id. Either way the id is fixed for the rest of the session; setting or
+ * Component ids must be unique within the form. A field without one is
+ * addressed by a random id that is kept internally and never set on the
+ * component. Either way the id is fixed for the rest of the session; setting or
  * changing the component id later has no effect on it.
  * </p>
  *
