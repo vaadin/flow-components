@@ -112,6 +112,97 @@ describe('Spreadsheet — autofit from a header double-click', () => {
   });
 });
 
+/**
+ * A protected sheet can still allow formatting, so the refusal is not
+ * "protected = frozen": `lockFormatColumns` / `lockFormatRows` are the
+ * workbook's own flags and the server sends them so the client can refuse
+ * the drag up front, rather than resize and be corrected by the next
+ * repaint.
+ */
+describe('Spreadsheet — resizing a protected sheet', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    await ctx.sheet.getColumnHeader().updateComplete;
+    await ctx.sheet.getRowHeader().updateComplete;
+    ctx.sent.length = 0;
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function dragColumnEdge(sheet: Spreadsheet, col: number, byPx: number): void {
+    sheet.getColumnHeader().dispatchEvent(
+      new CustomEvent('column-resize-start', {
+        detail: { col, clientX: 100 },
+        bubbles: true,
+        composed: true
+      })
+    );
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 100 + byPx, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  }
+
+  function autofitColumn(sheet: Spreadsheet, col: number): void {
+    sheet
+      .getColumnHeader()
+      .shadowRoot!.querySelector<HTMLElement>(`.col-resize-handle[data-col="${col}"]`)!
+      .dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true }));
+  }
+
+  it('resizes a column on an unprotected sheet', () => {
+    dragColumnEdge(ctx.sheet, 3, 40);
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.have.length(1);
+  });
+
+  it('refuses the drag when the sheet locks column formatting', () => {
+    ctx.sheet.setSheetProtected(true);
+    ctx.sheet.setLockFormatColumns(true);
+
+    dragColumnEdge(ctx.sheet, 3, 40);
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.be.empty;
+  });
+
+  it('allows the drag on a protected sheet that permits formatting', () => {
+    ctx.sheet.setSheetProtected(true);
+    ctx.sheet.setLockFormatColumns(false);
+
+    dragColumnEdge(ctx.sheet, 3, 40);
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.have.length(1);
+  });
+
+  it('refuses autofit when the sheet locks column formatting', () => {
+    ctx.sheet.setSheetProtected(true);
+    ctx.sheet.setLockFormatColumns(true);
+
+    autofitColumn(ctx.sheet, 3);
+
+    expect(ctx.sent.filter((e) => e.type === 'onColumnAutofit')).to.be.empty;
+  });
+
+  it('refuses a row resize when the sheet locks row formatting', () => {
+    ctx.sheet.setSheetProtected(true);
+    ctx.sheet.setLockFormatRows(true);
+
+    ctx.sheet.getRowHeader().dispatchEvent(
+      new CustomEvent('row-resize-start', {
+        detail: { row: 3, clientY: 100 },
+        bubbles: true,
+        composed: true
+      })
+    );
+    document.dispatchEvent(new MouseEvent('mousemove', { clientY: 140, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+    expect(ctx.sent.filter((e) => e.type === 'rowsResized')).to.be.empty;
+  });
+});
+
 describe('Spreadsheet — a write to a protected cell', () => {
   let ctx: ReturnType<typeof attachSheet>;
 

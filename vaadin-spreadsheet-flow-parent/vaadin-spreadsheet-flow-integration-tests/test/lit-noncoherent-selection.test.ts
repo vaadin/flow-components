@@ -195,6 +195,20 @@ describe('Spreadsheet non-coherent selection — server events', () => {
     expect(ctx.events[0].data).to.deep.equal({ row: 3, column: 3 });
   });
 
+  it('keeps Ctrl-added ranges when a plain shift-click extends the last one', () => {
+    // Excel: shift extends the range you are on and leaves the ranges you
+    // picked out earlier alone. Rebuilding the selection from scratch here
+    // silently dropped them, so B1:B3 vanished the moment D3:E3 was drawn.
+    clickCell(ctx.sheet, 2, 1);
+    clickCell(ctx.sheet, 2, 3, { shiftKey: true });
+    clickCell(ctx.sheet, 4, 3, { ctrlKey: true });
+    clickCell(ctx.sheet, 5, 3, { shiftKey: true });
+
+    const selection = ctx.sheet.getSelection();
+    expect(selection.activeRange).to.eql({ c1: 4, c2: 5, r1: 3, r2: 3 });
+    expect(selection.auxRanges).to.eql([{ c1: 2, c2: 2, r1: 1, r2: 3 }]);
+  });
+
   it('Ctrl-shift-click reports the added range', () => {
     clickCell(ctx.sheet, 2, 2);
     ctx.events.length = 0;

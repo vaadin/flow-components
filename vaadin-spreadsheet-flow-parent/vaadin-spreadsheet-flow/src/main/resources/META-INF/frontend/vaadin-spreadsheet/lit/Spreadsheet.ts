@@ -763,9 +763,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     if (shiftKey) {
       // Extend the active range from the existing active cell
-      // (= the anchor) to the clicked coordinate.
+      // (= the anchor) to the clicked coordinate. Ranges picked out
+      // with earlier Ctrl-clicks stay: shift extends the last range,
+      // it does not start the selection over.
       const anchor = this.selection.activeCell;
-      this.selection = selectRange(anchor.col, anchor.row, col, row);
+      this.selection = {
+        ...selectRange(anchor.col, anchor.row, col, row),
+        auxRanges: this.selection.auxRanges
+      };
     } else {
       this.selection = selectSingleCell(col, row);
     }
@@ -794,7 +799,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * current width + mouse position so {@link handleDocumentMouseMove}
    * can apply deltas. Slice 164.
    */
+  /**
+   * Whether the user may change column widths.
+   *
+   * A protected sheet can still allow formatting; `lockFormatColumns` is
+   * the workbook's own flag for that, and the server sends it precisely so
+   * the client can refuse the drag rather than let it happen and be undone
+   * by the next repaint.
+   */
+  private canResizeColumn(): boolean {
+    return !this.sheetProtected || !this.lockFormatColumns;
+  }
+
+  /** Whether the user may change row heights. See {@link canResizeColumn}. */
+  private canResizeRow(): boolean {
+    return !this.sheetProtected || !this.lockFormatRows;
+  }
+
   private readonly handleColumnResizeStart = (e: CustomEvent<{ col: number; clientX: number }>): void => {
+    if (!this.canResizeColumn()) {
+      return;
+    }
     const { col, clientX } = e.detail;
     const idx = col - 1;
     const startWidth = idx < this.colWidths.length ? this.colWidths[idx] : this.defColWidth;
@@ -805,6 +830,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Row resize drag — start. Mirror of column variant.
    */
   private readonly handleRowResizeStart = (e: CustomEvent<{ row: number; clientY: number }>): void => {
+    if (!this.canResizeRow()) {
+      return;
+    }
     const { row, clientY } = e.detail;
     const idx = row - 1;
     // Note: rowHeights is in POINTS, not pixels. We convert
@@ -1038,8 +1066,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
       // drag start). Standard Excel "shift-drag" behavior.
+      // Aux ranges survive, as on a shift-click.
       const anchor = this.selection.activeCell;
-      this.selection = selectRange(anchor.col, anchor.row, col, row);
+      this.selection = {
+        ...selectRange(anchor.col, anchor.row, col, row),
+        auxRanges: this.selection.auxRanges
+      };
     } else {
       this.selection = selectSingleCell(col, row);
     }
@@ -2162,6 +2194,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * column, including the ones outside the viewport.
    */
   private readonly handleColumnAutofit = (e: CustomEvent<{ col: number }>): void => {
+    if (!this.canResizeColumn()) {
+      return;
+    }
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'onColumnAutofit', data: { columnIndex: e.detail.col } },
@@ -2173,6 +2208,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Double-click on a row's resize handle — size it to its tallest value. */
   private readonly handleRowAutofit = (e: CustomEvent<{ row: number }>): void => {
+    if (!this.canResizeRow()) {
+      return;
+    }
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'onRowAutofit', data: { rowIndex: e.detail.row } },
