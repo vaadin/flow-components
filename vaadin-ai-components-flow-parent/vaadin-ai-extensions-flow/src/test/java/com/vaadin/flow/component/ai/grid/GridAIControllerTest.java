@@ -13,9 +13,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -791,6 +793,18 @@ class GridAIControllerTest {
             var ts = Timestamp.valueOf("2024-01-15 12:30:00");
             Assertions.assertEquals("2024-01-15 12:30",
                     GridFormatting.formatValue(ts));
+        }
+
+        @Test
+        void sqlTime() {
+            Assertions.assertEquals("14:30",
+                    GridFormatting.formatValue(Time.valueOf("14:30:00")));
+        }
+
+        @Test
+        void localTime() {
+            Assertions.assertEquals("14:30",
+                    GridFormatting.formatValue(LocalTime.of(14, 30, 15)));
         }
 
         @Test

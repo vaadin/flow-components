@@ -172,7 +172,7 @@ public final class ChartRenderer implements Serializable {
             }
         }
 
-        // Detect datetime X values (epoch ms > year 2000).
+        // Detect datetime X values (epoch ms from year 2000 on).
         // Always override: the data is authoritative for axis type when
         // values are clearly timestamps (e.g. OHLC dates).
         // Check per-series: if any series has all-datetime X values, set
@@ -305,7 +305,7 @@ public final class ChartRenderer implements Serializable {
 
     /**
      * Checks whether any series has all non-null X values that look like epoch
-     * millisecond timestamps (after year 2000). Checks per-series to handle
+     * millisecond timestamps (year 2000 or later). Checks per-series to handle
      * multi-query scenarios where one series has datetime X and another has
      * row-index X values.
      */
@@ -320,7 +320,7 @@ public final class ChartRenderer implements Serializable {
             for (var item : ds.getData()) {
                 var x = item.getX();
                 if (x != null) {
-                    if (x.longValue() <= EPOCH_MS_YEAR_2000) {
+                    if (x.longValue() < EPOCH_MS_YEAR_2000) {
                         allDatetime = false;
                         break;
                     }
