@@ -968,3 +968,163 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 });
+
+/**
+ * Excel edits cells in two modes, and only the arrow keys tell them apart.
+ *
+ * Typing over a cell is "enter" mode: an arrow commits what was typed and
+ * moves the selection the way it points. Opening the existing value with F2
+ * or a double-click is "edit" mode: an arrow moves the caret through the
+ * text instead. The connector only ever did the second, so typing a value
+ * and pressing an arrow left the editor open and the value uncommitted.
+ */
+describe('Spreadsheet — committing an edit with a key', () => {
+    function editorInput(sheet: Spreadsheet): HTMLInputElement | null {
+        return sheet.getCellGrid().shadowRoot!.querySelector('[part~="cell-input"]');
+    }
+
+    function attach(): { host: HTMLElement; sheet: Spreadsheet; sent: any[]; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setCols(10);
+        sheet.setRows(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+        sheet.recomputeViewport();
+        const sent: any[] = [];
+        host.addEventListener('spreadsheet-event', (e) => sent.push((e as CustomEvent).detail));
+        return {
+            host,
+            sheet,
+            sent,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    /** Select a cell and start typing into it — Excel's "enter" mode. */
+    async function typeOver(sheet: Spreadsheet, col: number, row: number, text: string) {
+        sheet.setSelectedCellAndRange('', col, row, col, col, row, row, false);
+        sheet
+            .getScrollContainer()
+            .dispatchEvent(
+                new KeyboardEvent('keydown', { key: text[0], bubbles: true, composed: true })
+            );
+        await sheet.getCellGrid().updateComplete;
+        const input = editorInput(sheet)!;
+        input.value = text;
+        return input;
+    }
+
+    /** Open the existing value with F2 — Excel's "edit" mode. */
+    async function openExisting(sheet: Spreadsheet, col: number, row: number) {
+        sheet.setSelectedCellAndRange('', col, row, col, col, row, row, false);
+        sheet
+            .getScrollContainer()
+            .dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true }));
+        await sheet.getCellGrid().updateComplete;
+        return editorInput(sheet)!;
+    }
+
+    function press(input: HTMLInputElement, key: string, shiftKey = false) {
+        input.dispatchEvent(
+            new KeyboardEvent('keydown', { key, shiftKey, bubbles: true, composed: true })
+        );
+    }
+
+    let ctx: ReturnType<typeof attach>;
+
+    beforeEach(() => {
+        ctx = attach();
+    });
+
+    afterEach(() => {
+        ctx.cleanup();
+    });
+
+    it('commits a typed value when an arrow key is pressed', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+        ctx.sent.length = 0;
+
+        press(input, 'ArrowDown');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sent.filter((e) => e.type === 'cellValueEdited')).to.eql([
+            { type: 'cellValueEdited', data: { row: 2, col: 2, value: '123' } },
+        ]);
+    });
+
+    it('moves the selection the way the arrow points', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'ArrowDown');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
+    });
+
+    it('moves right on ArrowRight', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'ArrowRight');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 3, row: 2 });
+    });
+
+    it('moves up on ArrowUp', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'ArrowUp');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 2, row: 1 });
+    });
+
+    it('closes the editor after an arrow commit', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        press(input, 'ArrowDown');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(editorInput(ctx.sheet)).to.be.null;
+    });
+
+    it('leaves the caret alone when the existing value is being edited', async () => {
+        const input = await openExisting(ctx.sheet, 2, 2);
+        ctx.sent.length = 0;
+
+        press(input, 'ArrowDown');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sent.filter((e) => e.type === 'cellValueEdited')).to.be.empty;
+        expect(editorInput(ctx.sheet), 'the editor closed').to.not.be.null;
+    });
+
+    it('still commits on Enter from edit mode', async () => {
+        const input = await openExisting(ctx.sheet, 2, 2);
+        input.value = 'edited';
+        ctx.sent.length = 0;
+
+        press(input, 'Enter');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sent.filter((e) => e.type === 'cellValueEdited')).to.eql([
+            { type: 'cellValueEdited', data: { row: 2, col: 2, value: 'edited' } },
+        ]);
+        expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
+    });
+
+    it('stops at the edge of the sheet', async () => {
+        const input = await typeOver(ctx.sheet, 1, 1, 'x');
+
+        press(input, 'ArrowUp');
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 1, row: 1 });
+    });
+});

@@ -282,6 +282,19 @@ export interface CellEditorState {
    * the user commits.
    */
   initialValue: string;
+
+  /**
+   * Excel's two editing modes, which differ only in what the arrow keys
+   * do.
+   *
+   * `enter` — the user started typing over the cell, so an arrow key
+   * commits the value and moves the selection.
+   * `edit` — the user opened the existing value with F2 or a
+   * double-click, so an arrow key moves the caret through the text.
+   *
+   * Absent means `edit`, the more conservative of the two.
+   */
+  mode?: 'enter' | 'edit';
 }
 
 /**

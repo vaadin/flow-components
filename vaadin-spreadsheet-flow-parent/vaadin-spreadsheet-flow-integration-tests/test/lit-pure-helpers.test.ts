@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import {
+  commitStep,
   computePositionedColGroupings,
   isCellInSelection,
   overlayComponentAppId,
@@ -201,4 +202,36 @@ describe('overlayComponentAppId', () => {
     // name and quietly find nothing.
     expect(overlayComponentAppId(document.createElement('div'))).to.equal('');
   });
+});
+
+/**
+ * Where the selection lands when an edit is committed with a key.
+ *
+ * Extracted from the commit handler so the direction table can be read at
+ * a glance: Enter down, Tab right, shift reverses each, an arrow the way
+ * it points, and nothing at all for a blur.
+ */
+describe('commitStep — direction of the post-commit move', () => {
+    it('moves down on Enter and up with shift', () => {
+        expect(commitStep('Enter', false)).to.eql({ dCol: 0, dRow: 1 });
+        expect(commitStep('Enter', true)).to.eql({ dCol: 0, dRow: -1 });
+    });
+
+    it('moves right on Tab and left with shift', () => {
+        expect(commitStep('Tab', false)).to.eql({ dCol: 1, dRow: 0 });
+        expect(commitStep('Tab', true)).to.eql({ dCol: -1, dRow: 0 });
+    });
+
+    it('follows an arrow key, which shift does not reverse', () => {
+        expect(commitStep('ArrowUp', false)).to.eql({ dCol: 0, dRow: -1 });
+        expect(commitStep('ArrowUp', true)).to.eql({ dCol: 0, dRow: -1 });
+        expect(commitStep('ArrowDown', false)).to.eql({ dCol: 0, dRow: 1 });
+        expect(commitStep('ArrowLeft', false)).to.eql({ dCol: -1, dRow: 0 });
+        expect(commitStep('ArrowRight', false)).to.eql({ dCol: 1, dRow: 0 });
+    });
+
+    it('stays put for a commit with no key — a blur', () => {
+        expect(commitStep(undefined, false)).to.be.null;
+        expect(commitStep('a', false)).to.be.null;
+    });
 });

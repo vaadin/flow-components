@@ -108,6 +108,33 @@ import type { CellGridRenderState } from './elements/types.js';
  * actually run.
  */
 /**
+ * Where the selection goes when an edit is committed with a key.
+ *
+ * Enter moves down and Tab right, each reversed by shift; an arrow key
+ * moves the way it points. Returns null for a commit that should leave the
+ * selection where it is — a blur, or a key with no direction.
+ */
+export function commitStep(key: string | undefined, shiftKey: boolean): { dCol: number; dRow: number } | null {
+  const back = shiftKey ? -1 : 1;
+  switch (key) {
+    case 'Enter':
+      return { dCol: 0, dRow: back };
+    case 'Tab':
+      return { dCol: back, dRow: 0 };
+    case 'ArrowUp':
+      return { dCol: 0, dRow: -1 };
+    case 'ArrowDown':
+      return { dCol: 0, dRow: 1 };
+    case 'ArrowLeft':
+      return { dCol: -1, dRow: 0 };
+    case 'ArrowRight':
+      return { dCol: 1, dRow: 0 };
+    default:
+      return null;
+  }
+}
+
+/**
  * Sample the cell-style width measurement uses: ten digits, matching what
  * the GWT client measured, so the ratios keep the same meaning server-side.
  */
@@ -1216,7 +1243,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // seeded the inline editor from the formula field for the same
     // reason.
     const initialValue = this.formulaFieldValueFor(col, row);
-    this.editor = { col, row, initialValue };
+    // Opening the existing value to change it: arrows move the caret.
+    this.editor = { col, row, initialValue, mode: 'edit' };
     this.recomputeViewport();
   };
 
@@ -1298,16 +1326,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // convention (slice 158). For 'Enter' / 'Tab' the move
     // direction is fixed; blur leaves the selection at the
     // committed cell. Clamped to grid bounds.
-    if (key === 'Enter' && this.rows > 0) {
-      const nextRow = shiftKey ? Math.max(1, row - 1) : Math.min(this.rows, row + 1);
-      this.selection = selectSingleCell(col, nextRow);
-      this.extendCol = col;
-      this.extendRow = nextRow;
-    } else if (key === 'Tab' && this.cols > 0) {
-      const nextCol = shiftKey ? Math.max(1, col - 1) : Math.min(this.cols, col + 1);
-      this.selection = selectSingleCell(nextCol, row);
+    // Enter moves down, Tab right, shift reverses each; an arrow key
+    // moves the way it points, which is what committing from Excel's
+    // "enter" editing mode does.
+    const step = commitStep(key, shiftKey === true);
+    if (step !== null && this.rows > 0 && this.cols > 0) {
+      const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
+      const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
+      this.selection = selectSingleCell(nextCol, nextRow);
       this.extendCol = nextCol;
-      this.extendRow = row;
+      this.extendRow = nextRow;
     }
     this.recomputeViewport();
     const data: CellValueEditedData = { row, col, value };
@@ -1321,7 +1349,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // If we moved the active cell, also dispatch the
     // selection event so the server stays in sync (slice
     // 150 contract — every selection write emits an event).
-    if (key === 'Enter' || key === 'Tab') {
+    if (step !== null) {
       this.dispatchSelectionEvent();
     }
   };
@@ -1553,7 +1581,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.editor = {
         col,
         row,
-        initialValue: this.formulaFieldValueFor(col, row)
+        initialValue: this.formulaFieldValueFor(col, row),
+        // F2 opens the existing value, so arrows move the caret.
+        mode: 'edit'
       };
       this.recomputeViewport();
       return;
@@ -1574,7 +1604,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return;
       }
       e.preventDefault();
-      this.editor = { col, row, initialValue: key };
+      // Typing over the cell: an arrow commits and moves on.
+      this.editor = { col, row, initialValue: key, mode: 'enter' };
       this.recomputeViewport();
       return;
     }

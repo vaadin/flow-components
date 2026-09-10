@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.testbench;
 import java.util.List;
 import java.util.Optional;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -439,13 +438,25 @@ public class SpreadsheetElement extends TestBenchElement {
 
     public static class ContextMenuElement extends TestBenchElement {
 
+        /**
+         * The menu item with the given caption, or {@code null}.
+         * <p>
+         * Matched on {@code textContent} rather than
+         * {@link WebElement#getText()}: the items live in the context menu's
+         * shadow root, where getText() reports the empty string, so every
+         * lookup came back null.
+         */
         public WebElement getItem(String text) {
-            for (WebElement item : findElements(By.cssSelector(".item"))) {
-                if (item.getText().trim().equals(text)) {
-                    return item;
-                }
-            }
-            return null;
+            return (WebElement) ((JavascriptExecutor) getCommandExecutor()
+                    .getDriver()).executeScript("""
+                            const menu = arguments[0];
+                            for (const item of menu.querySelectorAll('.item')) {
+                                if (item.textContent.trim() === arguments[1]) {
+                                    return item;
+                                }
+                            }
+                            return null;
+                            """, this, text);
         }
 
     }

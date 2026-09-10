@@ -1269,6 +1269,12 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     key?: string,
     shiftKey?: boolean
   ): void => {
+    // Closing the editor takes the input out of the document, and losing
+    // the focus that way fires blur — which would commit a second time.
+    // One edit, one `cellValueEdited`.
+    if (target instanceof HTMLElement) {
+      target.dataset.editorClosed = 'true';
+    }
     target.dispatchEvent(
       new CustomEvent(type, {
         // Include the key + shift modifier so the connector can
@@ -1282,6 +1288,8 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     );
   };
 
+  const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
   const onKeyDown = (e: KeyboardEvent): void => {
     const input = e.currentTarget as HTMLInputElement;
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -1290,15 +1298,25 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     } else if (e.key === 'Escape') {
       e.preventDefault();
       dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
+    } else if (editor.mode === 'enter' && ARROW_KEYS.includes(e.key)) {
+      // Excel has two editing modes and they differ here: when the user
+      // is typing over the cell, an arrow commits and moves on. Only
+      // when they opened the existing value to change it does an arrow
+      // move the caret instead.
+      e.preventDefault();
+      dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);
     }
-    // Other keys (typing) are NOT stopped so the input receives
-    // them. Arrow keys etc. move the caret inside the input
-    // rather than navigating the spreadsheet — Excel convention.
+    // Other keys (typing) are NOT stopped so the input receives them.
     e.stopPropagation();
   };
 
   const onBlur = (e: FocusEvent): void => {
     const input = e.currentTarget as HTMLInputElement;
+    if (input.dataset.editorClosed === 'true') {
+      // Already committed or cancelled by a key; this blur is the
+      // editor being taken off the sheet, not the user leaving it.
+      return;
+    }
     // Blur commit doesn't pass key/shift — the connector
     // leaves the selection at the committed cell.
     dispatchEditorEvent(input, 'cell-editor-commit', input.value);
