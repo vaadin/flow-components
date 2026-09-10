@@ -35,6 +35,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
@@ -301,6 +302,112 @@ class FormAIControllerTest {
                             + "should be discovered as a single field; its "
                             + "internal children should not be exposed as "
                             + "separate form fields");
+        }
+
+        @Test
+        void fieldsInsideCompositeAreDiscoveredInDocumentOrder() {
+            var before = new TestField();
+            var inner1 = new TestField();
+            var inner2 = new TestField();
+            var after = new TestField();
+            var composite = new FieldGroup(inner1, inner2);
+            var form = new Div(before, composite, after);
+
+            Assertions.assertEquals(List.of(before, inner1, inner2, after),
+                    FormFieldDiscovery.collectFields(form),
+                    "A Composite does not implement HasComponents, but the "
+                            + "fields in its content are part of the form");
+        }
+
+        @Test
+        void fieldsInsideNestedCompositesAreDiscovered() {
+            var deep = new TestField();
+            var form = new Div(new FieldGroup(new Div(new FieldGroup(deep))));
+
+            Assertions.assertEquals(List.of(deep),
+                    FormFieldDiscovery.collectFields(form));
+        }
+
+        @Test
+        void compositeWhoseContentIsAFieldContributesThatField() {
+            var field = new TestField();
+            var wrapper = new Composite<TestField>() {
+                @Override
+                protected TestField initContent() {
+                    return field;
+                }
+            };
+            var form = new Div(wrapper);
+
+            Assertions.assertEquals(List.of(field),
+                    FormFieldDiscovery.collectFields(form));
+        }
+
+        @Test
+        void compositeImplementingHasValueIsTreatedAsLeaf() {
+            var innerChild = new TestField();
+            var compositeField = new CompositeValueField(innerChild);
+            var form = new Div(compositeField);
+
+            Assertions.assertEquals(List.of(compositeField),
+                    FormFieldDiscovery.collectFields(form),
+                    "A Composite that is itself a field is discovered as one "
+                            + "field; its content is its internal composition");
+        }
+
+        /** Reusable group of fields built the recommended way. */
+        private static class FieldGroup extends Composite<Div> {
+            FieldGroup(Component... children) {
+                getContent().add(children);
+            }
+        }
+
+        /** A Composite that is itself the field, wrapping an inner one. */
+        private static class CompositeValueField extends Composite<Div>
+                implements HasValue<HasValue.ValueChangeEvent<String>, String> {
+            private String value = "";
+
+            CompositeValueField(Component... children) {
+                getContent().add(children);
+            }
+
+            @Override
+            public void setValue(String value) {
+                this.value = value;
+            }
+
+            @Override
+            public String getValue() {
+                return value;
+            }
+
+            @Override
+            public Registration addValueChangeListener(
+                    ValueChangeListener<? super ValueChangeEvent<String>> listener) {
+                return () -> {
+                    // no events in this fixture
+                };
+            }
+
+            @Override
+            public void setReadOnly(boolean readOnly) {
+                // read-only state not modelled
+            }
+
+            @Override
+            public boolean isReadOnly() {
+                return false;
+            }
+
+            @Override
+            public void setRequiredIndicatorVisible(boolean visible) {
+                // required indicator not modelled
+            }
+
+            @Override
+            public boolean isRequiredIndicatorVisible() {
+                return false;
+            }
         }
 
         @Test
