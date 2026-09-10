@@ -27,8 +27,7 @@
     </dependencies>
     <build>
         <plugins>
-            <!-- Also pins the npm versions of the packages this module ships,
-                through the execution the root pom configures. -->
+            <!-- Also pins the npm versions this module ships, see the root pom. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
