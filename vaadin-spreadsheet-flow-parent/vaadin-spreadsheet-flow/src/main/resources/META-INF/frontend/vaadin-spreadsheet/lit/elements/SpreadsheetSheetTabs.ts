@@ -24,13 +24,27 @@ export interface SheetTabsRenderState {
    * tabs render without any highlighted.
    */
   activeIndex: number;
+  /**
+   * Index of the leftmost tab currently shown, 0-based. With more
+   * sheets than fit, the strip scrolls by whole tabs and the scroll
+   * buttons move this. Mirrors the GWT client's `tabScrollIndex`, and
+   * the server is told about changes so it can restore the position.
+   */
+  firstVisibleTab: number;
+  /**
+   * Whether a new sheet can be added. A read-only workbook still shows
+   * the button — Excel does — but it does nothing.
+   */
+  readOnly: boolean;
 }
 
 /** Helper: build the empty state for tests + initial render. */
 export function emptySheetTabsRenderState(): SheetTabsRenderState {
   return {
     sheetNames: [],
-    activeIndex: 0
+    activeIndex: 0,
+    firstVisibleTab: 0,
+    readOnly: false
   };
 }
 
@@ -58,13 +72,42 @@ export class SpreadsheetSheetTabs extends LitElement {
    * `vaadin-spreadsheet::part(cell)` matches nothing, and the whole
    * documented styling API silently does nothing.
    */
-  static readonly EXPORTED_PARTS = 'tab,tab-selected';
+  static readonly EXPORTED_PARTS =
+    'tab,tab-selected,scroll-tabs-button,scroll-tabs-button-disabled,' +
+    'scroll-tabs-to-start-button,scroll-tabs-backward-button,' +
+    'scroll-tabs-forward-button,scroll-tabs-to-end-button,new-tab-button';
 
   static properties = {
     renderState: { attribute: false }
   };
 
   static styles = css`
+    /* The buttons sit before the tabs, as the GWT strip had them. */
+    .sheet-tabsheet-options {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .sheet-tabsheet-container {
+      display: inline-flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .sheet-tabsheet-options > div {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      background: var(--vaadin-spreadsheet-tab-button-bg, #808080);
+    }
+
+    /* Kept in the DOM so a stylesheet can reach it, but inert. */
+    .sheet-tabsheet-options > div.hidden {
+      opacity: 0.3;
+      cursor: default;
+    }
+
     :host {
       display: flex;
       flex-direction: row;
@@ -132,6 +175,30 @@ export class SpreadsheetSheetTabs extends LitElement {
     if (!(target instanceof Element)) {
       return;
     }
+
+    // A disabled scroll button carries the `hidden` class; it is still
+    // in the DOM so a stylesheet can style it, but it does nothing.
+    const scroll = target.closest<HTMLElement>('[data-scroll]');
+    if (scroll) {
+      if (!scroll.classList.contains('hidden')) {
+        this.dispatchEvent(
+          new CustomEvent('sheet-tabs-scroll', {
+            detail: { direction: scroll.dataset.scroll },
+            bubbles: true,
+            composed: true
+          })
+        );
+      }
+      return;
+    }
+
+    if (target.closest('[data-new-tab]')) {
+      this.dispatchEvent(
+        new CustomEvent('sheet-tab-add', { bubbles: true, composed: true })
+      );
+      return;
+    }
+
     const tab = target.closest<HTMLElement>('.sheet-tab');
     if (!tab) {
       return;
@@ -149,11 +216,58 @@ export class SpreadsheetSheetTabs extends LitElement {
     );
   };
 
+  /**
+   * The strip's buttons, in the order the GWT client had them.
+   *
+   * Not named `renderOptions`: LitElement assigns an instance property
+   * of that name in its own constructor, which shadows a prototype
+   * method and turns the call into "not a function" at render time.
+   *
+   * Class names and parts are both contract: the classes are what the
+   * default stylesheet and the TestBench elements look for, and the
+   * parts are documented for application CSS. A button that cannot do
+   * anything right now swaps its `scroll-tabs-button` part for
+   * `scroll-tabs-button-disabled`, so a stylesheet can grey it out.
+   */
+  private renderStripButtons(canScrollBack: boolean, canScrollForward: boolean): TemplateResult {
+    const scrollPart = (enabled: boolean, specific: string): string =>
+      `${enabled ? 'scroll-tabs-button' : 'scroll-tabs-button-disabled'} ${specific}`;
+    const scrollClass = (cls: string, enabled: boolean): string =>
+      enabled ? cls : `${cls} hidden`;
+    return html`
+      <div class="sheet-tabsheet-options">
+        <div
+          class=${scrollClass('scroll-tabs-beginning', canScrollBack)}
+          part=${scrollPart(canScrollBack, 'scroll-tabs-to-start-button')}
+          data-scroll="start"
+        ></div>
+        <div
+          class=${scrollClass('scroll-tabs-left', canScrollBack)}
+          part=${scrollPart(canScrollBack, 'scroll-tabs-backward-button')}
+          data-scroll="backward"
+        ></div>
+        <div
+          class=${scrollClass('scroll-tabs-right', canScrollForward)}
+          part=${scrollPart(canScrollForward, 'scroll-tabs-forward-button')}
+          data-scroll="forward"
+        ></div>
+        <div
+          class=${scrollClass('scroll-tabs-end', canScrollForward)}
+          part=${scrollPart(canScrollForward, 'scroll-tabs-to-end-button')}
+          data-scroll="end"
+        ></div>
+        <div class="add-new-tab" part="new-tab-button" data-new-tab></div>
+      </div>
+    `;
+  }
+
   render(): TemplateResult {
-    const { sheetNames, activeIndex } = this.renderState;
+    const { sheetNames, activeIndex, firstVisibleTab = 0 } = this.renderState;
     if (sheetNames.length === 0) {
       return html``;
     }
+    const canScrollBack = firstVisibleTab > 0;
+    const canScrollForward = firstVisibleTab < sheetNames.length - 1;
     const tabs = sheetNames.map((name, i) => {
       const oneBasedIndex = i + 1;
       const isActive = oneBasedIndex === activeIndex;
@@ -165,7 +279,12 @@ export class SpreadsheetSheetTabs extends LitElement {
       const part = isActive ? 'tab tab-selected' : 'tab';
       return html` <div class=${className} part=${part} data-index=${oneBasedIndex}> ${name} </div> `;
     });
-    return html`${tabs}`;
+    // The tabs scroll by whole tabs; hiding the ones before
+    // firstVisibleTab is enough and needs no width arithmetic.
+    return html`
+      ${this.renderStripButtons(canScrollBack, canScrollForward)}
+      <div class="sheet-tabsheet-container"> ${tabs.slice(firstVisibleTab)} </div>
+    `;
   }
 }
 

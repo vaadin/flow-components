@@ -318,6 +318,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * children of the cell-grid so the slots in its shadow root can project
    * them over the sheet.
    */
+  /**
+   * Leftmost sheet tab currently shown. The strip scrolls by whole
+   * tabs; the scroll buttons move this and the server is told, so it
+   * can restore the position on the next load.
+   */
+  private firstVisibleTab = 0;
   private readonly overlayComponents: SlottedVirtualChildren;
   /**
    * Server-side components rendered inside a cell. Same mechanism as
@@ -554,6 +560,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Sheet tab click → switch active sheet via spreadsheet-event
     // (slice 154).
     this.sheetTabs.addEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
+    this.sheetTabs.addEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
+    this.sheetTabs.addEventListener('sheet-tab-add', this.handleSheetTabAdd);
     this.scrollContainer.addEventListener('scroll', this.handleScroll);
     // Clipboard integration (slice 163). The browser routes
     // copy/cut/paste events to the focused element when the
@@ -1839,6 +1847,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.columnHeader.removeEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
     this.rowHeader.removeEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
     this.sheetTabs.removeEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
+    this.sheetTabs.removeEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
+    this.sheetTabs.removeEventListener('sheet-tab-add', this.handleSheetTabAdd);
     this.cellGrid.removeEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.removeEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
     this.cellGrid.removeEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
@@ -2383,7 +2393,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private syncSheetTabs(): void {
     this.sheetTabs.renderState = {
       sheetNames: this.sheetNames,
-      activeIndex: this.sheetIndex
+      activeIndex: this.sheetIndex,
+      firstVisibleTab: this.firstVisibleTab,
+      readOnly: this.workbookProtected
     };
   }
 
@@ -2394,6 +2406,52 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * via the cell value APIs, which the next render picks up.
    * Slice 154.
    */
+  /**
+   * A scroll button moved the strip.
+   *
+   * Nothing is reported: the GWT client told its own handler about the
+   * new index, but the Flow server has no counterpart for it, so which
+   * tab is leftmost is the client's business alone. Scrolling the strip
+   * does not change the sheet.
+   */
+  private readonly handleSheetTabsScroll = (
+    e: CustomEvent<{ direction: 'start' | 'backward' | 'forward' | 'end' }>
+  ): void => {
+    const last = Math.max(0, this.sheetNames.length - 1);
+    const moved = {
+      start: 0,
+      backward: this.firstVisibleTab - 1,
+      forward: this.firstVisibleTab + 1,
+      end: last
+    }[e.detail.direction];
+    const next = Math.min(last, Math.max(0, moved));
+    if (next === this.firstVisibleTab) {
+      return;
+    }
+    this.firstVisibleTab = next;
+    this.syncSheetTabs();
+  };
+
+  /** The + button: ask the server for a new sheet. */
+  private readonly handleSheetTabAdd = (): void => {
+    if (this.workbookProtected) {
+      return;
+    }
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: {
+          type: 'sheetCreated',
+          data: {
+            scrollLeft: this.scrollContainer.scrollLeft,
+            scrollTop: this.scrollContainer.scrollTop
+          }
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
   private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
     const { index } = e.detail;
     if (index === this.sheetIndex) {
