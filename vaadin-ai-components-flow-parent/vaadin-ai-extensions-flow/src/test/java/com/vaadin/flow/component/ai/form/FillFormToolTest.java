@@ -2308,6 +2308,11 @@ class FillFormToolTest {
             }
 
             @Override
+            public boolean isSourceTrackingEnabled() {
+                return false;
+            }
+
+            @Override
             public String executeFill(JsonNode arguments) {
                 throw toThrow;
             }
