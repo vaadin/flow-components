@@ -2640,6 +2640,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       overlays: positionedOverlays,
       popupButtons: positionedPopupButtons,
       paintRect: this.painting?.outcome.kind === 'none' ? null : this.painting?.outcome.painted ?? null,
+      commentText: this.cellComments,
+      commentAuthors: this.cellCommentAuthors,
+      visibleCommentKeys: this.visibleCellComments,
+      invalidFormulaMessage: this.invalidFormulaErrorMessage,
       // Comment-bearing + hyperlink cell keys (slice 165).
       // The maps from setCellComments / setHyperlinksTooltips
       // are keyed by the cell-key format already, so a Set

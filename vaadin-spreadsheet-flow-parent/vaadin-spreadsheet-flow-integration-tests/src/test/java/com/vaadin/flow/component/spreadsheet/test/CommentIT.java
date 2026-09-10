@@ -85,8 +85,11 @@ public class CommentIT extends AbstractSpreadsheetIT {
 
         SheetCellElement cell = getSpreadsheet().getCellAt(3, 3);
         Assert.assertTrue(cell.hasCommentIndicator());
-        WebElement triangle = cell
-                .findElement(By.className("cell-comment-triangle"));
+        // The triangle is a sibling of its cell in the grid, positioned in
+        // grid coordinates, so it is found by its anchor rather than by
+        // searching inside the cell element.
+        WebElement triangle = findElementInShadowRoot(By.cssSelector(
+                "[part~=\"comment-triangle\"][data-col=\"3\"][data-row=\"3\"]"));
         new Actions(getDriver()).contextClick(triangle).build().perform();
         Assert.assertFalse(hasOption("Insert comment"));
     }
@@ -125,27 +128,34 @@ public class CommentIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCommentPresent(final String text) {
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By.xpath(
-                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
-                                + " and contains(text(), '" + text + "')]"))
-                        .size() > 0;
-            }
-        });
+        waitUntil(webDriver -> commentOverlayCount(text) > 0);
     }
 
     private void assertCommentNotPresent(final String text) {
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By.xpath(
-                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
-                                + " and contains(text(), '" + text + "')]"))
-                        .size() == 0;
-            }
-        });
+        waitUntil(webDriver -> commentOverlayCount(text) == 0);
+    }
+
+    /**
+     * Comment notes carrying the given text.
+     * <p>
+     * GWT floated them in the document body, so an xpath over the document
+     * found them; the Lit client draws them in the cell grid's shadow root,
+     * which no document query reaches.
+     */
+    private long commentOverlayCount(String text) {
+        Object count = executeScript("""
+                const grid = arguments[0].shadowRoot.querySelector(
+                    'vaadin-spreadsheet-internal-cell-grid');
+                if (!grid || !grid.shadowRoot) return 0;
+                const notes = grid.shadowRoot.querySelectorAll(
+                    '.comment-overlay-label, .comment-overlay-invalidformula');
+                let found = 0;
+                for (const note of notes) {
+                    if (note.textContent.includes(arguments[1])) found++;
+                }
+                return found;
+                """, getSpreadsheet(), text);
+        return count instanceof Long ? (Long) count : 0L;
     }
 
 }

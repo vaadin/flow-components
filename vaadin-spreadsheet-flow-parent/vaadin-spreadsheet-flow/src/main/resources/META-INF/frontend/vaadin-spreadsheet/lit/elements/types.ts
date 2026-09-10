@@ -210,6 +210,20 @@ export interface CellGridRenderState {
    */
   paintRect?: CellRect | null;
 
+  /** Comment text by cell key, for every cell that carries one. */
+  commentText?: Readonly<Record<string, string>>;
+
+  /** Comment author by cell key, where the workbook records one. */
+  commentAuthors?: Readonly<Record<string, string>>;
+
+  /**
+   * Cells whose comment is shown without hovering — Excel's "show comment".
+   */
+  visibleCommentKeys?: ReadonlyArray<string>;
+
+  /** Message shown when hovering a cell whose formula the server rejected. */
+  invalidFormulaMessage?: string | null;
+
   /**
    * Cell keys (in {@link toKey} format — `"col<C> row<R>"`)
    * whose cell carries a comment. The cell-grid renders a
@@ -343,6 +357,10 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     overlays: [],
     popupButtons: [],
     paintRect: null,
+    commentText: {},
+    commentAuthors: {},
+    visibleCommentKeys: [],
+    invalidFormulaMessage: null,
     commentCells: new Set(),
     invalidFormulaCells: new Set(),
     hyperlinkCells: new Set(),

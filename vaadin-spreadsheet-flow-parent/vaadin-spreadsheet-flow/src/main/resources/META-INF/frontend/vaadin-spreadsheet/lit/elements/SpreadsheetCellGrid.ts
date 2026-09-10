@@ -7,12 +7,12 @@
  * license.
  */
 
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import type { DirectiveResult } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
-import { toKey } from '../algorithms/CellKeys.js';
+import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import type { CellData } from '../types/wire.js';
 import { overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
@@ -101,6 +101,25 @@ export class SpreadsheetCellGrid extends LitElement {
       position: absolute;
       pointer-events: none;
       box-sizing: border-box;
+    }
+
+    /* Comment notes. Anchored at the cell's top-right and above every
+       cell, since the point is to be readable over the sheet. */
+    .v-spreadsheet-comment-overlay {
+      z-index: 20;
+      max-width: 260px;
+      padding: 4px 6px;
+      box-sizing: border-box;
+      pointer-events: none;
+      white-space: pre-wrap;
+      background: var(--vaadin-spreadsheet-comment-overlay-bg, #ffffe1);
+      border: 1px solid var(--vaadin-spreadsheet-comment-overlay-border-color, #c0c0c0);
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+      font-size: 0.9em;
+    }
+
+    .v-spreadsheet-comment-overlay .comment-overlay-author {
+      font-weight: bold;
     }
 
     /* The fill handle's drag outline. Dashed, so it reads as a preview
@@ -340,6 +359,9 @@ export class SpreadsheetCellGrid extends LitElement {
     // outside the spreadsheet still terminates cleanly.
     this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown);
     this.shadowRoot!.addEventListener('mouseover', this.handleShadowMouseOver);
+    // mouseleave on the grid itself: mouseout fires between cells too, and
+    // would flicker the comment off and on as the pointer crosses a border.
+    this.addEventListener('mouseleave', this.handleGridMouseLeave);
     // Right-click delegation (slice 166). preventDefault stops
     // the browser's native context menu so the server-supplied
     // ContextMenu component is the only one shown. Dispatches
@@ -421,6 +443,21 @@ export class SpreadsheetCellGrid extends LitElement {
    * during drag); the connector filters by checking its
    * dragging flag. Slice 155.
    */
+  /** The cell the pointer is over, or null. Presentation-only state. */
+  private hoveredKey: string | null = null;
+
+  private setHoveredKey(key: string | null): void {
+    if (this.hoveredKey === key) {
+      return;
+    }
+    this.hoveredKey = key;
+    this.requestUpdate();
+  }
+
+  private readonly handleGridMouseLeave = (): void => {
+    this.setHoveredKey(null);
+  };
+
   private readonly handleShadowMouseOver = (e: Event): void => {
     const target = e.target;
     if (!(target instanceof Element)) {
@@ -435,6 +472,11 @@ export class SpreadsheetCellGrid extends LitElement {
     if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
       return;
     }
+    // Which cell the pointer is over decides whether a comment shows, and
+    // that is presentation only — the connector never needs to know, and
+    // routing it through a full render-state push would repaint the sheet
+    // on every pointer move.
+    this.setHoveredKey(toKey(col, row));
     this.dispatchEvent(
       new CustomEvent('cell-mouseover', {
         detail: { col, row },
@@ -649,7 +691,8 @@ export class SpreadsheetCellGrid extends LitElement {
     const sheetOverlays = buildSheetOverlays(this.renderState);
     const popupButtons = buildPopupButtons(this.renderState);
     const paintOutline = buildPaintOutline(this.renderState);
-    return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${editor}`;
+    const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
+    return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${commentOverlays}${editor}`;
   }
 }
 
@@ -740,10 +783,16 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       const invalidIndicator = invalidFormulaCells.has(key)
         ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
         : '';
+      // The triangle is a sibling of its cell, not a child — it is
+      // positioned in grid coordinates like every other overlay — so it
+      // carries the anchor as data attributes, the way the popup buttons
+      // and sheet overlays do. Nothing else ties it to its cell.
       const commentIndicator = commentCells.has(key)
         ? html`<div
             class="comment-indicator"
             part="comment-triangle"
+            data-col=${col}
+            data-row=${row}
             style="left:${left + width}px;top:${top}px;"
           ></div>`
         : '';
@@ -963,6 +1012,66 @@ function rectGeometry(
     width: Math.max(0, right - left),
     height: Math.max(0, bottom - top)
   };
+}
+
+/**
+ * Comment overlays — the little yellow notes.
+ *
+ * Two things put one on screen: the workbook marking a comment "always
+ * visible", and the pointer resting on a cell that has one. A cell whose
+ * formula the server rejected shows the same overlay carrying the error
+ * instead, which is why one function renders both.
+ *
+ * Class names are the GWT ones (`comment-overlay-label`,
+ * `comment-overlay-author`, `comment-overlay-invalidformula`): applications
+ * style these today, and renaming them would break that for no gain.
+ */
+function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
+  const text = state.commentText ?? {};
+  const authors = state.commentAuthors ?? {};
+  const invalidCells = state.invalidFormulaCells ?? new Set<string>();
+  const invalidMessage = state.invalidFormulaMessage ?? null;
+
+  const keys = new Set<string>(state.visibleCommentKeys ?? []);
+  if (hoveredKey !== null && (hoveredKey in text || invalidCells.has(hoveredKey))) {
+    keys.add(hoveredKey);
+  }
+
+  const overlays: TemplateResult[] = [];
+  for (const key of keys) {
+    const coord = parseColRow(key);
+    if (coord.col < 1 || coord.row < 1) {
+      continue;
+    }
+    // An invalid formula only shows while hovered — an always-visible
+    // comment is the workbook's choice, an error message is feedback.
+    const showsError = key === hoveredKey && invalidCells.has(key) && invalidMessage !== null;
+    const comment = text[key];
+    if (!showsError && comment === undefined) {
+      continue;
+    }
+    const geometry = rectGeometry(state, {
+      c1: coord.col,
+      c2: coord.col,
+      r1: coord.row,
+      r2: coord.row
+    });
+    if (geometry === null) {
+      continue;
+    }
+    // Anchored at the cell's top-right, the way Excel hangs a note off the
+    // comment triangle.
+    const style = `left:${geometry.left + geometry.width}px;top:${geometry.top}px;` + 'position:absolute;';
+    const author = authors[key];
+    overlays.push(html`
+      <div class="v-spreadsheet-comment-overlay" style=${style}>
+        ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
+        ${author ? html`<div class="comment-overlay-author">${author}</div>` : nothing}
+        ${comment === undefined ? nothing : html`<div class="comment-overlay-label">${comment}</div>`}
+      </div>
+    `);
+  }
+  return overlays;
 }
 
 function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | string {

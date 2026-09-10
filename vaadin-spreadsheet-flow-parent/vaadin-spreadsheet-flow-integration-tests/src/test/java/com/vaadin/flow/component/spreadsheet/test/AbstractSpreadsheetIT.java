@@ -130,6 +130,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         selector = selector.replace(".s-corner", ".selection-corner");
         // Popup (filter) button on a table header cell.
         selector = selector.replace(".popupbutton", ".popup-button");
+        // Header corner — the empty box where the two header strips meet.
+        selector = selector.replace(".corner", ".sheet-header-corner");
         // Cell comment indicator. The Lit element exposes it as a
         // documented part rather than a class.
         selector = selector.replace(".cell-comment-triangle",
