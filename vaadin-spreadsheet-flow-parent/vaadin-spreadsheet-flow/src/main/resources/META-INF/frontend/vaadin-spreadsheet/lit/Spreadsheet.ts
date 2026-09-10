@@ -45,6 +45,7 @@ import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import {
   SlottedVirtualChildren,
+  actionIconSlotName,
   cellComponentSlotName,
   cellEditorSlotName,
   flowVirtualChildResolver,
@@ -99,6 +100,12 @@ import type { CellGridRenderState } from './elements/types.js';
  * `import { Spreadsheet } from './lit/Spreadsheet.js'` does this code
  * actually run.
  */
+/**
+ * Sample the cell-style width measurement uses: ten digits, matching what
+ * the GWT client measured, so the ratios keep the same meaning server-side.
+ */
+const WIDTH_PROBE_TEXT = '5555555555';
+
 export class Spreadsheet implements SpreadsheetClientApi {
   // ====================================================================
   // Internal state — placeholder fields. The real Phase 3.2+ class
@@ -351,11 +358,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly popupContents: SlottedVirtualChildren;
 
+  /**
+   * Icons on context-menu actions. Server-side components attached to the
+   * action, so they need placing like any other; a fourth holder because
+   * they live in the context menu's shadow root rather than the grid's.
+   */
+  private readonly actionIcons: SlottedVirtualChildren;
+
   /** The overlay the open popup's content is shown in. */
   private readonly popupOverlay: HTMLElement;
 
   /** The popup that is open, or null when none is. */
   private openPopup: { row: number; col: number; nodeId: string } | null = null;
+
+  /** Whether the cell styles have changed since the last width measurement. */
+  private styleWidthRatiosStale = false;
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -509,6 +526,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       'position:absolute;z-index:20;box-sizing:border-box;' +
       'background:var(--vaadin-spreadsheet-popup-background, #fff);' +
       'border:1px solid var(--vaadin-spreadsheet-popup-border-color, #c0c0c0);';
+    this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
     this.popupContents = new SlottedVirtualChildren(host, this.popupOverlay, resolveVirtualChild, popupContentSlotName);
     // A flex column holding the formula bar, the sheet, and the tabs.
     // `flex:1 1 auto` fills a host that has a definite height and
@@ -1857,6 +1875,61 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
   }
 
+  /**
+   * Tell the server how wide one character is in each cell style.
+   *
+   * A cell under the General format shows as many digits as fit and falls
+   * back to scientific notation when they do not, and the server decides
+   * that: it knows the column width in pixels but not the font, so it needs
+   * a pixels-per-character ratio per style index. Without one it assumes
+   * everything fits and no number is ever shortened.
+   *
+   * Measured the way the GWT client measured it — ten digits in a probe
+   * carrying the style's class, divided by ten — so the server's existing
+   * arithmetic keeps its meaning.
+   */
+  private reportCellStyleWidthRatios(): void {
+    const styleIndexes = Object.keys(this.cellStyleToCSSStyle)
+      .map(Number)
+      .filter((index) => Number.isFinite(index));
+    const root = this.cellGrid.shadowRoot;
+    if (styleIndexes.length === 0 || root === null) {
+      return;
+    }
+
+    const probe = document.createElement('span');
+    // Out of flow and off-screen so measuring never disturbs the sheet.
+    // `width:auto` overrides nothing in `.cell` but guards a theme that
+    // sets one.
+    probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
+    probe.textContent = WIDTH_PROBE_TEXT;
+    root.appendChild(probe);
+    const ratios = styleIndexes.map((index) => {
+      probe.className = `cell cs${index}`;
+      return probe.clientWidth / WIDTH_PROBE_TEXT.length;
+    });
+    probe.remove();
+
+    if (ratios.every((ratio) => ratio === 0)) {
+      // Nothing was laid out — the sheet is hidden, or the styles have not
+      // been applied yet. A zero ratio would tell the server every value
+      // fits in no space at all, so say nothing and measure again later.
+      this.styleWidthRatiosStale = true;
+      return;
+    }
+
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: {
+          type: 'setCellStyleWidthRatios',
+          data: { styleIndexes, ratios }
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
   recomputeViewport(): void {
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
@@ -1865,6 +1938,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportHeight: this.scrollContainer.clientHeight
     });
     this.announceViewport();
+    if (this.styleWidthRatiosStale) {
+      this.styleWidthRatiosStale = false;
+      // Measured once the grid has painted the rules that were just
+      // handed to it, not against the ones it is replacing.
+      void this.cellGrid.updateComplete.then(() => this.reportCellStyleWidthRatios());
+    }
   }
 
   /**
@@ -1886,6 +1965,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellComponents.clear();
     this.cellEditors.clear();
     this.popupContents.clear();
+    this.actionIcons.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     document.removeEventListener('keydown', this.handleContextMenuKeyDown);
@@ -2745,14 +2825,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scheduleRender();
   }
   showActions(actionDetails: SpreadsheetActionDetails[]): void {
+    const actions = coerceArray<SpreadsheetActionDetails>(actionDetails);
     this.contextMenu.renderState = {
       open: true,
       x: this.lastContextMenuPosition.x,
       y: this.lastContextMenuPosition.y,
       // Arrives JSON-serialized through the Flow lane, like the
       // collection-shaped property pushes slice 179 handles.
-      actions: coerceArray<SpreadsheetActionDetails>(actionDetails)
+      actions
     };
+    // An action can carry an icon component; 0 means it has none. The
+    // slots that show them are in the menu's template, so place the
+    // elements only once that has rendered.
+    const iconIds = actions
+      .filter((action) => Number(action.iconNodeId) > 0)
+      .map((action) => String(action.iconNodeId));
+    void this.contextMenu.updateComplete.then(() => this.actionIcons.sync(iconIds));
   }
 
   /**
@@ -2774,6 +2862,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.contextMenu.renderState = emptyContextMenuRenderState();
+    this.actionIcons.clear();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'contextMenuClosed', data: {} },
@@ -2953,6 +3042,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   setCellStyleToCSSStyle(map: Record<number, string>): void {
     this.cellStyleToCSSStyle = coerceObject(map);
+    // The server sizes General-format numbers against how wide a digit is
+    // in each style, and only the client can measure that.
+    this.styleWidthRatiosStale = true;
   }
   setRowIndexToStyleIndex(map: Record<number, number>): void {
     this.rowIndexToStyleIndex = coerceObject(map);

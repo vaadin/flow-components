@@ -123,7 +123,7 @@ describe('Spreadsheet skeleton — RPC stubs are callable without throwing', () 
 
     it('popup-button methods are callable', () => {
         expect(() =>
-            sheet.onPopupButtonOpened(1, 1, 'content', 'app')
+            sheet.onPopupButtonOpen(1, 1, 'content', 'app')
         ).to.not.throw();
         expect(() => sheet.closePopup(1, 1)).to.not.throw();
         expect(() => sheet.addPopupButton('{}')).to.not.throw();
@@ -308,15 +308,17 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         expect(rootKids.includes(sheet.getSheetTabs())).to.be.true;
 
         const scroller = sheet.getScrollContainer();
-        // Four scroll-container children: header-corner, column-header,
-        // row-header, cell-grid. (Identity checks via `===` to avoid
-        // chai serializing LitElements with cyclic renderState.)
-        expect(scroller.children).to.have.length(4);
+        // Five scroll-container children: header-corner, column-header,
+        // row-header, cell-grid, and the popup overlay, which sits here so
+        // it tracks the sheet as it scrolls. (Identity checks via `===` to
+        // avoid chai serializing LitElements with cyclic renderState.)
+        expect(scroller.children).to.have.length(5);
         const kids = Array.from(scroller.children);
         expect(kids.includes(sheet.getColumnHeader())).to.be.true;
         expect(kids.includes(sheet.getRowHeader())).to.be.true;
         expect(kids.includes(sheet.getCellGrid())).to.be.true;
         expect(kids.includes(sheet.getHeaderCorner())).to.be.true;
+        expect(kids.includes(sheet.getPopupOverlay())).to.be.true;
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -566,9 +568,10 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         expect(scroller.style.overflow).to.equal('auto');
         const computed = getComputedStyle(scroller);
         expect(computed.display).to.equal('grid');
-        // Four children: header-corner + column-header + row-header
-        // + cell-grid (CSS-grid layout, slice 144+145).
-        expect(scroller.children).to.have.length(4);
+        // Five children: header-corner + column-header + row-header
+        // + cell-grid (CSS-grid layout, slice 144+145), plus the
+        // popup overlay, which scrolls with the sheet.
+        expect(scroller.children).to.have.length(5);
 
         cleanup();
     });

@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { actionIconSlotName } from '../dom/VirtualChildren.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
 
 /**
@@ -91,7 +92,9 @@ export class SpreadsheetContextMenu extends LitElement {
     }
 
     .item {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       width: 100%;
       padding: 4px 12px;
       border: 0;
@@ -160,6 +163,9 @@ export class SpreadsheetContextMenu extends LitElement {
         ${actions.map(
           (action) => html`
             <button class="item" part="context-menu-item" type="button" data-key=${action.key} data-type=${action.type}>
+              ${action.iconNodeId
+                ? html`<slot class="item-icon" name=${actionIconSlotName(String(action.iconNodeId))}></slot>`
+                : nothing}
               ${action.caption}
             </button>
           `

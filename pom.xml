@@ -83,6 +83,12 @@
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <jetty.scan>0</jetty.scan>
+        <!-- The IT server runs the Vite dev server by default. Override with
+             -Dvaadin.frontend.hotdeploy=false to serve a pre-built bundle
+             instead, which a long test run needs: the dev server can die
+             partway through and every test after that fails on a page that
+             never loads. -->
+        <vaadin.frontend.hotdeploy>true</vaadin.frontend.hotdeploy>
         <karaf-maven-plugin.version>4.4.11</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.6.0</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
@@ -380,7 +386,7 @@
                             <project.basedir>${project.basedir}</project.basedir>
                             <vaadin.productionMode>false</vaadin.productionMode>
                             <vaadin.reuseDevServer>true</vaadin.reuseDevServer>
-                            <vaadin.frontend.hotdeploy>true</vaadin.frontend.hotdeploy>
+                            <vaadin.frontend.hotdeploy>${vaadin.frontend.hotdeploy}</vaadin.frontend.hotdeploy>
                         </systemProperties>
                     </configuration>
                     <executions>

@@ -8,13 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
@@ -56,30 +52,46 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
     private void assertFreezePanePositionedCorrectly(String filename,
             int frozenRows, int frozenColumns, String regularCell) {
         loadFile(filename);
-        WebElement topLeft = findElementInShadowRoot(
-                By.className("top-left-pane"));
 
-        assertVisibleChildCount(topLeft, "rh", frozenRows);
-        assertVisibleChildCount(topLeft, "ch", frozenColumns);
+        assertFrozenHeaderCount("row", "row", frozenRows);
+        assertFrozenHeaderCount("column", "col", frozenColumns);
         Assert.assertEquals("First regular cell not where it's supposed to be,",
                 "regular", getCellValue(regularCell));
     }
 
-    private void assertVisibleChildCount(WebElement parent,
-            String childClassName, int expectedChildCount) {
-        List<WebElement> childElements = parent
-                .findElements(By.className(childClassName));
-        int actualChildCount = 0;
-        for (WebElement childElement : childElements) {
-            if ("none".equals(childElement.getCssValue("display"))
-                    || "0px".equals(childElement.getCssValue("height"))) {
-                continue;
-            }
-            ++actualChildCount;
-        }
+    /**
+     * Count the header cells drawn in a frozen strip, skipping the ones a
+     * hidden row or column collapses to nothing.
+     * <p>
+     * GWT drew both frozen strips inside a single top-left pane; the Lit client
+     * gives the row and column headers a frozen strip each, so the two are
+     * counted separately.
+     */
+    private void assertFrozenHeaderCount(String element, String axis,
+            int expected) {
+        Long count = (Long) ((org.openqa.selenium.JavascriptExecutor) getDriver())
+                .executeScript("""
+                        const [element, axis] = [arguments[1], arguments[2]];
+                        const header = arguments[0].shadowRoot.querySelector(
+                            `vaadin-spreadsheet-internal-${element}-header`);
+                        const strip = header && header.shadowRoot
+                            .querySelector('.frozen-header-strip');
+                        if (!strip) return 0;
+                        const cells = strip.querySelectorAll(
+                            `.${axis}-header-cell`);
+                        let visible = 0;
+                        for (const cell of cells) {
+                            const style = getComputedStyle(cell);
+                            if (style.display === 'none') continue;
+                            if (parseFloat(style.height) === 0) continue;
+                            if (parseFloat(style.width) === 0) continue;
+                            visible++;
+                        }
+                        return visible;
+                        """, getSpreadsheet(), element, axis);
 
         Assert.assertEquals(
-                String.format("Unexpected child count (%s),", childClassName),
-                expectedChildCount, actualChildCount);
+                String.format("Unexpected frozen %s-header count,", axis),
+                expected, count.intValue());
     }
 }

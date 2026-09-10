@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -44,7 +43,16 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         cell.contextClick();
 
         var cellRect = cell.getRect();
-        var overlayRect = findElement(By.className("v-contextmenu")).getRect();
+        // The menu is drawn inside the spreadsheet's shadow root; GWT put
+        // a .v-contextmenu div in the document body.
+        var overlay = (WebElement) executeScript("""
+                const menu = arguments[0].shadowRoot.querySelector(
+                    'vaadin-spreadsheet-internal-context-menu');
+                return menu && menu.shadowRoot
+                    ? menu.shadowRoot.querySelector('[part~="context-menu"]')
+                    : null;
+                """, getSpreadsheet());
+        var overlayRect = overlay.getRect();
         // Assert that the overlay is positioned over the cell
         assertInRange(cellRect.x, overlayRect.x, cellRect.x + cellRect.width);
         assertInRange(cellRect.y, overlayRect.y, cellRect.y + cellRect.height);
@@ -139,11 +147,33 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("lumo:cog", colIcon.getAttribute("icon"));
     }
 
+    /**
+     * The icon component an action shows.
+     * <p>
+     * The menu item lives in the context menu's shadow root and the icon is a
+     * light-DOM child of the spreadsheet projected into it, so neither is
+     * reachable by an ordinary document query.
+     */
     private WebElement getIconFromAction(String actionText) {
-        return findElements(By.className("gwt-MenuItem")).stream()
-                .filter(el -> el.getText().equals(actionText))
-                .map(el -> el.findElement(By.tagName("vaadin-icon")))
-                .findFirst().orElseThrow();
+        WebElement icon = (WebElement) executeScript("""
+                const menu = arguments[0].shadowRoot.querySelector(
+                    'vaadin-spreadsheet-internal-context-menu');
+                if (!menu || !menu.shadowRoot) return null;
+                for (const item of menu.shadowRoot.querySelectorAll('.item')) {
+                    if (item.textContent.trim() !== arguments[1]) continue;
+                    const slot = item.querySelector('slot.item-icon');
+                    const assigned = slot
+                        ? slot.assignedElements({ flatten: true })
+                        : [];
+                    return assigned[0] || null;
+                }
+                return null;
+                """, getSpreadsheet(), actionText);
+        if (icon == null) {
+            throw new java.util.NoSuchElementException(
+                    "No icon on the action '" + actionText + "'");
+        }
+        return icon;
     }
 
 }

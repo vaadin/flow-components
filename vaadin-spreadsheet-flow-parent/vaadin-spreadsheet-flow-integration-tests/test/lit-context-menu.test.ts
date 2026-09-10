@@ -240,3 +240,147 @@ describe('Spreadsheet context menu — dismissing', () => {
     ctx.cleanup = () => {};
   });
 });
+
+/**
+ * Action icons.
+ *
+ * `SpreadsheetAction.setIcon` attaches the icon as a virtual child and the
+ * server sends its Flow node id on the action. The connector ignored it, so
+ * every menu item rendered as bare text however the application decorated
+ * it.
+ */
+describe('Spreadsheet — context-menu action icons', () => {
+  const originalVaadin = (window as any).Vaadin;
+
+  function attachWithShadow(): { host: HTMLElement; sheet: Spreadsheet; cleanup: () => void } {
+    const host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    // The icon is projected through two shadow roots — the host's and the
+    // menu's — so the host needs a real one.
+    const sheet = new Spreadsheet(host, host.attachShadow({ mode: 'open' }));
+    sheet.setCols(10);
+    sheet.setRows(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(10).fill(15));
+    return {
+      host,
+      sheet,
+      cleanup: () => {
+        sheet.dispose();
+        host.remove();
+      }
+    };
+  }
+
+  function withIcons(nodes: Record<number, HTMLElement>): void {
+    (window as any).Vaadin = {
+      Flow: { clients: { '': { getByNodeId: (n: number) => nodes[n] ?? null } } }
+    };
+  }
+
+  function icon(name: string): HTMLElement {
+    const el = document.createElement('vaadin-icon');
+    el.setAttribute('icon', name);
+    return el;
+  }
+
+  let ctx: ReturnType<typeof attachWithShadow>;
+
+  beforeEach(() => {
+    ctx = attachWithShadow();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+    (window as any).Vaadin = originalVaadin;
+  });
+
+  it('shows the icon component the action carries', async () => {
+    const academy = icon('vaadin:academy-cap');
+    withIcons({ 7: academy });
+
+    ctx.sheet.showActions([
+      { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
+    ] as any);
+    await ctx.sheet.getContextMenu().updateComplete;
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    const slot = ctx.sheet
+      .getContextMenu()
+      .shadowRoot!.querySelector<HTMLSlotElement>('slot.item-icon');
+    expect(slot, 'no icon slot rendered').to.not.be.null;
+    expect(slot!.assignedElements({ flatten: true })).to.eql([academy]);
+  });
+
+  it('renders no icon slot for an action without one', async () => {
+    withIcons({});
+
+    ctx.sheet.showActions([
+      { caption: 'Plain', type: 0, key: '1', iconNodeId: 0 }
+    ] as any);
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    expect(ctx.sheet.getContextMenu().shadowRoot!.querySelector('slot.item-icon')).to.be.null;
+  });
+
+  it('places one icon per action that has one', async () => {
+    withIcons({ 7: icon('vaadin:academy-cap'), 8: icon('lumo:angle-up') });
+
+    ctx.sheet.showActions([
+      { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 },
+      { caption: 'Plain', type: 0, key: '2', iconNodeId: 0 },
+      { caption: 'Lumo icon', type: 0, key: '3', iconNodeId: 8 }
+    ] as any);
+    await ctx.sheet.getContextMenu().updateComplete;
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    const slots = ctx.sheet.getContextMenu().shadowRoot!.querySelectorAll('slot.item-icon');
+    expect(slots).to.have.length(2);
+    expect(ctx.host.querySelectorAll('vaadin-icon')).to.have.length(2);
+  });
+
+  it('keeps the caption alongside the icon', async () => {
+    withIcons({ 7: icon('vaadin:academy-cap') });
+
+    ctx.sheet.showActions([
+      { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
+    ] as any);
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    const item = ctx.sheet.getContextMenu().shadowRoot!.querySelector('.item')!;
+    expect(item.textContent!.trim()).to.equal('Vaadin icon');
+  });
+
+  it('releases the icons when the menu closes', async () => {
+    const academy = icon('vaadin:academy-cap');
+    withIcons({ 7: academy });
+
+    ctx.sheet.showActions([
+      { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
+    ] as any);
+    await ctx.sheet.getContextMenu().updateComplete;
+    await ctx.sheet.getContextMenu().updateComplete;
+    expect(academy.parentElement).to.equal(ctx.host);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    expect(academy.parentElement).to.be.null;
+  });
+
+  it('accepts the action list as the JSON string Flow sends', async () => {
+    withIcons({ 7: icon('vaadin:academy-cap') });
+
+    ctx.sheet.showActions(
+      JSON.stringify([{ caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }]) as any
+    );
+    await ctx.sheet.getContextMenu().updateComplete;
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    expect(
+      ctx.sheet.getContextMenu().shadowRoot!.querySelector<HTMLSlotElement>('slot.item-icon')!
+        .assignedElements({ flatten: true })
+    ).to.have.length(1);
+  });
+});

@@ -72,6 +72,17 @@ export function popupContentSlotName(nodeId: string): string {
   return `popup-content-${nodeId}`;
 }
 
+/**
+ * Name of the slot a context-menu action's icon is projected through.
+ *
+ * The icon is a server-side component (`vaadin-icon` and anything else an
+ * application hands to `SpreadsheetAction.setIcon`), attached as a virtual
+ * child like every other hosted component.
+ */
+export function actionIconSlotName(nodeId: string): string {
+  return `action-icon-${nodeId}`;
+}
+
 /** Resolves a Flow node id to the element Flow created for it. */
 export type VirtualChildResolver = (nodeId: string) => HTMLElement | null;
 

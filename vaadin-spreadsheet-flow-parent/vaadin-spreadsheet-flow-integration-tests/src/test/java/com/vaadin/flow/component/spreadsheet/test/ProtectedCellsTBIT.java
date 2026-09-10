@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -173,7 +174,11 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
         try {
             waitUntil(driver -> {
                 cell.doubleClick();
-                return getSpreadsheet().getCellValueInput().isDisplayed();
+                // No editor at all is the protected case, not an error:
+                // getCellValueInput returns null when the cell-grid is not
+                // showing one, and an NPE here would escape the wait.
+                WebElement input = getSpreadsheet().getCellValueInput();
+                return input != null && input.isDisplayed();
             }, 2);
             return true;
         } catch (TimeoutException e) {
