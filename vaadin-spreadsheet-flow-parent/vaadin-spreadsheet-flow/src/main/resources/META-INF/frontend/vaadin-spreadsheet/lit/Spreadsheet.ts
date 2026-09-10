@@ -41,6 +41,11 @@ import {
   convertPointsToPixel
 } from './algorithms/ViewportMath.js';
 import { toKey } from './algorithms/CellKeys.js';
+import {
+  SlottedVirtualChildren,
+  flowVirtualChildResolver,
+  overlayComponentSlotName
+} from './dom/VirtualChildren.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
@@ -292,6 +297,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
+  /**
+   * Server-side components the sheet renders as overlays — charts, and
+   * anything else added with {@code Spreadsheet.setComponent}. Flow creates
+   * the elements but leaves placing them to us; they become light-DOM
+   * children of the cell-grid so the slots in its shadow root can project
+   * them over the sheet.
+   */
+  private readonly overlayComponents: SlottedVirtualChildren;
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -410,6 +423,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs = new SpreadsheetSheetTabs();
     this.formulaBar = new SpreadsheetFormulaBar();
     this.contextMenu = new SpreadsheetContextMenu();
+    this.overlayComponents = new SlottedVirtualChildren(
+      this.cellGrid,
+      (nodeId) => flowVirtualChildResolver(overlayComponentAppId(host))(nodeId),
+      overlayComponentSlotName
+    );
     // Host becomes a flex column so the scroll container takes
     // the available space + the sheet tabs sit below at their
     // intrinsic height. Slice 154. Existing host width/height
@@ -1704,6 +1722,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.removeEventListener('cut', this.handleCut as EventListener);
     this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
     this.cellGrid.removeEventListener('cell-click', this.handleCellClick as EventListener);
+    this.overlayComponents.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     document.removeEventListener('keydown', this.handleContextMenuKeyDown);
@@ -1911,6 +1930,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.style.width = `${state.totalGridWidthPx}px`;
     this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
     this.cellGrid.renderState = state;
+    // The slots that project these live in the template we just handed the
+    // cell-grid, so the components have to be parented before the browser
+    // resolves them. sync() is idempotent, so the repaint on every scroll
+    // tick costs a set comparison and nothing else.
+    this.overlayComponents.sync(
+      state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id)
+    );
     // Column-header strip (slice 143). Sized + state-pushed only
     // when headerRowHeight > 0 so the default opt-out path stays
     // a no-op — important to avoid feedback loops with the
@@ -3009,6 +3035,17 @@ export function computePositionedPopupButtons(
       active: state.active
     };
   });
+}
+
+/**
+ * The Flow application the sheet belongs to.
+ *
+ * The server pushes it as an {@code appId} property on the host — the
+ * component is registered against one running application, and looking a
+ * virtual child up in the wrong one silently finds nothing.
+ */
+export function overlayComponentAppId(host: HTMLElement): string {
+  return String((host as unknown as { appId?: string }).appId ?? '');
 }
 
 /**

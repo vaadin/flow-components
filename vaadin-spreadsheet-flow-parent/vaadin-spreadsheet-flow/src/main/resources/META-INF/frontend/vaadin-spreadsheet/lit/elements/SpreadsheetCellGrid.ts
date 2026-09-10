@@ -14,6 +14,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
 import type { CellData } from '../types/wire.js';
+import { overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
@@ -1122,10 +1123,11 @@ function buildSheetOverlays(state: CellGridRenderState): DirectiveResult {
           />
         `;
       }
-      // COMPONENT overlay: render a placeholder that a future
-      // slice will replace with the actual Vaadin component
-      // (via slot or appended-child injection from the Flow
-      // wrapper).
+      // COMPONENT overlay — a chart or any component the server put on the
+      // sheet. Flow created the element and left it out of the document;
+      // the connector parents it to this element and points its `slot`
+      // attribute here. The wrapper div carries the geometry so the
+      // component itself only has to fill it.
       return html`
         <div
           class="sheet-overlay sheet-overlay-component"
@@ -1133,7 +1135,9 @@ function buildSheetOverlays(state: CellGridRenderState): DirectiveResult {
           data-col=${overlay.col}
           data-row=${overlay.row}
           style=${style}
-        ></div>
+        >
+          <slot name=${overlayComponentSlotName(overlay.id)}></slot>
+        </div>
       `;
     }
   );
