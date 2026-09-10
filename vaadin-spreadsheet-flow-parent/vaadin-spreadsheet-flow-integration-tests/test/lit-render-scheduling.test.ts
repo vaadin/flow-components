@@ -151,6 +151,67 @@ describe('Spreadsheet render scheduling — server pushes repaint', () => {
     });
 });
 
+describe('Spreadsheet render scheduling — end of a server batch', () => {
+    let ctx: Awaited<ReturnType<typeof attachSheet>>;
+
+    beforeEach(async () => {
+        ctx = await attachSheet();
+    });
+
+    afterEach(() => {
+        ctx.cleanup();
+    });
+
+    it('has painted by the time notifyStateChanges returns', async () => {
+        // This runs while the browser is still processing the server's
+        // response, so painting here keeps the rule callers rely on: once a
+        // round trip is finished, the sheet shows its result. A deferred
+        // paint leaves the DOM a frame behind, and every test that acts and
+        // then reads is racing it.
+        ctx.sheet.updateBottomRightCellValues([cell(1, 1, 'fresh')]);
+        ctx.sheet.notifyStateChanges(['cellStyleToCSSStyle'], false);
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        const painted = ctx.sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector('.cell.col1.row1')!;
+        expect(painted.textContent!.trim()).to.equal('fresh');
+    });
+
+    it('drops a frame already scheduled rather than painting twice', async () => {
+        ctx.sheet.updateBottomRightCellValues([cell(1, 1, 'fresh')]);
+        let renders = 0;
+        const grid = ctx.sheet.getCellGrid();
+        const originalUpdate = grid.updated.bind(grid);
+        (grid as any).updated = (changed: any) => {
+            renders += 1;
+            return originalUpdate(changed);
+        };
+
+        ctx.sheet.notifyStateChanges(['cellStyleToCSSStyle'], false);
+        await grid.updateComplete;
+        const afterFlush = renders;
+        await afterFrame();
+
+        expect(renders).to.equal(afterFlush);
+    });
+
+    it('paints nothing when the batch changed nothing', async () => {
+        ctx.sheet.updateBottomRightCellValues([cell(1, 1, 'fresh')]);
+        await afterFrame();
+        const before = ctx.sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector('.cell.col1.row1')!.textContent;
+
+        ctx.sheet.notifyStateChanges([], false);
+
+        expect(
+            ctx.sheet.getCellGrid().shadowRoot!.querySelector('.cell.col1.row1')!
+                .textContent
+        ).to.equal(before);
+    });
+});
+
 describe('Spreadsheet render scheduling — coalescing', () => {
     let ctx: Awaited<ReturnType<typeof attachSheet>>;
 

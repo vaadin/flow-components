@@ -1711,6 +1711,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     });
   }
 
+  /**
+   * Repaint now, dropping any frame already scheduled.
+   *
+   * The counterpart to {@link scheduleRender}: coalescing is right for
+   * scrolling, where the next frame is the soonest anything can be seen
+   * anyway, and wrong at the end of a server round trip, where the caller
+   * has been told the work is done.
+   */
+  private flushRender(): void {
+    if (this.pendingRenderFrame !== null) {
+      cancelAnimationFrame(this.pendingRenderFrame);
+      this.pendingRenderFrame = null;
+    }
+    this.recomputeViewport();
+  }
+
   recomputeViewport(): void {
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
@@ -2387,10 +2403,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // style maps, grouping, hidden rows and columns — reaches the connector
     // and never reaches the screen.
     //
-    // The repaint is coalesced, which is what folds the whole batch into a
-    // single render pass.
+    // Rendered now rather than on the next animation frame. This runs at
+    // the end of the batch, while the browser is still processing the
+    // server's response, so painting here keeps the rule a caller can rely
+    // on: once a round trip is finished, the sheet shows its result. A
+    // deferred paint leaves the DOM a frame behind — invisible to a person,
+    // but every test that acts and then reads is racing it.
+    //
+    // Still one render per batch: this is called once, after every changed
+    // property has been forwarded.
     if (changedPropertyNames.length > 0) {
-      this.scheduleRender();
+      this.flushRender();
     }
   }
 
