@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 
 import org.junit.jupiter.api.Assertions;
@@ -83,6 +84,58 @@ class IdStorageTest {
 
         Assertions.assertNotEquals(idOf(a), idOf(b),
                 "Two distinct Components must get distinct field ids");
+    }
+
+    @Test
+    void componentIdIsUsedAsFieldId() {
+        var field = new TestField();
+        field.setId("first-name");
+        var controller = new FormAIController(new Div(field));
+        controller.describeField(field, "X");
+
+        Assertions.assertEquals("first-name", idOf(field),
+                "A field with a component id must be addressed by that id");
+    }
+
+    @Test
+    void componentIdIsUsedInFormState() {
+        var field = new TestField();
+        field.setId("first-name");
+        var controller = new FormAIController(new Div(field));
+
+        var fields = formStateFields(controller);
+
+        Assertions.assertEquals(1, fields.size());
+        Assertions.assertEquals("first-name",
+                fields.get(0).get("id").asString());
+    }
+
+    @Test
+    void blankComponentIdFallsBackToGeneratedId() {
+        var field = new TestField();
+        field.setId("");
+        var controller = new FormAIController(new Div(field));
+        controller.describeField(field, "X");
+
+        var id = idOf(field);
+        Assertions.assertNotNull(id);
+        Assertions.assertFalse(id.isBlank(),
+                "A blank component id must not become the field id");
+    }
+
+    @Test
+    void componentIdSetAfterFirstDiscoveryDoesNotChangeFieldId() {
+        var field = new TestField();
+        var controller = new FormAIController(new Div(field));
+        controller.describeField(field, "X");
+        var generated = idOf(field);
+
+        field.setId("late-id");
+        controller.describeField(field, "Y");
+
+        Assertions.assertEquals(generated, idOf(field),
+                "The field id is fixed once assigned; a later component id "
+                        + "must not replace it");
     }
 
     /** HasValue that is not a Component — rejection case. */

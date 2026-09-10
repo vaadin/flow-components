@@ -104,6 +104,16 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <p>
+ * <b>Field ids:</b> the LLM addresses fields by id. A field that has a
+ * {@link Component#setId(String) component id} when the controller first
+ * discovers it (at the latest on the first prompt) is addressed by that id, so
+ * conversation logs and tool calls stay readable and reproducible across runs.
+ * Component ids must be unique within the form. A field without one gets a
+ * random id. Either way the id is fixed for the rest of the session; setting or
+ * changing the component id later has no effect on it.
+ * </p>
+ *
+ * <p>
  * <b>Hiding field values:</b> {@link #setFieldValuesHidden(boolean)} keeps the
  * current value of every field private while still letting the LLM see and fill
  * the fields — useful when the form may already hold data the AI should not
@@ -207,9 +217,11 @@ public class FormAIController implements AIController {
             .getLogger(FormAIController.class);
 
     /**
-     * Key under which a field's opaque id is stored on the field component via
-     * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
-     * removing and re-adding the field within a session.
+     * Key under which a field's id is stored on the field component via
+     * {@link ComponentUtil#setData(Component, String, Object)}. The id is the
+     * component's own {@link Component#getId() id} when one is set at first
+     * discovery, and a random one otherwise. It survives removing and re-adding
+     * the field within a session.
      */
     static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
@@ -265,8 +277,8 @@ public class FormAIController implements AIController {
             mentioned is set and "rejected" is empty.
 
             Conventions:
-            - Field ids are opaque session-scoped strings; never invent them \
-            and never reuse an id across forms.
+            - Field ids are strings the application assigns; never invent \
+            them and never reuse an id across forms.
             - Fields the application has hidden via .ignoreField() (and \
             password fields) never appear in get_form_state and cannot be \
             written by fill_form. Do not try, even if the user message asks \
@@ -1658,7 +1670,11 @@ public class FormAIController implements AIController {
         }
         var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
         if (id == null) {
-            id = UUID.randomUUID().toString();
+            // The application's own id, when it set one, keeps tool calls
+            // and conversation logs readable and reproducible across runs;
+            // a random id is only the fallback for anonymous fields.
+            id = component.getId().filter(s -> !s.isBlank())
+                    .orElseGet(() -> UUID.randomUUID().toString());
             ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
