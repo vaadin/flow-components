@@ -1292,7 +1292,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // The key belongs to the component the user is typing into. Acting
       // on it as a sheet shortcut moves the selection out from under a
       // custom editor mid-edit, which takes the editor off the sheet.
-      return;
+      //
+      // Two keys are the way back out of a custom editor, so they are the
+      // sheet's after all: Escape returns the focus, and Tab returns it
+      // and then moves on to the next cell.
+      const fromEditor = this.eventCameFromCellEditor(e);
+      if (!fromEditor || (e.key !== 'Escape' && e.key !== 'Tab')) {
+        return;
+      }
+      this.scrollContainer.focus();
+      if (e.key === 'Escape') {
+        return;
+      }
+      e.preventDefault();
     }
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
@@ -2752,6 +2764,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.cellComponents.owns(target) ||
         this.overlayComponents.owns(target)
       ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Whether an event came out of a custom cell editor specifically. */
+  private eventCameFromCellEditor(e: Event): boolean {
+    for (const target of e.composedPath()) {
+      if (this.cellEditors.owns(target)) {
         return true;
       }
     }

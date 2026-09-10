@@ -644,6 +644,64 @@ describe('Spreadsheet — custom cell editors', () => {
     expect(editor.isConnected).to.be.true;
   });
 
+  it('gives focus back to the sheet on Escape', async () => {
+    // Escape is the way out of a custom editor. Without it the editor
+    // keeps the keyboard and the sheet can never be driven again.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    editor.focus();
+
+    editor.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true })
+    );
+
+    expect(document.activeElement).to.not.equal(editor);
+    // Escape leaves the selection where it is.
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    cleanup();
+  });
+
+  it('gives focus back and moves on for Tab', async () => {
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    editor.focus();
+
+    editor.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(document.activeElement).to.not.equal(editor);
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 2 });
+    cleanup();
+  });
+
+  it('keeps Escape inside an in-cell component', async () => {
+    // Only editors have a way out to give back — a component in a cell
+    // is not something the sheet took the keyboard from.
+    const widget = document.createElement('input');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    widget.focus();
+
+    widget.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true })
+    );
+
+    expect(document.activeElement).to.equal(widget);
+    cleanup();
+  });
+
   it('leaves the selection alone for arrow keys in the editor', async () => {
     // Arrow keys move the caret inside a text field.
     const editor = field();
