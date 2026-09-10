@@ -47,7 +47,12 @@ export const spreadsheetStyles = css`
     --vaadin-spreadsheet-header-border-color: #c7c7c7;
     --vaadin-spreadsheet-text-color: #474747;
 
-    display: block;
+    /* A flex column so the root fills a host that has been given a
+       height. Declared here rather than written onto the host inline,
+       so an application that lays the component out its own way can
+       still override it. */
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     flex: 1 1 auto;
@@ -57,9 +62,22 @@ export const spreadsheetStyles = css`
     font-family: Helvetica;
     font-size: 14px;
     box-sizing: border-box;
-    border: 1px solid var(--vaadin-spreadsheet-border-color);
     overflow: hidden;
     position: relative;
+  }
+
+  /* The component's own root, which owns the vertical layout and
+     carries the visible frame. The border belongs here rather than on
+     the host for the same reason the layout does: the host is the
+     application's element. Keeping it here also means the root fills
+     the host exactly, as the GWT widget's root div did. */
+  /* The visible frame. It belongs on the component's own root rather
+     than on the host, for the same reason the layout does — and it
+     keeps the root exactly the size of the host, as the GWT widget's
+     root div was. The root's sizing is set on the element itself; only
+     the theming lives here. */
+  .spreadsheet-root {
+    border: 1px solid var(--vaadin-spreadsheet-border-color);
   }
 
   /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant
