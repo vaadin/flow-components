@@ -3315,11 +3315,36 @@ export class Spreadsheet implements SpreadsheetClientApi {
   closePopup(_row: number, _column: number): void {
     // TODO Phase 3.5 — close active popup at coordinates.
   }
-  addPopupButton(_rawState: string): void {
-    // TODO Phase 3.5 — register a popup-button anchor.
+  /**
+   * A popup (filter) button was attached to a cell.
+   *
+   * These arrive one at a time over the RPC lane rather than as a list
+   * property, because on the server each is a real component with its
+   * own lifecycle. The connector keeps them in the same list the
+   * renderer already positions, keyed by their cell.
+   */
+  addPopupButton(rawState: PopupButtonState | string): void {
+    const state = coerceObject<unknown>(rawState) as unknown as PopupButtonState;
+    if (state === null || typeof state.col !== 'number') {
+      return;
+    }
+    this.popupButtonStates = [
+      ...this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state)),
+      state
+    ];
+    this.scheduleRender();
   }
-  removePopupButton(_rawState: string): void {
-    // TODO Phase 3.5 — unregister a popup-button anchor.
+
+  /** The button's cell is what identifies it; the rest of the state may differ. */
+  removePopupButton(rawState: PopupButtonState | string): void {
+    const state = coerceObject<unknown>(rawState) as unknown as PopupButtonState;
+    if (state === null || typeof state.col !== 'number') {
+      return;
+    }
+    this.popupButtonStates = this.popupButtonStates.filter(
+      (b) => !samePopupButtonCell(b, state)
+    );
+    this.scheduleRender();
   }
 
   // ====================================================================
@@ -3504,6 +3529,11 @@ export function visibleCellSlots(
  * component is registered against one running application, and looking a
  * virtual child up in the wrong one silently finds nothing.
  */
+/** Two popup-button states describe the same button when they share a cell. */
+function samePopupButtonCell(a: PopupButtonState, b: PopupButtonState): boolean {
+  return a.col === b.col && a.row === b.row;
+}
+
 export function overlayComponentAppId(host: HTMLElement): string {
   return String((host as unknown as { appId?: string }).appId ?? '');
 }

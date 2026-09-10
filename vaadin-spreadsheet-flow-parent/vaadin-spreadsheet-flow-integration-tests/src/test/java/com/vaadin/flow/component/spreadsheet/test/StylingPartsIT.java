@@ -22,7 +22,6 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-spreadsheet")
 public class StylingPartsIT extends AbstractSpreadsheetIT {
@@ -61,8 +60,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var formulaField = spreadsheet.getFormulaField();
         assertPartEquals(formulaField, "formula-field");
 
-        var tab = spreadsheet.$(TestBenchElement.class)
-                .withClassName("sheet-tabsheet-tab").first();
+        var tab = findElementInShadowRoot(By.className("sheet-tab"));
         assertPartContains(tab, "tab");
 
         //@formatter:off
@@ -76,13 +74,12 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         //@formatter:on
 
         for (var entry : scrollTabButtons.entrySet()) {
-            var button = spreadsheet.$(TestBenchElement.class)
-                    .withClassName(entry.getKey()).first();
+            var button = findElementInShadowRoot(By.className(entry.getKey()));
             assertPartContains(button, entry.getValue());
         }
 
-        var selectionCorner = spreadsheet.$(TestBenchElement.class)
-                .withClassName("s-corner").first();
+        var selectionCorner = findElementInShadowRoot(
+                By.className("selection-corner"));
         assertPartEquals(selectionCorner, "selection-corner");
 
         var cellInput = getInlineEditor("A1");
@@ -135,8 +132,10 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var spreadsheet = getSpreadsheet();
         var firstCell = spreadsheet.getCellAt("A1");
 
-        var commentTriangle = firstCell
-                .findElement(By.className("cell-comment-triangle"));
+        // The indicator is a sibling of the cell rather than a child, so
+        // it is found through the sheet rather than under the cell.
+        var commentTriangle = findElementInShadowRoot(
+                By.cssSelector("[part~=\"comment-triangle\"]"));
         assertPartEquals(commentTriangle, "comment-triangle");
     }
 
@@ -160,8 +159,8 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.SpreadsheetTable);
         var spreadsheet = getSpreadsheet();
         var popupButtonCell = spreadsheet.getCellAt("B2");
-        var popupButton = popupButtonCell
-                .findElement(By.className("popupbutton"));
+        var popupButton = findElementInShadowRoot(
+                By.cssSelector("[part~=\"popup-button\"]"));
         assertPartEquals(popupButton, "popup-button");
     }
 
@@ -170,8 +169,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var spreadsheet = getSpreadsheet();
         spreadsheet.addSheet();
 
-        var sheetTabs = spreadsheet.$(TestBenchElement.class)
-                .withClassName("sheet-tabsheet-tab");
+        var sheetTabs = findElementsInShadowRoot(By.className("sheet-tab"));
 
         assertPartEquals(sheetTabs.get(0), "tab");
         assertPartEquals(sheetTabs.get(1), "tab", "tab-selected");
@@ -183,22 +181,22 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         getDriver().manage().window().setSize(new Dimension(800, 600));
         var spreadsheet = getSpreadsheet();
 
-        var scrollTabBeginning = spreadsheet.$(TestBenchElement.class)
-                .withClassName("scroll-tabs-beginning").first();
+        var scrollTabBeginning = findElementInShadowRoot(
+                By.className("scroll-tabs-beginning"));
         assertPartEquals(scrollTabBeginning, SCROLL_TABS_BUTTON_DISABLED,
                 SCROLL_TABS_TO_START_BUTTON);
 
-        var scrollTabLeft = spreadsheet.$(TestBenchElement.class)
-                .withClassName("scroll-tabs-left").first();
+        var scrollTabLeft = findElementInShadowRoot(
+                By.className("scroll-tabs-left"));
         assertPartEquals(scrollTabLeft, SCROLL_TABS_BUTTON_DISABLED,
                 SCROLL_TABS_BACKWARD_BUTTON);
 
-        var scrollTabRight = spreadsheet.$(TestBenchElement.class)
-                .withClassName("scroll-tabs-right").first();
+        var scrollTabRight = findElementInShadowRoot(
+                By.className("scroll-tabs-right"));
         assertPartEquals(scrollTabRight, SCROLL_TABS_BUTTON,
                 SCROLL_TABS_FORWARD_BUTTON);
-        var scrollTabEnd = spreadsheet.$(TestBenchElement.class)
-                .withClassName("scroll-tabs-end").first();
+        var scrollTabEnd = findElementInShadowRoot(
+                By.className("scroll-tabs-end"));
         assertPartEquals(scrollTabEnd, SCROLL_TABS_BUTTON,
                 SCROLL_TABS_TO_END_BUTTON);
 
@@ -219,7 +217,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
      * Helper method to check if an element's part attribute contains all the
      * expected parts, regardless of order.
      */
-    private void assertPartContains(TestBenchElement element,
+    private void assertPartContains(WebElement element,
             String... expectedParts) {
         String partAttribute = element.getAttribute("part");
         Assert.assertNotNull("Part attribute should not be null",

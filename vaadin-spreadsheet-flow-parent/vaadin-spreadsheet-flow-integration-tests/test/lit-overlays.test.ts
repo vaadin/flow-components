@@ -739,3 +739,112 @@ describe('Overlays — addressable by their anchor cell', () => {
         el.remove();
     });
 });
+
+describe('Spreadsheet — popup (filter) buttons', () => {
+    /**
+     * A popup button is a real component on the server, so each one is
+     * attached and detached over its own RPC call rather than arriving
+     * as a list property. The connector keeps them in the list the
+     * renderer already positions.
+     */
+    function attachSheet(): { sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        return {
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    const button = (col: number, row: number, over: Record<string, unknown> = {}) => ({
+        col, row, active: false, headerHidden: false,
+        popupHeight: null, popupWidth: null, sheet: 'Sheet1', ...over,
+    });
+
+    async function buttons(sheet: Spreadsheet): Promise<HTMLElement[]> {
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+        return [
+            ...sheet.getCellGrid().shadowRoot!.querySelectorAll<HTMLElement>(
+                '[part~="popup-button"]'
+            ),
+        ];
+    }
+
+    it('renders a button that was added', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+
+        expect(await buttons(sheet)).to.have.length(1);
+        cleanup();
+    });
+
+    it('accepts the JSON-serialized state the server sends', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(JSON.stringify(button(2, 3)) as any);
+
+        expect(await buttons(sheet)).to.have.length(1);
+        cleanup();
+    });
+
+    it('renders one per anchored cell', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+        sheet.addPopupButton(button(4, 3) as any);
+        sheet.addPopupButton(button(6, 3) as any);
+
+        expect(await buttons(sheet)).to.have.length(3);
+        cleanup();
+    });
+
+    it('replaces rather than duplicates when a cell is re-added', async () => {
+        // The server re-attaches a button when its state changes.
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+        sheet.addPopupButton(button(2, 3, { active: true }) as any);
+
+        expect(await buttons(sheet)).to.have.length(1);
+        cleanup();
+    });
+
+    it('removes the button for a cell', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+        sheet.addPopupButton(button(4, 3) as any);
+
+        sheet.removePopupButton(button(2, 3) as any);
+
+        const rendered = await buttons(sheet);
+        expect(rendered).to.have.length(1);
+        expect(rendered[0].dataset.col).to.equal('4');
+        cleanup();
+    });
+
+    it('identifies the button to remove by its cell, not the rest of its state', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3, { active: true }) as any);
+
+        sheet.removePopupButton(button(2, 3, { active: false }) as any);
+
+        expect(await buttons(sheet)).to.have.length(0);
+        cleanup();
+    });
+
+    it('ignores a malformed state rather than rendering nonsense', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton('' as any);
+        sheet.addPopupButton('{oops' as any);
+
+        expect(await buttons(sheet)).to.have.length(0);
+        cleanup();
+    });
+});

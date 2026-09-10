@@ -396,12 +396,17 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The "add new sheet" button isn't implemented in the Lit sheet-tabs
-     * element yet — this is a no-op until it is.
+     * Adds a new sheet by clicking the tab strip's add button.
+     *
+     * @throws NoSuchElementException
+     *             if the add button is not present
      */
     public void addSheet() {
-        // No-op (deferred): Lit sheet-tabs doesn't render an add
-        // button.
+        WebElement addButton = findInSheetTabs(".add-new-tab");
+        if (addButton == null) {
+            throw new NoSuchElementException("Add-sheet button not found");
+        }
+        addButton.click();
     }
 
     /**
