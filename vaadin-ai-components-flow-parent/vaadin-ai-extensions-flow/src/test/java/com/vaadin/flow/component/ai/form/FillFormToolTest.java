@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
@@ -52,6 +53,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -1888,6 +1890,49 @@ class FillFormToolTest {
     }
 
     @Test
+    @Timeout(30)
+    void fillForm_onALockHoldingThreadBindsTheThreadLocalsForTheWrite()
+            throws Exception {
+        // Holding the session lock does not imply the Vaadin thread locals
+        // are bound: a provider can take the lock on its own thread — with
+        // session.lock() or an outer accessSynchronously — and call the tool
+        // from there. Writing the fields straight from that thread would run
+        // every value-change listener the fill triggers with
+        // UI.getCurrent() == null, which is what the ui.access() hop existed
+        // to prevent in the first place. accessSynchronously keeps that
+        // guarantee for the inline path.
+        var field = new CurrentInstanceCapturingField();
+        var controller = controllerFor(field);
+        var session = ui.getSession();
+        queueAccessCommands();
+
+        // Hand the lock over the way a request that has finished would, so
+        // the provider's thread can take it.
+        session.unlock();
+        try {
+            var raw = CompletableFuture.supplyAsync(() -> {
+                session.lock();
+                try {
+                    return fillFormPayload(controller,
+                            payload(field, "\"Ana Torres\""));
+                } finally {
+                    session.unlock();
+                }
+            }).get(20, TimeUnit.SECONDS);
+
+            Assertions.assertTrue(success(parseResult(raw)),
+                    "Fill from a lock-holding provider thread must succeed, "
+                            + "got: " + raw);
+            Assertions.assertSame(ui.getUI(), field.uiDuringWrite,
+                    "The write must see the UI bound as the current one");
+            Assertions.assertSame(session, field.sessionDuringWrite,
+                    "The write must see the session bound as the current one");
+        } finally {
+            session.lock();
+        }
+    }
+
+    @Test
     void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
         // FormValueConverter.convert delegates to field.getEmptyValue() for
         // JSON null. A field whose getEmptyValue() throws produces an
@@ -2057,6 +2102,34 @@ class FillFormToolTest {
         @Override
         public String getEmptyValue() {
             throw new RuntimeException("internal-detail-from-getemptyvalue");
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
+    /**
+     * Field that records the Vaadin thread locals in force while its value is
+     * written, so a test can tell whether the fill ran with them bound.
+     */
+    @com.vaadin.flow.component.Tag("current-instance-capturing-field")
+    private static class CurrentInstanceCapturingField extends
+            com.vaadin.flow.component.AbstractField<CurrentInstanceCapturingField, String> {
+
+        private transient UI uiDuringWrite;
+        private transient VaadinSession sessionDuringWrite;
+
+        CurrentInstanceCapturingField() {
+            super("");
+        }
+
+        @Override
+        public void setValue(String value) {
+            uiDuringWrite = UI.getCurrent();
+            sessionDuringWrite = VaadinSession.getCurrent();
+            super.setValue(value);
         }
 
         @Override
