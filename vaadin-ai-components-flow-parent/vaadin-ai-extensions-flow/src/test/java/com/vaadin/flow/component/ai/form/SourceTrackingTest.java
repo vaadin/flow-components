@@ -146,6 +146,65 @@ class SourceTrackingTest {
         }
 
         @Test
+        void bothSchemasDeclareAnObjectRootWithAnOpenKeyedValuesMap() {
+            var controller = controllerFor(new TestField());
+
+            for (var tracking : List.of(false, true)) {
+                controller.setSourceTrackingEnabled(tracking);
+                var schema = JacksonUtils.readTree(fillFormSchema(controller));
+                Assertions.assertEquals("object",
+                        schema.path("type").asString(),
+                        "Source tracking " + tracking);
+                var values = schema.path("properties").path("values");
+                Assertions.assertEquals("object",
+                        values.path("type").asString(),
+                        "Source tracking " + tracking);
+                Assertions.assertTrue(
+                        values.path("additionalProperties").asBoolean(),
+                        "Any field id must be accepted, source tracking "
+                                + tracking);
+            }
+        }
+
+        @Test
+        void sourceEntryDeclaresTheTypesTheParserAccepts() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var entry = sourceEntry(controller);
+            Assertions.assertEquals("object", entry.path("type").asString());
+            var properties = entry.path("properties");
+            Assertions.assertEquals("string",
+                    properties.path("confidence").path("type").asString());
+            Assertions.assertEquals("array",
+                    properties.path("extracts").path("type").asString());
+            var item = properties.path("extracts").path("items");
+            Assertions.assertEquals("object", item.path("type").asString());
+            Assertions.assertEquals("string", item.path("properties")
+                    .path("text").path("type").asString());
+            Assertions.assertEquals("object", item.path("properties")
+                    .path("location").path("type").asString());
+        }
+
+        @Test
+        void sourceEntryPinsTheRectToFourNumbers() {
+            // The parser drops a rect that is not four numbers, so the
+            // schema must ask for exactly that.
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var rect = sourceEntry(controller).path("properties")
+                    .path("extracts").path("items").path("properties")
+                    .path("location").path("properties").path("rect");
+
+            Assertions.assertEquals("array", rect.path("type").asString());
+            Assertions.assertEquals("number",
+                    rect.path("items").path("type").asString());
+            Assertions.assertEquals(4, rect.path("minItems").asInt());
+            Assertions.assertEquals(4, rect.path("maxItems").asInt());
+        }
+
+        @Test
         void sourceEntryListsEveryConfidenceLevel() {
             var controller = controllerFor(new TestField())
                     .setSourceTrackingEnabled(true);
@@ -450,6 +509,22 @@ class SourceTrackingTest {
             Assertions.assertEquals(1, parserDebugMessages().size(),
                     "The malformed source must be logged exactly once, got: "
                             + parserDebugMessages());
+        }
+
+        @Test
+        void aFillWithoutASourceLogsNothing() {
+            // The ordinary case with tracking on: a value taken from the
+            // prompt carries no source. That is not a malformed source, so
+            // nothing is dropped and nothing is logged.
+            var field = new TestField();
+            var controller = trackingControllerFor(field);
+
+            fill(controller, field, "\"plain\"");
+
+            Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
+            Assertions.assertTrue(parserDebugMessages().isEmpty(),
+                    "A value reported without a source must not be logged as "
+                            + "a dropped one, got: " + parserDebugMessages());
         }
 
         @Test
