@@ -39,6 +39,18 @@ import tools.jackson.databind.JsonNode;
  */
 public final class GridAITools {
 
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same query: change it and try "
+            + "once more, or report the failure if you cannot.";
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAITools.class);
 
@@ -234,7 +246,7 @@ public final class GridAITools {
                     return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_grid_data failed", e);
-                    return "Error updating grid data.";
+                    return "Error updating grid data." + RETRY_ONCE;
                 }
             }
         };
