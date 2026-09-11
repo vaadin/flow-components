@@ -570,7 +570,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private UserMessage buildUserMessage(LLMRequest request) {
         var contents = new ArrayList<Content>();
-        contents.add(TextContent.from(request.userMessage()));
+        contents.add(TextContent.from(LLMProviderHelpers.withSessionContext(
+                request.userMessage(), request.sessionContext())));
         var attachments = request.attachments();
         if (attachments != null) {
             attachments.stream()

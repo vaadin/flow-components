@@ -470,7 +470,8 @@ public class SpringAILLMProvider implements LLMProvider {
                     a -> a.param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
         }
         promptSpec = promptSpec.user(userSpec -> {
-            userSpec.text(request.userMessage());
+            userSpec.text(LLMProviderHelpers.withSessionContext(
+                    request.userMessage(), request.sessionContext()));
             var media = buildMedia(request);
             if (media.length != 0) {
                 userSpec.media(media);
